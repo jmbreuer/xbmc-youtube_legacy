@@ -106,7 +106,6 @@ class YouTubeNavigation:
                 if (cat_get("path").rfind("/") <= len(path +"/")):
                     self.addListItem(params, category)
         
-        xbmc.executebuiltin("Container.SetViewMode(50)")
         xbmcplugin.endOfDirectory( handle=int( sys.argv[ 1 ] ), succeeded=True, cacheToDisc=True )
 
     def executeAction(self, params = {}):
@@ -337,8 +336,11 @@ class YouTubeNavigation:
         listitem.setInfo(type='Video', infoLabels=video)
         if self.__dbg__:
             print self.__plugin__ + " - Playing video: " + video['Title'] + " - " + get('videoid') + " - " + video['video_url']
-        xbmcplugin.setResolvedUrl(handle=int(sys.argv[1]), succeeded=True, listitem=listitem)
 
+        xbmcplugin.setResolvedUrl(handle=int(sys.argv[1]), succeeded=True, listitem=listitem)
+        
+        self.__settings__.setSetting( "vidstatus-" + video['videoid'], "7" )
+            
     def search(self, params = {}):
         get = params.get
         if (get("search")):
@@ -733,7 +735,6 @@ class YouTubeNavigation:
                                  
             self.addFolderListItem(params, item, listSize)
         
-        xbmc.executebuiltin("Container.SetViewMode(50)")
         xbmcplugin.endOfDirectory( handle=int( sys.argv[ 1 ] ), succeeded=True, cacheToDisc=False )
     
     #parses a video list consisting of a tuple of dictionaries 

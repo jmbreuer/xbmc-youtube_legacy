@@ -119,4 +119,5 @@
     <string id="30617">Error handling called but no error was given</string>
     <string id="30618">Couldn't extract video url</string>
     <string id="30619">Couldn't scrape YouTube</string>
+    <string id="30620">Stream type not supported</string>
 </strings>

@@ -11,7 +11,7 @@ class YouTubeCore(object):
 	__language__ = sys.modules[ "__main__" ].__language__
 	__plugin__ = sys.modules[ "__main__" ].__plugin__
 	__dbg__ = sys.modules[ "__main__" ].__dbg__
-	__dbgv__ = False
+	__dbgv__ = True
 	
 	APIKEY = "AI39si6hWF7uOkKh4B9OEAX-gK337xbwR9Vax-cdeF9CF9iNAcQftT8NVhEXaORRLHAmHxj6GjM-Prw04odK4FxACFfKkiH9lg";
 	USERAGENT = "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; .NET CLR 1.1.4322; .NET CLR 2.0.50727)";
@@ -300,6 +300,7 @@ class YouTubeCore(object):
 					
 				if video['stream_map'] == "True":
 					print self.__plugin__ + " downloadVideo stream_map not implemented in downloadVideo"
+					return (self.__language__(30620), 303)
 				else:
 					(filename, header) = urllib.urlretrieve(video['video_url'], "%s/%s.flv" % ( path,video['Title']))
 					self.__settings__.setSetting( "vidstatus-" + videoid, "1" )
@@ -440,8 +441,6 @@ class YouTubeCore(object):
 					return (self.__language__(30607), 303)
 				video['video_url'] = video_url;
 
-				self.__settings__.setSetting( "vidstatus-" + video['videoid'], "7" )
-				
 				if self.__dbg__:
 					print self.__plugin__ + " construct_video_url done"
 				return (video, 200);
