@@ -145,7 +145,6 @@ class YouTubeNavigation:
                 self.showMessage(self.__language__(30609), self.__language__(30610))
                 self.login()
                 
-        print self.__plugin__ + ": hit the option list.. "
         item_favorites = {'label':self.__language__( 30020 ), 'path':get("path"), 'external':"true", 'login':"true", 'thumbnail':"favorites", 'feed':"favorites", "contact":get("contact")}
         self.addFolderListItem(params, item_favorites, 1)
         item_playlists = {'label':self.__language__( 30023 ), 'path':get("path"), 'external':"true", 'login':"true", 'thumbnail':"playlists", 'feed':"playlists", "contact":get("contact")}
@@ -154,7 +153,7 @@ class YouTubeNavigation:
         self.addFolderListItem(params, item_subscriptions, 3)
         item_uploads = {'label':self.__language__( 30022 ), 'path':get("path"), 'external':"true", 'login':"true", 'thumbnail':"uploads", 'feed':"uploads", "contact":get("contact") }
         self.addFolderListItem(params, item_uploads, 4)
-        print self.__plugin__ + ": option list done.. "
+        
         xbmcplugin.endOfDirectory( handle=int( sys.argv[ 1 ] ), succeeded=True, cacheToDisc=False)
 
     def parseFeeds(self, params):
@@ -482,7 +481,9 @@ class YouTubeNavigation:
             xbmcplugin.endOfDirectory( handle=int( sys.argv[ 1 ] ), succeeded=True, cacheToDisc=False )
         else:
             self.login()
+			xbmcplugin.endOfDirectory( handle=int( sys.argv[ 1 ] ), succeeded=True, cacheToDisc=False )
             xbmc.executebuiltin( "Container.Refresh" )
+            
     
     def addSubscription(self, params = {}):
         get = params.get
@@ -523,7 +524,7 @@ class YouTubeNavigation:
                     if (item("login") == "true"):
                         self.addActionListItem(params, item_params)
                 else:
-                    if (item("login") == "true"):
+                    if (item("login") == "false"):
                         self.addActionListItem(params, item_params)
             else :
                 self.addActionListItem(params, item_params)

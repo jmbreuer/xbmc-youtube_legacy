@@ -117,7 +117,7 @@
     <string id="30614">Removed contact</string>
     <string id="30615">Not found</string>
     <string id="30616">Error loging in</string>
-    <string id="30617">Error handling called but no error was given</string>
+    <string id="30617">Unkown error</string>
     <string id="30618">Couldn't extract video url</string>
     <string id="30619">Couldn't scrape YouTube</string>
     <string id="30620">Stream type not supported</string>
