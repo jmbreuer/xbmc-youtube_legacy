@@ -139,11 +139,12 @@ class YouTubeNavigation:
 
     def listOptionFolder(self, params = {}):
         get = params.get
-        if ( get('login') ):
+        if ( get('login') and self.__settings__.getSetting( "username" ) != "" ):
             auth = self.__settings__.getSetting( "auth" )
             if ( not auth ) :
-                #self.showMessage(self.__language__(30609), self.__language__(30610))
                 self.login()
+                auth = self.__settings__.getSetting( "auth" )
+                
                 
         item_favorites = {'label':self.__language__( 30020 ), 'path':get("path"), 'external':"true", 'login':"true", 'thumbnail':"favorites", 'feed':"favorites", "contact":get("contact")}
         self.addFolderListItem(params, item_favorites, 1)
@@ -174,11 +175,11 @@ class YouTubeNavigation:
     def listUserFolder(self, params = {}):
         print self.__plugin__ + " listUserFolder"
         get = params.get
-        if ( get('login') ):
+        if ( get('login') and self.__settings__.getSetting( "username" ) != "" ):
             auth = self.__settings__.getSetting( "auth" )
             if ( not auth ) :
-                #self.showMessage(self.__language__(30609), self.__language__(30610))
                 self.login()
+                auth = self.__settings__.getSetting( "auth" )
                 
         feed = self.parseFeeds(params)
                         
@@ -213,11 +214,11 @@ class YouTubeNavigation:
     def listUserFolderFeeds(self, params = {}):
         print self.__plugin__ + " listUserFolderFeeds"
         get = params.get
-        if ( get('login') ):
+        if ( get('login') and self.__settings__.getSetting( "username" ) != "" ):
             auth = self.__settings__.getSetting( "auth" )
             if ( not auth ) :
-                #self.showMessage(self.__language__(30609), self.__language__(30610))
                 self.login()
+                auth = self.__settings__.getSetting( "auth" )
             
         feed = self.parseFeeds(params)
         
@@ -252,7 +253,6 @@ class YouTubeNavigation:
         (result, status) = core.login()
         if status != 200:
             self.errorHandling(self.__language__(30609), result, 303)
-#                self.errorHandling(self.__language__(30609), self.__language__(30616), status)
 
     def listStoredSearches(self, params = {}):
         get = params.get
