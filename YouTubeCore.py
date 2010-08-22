@@ -34,9 +34,7 @@ class YouTubeCore(object):
 			print self.__plugin__ + " login"
 		uname = self.__settings__.getSetting( "username" )
 	        passwd = self.__settings__.getSetting( "user_password" )
-		self.__dbg__ = sys.modules[ "__main__" ].__dbg__
-		self.__dbg__ = True
-		
+
 		url = urllib2.Request("https://www.google.com/youtube/accounts/ClientLogin");
 		url.add_header('User-Agent', self.USERAGENT)
 		url.add_header('GData-Version', 2)

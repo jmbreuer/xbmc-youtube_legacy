@@ -115,7 +115,7 @@ class YouTubeNavigation:
         if (get("action") == "search"):
             self.search(params)
         if (get("action") == "settings"):
-            self.changeSettings(params)
+            self.login(params)
         if (get("action") == "delete"):
             self.deleteSearchQuery(params)
         if (get("action") == "remove_favorite"):
@@ -144,8 +144,7 @@ class YouTubeNavigation:
             if ( not auth ) :
                 self.login()
                 auth = self.__settings__.getSetting( "auth" )
-                
-                
+
         item_favorites = {'label':self.__language__( 30020 ), 'path':get("path"), 'external':"true", 'login':"true", 'thumbnail':"favorites", 'feed':"favorites", "contact":get("contact")}
         self.addFolderListItem(params, item_favorites, 1)
         item_playlists = {'label':self.__language__( 30023 ), 'path':get("path"), 'external':"true", 'login':"true", 'thumbnail':"playlists", 'feed':"playlists", "contact":get("contact")}
@@ -248,11 +247,13 @@ class YouTubeNavigation:
 
         self.parseVideoList(get("path"), params, result);
             
-    def login(self):
+    def login(self, params = {}):
         self.__settings__.openSettings()
         (result, status) = core.login()
         if status != 200:
             self.errorHandling(self.__language__(30609), result, 303)
+        if params != {}:
+            xbmc.executebuiltin( "Container.Refresh" )
 
     def listStoredSearches(self, params = {}):
         get = params.get
@@ -475,16 +476,6 @@ class YouTubeNavigation:
             self.__settings__.setSetting(viewmode, get("view_mode"))
         
         xbmc.executebuiltin( "Container.Refresh" )
-        
-    def changeSettings(self, params = {}):
-        if (len(self.__settings__.getSetting( "auth" )) > 0):
-            self.__settings__.openSettings()
-            xbmcplugin.endOfDirectory( handle=int( sys.argv[ 1 ] ), succeeded=True, cacheToDisc=False )
-        else:
-            self.login()
-            xbmcplugin.endOfDirectory( handle=int( sys.argv[ 1 ] ), succeeded=True, cacheToDisc=False )
-            xbmc.executebuiltin( "Container.Refresh" )
-            
     
     def addSubscription(self, params = {}):
         get = params.get
