@@ -3,6 +3,11 @@
   - Revision 32246 never loads the video
   - In later revisions(33035) XBMC freezes
 
+[B]Versio 0.9.1[/B]
+- After showing the settings window on the first run it didn't log in.
+- Improved error messages related to login.
+- Added some more error handling.
+
 [B]Version 0.9[/B]
 - Cleanup of listFeedFolder
 - Cleanup of listUserFolder
