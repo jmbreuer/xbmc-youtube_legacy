@@ -1,5 +1,4 @@
 import sys, xbmc, xbmcaddon
-#import YouTubeCore as core
 
 REMOTE_DBG = False
 
@@ -30,10 +29,11 @@ __dbg__ = __settings__.getSetting( "debug" ) == "True"
 if (__name__ == "__main__" ):
     import YouTubeNavigation as navigation
     navigator = navigation.YouTubeNavigation()
-
+    
     if ( not __settings__.getSetting( "firstrun" ) ):
-         __settings__.openSettings()
-         __settings__.setSetting( "firstrun", '1' )
+        navigator.login()
+        __settings__.setSetting( "firstrun", '1' )
+        
     if (not sys.argv[2]):
         navigator.listMenu()
     else:

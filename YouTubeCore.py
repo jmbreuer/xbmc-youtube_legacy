@@ -34,9 +34,17 @@ class YouTubeCore(object):
 			print self.__plugin__ + " login"
 		uname = self.__settings__.getSetting( "username" )
 	        passwd = self.__settings__.getSetting( "user_password" )
+		self.__dbg__ = sys.modules[ "__main__" ].__dbg__
+		self.__dbg__ = True
+		
 		url = urllib2.Request("https://www.google.com/youtube/accounts/ClientLogin");
 		url.add_header('User-Agent', self.USERAGENT)
 		url.add_header('GData-Version', 2)
+
+		if ( uname == "" and passwd == "" ):
+			if self.__dbg__:
+				print self.__plugin__ + " login no username or password set "
+			return ( "", 200 )
 	
 		headers = urllib.urlencode({'Email': uname, 'Passwd': passwd, 'service': 'youtube', 'source': 'test'});
 		try:
@@ -51,11 +59,11 @@ class YouTubeCore(object):
 				self._httpLogin()
 				if self.__dbg__:
 					print self.__plugin__ + " login done: " + nick
-				return True;
+				return ( "", 200 )
 		except:
 			if self.__dbg__:
 				print self.__plugin__ + " login failed, hit except"
-			return False;
+			return ( self.__language__(30616), 500 );
 	
 	def search(self, query, page = "0" ):
 		if self.__dbg__:

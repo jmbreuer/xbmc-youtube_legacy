@@ -15,7 +15,7 @@ class YouTubeNavigation:
     __language__ = sys.modules[ "__main__" ].__language__
     __plugin__ = sys.modules[ "__main__"].__plugin__    
     __dbg__ = sys.modules[ "__main__" ].__dbg__
-        
+                 
     plugin_thumbnail_path = os.path.join( os.getcwd(), "thumbnails" )
 
     #===============================================================================
@@ -142,7 +142,7 @@ class YouTubeNavigation:
         if ( get('login') ):
             auth = self.__settings__.getSetting( "auth" )
             if ( not auth ) :
-                self.showMessage(self.__language__(30609), self.__language__(30610))
+                #self.showMessage(self.__language__(30609), self.__language__(30610))
                 self.login()
                 
         item_favorites = {'label':self.__language__( 30020 ), 'path':get("path"), 'external':"true", 'login':"true", 'thumbnail':"favorites", 'feed':"favorites", "contact":get("contact")}
@@ -177,7 +177,7 @@ class YouTubeNavigation:
         if ( get('login') ):
             auth = self.__settings__.getSetting( "auth" )
             if ( not auth ) :
-                self.showMessage(self.__language__(30609), self.__language__(30610))
+                #self.showMessage(self.__language__(30609), self.__language__(30610))
                 self.login()
                 
         feed = self.parseFeeds(params)
@@ -216,7 +216,7 @@ class YouTubeNavigation:
         if ( get('login') ):
             auth = self.__settings__.getSetting( "auth" )
             if ( not auth ) :
-                self.showMessage(self.__language__(30609), self.__language__(30610))
+                #self.showMessage(self.__language__(30609), self.__language__(30610))
                 self.login()
             
         feed = self.parseFeeds(params)
@@ -249,9 +249,10 @@ class YouTubeNavigation:
             
     def login(self):
         self.__settings__.openSettings()
-        status = core.login()
+        (result, status) = core.login()
         if status != 200:
-                self.errorHandling(self.__language__(30609), self.__language__(30616), status)
+            self.errorHandling(self.__language__(30609), result, 303)
+#                self.errorHandling(self.__language__(30609), self.__language__(30616), status)
 
     def listStoredSearches(self, params = {}):
         get = params.get
@@ -481,7 +482,7 @@ class YouTubeNavigation:
             xbmcplugin.endOfDirectory( handle=int( sys.argv[ 1 ] ), succeeded=True, cacheToDisc=False )
         else:
             self.login()
-			xbmcplugin.endOfDirectory( handle=int( sys.argv[ 1 ] ), succeeded=True, cacheToDisc=False )
+            xbmcplugin.endOfDirectory( handle=int( sys.argv[ 1 ] ), succeeded=True, cacheToDisc=False )
             xbmc.executebuiltin( "Container.Refresh" )
             
     
@@ -828,10 +829,15 @@ class YouTubeNavigation:
         
         return commands
 
-    def errorHandling(self, title, result, status):
+    def errorHandling(self, title = "", result = "", status = 500):
+        if title == "":
+            title = self.__language__(30600)
+        if result == "":
+            result = self.__language__(30617)
+            
         if ( status == 303):
             self.showMessage(title, result)
         elif ( status == 500):
-            self.showMessage(self.__language__(30600), self.__language__(30606))
+            self.showMessage(title, self.__language__(30606))
         else:
-            self.showMessage(self.__language__(30600), self.__language__(30617))
+            self.showMessage(title, self.__language__(30617))
