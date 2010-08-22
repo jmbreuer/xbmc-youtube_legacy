@@ -15,7 +15,6 @@
     <setting id="notification_length" type="enum" label="30214" values="5|10|15|20|25|30" default="1" />
     
     <!--  	 		 you're not ready for these yet simba 				-->
-    <!-- <setting id="folder_view" type="enum" label="30212" values="List View|Thumbnails View|Off"  default="0" /> -->
     <!-- <setting id="video_view" type="enum" label="30213" values="List View|Thumbnails View|Off" default="1" /> -->
     <setting type="sep" />
     <setting id="debug" type="bool" label="30246" default="false" />
