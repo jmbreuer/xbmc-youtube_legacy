@@ -1,0 +1,49 @@
+Ongoing:
+[tobias] Core stabiliy
+
+Bugs:
+
+
+DONE:
+check that context menu items still work
+cleanup listFeedFolder
+cleanup listUserFolder
+fix contacts
+missing subscription functionality in core
+has anyone checked that add user works, including add user by search? <- multiple times.
+Fix pageination on new searc
+Handle old auth
+Add status reporting to all core functions
+Contact manipulation.
+fix remove favorite.. <- wouldn't need fixing if you didn't break it
+Suggestions for you - scraper
+list contacts standard feeds
+Video Information
+Queue Context item
+Move all messages to strings.xml
+Icons for next
+hook for hd video selector setting
+fix pagination in feeds, and subscriptions...
+hook for standard feed period selector
+hook for standard feed region selector
+hook for safeSearch on searches
+More error messages
+pagination under contacts is in some cases broken find out why (prolly just a missing param)
+Always Pop settings when we need to.. (download folder etc)
+Icons on all folders..
+	icons on playlists
+	icons on searches
+Video Information is lacking compared to old plugin.. we could properly do this better (since we do extract all the information)
+
+	
+Dropped:
+Find out what causes the lookup failures <- generic xbmc error, if they couldn't be arsed, why should we.
+Add counting support
+Add progress bar to video download <- Not needed is always background
+    https://code.google.com/p/xbmc-addons/source/browse/trunk/plugins/video/NZB%20Streamer/nzb/sabnzbd_actions.py
+    https://code.google.com/p/xbmc-addons/source/browse/trunk/plugins/video/NZB%20Streamer/nzb_stream.py
+
+Default view for folders and video items defined in settings, and affected <-- cant do settings part without major change i xbmc
+Related videos? <-- seems really pointless as a context item.. but hell i'll add it if someone asks
+cm += [ ( __language__( 30500 ), "Container.Update(%s?title=%s&category='related'&page=1&vq=''&username=''&cat=''&orderby='relevance'&related=%s&issearch=False&update_listing=False)" % ( sys.argv[0], repr( __language__( 30968 ) ), repr( video[ "id" ][ "$t" ].split( "/" )[ -1 ] ), ), ) ]
+Make find similar functionality (search from video title) work. (invalid handle shit)
