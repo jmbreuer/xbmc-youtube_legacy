@@ -737,9 +737,8 @@ class YouTubeCore(object):
 			video['Date'] = self._getNodeValue(node, "published", "Unknown Date").encode( "utf-8" )
 			video['user'] = self._getNodeValue(node, "name", "Unknown Name").encode( "utf-8" )
 			video['Studio'] = self._getNodeValue(node, "media:credit", "Unknown Uploader").encode( "utf-8" )
-			video['Duration'] = str(int(self._getNodeAttribute(node, "yt:duration", 'seconds', '0')) / 60)
-			if ( video['Duration'] == "0" ):
-				video['Duration'] = "1"
+			duration = int(self._getNodeAttribute(node, "yt:duration", 'seconds', '0'))
+			video['Duration'] = "%02d:%02d" % ( duration / 60, duration % 60 )
 			video['Rating'] = float(self._getNodeAttribute(node,"gd:rating", 'average', "0.0"))
 			#video['viewCount'] = self._getNodeAttribute(node, "yt:statistics", 'viewCount', "0") <- Not used by xbmc
 			video['Genre'] = self._getNodeAttribute(node, "media:category", "label", "Unknown Genre").encode( "utf-8" )
