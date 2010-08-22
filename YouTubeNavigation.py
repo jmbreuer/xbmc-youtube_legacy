@@ -605,7 +605,7 @@ class YouTubeNavigation:
         thumbnail = self.getThumbnail(item("thumbnail"))
         listitem=xbmcgui.ListItem( item("label"), iconImage=icon, thumbnailImage=thumbnail )
         
-        if (item("action") == "search"):
+        if (item("action") == "search" ):
             folder = True
         else:
             listitem.setProperty('IsPlayable', 'true');
