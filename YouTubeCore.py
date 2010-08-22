@@ -65,17 +65,6 @@ class YouTubeCore(object):
 				print self.__plugin__ + " login failed, hit http except: " + error
 			if e.code == 403:
 				return ( self.__language__(30621), 303 )
-			return ( error, 303 )	
-                except httplib.BadStatusLine, e:
-			error = repr(e)
-			if self.__dbg__:
-				print self.__plugin__ + " login failed, hit badstatus except: " + error
-			return ( error, 303 )
-		
-		except httplib.InvalidURL, e:
-			error = repr(e)
-			if self.__dbg__:
-				print self.__plugin__ + " login failed, hit invalid url except: " + error
 			return ( error, 303 )
 		
 		except ValueError, e:
