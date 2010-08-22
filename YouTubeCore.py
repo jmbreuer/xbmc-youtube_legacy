@@ -91,9 +91,14 @@ class YouTubeCore(object):
 				if self.__dbg__:
                                         print self.__plugin__ + " search done with no results"
 				return (self.__language__(30601), 303)
+                except urllib2.HTTPError, e:
+			error = str(e)
+			if self.__dbg__:
+				print self.__plugin__ + " search failed, hit except: " + error
+			return ( error, 303 )
 		except:
 			if self.__dbg__:
-				print self.__plugin__ + " search failed, hit except"
+				print self.__plugin__ + " search failed with uncaught exception"
 			return ( [], 500 )
 
 	def feeds(self, feed, page = "0" ):
@@ -133,9 +138,14 @@ class YouTubeCore(object):
 				if self.__dbg__:
                                         print self.__plugin__ + " feeds done with no results"
 				return (self.__language__(30602), 303)
+                except urllib2.HTTPError, e:
+			error = str(e)
+			if self.__dbg__:
+				print self.__plugin__ + " feed failed, hit except: " + error
+			return ( error, 303 )										
 		except:
 			if self.__dbg__:
-				print self.__plugin__ + " feed failed with except " + feed
+				print self.__plugin__ + " feed failed with uncaught exception "
 			return ( [], 500 )
 	
 	def list(self, feed, page = "0", retry = True):
