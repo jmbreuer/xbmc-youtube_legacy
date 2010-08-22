@@ -34,6 +34,7 @@ class YouTubeCore(object):
 			print self.__plugin__ + " login"
 		uname = self.__settings__.getSetting( "username" )
 	        passwd = self.__settings__.getSetting( "user_password" )
+		self.__dbg__ = True
 
 		url = urllib2.Request("https://www.google.com/youtube/accounts/ClientLogin");
 		url.add_header('User-Agent', self.USERAGENT)
@@ -58,9 +59,16 @@ class YouTubeCore(object):
 				if self.__dbg__:
 					print self.__plugin__ + " login done: " + nick
 				return ( "", 200 )
+                except urllib2.HTTPError, e:
+			error = str(e)
+			if self.__dbg__:
+				print self.__plugin__ + " login failed, hit except: " + error
+			if e.code == 403:
+				return ( self.__language__(30621), 303 )
+			return ( error, 303 )	
 		except:
 			if self.__dbg__:
-				print self.__plugin__ + " login failed, hit except"
+				print self.__plugin__ + " login failed uncaught exception"
 			return ( self.__language__(30616), 500 );
 	
 	def search(self, query, page = "0" ):
