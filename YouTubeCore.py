@@ -62,10 +62,39 @@ class YouTubeCore(object):
                 except urllib2.HTTPError, e:
 			error = str(e)
 			if self.__dbg__:
-				print self.__plugin__ + " login failed, hit except: " + error
+				print self.__plugin__ + " login failed, hit http except: " + error
 			if e.code == 403:
 				return ( self.__language__(30621), 303 )
 			return ( error, 303 )	
+		except urllib2.URLError, e:
+			error = str(e)
+			if self.__dbg__:
+				print self.__plugin__ + " login failed, hit url except: " + error
+			return ( error, 303 )
+		
+                except httplib.BadStatusLine, e:
+			error = str(e)
+			if self.__dbg__:
+				print self.__plugin__ + " login failed, hit badstatus except: " + error
+			return ( error, 303 )
+		
+		except httplib.InvalidURL, e:
+			error = str(e)
+			if self.__dbg__:
+				print self.__plugin__ + " login failed, hit invalid url except: " + error
+			return ( error, 303 )
+		
+		except ValueError, e:
+			error = str(e)
+			if self.__dbg__:
+				print self.__plugin__ + " login failed, hit valueerror except: " + error
+			return ( error, 303 )
+		
+		except IOError, e:
+			error = str(e)
+			if self.__dbg__:
+				print self.__plugin__ + " login failed, hit ioerror except: " + error
+			return ( error, 303 )
 		except:
 			if self.__dbg__:
 				print self.__plugin__ + " login failed uncaught exception"
