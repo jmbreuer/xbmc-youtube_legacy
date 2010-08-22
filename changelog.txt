@@ -1,6 +1,9 @@
 [B]Errata[/B]
-- plugin crashes when changing video if a keyboard is displayed
+- Plugin can't play next item in queue if a modal keyboard is displayed ( XBMC bug )
+  - Revision 32246 never loads the video
+  - In later revisions(33035) XBMC freezes
 
 [B]Version 0.9[/B]
 - Cleanup of listFeedFolder
 - Cleanup of listUserFolder
+- Added Viewed and Downloaded overlay to video items.

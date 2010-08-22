@@ -1,7 +1,6 @@
 import sys, xbmc, xbmcaddon
 #import YouTubeCore as core
 
-
 REMOTE_DBG = False
 
 # append pydev remote debugger
