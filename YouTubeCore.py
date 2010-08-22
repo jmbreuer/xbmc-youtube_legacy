@@ -84,17 +84,17 @@ class YouTubeCore(object):
 				print self.__plugin__ + " login failed, hit valueerror except: " + error
 			return ( error, 303 )
 		
-		except urllib2.URLError, e:
-			error = repr(e)
-			if self.__dbg__:
-				print self.__plugin__ + " login failed, hit url except: " + error
-			return ( error, 303 )
-			
 		except IOError, e:
 			error = repr(e)
 			if self.__dbg__:
 				print self.__plugin__ + " login failed, hit ioerror except: " + error
 			return ( error, 303 )
+		
+		except urllib2.URLError, e:
+			error = repr(e)
+			if self.__dbg__:
+				print self.__plugin__ + " login failed, hit url except: " + error
+			return ( error, 303 )										
 		except:
 			if self.__dbg__:
 				print self.__plugin__ + " login failed uncaught exception"
