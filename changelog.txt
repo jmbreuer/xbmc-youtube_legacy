@@ -3,7 +3,11 @@
   - Revision 32246 never loads the video
   - In later revisions(33035) XBMC freezes
 
-[B]Versio 0.9.1[/B]
+[B]Version 0.9.2[/B]
+- Added debug to login
+- Fixed playback of non playable item (settings)
+
+[B]Version 0.9.1[/B]
 - After showing the settings window on the first run it didn't log in.
 - Improved error messages related to login.
 - Added some more error handling.
