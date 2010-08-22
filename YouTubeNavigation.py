@@ -673,6 +673,9 @@ class YouTubeNavigation:
                 
             result_params["label"] = result("Title")
             
+            if (get("feed") == "contacts"):
+                result_params["thumbnail"] = "user"
+            
             if (get("feed") == "subscriptions"):
                 viewmode = ""
                 if (get("external")):
