@@ -81,6 +81,7 @@
 	<string id="30243">Sweden</string>
 	<string id="30244">Taiwan</string>
 	<string id="30245">United States</string>    
+    <string id="30246">Debug</string>
     
     <!-- Menu strings -->
     <string id="30500">Related videos</string>
