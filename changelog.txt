@@ -1,3 +1,6 @@
+[B]Errata[/B]
+- plugin crashes when changing video screen if a keyboard is displayed
+
 [B]Version 0.9[/B]
 - Cleanup of listFeedFolder
 - Cleanup of listUserFolder
