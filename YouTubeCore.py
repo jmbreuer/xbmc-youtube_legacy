@@ -12,6 +12,7 @@ class YouTubeCore(object):
 	__plugin__ = sys.modules[ "__main__" ].__plugin__
 	__dbg__ = sys.modules[ "__main__" ].__dbg__
 	__dbgv__ = False
+	__release__ = False
 	
 	APIKEY = "AI39si6hWF7uOkKh4B9OEAX-gK337xbwR9Vax-cdeF9CF9iNAcQftT8NVhEXaORRLHAmHxj6GjM-Prw04odK4FxACFfKkiH9lg";
 	USERAGENT = "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; .NET CLR 1.1.4322; .NET CLR 2.0.50727)";
@@ -73,10 +74,11 @@ class YouTubeCore(object):
 				print self.__plugin__ + " login failed, hit valueerror except: " + error
 			return ( error, 303 )
 		
-		except IOError as (errno, strerror):
+		except IOError, e:
+			error = repr(e)
 			if self.__dbg__:
-				print self.__plugin__ + " login failed, hit ioerror except: I/O error({0}): {1}".format(errno, strerror)
-			return ( strerror, 303 )
+				print self.__plugin__ + " login failed, hit ioerror except: " + error
+			return ( error, 303 )
 		
 		except urllib2.URLError, e:
 			error = repr(e)
@@ -371,49 +373,6 @@ class YouTubeCore(object):
 		if self.__dbg__:
 			print self.__plugin__ + " downloadVideo done"
 		return ( video, status )
-
-
-	def extractVariables(self, videoid, login = False):
-		if self.__dbg__:
-			print self.__plugin__ + " extractVariables : " + repr(videoid)
-				
-		# add try except
-		link = 'http://www.youtube.com/watch?v=' +videoid + "&safeSearch=none&restriction=US&hl=en_US"
-		request = urllib2.Request(link);
-		request.add_header('User-Agent', 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; .NET CLR 1.1.4322; .NET CLR 2.0.50727)');
-		# Video might be censored, try again with a cookie.
-		# Get a new LOGIN_INFO cookie (for some reason the old one will fail) and use request url again.
-		if login:
-			if ( self._httpLogin() ):
-				request.add_header('Cookie', 'LOGIN_INFO=' + self.__settings__.getSetting( "login_info" ) )
-			else:
-				if self.__dbg__:
-					print self.__plugin__ + " construct_video_url failed because login failed"
-					return (self.__language__(30609), 303)
-				
-		con = urllib2.urlopen(request);
-		htmlSource = con.read();
-		con.close()
-		if self.__dbgv__:
-			print self.__plugin__ + " extractVariables result: " + repr(htmlSource)
-
-		fmtSource = re.findall('"fmt_url_map": "([^"]+)"', htmlSource);
-		if fmtSource:
-			swfConfig = False
-			stream_map = "False"
-		else:
-			swfConfig = re.findall('var swfConfig = {(.*)};', htmlSource)
-			if len(swfConfig) > 0:
-				swfConfig = swfConfig[0].replace("\\", "")
-				swfConfig = eval("{%s}" % swfConfig)
-				swfConfig = swfConfig['url']
-			fmtSource = re.findall('"fmt_stream_map": "([^"]+)"', htmlSource);
-			stream_map = 'True'
-			
-		if self.__dbg__:
-			print self.__plugin__ + " extractVariables done"
-				
-		return (fmtSource, swfConfig, stream_map)
 	
 	def construct_video_url(self, videoid, encoding = 'utf-8'):
 		if self.__dbg__:
@@ -430,10 +389,10 @@ class YouTubeCore(object):
 
 		if ( 'apierror' not in video):
 			try:
-				(fmtSource, swfConfig, video['stream_map']) = self.extractVariables(videoid)
+				(fmtSource, swfConfig, video['stream_map']) = self._extractVariables(videoid)
 
 				if not fmtSource:
-					(fmtSource, swfConfig, video['stream_map']) = self.extractVariables(videoid, True)
+					(fmtSource, swfConfig, video['stream_map']) = self._extractVariables(videoid, True)
 					
 					if not fmtSource:
 						print self.__plugin__ + " IMPORTANT : " + videoid
@@ -441,7 +400,10 @@ class YouTubeCore(object):
 							print self.__plugin__ + " construct_video_url failed, empty fmtSource after trying with cookie"
 						#print htmlSource
 						return (self.__language__(30618), 303)
-						  
+				
+				if ( video['stream_map'] == 303 ):
+					return (fmtSource, 303)
+				
 				fmt_url_map = urllib.unquote_plus(fmtSource[0]).split('|');
 
 				links = {};
@@ -514,7 +476,6 @@ class YouTubeCore(object):
 			except:
 				if self.__dbg__:
 					print self.__plugin__ + " construct_video_url uncaught exception"
-					print self.__plugin__ + " ERROR-except: %s::%s (%d) - %s" % (self.__class__.__name__  , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
 				return ('', 500)
 		else:
 			if self.__dbg__:
@@ -607,6 +568,65 @@ class YouTubeCore(object):
 	# False MUST be handled properly in External functions
         #
         #===============================================================================
+
+	def _extractVariables(self, videoid, login = False):
+		if self.__dbg__:
+			print self.__plugin__ + " extractVariables : " + repr(videoid)
+				
+		# add try except
+		try:
+			link = 'http://www.youtube.com/watch?v=' +videoid + "&safeSearch=none&restriction=US&hl=en_US"
+			request = urllib2.Request(link);
+			request.add_header('User-Agent', 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; .NET CLR 1.1.4322; .NET CLR 2.0.50727)');
+			# Video might be censored, try again with a cookie.
+			# Get a new LOGIN_INFO cookie (for some reason the old one will fail) and use request url again.
+			if login:
+				if ( self._httpLogin() ):
+					request.add_header('Cookie', 'LOGIN_INFO=' + self.__settings__.getSetting( "login_info" ) )
+				else:
+					if self.__dbg__:
+						print self.__plugin__ + " _extractVariables failed because login failed"
+						return ( self.__language__(30609), self.__language__(30609), 303)
+				
+			con = urllib2.urlopen(request);
+			htmlSource = con.read();
+			con.close()
+			if self.__dbgv__:
+				print self.__plugin__ + " _extractVariables result: " + repr(htmlSource)
+
+			fmtSource = re.findall('"fmt_url_map": "([^"]+)"', htmlSource);
+			if fmtSource:
+				swfConfig = False
+				stream_map = "False"
+			else:
+				if self.__release__:
+					if self.__dbg__:
+						print self.__plugin__ + " _extractVariables exited. RTMP disabled."
+					return ( self.__language__(30625), self.__language__(30625), 303 )
+				
+				else:
+					swfConfig = re.findall('var swfConfig = {(.*)};', htmlSource)
+					if len(swfConfig) > 0:
+						swfConfig = swfConfig[0].replace("\\", "")
+						swfConfig = eval("{%s}" % swfConfig)
+						swfConfig = swfConfig['url']
+					fmtSource = re.findall('"fmt_stream_map": "([^"]+)"', htmlSource);
+					stream_map = 'True'
+			
+			if self.__dbg__:
+				print self.__plugin__ + " extractVariables done"
+				
+		except urllib2.HTTPError, e:
+			error = str(e)
+			if self.__dbg__:
+				print self.__plugin__ + " scrapeVideos except: " + error
+			return ( error, 303 )
+		except:
+			if self.__dbg__:
+				print self.__plugin__ + " construct_video_url uncaught exception"
+			return ( '', 500 )
+									
+		return (fmtSource, swfConfig, stream_map)
 
 	def _getAuth(self):
 		if self.__dbg__:

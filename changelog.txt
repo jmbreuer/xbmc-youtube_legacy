@@ -5,8 +5,9 @@
 [B]Version 0.9.4[/B]
 - Added refinements of searches support
 - Added queue folder support
-- Fixed rtmpe support
-- Updated debug information for login.
+- Fixed RTMP support
+- Implemented release disable support for RTMP
+- Added try/except to _extractVariables
 
 [B]Version 0.9.3[/B]
 - Added better errorhandling of videos youtube deny access too
