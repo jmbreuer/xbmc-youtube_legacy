@@ -502,6 +502,10 @@ class YouTubeCore(object):
 					if self.__dbg__:
 						print self.__plugin__ + " construct_video_url failed, video_url not set"
 					return (self.__language__(30607), 303)
+				
+				if (video['stream_map'] == 'True'):
+					video['swf_config'] = swfConfig
+					
 				video['video_url'] = video_url;
 
 				if self.__dbg__:

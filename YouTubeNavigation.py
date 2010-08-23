@@ -337,7 +337,10 @@ class YouTubeNavigation:
             return False
 
         listitem=xbmcgui.ListItem(label=video['Title'], iconImage="DefaultFolder.png", thumbnailImage=video['thumbnail'], path=video['video_url']);
-                                
+        if (video['swf_config']):
+            print "YOUTUBEDEV: " + video['swf_config']
+            listitem.setProperty("SWFPlayer", video['swf_config'])
+              
         listitem.setInfo(type='Video', infoLabels=video)
         if self.__dbg__:
             print self.__plugin__ + " - Playing video: " + video['Title'] + " - " + get('videoid') + " - " + video['video_url']
@@ -814,9 +817,10 @@ class YouTubeNavigation:
             
             self.addFolderListItem(params, item)
         
-#        xbmc.executebuiltin("Container.SetViewMode(500)")
+        xbmc.executebuiltin("Container.SetViewMode(500)")
+#        xbmcplugin.setContent(handle=int( sys.argv[ 1 ] ), content="musicvideos")
         xbmcplugin.endOfDirectory( handle=int( sys.argv[ 1 ] ), succeeded=True, cacheToDisc=True )
-        xbmcplugin.setContent(handle=int( sys.argv[ 1 ] ), content='movies')
+
         
     #=================================== Tool Box ======================================= 
     # shows a more userfriendly notification
