@@ -114,6 +114,8 @@ class YouTubeNavigation:
             self.playVideoById(params)
         if (get("action") == "search"):
             self.search(params)
+        if (get("action") == "refine_user"):
+            self.refineSearch(params)
         if (get("action") == "settings"):
             self.login(params)
         if (get("action") == "delete"):
@@ -341,11 +343,19 @@ class YouTubeNavigation:
         xbmcplugin.setResolvedUrl(handle=int(sys.argv[1]), succeeded=True, listitem=listitem)
         
         self.__settings__.setSetting( "vidstatus-" + video['videoid'], "7" )
-            
+
+    def refineSearch(self, params = {}):
+        get = params.get
+        query = get("search")
+        self.deleteSearchQuery({'delete': get("search")})
+        author = self.getUserInput('Search on author', '')
+        self.saveSearchQuery(query)
+                    
     def search(self, params = {}):
         get = params.get
         if (get("search")):
             query = get("search")
+            self.saveSearchQuery(query)
         else :
             query = self.getUserInput('Search', '')
             if (query):
@@ -528,6 +538,7 @@ class YouTubeNavigation:
         
         icon = "DefaultFolder.png"
         thumbnail = item("thumbnail")
+        cm = []
         
         if (item("thumbnail", "DefaultFolder.png").find("http://") == -1):    
             thumbnail = self.getThumbnail(item("thumbnail"))
@@ -537,11 +548,13 @@ class YouTubeNavigation:
         
         if (item("search")):
             url += "search=" + item("search") + "&"
-            cm = [ ( self.__language__( 30508 ), 'XBMC.RunPlugin(%s?path=%s&action=delete&delete=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) ]
-            listitem.addContextMenuItems( cm, replaceItems=True )
-        
+            cm.append( ( self.__language__( 30508 ), 'XBMC.RunPlugin(%s?path=%s&action=delete&delete=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
+            cm.append( ( self.__language__( 30515 ), 'XBMC.RunPlugin(%s?path=%s&action=refine_user&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
+            #cm.append( ( self.__language__( 30516 ), 'XBMC.RunPlugin(%s?path=%s&action=refine_category&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
+            
         if (item("playlist")):
             url += "playlist=" + item("playlist") + "&"
+            cm.append( ( self.__language__( 30514 ), "XBMC.Action(Queue)" ) )
         
         if (item("action")):
             url += "action=" + item("action") + "&"
@@ -559,40 +572,40 @@ class YouTubeNavigation:
             cm_url +=")"
             
             if (item("feed") == "subscriptions_favorites"):
-                cm = [ (self.__language__( 30511 ), cm_url) ]
+                cm.append( (self.__language__( 30511 ), cm_url) )
                 
             elif (item("feed") == "subscriptions_uploads"):
-                cm = [ (self.__language__( 30510 ), cm_url) ]
-
+                cm.append ( (self.__language__( 30510 ), cm_url) )
+        
             cm.append( ( self.__language__( 30513 ) % item("channel"), 'XBMC.RunPlugin(%s?path=%s&editurl=%s&action=remove_subscription)' % ( sys.argv[0], item("path"), item("editurl") ) ) )
             
             if (get("external")):
                 cm.append( ( self.__language__( 30512 ) % item("channel"), 'XBMC.RunPlugin(%s?path=%s&channel=%s&action=add_subscription)' % ( sys.argv[0], item("path"), item("channel") ) ) )
                 
-            listitem.addContextMenuItems( cm, replaceItems=True )
-        
         if (item("login") == "true"):
             url += "login=true&"
         
         if (item("contact")):
             url += "contact=" + item("contact") + "&"
-            cm = []
             if (item("external")):
                 cm.append( (self.__language__(30026), 'XBMC.RunPlugin(%s?path=%s&action=add_contact&)' % ( sys.argv[0], item("path") ) ) )
             else:
                 cm.append( (self.__language__(30025), 'XBMC.RunPlugin(%s?path=%s&action=remove_contact&contact=%s&)' % ( sys.argv[0], item("path"), item("contact") ) ) )
-
-            listitem.addContextMenuItems( cm, replaceItems=True )
-            
+    
         if (item("page")):
             url += "page=" + item("page") + "&"
-        
+
+        if ( item("feed") == "favorites"  or item("feed") == "playlists" or item("feed") == "uploads" ):
+            cm.append( ( self.__language__( 30514 ), "XBMC.Action(Queue)" ) )
+            
         if (item("channel")):
             url += "channel=" + item("channel") + "&"
             
         if (item("scraper")):
             url += "scraper=" + item("scraper") + "&"
-            
+
+        if len(cm) > 0:
+            listitem.addContextMenuItems( cm, replaceItems=True )
         listitem.setProperty( "Folder", "true" )
         xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url, listitem=listitem, isFolder=True, totalItems=size)
     

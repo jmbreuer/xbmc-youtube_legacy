@@ -98,6 +98,9 @@
     <string id="30511">Change subscription to uploads</string>
     <string id="30512">Subscribe to %s</string>
     <string id="30513">Unsubscribe from %s</string>
+    <string id="30514">Queue folder</string>
+    <string id="30515">Refine to user</string>
+    <string id="30516">Refine to category</string>
 
     <!-- messages -->
     <string id="30600">Error</string>
