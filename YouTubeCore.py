@@ -51,10 +51,28 @@ class YouTubeCore(object):
 	
 		headers = urllib.urlencode({'Email': uname, 'Passwd': passwd, 'service': 'youtube', 'source': 'test'});
 		try:
+			if self.__dbg__:
+				print self.__plugin__ + " login connect"
 			con = urllib2.urlopen(url, headers);
-		
+
+			if self.__dbg__:
+				print self.__plugin__ + " login read"
+					
 			value = con.read();
+
+			if self.__dbg__:
+				print self.__plugin__ + " login close"
+					
+			con.close()
+
+			if self.__dbg__:
+				print self.__plugin__ + " login regex"
+					
 			result = re.compile('Auth=(.*)\nYouTubeUser=(.*)').findall(value);
+
+			if self.__dbg__:
+				print self.__plugin__ + " login result : " + str(len(result))
+					
 			if len(result) > 0:
 				( auth, nick ) = result[0]
 				self.__settings__.setSetting('auth', auth)
