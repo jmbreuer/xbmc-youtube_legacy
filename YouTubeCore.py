@@ -47,7 +47,7 @@ class YouTubeCore(object):
 			return ( "", 200 )
 
 		if self.__dbg__:
-			print self.__plugin__ + " login data username type %s - length %s. Password type %s - lenght %s. " % ( str(type(uname)), str(len(uname)), str(type(passwd)), str(len(passwd)) )
+			print self.__plugin__ + " login data username %s - Password %s " % ( str(type(uname)), str(type(passwd)))
 	
 		headers = urllib.urlencode({'Email': uname, 'Passwd': passwd, 'service': 'youtube', 'source': 'test'});
 		try:
