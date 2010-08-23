@@ -73,11 +73,10 @@ class YouTubeCore(object):
 				print self.__plugin__ + " login failed, hit valueerror except: " + error
 			return ( error, 303 )
 		
-		except IOError, e:
-			error = repr(e)
+		except IOError as (errno, strerror):
 			if self.__dbg__:
-				print self.__plugin__ + " login failed, hit ioerror except: " + error
-			return ( error, 303 )
+				print self.__plugin__ + " login failed, hit ioerror except: I/O error({0}): {1}".format(errno, strerror)
+			return ( strerror, 303 )
 		
 		except urllib2.URLError, e:
 			error = repr(e)
