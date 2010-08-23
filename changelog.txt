@@ -1,7 +1,6 @@
 [B]Errata[/B]
 - Plugin can't play next item in queue if a modal keyboard is displayed ( XBMC bug )
-  - Revision 32246 never loads the video
-  - In later revisions(33035) XBMC freezes
+  - Fixed in svn revision 33055, will be merged with dharma when a reviewer signs off.
 
 [B]Version 0.9.2[/B]
 - Added debug to login
