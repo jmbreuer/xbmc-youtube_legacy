@@ -336,12 +336,13 @@ class YouTubeNavigation:
             self.errorHandling(self.__language__(30603), video, status)
             return False
 
+        if ( 'swf_config' in video ):
+            video['video_url'] += " swfurl=%s swfvfy=1" % video['swf_config']
+
         listitem=xbmcgui.ListItem(label=video['Title'], iconImage="DefaultFolder.png", thumbnailImage=video['thumbnail'], path=video['video_url']);
-        if (video['swf_config']):
-            print "YOUTUBEDEV: " + video['swf_config']
-            listitem.setProperty("SWFPlayer", video['swf_config'])
-              
+        
         listitem.setInfo(type='Video', infoLabels=video)
+        
         if self.__dbg__:
             print self.__plugin__ + " - Playing video: " + video['Title'] + " - " + get('videoid') + " - " + video['video_url']
 

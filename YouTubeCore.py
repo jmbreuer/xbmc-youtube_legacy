@@ -405,9 +405,9 @@ class YouTubeCore(object):
 		else:
 			swfConfig = re.findall('var swfConfig = {(.*)};', htmlSource)
 			if len(swfConfig) > 0:
-				swfConfig = eval("{%s}" % swfConfig[0])
-				swfConfig = swfConfig['url'].replace("\\", "")
-			print swfConfig
+				swfConfig = swfConfig[0].replace("\\", "")
+				swfConfig = eval("{%s}" % swfConfig)
+				swfConfig = swfConfig['url']
 			fmtSource = re.findall('"fmt_stream_map": "([^"]+)"', htmlSource);
 			stream_map = 'True'
 			
@@ -511,7 +511,6 @@ class YouTubeCore(object):
 				if self.__dbg__:
 					print self.__plugin__ + " construct_video_url done"
 
-				print self.__plugin__ + " construct_video_url swfConfig: " + swfConfig
 				return (video, 200);
 			except:
 				if self.__dbg__:
