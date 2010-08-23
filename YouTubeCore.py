@@ -506,12 +506,13 @@ class YouTubeCore(object):
 
 				if self.__dbg__:
 					print self.__plugin__ + " construct_video_url done"
+
+				print self.__plugin__ + " construct_video_url swfConfig: " + swfConfig
 				return (video, 200);
 			except:
 				if self.__dbg__:
 					print self.__plugin__ + " construct_video_url uncaught exception"
 					print self.__plugin__ + " ERROR-except: %s::%s (%d) - %s" % (self.__class__.__name__  , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
-				print self.__plugin__ + " construct_video_url swfConfig" + swfConfig
 				return ('', 500)
 		else:
 			if self.__dbg__:
