@@ -8,6 +8,7 @@
 - Fixed RTMP support
 - Implemented release disable support for RTMP
 - Added try/except to _extractVariables
+- Hopefully improved login debugging.
 
 [B]Version 0.9.3[/B]
 - Added better errorhandling of videos youtube deny access too

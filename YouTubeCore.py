@@ -45,6 +45,9 @@ class YouTubeCore(object):
 			if self.__dbg__:
 				print self.__plugin__ + " login no username or password set "
 			return ( "", 200 )
+
+		if self.__dbg__:
+			print self.__plugin__ + " login data username type %s - length %s. Password type %s - lenght %s. " % ( str(type(uname)), str(len(uname)), str(type(passwd)), str(len(passwd)) )
 	
 		headers = urllib.urlencode({'Email': uname, 'Passwd': passwd, 'service': 'youtube', 'source': 'test'});
 		try:
@@ -60,6 +63,7 @@ class YouTubeCore(object):
 				if self.__dbg__:
 					print self.__plugin__ + " login done: " + nick
 				return ( "", 200 )
+			
                 except urllib2.HTTPError, e:
 			error = str(e)
 			if self.__dbg__:
@@ -75,9 +79,16 @@ class YouTubeCore(object):
 			return ( error, 303 )
 		
 		except IOError, e:
-			error = repr(e)
+			# http://bytes.com/topic/python/answers/33770-error-codes-urlerror
+			# Couldn't reach server?
+			try:
+				(code, message) = e
+			except:
+				code = 0
+				message = repr(e)
+				
 			if self.__dbg__:
-				print self.__plugin__ + " login failed, hit ioerror except: " + error
+				print self.__plugin__ + " login failed, hit ioerror except: [%s] %s" % ( code, message )
 			return ( error, 303 )
 		
 		except urllib2.URLError, e:
