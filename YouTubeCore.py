@@ -365,7 +365,6 @@ class YouTubeCore(object):
 
 
 	def construct_video_url(self, videoid, encoding = 'utf-8'):
-		videoid = "IcgfdtkcIW0"
 		if self.__dbg__:
 			print self.__plugin__ + " construct_video_url : " + repr(videoid)
 
