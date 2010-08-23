@@ -770,8 +770,9 @@ class YouTubeNavigation:
             
             self.addFolderListItem(params, item)
         
-        xbmc.executebuiltin("Container.SetViewMode(500)")
+#        xbmc.executebuiltin("Container.SetViewMode(500)")
         xbmcplugin.endOfDirectory( handle=int( sys.argv[ 1 ] ), succeeded=True, cacheToDisc=True )
+        xbmcplugin.setContent(handle=int( sys.argv[ 1 ] ), content='movies')
         
     #=================================== Tool Box ======================================= 
     # shows a more userfriendly notification

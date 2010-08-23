@@ -365,6 +365,7 @@ class YouTubeCore(object):
 
 
 	def construct_video_url(self, videoid, encoding = 'utf-8'):
+		videoid = "IcgfdtkcIW0"
 		if self.__dbg__:
 			print self.__plugin__ + " construct_video_url : " + repr(videoid)
 
@@ -385,6 +386,7 @@ class YouTubeCore(object):
 				request.add_header('User-Agent', 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; .NET CLR 1.1.4322; .NET CLR 2.0.50727)');
 				con = urllib2.urlopen(request);
 				htmlSource = con.read();
+				
 				if self.__dbgv__:
 					print self.__plugin__ + " construct_video_url result: " + repr(htmlSource)
 				con.close()
@@ -573,15 +575,15 @@ class YouTubeCore(object):
 			print self.__plugin__ + " scrapeVideos done"
 		return ( ytobjects, 200 )
 
-    #===============================================================================
+        #===============================================================================
 	#
-    # Internal functions to YouTubeCore.py
+        # Internal functions to YouTubeCore.py
 	#
 	# Return should be value(True for bool functions), or False if failed.
 	#
 	# False MUST be handled properly in External functions
-    #
-    #===============================================================================
+        #
+        #===============================================================================
 
 	def _getAuth(self):
 		if self.__dbg__:
@@ -805,6 +807,34 @@ class YouTubeCore(object):
 			print self.__plugin__ + " _getvideoinfo done"
 		return ytobjects;
 
+	def _getAlert(self, videoid):
+		if self.__dbg__:
+			print self.__plugin__ + " _getAlert"
+
+		link = 'http://www.youtube.com/watch?v=' +videoid + "&safeSearch=none"
+		request = urllib2.Request(link);
+		request.add_header('User-Agent', 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; .NET CLR 1.1.4322; .NET CLR 2.0.50727)');
+		#if ( self._httpLogin() ):
+			#request.add_header('Cookie', 'LOGIN_INFO=' + self.__settings__.getSetting( "login_info" ) )
+		con = urllib2.urlopen(request);
+		http_result = con.read();
+		
+		start = http_result.find('class="yt-alert-content">')
+		if start == -1:
+			return self.__language__(30622)
+		
+		start += len('class="yt-alert-content">')
+		result = http_result[start: http_result.find('</div>', start)].strip()
+
+		# Why doesn't this work?
+		#result = result.replace("\n", "")
+		#alert = re.compile('class="yt-alert-content">(.*)</div>', re.M).findall(result);
+
+		if self.__dbg__:
+			print self.__plugin__ + " _getAlert : " + repr(start)
+
+		return result
+	
 	def _get_details(self, videoid):
 		if self.__dbg__:
 			print self.__plugin__ + " _get_details: " + repr(videoid)
@@ -823,20 +853,23 @@ class YouTubeCore(object):
 				if self.__dbg__:
 					print self.__plugin__ + " _get_details done"
 				return result[0];
+			
 		except urllib2.URLError, err:
 			if self.__dbg__:
                                 print self.__plugin__ + " _get_details except: " + str(err)
-
-			if (err.code == 403):
-				# 403 == Forbidden
-				# Happens on "removed by user" and "This video has been removed due to terms of use violation."
-				return False
 
 			video = {}
 			video['Title'] = "Error"
 			video['videoid'] = videoid
 			video['thumbnail'] = "Error"
 			video['video_url'] = False
+
+			if (err.code == 403):
+				# 403 == Forbidden
+				# Happens on "removed by user" and "This video has been removed due to terms of use violation." and "This video is private"
+				
+				video['apierror'] = self._getAlert(videoid)
+				return video
 
 			if (err.code == 503):
 				if self.__dbg__:
@@ -860,7 +893,8 @@ class YouTubeCore(object):
 			print self.__plugin__ + " _httpLogin"
 		uname = self.__settings__.getSetting( "username" )
 		pword = self.__settings__.getSetting( "user_password" )
-	
+		if ( uname == "" and passwd == "" ):
+			return False
 		cj = cookielib.LWPCookieJar()
 		
 		opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))

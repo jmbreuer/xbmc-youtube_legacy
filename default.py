@@ -24,7 +24,7 @@ __XBMC_Revision__ = "32430"
 
 __settings__ = xbmcaddon.Addon(id='plugin.video.youtube.beta')
 __language__ = __settings__.getLocalizedString
-__dbg__ = __settings__.getSetting( "debug" ) == "True"
+__dbg__ = __settings__.getSetting( "debug" ) == "true"
 
 if (__name__ == "__main__" ):
     import YouTubeNavigation as navigation
