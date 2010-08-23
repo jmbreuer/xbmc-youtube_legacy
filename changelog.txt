@@ -2,6 +2,12 @@
 - Plugin can't play next item in queue if a modal keyboard is displayed ( XBMC bug )
   - Fixed in svn revision 33055, will be merged with dharma when a reviewer signs off.
 
+[B]Version 0.9.4[/B]
+- Added refinements of searches support
+- Added queue folder support
+- Fixed rtmpe support
+- Updated debug information for login.
+
 [B]Version 0.9.3[/B]
 - Added better errorhandling of videos youtube deny access too
 - Actually enable debugging
