@@ -101,6 +101,7 @@
     <string id="30514">Queue folder</string>
     <string id="30515">Refine to user</string>
     <string id="30516">Refine to category</string>
+    <string id="30517">Clear refinements</string>
 
     <!-- messages -->
     <string id="30600">Error</string>
@@ -126,4 +127,7 @@
     <string id="30620">Stream type not supported</string>
     <string id="30621">Bad username or password</string>
     <string id="30622">Playback failed, try logging in</string>
+    <string id="30623">Refinement added</string>
+    <string id="30624">Refinement cleared</string>
+
 </strings>

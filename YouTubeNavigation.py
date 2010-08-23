@@ -116,6 +116,8 @@ class YouTubeNavigation:
             self.search(params)
         if (get("action") == "refine_user"):
             self.refineSearch(params)
+        if (get("action") == "delete_refinements"):
+            self.deleteRefinements(params)
         if (get("action") == "settings"):
             self.login(params)
         if (get("action") == "delete"):
@@ -347,10 +349,35 @@ class YouTubeNavigation:
     def refineSearch(self, params = {}):
         get = params.get
         query = get("search")
-        self.deleteSearchQuery({'delete': get("search")})
-        author = self.getUserInput('Search on author', '')
-        self.saveSearchQuery(query)
-                    
+        try:
+            searches = eval(self.__settings__.getSetting("stored_searches_author"))
+        except :
+            searches = {}
+        if query in searches:
+            author = self.getUserInput('Search on author', searches[query])
+        else:
+            author = self.getUserInput('Search on author', '')
+
+        if author == "":
+            del searches[query]
+        else:
+            searches[query] = author
+        self.__settings__.setSetting("stored_searches_author", repr(searches))
+        self.showMessage(self.__language__(30006), self.__language__(30623))
+                        
+
+    def deleteRefinements(self, params = {}):
+        get = params.get
+        query = get("search")
+        try:
+            searches = eval(self.__settings__.getSetting("stored_searches_author"))
+        except :
+            searches = {}
+        if query in searches:
+            del searches[query]
+            self.__settings__.setSetting("stored_searches_author", repr(searches))
+            self.showMessage(self.__language__(30006), self.__language__(30624))
+                                                                                            
     def search(self, params = {}):
         get = params.get
         if (get("search")):
@@ -417,9 +444,9 @@ class YouTubeNavigation:
         get = params.get
         query = get("delete")
         
-        try :
+        try:
             searches = eval(self.__settings__.getSetting("stored_searches"))
-        except :
+        except:
             searches = []
             
         for count, search in enumerate(searches):
@@ -430,15 +457,17 @@ class YouTubeNavigation:
         xbmc.executebuiltin( "Container.Refresh" )
         
     def saveSearchQuery(self, query):
-        try :
+        try:
             searches = eval(self.__settings__.getSetting("stored_searches"))
-        except :
+        except:
             searches = []
             
         for count, search in enumerate(searches):
             if (search.lower() == query.lower()):
                 del(searches[count])
+                self.deleteRefinements({'search': query})
                 break
+        
         searchCount = ( 10, 20, 30, 40, )[ int( self.__settings__.getSetting( "saved_searches" ) ) ]
         searches = [query] + searches[:searchCount]
         self.__settings__.setSetting("stored_searches", repr(searches))
@@ -550,6 +579,8 @@ class YouTubeNavigation:
             url += "search=" + item("search") + "&"
             cm.append( ( self.__language__( 30508 ), 'XBMC.RunPlugin(%s?path=%s&action=delete&delete=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
             cm.append( ( self.__language__( 30515 ), 'XBMC.RunPlugin(%s?path=%s&action=refine_user&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
+            cm.append( ( self.__language__( 30517 ), 'XBMC.RunPlugin(%s?path=%s&action=delete_refinements&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
+                        
             #cm.append( ( self.__language__( 30516 ), 'XBMC.RunPlugin(%s?path=%s&action=refine_category&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
             
         if (item("playlist")):

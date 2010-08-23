@@ -95,8 +95,15 @@ class YouTubeCore(object):
 		per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
 		safe_search = ("none", "moderate", "strict" ) [int( self.__settings__.getSetting( "safe_search" ) ) ]
 		link = "http://gdata.youtube.com/feeds/api/videos?" + urllib.urlencode({'q': query}) + "&safeSearch=" + safe_search + "&start-index=" + str( per_page * int(page) + 1) + "&max-results=" + repr(per_page)
-		#if ( author != "" ):
-			#link += "&" + urllib.urlencode({'author': author})
+		try:
+			authors = eval(self.__settings__.getSetting("stored_searches_author"))
+		except:
+			authors = {}
+		if len(authors) > 0:
+			print self.__plugin__ + " search test empty searches"
+			print authors
+			link += "&" + urllib.urlencode({'author': authors[query]})
+			print link
 		url = urllib2.Request(link);
 		url.add_header('User-Agent', self.USERAGENT);
 		url.add_header('GData-Version', 2)
@@ -426,10 +433,10 @@ class YouTubeCore(object):
 				(fmtSource, swfConfig, video['stream_map']) = self.extractVariables(videoid)
 
 				if not fmtSource:
-					(fmtSource, swfConfig, video['stream_map']) = self.extractVariables(videoid)
+					(fmtSource, swfConfig, video['stream_map']) = self.extractVariables(videoid, True)
 					
 					if not fmtSource:
-						print self.__plugin__ + " IMPORTANT : " + link
+						print self.__plugin__ + " IMPORTANT : " + videoid
 						if self.__dbg__:
 							print self.__plugin__ + " construct_video_url failed, empty fmtSource after trying with cookie"
 						#print htmlSource
