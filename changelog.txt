@@ -2,6 +2,11 @@
 - Plugin can't play next item in queue if a modal keyboard is displayed ( XBMC bug )
   - Fixed in svn revision 33055, will be merged with dharma when a reviewer signs off.
 
+[B]Version 0.9.5[/B]
+- Added even more debug to login
+- Make login retry on IOERror failure
+- Removed some login headers.
+
 [B]Version 0.9.4[/B]
 - Added refinements of searches support
 - Added queue folder support
