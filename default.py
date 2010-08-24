@@ -18,7 +18,7 @@ __plugin__ = "YouTube"
 __author__ = "TheCombine"
 __url__ = "www.xbmc.com"
 __svn_url__ = ""
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 __svn_revision__ = "$Revision$"
 __XBMC_Revision__ = "32430"
 

@@ -30,17 +30,41 @@ class YouTubeCore(object):
 		#self.__settings__.setSetting( "debug", "True" )
 		return None
 
+	#===========================================================================
+	# def authenticate(self, user_id, user_password):
+	#	try:
+	#		auth_request = {'Email': user_id,
+	#		 'Passwd': user_password,
+	#		 'service': 'youtube',
+	#		 'source': 'You Tube plugin'}
+	#		request = urllib2.Request('https://www.google.com/youtube/accounts/ClientLogin', urlencode(auth_request))
+	#		request.add_header('Content-Type', 'application/x-www-form-urlencoded')
+	#		opener = urllib2.urlopen(request)
+	#		data = opener.read()
+	#		opener.close()
+	#		authkey = re.findall('Auth=(.+)', data)[0]
+	#		userid = re.findall('YouTubeUser=(.+)', data)[0]
+	#		self._login(user_id, user_password)
+	#		return (authkey, userid)
+	#	except:
+	#		print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
+	#		 , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
+	#		return ('', '')
+	#===========================================================================
+		
 	def login(self):
 		if self.__dbg__:
 			print self.__plugin__ + " login"
+
+		self.__dbg__ = True # For now we hardcode debug to true, since we're having problems with this part..
 		uname = self.__settings__.getSetting( "username" )
-	        passwd = self.__settings__.getSetting( "user_password" )
-		self.__dbg__ = True
-
+		passwd = self.__settings__.getSetting( "user_password" )
+		
 		url = urllib2.Request("https://www.google.com/youtube/accounts/ClientLogin");
-		url.add_header('User-Agent', self.USERAGENT)
+		#url.add_header('User-Agent', self.USERAGENT) # don't think its a good idea to lie about who we are when we're trying to login, might complicate things 
+		url.add_header('Content-Type', 'application/x-www-form-urlencoded') # Prolly good idea to tell
 		url.add_header('GData-Version', 2)
-
+		
 		if ( uname == "" and passwd == "" ):
 			if self.__dbg__:
 				print self.__plugin__ + " login no username or password set "
@@ -49,7 +73,10 @@ class YouTubeCore(object):
 		if self.__dbg__:
 			print self.__plugin__ + " login data username %s - Password %s " % ( str(type(uname)), str(type(passwd)))
 	
-		headers = urllib.urlencode({'Email': uname, 'Passwd': passwd, 'service': 'youtube', 'source': 'test'});
+		headers = urllib.urlencode({'Email': uname, 
+									'Passwd': passwd, 
+									'service': 'youtube', 
+									'source': 'You Tube plugin'});
 		try:
 			if self.__dbg__:
 				print self.__plugin__ + " login connect"
