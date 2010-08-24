@@ -52,7 +52,29 @@ class YouTubeCore(object):
 	#		return ('', '')
 	#===========================================================================
 		
-	def login(self):
+	def interrogate(self, item):
+		"""Print useful information about item."""
+		if hasattr(item, '__name__'):
+			print "NAME:    ", item.__name__
+		if hasattr(item, '__class__'):
+			print "CLASS:   ", item.__class__.__name__
+		print "ID:      ", id(item)
+		print "TYPE:    ", type(item)
+		print "VALUE:   ", repr(item)
+		print "CALLABLE:",
+		if callable(item):
+			print "Yes"
+		else:
+			print "No"
+		
+		if hasattr(item, '__doc__'):
+			doc = getattr(item, '__doc__')
+			doc = doc.strip()   # Remove leading/trailing whitespace.
+			firstline = doc.split('\n')[0]
+		print "DOC:     ", firstline
+	
+						
+	def login(self, retry = True):
 		if self.__dbg__:
 			print self.__plugin__ + " login"
 
@@ -107,6 +129,8 @@ class YouTubeCore(object):
 				self._httpLogin()
 				if self.__dbg__:
 					print self.__plugin__ + " login done: " + nick
+				# DISABLE THIS
+				raise IOError("raised")
 				return ( "", 200 )
 			
                 except urllib2.HTTPError, e:
@@ -126,15 +150,21 @@ class YouTubeCore(object):
 		except IOError, e:
 			# http://bytes.com/topic/python/answers/33770-error-codes-urlerror
 			# Couldn't reach server?
-			try:
-				(code, message) = e
-			except:
-				code = 0
-				message = repr(e)
+#			try:
+#				(code, message) = e
+#			except:
+#				code = 0
+#				message = repr(e)
 				
 			if self.__dbg__:
-				print self.__plugin__ + " login failed, hit ioerror except: [%s] %s" % ( code, message )
-			return ( message, 303 )
+				#print self.__plugin__ + " login failed, hit ioerror except: [%s] %s" % ( code, message )
+				print self.__plugin__ + " login failed, hit ioerror except2: : " + repr(e)
+				print self.interrogate(e)
+				print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
+								   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
+					
+					
+			return ( "IOERROR", 303 )
 		
 		except urllib2.URLError, e:
 			error = repr(e)
