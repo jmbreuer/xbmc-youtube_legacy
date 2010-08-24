@@ -69,20 +69,32 @@ class YouTubeCore(object):
 		
 		if hasattr(item, '__doc__'):
 			doc = getattr(item, '__doc__')
-			doc = doc.strip()   # Remove leading/trailing whitespace.
-			firstline = doc.split('\n')[0]
-		print "DOC:     ", firstline
+			if doc:
+				doc = doc.strip()   # Remove leading/trailing whitespace.
+				firstline = doc.split('\n')[0]
+				print "DOC:     ", firstline
 	
 						
 	def login(self, retry = True):
+		self.__dbg__ = True # For now we hardcode debug to true, since we're having problems with this part..
+		
 		if self.__dbg__:
 			print self.__plugin__ + " login"
-
-		self.__dbg__ = True # For now we hardcode debug to true, since we're having problems with this part..
+			
 		uname = self.__settings__.getSetting( "username" )
 		passwd = self.__settings__.getSetting( "user_password" )
-		
-		url = urllib2.Request("https://www.google.com/youtube/accounts/ClientLogin");
+
+
+		if not retry:
+			import socket
+			ip = socket.gethostbyname('google.com')
+			if self.__dbg__:
+				print self.__plugin__  + " login ip : " + repr(ip)
+			url = urllib2.Request("https://" + ip + "/youtube/accounts/ClientLogin");
+		else:
+			if self.__dbg__:
+				print self.__plugin__  + " login not using ip address"
+			url = urllib2.Request("https://www.google.com/youtube/accounts/ClientLogin");
 		#url.add_header('User-Agent', self.USERAGENT) # don't think its a good idea to lie about who we are when we're trying to login, might complicate things 
 		url.add_header('Content-Type', 'application/x-www-form-urlencoded') # Prolly good idea to tell
 		url.add_header('GData-Version', 2)
@@ -130,7 +142,7 @@ class YouTubeCore(object):
 				if self.__dbg__:
 					print self.__plugin__ + " login done: " + nick
 				# DISABLE THIS
-				raise IOError("raised")
+				#raise IOError("raised")
 				return ( "", 200 )
 			
                 except urllib2.HTTPError, e:
@@ -159,10 +171,12 @@ class YouTubeCore(object):
 			if self.__dbg__:
 				#print self.__plugin__ + " login failed, hit ioerror except: [%s] %s" % ( code, message )
 				print self.__plugin__ + " login failed, hit ioerror except2: : " + repr(e)
-				print self.interrogate(e)
 				print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
 								   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
-					
+				print self.interrogate(e)
+
+			if retry:
+		       		return self.login(False)
 					
 			return ( "IOERROR", 303 )
 		
