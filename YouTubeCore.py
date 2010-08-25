@@ -82,13 +82,25 @@ class YouTubeCore(object):
 					    'source': 'YouTube plugin'});
 	
 		try:
-			con = urllib2.urlopen(url, data);
+			import httplib2
+			h = httplib2.Http(".cache")
+			headers = {}
+			headers["Content-Type"] = "application/x-www-form-urlencoded"
+			headers['GData-Version'] = '2'
+			resp, content = h.request("https://www.google.com/youtube/accounts/ClientLogin",
+						      "POST", body=data,
+						  headers=headers)
+			
+			#con = urllib2.urlopen(url, data);
 
-			if self.__dbg__:
-				print self.__plugin__ + " login reply header: " + repr(con.info().headers)
+			#if self.__dbg__:
+				#print self.__plugin__ + " login reply header: " + repr(con.info().headers)
 				
-			value = con.read();
-			con.close()
+			#value = con.read();
+			#con.close()
+			
+			value = content
+
 			result = re.compile('Auth=(.*)\nYouTubeUser=(.*)').findall(value);
 					
 			if len(result) > 0:
