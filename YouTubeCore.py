@@ -83,7 +83,7 @@ class YouTubeCore(object):
 	
 		try:
 			import httplib2
-			h = httplib2.Http(".cache")
+			h = httplib2.Http("")
 			headers = {}
 			headers["Content-Type"] = "application/x-www-form-urlencoded"
 			headers['GData-Version'] = '2'
