@@ -188,6 +188,8 @@ class YouTubeCore(object):
 		except:
 			if self.__dbg__:
 				print self.__plugin__ + " login failed uncaught exception"
+				print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
+								   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
 			return ( self.__language__(30616), 500 );
 	
 	def search(self, query, page = "0"):
@@ -228,6 +230,8 @@ class YouTubeCore(object):
 		except:
 			if self.__dbg__:
 				print self.__plugin__ + " search failed with uncaught exception"
+				print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
+								   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
 			return ( [], 500 )
 
 	def feeds(self, feed, page = "0" ):
@@ -243,13 +247,16 @@ class YouTubeCore(object):
 			feed += "?"
 		else:
 			feed += "&"
-			feed += "start-index=" + str( per_page * int(page) + 1) + "&max-results=" + repr(per_page)
+		feed += "start-index=" + str( per_page * int(page) + 1) + "&max-results=" + repr(per_page)
 			
 		if (feed.find("standardfeeds") > 0):
 			region = ('', 'AU', 'BR', 'CA', 'CZ', 'FR', 'DE', 'GB', 'NL', 'HK', 'IN', 'IE', 'IL', 'IT', 'JP', 'MX', 'NZ', 'PL', 'RU', 'KR', 'ES','SE', 'TW', 'US', 'ZA' )[ int( self.__settings__.getSetting( "region_id" ) ) ]
 			if (region):
 				feed = feed.replace("/standardfeeds/", "/standardfeeds/"+ region + "/")
-		
+
+		if self.__dbg__:
+			print self.__plugin__ + " feeds : " + repr(feed) + " page: " + repr(page)
+			
 		url = urllib2.Request(feed); # Implement start-index here                            
 		url.add_header('User-Agent', self.USERAGENT);
 		url.add_header('GData-Version', 2)
@@ -267,6 +274,7 @@ class YouTubeCore(object):
 				if self.__dbg__:
                                         print self.__plugin__ + " feeds done with no results"
 				return (self.__language__(30602), 303)
+			
                 except urllib2.HTTPError, e:
 			error = str(e)
 			if self.__dbg__:
@@ -275,6 +283,9 @@ class YouTubeCore(object):
 		except:
 			if self.__dbg__:
 				print self.__plugin__ + " feed failed with uncaught exception "
+				print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
+								   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
+				
 			return ( [], 500 )
 	
 	def list(self, feed, page = "0", retry = True):
@@ -331,6 +342,8 @@ class YouTubeCore(object):
                 except:
 			if self.__dbg__:
                                         print self.__plugin__ + " list uncaught exception"
+					print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
+									   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
                         return ( [], 500 )
 
         def delete_favorite(self, delete_url):
@@ -400,6 +413,9 @@ class YouTubeCore(object):
 		except:
                         if self.__dbg__:
                                         print self.__plugin__ + " playlist uncaught exception"
+					print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
+									   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
+					
                         return ( [], 500 )
 
 		result = con.read()
@@ -464,6 +480,9 @@ class YouTubeCore(object):
 			except:
 				if self.__dbg__:
                                         print self.__plugin__ + " downloadVideo uncaught exception"
+					print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
+									   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
+					
 				return (self.__language__(30606), 303)
 		else:
 			if self.__dbg__:
@@ -580,6 +599,9 @@ class YouTubeCore(object):
 			except:
 				if self.__dbg__:
 					print self.__plugin__ + " construct_video_url uncaught exception"
+					print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
+									   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
+					
 				return ('', 500)
 		else:
 			if self.__dbg__:
@@ -644,6 +666,10 @@ class YouTubeCore(object):
 						print self.__plugin__ + " scrapeVideos except: " + str(e)
 					return ( str(e), 303 )
 				except:
+					if self.__dbg__:
+						print self.__plugin__ + " scrapeVideos caught unknown exception"
+						print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
+										   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
 					return ( "", 500 )
 				
 				temp = self._getvideoinfo(value)
@@ -732,6 +758,8 @@ class YouTubeCore(object):
 		except:
 			if self.__dbg__:
 				print self.__plugin__ + " construct_video_url uncaught exception"
+				print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
+								   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
 			return ( '', 500 )
 									
 		return (fmtSource, swfConfig, stream_map)
@@ -847,6 +875,9 @@ class YouTubeCore(object):
 		except:
 			if self.__dbg__:
                                 print self.__plugin__ + " _youTubeDel uncaught exception"
+				print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
+								   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
+				
 			return ( "" , 500)
 	
 	def _getNodeAttribute(self, node, tag, attribute, default = ""):
@@ -1039,6 +1070,9 @@ class YouTubeCore(object):
 		except:
 			if self.__dbg__:
                                 print self.__plugin__ + " _get_details uncaught exception"
+				print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
+								   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
+				
 			return False
 		
 		
@@ -1095,6 +1129,8 @@ class YouTubeCore(object):
 		except:
 			if self.__dbg__:
                                 print self.__plugin__ + " _httpLogin: uncaught exception"
+				print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
+								   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
 			return False
 
 	# try except status this.
@@ -1136,6 +1172,9 @@ class YouTubeCore(object):
 		except:
 			if self.__dbg__:
 				print self.__plugin__ + " _scrapeYouTubeData uncaught exception"
+				print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
+								   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
+			
 			return ( "", 500 )
 	
 if __name__ == '__main__':
