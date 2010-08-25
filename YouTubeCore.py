@@ -85,12 +85,15 @@ class YouTubeCore(object):
 		if self.__dbg__:
 			print self.__plugin__ + " login data username %s - Password %s " % ( str(type(uname)), str(type(passwd)))
 	
-		headers = urllib.urlencode({'Email': uname, 
-									'Passwd': passwd, 
-									'service': 'youtube', 
-									'source': 'YouTube plugin'});
+		data = urllib.urlencode({'Email': uname, 
+					    'Passwd': passwd, 
+					    'service': 'youtube', 
+					    'source': 'YouTube plugin'});
+	
 		try:
-			con = urllib2.urlopen(url, headers);
+			# DISABLE THIS
+			raise IOError("raised")
+			con = urllib2.urlopen(url, data);
 
 			if self.__dbg__:
 				print self.__plugin__ + " login reply header: " + repr(con.info().headers)
@@ -107,8 +110,9 @@ class YouTubeCore(object):
 
 				if self.__dbg__:
 					print self.__plugin__ + " login done: " + nick
-
 				return ( self.__language__(30030), 200 )
+			
+			return ( self.__language__(30609), 303 )
 			
                 except urllib2.HTTPError, e:
 			error = str(e)
@@ -134,6 +138,46 @@ class YouTubeCore(object):
 
 			if retry:
 		       		return self.login(False)
+			else:				
+				import httplib
+				try:
+					data = "Email=%s&Passwd=%s&service=youtube&source=YouTubePlugin" % ( uname, passwd )
+						
+					headers = {}
+					headers["Content-Type"] = "application/x-www-form-urlencoded"
+					headers['GData-Version'] = '2'
+					
+					conn = httplib.HTTPSConnection('www.google.com')
+					conn.request(method='POST', url='https://www.google.com/youtube/accounts/ClientLogin', body=data, headers=headers)
+					response = conn.getresponse()
+					data = response.read()
+					conn.close()
+					
+					print self.__plugin__ + " login httpLib: %s - %s " % (response.status, response.reason)
+					print data
+
+					
+					if (response.status == 200):
+						result = re.compile('Auth=(.*)\nYouTubeUser=(.*)').findall(data);
+
+						if len(result) > 0:
+							( auth, nick ) = result[0]
+							self.__settings__.setSetting('auth', auth)
+							self.__settings__.setSetting('nick', nick)
+							self._httpLogin()
+							
+							if self.__dbg__:
+								print self.__plugin__ + " login done: " + nick
+							return ( self.__language__(30030), 200 )
+						return ( self.__language__(30030), 200 )
+					return ( self.__language__(30609), 303 )
+									
+				except AttributeError, e:
+					print self.__plugin__ + '/ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
+											     , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
+					
+					print self.__plugin__ + " login exception: "
+					print self.interrogate(e)
 					
 			return ( "IOERROR", 303 )
 		
