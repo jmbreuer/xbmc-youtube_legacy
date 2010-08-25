@@ -32,6 +32,8 @@
     <string id="30027">Login..</string>
     <string id="30028">Change plugin settings</string>
     <string id="30029">Contact</string>
+    <string id="30030">Logged in</string>
+    <string id="30031">Login</string>
 
      
     <!-- Plugin settings strings -->
@@ -120,7 +122,7 @@
     <string id="30613">Added contact</string>
     <string id="30614">Removed contact</string>
     <string id="30615">Not found</string>
-    <string id="30616">Error loging in</string>
+    <string id="30616"></string> <!-- empty -->
     <string id="30617">Unkown error</string>
     <string id="30618">Couldn't extract video url</string>
     <string id="30619">Couldn't scrape YouTube</string>

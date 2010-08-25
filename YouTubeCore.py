@@ -15,7 +15,8 @@ class YouTubeCore(object):
 	__release__ = False
 	
 	APIKEY = "AI39si6hWF7uOkKh4B9OEAX-gK337xbwR9Vax-cdeF9CF9iNAcQftT8NVhEXaORRLHAmHxj6GjM-Prw04odK4FxACFfKkiH9lg";
-	USERAGENT = "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; .NET CLR 1.1.4322; .NET CLR 2.0.50727)";
+	#USERAGENT = "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; .NET CLR 1.1.4322; .NET CLR 2.0.50727)";
+	USERAGENT = "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-GB; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8"
 
 	#===============================================================================
 	#
@@ -26,31 +27,7 @@ class YouTubeCore(object):
 	#===============================================================================
 	
 	def __init__(self):
-		#enable debug
-		#self.__settings__.setSetting( "debug", "True" )
 		return None
-
-	#===========================================================================
-	# def authenticate(self, user_id, user_password):
-	#	try:
-	#		auth_request = {'Email': user_id,
-	#		 'Passwd': user_password,
-	#		 'service': 'youtube',
-	#		 'source': 'You Tube plugin'}
-	#		request = urllib2.Request('https://www.google.com/youtube/accounts/ClientLogin', urlencode(auth_request))
-	#		request.add_header('Content-Type', 'application/x-www-form-urlencoded')
-	#		opener = urllib2.urlopen(request)
-	#		data = opener.read()
-	#		opener.close()
-	#		authkey = re.findall('Auth=(.+)', data)[0]
-	#		userid = re.findall('YouTubeUser=(.+)', data)[0]
-	#		self._login(user_id, user_password)
-	#		return (authkey, userid)
-	#	except:
-	#		print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
-	#		 , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
-	#		return ('', '')
-	#===========================================================================
 		
 	def interrogate(self, item):
 		"""Print useful information about item."""
@@ -76,13 +53,14 @@ class YouTubeCore(object):
 	
 						
 	def login(self, retry = True):
-		self.__dbg__ = True # For now we hardcode debug to true, since we're having problems with this part..
-		
 		if self.__dbg__:
 			print self.__plugin__ + " login"
 			
 		uname = self.__settings__.getSetting( "username" )
 		passwd = self.__settings__.getSetting( "user_password" )
+		
+		self.__settings__.setSetting('auth', "")
+		self.__settings__.setSetting('nick', "")
 
 
 		if not retry:
@@ -95,8 +73,8 @@ class YouTubeCore(object):
 			if self.__dbg__:
 				print self.__plugin__  + " login not using ip address"
 			url = urllib2.Request("https://www.google.com/youtube/accounts/ClientLogin");
-		#url.add_header('User-Agent', self.USERAGENT) # don't think its a good idea to lie about who we are when we're trying to login, might complicate things 
-		url.add_header('Content-Type', 'application/x-www-form-urlencoded') # Prolly good idea to tell
+			
+		url.add_header('Content-Type', 'application/x-www-form-urlencoded')
 		url.add_header('GData-Version', 2)
 		
 		if ( uname == "" and passwd == "" ):
@@ -110,41 +88,27 @@ class YouTubeCore(object):
 		headers = urllib.urlencode({'Email': uname, 
 									'Passwd': passwd, 
 									'service': 'youtube', 
-									'source': 'You Tube plugin'});
+									'source': 'YouTube plugin'});
 		try:
-			if self.__dbg__:
-				print self.__plugin__ + " login connect"
 			con = urllib2.urlopen(url, headers);
 
 			if self.__dbg__:
-				print self.__plugin__ + " login: " + repr(con.info().headers)
-				print self.__plugin__ + " login read"
-					
+				print self.__plugin__ + " login reply header: " + repr(con.info().headers)
+				
 			value = con.read();
-
-			if self.__dbg__:
-				print self.__plugin__ + " login close"
-					
 			con.close()
-
-			if self.__dbg__:
-				print self.__plugin__ + " login regex"
-					
 			result = re.compile('Auth=(.*)\nYouTubeUser=(.*)').findall(value);
-
-			if self.__dbg__:
-				print self.__plugin__ + " login result : " + str(len(result))
 					
 			if len(result) > 0:
 				( auth, nick ) = result[0]
 				self.__settings__.setSetting('auth', auth)
 				self.__settings__.setSetting('nick', nick)
 				self._httpLogin()
+
 				if self.__dbg__:
 					print self.__plugin__ + " login done: " + nick
-				# DISABLE THIS
-				#raise IOError("raised")
-				return ( "", 200 )
+
+				return ( self.__language__(30030), 200 )
 			
                 except urllib2.HTTPError, e:
 			error = str(e)
@@ -162,15 +126,7 @@ class YouTubeCore(object):
 		
 		except IOError, e:
 			# http://bytes.com/topic/python/answers/33770-error-codes-urlerror
-			# Couldn't reach server?
-#			try:
-#				(code, message) = e
-#			except:
-#				code = 0
-#				message = repr(e)
-				
 			if self.__dbg__:
-				#print self.__plugin__ + " login failed, hit ioerror except: [%s] %s" % ( code, message )
 				print self.__plugin__ + " login failed, hit ioerror except2: : " + repr(e)
 				print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
 								   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
@@ -191,7 +147,7 @@ class YouTubeCore(object):
 				print self.__plugin__ + " login failed uncaught exception"
 				print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
 								   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
-			return ( self.__language__(30616), 500 );
+			return ( self.__language__(30609), 500 );
 	
 	def search(self, query, page = "0"):
 		if self.__dbg__:
@@ -420,8 +376,10 @@ class YouTubeCore(object):
                         return ( [], 500 )
 
 		result = con.read()
+
 		if self.__dbgv__:
 			print self.__plugin__ + " playlist result: " + repr(result)
+
 		con.close()
 		dom = parseString(result);
 		links = dom.getElementsByTagName("link");
@@ -435,15 +393,17 @@ class YouTubeCore(object):
 				if (lget("rel").value == "next"):
 					next = "true"
 					break
-				
+		
 		playobjects = [];
 		for node in entries:
 			video = {};
-			video['published'] = node.getElementsByTagName("published").item(0).firstChild.nodeValue;
 			video['Title'] = str(node.getElementsByTagName("title").item(0).firstChild.nodeValue.replace('Activity of : ', '').replace('Videos published by : ', '')).encode( "utf-8" );
+			
+			video['published'] self._getNodeValue(node, "published", "2008-07-05T19:56:35.000-07:00")
 			video['summary'] = self._getNodeValue(node, 'summary', 'Unknown')
 			video['content'] = self._getNodeAttribute(node, 'content', 'src', 'FAIL')
 			video['playlistId'] = self._getNodeValue(node, 'yt:playlistId', '')
+			
 			if node.getElementsByTagName("link"):
 				link = node.getElementsByTagName("link")
 				for i in range(len(link)):
@@ -512,6 +472,9 @@ class YouTubeCore(object):
 				(fmtSource, swfConfig, video['stream_map']) = self._extractVariables(videoid)
 
 				if not fmtSource:
+					if self.__dbg__:
+						print self.__plugin__ + " construct_video_url Hopefully this extra if check is now legacy"
+						
 					(fmtSource, swfConfig, video['stream_map']) = self._extractVariables(videoid, True)
 					
 					if not fmtSource:
@@ -714,15 +677,17 @@ class YouTubeCore(object):
 			link = 'http://www.youtube.com/watch?v=' +videoid + "&safeSearch=none&restriction=US&hl=en_US"
 			request = urllib2.Request(link);
 			request.add_header('User-Agent', 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; .NET CLR 1.1.4322; .NET CLR 2.0.50727)');
-			# Video might be censored, try again with a cookie.
-			# Get a new LOGIN_INFO cookie (for some reason the old one will fail) and use request url again.
-			if login:
+			
+			# Login if the user is logged in.
+			auth = self._getAuth()
+			#if login:
+			if auth:
+				# Get a new LOGIN_INFO cookie (for some reason the old one will fail) and use request url again.
 				if ( self._httpLogin() ):
 					request.add_header('Cookie', 'LOGIN_INFO=' + self.__settings__.getSetting( "login_info" ) )
 				else:
 					if self.__dbg__:
-						print self.__plugin__ + " _extractVariables failed because login failed"
-						return ( self.__language__(30609), self.__language__(30609), 303)
+						print self.__plugin__ + " _extractVariables login failed"
 				
 			con = urllib2.urlopen(request);
 			htmlSource = con.read();
@@ -915,36 +880,37 @@ class YouTubeCore(object):
 		#construct list of video objects					
 		ytobjects = [];
 		for node in entries:
-			# THIS IS FUCKLY AND NEEDS TO BE FIXED
 			video = {};
+
+			# This shouldn't be needed anymore.
 			if not node.getElementsByTagName("media:title").item(0):
-				print self.__plugin__ + ' _getvideoinfo media:title missing';
-				continue;
+				print self.__plugin__ + ' _getvideoinfo media:title missing'
+				#continue;
 			
 			# http://code.google.com/intl/en/apis/youtube/2.0/reference.html#youtube_data_api_tag_yt:state <- more reason codes
 			# requesterRegion - This video is not available in your region. <- fails
 			# limitedSyndication - Syndication of this video was restricted by its owner. <- works
 			
 			if node.getElementsByTagName("yt:state").item(0):
-				if node.getElementsByTagName("yt:state").item(0).hasAttribute('name'):
-					# What to do about failed?
-					state = node.getElementsByTagName("yt:state").item(0).getAttribute('name')
+				
+				state = self._getNodeAttribute(node, "yt:state", 'name', 'Unknown Name')
 
+				# Ignore unplayable items.
 	        		if ( state == 'deleted' or state == 'rejected'):
 	        			continue
 	        		else:
-	        			#print self.__plugin__ + "/ERROR: DO NOT REMOVE THIS DEBUG CODE"
-	        			#print self.__plugin__ + "/ERROR: A video marked as rejected or failed was just fetched, check if it can play and handle appropriatly"
-	        			#print self.__plugin__ + "/ERROR: Name: " + node.getElementsByTagName("yt:state").item(0).getAttribute('name')
-	        			#print node.getElementsByTagName("yt:state").item(0).getAttribute('name');
-							
+					# Get reason for why we can't playback the file.		
 					if node.getElementsByTagName("yt:state").item(0).hasAttribute('reasonCode'):
-						reason = node.getElementsByTagName("yt:state").item(0).getAttribute('reasonCode')
-						value = node.getElementsByTagName("yt:state").item(0).firstChild.nodeValue;
+						reason = self._getNodeAttribute(node, "yt:state", 'reasonCode', 'Unknown reasonCode')
+						value = self._getNodeValue(node, "yt:state", "Unknown reasonValue").encode('utf-8')
+						
 						if ( reason != 'limitedSyndication' ):
 							video['reasonCode'] = reason
 							video['reasonValue'] = value
+						
+						if self.__dbg__:
 							print self.__plugin__ + "/ERROR reasonCode: [%s] %s " % ( reason, value )
+							
 						if reason == "private":
 							continue
 
@@ -988,8 +954,10 @@ class YouTubeCore(object):
 			video['next'] = next
 
 			ytobjects.append(video);
+
 		if self.__dbg__:
 			print self.__plugin__ + " _getvideoinfo done"
+
 		return ytobjects;
 
 	def _getAlert(self, videoid):
@@ -998,9 +966,11 @@ class YouTubeCore(object):
 
 		link = 'http://www.youtube.com/watch?v=' +videoid + "&safeSearch=none"
 		request = urllib2.Request(link);
-		request.add_header('User-Agent', 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; .NET CLR 1.1.4322; .NET CLR 2.0.50727)');
-		#if ( self._httpLogin() ):
-			#request.add_header('Cookie', 'LOGIN_INFO=' + self.__settings__.getSetting( "login_info" ) )
+		request.add_header('User-Agent', self.USERAGENT)
+		
+		if ( self._httpLogin() ):
+			request.add_header('Cookie', 'LOGIN_INFO=' + self.__settings__.getSetting( "login_info" ) )
+
 		con = urllib2.urlopen(request);
 		http_result = con.read();
 		
@@ -1024,6 +994,7 @@ class YouTubeCore(object):
 	def _get_details(self, videoid):
 		if self.__dbg__:
 			print self.__plugin__ + " _get_details: " + repr(videoid)
+
 		url = urllib2.Request("http://gdata.youtube.com/feeds/api/videos/" + videoid);
 		url.add_header('User-Agent', self.USERAGENT);
 		url.add_header('GData-Version', 2)

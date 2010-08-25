@@ -254,10 +254,11 @@ class YouTubeNavigation:
     def login(self, params = {}):
         self.__settings__.openSettings()
         (result, status) = core.login()
-        if status != 200:
-            self.errorHandling(self.__language__(30609), result, 303)
-        if params != {}:
-            xbmc.executebuiltin( "Container.Refresh" )
+        if status == 200:
+            self.errorHandling(self.__language__(30031), result, 303)
+        else:
+            self.errorHandling(self.__language__(30609), result, 505)
+        xbmc.executebuiltin( "Container.Refresh" )
 
     def listStoredSearches(self, params = {}):
         get = params.get

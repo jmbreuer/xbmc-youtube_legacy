@@ -2,6 +2,12 @@
 - Plugin can't play next item in queue if a modal keyboard is displayed ( XBMC bug )
   - Fixed in svn revision 33055, will be merged with dharma when a reviewer signs off.
 
+[B]Version 0.9.7[/B]
+- Minor bugfixes
+- Improve messages
+- General cleanup
+- Hardening certain function.
+
 [B]Version 0.9.6[/B]
 - Fixed potential crash in Recommended core function
 - Fixed crash in Feeds when a video was marked private
