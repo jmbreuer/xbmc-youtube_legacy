@@ -7,6 +7,8 @@
 - Improve messages
 - General cleanup
 - Hardening certain function.
+- Replaced some icons to fix license issues.
+- Tested against revision 33122 on linux(ubuntu and arch), Windows vista, and Snow Leopard.
 
 [B]Version 0.9.6[/B]
 - Fixed potential crash in Recommended core function
