@@ -399,7 +399,7 @@ class YouTubeCore(object):
 			video = {};
 			video['Title'] = str(node.getElementsByTagName("title").item(0).firstChild.nodeValue.replace('Activity of : ', '').replace('Videos published by : ', '')).encode( "utf-8" );
 			
-			video['published'] self._getNodeValue(node, "published", "2008-07-05T19:56:35.000-07:00")
+			video['published'] = self._getNodeValue(node, "published", "2008-07-05T19:56:35.000-07:00")
 			video['summary'] = self._getNodeValue(node, 'summary', 'Unknown')
 			video['content'] = self._getNodeAttribute(node, 'content', 'src', 'FAIL')
 			video['playlistId'] = self._getNodeValue(node, 'yt:playlistId', '')
