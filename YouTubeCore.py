@@ -117,6 +117,7 @@ class YouTubeCore(object):
 			con = urllib2.urlopen(url, headers);
 
 			if self.__dbg__:
+				print self.__plugin__ + " login: " + repr(con.info().headers)
 				print self.__plugin__ + " login read"
 					
 			value = con.read();

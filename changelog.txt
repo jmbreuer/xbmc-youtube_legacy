@@ -6,9 +6,10 @@
 - Fixed potential crash in Recommended core function
 - Fixed crash in Feeds when a video was marked private
 - Added more debug to rtmp calls
+- Added more debug to login
 - Added debug to uncaught exceptions through the entire core.
 - Fixed pageination in "Most Recent" and "Recently Featured"
-- Force enabled debug.
+- Always have enabled debug.
 
 [B]Version 0.9.5[/B]
 - Added even more debug to login
