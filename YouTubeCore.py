@@ -513,7 +513,11 @@ class YouTubeCore(object):
 				if (video['stream_map'] == 'True'):
 					if self.__dbg__:
 						print self.__plugin__ + " construct_video_url: stream map"
+						
 					for fmt_url in fmt_url_map:
+						if self.__dbg__:
+							print self.__plugin__ + " construct_video_url: fmt_url : " + repr(fmt_url)
+							
 						if (len(fmt_url) > 7 and fmt_url.find(":\\/\\/") > 0):
 							if (fmt_url.rfind(',') > fmt_url.rfind('\/id\/')):
 								final_url = fmt_url[:fmt_url.rfind(',')]
@@ -648,9 +652,14 @@ class YouTubeCore(object):
 				link = ""
 
 		for item in failed:
-			videoitem = self._get_details(item)
+			videoitem = self._get_details(item)			
 			if videoitem:
-				ytobjects.append(videoitem)
+				if ( 'apierror' not in videoitem):
+					ytobjects.append(videoitem)
+				else:
+					if self.__dbg__:
+						print self.__plugin__ + " scrapeVideos, got apierror: " + videoitem['apierror']
+										
 		
 		if (len(ytobjects) > 0):
 			ytobjects[len(ytobjects)-1]['next'] = next
@@ -703,7 +712,6 @@ class YouTubeCore(object):
 					if self.__dbg__:
 						print self.__plugin__ + " _extractVariables exited. RTMP disabled."
 					return ( self.__language__(30625), self.__language__(30625), 303 )
-				
 				else:
 					swfConfig = re.findall('var swfConfig = {(.*)};', htmlSource)
 					if len(swfConfig) > 0:
@@ -904,7 +912,9 @@ class YouTubeCore(object):
 						if ( reason != 'limitedSyndication' ):
 							video['reasonCode'] = reason
 							video['reasonValue'] = value
-							print self.__plugin__ + "/ERROR reasonCode: " + reason + " - " + value
+							print self.__plugin__ + "/ERROR reasonCode: [%s] %s " % ( reason, value )
+						if reason == "private":
+							continue
 
 			video['videoid'] = self._getNodeValue(node, "yt:videoid", "missing")
 
@@ -975,6 +985,7 @@ class YouTubeCore(object):
 
 		if self.__dbg__:
 			print self.__plugin__ + " _getAlert : " + repr(start)
+			print self.__plugin__ + " _getAlert done"
 
 		return result
 	
@@ -1009,7 +1020,7 @@ class YouTubeCore(object):
 
 			if (err.code == 403):
 				# 403 == Forbidden
-				# Happens on "removed by user" and "This video has been removed due to terms of use violation." and "This video is private"
+				# Happens on "removed by user" and "This video has been removed due to terms of use violation." and "This video is private
 				
 				video['apierror'] = self._getAlert(videoid)
 				return video
