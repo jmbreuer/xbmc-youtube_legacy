@@ -210,7 +210,7 @@ class YouTubeCore(object):
 		if self.__dbg__:
 			print self.__plugin__ + " feeds : " + repr(feed) + " page: " + repr(page)
 			
-		url = urllib2.Request(feed); # Implement start-index here                            
+		url = urllib2.Request(feed);
 		url.add_header('User-Agent', self.USERAGENT);
 		url.add_header('GData-Version', 2)
 		try:
@@ -996,8 +996,10 @@ class YouTubeCore(object):
 		url.add_header('GData-Version', 2)
 		try:
 			con = urllib2.urlopen(url);
-			result = self._getvideoinfo(con.read())
+			result = con.read();
 			con.close()
+			result = self._getvideoinfo(result)
+			
 			if len(result) == 0:
 				if self.__dbg__:
 					print self.__plugin__ + " _get_details result was empty"
