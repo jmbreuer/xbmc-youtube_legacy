@@ -14,7 +14,7 @@ if REMOTE_DBG:
         sys.stderr.write("Error: " + "You must add org.python.pydev.debug.pysrc to your PYTHONPATH.")
 
 # plugin constants
-__version__ = "0.9.7"
+__version__ = "0.9.8"
 __plugin__ = "YouTube-" + __version__
 __author__ = "TheCollective"
 __url__ = "www.xbmc.com"
