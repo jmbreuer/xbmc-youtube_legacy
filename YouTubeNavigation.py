@@ -98,7 +98,6 @@ class YouTubeNavigation:
             return
         
         path = get("path", "/root")
-        size = len(self.categories);
         
         for category in self.categories:
             cat_get = category.get 
@@ -318,7 +317,7 @@ class YouTubeNavigation:
             if ( results ):
                 self.parseVideoList(get("path"), params, results)
             elif ( status == 303):
-                self.showMessage(self.__language__(30600), result)
+                self.showMessage(self.__language__(30600), results)
             else:
                 self.showMessage(self.__language__(30600), self.__language__(30606))
 
