@@ -367,7 +367,8 @@ class YouTubeNavigation:
         print "YouTube"
         print author
         if author == "":
-            del searches[query]
+            if author in searches:
+                del searches[query]
         elif author:
             searches[query] = author
             
