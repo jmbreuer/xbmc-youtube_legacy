@@ -358,6 +358,7 @@ class YouTubeNavigation:
             searches = eval(self.__settings__.getSetting("stored_searches_author"))
         except :
             searches = {}
+            
         if query in searches:
             author = self.getUserInput('Search on author', searches[query])
         else:
@@ -367,6 +368,7 @@ class YouTubeNavigation:
             del searches[query]
         else:
             searches[query] = author
+
         self.__settings__.setSetting("stored_searches_author", repr(searches))
         self.showMessage(self.__language__(30006), self.__language__(30623))
                         
@@ -457,7 +459,9 @@ class YouTubeNavigation:
         for count, search in enumerate(searches):
             if (search.lower() == query.lower()):
                 del(searches[count])
+                self.deleteRefinements({'search': query})
                 break
+            
         self.__settings__.setSetting("stored_searches", repr(searches))
         xbmc.executebuiltin( "Container.Refresh" )
         
@@ -470,7 +474,6 @@ class YouTubeNavigation:
         for count, search in enumerate(searches):
             if (search.lower() == query.lower()):
                 del(searches[count])
-                self.deleteRefinements({'search': query})
                 break
         
         searchCount = ( 10, 20, 30, 40, )[ int( self.__settings__.getSetting( "saved_searches" ) ) ]
@@ -845,9 +848,13 @@ class YouTubeNavigation:
         return thumbnail
 
     # raise a keyboard for user input
-    def getUserInput(self, title, default="", hidden=False):
+    def getUserInput(self, title = "Input", default="", hidden=False):
         result = None
 
+        # Fix for when this functions is called with default=None
+        if not default:
+            default = ""
+            
         keyboard = xbmc.Keyboard(default, title)
         keyboard.setHiddenInput(hidden)
         keyboard.doModal()
