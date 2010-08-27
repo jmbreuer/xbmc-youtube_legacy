@@ -414,14 +414,14 @@ class YouTubeNavigation:
                 self.__settings__.openSettings()
                 path = self.__settings__.getSetting( "downloadPath" )
 
-            self.showMessage(self.__language__(30612), get("title", "Unknown Title"))
+            self.showMessage(self.__language__(30612), urllib.unquote_plus(get("title", "Unknown Title")))
 
             ( video, status ) = core.downloadVideo(path, get("videoid"));
             if status != 200 :
                 self.errorHandling(self.__language__( 30501 ), video, status)
                 return False
 
-            self.showMessage(self.__language__( 30604 ), video['Title'])
+            self.showMessage(self.__language__( 30604 ), urllib.unquote_plus(video['Title']) )
 
     def addToFavorites(self, params = {}):
         get = params.get
@@ -682,7 +682,7 @@ class YouTubeNavigation:
         else:
             cm.append( ( self.__language__( 30503 ), 'XBMC.RunPlugin(%s?path=%s&action=add_favorite&videoid=%s&)' % ( sys.argv[0],  item("path"), item("videoid") ) ) )
 
-        cm.append( ( self.__language__(30501), "XBMC.RunPlugin(%s?path=%s&action=download&videoid=%s&title=%s)" % ( sys.argv[0],  item("path"), item("videoid"), item("label").decode("ascii", "ignore") ) ) )
+        cm.append( ( self.__language__(30501), "XBMC.RunPlugin(%s?path=%s&action=download&videoid=%s&title=%s)" % ( sys.argv[0],  item("path"), item("videoid"), urllib.quote_plus(item("label").decode("ascii", "ignore") ) ) ) )
         cm.append( ( self.__language__( 30512 ) % item("Studio"), 'XBMC.RunPlugin(%s?path=%s&channel=%s&action=add_subscription)' % ( sys.argv[0], item("path"), item("Studio") ) ) )
         #cm.append( ( self.__language__(30507), "XBMC.RunPlugin(%s?path=%s&action=search&search=%s)" % ( sys.argv[0],  "/root/search", item("label").decode("ascii", "ignore") ) ) )        
         cm.append( ( self.__language__( 30504 ), "XBMC.Action(Queue)", ) )

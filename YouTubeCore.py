@@ -1048,9 +1048,9 @@ class YouTubeCore(object):
 			return False
 		
 		
-	def _httpLogin(self):
+	def _httpLogin(self, error = 0):
 		if self.__dbg__:
-			print self.__plugin__ + " _httpLogin"
+			print self.__plugin__ + " _httpLogin - errors: " + str(error)
 
 		uname = self.__settings__.getSetting( "username" )
 		pword = self.__settings__.getSetting( "user_password" )
@@ -1104,9 +1104,26 @@ class YouTubeCore(object):
 			start = cookies.find("name='LOGIN_INFO', value='") + len("name='LOGIN_INFO', value='")
 			login_info = cookies[start:cookies.find("', port=None", start)]
 			self.__settings__.setSetting( "login_info", login_info )
+			
 			if self.__dbg__:
-				print self.__plugin__ + " _httpLogin: Logged in with login_info cookie: " + login_info
+				print self.__plugin__ + " _httpLogin: Logged in on attempt %s with login_info cookie: %s " % ( str(error + 1), login_info)
+
 			return True
+		
+		except IOError, e:
+			# http://bytes.com/topic/python/answers/33770-error-codes-urlerror
+			if self.__dbg__:
+				print self.__plugin__ + " login failed, hit ioerror except2: : " + repr(e)
+				print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
+								   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
+				print self.interrogate(e)
+				
+				if error < 9:
+					import time
+					time.sleep(1)
+					return self._httpLogin( error + 1 )
+				
+				return ( "IOERROR", 303 )
 		except:
 			if self.__dbg__:
 				print self.__plugin__ + " _httpLogin: uncaught exception"

@@ -8,6 +8,9 @@
 - Added steps to httpLogin to aid with debugging
 - Harden swfConfig
 - Only httpLogin when required
+- Minor fixes
+- Fix, download didn't work with & in the title
+- Loop httpLogin up to 10 times on connection failure.
 
 [B]Version 0.9.7[/B]
 - Minor bugfixes
