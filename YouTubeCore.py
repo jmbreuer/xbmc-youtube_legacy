@@ -237,10 +237,10 @@ class YouTubeCore(object):
 			return ( error, 303 )										
 		except:
 			if self.__dbg__:
-				print self.__plugin__ + " feed failed with uncaught exception "
-				print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
+				print self.__plugin__ + " feed failed with uncaught exception dumping result"
+				print self.__plugin__ + " feed result: " + repr(result)
+				print self.__plugin__ + ' feed ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
 								   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
-				print self.__plugin__ + " feeds result: " + repr(result)
 				
 			return ( [], 500 )
 	
@@ -298,10 +298,11 @@ class YouTubeCore(object):
 			return ( error, 303 )
                 except:
 			if self.__dbg__:
-                                        print self.__plugin__ + " list uncaught exception"
-					print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
-									   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
+                                        print self.__plugin__ + " list uncaught exception dumping result"
 					print self.__plugin__ + " list result: " + repr(result)
+					print self.__plugin__ + ' list ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
+									   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
+					
                         return ( [], 500 )
 
         def delete_favorite(self, delete_url):
@@ -374,10 +375,10 @@ class YouTubeCore(object):
 			return ( error, 303 )
 		except:
                         if self.__dbg__:
-                                        print self.__plugin__ + " playlist uncaught exception"
-					print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
-									   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
+                                        print self.__plugin__ + " playlist uncaught exception dumping result"
 					print self.__plugin__ + " playlist result: " + repr(result)
+					print self.__plugin__ + ' playlist ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
+									   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
 					
                         return ( [], 500 )
 
@@ -484,7 +485,7 @@ class YouTubeCore(object):
 						print self.__plugin__ + " IMPORTANT : " + videoid
 						if self.__dbg__:
 							print self.__plugin__ + " construct_video_url failed, empty fmtSource after trying with cookie"
-						#print htmlSource
+				
 						return (self.__language__(30618), 303)
 				
 				if ( video['stream_map'] == 303 ):
@@ -682,10 +683,7 @@ class YouTubeCore(object):
 			request = urllib2.Request(link);
 			request.add_header('User-Agent', 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; .NET CLR 1.1.4322; .NET CLR 2.0.50727)');
 			
-			# Login if the user is logged in.
-			auth = self._getAuth()
-			#if login:
-			if auth:
+			if ( login ):
 				# Get a new LOGIN_INFO cookie (for some reason the old one will fail) and use request url again.
 				if ( self._httpLogin() ):
 					request.add_header('Cookie', 'LOGIN_INFO=' + self.__settings__.getSetting( "login_info" ) )
@@ -699,9 +697,9 @@ class YouTubeCore(object):
 			if self.__dbgv__:
 				print self.__plugin__ + " _extractVariables result: " + repr(htmlSource)
 
+			swf_url = False
 			fmtSource = re.findall('"fmt_url_map": "([^"]+)"', htmlSource);
 			if fmtSource:
-				swfConfig = False
 				stream_map = "False"
 			else:
 				if self.__release__:
@@ -709,11 +707,10 @@ class YouTubeCore(object):
 						print self.__plugin__ + " _extractVariables exited. RTMP disabled."
 					return ( self.__language__(30625), self.__language__(30625), 303 )
 				else:
-					swfConfig = re.findall('var swfConfig = {(.*)};', htmlSource)
+					swfConfig = re.findall('var swfConfig = {"url": "(.*)", "min.*};', htmlSource)
 					if len(swfConfig) > 0:
-						swfConfig = swfConfig[0].replace("\\", "")
-						swfConfig = eval("{%s}" % swfConfig)
-						swfConfig = swfConfig['url']
+						swf_url = swfConfig[0].replace("\\", "")
+						
 					fmtSource = re.findall('"fmt_stream_map": "([^"]+)"', htmlSource);
 					stream_map = 'True'
 			
@@ -727,13 +724,14 @@ class YouTubeCore(object):
 			return ( error, 303 )
 		except:
 			if self.__dbg__:
-				print self.__plugin__ + " construct_video_url uncaught exception"
-				print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
-								   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
+				print self.__plugin__ + " _extractVariables uncaught exception dumping htmlSource"
 				print self.__plugin__ + " _extractVariables result: " + repr(htmlSource)
+				print self.__plugin__ + ' _extractVariables ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
+								   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
+				
 			return ( '', 500 )
 									
-		return (fmtSource, swfConfig, stream_map)
+		return (fmtSource, swf_url, stream_map)
 
 	def _getAuth(self):
 		if self.__dbg__:
