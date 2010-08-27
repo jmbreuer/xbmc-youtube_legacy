@@ -104,7 +104,7 @@ class YouTubeCore(object):
 			
 			return ( self.__language__(30609), 303 )
 			
-                except urllib2.HTTPError, e:
+		except urllib2.HTTPError, e:
 			error = str(e)
 			if self.__dbg__:
 				print self.__plugin__ + " login failed, hit http except: " + error
@@ -129,7 +129,7 @@ class YouTubeCore(object):
 			if error < 9:
 				import time
 				time.sleep(1)
-		       		return self.login( error + 1 )
+				return self.login( error + 1 )
 			
 			return ( "IOERROR", 303 )
 		
@@ -147,7 +147,7 @@ class YouTubeCore(object):
 	
 	def search(self, query, page = "0"):
 		if self.__dbg__:
-                        print self.__plugin__ + " search: " + repr(query) + " - page: " + repr(page)
+			print self.__plugin__ + " search: " + repr(query) + " - page: " + repr(page)
 		per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
 		safe_search = ("none", "moderate", "strict" ) [int( self.__settings__.getSetting( "safe_search" ) ) ]
 		link = "http://gdata.youtube.com/feeds/api/videos?" + urllib.urlencode({'q': query}) + "&safeSearch=" + safe_search + "&start-index=" + str( per_page * int(page) + 1) + "&max-results=" + repr(per_page)
@@ -173,9 +173,9 @@ class YouTubeCore(object):
 				return (result, 200)
 			else:
 				if self.__dbg__:
-                                        print self.__plugin__ + " search done with no results"
+					print self.__plugin__ + " search done with no results"
 				return (self.__language__(30601), 303)
-                except urllib2.HTTPError, e:
+		except urllib2.HTTPError, e:
 			error = str(e)
 			if self.__dbg__:
 				print self.__plugin__ + " search failed, hit except: " + error
@@ -223,14 +223,14 @@ class YouTubeCore(object):
 			con.close()
 			if len(result) > 0:
 				if self.__dbg__:
-                                        print self.__plugin__ + " feeds done : " + str(len(result))
+					print self.__plugin__ + " feeds done : " + str(len(result))
 				return ( result, 200 )
 			else:
 				if self.__dbg__:
-                                        print self.__plugin__ + " feeds done with no results"
+					print self.__plugin__ + " feeds done with no results"
 				return (self.__language__(30602), 303)
 			
-                except urllib2.HTTPError, e:
+		except urllib2.HTTPError, e:
 			error = str(e)
 			if self.__dbg__:
 				print self.__plugin__ + " feed failed, hit except: " + error
@@ -250,17 +250,17 @@ class YouTubeCore(object):
 		result = ""
 		auth = self._getAuth()
 		if ( not auth ):
-                        if self.__dbg__:
-                                print self.__plugin__ + " playlists auth wasn't set "
+			if self.__dbg__:
+				print self.__plugin__ + " playlists auth wasn't set "
 			return ( self.__language__(30609) , 303 )
 		
 		per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
 	
 		if ( feed.find("?") == -1 ):
-                        feed += "?"
-                else:
-                        feed += "&"
-                feed += "start-index=" + str( per_page * int(page) + 1) + "&max-results=" + repr(per_page)
+			feed += "?"
+		else:
+			feed += "&"
+			feed += "start-index=" + str( per_page * int(page) + 1) + "&max-results=" + repr(per_page)
 		feed = feed.replace(" ", "+")
 		url = urllib2.Request(feed)
 		url.add_header('User-Agent', self.USERAGENT)
@@ -268,18 +268,18 @@ class YouTubeCore(object):
 		url.add_header('Authorization', 'GoogleLogin auth=' + auth);
 		url.add_header('X-GData-Key', 'key=' + self.APIKEY);
 		try:
-                        con = urllib2.urlopen(url);
+			con = urllib2.urlopen(url);
 			result = self._getvideoinfo(con.read())
 			if self.__dbgv__:
 				print self.__plugin__ + " list result: " + repr(result)
 			con.close();
 			if len(result) > 0:
 				if self.__dbg__:
-                                        print self.__plugin__ + " list done :" + str(len(result))
+					print self.__plugin__ + " list done :" + str(len(result))
 				return (result, 200)
 			else:
 				if self.__dbg__:
-                                        print self.__plugin__ + " list done with no results"
+					print self.__plugin__ + " list done with no results"
 				return (self.__language__(30602), 303)
 
 		except urllib2.HTTPError, e:
@@ -294,18 +294,16 @@ class YouTubeCore(object):
 						print self.__plugin__ + " list done: retrying failed because login failed"
 					return ( error, 303 )
 			if self.__dbg__:
-                                        print self.__plugin__ + " list except: " + error
+				print self.__plugin__ + " list except: " + error
 			return ( error, 303 )
-                except:
+		except:
 			if self.__dbg__:
-                                        print self.__plugin__ + " list uncaught exception dumping result"
-					print self.__plugin__ + " list result: " + repr(result)
-					print self.__plugin__ + ' list ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
-									   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
-					
-                        return ( [], 500 )
+				print self.__plugin__ + " list uncaught exception dumping result"
+				print self.__plugin__ + " list result: " + repr(result)
+				print self.__plugin__ + ' list ERROR: %s::%s (%d) - %s' % (self.__class__.__name__ , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
+				return ( [], 500 )
 
-        def delete_favorite(self, delete_url):
+	def delete_favorite(self, delete_url):
 		return self._youTubeDel(delete_url)
 	
 	def remove_contact(self, contact_id):
@@ -343,23 +341,23 @@ class YouTubeCore(object):
 		
 		per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
 		if ( link.find("?") == -1 ):
-                        link += "?"
-                else:
-                        link += "&"
-                link += "start-index=" + str( per_page * int(page) + 1) + "&max-results=" + repr(per_page)
+			link += "?"
+		else:
+			link += "&"
+			link += "start-index=" + str( per_page * int(page) + 1) + "&max-results=" + repr(per_page)
 
 		url = urllib2.Request(link)
-                url.add_header('User-Agent', self.USERAGENT)
-                url.add_header('GData-Version', 2)
-                url.add_header('Authorization', 'GoogleLogin auth=' + auth);
-                url.add_header('X-GData-Key', 'key=' + self.APIKEY);
+		url.add_header('User-Agent', self.USERAGENT)
+		url.add_header('GData-Version', 2)
+		url.add_header('Authorization', 'GoogleLogin auth=' + auth);
+		url.add_header('X-GData-Key', 'key=' + self.APIKEY);
 		
-                try:
-                        con = urllib2.urlopen(url);
+		try:
+			con = urllib2.urlopen(url);
 			result = con.read()
 			con.close()
-                except urllib2.HTTPError, e:
-                        error = str(e)
+		except urllib2.HTTPError, e:
+			error = str(e)
 			if ( error.find("401") > 0 and retry ):
 				if self.login():
 					if self.__dbg__:
@@ -374,13 +372,11 @@ class YouTubeCore(object):
 				print self.__plugin__ + " playlist except: " + error
 			return ( error, 303 )
 		except:
-                        if self.__dbg__:
-                                        print self.__plugin__ + " playlist uncaught exception dumping result"
-					print self.__plugin__ + " playlist result: " + repr(result)
-					print self.__plugin__ + ' playlist ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
-									   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
-					
-                        return ( [], 500 )
+			if self.__dbg__:
+				print self.__plugin__ + " playlist uncaught exception dumping result"
+				print self.__plugin__ + " playlist result: " + repr(result)
+				print self.__plugin__ + ' playlist ERROR: %s::%s (%d) - %s' % (self.__class__.__name__ , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])	
+				return ( [], 500 )
 
 		if self.__dbgv__:
 			print self.__plugin__ + " playlist result: " + repr(result)
@@ -418,13 +414,13 @@ class YouTubeCore(object):
 
 			playobjects.append(video);
 			if self.__dbg__:
-                                        print self.__plugin__ + " playlist done : " + str(len(playobjects))
+				print self.__plugin__ + " playlist done : " + str(len(playobjects))
 		return ( playobjects, 200 );
 	
 	def downloadVideo(self, path, videoid):
 		if self.__dbg__:
 			print self.__plugin__ + " downloadVideo : " + repr(path) + " - videoid : " + repr(videoid)
- 		( video, status )  = self.construct_video_url(videoid);
+		( video, status )  = self.construct_video_url(videoid);
 		
 		if ( status == 200 ):
 			path = self.__settings__.getSetting( "downloadPath" )
@@ -440,14 +436,14 @@ class YouTubeCore(object):
 					self.__settings__.setSetting( "vidstatus-" + videoid, "1" )
 			except urllib2.HTTPError, e:
 				if self.__dbg__:
-                                        print self.__plugin__ + " downloadVideo except: " + str(e)
+					print self.__plugin__ + " downloadVideo except: " + str(e)
 				return ( str(e), 303 )
 			except:
 				if self.__dbg__:
-                                        print self.__plugin__ + " downloadVideo uncaught exception"
+					print self.__plugin__ + " downloadVideo uncaught exception"
 					print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
 									   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
-					
+				
 				return (self.__language__(30606), 303)
 		else:
 			if self.__dbg__:
@@ -495,7 +491,7 @@ class YouTubeCore(object):
 
 				links = {};
 				video_url = False
-				breaker = False
+
 				print self.__plugin__ + " construct_video_url: stream_map : " + video['stream_map']
 				if (video['stream_map'] == 'True'):
 					if self.__dbg__:
@@ -542,7 +538,7 @@ class YouTubeCore(object):
 					video_url = get(18)
 				elif (get(5)):
 					video_url = get(5)
-					 
+				
 				if (hd_quality > 0): #<-- 720p
 					if (get(22)):
 						video_url = get(22)
@@ -596,7 +592,7 @@ class YouTubeCore(object):
 			if (result == 200):
 				self.__settings__.setSetting("recommendedVideos", self.arrayToPipe(videos))									
 			else:
-				return ( video, result )
+				return ( videos, result )
 		else:
 			videos = oldVideos.split("|")
 		
@@ -607,7 +603,7 @@ class YouTubeCore(object):
 
 		subitems = videos[(per_page * page):(per_page * (page + 1))]
 		ytobjects = []
-                failed = []
+		failed = []
 		counter = 0
 		link = ""
 
@@ -662,15 +658,15 @@ class YouTubeCore(object):
 			print self.__plugin__ + " scrapeVideos done"
 		return ( ytobjects, 200 )
 
-        #===============================================================================
+	#===============================================================================
 	#
-        # Internal functions to YouTubeCore.py
+	# Internal functions to YouTubeCore.py
 	#
 	# Return should be value(True for bool functions), or False if failed.
 	#
 	# False MUST be handled properly in External functions
-        #
-        #===============================================================================
+	#
+	#===============================================================================
 
 	def _extractVariables(self, videoid, login = False):
 		if self.__dbg__:
@@ -741,7 +737,7 @@ class YouTubeCore(object):
 
 		if ( auth ):
 			if self.__dbg__:
-                                print self.__plugin__ + " _getAuth returning stored auth"
+				print self.__plugin__ + " _getAuth returning stored auth"
 			return auth
 		else:
 			if self.login():
@@ -759,8 +755,8 @@ class YouTubeCore(object):
 			print self.__plugin__ + " _youTubeAdd: " + repr(url) + " add_request " + repr(add_request)
 		auth = self._getAuth()
 		if ( not auth ):
-                        if self.__dbg__:
-                                print self.__plugin__ + " playlists auth wasn't set "
+			if self.__dbg__:
+				print self.__plugin__ + " playlists auth wasn't set "
 			return ( self.__language__(30609) , 303 )
 		
 		try:
@@ -802,8 +798,8 @@ class YouTubeCore(object):
 
 		auth = self._getAuth()
 		if ( not auth ):
-                        if self.__dbg__:
-                                print self.__plugin__ + " _youTubeDel auth wasn't set "
+			if self.__dbg__:
+				print self.__plugin__ + " _youTubeDel auth wasn't set "
 			return ( self.__language__(30609) , 303 )
 
 		try:
@@ -839,11 +835,11 @@ class YouTubeCore(object):
 				return ( resp, 303 )
 		except urllib2.HTTPError, e:
 			if self.__dbg__:
-                                print self.__plugin__ + " _youTubeDel except: " + str(e)
+				print self.__plugin__ + " _youTubeDel except: " + str(e)
 			return ( str(e), 303 )
 		except:
 			if self.__dbg__:
-                                print self.__plugin__ + " _youTubeDel uncaught exception"
+				print self.__plugin__ + " _youTubeDel uncaught exception"
 				print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
 								   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
 				
@@ -899,9 +895,9 @@ class YouTubeCore(object):
 				state = self._getNodeAttribute(node, "yt:state", 'name', 'Unknown Name')
 
 				# Ignore unplayable items.
-	        		if ( state == 'deleted' or state == 'rejected'):
-	        			continue
-	        		else:
+				if ( state == 'deleted' or state == 'rejected'):
+					continue
+				else:
 					# Get reason for why we can't playback the file.		
 					if node.getElementsByTagName("yt:state").item(0).hasAttribute('reasonCode'):
 						reason = self._getNodeAttribute(node, "yt:state", 'reasonCode', 'Unknown reasonCode')
@@ -1018,7 +1014,7 @@ class YouTubeCore(object):
 			
 		except urllib2.URLError, err:
 			if self.__dbg__:
-                                print self.__plugin__ + " _get_details except: " + str(err)
+				print self.__plugin__ + " _get_details except: " + str(err)
 
 			video = {}
 			video['Title'] = "Error"
@@ -1035,7 +1031,7 @@ class YouTubeCore(object):
 
 			if (err.code == 503):
 				if self.__dbg__:
-                                        print self.__plugin__ + " _get_details exception 503: " + str(err)
+					print self.__plugin__ + " _get_details exception 503: " + str(err)
 				video['apierror'] = self.__language__(30605)
 				return video
 			else:
@@ -1046,7 +1042,7 @@ class YouTubeCore(object):
 
 		except:
 			if self.__dbg__:
-                                print self.__plugin__ + " _get_details uncaught exception"
+				print self.__plugin__ + " _get_details uncaught exception"
 				print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
 								   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
 				
@@ -1059,8 +1055,7 @@ class YouTubeCore(object):
 
 		uname = self.__settings__.getSetting( "username" )
 		pword = self.__settings__.getSetting( "user_password" )
-
-		if ( uname == "" and passwd == "" ):
+		if ( uname == "" and pword == "" ):
 			return False
 
 		cj = cookielib.LWPCookieJar()
@@ -1099,12 +1094,12 @@ class YouTubeCore(object):
 			newurl = re.compile('<meta http-equiv="refresh" content="0; url=&#39;(.*)&#39;"></head>').findall(result)[0].replace("&amp;", "&")
 			url = urllib2.Request(newurl)
 			url.add_header('User-Agent', self.USERAGENT)
-
+			
 			# Login to youtube
 			if self.__dbg__:
 				print self.__plugin__ + " _httpLogin: step 3"
 			con = urllib2.urlopen(newurl)
-
+			
 			# Save cookiefile in settings
 			cookies = repr(cj)
 			start = cookies.find("name='LOGIN_INFO', value='") + len("name='LOGIN_INFO', value='")
@@ -1115,7 +1110,7 @@ class YouTubeCore(object):
 			return True
 		except:
 			if self.__dbg__:
-                                print self.__plugin__ + " _httpLogin: uncaught exception"
+				print self.__plugin__ + " _httpLogin: uncaught exception"
 				print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
 								   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
 			return False
@@ -1127,12 +1122,12 @@ class YouTubeCore(object):
 		result = ""
 
 		login_info = self.__settings__.getSetting( "login_info" )
-                if ( not login_info ):
+		if ( not login_info ):
 			if ( self._httpLogin() ):
 				login_info = self.__settings__.getSetting( "login_info" )
 		
 		url = urllib2.Request(feed + "&hl=en")
-                url.add_header('User-Agent', self.USERAGENT)
+		url.add_header('User-Agent', self.USERAGENT)
 		url.add_header('Cookie', 'LOGIN_INFO=' + login_info)
 
 		try:
@@ -1153,9 +1148,9 @@ class YouTubeCore(object):
 			if self.__dbg__:
 				print self.__plugin__ + " _scrapeYouTubeData done"
 			return ( videos, 200 )
-                except urllib2.HTTPError, e:
+		except urllib2.HTTPError, e:
 			if self.__dbg__:
-                                print self.__plugin__ + " _scrapeYouTubeData exception: " + str(e)
+				print self.__plugin__ + " _scrapeYouTubeData exception: " + str(e)
 			return ( self.__language__(30619), "303" )
 		except:
 			if self.__dbg__:
