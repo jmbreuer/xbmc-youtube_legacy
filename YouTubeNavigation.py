@@ -364,13 +364,15 @@ class YouTubeNavigation:
         else:
             author = self.getUserInput('Search on author', '')
 
+        print "YouTube"
+        print author
         if author == "":
             del searches[query]
-        else:
+        elif author:
             searches[query] = author
-
-        self.__settings__.setSetting("stored_searches_author", repr(searches))
-        self.showMessage(self.__language__(30006), self.__language__(30623))
+            
+            self.__settings__.setSetting("stored_searches_author", repr(searches))
+            self.showMessage(self.__language__(30006), self.__language__(30623))
                         
 
     def deleteRefinements(self, params = {}):
