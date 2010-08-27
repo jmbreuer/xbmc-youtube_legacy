@@ -99,7 +99,7 @@ class YouTubeCore(object):
 
 				if self.__dbg__:
 					print self.__plugin__ + " login done: " + nick
-				return ( "[%s] %s" % ( str(error), self.__language__(30030) ), 200 )
+				return ( self.__language__(30030), 200 )
 			
 			return ( self.__language__(30609), 303 )
 			

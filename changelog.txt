@@ -12,6 +12,7 @@
 - Fix, download didn't work with & in the title
 - Loop httpLogin up to 10 times on connection failure.
 - Debug is no longer forced on.
+- Remove counter on login message
 
 [B]Version 0.9.7[/B]
 - Minor bugfixes
