@@ -369,11 +369,13 @@ class YouTubeNavigation:
         if author == "":
             if author in searches:
                 del searches[query]
+                xbmc.executebuiltin( "Container.Refresh" )
         elif author:
             searches[query] = author
             
             self.__settings__.setSetting("stored_searches_author", repr(searches))
             self.showMessage(self.__language__(30006), self.__language__(30623))
+            xbmc.executebuiltin( "Container.Refresh" )
                         
 
     def deleteRefinements(self, params = {}):
@@ -383,10 +385,12 @@ class YouTubeNavigation:
             searches = eval(self.__settings__.getSetting("stored_searches_author"))
         except :
             searches = {}
+            
         if query in searches:
             del searches[query]
             self.__settings__.setSetting("stored_searches_author", repr(searches))
             self.showMessage(self.__language__(30006), self.__language__(30624))
+            xbmc.executebuiltin( "Container.Refresh" )
                                                                                             
     def search(self, params = {}):
         get = params.get
@@ -590,7 +594,14 @@ class YouTubeNavigation:
             url += "search=" + item("search") + "&"
             cm.append( ( self.__language__( 30508 ), 'XBMC.RunPlugin(%s?path=%s&action=delete&delete=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
             cm.append( ( self.__language__( 30515 ), 'XBMC.RunPlugin(%s?path=%s&action=refine_user&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
-            cm.append( ( self.__language__( 30517 ), 'XBMC.RunPlugin(%s?path=%s&action=delete_refinements&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
+            
+            try:
+                searches = eval(self.__settings__.getSetting("stored_searches_author"))
+            except :
+                searches = {}
+                
+            if item("search") in searches:                            
+                cm.append( ( self.__language__( 30517 ), 'XBMC.RunPlugin(%s?path=%s&action=delete_refinements&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
                         
             #cm.append( ( self.__language__( 30516 ), 'XBMC.RunPlugin(%s?path=%s&action=refine_category&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
             
