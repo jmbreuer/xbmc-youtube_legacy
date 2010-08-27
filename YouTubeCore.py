@@ -157,7 +157,8 @@ class YouTubeCore(object):
 		if len(authors) > 0:
 			print self.__plugin__ + " search test empty searches"
 			print authors
-			link += "&" + urllib.urlencode({'author': authors[query]})
+			if query in authors:
+				link += "&" + urllib.urlencode({'author': authors[query]})
 			print link
 		url = urllib2.Request(link);
 		url.add_header('User-Agent', self.USERAGENT);
