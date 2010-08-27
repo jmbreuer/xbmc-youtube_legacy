@@ -15,8 +15,7 @@ class YouTubeCore(object):
 	__release__ = False
 	
 	APIKEY = "AI39si6hWF7uOkKh4B9OEAX-gK337xbwR9Vax-cdeF9CF9iNAcQftT8NVhEXaORRLHAmHxj6GjM-Prw04odK4FxACFfKkiH9lg";
-	#USERAGENT = "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; .NET CLR 1.1.4322; .NET CLR 2.0.50727)";
-	USERAGENT = "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-GB; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8"
+      	USERAGENT = "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-GB; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8"
 
 	#===============================================================================
 	#
@@ -260,7 +259,7 @@ class YouTubeCore(object):
 			feed += "?"
 		else:
 			feed += "&"
-			feed += "start-index=" + str( per_page * int(page) + 1) + "&max-results=" + repr(per_page)
+		feed += "start-index=" + str( per_page * int(page) + 1) + "&max-results=" + repr(per_page)
 		feed = feed.replace(" ", "+")
 		url = urllib2.Request(feed)
 		url.add_header('User-Agent', self.USERAGENT)
@@ -344,7 +343,7 @@ class YouTubeCore(object):
 			link += "?"
 		else:
 			link += "&"
-			link += "start-index=" + str( per_page * int(page) + 1) + "&max-results=" + repr(per_page)
+		link += "start-index=" + str( per_page * int(page) + 1) + "&max-results=" + repr(per_page)
 
 		url = urllib2.Request(link)
 		url.add_header('User-Agent', self.USERAGENT)
