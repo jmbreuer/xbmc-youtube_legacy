@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <strings>
-    <string id="30000">YouTube</string>
-
     <!-- Category strings -->
     <string id="30001">YouTube Feeds</string>
     <string id="30002">My Favorites</string>
@@ -86,51 +84,44 @@
     <string id="30246">Debug</string>
     
     <!-- Menu strings -->
-    <string id="30500">Related videos</string>
+    <string id="30500">Clear refinements</string>
     <string id="30501">Download video</string>
     <string id="30502">Video information</string>
     <string id="30503">Add to My Favorites</string>
     <string id="30504">Queue video</string>
-    <string id="30505">Add Contact...</string>
+    <string id="30505">Refine to user</string>
     <string id="30506">Delete from My Favorites</string>
-    <string id="30507">Find similar</string>
+    <string id="30507">Queue folder</string>
     <string id="30508">Delete saved search</string>
     <string id="30509">More Results</string>
     <string id="30510">Change subscription to favorites</string>
     <string id="30511">Change subscription to uploads</string>
     <string id="30512">Subscribe to %s</string>
     <string id="30513">Unsubscribe from %s</string>
-    <string id="30514">Queue folder</string>
-    <string id="30515">Refine to user</string>
-    <string id="30516">Refine to category</string>
-    <string id="30517">Clear refinements</string>
 
     <!-- messages -->
     <string id="30600">Error</string>
     <string id="30601">No results!</string>
-    <string id="30602">No recent activity</string> <!-- Except for this one -->
-    <string id="30603">Playback failed</string> <!-- and this one -->
-    <string id="30604">Download complete</string> <!-- and this one -->
+    <string id="30602">No recent activity</string>
+    <string id="30603">Playback failed</string>
+    <string id="30604">Download complete</string>
     <string id="30605">YouTube not answering</string>
-    <string id="30606">Uncaught error: </string>
+    <string id="30606">Uncaught error:</string>
     <string id="30607">No suitable resolution found</string>
-    <string id="30608">Unknown VideoId ?</string>
+    <string id="30608">RTMP support disabled</string>
     <string id="30609">Login Failed</string>
-    <string id="30610">Try again ?</string>
+    <string id="30610">Refinement cleared</string>
     <string id="30611">Download folder not set</string>
     <string id="30612">Starting download</string>
     <string id="30613">Added contact</string>
     <string id="30614">Removed contact</string>
     <string id="30615">Not found</string>
-    <string id="30616"></string> <!-- empty -->
+    <string id="30616">Refinement added</string>
     <string id="30617">Unkown error</string>
     <string id="30618">Couldn't extract video url</string>
     <string id="30619">Couldn't scrape YouTube</string>
     <string id="30620">Stream type not supported</string>
     <string id="30621">Bad username or password</string>
     <string id="30622">Playback failed, try logging in</string>
-    <string id="30623">Refinement added</string>
-    <string id="30624">Refinement cleared</string>
-    <string id="30625">RTMP support disabled</string>
 
 </strings>

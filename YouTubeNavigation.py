@@ -373,7 +373,7 @@ class YouTubeNavigation:
             searches[query] = author
             
             self.__settings__.setSetting("stored_searches_author", repr(searches))
-            self.showMessage(self.__language__(30006), self.__language__(30623))
+            self.showMessage(self.__language__(30006), self.__language__(30616))
             xbmc.executebuiltin( "Container.Refresh" )
                         
 
@@ -388,7 +388,7 @@ class YouTubeNavigation:
         if query in searches:
             del searches[query]
             self.__settings__.setSetting("stored_searches_author", repr(searches))
-            self.showMessage(self.__language__(30006), self.__language__(30624))
+            self.showMessage(self.__language__(30006), self.__language__(30610))
             xbmc.executebuiltin( "Container.Refresh" )
                                                                                             
     def search(self, params = {}):
@@ -592,7 +592,7 @@ class YouTubeNavigation:
         if (item("search")):
             url += "search=" + item("search") + "&"
             cm.append( ( self.__language__( 30508 ), 'XBMC.RunPlugin(%s?path=%s&action=delete&delete=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
-            cm.append( ( self.__language__( 30515 ), 'XBMC.RunPlugin(%s?path=%s&action=refine_user&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
+            cm.append( ( self.__language__( 30505 ), 'XBMC.RunPlugin(%s?path=%s&action=refine_user&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
             
             try:
                 searches = eval(self.__settings__.getSetting("stored_searches_author"))
@@ -600,13 +600,11 @@ class YouTubeNavigation:
                 searches = {}
                 
             if item("search") in searches:                            
-                cm.append( ( self.__language__( 30517 ), 'XBMC.RunPlugin(%s?path=%s&action=delete_refinements&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
-                        
-            #cm.append( ( self.__language__( 30516 ), 'XBMC.RunPlugin(%s?path=%s&action=refine_category&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
+                cm.append( ( self.__language__( 30500 ), 'XBMC.RunPlugin(%s?path=%s&action=delete_refinements&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )                        
             
         if (item("playlist")):
             url += "playlist=" + item("playlist") + "&"
-            cm.append( ( self.__language__( 30514 ), "XBMC.Action(Queue)" ) )
+            cm.append( ( self.__language__( 30507 ), "XBMC.Action(Queue)" ) )
         
         if (item("action")):
             url += "action=" + item("action") + "&"
@@ -648,7 +646,7 @@ class YouTubeNavigation:
             url += "page=" + item("page") + "&"
 
         if ( item("feed") == "favorites"  or item("feed") == "playlists" or item("feed") == "uploads" ):
-            cm.append( ( self.__language__( 30514 ), "XBMC.Action(Queue)" ) )
+            cm.append( ( self.__language__( 30507 ), "XBMC.Action(Queue)" ) )
             
         if (item("channel")):
             url += "channel=" + item("channel") + "&"
@@ -700,7 +698,6 @@ class YouTubeNavigation:
 
         cm.append( ( self.__language__(30501), "XBMC.RunPlugin(%s?path=%s&action=download&videoid=%s&title=%s)" % ( sys.argv[0],  item("path"), item("videoid"), urllib.quote_plus(item("label").decode("ascii", "ignore") ) ) ) )
         cm.append( ( self.__language__( 30512 ) % item("Studio"), 'XBMC.RunPlugin(%s?path=%s&channel=%s&action=add_subscription)' % ( sys.argv[0], item("path"), item("Studio") ) ) )
-        #cm.append( ( self.__language__(30507), "XBMC.RunPlugin(%s?path=%s&action=search&search=%s)" % ( sys.argv[0],  "/root/search", item("label").decode("ascii", "ignore") ) ) )        
         cm.append( ( self.__language__( 30504 ), "XBMC.Action(Queue)", ) )
         cm.append( ( self.__language__( 30502 ), "XBMC.Action(Info)", ) )
         
