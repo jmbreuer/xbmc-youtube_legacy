@@ -190,6 +190,7 @@ class YouTubeCore(object):
 	def feeds(self, feed, page = "0" ):
 		if self.__dbg__:
 			print self.__plugin__ + " feeds : " + repr(feed) + " page: " + repr(page)
+		result = ""
 		per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
 		
 		if (feed.find("%s") > 0 ):
@@ -218,6 +219,7 @@ class YouTubeCore(object):
 			result = self._getvideoinfo(con.read())
 			if self.__dbgv__:
 				print self.__plugin__ + " feeds result: " + repr(result)
+
 			con.close()
 			if len(result) > 0:
 				if self.__dbg__:
@@ -238,12 +240,14 @@ class YouTubeCore(object):
 				print self.__plugin__ + " feed failed with uncaught exception "
 				print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
 								   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
+				print self.__plugin__ + " feeds result: " + repr(result)
 				
 			return ( [], 500 )
 	
 	def list(self, feed, page = "0", retry = True):
 		if self.__dbg__:
 			print self.__plugin__ + " list: " + repr(feed) + " - page: " + repr(page)
+		result = ""
 		auth = self._getAuth()
 		if ( not auth ):
                         if self.__dbg__:
@@ -297,6 +301,7 @@ class YouTubeCore(object):
                                         print self.__plugin__ + " list uncaught exception"
 					print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
 									   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
+					print self.__plugin__ + " list result: " + repr(result)
                         return ( [], 500 )
 
         def delete_favorite(self, delete_url):
@@ -327,6 +332,8 @@ class YouTubeCore(object):
 	def playlists(self, link, page = '0', retry = True):
 		if self.__dbg__:
 			print self.__plugin__ + " playlists " + repr(link) + " - page: " + repr(page)
+		result = ""
+
 		auth = self._getAuth()
 		if ( not auth ):
 			if self.__dbg__:
@@ -348,6 +355,8 @@ class YouTubeCore(object):
 		
                 try:
                         con = urllib2.urlopen(url);
+			result = con.read()
+			con.close()
                 except urllib2.HTTPError, e:
                         error = str(e)
 			if ( error.find("401") > 0 and retry ):
@@ -368,15 +377,13 @@ class YouTubeCore(object):
                                         print self.__plugin__ + " playlist uncaught exception"
 					print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
 									   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
+					print self.__plugin__ + " playlist result: " + repr(result)
 					
                         return ( [], 500 )
-
-		result = con.read()
 
 		if self.__dbgv__:
 			print self.__plugin__ + " playlist result: " + repr(result)
 
-		con.close()
 		dom = parseString(result);
 		links = dom.getElementsByTagName("link");
 		entries = dom.getElementsByTagName("entry");
@@ -667,6 +674,7 @@ class YouTubeCore(object):
 	def _extractVariables(self, videoid, login = False):
 		if self.__dbg__:
 			print self.__plugin__ + " extractVariables : " + repr(videoid)
+		htmlSource = ""
 				
 		# add try except
 		try:
@@ -722,6 +730,7 @@ class YouTubeCore(object):
 				print self.__plugin__ + " construct_video_url uncaught exception"
 				print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
 								   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
+				print self.__plugin__ + " _extractVariables result: " + repr(htmlSource)
 			return ( '', 500 )
 									
 		return (fmtSource, swfConfig, stream_map)
@@ -1049,10 +1058,13 @@ class YouTubeCore(object):
 	def _httpLogin(self):
 		if self.__dbg__:
 			print self.__plugin__ + " _httpLogin"
+
 		uname = self.__settings__.getSetting( "username" )
 		pword = self.__settings__.getSetting( "user_password" )
+
 		if ( uname == "" and passwd == "" ):
 			return False
+
 		cj = cookielib.LWPCookieJar()
 		
 		opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
@@ -1063,6 +1075,8 @@ class YouTubeCore(object):
 		url.add_header('User-Agent', self.USERAGENT)
 
 		try:
+			if self.__dbg__:
+				print self.__plugin__ + " _httpLogin: step 1"
 			con = urllib2.urlopen(url)
 			header = con.info()
 			galx = re.compile('Set-Cookie: GALX=(.*);Path=/accounts;Secure').findall(str(header))[0]
@@ -1076,16 +1090,21 @@ class YouTubeCore(object):
 						   'continue': cont})
 
 			# Login to Google
+			if self.__dbg__:
+				print self.__plugin__ + " _httpLogin: step 2"
 			url = urllib2.Request('https://www.google.com/accounts/ServiceLoginAuth?service=youtube', params)
 			url.add_header('User-Agent', self.USERAGENT)
 		
 			con = urllib2.urlopen(url)
 			result = con.read()
+
 			newurl = re.compile('<meta http-equiv="refresh" content="0; url=&#39;(.*)&#39;"></head>').findall(result)[0].replace("&amp;", "&")
 			url = urllib2.Request(newurl)
 			url.add_header('User-Agent', self.USERAGENT)
 
 			# Login to youtube
+			if self.__dbg__:
+				print self.__plugin__ + " _httpLogin: step 3"
 			con = urllib2.urlopen(newurl)
 
 			# Save cookiefile in settings
@@ -1107,6 +1126,7 @@ class YouTubeCore(object):
 	def _scrapeYouTubeData(self, feed, retry = True):
 		if self.__dbg__:
 			print self.__plugin__ + " _scrapeYouTubeData: " + repr(feed)
+		result = ""
 
 		login_info = self.__settings__.getSetting( "login_info" )
                 if ( not login_info ):
@@ -1144,6 +1164,7 @@ class YouTubeCore(object):
 				print self.__plugin__ + " _scrapeYouTubeData uncaught exception"
 				print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
 								   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
+				print self.__plugin__ + " _scrapeYouTubeData result: " + repr(result)
 			
 			return ( "", 500 )
 	

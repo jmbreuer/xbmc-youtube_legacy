@@ -4,6 +4,8 @@
 
 [B]Version 0.9.8[/B]
 - fix login message "bad username and password"
+- Always print reply from youtube on uncaught exceptions
+- Added steps to httpLogin to aid with debugging
 
 [B]Version 0.9.7[/B]
 - Minor bugfixes
