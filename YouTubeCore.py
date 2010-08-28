@@ -283,9 +283,10 @@ class YouTubeCore(object):
 					if self.__dbg__:
 						print self.__plugin__ + " list done: retrying failed because login failed"
 					return ( error, 303 )
-			if self.__dbg__:
-				print self.__plugin__ + " list except: " + error
-			return ( error, 303 )
+			else:
+				if self.__dbg__:
+					print self.__plugin__ + " list except: " + error
+				return ( error, 303 )
 		except:
 			if self.__dbg__:
 				print self.__plugin__ + " list uncaught exception dumping result"
