@@ -341,7 +341,7 @@ class YouTubeNavigation:
         if ( 'swf_config' in video ):
             video['video_url'] += " swfurl=%s swfvfy=1" % video['swf_config']
 
-        listitem=xbmcgui.ListItem(label=video['Title'], iconImage="DefaultFolder.png", thumbnailImage=video['thumbnail'], path=video['video_url']);
+        listitem=xbmcgui.ListItem(label=video['Title'], iconImage=video['thumbnail'], thumbnailImage=video['thumbnail'], path=video['video_url']);
         
         listitem.setInfo(type='Video', infoLabels=video)
         
@@ -683,7 +683,7 @@ class YouTubeNavigation:
         get = params.get
         item = item_params.get
 
-        icon = "DefaultFolder.png"
+        icon = item("thumbnail", "DefaultFolder.png")
         listitem=xbmcgui.ListItem(item("label"), iconImage=icon, thumbnailImage=item("thumbnail") )
 
         url = '%s?path=%s&action=play_video&videoid=%s' % ( sys.argv[0], item("path"), item("videoid"));
