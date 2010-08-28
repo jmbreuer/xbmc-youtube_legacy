@@ -283,6 +283,9 @@ class YouTubeCore(object):
 					if self.__dbg__:
 						print self.__plugin__ + " list done: retrying failed because login failed"
 					return ( error, 303 )
+			elif ( error.find("403") > 0 ):
+				# Happens if a user has subscriped to a user and the user has no uploads
+				return (self.__language__(30601), 303)
 			else:
 				if self.__dbg__:
 					print self.__plugin__ + " list except: " + error
