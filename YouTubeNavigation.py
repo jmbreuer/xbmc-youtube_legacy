@@ -832,8 +832,14 @@ class YouTubeNavigation:
             
             self.addFolderListItem(params, item)
         
-        xbmc.executebuiltin("Container.SetViewMode(500)")
-#        xbmcplugin.setContent(handle=int( sys.argv[ 1 ] ), content="musicvideos")
+        
+        video_view = self.__settings__.getSetting("video_view")
+        
+        if (not video_view):
+            video_view = "500"
+        
+        xbmc.executebuiltin("Container.SetViewMode(" + video_view + ")")
+        
         xbmcplugin.endOfDirectory( handle=int( sys.argv[ 1 ] ), succeeded=True, cacheToDisc=True )
 
         
