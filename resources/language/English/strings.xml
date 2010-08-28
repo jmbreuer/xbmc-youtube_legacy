@@ -82,7 +82,20 @@
 	<string id="30244">Taiwan</string>
 	<string id="30245">United States</string>    
     <string id="30246">Debug</string>
-    
+    <string id="30247">General</string>
+    <string id="30248">Folders</string>
+    <string id="30249">Hide Feeds</string>
+    <string id="30250">Hide Suggests</string>
+    <string id="30251">Hide Contacts</string>
+    <string id="30252">Hide Favorites</string>
+    <string id="30253">Hide Playlists</string>
+    <string id="30254">Hide Subscriptions</string>
+    <string id="30255">Hide Uploads</string>
+    <string id="30256">Hide Search</string>
+    <string id="30257">Hide Play Video by ID</string>
+    <string id="30258">Hide Settings</string>
+
+
     <!-- Menu strings -->
     <string id="30500">Clear refinements</string>
     <string id="30501">Download video</string>

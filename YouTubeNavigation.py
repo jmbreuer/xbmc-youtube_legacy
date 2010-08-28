@@ -103,7 +103,9 @@ class YouTubeNavigation:
             cat_get = category.get 
             if (cat_get("path").find(path +"/") > -1 ):
                 if (cat_get("path").rfind("/") <= len(path +"/")):
-                    self.addListItem(params, category)
+                    print "YouTube - " + cat_get("path").replace("/root/", "")
+                    if self.__settings__.getSetting( cat_get("path").replace("/root/", "") ) != "true":
+                        self.addListItem(params, category)
         
         xbmcplugin.endOfDirectory( handle=int( sys.argv[ 1 ] ), succeeded=True, cacheToDisc=True )
 
