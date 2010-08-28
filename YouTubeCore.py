@@ -259,10 +259,14 @@ class YouTubeCore(object):
 		url.add_header('X-GData-Key', 'key=' + self.APIKEY);
 		try:
 			con = urllib2.urlopen(url);
-			result = self._getvideoinfo(con.read())
+			result = con.read()
+			con.close()
+
 			if self.__dbgv__:
 				print self.__plugin__ + " list result: " + repr(result)
-			con.close();
+
+			result = self._getvideoinfo(result)
+
 			if len(result) > 0:
 				if self.__dbg__:
 					print self.__plugin__ + " list done :" + str(len(result))
