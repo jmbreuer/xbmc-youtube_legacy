@@ -458,112 +458,123 @@ class YouTubeCore(object):
 				print self.__plugin__ + " construct_video_url failed because of missing video from _get_details"
 			return ("", 500)
 		
-		hd_quality = int(self.__settings__.getSetting( "hd_videos" ))
-
-		if ( 'apierror' not in video):
-			try:
-				(fmtSource, swfConfig, video['stream_map']) = self._extractVariables(videoid)
-
-				if not fmtSource:
-					if self.__dbg__:
-						print self.__plugin__ + " construct_video_url Hopefully this extra if check is now legacy"
-						
-					(fmtSource, swfConfig, video['stream_map']) = self._extractVariables(videoid, True)
-					
-					if not fmtSource:
-						print self.__plugin__ + " IMPORTANT : " + videoid
-						if self.__dbg__:
-							print self.__plugin__ + " construct_video_url failed, empty fmtSource after trying with cookie"
-				
-						return (self.__language__(30618), 303)
-				
-				if ( video['stream_map'] == 303 ):
-					return (fmtSource, 303)
-				
-				fmt_url_map = urllib.unquote_plus(fmtSource[0]).split('|');
-
-				links = {};
-				video_url = False
-
-				print self.__plugin__ + " construct_video_url: stream_map : " + video['stream_map']
-				if (video['stream_map'] == 'True'):
-					if self.__dbg__:
-						print self.__plugin__ + " construct_video_url: stream map"
-						
-					for fmt_url in fmt_url_map:
-						if self.__dbg__:
-							print self.__plugin__ + " construct_video_url: fmt_url : " + repr(fmt_url)
-							
-						if (len(fmt_url) > 7 and fmt_url.find(":\\/\\/") > 0):
-							if (fmt_url.rfind(',') > fmt_url.rfind('\/id\/')):
-								final_url = fmt_url[:fmt_url.rfind(',')]
-								quality = final_url[final_url.rfind('\/itag\/') + 8:]
-								links[int(quality)] = final_url.replace('\/','/')
-							else :
-								final_url = fmt_url
-								quality = final_url[final_url.rfind('\/itag\/') + 8:]
-								links[int(quality)] = final_url.replace('\/','/')
-				
-				else:
-					if self.__dbg__:
-						print self.__plugin__ + " construct_video_url: non stream map" 
-					for fmt_url in fmt_url_map:
-						if (len(fmt_url) > 7):
-							if (fmt_url.rfind(',') > fmt_url.rfind('&id=')):
-								final_url = fmt_url[:fmt_url.rfind(',')]
-								quality = final_url[final_url.rfind('itag=') + 5:]
-								quality = quality[:quality.find('&')]
-								links[int(quality)] = final_url.replace('\/','/')
-							else :
-								final_url = fmt_url
-								quality = final_url[final_url.rfind('itag=') + 5:]
-								quality = quality[:quality.find('&')]
-								links[int(quality)] = final_url.replace('\/','/')
-				
-				get = links.get
-				
-				# SD videos are default, but we go for the highest res
-				if (get(35)):
-					video_url = get(35)
-				elif (get(34)):
-					video_url = get(34)
-				elif (get(18)):
-					video_url = get(18)
-				elif (get(5)):
-					video_url = get(5)
-				
-				if (hd_quality > 0): #<-- 720p
-					if (get(22)):
-						video_url = get(22)
-				if (hd_quality > 1): #<-- 1080p
-					if (get(37)):
-						video_url = get(37)
-						
-				if ( not video_url ):
-					if self.__dbg__:
-						print self.__plugin__ + " construct_video_url failed, video_url not set"
-					return (self.__language__(30607), 303)
-				
-				if (video['stream_map'] == 'True'):
-					video['swf_config'] = swfConfig
-					
-				video['video_url'] = video_url;
-
-				if self.__dbg__:
-					print self.__plugin__ + " construct_video_url done"
-
-				return (video, 200);
-			except:
-				if self.__dbg__:
-					print self.__plugin__ + " construct_video_url uncaught exception"
-					print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
-									   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
-					
-				return ('', 500)
-		else:
+		if ( 'apierror' in video):
 			if self.__dbg__:
 				print self.__plugin__ + " construct_video_url, got apierror: " + video['apierror']
 			return (video['apierror'], 303)
+		
+		hd_quality = int(self.__settings__.getSetting( "hd_videos" ))
+			
+		try:
+			(fmtSource, swfConfig, video['stream_map']) = self._extractVariables(videoid)
+			
+			if not fmtSource:
+				if self.__dbg__:
+					print self.__plugin__ + " construct_video_url Hopefully this extra if check is now legacy"
+					
+				(fmtSource, swfConfig, video['stream_map']) = self._extractVariables(videoid, True)
+				
+				if not fmtSource:
+					print self.__plugin__ + " IMPORTANT : " + videoid
+					if self.__dbg__:
+						print self.__plugin__ + " construct_video_url failed, empty fmtSource after trying with cookie"
+					
+					return (self.__language__(30618), 303)
+			
+			if ( video['stream_map'] == 303 ):
+				return (fmtSource, 303)
+			
+			fmt_url_map = urllib.unquote_plus(fmtSource[0]).split('|')
+			print "YOUTUBEDEV: FMT_NAV_MAP - " + repr(fmtSource)
+			links = {};
+			video_url = False
+
+			print self.__plugin__ + " construct_video_url: stream_map : " + video['stream_map']
+			if (video['stream_map'] == 'True'):
+				if self.__dbg__:
+					print self.__plugin__ + " construct_video_url: stream map"
+					
+				for fmt_url in fmt_url_map:
+					if self.__dbg__:
+						print self.__plugin__ + " construct_video_url: fmt_url : " + repr(fmt_url)
+						
+					if (len(fmt_url) > 7 and fmt_url.find(":\\/\\/") > 0):
+						if (fmt_url.rfind(',') > fmt_url.rfind('\/id\/')):
+							final_url = fmt_url[:fmt_url.rfind(',')]
+							if (final_url.rfind('\/itag\/') > 0):
+								quality = final_url[final_url.rfind('\/itag\/') + 8:]
+							else :
+								quality = "5"
+							links[int(quality)] = final_url.replace('\/','/')
+						else :
+							final_url = fmt_url
+							if (final_url.rfind('\/itag\/') > 0):
+								quality = final_url[final_url.rfind('\/itag\/') + 8:]
+							else :
+								quality = "5"
+							links[int(quality)] = final_url.replace('\/','/')
+			
+			else:
+				if self.__dbg__:
+					print self.__plugin__ + " construct_video_url: non stream map" 
+				for fmt_url in fmt_url_map:
+					if (len(fmt_url) > 7):
+						if (fmt_url.rfind(',') > fmt_url.rfind('&id=')): 
+							final_url = fmt_url[:fmt_url.rfind(',')]
+							if (final_url.rfind('itag=') > 0):
+								quality = final_url[final_url.rfind('itag=') + 5:]
+								quality = quality[:quality.find('&')]
+							else:
+								quality = "5"
+							links[int(quality)] = final_url.replace('\/','/')
+						else :
+							final_url = fmt_url
+							if (final_url.rfind('itag=') > 0):
+								quality = final_url[final_url.rfind('itag=') + 5:]
+								quality = quality[:quality.find('&')]
+							else :
+								quality = "5"
+							links[int(quality)] = final_url.replace('\/','/')
+			
+			get = links.get
+			
+			# SD videos are default, but we go for the highest res
+			if (get(35)):
+				video_url = get(35)
+			elif (get(34)):
+				video_url = get(34)
+			elif (get(18)):
+				video_url = get(18)
+			elif (get(5)):
+				video_url = get(5)
+			
+			if (hd_quality > 0): #<-- 720p
+				if (get(22)):
+					video_url = get(22)
+			if (hd_quality > 1): #<-- 1080p
+				if (get(37)):
+					video_url = get(37)
+					
+			if ( not video_url ):
+				if self.__dbg__:
+					print self.__plugin__ + " construct_video_url failed, video_url not set"
+				return (self.__language__(30607), 303)
+			
+			if (video['stream_map'] == 'True'):
+				video['swf_config'] = swfConfig
+				
+			video['video_url'] = video_url;
+
+			if self.__dbg__:
+				print self.__plugin__ + " construct_video_url done"
+
+			return (video, 200);
+		except:
+			if self.__dbg__:
+				print self.__plugin__ + " construct_video_url uncaught exception"
+				print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__ , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
+			return ('', 500)
+
 
 	def arrayToPipe(self, input):
 		pipedItems = ""
