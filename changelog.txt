@@ -6,6 +6,7 @@
 - Bugfixes
 - Cleanup
 - Errorhandling
+- Show/Hide folders
 
 [B]Version 0.9.8[/B]
 - fix login message "bad username and password"
