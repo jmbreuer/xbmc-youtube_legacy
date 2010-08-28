@@ -15,9 +15,6 @@
     <setting id="perpage" type="enum" label="30210" values="10|15|20|25|30|40|50" default="3" />
     <setting id="saved_searches" type="enum" label="30211" values="10|20|30|40" default="3" />
     <setting id="notification_length" type="enum" label="30214" values="5|10|15|20|25|30" default="1" />
-    
-    <!--  	 		 you're not ready for these yet simba 				-->
-    <!-- <setting id="video_view" type="enum" label="30213" values="List View|Thumbnails View|Off" default="1" /> -->
     <setting type="sep" />
     <setting id="debug" type="bool" label="30246" default="false" />
   </category>
