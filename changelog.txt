@@ -1,6 +1,11 @@
 [B]Errata[/B]
 - Plugin can't play next item in queue if a modal keyboard is displayed ( XBMC bug )
-  - Fixed in svn revision 33055, will be merged with dharma when a reviewer signs off.
+  - Fixed in svn revision 33055
+
+[B]Version 0.9.9[/B]
+- Bugfixes
+- Cleanup
+- Errorhandling
 
 [B]Version 0.9.8[/B]
 - fix login message "bad username and password"

@@ -66,25 +66,15 @@ class YouTubeCore(object):
 				print self.__plugin__ + " login no username or password set "
 			return ( "", 200 )
 
-		if self.__dbg__:
-			print self.__plugin__ + " login data username %s - Password %s " % ( str(type(uname)), str(type(passwd)))
-	
-
 		url = urllib2.Request("https://www.google.com/youtube/accounts/ClientLogin");
 
 		url.add_header('Content-Type', 'application/x-www-form-urlencoded')
 		url.add_header('GData-Version', 2)
 		
-		data = urllib.urlencode({'Email': uname, 
-					    'Passwd': passwd, 
-					    'service': 'youtube', 
-					    'source': 'YouTube plugin'});
+		data = urllib.urlencode({'Email': uname, 'Passwd': passwd, 'service': 'youtube', 'source': 'YouTube plugin'});
 	
 		try:
 			con = urllib2.urlopen(url, data);
-
-			if self.__dbg__:
-				print self.__plugin__ + " login reply header: " + repr(con.info().headers)
 				
 			value = con.read();
 			con.close()
@@ -301,7 +291,7 @@ class YouTubeCore(object):
 				print self.__plugin__ + " list uncaught exception dumping result"
 				print self.__plugin__ + " list result: " + repr(result)
 				print self.__plugin__ + ' list ERROR: %s::%s (%d) - %s' % (self.__class__.__name__ , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
-				return ( [], 500 )
+			return ( [], 500 )
 
 	def delete_favorite(self, delete_url):
 		return self._youTubeDel(delete_url)
@@ -376,7 +366,7 @@ class YouTubeCore(object):
 				print self.__plugin__ + " playlist uncaught exception dumping result"
 				print self.__plugin__ + " playlist result: " + repr(result)
 				print self.__plugin__ + ' playlist ERROR: %s::%s (%d) - %s' % (self.__class__.__name__ , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])	
-				return ( [], 500 )
+			return ( [], 500 )
 
 		if self.__dbgv__:
 			print self.__plugin__ + " playlist result: " + repr(result)
@@ -415,11 +405,13 @@ class YouTubeCore(object):
 			playobjects.append(video);
 			if self.__dbg__:
 				print self.__plugin__ + " playlist done : " + str(len(playobjects))
+				
 		return ( playobjects, 200 );
 	
 	def downloadVideo(self, path, videoid):
 		if self.__dbg__:
 			print self.__plugin__ + " downloadVideo : " + repr(path) + " - videoid : " + repr(videoid)
+			
 		( video, status )  = self.construct_video_url(videoid);
 		
 		if ( status == 200 ):
@@ -859,105 +851,107 @@ class YouTubeCore(object):
 		
 		return default;
 
-	# try catch status this
 	def _getvideoinfo(self, value):
 		if self.__dbg__:
 			print self.__plugin__ + " _getvideoinfo: " + str(len(value))
-		dom = parseString(value);
-		links = dom.getElementsByTagName("link");
-		entries = dom.getElementsByTagName("entry");
-		next = "false"
 
-		#find out if there are more pages
-		if (len(links)):
-			for link in links:
-				lget = link.attributes.get
-				if (lget("rel").value == "next"):
-					next = "true"
-					break
+		try:
+			dom = parseString(value);
+			links = dom.getElementsByTagName("link");
+			entries = dom.getElementsByTagName("entry");
+			next = "false"
 
-		#construct list of video objects					
-		ytobjects = [];
-		for node in entries:
-			video = {};
-
-			# This shouldn't be needed anymore.
-			if not node.getElementsByTagName("media:title").item(0):
-				print self.__plugin__ + ' _getvideoinfo media:title missing'
-				#continue;
+		        #find out if there are more pages
 			
-			# http://code.google.com/intl/en/apis/youtube/2.0/reference.html#youtube_data_api_tag_yt:state <- more reason codes
-			# requesterRegion - This video is not available in your region. <- fails
-			# limitedSyndication - Syndication of this video was restricted by its owner. <- works
+			if (len(links)):
+				for link in links:
+					lget = link.attributes.get
+					if (lget("rel").value == "next"):
+						next = "true"
+						break
+
+		        #construct list of video objects					
+			ytobjects = [];
+			for node in entries:
+				video = {};
+
+				# http://code.google.com/intl/en/apis/youtube/2.0/reference.html#youtube_data_api_tag_yt:state <- more reason codes
+				# requesterRegion - This video is not available in your region. <- fails
+				# limitedSyndication - Syndication of this video was restricted by its owner. <- works
 			
-			if node.getElementsByTagName("yt:state").item(0):
+				if node.getElementsByTagName("yt:state").item(0):
 				
-				state = self._getNodeAttribute(node, "yt:state", 'name', 'Unknown Name')
+					state = self._getNodeAttribute(node, "yt:state", 'name', 'Unknown Name')
 
-				# Ignore unplayable items.
-				if ( state == 'deleted' or state == 'rejected'):
-					continue
-				else:
-					# Get reason for why we can't playback the file.		
-					if node.getElementsByTagName("yt:state").item(0).hasAttribute('reasonCode'):
-						reason = self._getNodeAttribute(node, "yt:state", 'reasonCode', 'Unknown reasonCode')
-						value = self._getNodeValue(node, "yt:state", "Unknown reasonValue").encode('utf-8')
+					# Ignore unplayable items.
+					if ( state == 'deleted' or state == 'rejected'):
+						continue
+					else:
+						# Get reason for why we can't playback the file.		
+						if node.getElementsByTagName("yt:state").item(0).hasAttribute('reasonCode'):
+							reason = self._getNodeAttribute(node, "yt:state", 'reasonCode', 'Unknown reasonCode')
+							value = self._getNodeValue(node, "yt:state", "Unknown reasonValue").encode('utf-8')
 						
-						if ( reason != 'limitedSyndication' ):
-							video['reasonCode'] = reason
-							video['reasonValue'] = value
+							if ( reason != 'limitedSyndication' ):
+								video['reasonCode'] = reason
+								video['reasonValue'] = value
 						
-						if self.__dbg__:
-							print self.__plugin__ + "/ERROR reasonCode: [%s] %s " % ( reason, value )
+							if self.__dbg__:
+								print self.__plugin__ + "/ERROR reasonCode: [%s] %s " % ( reason, value )
 							
-						if reason == "private":
-							continue
+							if reason == "private":
+								continue
 
-			video['videoid'] = self._getNodeValue(node, "yt:videoid", "missing")
+				video['videoid'] = self._getNodeValue(node, "yt:videoid", "missing")
 
-			# this really shouldn't be needed
-			if ( video['videoid'] == "missing" ):
-				video['videolink'] = node.getElementsByTagName("link").item(0).getAttribute('href')
-				match = re.match('.*?v=(.*)\&.*', video['videolink'])
-				if match:
-					video['videoid'] = match.group(1)
-				else:
-					continue
+				# this really shouldn't be needed
+				if ( video['videoid'] == "missing" ):
+					video['videolink'] = node.getElementsByTagName("link").item(0).getAttribute('href')
+					match = re.match('.*?v=(.*)\&.*', video['videolink'])
+					if match:
+						video['videoid'] = match.group(1)
+					else:
+						continue
+					
+                                #http://wiki.xbmc.org/?title=InfoLabels
+				video['Title'] = self._getNodeValue(node, "media:title", "Unknown Title").encode('utf-8') # Convert from utf-16 to combat breakage
+				video['Plot'] = self._getNodeValue(node, "media:description", "Unknown Plot").encode( "utf-8" )
+				video['Date'] = self._getNodeValue(node, "published", "Unknown Date").encode( "utf-8" )
+				video['user'] = self._getNodeValue(node, "name", "Unknown Name").encode( "utf-8" )
+				video['Studio'] = self._getNodeValue(node, "media:credit", "Unknown Uploader").encode( "utf-8" )
+				duration = int(self._getNodeAttribute(node, "yt:duration", 'seconds', '0'))
+				video['Duration'] = "%02d:%02d" % ( duration / 60, duration % 60 )
+				video['Rating'] = float(self._getNodeAttribute(node,"gd:rating", 'average', "0.0"))
+                                #video['viewCount'] = self._getNodeAttribute(node, "yt:statistics", 'viewCount', "0") <- Not used by xbmc
+				video['Genre'] = self._getNodeAttribute(node, "media:category", "label", "Unknown Genre").encode( "utf-8" )
 
-			#http://wiki.xbmc.org/?title=InfoLabels
+				if node.getElementsByTagName("link"):
+					link = node.getElementsByTagName("link")
+					for i in range(len(link)):
+						if link.item(i).getAttribute('rel') == 'edit':
+							video['editurl'] = link.item(i).getAttribute('href')
+
+				video['thumbnail'] = "http://i.ytimg.com/vi/" + video['videoid'] + "/0.jpg"
 			
-			video['Title'] = self._getNodeValue(node, "media:title", "Unknown Title").encode('utf-8') # Convert from utf-16 to combat breakage
-			video['Plot'] = self._getNodeValue(node, "media:description", "Unknown Plot").encode( "utf-8" )
-			video['Date'] = self._getNodeValue(node, "published", "Unknown Date").encode( "utf-8" )
-			video['user'] = self._getNodeValue(node, "name", "Unknown Name").encode( "utf-8" )
-			video['Studio'] = self._getNodeValue(node, "media:credit", "Unknown Uploader").encode( "utf-8" )
-			duration = int(self._getNodeAttribute(node, "yt:duration", 'seconds', '0'))
-			video['Duration'] = "%02d:%02d" % ( duration / 60, duration % 60 )
-			video['Rating'] = float(self._getNodeAttribute(node,"gd:rating", 'average', "0.0"))
-			#video['viewCount'] = self._getNodeAttribute(node, "yt:statistics", 'viewCount', "0") <- Not used by xbmc
-			video['Genre'] = self._getNodeAttribute(node, "media:category", "label", "Unknown Genre").encode( "utf-8" )
+				overlay = self.__settings__.getSetting( "vidstatus-" + video['videoid'] )
 
-			if node.getElementsByTagName("link"):
-				link = node.getElementsByTagName("link")
-				for i in range(len(link)):
-					if link.item(i).getAttribute('rel') == 'edit':
-						video['editurl'] = link.item(i).getAttribute('href')
-
-			video['thumbnail'] = "http://i.ytimg.com/vi/" + video['videoid'] + "/0.jpg"
-			
-			overlay = self.__settings__.getSetting( "vidstatus-" + video['videoid'] )
-
-			if overlay:
-				video['Overlay'] = int(overlay)
+				if overlay:
+					video['Overlay'] = int(overlay)
 				
-			video['next'] = next
+				video['next'] = next
 
-			ytobjects.append(video);
+				ytobjects.append(video);
 
-		if self.__dbg__:
-			print self.__plugin__ + " _getvideoinfo done"
-
-		return ytobjects;
+				if self.__dbg__:
+					print self.__plugin__ + " _getvideoinfo done"
+			return ytobjects;
+		except:
+			if self.__dbg__:
+				print self.__plugin__ + " _getvideoinfo uncaught exception"
+				print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
+								   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
+				
+			return ( "", 500 )
 
 	def _getAlert(self, videoid):
 		if self.__dbg__:
@@ -1132,7 +1126,6 @@ class YouTubeCore(object):
 								   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
 			return False
 
-	# try except status this.
 	def _scrapeYouTubeData(self, feed, retry = True):
 		if self.__dbg__:
 			print self.__plugin__ + " _scrapeYouTubeData: " + repr(feed)
@@ -1177,8 +1170,3 @@ class YouTubeCore(object):
 				print self.__plugin__ + " _scrapeYouTubeData result: " + repr(result)
 			
 			return ( "", 500 )
-	
-if __name__ == '__main__':
-	core = YouTubeCore();
-#	core.scrape();
-	sys.exit(0);

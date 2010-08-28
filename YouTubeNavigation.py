@@ -363,8 +363,6 @@ class YouTubeNavigation:
         else:
             author = self.getUserInput('Search on author', '')
 
-        print "YouTube"
-        print author
         if author == "":
             if author in searches:
                 del searches[query]
