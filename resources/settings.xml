@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <settings>
+
   <!-- General -->
   <category label="30247">
     <setting id="username" type="text" label="30200" default="" />
@@ -16,8 +17,8 @@
     <setting id="saved_searches" type="enum" label="30211" values="10|20|30|40" default="3" />
     <setting id="notification_length" type="enum" label="30214" values="5|10|15|20|25|30" default="1" />
     <setting type="sep" />
-    
   </category>
+
   <!-- Folders -->
   <category label="30248">
     <setting id="feeds" type="bool" label="30249" default="false" />
@@ -29,7 +30,14 @@
     <setting id="uploads" type="bool" label="30255" default="false" />
     <setting id="search" type="bool" label="30256" default="false" />
     <setting id="playbyid" type="bool" label="30257" default="false" />
-    <setting id="debug" type="bool" label="30246" default="false" />
-    <setting id="video_view" type="number" label="30258" default="500" />
   </category>
+
+  <!-- Advanced -->
+  <category label="30259">
+    <setting id="debug" type="bool" label="30246" default="false" />
+    <setting id="video_view" type="bool" label="30258" default="false" />
+    <setting id="debug" type="bool" label="30246" default="false" />
+    <setting id="hd_videos_download" type="enum" label="30260" lvalues="30261|30217|30216|30215" default="0" />
+  </category>
+
 </settings>

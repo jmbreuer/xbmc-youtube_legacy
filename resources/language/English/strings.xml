@@ -83,7 +83,7 @@
 	<string id="30245">United States</string>    
     <string id="30246">Debug</string>
     <string id="30247">General</string>
-    <string id="30248">Advanced</string>
+    <string id="30248">Folder</string>
     <string id="30249">Hide Feeds</string>
     <string id="30250">Hide Youtube Suggests</string>
     <string id="30251">Hide Contacts</string>
@@ -93,8 +93,10 @@
     <string id="30255">Hide Uploads</string>
     <string id="30256">Hide Search</string>
     <string id="30257">Hide Play Video by ID</string>
-    <string id="30258">Default View-mode for video lists</string>
-
+    <string id="30258">Set thumbnail view for videos in Confluence</string>
+    <string id="30259">Advanced</string>
+    <string id="30260">Max download video quality (if available)</string>
+    <string id="30261">Off</string>
 
     <!-- Menu strings -->
     <string id="30500">Clear refinements</string>

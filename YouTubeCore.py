@@ -250,13 +250,15 @@ class YouTubeCore(object):
 			feed += "?"
 		else:
 			feed += "&"
+
 		feed += "start-index=" + str( per_page * int(page) + 1) + "&max-results=" + repr(per_page)
 		feed = feed.replace(" ", "+")
+		
 		url = urllib2.Request(feed)
 		url.add_header('User-Agent', self.USERAGENT)
 		url.add_header('GData-Version', 2)
 		url.add_header('Authorization', 'GoogleLogin auth=' + auth);
-		url.add_header('X-GData-Key', 'key=' + self.APIKEY);
+		url.add_header('X-GData-Key', 'key=' + self.APIKEY)
 		try:
 			con = urllib2.urlopen(url);
 			result = con.read()
@@ -289,6 +291,7 @@ class YouTubeCore(object):
 					return ( error, 303 )
 			elif ( error.find("403") > 0 ):
 				# Happens if a user has subscriped to a user and the user has no uploads
+				print self.__plugin__ + ' list ERROR: %s::%s (%d) - %s' % (self.__class__.__name__ , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
 				return (self.__language__(30601), 303)
 			else:
 				if self.__dbg__:
@@ -411,16 +414,20 @@ class YouTubeCore(object):
 			video['next'] = next
 
 			playobjects.append(video);
-			if self.__dbg__:
-				print self.__plugin__ + " playlist done : " + str(len(playobjects))
+			
+		if self.__dbg__:
+			print self.__plugin__ + " playlist done"
 				
 		return ( playobjects, 200 );
 	
-	def downloadVideo(self, path, videoid):
+	def downloadVideo(self, path, params):
+		get = params.get
+		if ( not get("videoid") ):
+		    return ( "", 200)
 		if self.__dbg__:
-			print self.__plugin__ + " downloadVideo : " + repr(path) + " - videoid : " + repr(videoid)
+			print self.__plugin__ + " downloadVideo : " + repr(path) + " - videoid : " + repr(get("videoid"))
 			
-		( video, status )  = self.construct_video_url(videoid);
+		( video, status )  = self.construct_video_url(params, download = True);
 		
 		if ( status == 200 ):
 			path = self.__settings__.getSetting( "downloadPath" )
@@ -433,6 +440,8 @@ class YouTubeCore(object):
 					return (self.__language__(30620), 303)
 				else:
 					(filename, header) = urllib.urlretrieve(video['video_url'], "%s/%s.flv" % ( path,video['Title']))
+
+					
 					self.__settings__.setSetting( "vidstatus-" + videoid, "1" )
 			except urllib2.HTTPError, e:
 				if self.__dbg__:
@@ -454,7 +463,13 @@ class YouTubeCore(object):
 			print self.__plugin__ + " downloadVideo done"
 		return ( video, status )
 	
-	def construct_video_url(self, videoid, encoding = 'utf-8'):
+	def construct_video_url(self, params, encoding = 'utf-8', download = False):
+		get = params.get
+		if ( not get("videoid") ):
+		         return ( "", 200)
+
+		videoid = get("videoid")
+		     
 		if self.__dbg__:
 			print self.__plugin__ + " construct_video_url : " + repr(videoid)
 
@@ -469,9 +484,16 @@ class YouTubeCore(object):
 			if self.__dbg__:
 				print self.__plugin__ + " construct_video_url, got apierror: " + video['apierror']
 			return (video['apierror'], 303)
+
+		if not download:
+			hd_quality = int(self.__settings__.getSetting( "hd_videos" ))
+		else:
+			hd_quality = int(self.__settings__.getSetting( "hd_videos_download" ))
+			if ( hd_quality == 0 ):
+				hd_quality = int(self.__settings__.getSetting( "hd_videos" ))
+			else:
+				hd_quality -= 1
 		
-		hd_quality = int(self.__settings__.getSetting( "hd_videos" ))
-			
 		try:
 			(fmtSource, swfConfig, video['stream_map']) = self._extractVariables(videoid)
 			
@@ -492,7 +514,6 @@ class YouTubeCore(object):
 				return (fmtSource, 303)
 			
 			fmt_url_map = urllib.unquote_plus(fmtSource[0]).split('|')
-			print "YOUTUBEDEV: FMT_NAV_MAP - " + repr(fmtSource)
 			links = {};
 			video_url = False
 

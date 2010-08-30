@@ -333,7 +333,7 @@ class YouTubeNavigation:
         
     def playVideo(self, params = {}):
         get = params.get
-        (video, status) = core.construct_video_url(get('videoid'));
+        (video, status) = core.construct_video_url(params);
         if status != 200:
             self.errorHandling(self.__language__(30603), video, status)
             return False
@@ -424,7 +424,7 @@ class YouTubeNavigation:
 
             self.showMessage(self.__language__(30612), urllib.unquote_plus(get("title", "Unknown Title")))
 
-            ( video, status ) = core.downloadVideo(path, get("videoid"));
+            ( video, status ) = core.downloadVideo(path, params);
             if status != 200 :
                 self.errorHandling(self.__language__( 30501 ), video, status)
                 return False
@@ -835,10 +835,8 @@ class YouTubeNavigation:
         
         video_view = self.__settings__.getSetting("video_view")
         
-        if (not video_view):
-            video_view = "500"
-        
-        xbmc.executebuiltin("Container.SetViewMode(" + video_view + ")")
+        if (video_view):
+            xbmc.executebuiltin("Container.SetViewMode(500)")
         
         xbmcplugin.endOfDirectory( handle=int( sys.argv[ 1 ] ), succeeded=True, cacheToDisc=True )
 

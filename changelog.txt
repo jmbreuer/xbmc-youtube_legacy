@@ -8,6 +8,8 @@
 - Errorhandling
 - Show/Hide folders
 - Fixed thumbnail bug
+- Added support download quality
+- Added support thumbnail view on confluence
 
 [B]Version 0.9.8[/B]
 - fix login message "bad username and password"
