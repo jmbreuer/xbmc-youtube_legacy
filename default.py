@@ -1,17 +1,22 @@
+'''
+    YouTube plugin for XBMC
+    Copyright (C) 2010 Tobias Ussing Senior And Henrik Mosgaard Jensen The Third
+    
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+    
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+'''
+
 import sys, xbmc, xbmcaddon
-
-REMOTE_DBG = False
-
-# append pydev remote debugger
-if REMOTE_DBG:
-    # Make pydev debugger work for auto reload.
-    # Note pydevd module need to be copied in XBMC\system\python\Lib\pysrc
-    try:
-        import pysrc.pydevd as pydevd
-    # stdoutToServer and stderrToServer redirect stdout and stderr to eclipse console
-        pydevd.settrace('localhost', stdoutToServer=True, stderrToServer=True)
-    except ImportError:
-        sys.stderr.write("Error: " + "You must add org.python.pydev.debug.pysrc to your PYTHONPATH.")
 
 # plugin constants
 __version__ = "0.9.9"
@@ -20,7 +25,7 @@ __author__ = "TheCollective"
 __url__ = "www.xbmc.com"
 __svn_url__ = ""
 __svn_revision__ = "$Revision$"
-__XBMC_Revision__ = "32430"
+__XBMC_Revision__ = "33324"
 __settings__ = xbmcaddon.Addon(id='plugin.video.youtube.beta')
 __language__ = __settings__.getLocalizedString
 __dbg__ = __settings__.getSetting( "debug" ) == "true"
