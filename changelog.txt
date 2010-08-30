@@ -8,7 +8,7 @@
 - Errorhandling
 - Show/Hide folders
 - Fixed thumbnail bug
-- Added support download quality
+- Added support for selection of download quality seperate from playback quality 
 - Added support thumbnail view on confluence
 
 [B]Version 0.9.8[/B]
