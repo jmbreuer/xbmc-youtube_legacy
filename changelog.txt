@@ -1,6 +1,7 @@
 [B]Errata[/B]
-- Plugin can't play next item in queue if a modal keyboard is displayed ( XBMC bug )
-  - Fixed in svn revision 33055
+- [XBMC] Can't replay a video that has already been played, unless the folder is refreshed.
+- [XBMC] Thumbnails sometimes turns into folders.
+- rtmpe download not supported.
 
 [B]Version 0.9.9[/B]
 - Bugfixes
@@ -10,6 +11,7 @@
 - Fixed thumbnail bug
 - Added support for selection of download quality seperate from playback quality 
 - Added support thumbnail view on confluence
+- New download code supporting useragent.
 
 [B]Version 0.9.8[/B]
 - fix login message "bad username and password"
