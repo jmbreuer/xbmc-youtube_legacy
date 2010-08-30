@@ -423,7 +423,7 @@ class YouTubeCore(object):
 	def downloadVideo(self, path, params):
 		get = params.get
 		if ( not get("videoid") ):
-		    return ( "", 200)
+			return ( "", 200)
 		if self.__dbg__:
 			print self.__plugin__ + " downloadVideo : " + repr(path) + " - videoid : " + repr(get("videoid"))
 			
@@ -439,10 +439,15 @@ class YouTubeCore(object):
 					print self.__plugin__ + " downloadVideo stream_map not implemented in downloadVideo"
 					return (self.__language__(30620), 303)
 				else:
-					(filename, header) = urllib.urlretrieve(video['video_url'], "%s/%s.flv" % ( path,video['Title']))
-
+					url = urllib2.Request(video['video_url'])
+					url.add_header('User-Agent', self.USERAGENT);
+					filename = "%s/%s.flv" % ( path,video['Title'])
+					file = open(filename, "wb")
+					con = urllib2.urlopen(url);
+					file.write(con.read())
+					con.close()
 					
-					self.__settings__.setSetting( "vidstatus-" + videoid, "1" )
+					self.__settings__.setSetting( "vidstatus-" + get("videoid"), "1" )
 			except urllib2.HTTPError, e:
 				if self.__dbg__:
 					print self.__plugin__ + " downloadVideo except: " + str(e)
@@ -466,10 +471,10 @@ class YouTubeCore(object):
 	def construct_video_url(self, params, encoding = 'utf-8', download = False):
 		get = params.get
 		if ( not get("videoid") ):
-		         return ( "", 200)
+			return ( "", 200)
 
 		videoid = get("videoid")
-		     
+		
 		if self.__dbg__:
 			print self.__plugin__ + " construct_video_url : " + repr(videoid)
 
@@ -901,7 +906,7 @@ class YouTubeCore(object):
 			entries = dom.getElementsByTagName("entry");
 			next = "false"
 
-		        #find out if there are more pages
+			#find out if there are more pages
 			
 			if (len(links)):
 				for link in links:
@@ -910,7 +915,7 @@ class YouTubeCore(object):
 						next = "true"
 						break
 
-		        #construct list of video objects					
+			#construct list of video objects					
 			ytobjects = [];
 			for node in entries:
 				video = {};
@@ -944,7 +949,6 @@ class YouTubeCore(object):
 
 				video['videoid'] = self._getNodeValue(node, "yt:videoid", "missing")
 
-				# this really shouldn't be needed
 				if ( video['videoid'] == "missing" ):
 					video['videolink'] = node.getElementsByTagName("link").item(0).getAttribute('href')
 					match = re.match('.*?v=(.*)\&.*', video['videolink'])
@@ -952,8 +956,7 @@ class YouTubeCore(object):
 						video['videoid'] = match.group(1)
 					else:
 						continue
-					
-                                #http://wiki.xbmc.org/?title=InfoLabels
+				
 				video['Title'] = self._getNodeValue(node, "media:title", "Unknown Title").encode('utf-8') # Convert from utf-16 to combat breakage
 				video['Plot'] = self._getNodeValue(node, "media:description", "Unknown Plot").encode( "utf-8" )
 				video['Date'] = self._getNodeValue(node, "published", "Unknown Date").encode( "utf-8" )
@@ -962,7 +965,6 @@ class YouTubeCore(object):
 				duration = int(self._getNodeAttribute(node, "yt:duration", 'seconds', '0'))
 				video['Duration'] = "%02d:%02d" % ( duration / 60, duration % 60 )
 				video['Rating'] = float(self._getNodeAttribute(node,"gd:rating", 'average', "0.0"))
-                                #video['viewCount'] = self._getNodeAttribute(node, "yt:statistics", 'viewCount', "0") <- Not used by xbmc
 				video['Genre'] = self._getNodeAttribute(node, "media:category", "label", "Unknown Genre").encode( "utf-8" )
 
 				if node.getElementsByTagName("link"):
