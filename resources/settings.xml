@@ -34,7 +34,7 @@
 
   <!-- Advanced -->
   <category label="30259">
-    <setting id="video_view" type="bool" label="30258" default="false" />
+    <setting id="video_view" type="bool" label="30258" default="true" />
     <setting id="hd_videos_download" type="enum" label="30260" lvalues="30261|30217|30216|30215" default="0" />
     <setting id="debug" type="bool" label="30246" default="false" />
   </category>

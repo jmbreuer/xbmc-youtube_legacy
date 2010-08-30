@@ -95,8 +95,8 @@
     <string id="30257">Hide Play Video by ID</string>
     <string id="30258">Set thumbnail view for videos in Confluence</string>
     <string id="30259">Advanced</string>
-    <string id="30260">Max download video quality (if available)</string>
-    <string id="30261">Off</string>
+    <string id="30260">Download quality (if available)</string>
+    <string id="30261">Same as playback</string>
 
     <!-- Menu strings -->
     <string id="30500">Clear refinements</string>
