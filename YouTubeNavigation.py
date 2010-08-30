@@ -623,14 +623,13 @@ class YouTubeNavigation:
             
             if (item("feed") == "subscriptions_favorites"):
                 cm.append( (self.__language__( 30511 ), cm_url) )
-                
             elif (item("feed") == "subscriptions_uploads"):
                 cm.append ( (self.__language__( 30510 ), cm_url) )
-        
-            cm.append( ( self.__language__( 30513 ) % item("channel"), 'XBMC.RunPlugin(%s?path=%s&editurl=%s&action=remove_subscription)' % ( sys.argv[0], item("path"), item("editurl") ) ) )
-            
+                    
             if (get("external")):
                 cm.append( ( self.__language__( 30512 ) % item("channel"), 'XBMC.RunPlugin(%s?path=%s&channel=%s&action=add_subscription)' % ( sys.argv[0], item("path"), item("channel") ) ) )
+            else:
+                cm.append( ( self.__language__( 30513 ) % item("channel"), 'XBMC.RunPlugin(%s?path=%s&editurl=%s&action=remove_subscription)' % ( sys.argv[0], item("path"), item("editurl") ) ) )
                 
         if (item("login") == "true"):
             url += "login=true&"
