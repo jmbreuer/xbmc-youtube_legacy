@@ -797,7 +797,7 @@ class YouTubeNavigation:
 
     def buildItemUrl(self, item_params = {}, url = ""):
         for k, v in item_params.items():
-            if (k != "path" and k != "thumbnail" and k!= "playlistId" and k!= "next" and k != "content" and k!= "editurl" and k!= "content"
+            if (k != "path" and k != "thumbnail" and k!= "playlistId" and k!= "next" and k != "content" and k!= "editurl"
                 and k!= "summary" and k!= "published"
                 ):
                 url += k + "=" + v + "&"
@@ -861,7 +861,7 @@ class YouTubeNavigation:
                             
             if ( item("feed") == "favorites"  or get("feed") == "playlists" or item("feed") == "uploads" ):
                 cm.append( ( self.__language__( 30507 ), "XBMC.Action(Queue)" ) )
-        
+        print self.__plugin__ + "added context menu item: " + repr(cm)
         return cm
 
 
