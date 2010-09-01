@@ -30,7 +30,6 @@ class YouTubeCore(object):
 	__plugin__ = sys.modules[ "__main__" ].__plugin__
 	__dbg__ = sys.modules[ "__main__" ].__dbg__
 	__dbgv__ = False
-	__release__ = False
 	
 	APIKEY = "AI39si6hWF7uOkKh4B9OEAX-gK337xbwR9Vax-cdeF9CF9iNAcQftT8NVhEXaORRLHAmHxj6GjM-Prw04odK4FxACFfKkiH9lg";
 	USERAGENT = "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-GB; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8"
@@ -753,17 +752,18 @@ class YouTubeCore(object):
 			if fmtSource:
 				stream_map = "False"
 			else:
-				if self.__release__:
-					if self.__dbg__:
-						print self.__plugin__ + " _extractVariables exited. RTMP disabled."
-					return ( self.__language__(30608), self.__language__(30608), 303 )
-				else:
-					swfConfig = re.findall('var swfConfig = {"url": "(.*)", "min.*};', htmlSource)
-					if len(swfConfig) > 0:
-						swf_url = swfConfig[0].replace("\\", "")
+				# Release
+				#if self.__dbg__:
+				#	print self.__plugin__ + " _extractVariables exited. RTMP disabled."
+				#return ( self.__language__(30608), self.__language__(30608), 303 )
+				swfConfig = re.findall('var swfConfig = {"url": "(.*)", "min.*};', htmlSource)
+
+				# Development
+				if len(swfConfig) > 0:
+					swf_url = swfConfig[0].replace("\\", "")
 						
-					fmtSource = re.findall('"fmt_stream_map": "([^"]+)"', htmlSource);
-					stream_map = 'True'
+				fmtSource = re.findall('"fmt_stream_map": "([^"]+)"', htmlSource);
+			       	stream_map = 'True'
 			
 			if self.__dbg__:
 				print self.__plugin__ + " extractVariables done"
