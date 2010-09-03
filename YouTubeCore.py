@@ -727,7 +727,6 @@ class YouTubeCore(object):
 			print self.__plugin__ + " extractVariables : " + repr(videoid)
 		htmlSource = ""
 				
-		# add try except
 		try:
 			link = 'http://www.youtube.com/watch?v=' +videoid + "&safeSearch=none&restriction=US&hl=en_US"
 			request = urllib2.Request(link);
@@ -768,6 +767,8 @@ class YouTubeCore(object):
 			if self.__dbg__:
 				print self.__plugin__ + " extractVariables done"
 				
+			return (fmtSource, swf_url, stream_map)
+				
 		except urllib2.HTTPError, e:
 			error = str(e)
 			if self.__dbg__:
@@ -781,8 +782,6 @@ class YouTubeCore(object):
 								   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
 				
 			return ( '', 500 )
-									
-		return (fmtSource, swf_url, stream_map)
 
 	def _getAuth(self):
 		if self.__dbg__:

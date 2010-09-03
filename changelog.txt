@@ -3,6 +3,9 @@
 - [XBMC] Thumbnails sometimes turns into folders.
 - rtmpe download not supported.
 
+[B]Version 1.1.0[/B]
+- Version bump to Final Release
+
 [B]Version 0.9.9[/B]
 - Bugfixes
 - Cleanup
