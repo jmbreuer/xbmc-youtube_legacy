@@ -1,3 +1,9 @@
+[B]TODO:[/B]
+- Scraper for exploring youtube categories 
+- Test refactor of YouTube Navigation
+- Refactor YouTube core to use elementree instead of xml mini dom 
+- Private videos requires genneralised login function with shorter timeout (3-6 second) on requests
+
 [B]Errata[/B]
 - [XBMC] Can't replay a video that has already been played, unless the folder is refreshed.
 - [XBMC] Thumbnails sometimes turns into folders.
