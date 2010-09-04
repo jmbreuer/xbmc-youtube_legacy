@@ -18,6 +18,7 @@
 
 import sys, urllib, urllib2, re, os, cookielib
 from xml.dom.minidom import parse, parseString
+import elementtree/ElementTree.py
 
 # ERRORCODES:
 # 200 = OK
@@ -755,9 +756,9 @@ class YouTubeCore(object):
 				#if self.__dbg__:
 				#	print self.__plugin__ + " _extractVariables exited. RTMP disabled."
 				#return ( self.__language__(30608), self.__language__(30608), 303 )
-				swfConfig = re.findall('var swfConfig = {"url": "(.*)", "min.*};', htmlSource)
-
+				
 				# Development
+				swfConfig = re.findall('var swfConfig = {"url": "(.*)", "min.*};', htmlSource)
 				if len(swfConfig) > 0:
 					swf_url = swfConfig[0].replace("\\", "")
 						
