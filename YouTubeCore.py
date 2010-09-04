@@ -18,7 +18,7 @@
 
 import sys, urllib, urllib2, re, os, cookielib
 from xml.dom.minidom import parse, parseString
-import elementtree/ElementTree.py
+import elementtree
 
 # ERRORCODES:
 # 200 = OK
