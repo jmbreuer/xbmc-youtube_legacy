@@ -3,7 +3,8 @@
 - [XBMC] Thumbnails sometimes turns into folders.
 - Download of rtmpe streams not supported.
 - playback of rtmpe streams not supported in release (Request by Team XBMC due to DMCA restrictions imposed by US Law).
-
+- XBMC has Excessive Memory use after running the plugin for prolonged periods of time
+ 
 [B]Version 1.8.0[/B]
 - Solved confusion cause by multiple licens files (removed GPL v2 license and renamed GPL v3 to LICENSE.txt)
 - Version bump to replace old YouTube plugin
