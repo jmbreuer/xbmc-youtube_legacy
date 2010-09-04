@@ -634,7 +634,9 @@ class YouTubeNavigation:
         get = params.get
         item = item_params.get
 
-        icon = item("thumbnail", "DefaultFolder.png")
+        icon = "default"
+        icon = self.getThumbnail(icon)
+        
         listitem=xbmcgui.ListItem(item("label"), iconImage=icon, thumbnailImage=item("thumbnail") )
 
         url = '%s?path=%s&action=play_video&videoid=%s' % ( sys.argv[0], item("path"), item("videoid"));
