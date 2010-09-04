@@ -68,7 +68,9 @@ License: "Freeware"
 http://www.iconarchive.com/show/mixed-icons-by-simiographics/Bullhorn-icon.html
 
 next.png
-Modfied version of Next icon from nuka's original Youtube plugin , assumed to be safe license wise.
+author: kyo-tux (Aeon Icon pack)
+License: "Free for non-commercial use
+http://kyo-tux.deviantart.com
 
 recommended.png		
 Author: Kyo Tux - Crysigns icons
