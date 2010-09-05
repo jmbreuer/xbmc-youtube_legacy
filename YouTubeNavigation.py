@@ -286,7 +286,7 @@ class YouTubeNavigation:
         for search in searches:
             item = {}
             item["label"] = search
-            item["search"] = search
+            item["search"] = urllib.quote_plus(search)
             item["action"] = "search"
             item["path"] = get("path")
             item["thumbnail"] = self.__settings__.getSetting("search_" + search + "_thumb") 
@@ -368,6 +368,8 @@ class YouTubeNavigation:
     def refineSearch(self, params = {}):
         get = params.get
         query = get("search")
+        query = urllib.unquote_plus(query)
+        
         try:
             searches = eval(self.__settings__.getSetting("stored_searches_author"))
         except :
@@ -393,6 +395,7 @@ class YouTubeNavigation:
     def deleteRefinements(self, params = {}):
         get = params.get
         query = get("search")
+        query = urllib.unquote_plus(query)
         try:
             searches = eval(self.__settings__.getSetting("stored_searches_author"))
         except :
@@ -469,6 +472,7 @@ class YouTubeNavigation:
     def deleteSearchQuery(self, params = {}):
         get = params.get
         query = get("delete")
+        query = urllib.unquote_plus(query)
         
         try:
             searches = eval(self.__settings__.getSetting("stored_searches"))
