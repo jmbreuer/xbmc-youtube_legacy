@@ -800,8 +800,7 @@ class YouTubeNavigation:
     def buildItemUrl(self, item_params = {}, url = ""):
         for k, v in item_params.items():
             if (k != "path" and k != "thumbnail" and k!= "playlistId" and k!= "next" and k != "content" and k!= "editurl"
-                and k!= "summary" and k!= "published"
-                ):
+                and k!= "summary" and k!= "published" and k!="Title" and k!= "label" ):
                 url += k + "=" + v + "&"
         return url
 
