@@ -18,6 +18,7 @@
 
 import sys, urllib, urllib2, re, os, cookielib
 from xml.dom.minidom import parse, parseString
+
 import elementtree
 
 # ERRORCODES:
@@ -64,11 +65,10 @@ class YouTubeCore(object):
 		if hasattr(item, '__doc__'):
 			doc = getattr(item, '__doc__')
 			if doc:
-				doc = doc.strip()   # Remove leading/trailing whitespace.
+				doc = doc.strip() # Remove leading/trailing whitespace.
 				firstline = doc.split('\n')[0]
 				print "DOC:     ", firstline
-	
-						
+
 	def login(self, error = 0):
 		if self.__dbg__:
 			print self.__plugin__ + " login - errors: " + str(error)
@@ -84,20 +84,20 @@ class YouTubeCore(object):
 				print self.__plugin__ + " login no username or password set "
 			return ( "", 200 )
 
-		url = urllib2.Request("https://www.google.com/youtube/accounts/ClientLogin");
+		url = urllib2.Request("https://www.google.com/youtube/accounts/ClientLogin")
 
 		url.add_header('Content-Type', 'application/x-www-form-urlencoded')
 		url.add_header('GData-Version', 2)
 		
-		data = urllib.urlencode({'Email': uname, 'Passwd': passwd, 'service': 'youtube', 'source': 'YouTube plugin'});
+		data = urllib.urlencode({'Email': uname, 'Passwd': passwd, 'service': 'youtube', 'source': 'YouTube plugin'})
 	
 		try:
 			con = urllib2.urlopen(url, data);
 				
-			value = con.read();
+			value = con.read()
 			con.close()
 
-			result = re.compile('Auth=(.*)\nYouTubeUser=(.*)').findall(value);
+			result = re.compile('Auth=(.*)\nYouTubeUser=(.*)').findall(value)
 					
 			if len(result) > 0:
 				( auth, nick ) = result[0]
