@@ -812,7 +812,13 @@ class YouTubeNavigation:
         cm = []
         get = params.get
         item = item_params.get
-        
+
+        if (item("Title")):
+            cm.append( ( "Search on Title", 'XBMC.RunPlugin(%s?path=/root/search&action=search&search=%s&)' % ( sys.argv[0], item('Title') ) ) )
+
+            if (item("label")):
+                cm.append( ( "Search on Title2", 'XBMC.RunPlugin(%s?path=/root/search&action=search&search=%s&)' % ( sys.argv[0], item('label') ) ) )
+                                                
         if (item("videoid")): 
             if ( self.__settings__.getSetting( "username" ) != "" and self.__settings__.getSetting( "auth" ) ):
                 if ( get("feed") == "favorites" and not get("contact") ):
@@ -834,7 +840,7 @@ class YouTubeNavigation:
                     searches = {}
                 
                 if item("search") in searches:                            
-                    cm.append( ( self.__language__( 30500 ), 'XBMC.RunPlugin(%s?path=%s&action=delete_refinements&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )                        
+                    cm.append( ( self.__language__( 30500 ), 'XBMC.RunPlugin(%s?path=%s&action=delete_refinements&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
             
             if (item("playlist")):
                 cm.append( ( self.__language__( 30507 ), "XBMC.Action(Queue)" ) )
