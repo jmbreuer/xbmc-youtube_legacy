@@ -1,5 +1,6 @@
 [B]TODO:[/B]
 - Scraper for exploring youtube categories 
+- Scraper for YouTube Trailers
 - Test refactor of YouTube Navigation
 - Remove url passing from xbmc - navigation - core layer (specifically editurl)
 - Remove stupid remapping of variable names between core and navigation (go with what, XBMC wants)
