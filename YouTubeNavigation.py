@@ -16,12 +16,13 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, urllib
+import sys
 import os
 import xbmc
 import xbmcaddon
 import xbmcgui
 import xbmcplugin
+import urllib
 import YouTubeCore
 
 core = YouTubeCore.YouTubeCore();
@@ -411,11 +412,12 @@ class YouTubeNavigation:
         get = params.get
         if (get("search")):
             query = get("search")
-            self.saveSearchQuery(query)
+            query = urllib.unquote_plus(query)
+            self.saveSearchQuery(query, query)
         else :
             query = self.getUserInput('Search', '')
             if (query):
-                self.saveSearchQuery(query)
+                self.saveSearchQuery(query, query)
                 params["search"] = query
         
         if (query):
@@ -488,19 +490,23 @@ class YouTubeNavigation:
         self.__settings__.setSetting("stored_searches", repr(searches))
         xbmc.executebuiltin( "Container.Refresh" )
         
-    def saveSearchQuery(self, query):
+    def saveSearchQuery(self, old_query, new_query):
+        old_query = urllib.unquote_plus(old_query)
+        new_query = urllib.unquote_plus(new_query)
+        
         try:
             searches = eval(self.__settings__.getSetting("stored_searches"))
         except:
             searches = []
             
         for count, search in enumerate(searches):
-            if (search.lower() == query.lower()):
+            if (search.lower() == old_query.lower()):
                 del(searches[count])
                 break
         
         searchCount = ( 10, 20, 30, 40, )[ int( self.__settings__.getSetting( "saved_searches" ) ) ]
-        searches = [query] + searches[:searchCount]
+        searches = [new_query] + searches[:searchCount]
+        print "oskdfnsldfj " + repr(searches)
         self.__settings__.setSetting("stored_searches", repr(searches))
     
     def addContact(self, params = {}):
@@ -867,7 +873,9 @@ class YouTubeNavigation:
                             
             if ( item("feed") == "favorites"  or get("feed") == "playlists" or item("feed") == "uploads" ):
                 cm.append( ( self.__language__( 30507 ), "XBMC.Action(Queue)" ) )
-        print self.__plugin__ + " added context menu item: " + repr(cm)
+        
+        if (self.__dbg__):
+            print self.__plugin__ + " added context menu item: " + repr(cm)
         return cm
 
 
