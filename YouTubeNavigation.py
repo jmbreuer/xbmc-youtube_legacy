@@ -138,7 +138,9 @@ class YouTubeNavigation:
         if (get("action") == "settings"):
             self.login(params)
         if (get("action") == "delete"):
-            self.deleteSearchQuery(params)
+            self.deleteSearch(params)
+        if (get("action") == "edit_search"):
+            self.editSearch(params)
         if (get("action") == "remove_favorite"):
             self.removeFromFavorites(params)
         if (get("action") == "add_favorite"):
@@ -365,71 +367,6 @@ class YouTubeNavigation:
         xbmcplugin.setResolvedUrl(handle=int(sys.argv[1]), succeeded=True, listitem=listitem)
         
         self.__settings__.setSetting( "vidstatus-" + video['videoid'], "7" )
-
-    def refineSearch(self, params = {}):
-        get = params.get
-        query = get("search")
-        query = urllib.unquote_plus(query)
-        
-        try:
-            searches = eval(self.__settings__.getSetting("stored_searches_author"))
-        except :
-            searches = {}
-            
-        if query in searches:
-            author = self.getUserInput('Search on author', searches[query])
-        else:
-            author = self.getUserInput('Search on author', '')
-
-        if author == "":
-            if author in searches:
-                del searches[query]
-                xbmc.executebuiltin( "Container.Refresh" )
-        elif author:
-            searches[query] = author
-            
-            self.__settings__.setSetting("stored_searches_author", repr(searches))
-            self.showMessage(self.__language__(30006), self.__language__(30616))
-            xbmc.executebuiltin( "Container.Refresh" )
-                        
-
-    def deleteRefinements(self, params = {}):
-        get = params.get
-        query = get("search")
-        query = urllib.unquote_plus(query)
-        try:
-            searches = eval(self.__settings__.getSetting("stored_searches_author"))
-        except :
-            searches = {}
-            
-        if query in searches:
-            del searches[query]
-            self.__settings__.setSetting("stored_searches_author", repr(searches))
-            self.showMessage(self.__language__(30006), self.__language__(30610))
-            xbmc.executebuiltin( "Container.Refresh" )
-                                                                                            
-    def search(self, params = {}):
-        get = params.get
-        if (get("search")):
-            query = get("search")
-            query = urllib.unquote_plus(query)
-            self.saveSearchQuery(query, query)
-        else :
-            query = self.getUserInput('Search', '')
-            if (query):
-                self.saveSearchQuery(query, query)
-                params["search"] = query
-        
-        if (query):
-            ( result, status ) = core.search(query, get("page", "0"));
-            if status != 200:
-                self.errorHandling(self.__language__(30006), result, status)
-                return False
-
-            thumbnail = result[0].get("thumbnail")
-            if (thumbnail and query):
-                self.__settings__.setSetting("search_" + query + "_thumb", thumbnail)
-            self.parseVideoList(get("path"), params, result)
                         
     def downloadVideo(self, params = {}):
         get = params.get
@@ -470,44 +407,6 @@ class YouTubeNavigation:
                 return False
 
             xbmc.executebuiltin( "Container.Refresh" )
-
-    def deleteSearchQuery(self, params = {}):
-        get = params.get
-        query = get("delete")
-        query = urllib.unquote_plus(query)
-        
-        try:
-            searches = eval(self.__settings__.getSetting("stored_searches"))
-        except:
-            searches = []
-            
-        for count, search in enumerate(searches):
-            if (search.lower() == query.lower()):
-                del(searches[count])
-                self.deleteRefinements({'search': query})
-                break
-            
-        self.__settings__.setSetting("stored_searches", repr(searches))
-        xbmc.executebuiltin( "Container.Refresh" )
-        
-    def saveSearchQuery(self, old_query, new_query):
-        old_query = urllib.unquote_plus(old_query)
-        new_query = urllib.unquote_plus(new_query)
-        
-        try:
-            searches = eval(self.__settings__.getSetting("stored_searches"))
-        except:
-            searches = []
-            
-        for count, search in enumerate(searches):
-            if (search.lower() == old_query.lower()):
-                del(searches[count])
-                break
-        
-        searchCount = ( 10, 20, 30, 40, )[ int( self.__settings__.getSetting( "saved_searches" ) ) ]
-        searches = [new_query] + searches[:searchCount]
-        print "oskdfnsldfj " + repr(searches)
-        self.__settings__.setSetting("stored_searches", repr(searches))
     
     def addContact(self, params = {}):
         get = params.get
@@ -573,7 +472,117 @@ class YouTubeNavigation:
                                                 
             xbmc.executebuiltin( "Container.Refresh" )
         return True
+    
+    #================================== Searching =========================================
+    def search(self, params = {}):
+        get = params.get
+        if (get("search")):
+            query = get("search")
+            query = urllib.unquote_plus(query)
+            self.saveSearch(query, query)
+        else :
+            query = self.getUserInput('Search', '')
+            if (query):
+                self.saveSearch(query,query)
+                params["search"] = query
         
+        if (query):
+            ( result, status ) = core.search(query, get("page", "0"));
+            if status != 200:
+                self.errorHandling(self.__language__(30006), result, status)
+                return False
+            
+            thumbnail = result[0].get('thumbnail')
+            
+            if (thumbnail and query):
+                self.__settings__.setSetting("search_" + query + "_thumb", thumbnail)
+                
+            self.parseVideoList(get("path"), params, result)
+            
+    def deleteSearch(self, params = {}):
+        get = params.get
+        query = get("delete")
+        query = urllib.unquote_plus(query)
+        try:
+            searches = eval(self.__settings__.getSetting("stored_searches"))
+        except:
+            searches = []
+            
+        for count, search in enumerate(searches):
+            if (search.lower() == query.lower()):
+                del(searches[count])
+                break
+        
+        self.__settings__.setSetting("stored_searches", repr(searches))
+        xbmc.executebuiltin( "Container.Refresh" )
+        
+    def saveSearch(self, old_query, new_query):
+        old_query = urllib.unquote_plus(old_query)
+        new_query = urllib.unquote_plus(new_query)
+        try:
+            searches = eval(self.__settings__.getSetting("stored_searches"))
+        except:
+            searches = []
+        
+        for count, search in enumerate(searches):
+            if (search.lower() == old_query.lower()):
+                del(searches[count])
+                break
+
+        searchCount = ( 10, 20, 30, 40, )[ int( self.__settings__.getSetting( "saved_searches" ) ) ]
+        searches = [new_query] + searches[:searchCount]
+        self.__settings__.setSetting("stored_searches", repr(searches))
+    
+    def editSearch(self, params = {}):
+        get = params.get
+        if (get("search")):
+            old_query = urllib.unquote_plus(get("search"))
+            new_query = self.getUserInput('Search', old_query)
+            self.saveSearch(old_query, new_query)
+            params["search"] = new_query
+            self.search(params)
+
+    def refineSearch(self, params = {}):
+        get = params.get
+        query = get("search")
+        query = urllib.unquote_plus(query)
+        
+        try:
+            searches = eval(self.__settings__.getSetting("stored_searches_author"))
+        except :
+            searches = {}
+            
+        if query in searches:
+            author = self.getUserInput('Search on author', searches[query])
+        else:
+            author = self.getUserInput('Search on author', '')
+
+        if author == "":
+            if author in searches:
+                del searches[query]
+                xbmc.executebuiltin( "Container.Refresh" )
+        elif author:
+            searches[query] = author
+            
+            self.__settings__.setSetting("stored_searches_author", repr(searches))
+            self.showMessage(self.__language__(30006), self.__language__(30616))
+            xbmc.executebuiltin( "Container.Refresh" )
+        
+    def deleteRefinements(self, params = {}):
+        get = params.get
+        query = get("search")
+        query = urllib.unquote_plus(query)
+        try:
+            searches = eval(self.__settings__.getSetting("stored_searches_author"))
+        except :
+            searches = {}
+            
+        if query in searches:
+            del searches[query]
+            self.__settings__.setSetting("stored_searches_author", repr(searches))
+            self.showMessage(self.__language__(30006), self.__language__(30610))
+            xbmc.executebuiltin( "Container.Refresh" )
+
     #================================== List Item manipulation =========================================    
     # is only used by List Menu
     def addListItem(self, params = {}, item_params = {}):
@@ -840,8 +849,9 @@ class YouTubeNavigation:
                 except :
                     searches = {}
                 
-                if item("search") in searches:                            
+                if item("search") in searches:
                     cm.append( ( self.__language__( 30500 ), 'XBMC.RunPlugin(%s?path=%s&action=delete_refinements&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
+                    cm.append( ( self.__language__( 30515 ), 'XBMC.Container.Update(%s?path=%s&action=edit_search&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
             
             if (item("playlist")):
                 cm.append( ( self.__language__( 30507 ), "XBMC.Action(Queue)" ) )
