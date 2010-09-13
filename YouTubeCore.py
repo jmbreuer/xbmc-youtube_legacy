@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, urllib, urllib2, re, os, cookielib
+import sys, urllib, urllib2, re, os, cookielib, string
 from xml.dom.minidom import parse, parseString
 
 import elementtree
@@ -437,54 +437,37 @@ class YouTubeCore(object):
 			print self.__plugin__ + " playlist done"
 				
 		return ( playobjects, 200 );
-	
-	def downloadVideo(self, path, params):
-		get = params.get
-		if ( not get("videoid") ):
-			return ( "", 200)
+	def downloadVideo(self, video):
 		if self.__dbg__:
-			print self.__plugin__ + " downloadVideo : " + repr(path) + " - videoid : " + repr(get("videoid"))
+			print self.__plugin__ + " downloadVideo : " + video['Title']
 			
-		( video, status )  = self.construct_video_url(params, download = True);
-		
-		if ( status == 200 ):
-			path = self.__settings__.getSetting( "downloadPath" )
-			try:
-				if self.__dbg__:
-					print self.__plugin__ + " downloadVideo stream_map: " + video['stream_map']
-					
-				if video['stream_map'] == "True":
-					print self.__plugin__ + " downloadVideo stream_map not implemented in downloadVideo"
-					return (self.__language__(30620), 303)
-				else:
-					url = urllib2.Request(video['video_url'])
-					url.add_header('User-Agent', self.USERAGENT);
-					filename = "%s/%s.flv" % ( path,video['Title'])
-					file = open(filename, "wb")
-					con = urllib2.urlopen(url);
-					file.write(con.read())
-					con.close()
-					
-					self.__settings__.setSetting( "vidstatus-" + get("videoid"), "1" )
-			except urllib2.HTTPError, e:
-				if self.__dbg__:
-					print self.__plugin__ + " downloadVideo except: " + str(e)
-				return ( str(e), 303 )
-			except:
-				if self.__dbg__:
-					print self.__plugin__ + " downloadVideo uncaught exception"
-					print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
-									   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
-				
-				return (self.__language__(30606), 303)
-		else:
+		path = self.__settings__.getSetting( "downloadPath" )
+		try:
+			url = urllib2.Request(video['video_url'])
+			url.add_header('User-Agent', self.USERAGENT);
+			valid_chars = "-_.() %s%s" % (string.ascii_letters, string.digits)
+			
+			filename = "%s/%s.mp4" % ( path, ''.join(c for c in video['Title'] if c in valid_chars) )
+			file = open(filename, "wb")
+			con = urllib2.urlopen(url);
+			file.write(con.read())
+			con.close()
+			
+			self.__settings__.setSetting( "vidstatus-" + video['videoid'], "1" )
+		except urllib2.HTTPError, e:
 			if self.__dbg__:
-				print self.__plugin__ + " downloadVideo got error from construct_video_url: [%s] %s" % ( status, video)
-			return (video, status)
+				print self.__plugin__ + " downloadVideo except: " + str(e)
+			return ( str(e), 303 )
+		except:
+			if self.__dbg__:
+				print self.__plugin__ + " downloadVideo uncaught exception"
+				print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__, sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
+				
+			return (self.__language__(30606), 303)
 
 		if self.__dbg__:
 			print self.__plugin__ + " downloadVideo done"
-		return ( video, status )
+		return ( video, 200 )
 	
 	def construct_video_url(self, params, encoding = 'utf-8', download = False):
 		get = params.get

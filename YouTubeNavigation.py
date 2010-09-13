@@ -377,14 +377,22 @@ class YouTubeNavigation:
                 self.__settings__.openSettings()
                 path = self.__settings__.getSetting( "downloadPath" )
 
-            self.showMessage(self.__language__(30612), urllib.unquote_plus(get("title", "Unknown Title")))
-
-            ( video, status ) = core.downloadVideo(path, params);
-            if status != 200 :
-                self.errorHandling(self.__language__( 30501 ), video, status)
+            ( video, status )  = core.construct_video_url(params)
+                
+            if status != 200:
+                if self.__dbg__:
+                    print self.__plugin__ + " downloadVideo got error from construct_video_url: [%s] %s" % ( status, video)
+                    self.errorHandling(self.__language__( 30501 ), video, status)
                 return False
-
-            self.showMessage(self.__language__( 30604 ), urllib.unquote_plus(video['Title']) )
+                
+            item = video.get
+                    
+            self.showMessage(self.__language__(30612), item("Title", "Unknown Title"))
+            
+            ( video, status ) = core.downloadVideo(video)
+                    
+            if status == 200:
+                self.showMessage(self.__language__( 30604 ), video['Title'])
 
     def addToFavorites(self, params = {}):
         get = params.get
@@ -837,7 +845,7 @@ class YouTubeNavigation:
                     cm.append( ( self.__language__( 30503 ), 'XBMC.RunPlugin(%s?path=%s&action=add_favorite&videoid=%s&)' % ( sys.argv[0],  item("path"), item("videoid") ) ) )
                 cm.append( ( self.__language__( 30512 ) % item("Studio"), 'XBMC.RunPlugin(%s?path=%s&channel=%s&action=add_subscription)' % ( sys.argv[0], item("path"), item("Studio") ) ) )
                 
-            cm.append( ( self.__language__(30501), "XBMC.RunPlugin(%s?path=%s&action=download&videoid=%s&title=%s)" % ( sys.argv[0],  item("path"), item("videoid"), urllib.quote_plus(item("label").decode("ascii", "ignore") ) ) ) )
+            cm.append( ( self.__language__(30501), "XBMC.RunPlugin(%s?path=%s&action=download&videoid=%s)" % ( sys.argv[0],  item("path"), item("videoid") ) ) )
             cm.append( ( self.__language__( 30504 ), "XBMC.Action(Queue)", ) )
             cm.append( ( self.__language__( 30502 ), "XBMC.Action(Info)", ) )
         else:
@@ -888,7 +896,22 @@ class YouTubeNavigation:
             print self.__plugin__ + " added context menu item: " + repr(cm)
         return cm
 
-
+    def makeAscii(self, str):
+        try:
+            return str.encode('ascii')
+        except:
+            if self.__dbg__:
+                print self.__plugin__ + " makeAscii hit except on : " + repr(str)
+            s = ""
+            for i in str:
+                try:
+                    i.encode("ascii")
+                except:
+                    continue
+                else:
+                    s += i
+            return s
+                                                                                                                                        
     def errorHandling(self, title = "", result = "", status = 500):
         if title == "":
             title = self.__language__(30600)
