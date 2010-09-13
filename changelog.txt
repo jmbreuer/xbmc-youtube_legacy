@@ -9,6 +9,8 @@
 - add edit search feature, pops up with search in question and allows you to change it.. 
 - Refactor YouTube core to use elementree instead of xml mini dom?
 - Private videos requires genneralised login function with shorter timeout (3-6 second) on requests
+- All functions should be able to loop on internal youtube errors
+- Procratinator
 
 [B]Errata[/B]
 - [XBMC] Can't replay a video that has already been played, unless the folder is refreshed.
@@ -16,13 +18,6 @@
 - Download of rtmpe streams not supported.
 - playback of rtmpe streams not supported in release (Request by Team XBMC due to DMCA restrictions imposed by US Law).
 - XBMC has Excessive Memory use after running the plugin for prolonged periods of time
- 
-[B]TODO[/B]
-- XML cleanup in core.
-- Procrastinator.
-- Loop on all http requests. Generic.
-- Timeout, 3 seconds.
-- Scraper for youtube categories
 
 [B]Youtube 1.8.1[/B]
 - Refactor navigation
