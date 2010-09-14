@@ -15,3 +15,12 @@ class YouTubeScraperCore:
     __dbg__ = sys.modules[ "__main__" ].__dbg__
 
     core = YouTubeCore.YouTubeCore()
+    
+    def placeHolder (self, params = {}):
+        get = params.get
+        if (get("something")):
+            print "do something"
+        else:
+            print "something else"
+        
+        return True
