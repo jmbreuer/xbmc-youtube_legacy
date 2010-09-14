@@ -1,4 +1,6 @@
 [B]TODO:[/B]
+- Add sort options (upload date, rating, etc)
+- Set content to movies
 - Scraper for exploring youtube categories 
 - Scraper for YouTube Trailers
 - Add select video quality pr video item as requested by nektarinos 
