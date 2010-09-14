@@ -68,6 +68,11 @@ class YouTubeNavigation:
     #               label                         , path                            , thumbnail                      ,  login          ,  feed / action
     categories = (
                   {'Title':__language__( 30001 )  ,'path':"/root/feeds"             , 'thumbnail':"feeds"            , 'login':"false" },
+                  {'Title':__language__( 30032 )  ,'path':"/root/trailers"          , 'thumbnail':"trailers"         , 'login':"false" },
+                  {'Title':__language__( 30035 )  ,'path':"/root/trailers/latest"   , 'thumbnail':"trailers"         , 'login':"false" , 'scraper':"latest_trailers" },
+                  {'Title':__language__( 30034 )  ,'path':"/root/trailers/current"  , 'thumbnail':"trailers"         , 'login':"false" , 'scraper':"current_trailers" },
+                  {'Title':__language__( 30036 )  ,'path':"/root/trailers/upcoming" , 'thumbnail':"trailers"         , 'login':"false" , 'scraper':"upcoming_trailers" },
+                  {'Title':__language__( 30033 )  ,'path':"/root/trailers/popular"  , 'thumbnail':"trailers"         , 'login':"false" , 'scraper':"popular_trailers" },
                   {'Title':__language__( 30019 )  ,'path':"/root/recommended"       , 'thumbnail':"recommended"      , 'login':"true"  , 'scraper':"recommended" },
                   {'Title':__language__( 30018 )  ,'path':"/root/contacts"          , 'thumbnail':"contacts"         , 'login':"true"  , 'feed':"contacts" },
                   {'Title':__language__( 30002 )  ,'path':"/root/favorites"         , 'thumbnail':"favorites"        , 'login':"true"  , 'feed':"favorites" },
@@ -212,12 +217,13 @@ class YouTubeNavigation:
                 if (cat_get("feed") == get("feed")):
                     feed_label = cat_get("Title")
                     break
+            
+            if (feed_label != ""):
+                self.errorHandling(feed_label, result, status)
+            else:
+                self.errorHandling(get("feed"), result, status)
                 
-                if (feed_label != ""):
-                    self.errorHandling(feed_label, result, status)
-                else:
-                    self.errorHandling(get("feed"), result, status)
-                return False
+            return False
             
         if ( get("feed") == "contacts"):
             item_add_user = {'Title':self.__language__( 30024 ), 'path':get("path"), 'login':"true", 'thumbnail':"add_user", 'action':"add_contact"}
@@ -691,7 +697,6 @@ class YouTubeNavigation:
             next = result("next") == "true"
             
             result_params["path"] = path
-            result_params["Title"] = result("Title")
             result_params["login"] = "true"
             
             if (get("feed") == "subscriptions"):
@@ -923,3 +928,4 @@ class YouTubeNavigation:
             self.showMessage(title, self.__language__(30606))
         else:
             self.showMessage(title, self.__language__(30617))
+        
