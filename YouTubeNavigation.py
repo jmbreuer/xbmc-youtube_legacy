@@ -67,27 +67,27 @@ class YouTubeNavigation:
     # we fill the list with category definitions, with labels from the appropriate language file
     #               label                         , path                            , thumbnail                      ,  login          ,  feed / action
     categories = (
-                  {'label':__language__( 30001 )  ,'path':"/root/feeds"             , 'thumbnail':"feeds"            , 'login':"false" },
-                  {'label':__language__( 30019 )  ,'path':"/root/recommended"       , 'thumbnail':"recommended"      , 'login':"true"  , 'scraper':"recommended" },
-                  {'label':__language__( 30018 )  ,'path':"/root/contacts"          , 'thumbnail':"contacts"         , 'login':"true"  , 'feed':"contacts" },
-                  {'label':__language__( 30002 )  ,'path':"/root/favorites"         , 'thumbnail':"favorites"        , 'login':"true"  , 'feed':"favorites" },
-                  {'label':__language__( 30017 )  ,'path':"/root/playlists"         , 'thumbnail':"playlists"        , 'login':"true"  , 'feed':"playlists" },
-                  {'label':__language__( 30003 )  ,'path':"/root/subscriptions"     , 'thumbnail':"subscriptions"    , 'login':"true"  , 'feed':"subscriptions" },
-                  {'label':__language__( 30004 )  ,'path':"/root/subscriptions/new" , 'thumbnail':"newsubscriptions" , 'login':"true"  , 'feed':"newsubscriptions" },
-                  {'label':__language__( 30005 )  ,'path':"/root/uploads"           , 'thumbnail':"uploads"          , 'login':"true"  , 'feed':"uploads" },
-                  {'label':__language__( 30006 )  ,'path':"/root/search"            , 'thumbnail':"search"           , 'login':"false" , 'feed':"searches" },
-                  {'label':__language__( 30007 )  ,'path':"/root/search/new"        , 'thumbnail':"search"           , 'login':"false" , 'action':"search" },
-                  {'label':__language__( 30008 )  ,'path':"/root/playbyid"          , 'thumbnail':"playbyid"         , 'login':"false" , 'action':"playbyid" },
-                  {'label':__language__( 30009 )  ,'path':"/root/feeds/discussed"   , 'thumbnail':"most"             , 'login':"false" , 'feed':"feed_discussed" },
-                  {'label':__language__( 30010 )  ,'path':"/root/feeds/linked"      , 'thumbnail':"most"             , 'login':"false" , 'feed':"feed_linked" },
-                  {'label':__language__( 30011 )  ,'path':"/root/feeds/viewed"      , 'thumbnail':"most"             , 'login':"false" , 'feed':"feed_viewed" },
-                  {'label':__language__( 30012 )  ,'path':"/root/feeds/recent"      , 'thumbnail':"most"             , 'login':"false" , 'feed':"feed_recent" },
-                  {'label':__language__( 30013 )  ,'path':"/root/feeds/responded"   , 'thumbnail':"most"             , 'login':"false" , 'feed':"feed_responded" },
-                  {'label':__language__( 30014 )  ,'path':"/root/feeds/featured"    , 'thumbnail':"featured"         , 'login':"false" , 'feed':"feed_featured" },
-                  {'label':__language__( 30015 )  ,'path':"/root/feeds/favorites"   , 'thumbnail':"top"              , 'login':"false" , 'feed':"feed_favorites" },
-                  {'label':__language__( 30016 )  ,'path':"/root/feeds/rated"       , 'thumbnail':"top"              , 'login':"false" , 'feed':"feed_rated" },
-                  {'label':__language__( 30027 )  ,'path':"/root/login"             , 'thumbnail':"login"            , 'login':"false" , 'action':"settings" },
-                  {'label':__language__( 30028 )  ,'path':"/root/settings"          , 'thumbnail':"settings"         , 'login':"true"  , 'action':"settings" }
+                  {'Title':__language__( 30001 )  ,'path':"/root/feeds"             , 'thumbnail':"feeds"            , 'login':"false" },
+                  {'Title':__language__( 30019 )  ,'path':"/root/recommended"       , 'thumbnail':"recommended"      , 'login':"true"  , 'scraper':"recommended" },
+                  {'Title':__language__( 30018 )  ,'path':"/root/contacts"          , 'thumbnail':"contacts"         , 'login':"true"  , 'feed':"contacts" },
+                  {'Title':__language__( 30002 )  ,'path':"/root/favorites"         , 'thumbnail':"favorites"        , 'login':"true"  , 'feed':"favorites" },
+                  {'Title':__language__( 30017 )  ,'path':"/root/playlists"         , 'thumbnail':"playlists"        , 'login':"true"  , 'feed':"playlists" },
+                  {'Title':__language__( 30003 )  ,'path':"/root/subscriptions"     , 'thumbnail':"subscriptions"    , 'login':"true"  , 'feed':"subscriptions" },
+                  {'Title':__language__( 30004 )  ,'path':"/root/subscriptions/new" , 'thumbnail':"newsubscriptions" , 'login':"true"  , 'feed':"newsubscriptions" },
+                  {'Title':__language__( 30005 )  ,'path':"/root/uploads"           , 'thumbnail':"uploads"          , 'login':"true"  , 'feed':"uploads" },
+                  {'Title':__language__( 30006 )  ,'path':"/root/search"            , 'thumbnail':"search"           , 'login':"false" , 'feed':"searches" },
+                  {'Title':__language__( 30007 )  ,'path':"/root/search/new"        , 'thumbnail':"search"           , 'login':"false" , 'action':"search" },
+                  {'Title':__language__( 30008 )  ,'path':"/root/playbyid"          , 'thumbnail':"playbyid"         , 'login':"false" , 'action':"playbyid" },
+                  {'Title':__language__( 30009 )  ,'path':"/root/feeds/discussed"   , 'thumbnail':"most"             , 'login':"false" , 'feed':"feed_discussed" },
+                  {'Title':__language__( 30010 )  ,'path':"/root/feeds/linked"      , 'thumbnail':"most"             , 'login':"false" , 'feed':"feed_linked" },
+                  {'Title':__language__( 30011 )  ,'path':"/root/feeds/viewed"      , 'thumbnail':"most"             , 'login':"false" , 'feed':"feed_viewed" },
+                  {'Title':__language__( 30012 )  ,'path':"/root/feeds/recent"      , 'thumbnail':"most"             , 'login':"false" , 'feed':"feed_recent" },
+                  {'Title':__language__( 30013 )  ,'path':"/root/feeds/responded"   , 'thumbnail':"most"             , 'login':"false" , 'feed':"feed_responded" },
+                  {'Title':__language__( 30014 )  ,'path':"/root/feeds/featured"    , 'thumbnail':"featured"         , 'login':"false" , 'feed':"feed_featured" },
+                  {'Title':__language__( 30015 )  ,'path':"/root/feeds/favorites"   , 'thumbnail':"top"              , 'login':"false" , 'feed':"feed_favorites" },
+                  {'Title':__language__( 30016 )  ,'path':"/root/feeds/rated"       , 'thumbnail':"top"              , 'login':"false" , 'feed':"feed_rated" },
+                  {'Title':__language__( 30027 )  ,'path':"/root/login"             , 'thumbnail':"login"            , 'login':"false" , 'action':"settings" },
+                  {'Title':__language__( 30028 )  ,'path':"/root/settings"          , 'thumbnail':"settings"         , 'login':"true"  , 'action':"settings" }
                   )
 
     #==================================== Main Entry Points===========================================
@@ -168,13 +168,13 @@ class YouTubeNavigation:
                 self.login()
                 auth = self.__settings__.getSetting( "auth" )
 
-        item_favorites = {'label':self.__language__( 30020 ), 'path':get("path"), 'external':"true", 'login':"true", 'thumbnail':"favorites", 'feed':"favorites", "contact":get("contact")}
+        item_favorites = {'Title':self.__language__( 30020 ), 'path':get("path"), 'external':"true", 'login':"true", 'thumbnail':"favorites", 'feed':"favorites", "contact":get("contact")}
         self.addFolderListItem(params, item_favorites, 1)
-        item_playlists = {'label':self.__language__( 30023 ), 'path':get("path"), 'external':"true", 'login':"true", 'thumbnail':"playlists", 'feed':"playlists", "contact":get("contact")}
+        item_playlists = {'Title':self.__language__( 30023 ), 'path':get("path"), 'external':"true", 'login':"true", 'thumbnail':"playlists", 'feed':"playlists", "contact":get("contact")}
         self.addFolderListItem(params, item_playlists, 2)
-        item_subscriptions = {'label':self.__language__( 30021 ), 'path':get("path"), 'external':"true", 'login':"true", 'thumbnail':"subscriptions", 'feed':"subscriptions", "contact":get("contact")}
+        item_subscriptions = {'Title':self.__language__( 30021 ), 'path':get("path"), 'external':"true", 'login':"true", 'thumbnail':"subscriptions", 'feed':"subscriptions", "contact":get("contact")}
         self.addFolderListItem(params, item_subscriptions, 3)
-        item_uploads = {'label':self.__language__( 30022 ), 'path':get("path"), 'external':"true", 'login':"true", 'thumbnail':"uploads", 'feed':"uploads", "contact":get("contact") }
+        item_uploads = {'Title':self.__language__( 30022 ), 'path':get("path"), 'external':"true", 'login':"true", 'thumbnail':"uploads", 'feed':"uploads", "contact":get("contact") }
         self.addFolderListItem(params, item_uploads, 4)
         
         xbmcplugin.endOfDirectory( handle=int( sys.argv[ 1 ] ), succeeded=True, cacheToDisc=False)
@@ -210,7 +210,7 @@ class YouTubeNavigation:
             for category in self.categories:
                 cat_get = category.get
                 if (cat_get("feed") == get("feed")):
-                    feed_label = cat_get("label")
+                    feed_label = cat_get("Title")
                     break
                 
                 if (feed_label != ""):
@@ -220,11 +220,11 @@ class YouTubeNavigation:
                 return False
             
         if ( get("feed") == "contacts"):
-            item_add_user = {'label':self.__language__( 30024 ), 'path':get("path"), 'login':"true", 'thumbnail':"add_user", 'action':"add_contact"}
+            item_add_user = {'Title':self.__language__( 30024 ), 'path':get("path"), 'login':"true", 'thumbnail':"add_user", 'action':"add_contact"}
             self.addFolderListItem(params, item_add_user,  1)
                         
         if ( get('feed') == 'subscriptions' ) :
-            item = {"label":self.__language__( 30004 ), "path":"/root/subscriptions/new", "thumbnail":"newsubscriptions", "login":"true", "feed":"newsubscriptions"}
+            item = {"Title":self.__language__( 30004 ), "path":"/root/subscriptions/new", "thumbnail":"newsubscriptions", "login":"true", "feed":"newsubscriptions"}
             if (get("contact")):
                 item["contact"] = get("contact")
                             
@@ -249,7 +249,7 @@ class YouTubeNavigation:
                 for category in self.categories:
                     cat_get = category.get
                     if (cat_get("feed") == get("feed")):
-                        feed_label = cat_get("label")
+                        feed_label = cat_get("Title")
                         break
                     
                 if (feed_label != ""):
@@ -279,7 +279,7 @@ class YouTubeNavigation:
 
     def listStoredSearches(self, params = {}):
         get = params.get
-        search_item = {'label':self.__language__( 30007 ),'path':"/root/search/new", 'thumbnail':"search", 'action':"search" }
+        search_item = {'Title':self.__language__( 30007 ),'path':"/root/search/new", 'thumbnail':"search", 'action':"search" }
         self.addActionListItem(params, search_item)
         try:
             searches = eval(self.__settings__.getSetting("stored_searches"))
@@ -288,7 +288,7 @@ class YouTubeNavigation:
                
         for search in searches:
             item = {}
-            item["label"] = search
+            item["Title"] = search
             item["search"] = urllib.quote_plus(search)
             item["action"] = "search"
             item["path"] = get("path")
@@ -309,7 +309,7 @@ class YouTubeNavigation:
             for category in self.categories:
                 cat_get = category.get
                 if (cat_get("action") == get("feed")):
-                    feed_label = cat_get("label")
+                    feed_label = cat_get("Title")
                     break
                 
             if (feed_label != ""):
@@ -627,7 +627,7 @@ class YouTubeNavigation:
         if (item("thumbnail", "DefaultFolder.png").find("http://") == -1):    
             thumbnail = self.getThumbnail(item("thumbnail"))
             
-        listitem=xbmcgui.ListItem( item("label"), iconImage=icon, thumbnailImage=thumbnail )
+        listitem=xbmcgui.ListItem( item("Title"), iconImage=icon, thumbnailImage=thumbnail )
         url = '%s?path=%s&' % ( sys.argv[0], item("path") )
         
         url = self.buildItemUrl(item_params, url)
@@ -644,7 +644,7 @@ class YouTubeNavigation:
         folder = False
         icon = "DefaultFolder.png"
         thumbnail = self.getThumbnail(item("thumbnail"))
-        listitem=xbmcgui.ListItem( item("label"), iconImage=icon, thumbnailImage=thumbnail )
+        listitem=xbmcgui.ListItem( item("Title"), iconImage=icon, thumbnailImage=thumbnail )
         
         if (item("action") == "search" or item("action") == "settings"):
             folder = True
@@ -664,7 +664,7 @@ class YouTubeNavigation:
         icon = "default"
         icon = self.getThumbnail(icon)
         
-        listitem=xbmcgui.ListItem(item("label"), iconImage=icon, thumbnailImage=item("thumbnail") )
+        listitem=xbmcgui.ListItem(item("Title"), iconImage=icon, thumbnailImage=item("thumbnail") )
 
         url = '%s?path=%s&action=play_video&videoid=%s' % ( sys.argv[0], item("path"), item("videoid"));
             
@@ -691,7 +691,7 @@ class YouTubeNavigation:
             next = result("next") == "true"
             
             result_params["path"] = path
-            result_params["label"] = result("Title")
+            result_params["Title"] = result("Title")
             result_params["login"] = "true"
             
             if (get("feed") == "subscriptions"):
@@ -730,9 +730,9 @@ class YouTubeNavigation:
             self.addFolderListItem( params, result_params, listSize + 1)
             
         if next:
-            item = {"label":self.__language__( 30509 ), "thumbnail":"next", "page":str(int(get("page", "0")) + 1)} 
+            item = {"Title":self.__language__( 30509 ), "thumbnail":"next", "page":str(int(get("page", "0")) + 1)} 
             for k, v in params.items():
-                if (k != "thumbnail" and k != "label" and k != "page"):
+                if (k != "thumbnail" and k != "Title" and k != "page"):
                     item[k] = v
                                  
             self.addFolderListItem(params, item, listSize)
@@ -752,14 +752,13 @@ class YouTubeNavigation:
             if ( result('reasonCode') ):
                 if result('reasonCode') == 'requesterRegion':
                     continue;
-            result_params["label"] = result("Title")
             result_params["path"] = path
             self.addVideoListItem( params, result_params, listSize)
         
         if next:
-            item = {"label":self.__language__( 30509 ), "thumbnail":"next", "page":str(int(get("page", "0")) + 1)} 
+            item = {"Title":self.__language__( 30509 ), "thumbnail":"next", "page":str(int(get("page", "0")) + 1)} 
             for k, v in params.items():
-                if ( k != "thumbnail" and k != "label" and k != "page"):
+                if ( k != "thumbnail" and k != "Title" and k != "page"):
                     item[k] = v
             
             self.addFolderListItem(params, item)
@@ -827,7 +826,7 @@ class YouTubeNavigation:
     def buildItemUrl(self, item_params = {}, url = ""):
         for k, v in item_params.items():
             if (k != "path" and k != "thumbnail" and k!= "playlistId" and k!= "next" and k != "content" and k!= "editurl"
-                and k!= "summary" and k!= "published" and k!="Title" and k!= "label" ):
+                and k!= "summary" and k!= "published" and k!="Title" and k!= "Title" ):
                 url += k + "=" + v + "&"
         return url
 
@@ -837,7 +836,7 @@ class YouTubeNavigation:
         item = item_params.get
                                                 
         if (item("videoid")): 
-            cm.append( ( self.__language__( 30514 ), "XBMC.Container.Update(%s?path=%s&action=search&search=%s)" % ( sys.argv[0],  get("path"), urllib.quote_plus(item("label").decode("ascii", "ignore") ) ) ) )
+            cm.append( ( self.__language__( 30514 ), "XBMC.Container.Update(%s?path=%s&action=search&search=%s)" % ( sys.argv[0],  get("path"), urllib.quote_plus(item("Title").decode("ascii", "ignore") ) ) ) )
             if ( self.__settings__.getSetting( "username" ) != "" and self.__settings__.getSetting( "auth" ) ):
                 if ( get("feed") == "favorites" and not get("contact") ):
                     cm.append( ( self.__language__( 30506 ), 'XBMC.RunPlugin(%s?path=%s&action=remove_favorite&editurl=%s&)' % ( sys.argv[0], item("path"), item("editurl") ) ) )
