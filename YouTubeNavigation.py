@@ -681,7 +681,7 @@ class YouTubeNavigation:
         listitem.setProperty( "Video", "true" )
         listitem.setProperty( "IsPlayable", "true");
         listitem.setInfo(type='Video', infoLabels=item_params)
-        
+        xbmcplugin.setContent( handle=int( sys.argv[ 1 ] ), content="movies" )
         xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url, listitem=listitem, isFolder=False, totalItems=listSize + 1)
                    
     #==================================== Core Output Parsing Functions ===========================================
