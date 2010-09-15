@@ -37,6 +37,7 @@
     <string id="30034">In Theaters</string>
     <string id="30035">Latest</string>
     <string id="30036">Opening Soon</string>
+    <string id="30037">YouTube Disco!</string>
 
      
     <!-- Plugin settings strings -->
@@ -102,6 +103,9 @@
     <string id="30259">Advanced</string>
     <string id="30260">Download quality (if available)</string>
     <string id="30261">Same as playback</string>
+    <string id="30262">Playback quality selection on video items</string> 
+    <string id="30263">Hide Youtube Disco!</string>
+    <string id="30264">Hide Youtube Trailers</string>
 
     <!-- Menu strings -->
     <string id="30500">Clear refinements</string>

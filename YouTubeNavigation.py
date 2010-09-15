@@ -73,6 +73,8 @@ class YouTubeNavigation:
                   {'Title':__language__( 30034 )  ,'path':"/root/trailers/current"  , 'thumbnail':"trailers"         , 'login':"false" , 'scraper':"current_trailers" },
                   {'Title':__language__( 30036 )  ,'path':"/root/trailers/upcoming" , 'thumbnail':"trailers"         , 'login':"false" , 'scraper':"upcoming_trailers" },
                   {'Title':__language__( 30033 )  ,'path':"/root/trailers/popular"  , 'thumbnail':"trailers"         , 'login':"false" , 'scraper':"popular_trailers" },
+                  {'Title':__language__( 30037 )  ,'path':"/root/disco"             , 'thumbnail':"discoball"        , 'login':"false" },
+                  {'Title':__language__( 30007 )  ,'path':"/root/disco/search"      , 'thumbnail':"search"           , 'login':"false" , 'action':"disco_search"},
                   {'Title':__language__( 30019 )  ,'path':"/root/recommended"       , 'thumbnail':"recommended"      , 'login':"true"  , 'scraper':"recommended" },
                   {'Title':__language__( 30018 )  ,'path':"/root/contacts"          , 'thumbnail':"contacts"         , 'login':"true"  , 'feed':"contacts" },
                   {'Title':__language__( 30002 )  ,'path':"/root/favorites"         , 'thumbnail':"favorites"        , 'login':"true"  , 'feed':"favorites" },
