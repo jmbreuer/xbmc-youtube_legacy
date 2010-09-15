@@ -1,15 +1,12 @@
 [B]TODO:[/B]
-- Add sort options (upload date, rating, etc)
-- Add More videos from User option...
+- Sort options stil missing a few (NOTE: tobias does the core provide a view count and video genre? if so enable the two lines in ParseVideoList )
 - Scraper for exploring youtube categories 
 - Scraper for YouTube Trailers
 - Scraper for YouTube Disco
 - Add select video quality pr video item as requested by nektarinos 
 - Test refactor of YouTube Navigation
 - Remove url passing from xbmc - navigation - core layer (specifically editurl)
-- Remove stupid remapping of variable names between core and navigation (go with what, XBMC wants)
 - Change interfaces in core to use params (this would again reduce much of the unnessecary remapping logic in navigation and reduce code duplication in core)?
- 
 - Refactor YouTube core to use elementree instead of xml mini dom?
 - Private videos requires genneralised login function with shorter timeout (3-6 second) on requests
 - All functions should be able to loop on internal youtube errors
@@ -23,9 +20,12 @@
 - XBMC has Excessive Memory use after running the plugin for prolonged periods of time
 
 [B]Youtube 1.8.1[/B]
+- Remove remapping of variable names between core and navigation
+- Added sorting options (title, upload date, rating, runtime)
+- Added "More videos by User" option as requested by spiff
 - Added edit search feature, pops up with search in question and allows you to change it..
 - Added "Set content to movies" for video lists as this will allow the user to use other skin view modes 
-- Refactor navigation
+- Refactor of navigation layer
 
 [B]Version 1.8.0[/B]
 - Solved confusion cause by multiple licens files (removed GPL v2 license and renamed GPL v3 to LICENSE.txt)
