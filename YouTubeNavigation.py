@@ -884,10 +884,7 @@ class YouTubeNavigation:
                     cm.append( ( self.__language__( 30500 ), 'XBMC.RunPlugin(%s?path=%s&action=delete_refinements&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
                 
                 cm.append( ( self.__language__( 30515 ), 'XBMC.Container.Update(%s?path=%s&action=edit_search&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
-            
-            if (item("playlist")):
-                cm.append( ( self.__language__( 30507 ), "XBMC.Action(Queue)" ) )
-                    
+                                
             if (item("view_mode")):
                 cm_url = 'XBMC.RunPlugin(%s?path=%s&channel=%s&action=change_subscription_view&view_mode=%s&' % ( sys.argv[0], item("path"), item("channel"), item("view_mode") )
                 if (item("external")):
