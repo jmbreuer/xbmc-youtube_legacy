@@ -208,7 +208,7 @@ class YouTubeNavigation:
                 auth = self.__settings__.getSetting( "auth" )
                 
         feed = self.parseFeeds(params)
-        print self.__plugin__ + " hit user folder"
+        
         (result, status) = core.playlists(feed, get("page", "0"))
         if status != 200:
             feed_label = ""
@@ -637,7 +637,7 @@ class YouTubeNavigation:
         url = '%s?path=%s&' % ( sys.argv[0], item("path") )
         
         url = self.buildItemUrl(item_params, url)
-        print self.__plugin__ + " folder item url " + url
+        
         if len(cm) > 0:
             listitem.addContextMenuItems( cm, replaceItems=True )
         listitem.setProperty( "Folder", "true" )
@@ -839,9 +839,12 @@ class YouTubeNavigation:
         cm = []
         get = params.get
         item = item_params.get
-                                                
+
+        title = self.makeAscii(item("Title"))
+        url_title = urllib.quote_plus(title)
+                                                                                  
         if (item("videoid")): 
-            cm.append( ( self.__language__( 30514 ), "XBMC.Container.Update(%s?path=%s&action=search&search=%s)" % ( sys.argv[0],  get("path"), urllib.quote_plus(item("Title").decode("ascii", "ignore") ) ) ) )
+            cm.append( ( self.__language__( 30514 ), "XBMC.Container.Update(%s?path=%s&action=search&search=%s)" % ( sys.argv[0],  get("path"), url_title ) ) )
             if ( self.__settings__.getSetting( "username" ) != "" and self.__settings__.getSetting( "auth" ) ):
                 if ( get("feed") == "favorites" and not get("contact") ):
                     cm.append( ( self.__language__( 30506 ), 'XBMC.RunPlugin(%s?path=%s&action=remove_favorite&editurl=%s&)' % ( sys.argv[0], item("path"), item("editurl") ) ) )
@@ -850,6 +853,7 @@ class YouTubeNavigation:
                 cm.append( ( self.__language__( 30512 ) % item("Studio"), 'XBMC.RunPlugin(%s?path=%s&channel=%s&action=add_subscription)' % ( sys.argv[0], item("path"), item("Studio") ) ) )
                 
             cm.append( ( self.__language__(30501), "XBMC.RunPlugin(%s?path=%s&action=download&videoid=%s)" % ( sys.argv[0],  item("path"), item("videoid") ) ) )
+            cm.append( ( self.__language__( 30514 ), "XBMC.Container.Update(%s?path=%s&action=search&search=%s)" % ( sys.argv[0],  get("path"), url_title ) ) )
             cm.append( ( self.__language__( 30504 ), "XBMC.Action(Queue)", ) )
             cm.append( ( self.__language__( 30502 ), "XBMC.Action(Info)", ) )
         else:
@@ -861,9 +865,12 @@ class YouTubeNavigation:
                 except :
                     searches = {}
                 
-                if item("search") in searches:
+                print item("search") + " - " + repr(searches)
+                
+                if item("Title") in searches:
                     cm.append( ( self.__language__( 30500 ), 'XBMC.RunPlugin(%s?path=%s&action=delete_refinements&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
-                    cm.append( ( self.__language__( 30515 ), 'XBMC.Container.Update(%s?path=%s&action=edit_search&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
+                
+                cm.append( ( self.__language__( 30515 ), 'XBMC.Container.Update(%s?path=%s&action=edit_search&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
             
             if (item("playlist")):
                 cm.append( ( self.__language__( 30507 ), "XBMC.Action(Queue)" ) )
@@ -874,10 +881,10 @@ class YouTubeNavigation:
                     cm_url += "external=true&contact=" + get("contact") + "&"
                 cm_url +=")"
             
-            if (item("feed") == "subscriptions_favorites"):
-                cm.append( (self.__language__( 30511 ), cm_url) )
-            elif (item("feed") == "subscriptions_uploads"):
-                cm.append ( (self.__language__( 30510 ), cm_url) )
+                if (item("feed") == "subscriptions_favorites"):
+                    cm.append( (self.__language__( 30511 ), cm_url) )
+                elif (item("feed") == "subscriptions_uploads"):
+                    cm.append ( (self.__language__( 30510 ), cm_url) )
 
             if (item("channel")):
                 if ( self.__settings__.getSetting( "username" ) != "" and self.__settings__.getSetting( "auth" ) ):
