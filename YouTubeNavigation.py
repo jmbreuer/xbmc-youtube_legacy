@@ -857,7 +857,7 @@ class YouTubeNavigation:
             cm.append( ( self.__language__( 30514 ), "XBMC.Container.Update(%s?path=%s&action=search&search=%s)" % ( sys.argv[0],  get("path"), url_title ) ) )
             
             if (get("feed") != "subscriptions_favorites" and get("feed") != "subscriptions_uploads"):
-                cm.append( ( self.__language__( 30516 ) % item("Studio"), "XBMC.Container.Update(%s?path=%s&feed=subscriptions_uploads&view_mode=subscriptions_uploads&channel=%s)" % ( sys.argv[0],  get("path"), item("Studio") ) ) )
+                cm.append( ( self.__language__( 30516 ) % item("Studio"), "XBMC.Container.Update(%s?path=%s&login=true&feed=subscriptions_uploads&view_mode=subscriptions_uploads&channel=%s)" % ( sys.argv[0],  get("path"), item("Studio") ) ) )
             
             cm.append( ( self.__language__( 30504 ), "XBMC.Action(Queue)", ) )
             cm.append( ( self.__language__( 30502 ), "XBMC.Action(Info)", ) )
