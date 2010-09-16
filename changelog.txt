@@ -1,7 +1,6 @@
 [B]TODO:[/B]
 - Add Play all where we currently have queue folder.. (function basically queues alle video items and starts playback of the first) 
 - Fix Sort option so that original sorting can be restored (less annoying, but still..) 
-- Sort options stil missing a few (NOTE: tobias does the core provide a view count and video genre? if so enable the two lines in ParseVideoList )
 - Scraper for exploring youtube categories 
 - Scraper for YouTube Trailers
 - Scraper for YouTube Disco

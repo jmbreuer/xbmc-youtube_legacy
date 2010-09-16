@@ -922,6 +922,7 @@ class YouTubeCore(object):
 
 			#construct list of video objects					
 			ytobjects = [];
+			track = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
 			for node in entries:
 				video = {};
 
@@ -970,6 +971,7 @@ class YouTubeCore(object):
 				duration = int(self._getNodeAttribute(node, "yt:duration", 'seconds', '0'))
 				video['Duration'] = "%02d:%02d" % ( duration / 60, duration % 60 )
 				video['Rating'] = float(self._getNodeAttribute(node,"gd:rating", 'average', "0.0"))
+				video['count'] = int(self._getNodeAttribute(node, "yt:statistics", 'viewCount', "0"))
 				video['Genre'] = self._getNodeAttribute(node, "media:category", "label", "Unknown Genre").encode( "utf-8" )
 
 				if node.getElementsByTagName("link"):
@@ -987,8 +989,10 @@ class YouTubeCore(object):
 					video['Overlay'] = int(overlay)
 				
 				video['next'] = next
-
+				video['year'] = track
 				ytobjects.append(video);
+				
+				track -= 1
 
 				if self.__dbg__:
 					print self.__plugin__ + " _getvideoinfo done"
