@@ -645,9 +645,15 @@ class YouTubeCore(object):
 
 		subitems = videos[(per_page * page):(per_page * (page + 1))]
 		
-		return self._get_batch_details(subitems, next)
+		( ytobjects, status ) = self._get_batch_details(subitems)
 
-	def _get_batch_details(self, items, next):
+		if status == 200:
+			if (len(ytobjects) > 0):
+				ytobjects[len(ytobjects)-1]['next'] = next
+						
+		return (ytobjects, status)
+
+	def _get_batch_details(self, items):
 		if self.__dbg__:
 			print self.__plugin__ + " _get_batch_details"
 			
@@ -698,10 +704,6 @@ class YouTubeCore(object):
 				else:
 					if self.__dbg__:
 						print self.__plugin__ + " scrapeVideos, got apierror: " + videoitem['apierror']
-										
-		
-		if (len(ytobjects) > 0):
-			ytobjects[len(ytobjects)-1]['next'] = next
 
 		if self.__dbg__:
 			print self.__plugin__ + " scrapeVideos done"
