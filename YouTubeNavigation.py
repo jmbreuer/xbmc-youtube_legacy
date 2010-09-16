@@ -108,7 +108,7 @@ class YouTubeNavigation:
             return
         
         if (get("login") == "true"):
-            if ( get('feed') == 'subscriptions' or get('feed') == 'playlists' or get('feed') == 'contacts' ):
+            if (get('feed') == 'subscriptions' or get('feed') == 'playlists' or get('feed') == 'contacts' ):
                 self.listUserFolder(params)                  
             elif ( get("feed") in self.feeds):
                 self.listUserFolderFeeds(params)
@@ -373,7 +373,6 @@ class YouTubeNavigation:
             self.errorHandling(self.__language__(30006), result, status)
         else:
             self.parseVideoList(get("path"), params, result)
-        
         
     def playVideo(self, params = {}):
         get = params.get
@@ -883,7 +882,6 @@ class YouTubeNavigation:
             if ( self.__settings__.getSetting( "username" ) != "" and self.__settings__.getSetting( "auth" ) ):
                 if ( get("feed") == "favorites" and not get("contact") ):
                     cm.append( ( self.__language__( 30506 ), 'XBMC.RunPlugin(%s?path=%s&action=remove_favorite&editid=%s&)' % ( sys.argv[0], item("path"), item("editid") ) ) )
-                    #print self.__plugin__ + " addContextMenuItem - editid: " + item("editid")
                 else:
                     cm.append( ( self.__language__( 30503 ), 'XBMC.RunPlugin(%s?path=%s&action=add_favorite&videoid=%s&)' % ( sys.argv[0],  item("path"), item("videoid") ) ) )
                 if (get("external") == "true" or (get("feed") != "subscriptions_favorites" and get("feed") != "subscriptions_uploads")):
@@ -928,7 +926,7 @@ class YouTubeNavigation:
                         cm.append( ( self.__language__( 30512 ) % item("channel"), 'XBMC.RunPlugin(%s?path=%s&channel=%s&action=add_subscription)' % ( sys.argv[0], item("path"), item("channel") ) ) )
                     else:
                         cm.append( ( self.__language__( 30513 ) % item("channel"), 'XBMC.RunPlugin(%s?path=%s&editid=%s&action=remove_subscription)' % ( sys.argv[0], item("path"), item("editid") ) ) )
-                    print self.__plugin__ + " addContextMenuItem - editid: " + item("editid")
+                        print self.__plugin__ + " addContextMenuItem - editid: " + item("editid")
                     
             if (item("contact")):
                 if ( self.__settings__.getSetting( "username" ) != "" and self.__settings__.getSetting( "auth" ) ):
