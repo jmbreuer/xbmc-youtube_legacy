@@ -1,6 +1,6 @@
 import sys, urllib, urllib2, re, string, cookielib
 from BeautifulSoup import BeautifulSoup, SoupStrainer
-#import YouTubeCore
+import YouTubeCore
 
 class YouTubeScraperCore:     
     #===========================================================================
@@ -10,7 +10,7 @@ class YouTubeScraperCore:
     # __dbg__ = sys.modules[ "__main__" ].__dbg__
     #===========================================================================
 
-    #core = YouTubeCore.YouTubeCore()
+    core = YouTubeCore.YouTubeCore()
     USERAGENT = "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-GB; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8"
         
     def scrapeTrailersGridFormat (self, page, params = {}):
@@ -31,6 +31,7 @@ class YouTubeScraperCore:
                 if (videoid):
                     if (videoid.find("=") > -1):
                         videoid = videoid[videoid.find("=")+1:]
+                    
                     item["videoid"] = videoid
                     item["thumbnail"] = trailer.div.a.span.img['src'] 
                     item["Title"] = trailer.div.a.span.img['title']
@@ -42,22 +43,22 @@ class YouTubeScraperCore:
                 
         return vobjects
     
-    def _searchDisco(self, query, params = {}):
+    def searchDisco(self, query, params = {}):
         get = params.get
         vobjects = []
         main_url = "http://www.youtube.com"
         url = main_url + "/disco?action_search=1&query=" + query
-        page = scraper._fetchPage(url)
+        page = self._fetchPage(url)
         if (page.find("watch?") != -1):
             page = page[page.find("/watch?"):page.rfind('"')]
             url = "http://www.youtube.com" + page
-            page = scraper._fetchPage(url)
+            page = self._fetchPage(url)
             
             list = SoupStrainer(id="quicklist", name="div")
             ajax = BeautifulSoup(page, parseOnlyThese=list)
             if (len(ajax) > 0):
                 url = main_url + ajax.div["data-active-ajax-url"]
-                page = scraper._fetchPage(url)
+                page = self._fetchPage(url)
     
                 video_list = SoupStrainer(name="ol")
                 videos = BeautifulSoup(page, parseOnlyThese=video_list)
@@ -68,12 +69,13 @@ class YouTubeScraperCore:
                         videoid = video.a["href"]
                         if (videoid.find("=") > 0):
                             videoid = videoid[videoid.find("=") +1:videoid.find("&")]
-                        item["videoid"] = videoid
-                        vobjects.append(item)
+                        item = self.core._get_details(videoid)
+                        if (item):
+                            vobjects.append(item)
+                        
                         video = video.findNextSibling(name="li", attrs = { 'class':re.compile("^quicklist-item")})
         
-        print repr(vobjects)
-        return vobjects
+        return (vobjects, 200)
         
     def scrapeTrailersListFormat (self, page, params = {}):
         get = params.get
@@ -93,11 +95,12 @@ class YouTubeScraperCore:
                 if (videoid):
                     if (videoid.find("=") > -1):
                         videoid = videoid[videoid.find("=")+1:]
-                    item["videoid"] = videoid
-                    item["thumbnail"] = trailer.div.div.a.span.img['src'] 
-                    item["Title"] = trailer.div.div.a.span.img['title']
-
-                    vobjects.append(item)
+                    item = self.core._get_details(videoid)
+                    
+                    if (item):
+                        item["thumbnail"] = trailer.div.div.a.span.img['src'] 
+                        vobjects.append(item)
+                        
                 trailer = trailer.findNextSibling(name="div")
         
         print repr(vobjects)
@@ -143,6 +146,6 @@ if __name__ == '__main__':
     print " " 
     search_query = "Rihanna"
     print "Disco Search for " + search_query 
-    scraper._searchDisco(search_query)
+    scraper.searchDisco(search_query)
 
     sys.exit(0);

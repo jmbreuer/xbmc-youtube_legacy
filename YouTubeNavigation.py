@@ -24,8 +24,10 @@ import xbmcgui
 import xbmcplugin
 import urllib
 import YouTubeCore
+import YouTubeScraperCore
 
 core = YouTubeCore.YouTubeCore();
+scraper = YouTubeScraperCore.YouTubeScraperCore();
     
 class YouTubeNavigation:     
     __settings__ = sys.modules[ "__main__" ].__settings__
@@ -166,6 +168,8 @@ class YouTubeNavigation:
             self.playVideo(params)
         if (get("action") == "change_subscription_view"):
             self.changeSubscriptionView(params)
+        if (get("action") == "disco_search"):
+            self.searchDisco(params)
 
     def listOptionFolder(self, params = {}):
         get = params.get
@@ -354,6 +358,22 @@ class YouTubeNavigation:
         params["videoid"] = result 
         if (result):
             self.playVideo(params);
+
+    def searchDisco(self, params = {}):
+        get = params.get
+        
+        if (get("search")):
+            query = urllib.unquote_plus(get("search"))
+        else:
+            query = self.getUserInput('Search', '')
+            
+        (result, status) = scraper.searchDisco(query, params)
+            
+        if (status != 200):
+            self.errorHandling(self.__language__(30006), result, status)
+        else:
+            self.parseVideoList(get("path"), params, result)
+        
         
     def playVideo(self, params = {}):
         get = params.get
