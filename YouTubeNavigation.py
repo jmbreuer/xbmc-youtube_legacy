@@ -893,7 +893,7 @@ class YouTubeNavigation:
             cm.append( ( self.__language__( 30514 ), "XBMC.Container.Update(%s?path=%s&action=search&search=%s)" % ( sys.argv[0],  get("path"), url_title ) ) )
             cm.append( ( self.__language__( 30504 ), "XBMC.Action(Queue)", ) )
             cm.append( ( self.__language__( 30502 ), "XBMC.Action(Info)", ) )
-        else:
+        elif (item("next")):
             if (item("search")):
                 cm.append( ( self.__language__( 30508 ), 'XBMC.RunPlugin(%s?path=%s&action=delete&delete=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
                 cm.append( ( self.__language__( 30505 ), 'XBMC.RunPlugin(%s?path=%s&action=refine_user&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
@@ -926,7 +926,7 @@ class YouTubeNavigation:
                         cm.append( ( self.__language__( 30512 ) % item("channel"), 'XBMC.RunPlugin(%s?path=%s&channel=%s&action=add_subscription)' % ( sys.argv[0], item("path"), item("channel") ) ) )
                     else:
                         cm.append( ( self.__language__( 30513 ) % item("channel"), 'XBMC.RunPlugin(%s?path=%s&editid=%s&action=remove_subscription)' % ( sys.argv[0], item("path"), item("editid") ) ) )
-#                        print self.__plugin__ + " addContextMenuItem - editid: " + item("editid")
+                        print self.__plugin__ + " addContextMenuItem - editid: " + item("editid")
                     
             if (item("contact")):
                 if ( self.__settings__.getSetting( "username" ) != "" and self.__settings__.getSetting( "auth" ) ):
