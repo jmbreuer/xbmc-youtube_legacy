@@ -17,9 +17,9 @@
 '''
 
 import sys, urllib, urllib2, re, os, cookielib, string
-from xml.dom.minidom import parse, parseString
+from xml.dom.minidom import parseString
 
-import elementtree
+#import elementtree
 
 # ERRORCODES:
 # 200 = OK
@@ -644,12 +644,19 @@ class YouTubeCore(object):
 			next = 'false'
 
 		subitems = videos[(per_page * page):(per_page * (page + 1))]
+		
+		return self._get_batch_details(subitems, next)
+
+	def _get_batch_details(self, items, next):
+		if self.__dbg__:
+			print self.__plugin__ + " _get_batch_details"
+			
 		ytobjects = []
 		failed = []
 		counter = 0
 		link = ""
-
-		for item in subitems:
+		
+		for item in items:
 			# Dashes break with google, fetch all video's with a dash in the videoid seperatly.
 			if (item.find('-') == -1):
 				link += item + "|"
@@ -657,7 +664,7 @@ class YouTubeCore(object):
 			else:
 				failed.append(item)
 				
-			if ( counter > 9 or item == subitems[len(subitems)-1] ):
+			if ( counter > 9 or item == items[len(items)-1] ):
 				link += "&restriction=US"
 				url = urllib2.Request("http://gdata.youtube.com/feeds/api/videos?q=" + link);
 				url.add_header('User-Agent', self.USERAGENT);
@@ -669,11 +676,11 @@ class YouTubeCore(object):
 					con.close()
 				except urllib2.HTTPError, e:
 					if self.__dbg__:
-						print self.__plugin__ + " scrapeVideos except: " + str(e)
+						print self.__plugin__ + " _get_batch_details except: " + str(e)
 					return ( str(e), 303 )
 				except:
 					if self.__dbg__:
-						print self.__plugin__ + " scrapeVideos caught unknown exception"
+						print self.__plugin__ + " _get_batch_details caught unknown exception"
 						print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
 										   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
 					return ( "", 500 )
