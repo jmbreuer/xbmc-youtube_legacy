@@ -416,8 +416,8 @@ class YouTubeNavigation:
     def removeFromFavorites(self, params = {}):
         get = params.get
         
-        if (get("editurl")):
-            (message, status ) = core.delete_favorite(get('editurl'))
+        if (get("editid")):
+            (message, status ) = core.delete_favorite(get('editid'))
             if status != 200:
                 self.errorHandling(self.__language__(30020), message, status)
                 return False
@@ -480,8 +480,8 @@ class YouTubeNavigation:
     
     def removeSubscription(self, params = {}):
         get = params.get
-        if (get("editurl")):
-            (message, status) = core.remove_subscription(get("editurl"))
+        if (get("editid")):
+            (message, status) = core.remove_subscription(get("editid"))
             if status != 200:
                 self.errorHandling(self.__language__(30021), message, status)
                 return False
@@ -841,7 +841,7 @@ class YouTubeNavigation:
 
     def buildItemUrl(self, item_params = {}, url = ""):
         for k, v in item_params.items():
-            if (k != "path" and k != "thumbnail" and k!= "playlistId" and k!= "next" and k != "content" and k!= "editurl"
+            if (k != "path" and k != "thumbnail" and k!= "playlistId" and k!= "next" and k != "content" and k!= "editid"
                 and k!= "summary" and k!= "published" and k!="Title" and k!= "Title" ):
                 url += k + "=" + v + "&"
         return url
@@ -859,7 +859,8 @@ class YouTubeNavigation:
 
             if ( self.__settings__.getSetting( "username" ) != "" and self.__settings__.getSetting( "auth" ) ):
                 if ( get("feed") == "favorites" and not get("contact") ):
-                    cm.append( ( self.__language__( 30506 ), 'XBMC.RunPlugin(%s?path=%s&action=remove_favorite&editurl=%s&)' % ( sys.argv[0], item("path"), item("editurl") ) ) )
+                    cm.append( ( self.__language__( 30506 ), 'XBMC.RunPlugin(%s?path=%s&action=remove_favorite&editid=%s&)' % ( sys.argv[0], item("path"), item("editid") ) ) )
+                    #print self.__plugin__ + " addContextMenuItem - editid: " + item("editid")
                 else:
                     cm.append( ( self.__language__( 30503 ), 'XBMC.RunPlugin(%s?path=%s&action=add_favorite&videoid=%s&)' % ( sys.argv[0],  item("path"), item("videoid") ) ) )
                 if (get("external") == "true" or (get("feed") != "subscriptions_favorites" and get("feed") != "subscriptions_uploads")):
@@ -903,20 +904,21 @@ class YouTubeNavigation:
                     if (get("external")):
                         cm.append( ( self.__language__( 30512 ) % item("channel"), 'XBMC.RunPlugin(%s?path=%s&channel=%s&action=add_subscription)' % ( sys.argv[0], item("path"), item("channel") ) ) )
                     else:
-                        cm.append( ( self.__language__( 30513 ) % item("channel"), 'XBMC.RunPlugin(%s?path=%s&editurl=%s&action=remove_subscription)' % ( sys.argv[0], item("path"), item("editurl") ) ) )
-                        
+                        cm.append( ( self.__language__( 30513 ) % item("channel"), 'XBMC.RunPlugin(%s?path=%s&editid=%s&action=remove_subscription)' % ( sys.argv[0], item("path"), item("editid") ) ) )
+                    print self.__plugin__ + " addContextMenuItem - editid: " + item("editid")
+                    
             if (item("contact")):
                 if ( self.__settings__.getSetting( "username" ) != "" and self.__settings__.getSetting( "auth" ) ):
                     if (item("external")):
                         cm.append( (self.__language__(30026), 'XBMC.RunPlugin(%s?path=%s&action=add_contact&)' % ( sys.argv[0], item("path") ) ) )
                     else:
-                        cm.append( (self.__language__(30025), 'XBMC.RunPlugin(%s?path=%s&action=remove_contact&contact=%s&)' % ( sys.argv[0], item("path"), item("contact") ) ) )
+                        cm.append( (self.__language__(30025), 'XBMC.RunPlugin(%s?path=%s&action=remove_contact&contact=%s&)' % ( sys.argv[0], item("path"), item("Title") ) ) )
                             
             if ( item("feed") == "favorites"  or get("feed") == "playlists" or item("feed") == "uploads" ):
                 cm.append( ( self.__language__( 30507 ), "XBMC.Action(Queue)" ) )
         
-        if (self.__dbg__):
-            print self.__plugin__ + " added context menu item: " + repr(cm)
+        #if (self.__dbg__):
+        #    print self.__plugin__ + " added context menu item: " + repr(cm)
         return cm
 
     def makeAscii(self, str):

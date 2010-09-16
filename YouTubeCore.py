@@ -322,15 +322,18 @@ class YouTubeCore(object):
 				print self.__plugin__ + ' list ERROR: %s::%s (%d) - %s' % (self.__class__.__name__ , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
 			return ( [], 500 )
 
-	def delete_favorite(self, delete_url):
+	def delete_favorite(self, obj):
+		delete_url = "http://gdata.youtube.com/feeds/api/users/default/favorites/%s" % obj
 		return self._youTubeDel(delete_url)
 	
-	def remove_contact(self, contact_id):
-		delete_url = "http://gdata.youtube.com/feeds/api/users/default/contacts/%s" % contact_id
+	def remove_contact(self, obj):
+		delete_url = "http://gdata.youtube.com/feeds/api/users/default/contacts/%s" % obj
 		return self._youTubeDel(delete_url)
 
-	def remove_subscription(self, editurl):
-		return self._youTubeDel(editurl)
+	def remove_subscription(self, obj):
+		delete_url = "http://gdata.youtube.com/feeds/api/users/%s/subscriptions/%s" % ( self.__settings__.getSetting( "nick" ), obj )
+		print self.__plugin__ + "remove : " + delete_url
+		return self._youTubeDel(delete_url)
 
 	def add_contact(self, contact_id):
 		url = "http://gdata.youtube.com/feeds/api/users/default/contacts"
@@ -427,8 +430,9 @@ class YouTubeCore(object):
 				link = node.getElementsByTagName("link")
 				for i in range(len(link)):
 					if link.item(i).getAttribute('rel') == 'edit':
-						video['editurl'] = link.item(i).getAttribute('href')
-																
+						obj = link.item(i).getAttribute('href')
+						video['editid'] = obj[obj.rfind('/')+1:]
+										
 			video['next'] = next
 
 			playobjects.append(video);
@@ -972,7 +976,8 @@ class YouTubeCore(object):
 					link = node.getElementsByTagName("link")
 					for i in range(len(link)):
 						if link.item(i).getAttribute('rel') == 'edit':
-							video['editurl'] = link.item(i).getAttribute('href')
+							obj = link.item(i).getAttribute('href')
+							video['editid'] = obj[obj.rfind('/')+1:]
 
 				video['thumbnail'] = "http://i.ytimg.com/vi/" + video['videoid'] + "/0.jpg"
 			

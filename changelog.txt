@@ -7,7 +7,6 @@
 - Scraper for YouTube Disco
 - Add select video quality pr video item as requested by nektarinos 
 - Test refactor of YouTube Navigation
-- Remove url passing from xbmc - navigation - core layer (specifically editurl)
 - Change interfaces in core to use params (this would again reduce much of the unnessecary remapping logic in navigation and reduce code duplication in core)?
 - Refactor YouTube core to use elementree instead of xml mini dom?
 - Private videos requires genneralised login function with shorter timeout (3-6 second) on requests
