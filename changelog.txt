@@ -1,16 +1,15 @@
 [B]TODO:[/B]
-- Add Play all where we currently have queue folder.. (function basically queues alle video items and starts playback of the first) 
-- Fix Sort option so that original sorting can be restored (less annoying, but still..) 
-- Scraper for exploring youtube categories 
-- Scraper for YouTube Trailers
-- Scraper for YouTube Disco
-- Add select video quality pr video item as requested by nektarinos 
-- Test refactor of YouTube Navigation
-- Change interfaces in core to use params (this would again reduce much of the unnessecary remapping logic in navigation and reduce code duplication in core)?
-- Refactor YouTube core to use elementree instead of xml mini dom?
-- Private videos requires genneralised login function with shorter timeout (3-6 second) on requests
-- All functions should be able to loop on internal youtube errors
-- Procratinator
+- Add Play all where we currently have queue folder.. (function basically queues alle video items and starts playback of the first) - tobias
+- Fix Sort option so that original sorting can be restored (less annoying, but still..) - done?
+- Scraper for exploring youtube categories - tobias
+- Scraper for YouTube Trailers - POC done
+- Scraper for YouTube Disco - POC done
+- Add select video quality pr video item as requested by nektarinos - henrik
+- Test refactor of YouTube Navigation - henrik
+- Change interfaces in core to use params (this would again reduce much of the unnessecary remapping logic in navigation and reduce code duplication in core)? - henrik
+- Private videos requires genneralised login function with shorter timeout (3-6 second) on requests - tobias
+- All functions should be able to loop on internal youtube errors - tobias
+- Procratinator - check up on thread
 
 [B]Errata[/B]
 - [XBMC] Can't replay a video that has already been played, unless the folder is refreshed.

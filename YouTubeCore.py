@@ -650,7 +650,7 @@ class YouTubeCore(object):
 		if status == 200:
 			if (len(ytobjects) > 0):
 				ytobjects[len(ytobjects)-1]['next'] = next
-						
+
 		return (ytobjects, status)
 
 	def _get_batch_details(self, items):
