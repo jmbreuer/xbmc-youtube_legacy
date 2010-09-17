@@ -2,9 +2,8 @@
 - Add Play all where we currently have queue folder.. (function basically queues alle video items and starts playback of the first) - tobias
 - Fix Sort option so that original sorting can be restored (less annoying, but still..) - done?
 - Scraper for exploring youtube categories - tobias
-- channel thumbs seem to have gotten alot uglier?..
-- Scraper for YouTube Trailers - POC done
-- Scraper for YouTube Disco - POC done
+- Scraper for YouTube Trailers - Basic done
+- Scraper for YouTube Disco - Basic done
 - Add select video quality pr video item as requested by nektarinos - henrik
 - Test refactor of YouTube Navigation - henrik
 - Change interfaces in core to use params (this would again reduce much of the unnessecary remapping logic in navigation and reduce code duplication in core)? - henrik
@@ -25,7 +24,9 @@
 - Added sorting options (title, upload date, rating, runtime)
 - Added "More videos by User" option as requested by spiff
 - Added edit search feature, pops up with search in question and allows you to change it..
-- Added "Set content to movies" for video lists as this will allow the user to use other skin view modes 
+- Added "Set content to movies" for video lists as this will allow the user to use other skin view modes
+- Added Nicer default icons for video items
+- Added Nicer default icons for searches
 - Refactor of navigation layer
 
 [B]Version 1.8.0[/B]

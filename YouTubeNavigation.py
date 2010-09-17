@@ -246,7 +246,7 @@ class YouTubeNavigation:
             
             self.addFolderListItem(params, item)
                             
-        self.parseFolderList(get("path"), params, result)
+        self.parseFolderList(params, result)
                                 
     def listUserFolderFeeds(self, params = {}):
         get = params.get
@@ -282,7 +282,7 @@ class YouTubeNavigation:
                 if (get("playlist")):
                     self.__settings__.setSetting("playlists_" + get("playlist") + "_thumb", thumbnail)
 
-        self.parseVideoList(get("path"), params, result);
+        self.parseVideoList(params, result);
         
     def login(self, params = {}):
         self.__settings__.openSettings()
@@ -340,7 +340,7 @@ class YouTubeNavigation:
             if (thumbnail and get("search")):
                 self.__settings__.setSetting("search_" + get("search") + "_thumb", thumbnail)
 
-        self.parseVideoList(get("path"), params, result);
+        self.parseVideoList(params, result);
 
     def scrapeVideos(self, params):
         get = params.get
@@ -348,9 +348,9 @@ class YouTubeNavigation:
         ( results, status ) = scraper.scrape(params)
         if ( results ):
             if (get("scraper") == "disco_top_artist"):
-                self.parseFolderList(get("path"), params, results)
+                self.parseFolderList(params, results)
             else:
-                self.parseVideoList(get("path"), params, results)
+                self.parseVideoList(params, results)
         elif ( status == 303):
             self.showMessage(self.__language__(30600), results)
         else:
@@ -379,7 +379,7 @@ class YouTubeNavigation:
         if (status != 200):
             self.errorHandling(self.__language__(30006), result, status)
         else:
-            self.parseVideoList(get("path"), params, result)
+            self.parseVideoList(params, result)
         
     def playVideo(self, params = {}):
         get = params.get
@@ -539,7 +539,7 @@ class YouTubeNavigation:
             if (thumbnail and query):
                 self.__settings__.setSetting("search_" + query + "_thumb", thumbnail)
                 
-            self.parseVideoList(get("path"), params, result)
+            self.parseVideoList(params, result)
             
     def deleteSearch(self, params = {}):
         get = params.get
@@ -654,6 +654,12 @@ class YouTubeNavigation:
         item = item_params.get
         
         icon = "DefaultFolder.png"
+        
+        if (item("action") == "disco_search"):
+            icon = self.getThumbnail("discoball")
+        elif (item("action") == "search"):
+            icon = self.getThumbnail("search")
+        
         thumbnail = item("thumbnail")
         
         cm = self.addContextMenuItems(params, item_params)
@@ -716,7 +722,7 @@ class YouTubeNavigation:
     #==================================== Core Output Parsing Functions ===========================================
 
     #parses a folder list consisting of a tuple of dictionaries
-    def parseFolderList(self, path, params, results):
+    def parseFolderList(self, params, results):
         listSize = len(results)
         get = params.get
         
@@ -725,7 +731,7 @@ class YouTubeNavigation:
             result = result_params.get
             next = result("next") == "true"
             
-            result_params["path"] = path
+            result_params["path"] = get("path")
             result_params["login"] = "true"
             
             if (get("feed") == "subscriptions"):
@@ -774,19 +780,20 @@ class YouTubeNavigation:
         xbmcplugin.endOfDirectory( handle=int( sys.argv[ 1 ] ), succeeded=True, cacheToDisc=False )
     
     #parses a video list consisting of a tuple of dictionaries 
-    def parseVideoList(self, path, params, results):
+    def parseVideoList(self, params, results):
         listSize = len(results)
         get = params.get
         
         next = False
         for result_params in results:
+            result_params["path"] = get("path")
             result = result_params.get
             next = result("next") == "true"
             
             if ( result('reasonCode') ):
                 if result('reasonCode') == 'requesterRegion':
                     continue;
-            result_params["path"] = path
+            
             self.addVideoListItem( params, result_params, listSize)
         
         if next:
