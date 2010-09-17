@@ -172,6 +172,9 @@ class YouTubeCore(object):
 		url.add_header('User-Agent', self.USERAGENT);
 		url.add_header('GData-Version', 2)
 		try:
+			if self.__dbg__:
+				print self.__plugin__ + " search - url: " + repr(link)
+								
 			con = urllib2.urlopen(url);
 			result = self._getvideoinfo(con.read())
 			con.close()
@@ -223,6 +226,9 @@ class YouTubeCore(object):
 		url.add_header('User-Agent', self.USERAGENT);
 		url.add_header('GData-Version', 2)
 		try:
+			if self.__dbg__:
+				print self.__plugin__ + " feeds - url: " + repr(feed)
+								
 			con = urllib2.urlopen(url);
 			result = self._getvideoinfo(con.read())
 			if self.__dbgv__:
@@ -672,7 +678,7 @@ class YouTubeCore(object):
 				link = ""
 
 		for item in failed:
-			videoitem = self._get_details(item)			
+			videoitem = self._get_details(item)
 			if videoitem:
 				if ( 'apierror' not in videoitem):
 					ytobjects.append(videoitem)
@@ -909,6 +915,8 @@ class YouTubeCore(object):
 			for node in entries:
 				video = {};
 
+                                video['videoid'] = self._getNodeValue(node, "yt:videoid", "missing")
+				
 				# http://code.google.com/intl/en/apis/youtube/2.0/reference.html#youtube_data_api_tag_yt:state <- more reason codes
 				# requesterRegion - This video is not available in your region. <- fails
 				# limitedSyndication - Syndication of this video was restricted by its owner. <- works
@@ -920,24 +928,28 @@ class YouTubeCore(object):
 					# Ignore unplayable items.
 					if ( state == 'deleted' or state == 'rejected'):
 						continue
-					else:
-						# Get reason for why we can't playback the file.		
-						if node.getElementsByTagName("yt:state").item(0).hasAttribute('reasonCode'):
-							reason = self._getNodeAttribute(node, "yt:state", 'reasonCode', 'Unknown reasonCode')
-							value = self._getNodeValue(node, "yt:state", "Unknown reasonValue").encode('utf-8')
-						
-							if ( reason != 'limitedSyndication' ):
-								video['reasonCode'] = reason
-								video['reasonValue'] = value
-						
+					
+					# Get reason for why we can't playback the file.		
+					if node.getElementsByTagName("yt:state").item(0).hasAttribute('reasonCode'):
+						reason = self._getNodeAttribute(node, "yt:state", 'reasonCode', 'Unknown reasonCode')
+						value = self._getNodeValue(node, "yt:state", "Unknown reasonValue").encode('utf-8')
+
+						if self.__dbg__:
+							print self.__plugin__ + " _getvideoinfo %s reasonCode: [%s] %s " % ( video['videoid'], reason, value )
+
+						if reason == "private":
+							continue
+						elif reason == 'requesterRegion':
+							continue
+						elif reason == 'limitedSyndication':
 							if self.__dbg__:
-								print self.__plugin__ + "/ERROR reasonCode: [%s] %s " % ( reason, value )
+								print self.__plugin__ + " _getvideoinfo hit limitedsyndication"
+						else:
+							if self.__dbg__:
+								print self.__plugin__ + " _getvideoinfo hit else"
+							video['reasonCode'] = reason
+						       	video['reasonValue'] = value
 							
-							if reason == "private":
-								continue
-
-				video['videoid'] = self._getNodeValue(node, "yt:videoid", "missing")
-
 				if ( video['videoid'] == "missing" ):
 					video['videolink'] = node.getElementsByTagName("link").item(0).getAttribute('href')
 					match = re.match('.*?v=(.*)\&.*', video['videolink'])
@@ -1020,10 +1032,14 @@ class YouTubeCore(object):
 		if self.__dbg__:
 			print self.__plugin__ + " _get_details: " + repr(videoid)
 
-		url = urllib2.Request("http://gdata.youtube.com/feeds/api/videos/" + videoid);
+		link = "http://gdata.youtube.com/feeds/api/videos/" + videoid + "?restriction=89.150.119.145"
+		url = urllib2.Request(link);
 		url.add_header('User-Agent', self.USERAGENT);
 		url.add_header('GData-Version', 2)
 		try:
+			if self.__dbg__:
+				print self.__plugin__ + " _get_details - url: " + repr(link)
+							
 			con = urllib2.urlopen(url);
 			result = con.read();
 			con.close()

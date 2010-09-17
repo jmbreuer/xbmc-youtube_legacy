@@ -955,8 +955,8 @@ class YouTubeNavigation:
 			if ( item("feed") == "favorites"  or get("feed") == "playlists" or item("feed") == "uploads" ):
 				cm.append( ( self.__language__( 30507 ), "XBMC.Action(Queue)" ) )
 		
-		if (self.__dbg__):
-			print self.__plugin__ + " added context menu item: " + repr(cm)
+		#if (self.__dbg__):
+			#print self.__plugin__ + " added context menu item: " + repr(cm)
 		return cm
 
 	def makeAscii(self, str):
