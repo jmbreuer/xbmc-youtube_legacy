@@ -139,41 +139,16 @@ class YouTubeScraperCore:
 		print "search url " + url
 		page = self._fetchPage(url)
 		
-		if (page.find("watch?") != -1):
-			items = []
+		if (page.find("a=") != -1):
+			print "disco response"
 			page = page[page.find("a=") + 2:]
 			mix_list_id = page[:page.find("&")]
 			url = self.urls["disco_mix_list"] % mix_list_id
+			print url
 			page = self._fetchPage(url)
-			# TODO: tobias fix this :D
-#			
-#			list = SoupStrainer(id="quicklist", name="div")
-#			ajax = BeautifulSoup(page, parseOnlyThese=list)
-#			if (len(ajax) > 0):
-#				if (ajax.div["data-active-ajax-url"]):
-#					url = self.urls["main"] + ajax.div["data-active-ajax-url"]
-#					print "ajax url " + url
-#				
-#				page = self._fetchPage(url)
-#				video_list = SoupStrainer(name="ol")
-#				videos = BeautifulSoup(page, parseOnlyThese=video_list)
-#				if (len(videos) > 0):
-#					video = videos.li
-#					while (video != None):
-#						videoid = video.a["href"]
-#						if (videoid.find("=") > 0):
-#							videoid = videoid[videoid.find("=") +1:videoid.find("&")]
-#						items.append(videoid)
-#						
-#						video = video.findNextSibling(name="li", attrs = { 'class':re.compile("^quicklist-item")})
 			
-			if (items):
-				#self.core.playlists(a, page, retry)
-				return self.core._get_batch_details(items)
-			else:
-				if (self.__dbg__):
-					print self.__plugin__ + " Disco scraper failed, youtube probably changed their layout"	
-		return ([], 303)
+			return self._get_disco_list(page)
+		return ("", 500)
 
 		
 	def scrapeTrailersListFormat (self, page, params = {}):
@@ -214,24 +189,17 @@ class YouTubeScraperCore:
 		con.close()
 		return page
 	
-	def _get_disco_list(self, playlistid):
+	def _get_disco_list(self, page):
 		if self.__dbg__:
-			print self.__plugin__ + " _get_disco_list : " + playlistid
-		link= "http://www.youtube.com/list_ajax?a=" + playlistid + "&amp;action_get_mixlist=1"
-		
-		url = urllib2.Request(link);
-		url.add_header('User-Agent', self.USERAGENT);
-		
+			print self.__plugin__ + " _get_disco_list"
+				
 		try:
-			con = urllib2.urlopen(url);
-			value = con.read()
-			con.close()
-			match = re.findall('.*?v=(.*)\&amp;a.*', value)
+			match = re.findall('.*?v=(.*)\&amp;a.*', page)
 			if match:
-				return self._get_batch_details(match)
+				return self.core._get_batch_details(match)
 			else:
 				print self.__plugin__ + " _get_disco_list no match"
-		       	return ( self.__language__(30601), 303)
+				return ( self.__language__(30601), 303)
 		
 		except urllib2.HTTPError, e:
 			if self.__dbg__:
@@ -243,7 +211,7 @@ class YouTubeScraperCore:
 				print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
 								   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
 			return ( "", 500 )
-		
+	
 	def scrapeDiscoTop25(self, params = {}):
 		get = params.get
 		url = self.urls["disco_main"]
