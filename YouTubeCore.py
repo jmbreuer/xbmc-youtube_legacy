@@ -496,7 +496,15 @@ class YouTubeCore(object):
 			return (video['apierror'], 303)
 
 		if not download:
-			hd_quality = int(self.__settings__.getSetting( "hd_videos" ))
+			if (not get("quality")):
+				hd_quality = int(self.__settings__.getSetting( "hd_videos" ))
+			else:
+				if (get("quality") == "1080p"):
+					hd_quality = 2
+				elif (get("quality") == "720p"):
+					hd_quality = 1
+				else: 
+					hd_quality = 0
 		else:
 			hd_quality = int(self.__settings__.getSetting( "hd_videos_download" ))
 			if ( hd_quality == 0 ):
@@ -898,7 +906,6 @@ class YouTubeCore(object):
 
 			#construct list of video objects					
 			ytobjects = [];
-			track = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
 			for node in entries:
 				video = {};
 
@@ -965,10 +972,7 @@ class YouTubeCore(object):
 					video['Overlay'] = int(overlay)
 				
 				video['next'] = next
-				video['year'] = track
 				ytobjects.append(video);
-				
-				track -= 1
 
 				if self.__dbg__:
 					print self.__plugin__ + " _getvideoinfo done"
