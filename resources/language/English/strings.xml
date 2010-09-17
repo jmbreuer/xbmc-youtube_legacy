@@ -38,6 +38,8 @@
     <string id="30035">Latest</string>
     <string id="30036">Opening Soon</string>
     <string id="30037">YouTube Disco!</string>
+    <string id="30038">Top 25</string>
+    <string id="30039">Most Popular Artists</string>
 
      
     <!-- Plugin settings strings -->
@@ -125,6 +127,10 @@
     <string id="30514">Find similar</string>
     <string id="30515">Edit search</string>
     <string id="30516">More videos by %s</string>
+    <string id="30517">Search on author</string>
+    <string id="30518">VideoID</string>
+    <string id="30519">Enter contact name</string>
+    
 
     <!-- messages -->
     <string id="30600">Error</string>
