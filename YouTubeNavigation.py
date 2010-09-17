@@ -64,7 +64,6 @@ class YouTubeNavigation:
     feeds['feed_featured'] = "http://gdata.youtube.com/feeds/api/standardfeeds/recently_featured"; # doesn't work with time
     feeds['subscriptions_uploads'] = "http://gdata.youtube.com/feeds/api/users/%s/uploads";
     feeds['subscriptions_favorites'] = "http://gdata.youtube.com/feeds/api/users/%s/favorites";
-    feeds['recommended'] = "http://www.youtube.com/videos?r=1";
 
     # we fill the list with category definitions, with labels from the appropriate language file
     #               label                         , path                            , thumbnail                      ,  login          ,  feed / action
@@ -345,27 +344,17 @@ class YouTubeNavigation:
 
     def scrapeVideos(self, params):
         get = params.get
-        if (get("scraper") in self.feeds):
-            feed = self.feeds[get("scraper")]
-            ( results, status ) = core.scrapeVideos(feed, params)
 
-            if ( results ):
+        ( results, status ) = scraper.scrape(params)
+        if ( results ):
+            if (get("scraper") == "disco_top_artist"):
+                self.parseFolderList(get("path"), params, results)
+            else:
                 self.parseVideoList(get("path"), params, results)
-            elif ( status == 303):
-                self.showMessage(self.__language__(30600), results)
-            else:
-                self.showMessage(self.__language__(30600), self.__language__(30606))
+        elif ( status == 303):
+            self.showMessage(self.__language__(30600), results)
         else:
-            ( results, status ) = scraper.scrape(params)
-            if ( results ):
-                if (get("scraper") == "disco_top_artist"):
-                    self.parseFolderList(get("path"), params, results)
-                else:
-                    self.parseVideoList(get("path"), params, results)
-            elif ( status == 303):
-                self.showMessage(self.__language__(30600), results)
-            else:
-                self.showMessage(self.__language__(30600), self.__language__(30606))
+            self.showMessage(self.__language__(30600), self.__language__(30606))
 
             
 

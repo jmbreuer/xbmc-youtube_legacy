@@ -20,10 +20,90 @@ class YouTubeScraperCore:
     urls['current_trailers'] = "http://www.youtube.com/trailers?s=trit"
     urls['upcoming_trailers'] = "http://www.youtube.com/trailers?s=tros"
     urls['popular_trailers'] = "http://www.youtube.com/trailers?s=trp"
+    urls['recommended'] = "http://www.youtube.com/videos?r=1";
+    
+    def scrapeRecommended(self, params = {}):
+        get = params.get
+        url = self.urls["recommended"]
         
+        if self.__dbg__:
+            print self.__plugin__ + " scrapeVideos: " + url + " - params: - " + repr(params)
+        
+        page = int(get("page", "0"))
+        per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
+
+        oldVideos = self.__settings__.getSetting("recommendedVideos")
+
+        if ( page == 0 or oldVideos == ""):
+            ( videos, result)  = self._scrapeYouTubeData(url)
+            if (result == 200):
+                self.__settings__.setSetting("recommendedVideos", self.core.arrayToPipe(videos))                                    
+            else:
+                return ( videos, result )
+        else:
+            videos = oldVideos.split("|")
+        
+        if ( per_page * ( page + 1 ) < len(videos) ):
+            next = 'true'
+        else:
+            next = 'false'
+
+        subitems = videos[(per_page * page):(per_page * (page + 1))]
+        
+        ( ytobjects, status ) = self.core._get_batch_details(subitems)
+
+        if status == 200:
+            if (len(ytobjects) > 0):
+                ytobjects[len(ytobjects)-1]['next'] = next
+
+        return (ytobjects, status)
+    
+    def _scrapeYouTubeData(self, url, retry = True):
+        if self.__dbg__:
+            print self.__plugin__ + " _scrapeYouTubeData: " + url
+        result = ""
+
+        login_info = self.__settings__.getSetting( "login_info" )
+        if ( not login_info ):
+            if ( self.core._httpLogin() ):
+                login_info = self.__settings__.getSetting( "login_info" )
+        
+        url = urllib2.Request(url + "&hl=en")
+        url.add_header('User-Agent', self.USERAGENT)
+        url.add_header('Cookie', 'LOGIN_INFO=' + login_info)
+
+        try:
+            con = urllib2.urlopen(url)
+            result = con.read()
+            if self.__dbg__:
+                print self.__plugin__ + " _scrapeYouTubeData result: " + repr(result)
+            con.close()
+
+            videos = re.compile('<a href="/watch\?v=(.*)&amp;feature=grec_browse" class=').findall(result);
+
+            if len(videos) == 0:
+                videos = re.compile('<div id="reco-(.*)" class=').findall(result);
+
+            if ( len(videos) == 0 and retry ):
+                self.core._httpLogin()
+                videos = self._scrapeYouTubeData(url, False)
+            if self.__dbg__:
+                print self.__plugin__ + " _scrapeYouTubeData done"
+            return ( videos, 200 )
+        except urllib2.HTTPError, e:
+            if self.__dbg__:
+                print self.__plugin__ + " _scrapeYouTubeData exception: " + str(e)
+            return ( self.__language__(30619), "303" )
+        except:
+            if self.__dbg__:
+                print self.__plugin__ + " _scrapeYouTubeData uncaught exception"
+                print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
+                                   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
+                print self.__plugin__ + " _scrapeYouTubeData result: " + repr(result)
+            return ( "", 500 )
+    
     def scrapeTrailersGridFormat (self, page, params = {}):
         get = params.get
-                 
         yobjects = []
 
         list = SoupStrainer(id="popular-column", name="div")
@@ -189,6 +269,8 @@ class YouTubeScraperCore:
             return self.scrapeDiscoTopArtist(params)
         if (get("scraper", "").find("trailers") > -1):
             return self.scrapeTrailers(params)
+        if (get("scraper") == "recommended"):
+            return self.scrapeRecommended(params)
     
 if __name__ == '__main__':
 

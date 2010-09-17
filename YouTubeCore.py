@@ -620,39 +620,6 @@ class YouTubeCore(object):
 			pipedItems += item + "|"
 		return pipedItems
 
-	def scrapeVideos(self, feed, params):
-		if self.__dbg__:
-			print self.__plugin__ + " scrapeVideos: " + repr(feed) + " - params: - " + repr(params)
-		get = params.get
-		page = int(get("page", "0"))
-		per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
-
-		oldVideos = self.__settings__.getSetting("recommendedVideos")
-
-		if ( page == 0 or oldVideos == ""):
-			( videos, result)  = self._scrapeYouTubeData(feed)
-			if (result == 200):
-				self.__settings__.setSetting("recommendedVideos", self.arrayToPipe(videos))									
-			else:
-				return ( videos, result )
-		else:
-			videos = oldVideos.split("|")
-		
-		if ( per_page * ( page + 1 ) < len(videos) ):
-			next = 'true'
-		else:
-			next = 'false'
-
-		subitems = videos[(per_page * page):(per_page * (page + 1))]
-		
-		( ytobjects, status ) = self._get_batch_details(subitems)
-
-		if status == 200:
-			if (len(ytobjects) > 0):
-				ytobjects[len(ytobjects)-1]['next'] = next
-
-		return (ytobjects, status)
-
 	def _get_batch_details(self, items):
 		if self.__dbg__:
 			print self.__plugin__ + " _get_batch_details"
@@ -1186,48 +1153,3 @@ class YouTubeCore(object):
 				print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
 								   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
 			return False
-
-	def _scrapeYouTubeData(self, feed, retry = True):
-		if self.__dbg__:
-			print self.__plugin__ + " _scrapeYouTubeData: " + repr(feed)
-		result = ""
-
-		login_info = self.__settings__.getSetting( "login_info" )
-		if ( not login_info ):
-			if ( self._httpLogin() ):
-				login_info = self.__settings__.getSetting( "login_info" )
-		
-		url = urllib2.Request(feed + "&hl=en")
-		url.add_header('User-Agent', self.USERAGENT)
-		url.add_header('Cookie', 'LOGIN_INFO=' + login_info)
-
-		try:
-			con = urllib2.urlopen(url)
-			result = con.read()
-			if self.__dbgv__:
-				print self.__plugin__ + " _scrapeYouTubeData result: " + repr(result)
-			con.close()
-
-			videos = re.compile('<a href="/watch\?v=(.*)&amp;feature=grec_browse" class=').findall(result);
-
-			if len(videos) == 0:
-				videos = re.compile('<div id="reco-(.*)" class=').findall(result);
-
-			if ( len(videos) == 0 and retry ):
-				self._httpLogin()
-				videos = self._scrapeYouTubeData(feed, False)
-			if self.__dbg__:
-				print self.__plugin__ + " _scrapeYouTubeData done"
-			return ( videos, 200 )
-		except urllib2.HTTPError, e:
-			if self.__dbg__:
-				print self.__plugin__ + " _scrapeYouTubeData exception: " + str(e)
-			return ( self.__language__(30619), "303" )
-		except:
-			if self.__dbg__:
-				print self.__plugin__ + " _scrapeYouTubeData uncaught exception"
-				print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
-								   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
-				print self.__plugin__ + " _scrapeYouTubeData result: " + repr(result)
-			
-			return ( "", 500 )
