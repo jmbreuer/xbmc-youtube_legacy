@@ -284,6 +284,8 @@ class YouTubeCore(object):
 		url.add_header('Authorization', 'GoogleLogin auth=' + auth);
 		url.add_header('X-GData-Key', 'key=' + self.APIKEY)
 		try:
+			if self.__dbg__:
+				print self.__plugin__ + " list - url: " + repr(link)
 			con = urllib2.urlopen(url);
 			result = con.read()
 			con.close()
@@ -381,6 +383,8 @@ class YouTubeCore(object):
 		url.add_header('X-GData-Key', 'key=' + self.APIKEY);
 		
 		try:
+			if self.__dbg__:
+				print self.__plugin__ + " playlists - url: " + repr(link)
 			con = urllib2.urlopen(url);
 			result = con.read()
 			con.close()
@@ -652,7 +656,7 @@ class YouTubeCore(object):
 				failed.append(item)
 				
 			if ( counter > 9 or item == items[len(items)-1] ):
-				link += "&restriction=US"
+				#link += "&restriction=US"
 				url = urllib2.Request("http://gdata.youtube.com/feeds/api/videos?q=" + link);
 				url.add_header('User-Agent', self.USERAGENT);
 				url.add_header('GData-Version', 2)
