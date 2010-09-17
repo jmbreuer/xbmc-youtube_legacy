@@ -171,7 +171,10 @@ class YouTubeScraperCore:
     
     def scrapeTrailers(self, params = {}):
         get = params.get
-        url = self.urls[get("scraper")]
+        if (get("scraper") in self.urls):
+            url = self.urls[get("scraper")]
+        else :
+            url = self.urls["trailers"]
         page = self._fetchPage(url, params)
         if (get("scraper") == "latest_trailers"):
             return self.scrapeTrailersListFormat(page, params)
