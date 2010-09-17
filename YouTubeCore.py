@@ -622,24 +622,23 @@ class YouTubeCore(object):
 			return ( result, 200 )
 		
 		except urllib2.HTTPError, e:
-			error = str(e)
+			import time
+			err = str(e)
 			
-			if ( error.find("401") > 0 and retry ):
-				if error > 0:				
-					if self.__dbg__:
-						print self.__plugin__ + " _fetcPage retrying done: retrying"
+			if ( err.find("401") > 0 and error == 0 ):
+				if self.__dbg__:
+					print self.__plugin__ + " _fetchPage retrying on 401"
 
-					# Try loging in.
-					self.login()
-					return self._fetchPage(link, api, auth, login, error +1)
-				elif ( error.find("403") > 0 ):
-					# Happens if a user has subscriped to a user and the user has no uploads
-					print self.__plugin__ + ' list ERROR: %s::%s (%d) - %s' % (self.__class__.__name__ , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
-					return (self.__language__(30601), 303)
-				else:
-					if self.__dbg__:
-						print self.__plugin__ + " _fetchPage except: " + error
-					return ( error, 303 )
+				self.login()
+				return self._fetchPage(link, api, auth, login, error +1)
+			elif ( err.find("403") > 0 ):
+				if self.__dbg__:
+					print self.__plugin__ + " _fetchPage HTTPError 403 - got empty results back: " + err
+				return (self.__language__(30601), 303)
+			else:
+				if self.__dbg__:
+					print self.__plugin__ + " _fetchPage HTTPError: " + err
+				return ( err, 303 )
 							
 		except:
 			if self.__dbg__:
