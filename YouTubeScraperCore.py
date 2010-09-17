@@ -214,6 +214,36 @@ class YouTubeScraperCore:
 		con.close()
 		return page
 	
+	def _get_disco_list(self, playlistid):
+		if self.__dbg__:
+			print self.__plugin__ + " _get_disco_list : " + playlistid
+		link= "http://www.youtube.com/list_ajax?a=" + playlistid + "&amp;action_get_mixlist=1"
+		
+		url = urllib2.Request(link);
+		url.add_header('User-Agent', self.USERAGENT);
+		
+		try:
+			con = urllib2.urlopen(url);
+			value = con.read()
+			con.close()
+			match = re.findall('.*?v=(.*)\&amp;a.*', value)
+			if match:
+				return self._get_batch_details(match)
+			else:
+				print self.__plugin__ + " _get_disco_list no match"
+		       	return ( self.__language__(30601), 303)
+		
+		except urllib2.HTTPError, e:
+			if self.__dbg__:
+				print self.__plugin__ + " _get_disco_list except: " + str(e)
+			return ( str(e), 303 )
+		except:
+			if self.__dbg__:
+				print self.__plugin__ + " _get_disco_list caught unknown exception"
+				print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
+								   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
+			return ( "", 500 )
+		
 	def scrapeDiscoTop25(self, params = {}):
 		get = params.get
 		url = self.urls["disco_main"]
