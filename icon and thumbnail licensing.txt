@@ -102,3 +102,12 @@ uploads.png
 Author: IconShock
 License: Linkware
 http://www.iconarchive.com/show/general-media-icons-by-iconshock/webcam-icon.html
+
+trailers.png
+Author: iTweek
+License: Free for non-commercial use, Includes a link back to author site.
+http://iTweek.deviantart.com
+
+discoball.png
+Author: HenrikDK
+License: Free for non-commercial use.
