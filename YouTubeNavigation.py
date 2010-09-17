@@ -77,6 +77,8 @@ class YouTubeNavigation:
                   {'Title':__language__( 30033 )  ,'path':"/root/trailers/popular"  , 'thumbnail':"trailers"         , 'login':"false" , 'scraper':"popular_trailers" },
                   {'Title':__language__( 30037 )  ,'path':"/root/disco"             , 'thumbnail':"discoball"        , 'login':"false" },
                   {'Title':__language__( 30007 )  ,'path':"/root/disco/search"      , 'thumbnail':"search"           , 'login':"false" , 'action':"disco_search"},
+                  {'Title':__language__( 30038 )  ,'path':"/root/disco/top_25"      , 'thumbnail':"discoball"        , 'login':"false" , 'scraper':"disco_top_25"},
+                  {'Title':__language__( 30039 )  ,'path':"/root/disco/popular"     , 'thumbnail':"discoball"        , 'login':"false" , 'scraper':"disco_top_artist"},
                   {'Title':__language__( 30019 )  ,'path':"/root/recommended"       , 'thumbnail':"recommended"      , 'login':"true"  , 'scraper':"recommended" },
                   {'Title':__language__( 30018 )  ,'path':"/root/contacts"          , 'thumbnail':"contacts"         , 'login':"true"  , 'feed':"contacts" },
                   {'Title':__language__( 30002 )  ,'path':"/root/favorites"         , 'thumbnail':"favorites"        , 'login':"true"  , 'feed':"favorites" },
@@ -107,6 +109,9 @@ class YouTubeNavigation:
             self.scrapeVideos(params)
             return
         
+        if (get("options") == "contact_options"):
+            self.listOptionFolder(params)
+            
         if (get("login") == "true"):
             if (get('feed') == 'subscriptions' or get('feed') == 'playlists' or get('feed') == 'contacts' ):
                 self.listUserFolder(params)                  
@@ -239,7 +244,7 @@ class YouTubeNavigation:
             item = {"Title":self.__language__( 30004 ), "path":"/root/subscriptions/new", "thumbnail":"newsubscriptions", "login":"true", "feed":"newsubscriptions"}
             if (get("contact")):
                 item["contact"] = get("contact")
-                            
+            
             self.addFolderListItem(params, item)
                             
         self.parseFolderList(get("path"), params, result)
@@ -279,7 +284,7 @@ class YouTubeNavigation:
                     self.__settings__.setSetting("playlists_" + get("playlist") + "_thumb", thumbnail)
 
         self.parseVideoList(get("path"), params, result);
-            
+        
     def login(self, params = {}):
         self.__settings__.openSettings()
         (result, status) = core.login()
@@ -350,11 +355,24 @@ class YouTubeNavigation:
                 self.showMessage(self.__language__(30600), results)
             else:
                 self.showMessage(self.__language__(30600), self.__language__(30606))
+        else:
+            ( results, status ) = scraper.scrape(params)
+            if ( results ):
+                if (get("scraper") == "disco_top_artist"):
+                    self.parseFolderList(get("path"), params, results)
+                else:
+                    self.parseVideoList(get("path"), params, results)
+            elif ( status == 303):
+                self.showMessage(self.__language__(30600), results)
+            else:
+                self.showMessage(self.__language__(30600), self.__language__(30606))
+
+            
 
     #================================== Plugin Actions =========================================
 
     def playVideoById(self, params = {}):
-        result = self.getUserInput('VideoID', '')
+        result = self.getUserInput(self.__language__(30518), '')
         params["videoid"] = result 
         if (result):
             self.playVideo(params);
@@ -365,7 +383,7 @@ class YouTubeNavigation:
         if (get("search")):
             query = urllib.unquote_plus(get("search"))
         else:
-            query = self.getUserInput('Search', '')
+            query = self.getUserInput(self.__language__(30006), '')
             
         (result, status) = scraper.searchDisco(query, params)
             
@@ -449,7 +467,7 @@ class YouTubeNavigation:
         if (get("contact")):
             contact = get("contact")
         else:
-            contact = self.getUserInput('Contact', '')
+            contact = self.getUserInput(self.__language__(30519), '')
             
         if (contact):
             (result, status) = core.add_contact(contact)
@@ -516,7 +534,7 @@ class YouTubeNavigation:
             query = urllib.unquote_plus(query)
             self.saveSearch(query, query)
         else :
-            query = self.getUserInput('Search', '')
+            query = self.getUserInput(self.__language__(30006), '')
             if (query):
                 self.saveSearch(query,query)
                 params["search"] = query
@@ -572,7 +590,7 @@ class YouTubeNavigation:
         get = params.get
         if (get("search")):
             old_query = urllib.unquote_plus(get("search"))
-            new_query = self.getUserInput('Search', old_query)
+            new_query = self.getUserInput(self.__language__(30006), old_query)
             self.saveSearch(old_query, new_query)
             params["search"] = new_query
             self.search(params)
@@ -588,9 +606,9 @@ class YouTubeNavigation:
             searches = {}
             
         if query in searches:
-            author = self.getUserInput('Search on author', searches[query])
+            author = self.getUserInput(self.__language__(30517), searches[query])
         else:
-            author = self.getUserInput('Search on author', '')
+            author = self.getUserInput(self.__language__(30517), '')
 
         if author == "":
             if author in searches:
@@ -638,7 +656,7 @@ class YouTubeNavigation:
                 else:
                     if (item("login") == "false"):
                         self.addActionListItem(params, item_params)
-            else :
+            else:
                 self.addActionListItem(params, item_params)
  
     # common function for adding folder items
@@ -673,7 +691,7 @@ class YouTubeNavigation:
         thumbnail = self.getThumbnail(item("thumbnail"))
         listitem=xbmcgui.ListItem( item("Title"), iconImage=icon, thumbnailImage=thumbnail )
         
-        if (item("action") == "search" or item("action") == "settings"):
+        if (item("action") == "search" or item("action") == "settings" or item("action" == "disco_search")):
             folder = True
         else:
             listitem.setProperty('IsPlayable', 'true');
@@ -744,7 +762,7 @@ class YouTubeNavigation:
             if (get("feed") == "contacts"):
                 result_params["thumbnail"] = "user"
                 result_params["contact"] = result("Title")
-                result_params["feed"] = "contact_option_list"
+                result_params["options"] = "contact_options"
                         
             if (result("playlist") or result("channel")):
                 if (result("playlist")):
@@ -790,8 +808,7 @@ class YouTubeNavigation:
             
             self.addFolderListItem(params, item)
         
-        
-        video_view = self.__settings__.getSetting("video_view")
+        video_view = self.__settings__.getSetting("video_view") == "true"
         
         if (video_view):
             xbmc.executebuiltin("Container.SetViewMode(500)")
@@ -804,8 +821,7 @@ class YouTubeNavigation:
         xbmcplugin.addSortMethod( handle=int( sys.argv[ 1 ] ), sortMethod=xbmcplugin.SORT_METHOD_PROGRAM_COUNT )
         xbmcplugin.addSortMethod( handle=int( sys.argv[ 1 ] ), sortMethod=xbmcplugin.SORT_METHOD_VIDEO_RUNTIME )
         xbmcplugin.addSortMethod( handle=int( sys.argv[ 1 ] ), sortMethod=xbmcplugin.SORT_METHOD_GENRE )
-        xbmcplugin.addSortMethod( handle=int( sys.argv[ 1 ] ), sortMethod=xbmcplugin.SORT_METHOD_VIDEO_YEAR )
-                
+        xbmcplugin.addSortMethod( handle=int( sys.argv[ 1 ] ), sortMethod=xbmcplugin.SORT_METHOD_VIDEO_YEAR )       
  
         xbmcplugin.endOfDirectory( handle=int( sys.argv[ 1 ] ), succeeded=True, cacheToDisc=True )
 
@@ -861,6 +877,7 @@ class YouTubeNavigation:
         
         return commands
 
+    # generic function for building the item url filters out many item params to reduce unicode problems
     def buildItemUrl(self, item_params = {}, url = ""):
         for k, v in item_params.items():
             if (k != "path" and k != "thumbnail" and k!= "playlistId" and k!= "next" and k != "content" and k!= "editid"
