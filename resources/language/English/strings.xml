@@ -130,7 +130,9 @@
     <string id="30517">Search on author</string>
     <string id="30518">VideoID</string>
     <string id="30519">Enter contact name</string>
-    
+    <string id="30520">Play 1080p</string>
+    <string id="30521">Play 720p</string>
+    <string id="30522">Play SD only</string>
 
     <!-- messages -->
     <string id="30600">Error</string>
