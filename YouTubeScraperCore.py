@@ -16,11 +16,15 @@ class YouTubeScraperCore:
     urls['disco_main'] = "http://www.youtube.com/disco" 
     urls['disco_search'] = "http://www.youtube.com/disco?action_search=1&query=%s"
     urls['main'] = "http://www.youtube.com"
-    
+    urls['trailers'] = "http://www.youtube.com/trailers?s=tr"
+    urls['current_trailers'] = "http://www.youtube.com/trailers?s=trit"
+    urls['upcoming_trailers'] = "http://www.youtube.com/trailers?s=tros"
+    urls['popular_trailers'] = "http://www.youtube.com/trailers?s=trp"
+        
     def scrapeTrailersGridFormat (self, page, params = {}):
         get = params.get
                  
-        vobjects = []
+        yobjects = []
 
         list = SoupStrainer(id="popular-column", name="div")
         trailers = BeautifulSoup(page, parseOnlyThese=list)
@@ -40,12 +44,13 @@ class YouTubeScraperCore:
                     item["thumbnail"] = trailer.div.a.span.img['src'] 
                     item["Title"] = trailer.div.a.span.img['title']
 
-                    vobjects.append(item)
+                    yobjects.append(item)
                 trailer = trailer.findNextSibling(name="div", attrs = { 'class':"trailer-cell *vl" })
         
-        print repr(vobjects)
-                
-        return vobjects
+        if (not yobjects):
+            return (yobjects, 500)
+        
+        return (yobjects, 200)
     
     def searchDisco(self, query, params = {}):
         get = params.get
@@ -89,10 +94,9 @@ class YouTubeScraperCore:
 
         
     def scrapeTrailersListFormat (self, page, params = {}):
-        get = params.get
-                 
-        vobjects = []
-
+        get = params.get         
+        yobjects = []
+        
         list = SoupStrainer(id="recent-trailers-container", name="div")
         trailers = BeautifulSoup(page, parseOnlyThese=list)
         
@@ -110,13 +114,13 @@ class YouTubeScraperCore:
                     
                     if (item):
                         item["thumbnail"] = trailer.div.div.a.span.img['src'] 
-                        vobjects.append(item)
+                        yobjects.append(item)
                         
                 trailer = trailer.findNextSibling(name="div")
+        if (not yobjects):
+            return (yobjects, 500)
         
-        print repr(vobjects)
-                
-        return vobjects
+        return (yobjects, 200)
 
     def _fetchPage(self, feed, params = {}):
         url = urllib2.Request(feed)
@@ -127,7 +131,7 @@ class YouTubeScraperCore:
         con.close()
         return page
     
-    def scrapeDiscoTop25(self, params):
+    def scrapeDiscoTop25(self, params = {}):
         get = params.get
         url = self.urls["disco_main"]
         page = self._fetchPage(url, params)
@@ -145,7 +149,7 @@ class YouTubeScraperCore:
 
         return ("Scraper failed", 500)
         
-    def scrapeDiscoTopArtist(self, params):
+    def scrapeDiscoTopArtist(self, params = {}):
         get = params.get
         url = self.urls["disco_main"]
         page = self._fetchPage(url, params)
@@ -165,43 +169,24 @@ class YouTubeScraperCore:
                 
         return (yobjects, 200)
     
+    def scrapeTrailers(self, params = {}):
+        get = params.get
+        url = self.urls[get("scraper")]
+        page = self._fetchPage(url, params)
+        if (get("scraper") == "latest_trailers"):
+            return self.scrapeTrailersListFormat(page, params)
+        else:
+            return self.scrapeTrailersGridFormat(page, params)
+        
     def scrape(self, params = {}):
         get = params.get
         if (get("scraper") == "disco_top_25"):
             return self.scrapeDiscoTop25(params)
         if (get("scraper") == "disco_top_artist"):
             return self.scrapeDiscoTopArtist(params)
+        if (get("scraper", "").find("trailers") > -1):
+            return self.scrapeTrailers(params)
     
 if __name__ == '__main__':
-    scraper = YouTubeScraperCore()
-    trailers_url = "http://www.youtube.com/trailers?s=tr"
-    
-    print "In Theaters"
-    url = trailers_url + "it"
-    page = scraper._fetchPage(url)
-    scraper.scrapeTrailersGridFormat(page)
-    
-    print " "
-    print "Popular"
-    url = trailers_url + "p"
-    page = scraper._fetchPage(url)
-    scraper.scrapeTrailersGridFormat(page)
-    
-    print " "
-    print "Opening Soon"
-    url = trailers_url + "os"
-    page = scraper._fetchPage(url)
-    scraper.scrapeTrailersGridFormat(page)
-    
-    print " "
-    print "Latest"
-    url = trailers_url
-    page = scraper._fetchPage(url)
-    scraper.scrapeTrailersListFormat(page)
-
-    print " " 
-    search_query = "Rihanna"
-    print "Disco Search for " + search_query 
-    scraper.searchDisco(search_query)
 
     sys.exit(0);
