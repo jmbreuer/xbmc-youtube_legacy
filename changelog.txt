@@ -5,8 +5,6 @@
 - Scraper for YouTube Disco - Basic done
 - Test refactor of YouTube Navigation - henrik and tobias that lazy bastard..
 - Change interfaces in core to use params (this would again reduce much of the unnessecary remapping logic in navigation and reduce code duplication in core)? - henrik
-- Private videos requires genneralised login function with shorter timeout (3-6 second) on requests - tobias
-- All functions should be able to loop on internal youtube errors - tobias
 - Procratinator - check up on thread
 
 [B]Errata[/B]
@@ -18,6 +16,9 @@
 - XBMC has Excessive Memory use after running the plugin for prolonged periods of time
 
 [B]Youtube 1.8.1[/B]
+- Refactored core functions for stability and readability.
+- Loop all url requests 5 times.
+- Added timeout option in settings
 - Remove remapping of variable names between core and navigation
 - Added sorting options (title, upload date, rating, runtime)
 - Added "More videos by User" option as requested by spiff

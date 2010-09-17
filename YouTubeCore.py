@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, urllib, urllib2, re, os, cookielib, string
+import sys, urllib, urllib2, re, os, cookielib, string, socket
 from xml.dom.minidom import parseString
 
 #import elementtree
@@ -45,6 +45,10 @@ class YouTubeCore(object):
 	#===============================================================================
 	
 	def __init__(self):
+		timeout = self.__settings__.getSetting( "timeout" )
+		if not timeout:
+			timeout = "5"
+		socket.setdefaulttimeout(float(timeout))
 		return None
 		
 	def interrogate(self, item):
