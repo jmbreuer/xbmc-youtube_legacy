@@ -2,6 +2,7 @@
 - Add Play all where we currently have queue folder.. (function basically queues alle video items and starts playback of the first) - tobias
 - Fix Sort option so that original sorting can be restored (less annoying, but still..) - done?
 - Scraper for exploring youtube categories - tobias
+- channel thumbs seem to have gotten alot uglier?..
 - Scraper for YouTube Trailers - POC done
 - Scraper for YouTube Disco - POC done
 - Add select video quality pr video item as requested by nektarinos - henrik
