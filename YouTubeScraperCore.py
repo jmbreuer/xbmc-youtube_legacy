@@ -49,13 +49,15 @@ class YouTubeScraperCore:
     
     def searchDisco(self, query, params = {}):
         get = params.get
-        url = self.urls["disco_search"] % query
+        url = self.urls["disco_search"] % urllib.quote_plus(query)
+        print "search url " + url
         page = self._fetchPage(url)
         
         if (page.find("watch?") != -1):
             items = []
             page = page[page.find("/watch?"):page.rfind('"')]
             url = self.urls["main"] + page
+            print "search result url " + url
             page = self._fetchPage(url)
             
             list = SoupStrainer(id="quicklist", name="div")
@@ -63,7 +65,8 @@ class YouTubeScraperCore:
             if (len(ajax) > 0):
                 if (ajax.div["data-active-ajax-url"]):
                     url = self.urls["main"] + ajax.div["data-active-ajax-url"]
-            
+                    print "ajax url " + url
+                
                 page = self._fetchPage(url)
                 video_list = SoupStrainer(name="ol")
                 videos = BeautifulSoup(page, parseOnlyThese=video_list)
