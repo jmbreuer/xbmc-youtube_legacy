@@ -157,19 +157,17 @@ class YouTubeCore(object):
 			print self.__plugin__ + " search: " + repr(query) + " - page: " + repr(page)
 		per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
 		safe_search = ("none", "moderate", "strict" ) [int( self.__settings__.getSetting( "safe_search" ) ) ]
-		link = "http://gdata.youtube.com/feeds/api/videos?" + urllib.urlencode({'q': query}) + "&safeSearch=" + safe_search + "&start-index=" + str( per_page * int(page) + 1) + "&max-results=" + repr(per_page)
+		start_index = per_page * int(page) + 1
+	
 		try:
 			authors = eval(self.__settings__.getSetting("stored_searches_author"))
-		except:
-			authors = {}
-		if len(authors) > 0:
-			print self.__plugin__ + " search test empty searches"
-			print authors
 			if query in authors:
-				link += "&" + urllib.urlencode({'author': authors[query]})
-			print link
+				author = "&" + urllib.urlencode({'author': authors[query]})
+		except:
+			author = ""
 
-		( result, status ) = self._fetchPageAPI(link)
+		link = "http://gdata.youtube.com/feeds/api/videos?q=%s&safeSearch=%s&start-index=%s&max-results=%s" % ( urllib.quote_plus(query), safe_search, start_index, per_page)
+		( result, status ) = self._fetchPage(link, api = True)
 
 		if status != 200:
 			return ( result, status )
@@ -199,6 +197,7 @@ class YouTubeCore(object):
 			feed += "?"
 		else:
 			feed += "&"
+			
 		feed += "start-index=" + str( per_page * int(page) + 1) + "&max-results=" + repr(per_page)
 			
 		if (feed.find("standardfeeds") > 0):
@@ -206,8 +205,7 @@ class YouTubeCore(object):
 			if (region):
 				feed = feed.replace("/standardfeeds/", "/standardfeeds/"+ region + "/")
 
-
-                ( result, status ) = self._fetchPageAPI(feed)
+                ( result, status ) = self._fetchPage(feed, api = True)
 
 		if status != 200:
 			return ( result, status )
@@ -243,57 +241,21 @@ class YouTubeCore(object):
 		feed += "start-index=" + str( per_page * int(page) + 1) + "&max-results=" + repr(per_page)
 		feed = feed.replace(" ", "+")
 		
-		url = urllib2.Request(feed)
-		url.add_header('User-Agent', self.USERAGENT)
-		url.add_header('GData-Version', 2)
-		url.add_header('Authorization', 'GoogleLogin auth=' + auth);
-		url.add_header('X-GData-Key', 'key=' + self.APIKEY)
-		try:
+		( result, status ) = self._fetchPage(feed, auth = True)
+
+		if status != 200:
+			return ( result, status)
+
+		result = self._getvideoinfo(result)
+
+		if len(result) > 0:
 			if self.__dbg__:
-				print self.__plugin__ + " list - url: " + repr(feed)
-			con = urllib2.urlopen(url);
-			result = con.read()
-			con.close()
-
-			if self.__dbgv__:
-				print self.__plugin__ + " list result: " + repr(result)
-
-			result = self._getvideoinfo(result)
-
-			if len(result) > 0:
-				if self.__dbg__:
-					print self.__plugin__ + " list done :" + str(len(result))
-				return (result, 200)
-			else:
-				if self.__dbg__:
-					print self.__plugin__ + " list done with no results"
-				return (self.__language__(30602), 303)
-
-		except urllib2.HTTPError, e:
-			error = str(e)
-			if ( error.find("401") > 0 and retry ):
-				if self.login():
-					if self.__dbg__:
-						print self.__plugin__ + " list done: retrying"
-					return self.list(feed, page, False)
-				else:
-					if self.__dbg__:
-						print self.__plugin__ + " list done: retrying failed because login failed"
-					return ( error, 303 )
-			elif ( error.find("403") > 0 ):
-				# Happens if a user has subscriped to a user and the user has no uploads
-				print self.__plugin__ + ' list ERROR: %s::%s (%d) - %s' % (self.__class__.__name__ , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
-				return (self.__language__(30601), 303)
-			else:
-				if self.__dbg__:
-					print self.__plugin__ + " list except: " + error
-				return ( error, 303 )
-		except:
+				print self.__plugin__ + " list done :" + str(len(result))
+			return (result, 200)
+		else:
 			if self.__dbg__:
-				print self.__plugin__ + " list uncaught exception dumping result"
-				print self.__plugin__ + " list result: " + repr(result)
-				print self.__plugin__ + ' list ERROR: %s::%s (%d) - %s' % (self.__class__.__name__ , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
-			return ( [], 500 )
+				print self.__plugin__ + " list done with no results"
+			return (self.__language__(30602), 303)
 
 	def delete_favorite(self, obj):
 		delete_url = "http://gdata.youtube.com/feeds/api/users/default/favorites/%s" % obj
@@ -340,43 +302,11 @@ class YouTubeCore(object):
 		else:
 			link += "&"
 		link += "start-index=" + str( per_page * int(page) + 1) + "&max-results=" + repr(per_page)
-
-		url = urllib2.Request(link)
-		url.add_header('User-Agent', self.USERAGENT)
-		url.add_header('GData-Version', 2)
-		url.add_header('Authorization', 'GoogleLogin auth=' + auth);
-		url.add_header('X-GData-Key', 'key=' + self.APIKEY);
 		
-		try:
-			if self.__dbg__:
-				print self.__plugin__ + " playlists - url: " + repr(link)
-			con = urllib2.urlopen(url);
-			result = con.read()
-			con.close()
-		except urllib2.HTTPError, e:
-			error = str(e)
-			if ( error.find("401") > 0 and retry ):
-				if self.login():
-					if self.__dbg__:
-						print self.__plugin__ + " playlist retrying"
-					return self.playlists(link, page, False)
-				else:
-					if self.__dbg__:
-						print self.__plugin__ + " playlist retrying failed because login failed"
-					return ( error, 303 )
-				
-			if self.__dbg__:
-				print self.__plugin__ + " playlist except: " + error
-			return ( error, 303 )
-		except:
-			if self.__dbg__:
-				print self.__plugin__ + " playlist uncaught exception dumping result"
-				print self.__plugin__ + " playlist result: " + repr(result)
-				print self.__plugin__ + ' playlist ERROR: %s::%s (%d) - %s' % (self.__class__.__name__ , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])	
-			return ( [], 500 )
+		( result, status ) = self._fetchPage(link, auth = True)
 
-		if self.__dbgv__:
-			print self.__plugin__ + " playlist result: " + repr(result)
+		if status != 200:
+			return ( result, status )
 
 		dom = parseString(result);
 		links = dom.getElementsByTagName("link");
@@ -622,7 +552,7 @@ class YouTubeCore(object):
 				failed.append(item)
 				
 			if ( counter > 9 or item == items[len(items)-1] ):
-				( result, status ) = self._fetchPageAPI("http://gdata.youtube.com/feeds/api/videos?q=" + link)
+				( result, status ) = self._fetchPage("http://gdata.youtube.com/feeds/api/videos?q=" + link, api = True)
 				
 				if status != 200:
 					return ( result, status )
@@ -655,68 +585,75 @@ class YouTubeCore(object):
 	#
 	#===============================================================================
 
-	def _fetchPage(self, link):
+	def _fetchPage(self, link, api = False, auth=False, login=False, error = 0):
 		if self.__dbg__:
 			print self.__plugin__ + " fetching page : " + link
 			
 		request = urllib2.Request(link)
-		request.add_header('User-Agent', 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; .NET CLR 1.1.4322; .NET CLR 2.0.50727)')
+
+		if api:
+			request.add_header('GData-Version', 2)
+		else:
+			request.add_header('User-Agent', 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; .NET CLR 1.1.4322; .NET CLR 2.0.50727)')
+
+                if ( login ):
+			# Get a new LOGIN_INFO cookie (for some reason the old one will fail) 
+			if ( self._httpLogin() ):
+				request.add_header('Cookie', 'LOGIN_INFO=' + self.__settings__.getSetting( "login_info" ) )
+			else:
+				if self.__dbg__:
+					print self.__plugin__ + " _fetchPage _httpLogin failed"
+
+		if auth:
+			authkey = self._getAuth()
+			if ( not authkey ):
+				if self.__dbg__:
+					print self.__plugin__ + " _fetchPage couldn't set auth "
+				# Lets see if it isn't better to just let it try without auth. 
+				#return ( self.__language__(30609) , 303 )
+													
+			request.add_header('Authorization', 'GoogleLogin auth=' + authkey)
+			request.add_header('X-GData-Key', 'key=' + self.APIKEY)
 		
 		try:
 			con = urllib2.urlopen(request)
 			result = con.read()
 			con.close()
 			return ( result, 200 )
+		
 		except urllib2.HTTPError, e:
 			error = str(e)
-			if self.__dbg__:
-				print self.__plugin__ + " _fetchPage except HTTPError: " + error
-			return ( error, 303 )
+			
+			if ( error.find("401") > 0 and retry ):
+				if error > 0:				
+					if self.__dbg__:
+						print self.__plugin__ + " _fetcPage retrying done: retrying"
+
+					# Try loging in.
+					self.login()
+					return self._fetchPage(link, api, auth, login, error +1)
+				elif ( error.find("403") > 0 ):
+					# Happens if a user has subscriped to a user and the user has no uploads
+					print self.__plugin__ + ' list ERROR: %s::%s (%d) - %s' % (self.__class__.__name__ , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
+					return (self.__language__(30601), 303)
+				else:
+					if self.__dbg__:
+						print self.__plugin__ + " _fetchPage except: " + error
+					return ( error, 303 )
+							
 		except:
 			if self.__dbg__:
 				print self.__plugin__ + ' _fetchPage ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
 												 , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
 				
-			return ( '', 500 )
-			
-        def _fetchPageAPI(self, link):
-		if self.__dbg__:
-			print self.__plugin__ + " fetching API : " + link
-			
-		request = urllib2.Request(link)
-		request.add_header('User-Agent', 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; .NET CLR 1.1.4322; .NET CLR 2.0.50727)')
-		request.add_header('GData-Version', 2)
-		
-		try:
-			con = urllib2.urlopen(request)
-			result = con.read()
-			con.close()
-			return ( result, 200 )
-		except urllib2.HTTPError, e:
-			error = str(e)
-			if self.__dbg__:
-				print self.__plugin__ + " _fetchPage except HTTPError: " + error
-			return ( error, 303 )
-		except:
-			if self.__dbg__:
-				print self.__plugin__ + ' _fetchPage ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
-												 , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
 			return ( '', 500 )
 		
 	def _extractVariables(self, videoid, login = False):
 		if self.__dbg__:
 			print self.__plugin__ + " extractVariables : " + repr(videoid)
-		htmlSource = ""
 
-		if ( login ):
-			# Get a new LOGIN_INFO cookie (for some reason the old one will fail) and use request url again.
-			if ( self._httpLogin() ):
-				request.add_header('Cookie', 'LOGIN_INFO=' + self.__settings__.getSetting( "login_info" ) )
-			else:
-				if self.__dbg__:
-					print self.__plugin__ + " _extractVariables login failed"
-				
-		( htmlSource, status ) = self._fetchPage('http://www.youtube.com/watch?v=' +videoid + "&safeSearch=none&hl=en_US")
+		# Should hl=en_US be there?
+		( htmlSource, status ) = self._fetchPage('http://www.youtube.com/watch?v=' +videoid + "&safeSearch=none&hl=en_US", login = True)
 
 		if status != 200:
 			return ( htmlSource, status, status )
@@ -987,15 +924,7 @@ class YouTubeCore(object):
 		if self.__dbg__:
 			print self.__plugin__ + " _getAlert"
 
-		link = 'http://www.youtube.com/watch?v=' +videoid + "&safeSearch=none"
-		request = urllib2.Request(link);
-		request.add_header('User-Agent', self.USERAGENT)
-		
-		if ( self._httpLogin() ):
-			request.add_header('Cookie', 'LOGIN_INFO=' + self.__settings__.getSetting( "login_info" ) )
-
-		con = urllib2.urlopen(request);
-		http_result = con.read();
+		http_result = self._fetchPage('http://www.youtube.com/watch?v=' +videoid + "&safeSearch=none", login = True)
 		
 		start = http_result.find('class="yt-alert-content">')
 		if start == -1:
@@ -1018,19 +947,11 @@ class YouTubeCore(object):
 		if self.__dbg__:
 			print self.__plugin__ + " _get_details: " + repr(videoid)
 
-		link = "http://gdata.youtube.com/feeds/api/videos/" + videoid
-		url = urllib2.Request(link);
-		url.add_header('User-Agent', self.USERAGENT);
-		url.add_header('GData-Version', 2)
-		try:
-			if self.__dbg__:
-				print self.__plugin__ + " _get_details - url: " + repr(link)
-							
-			con = urllib2.urlopen(url);
-			result = con.read();
-			con.close()
+		( result, status ) = self._fetchPage("http://gdata.youtube.com/feeds/api/videos/" + videoid, api = True)
+
+		if status == 200:
 			result = self._getvideoinfo(result)
-			
+		
 			if len(result) == 0:
 				if self.__dbg__:
 					print self.__plugin__ + " _get_details result was empty"
@@ -1039,43 +960,25 @@ class YouTubeCore(object):
 				if self.__dbg__:
 					print self.__plugin__ + " _get_details done"
 				return result[0];
-			
-		except urllib2.URLError, err:
+		else:
 			if self.__dbg__:
-				print self.__plugin__ + " _get_details except: " + str(err)
-
+				print self.__plugin__ + " _get_details got bad status: " + str(status)
 			video = {}
 			video['Title'] = "Error"
 			video['videoid'] = videoid
 			video['thumbnail'] = "Error"
 			video['video_url'] = False
 
-			if (err.code == 403):
-				# 403 == Forbidden
-				# Happens on "removed by user" and "This video has been removed due to terms of use violation." and "This video is private
-				
+			if (status == 403):
+				# Override the 403 passed from _fetchPage with error provided by youtube.
 				video['apierror'] = self._getAlert(videoid)
 				return video
-
-			if (err.code == 503):
-				if self.__dbg__:
-					print self.__plugin__ + " _get_details exception 503: " + str(err)
+			elif (status == 503):
 				video['apierror'] = self.__language__(30605)
 				return video
 			else:
-				if self.__dbg__:
-					print self.__plugin__ + " _get_details uncaught except: [%s] %s" % ( err.code, str(err) )
-				video['apierror'] = self.__language__(30606) + str(err.code)
+				video['apierror'] = self.__language__(30606) + str(status)
 				return video
-
-		except:
-			if self.__dbg__:
-				print self.__plugin__ + " _get_details uncaught exception"
-				print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
-								   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
-				
-			return False
-		
 		
 	def _httpLogin(self, error = 0):
 		if self.__dbg__:
