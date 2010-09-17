@@ -168,35 +168,22 @@ class YouTubeCore(object):
 			if query in authors:
 				link += "&" + urllib.urlencode({'author': authors[query]})
 			print link
-		url = urllib2.Request(link);
-		url.add_header('User-Agent', self.USERAGENT);
-		url.add_header('GData-Version', 2)
-		try:
+
+		( result, status ) = self._fetchPageAPI(link)
+
+		if status != 200:
+			return ( result, status )
+
+		result = self._getvideoinfo(result)
+		
+		if len(result) > 0:
 			if self.__dbg__:
-				print self.__plugin__ + " search - url: " + repr(link)
-								
-			con = urllib2.urlopen(url);
-			result = self._getvideoinfo(con.read())
-			con.close()
-			if len(result) > 0:
-				if self.__dbg__:
-					print self.__plugin__ + " search done :" + str(len(result))
-				return (result, 200)
-			else:
-				if self.__dbg__:
-					print self.__plugin__ + " search done with no results"
-				return (self.__language__(30601), 303)
-		except urllib2.HTTPError, e:
-			error = str(e)
+				print self.__plugin__ + " search done :" + str(len(result))
+			return (result, 200)
+		else:
 			if self.__dbg__:
-				print self.__plugin__ + " search failed, hit except: " + error
-			return ( error, 303 )
-		except:
-			if self.__dbg__:
-				print self.__plugin__ + " search failed with uncaught exception"
-				print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
-								   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
-			return ( [], 500 )
+				print self.__plugin__ + " search done with no results"
+			return (self.__language__(30601), 303)
 
 	def feeds(self, feed, page = "0" ):
 		if self.__dbg__:
@@ -219,44 +206,22 @@ class YouTubeCore(object):
 			if (region):
 				feed = feed.replace("/standardfeeds/", "/standardfeeds/"+ region + "/")
 
-		if self.__dbg__:
-			print self.__plugin__ + " feeds : " + repr(feed) + " page: " + repr(page)
-			
-		url = urllib2.Request(feed);
-		url.add_header('User-Agent', self.USERAGENT);
-		url.add_header('GData-Version', 2)
-		try:
-			if self.__dbg__:
-				print self.__plugin__ + " feeds - url: " + repr(feed)
-								
-			con = urllib2.urlopen(url);
-			result = self._getvideoinfo(con.read())
-			if self.__dbgv__:
-				print self.__plugin__ + " feeds result: " + repr(result)
 
-			con.close()
-			if len(result) > 0:
-				if self.__dbg__:
-					print self.__plugin__ + " feeds done : " + str(len(result))
-				return ( result, 200 )
-			else:
-				if self.__dbg__:
-					print self.__plugin__ + " feeds done with no results"
-				return (self.__language__(30602), 303)
-			
-		except urllib2.HTTPError, e:
-			error = str(e)
+                ( result, status ) = self._fetchPageAPI(feed)
+
+		if status != 200:
+			return ( result, status )
+
+		result = self._getvideoinfo(result)
+					
+		if len(result) > 0:
 			if self.__dbg__:
-				print self.__plugin__ + " feed failed, hit except: " + error
-			return ( error, 303 )										
-		except:
+				print self.__plugin__ + " feeds done : " + str(len(result))
+			return ( result, 200 )
+		else:
 			if self.__dbg__:
-				print self.__plugin__ + " feed failed with uncaught exception dumping result"
-				print self.__plugin__ + " feed result: " + repr(result)
-				print self.__plugin__ + ' feed ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
-								   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
-				
-			return ( [], 500 )
+				print self.__plugin__ + " feeds done with no results"
+			return (self.__language__(30602), 303)
 	
 	def list(self, feed, page = "0", retry = True):
 		if self.__dbg__:
@@ -285,7 +250,7 @@ class YouTubeCore(object):
 		url.add_header('X-GData-Key', 'key=' + self.APIKEY)
 		try:
 			if self.__dbg__:
-				print self.__plugin__ + " list - url: " + repr(link)
+				print self.__plugin__ + " list - url: " + repr(feed)
 			con = urllib2.urlopen(url);
 			result = con.read()
 			con.close()
@@ -451,6 +416,7 @@ class YouTubeCore(object):
 			print self.__plugin__ + " playlist done"
 				
 		return ( playobjects, 200 );
+	
 	def downloadVideo(self, video):
 		if self.__dbg__:
 			print self.__plugin__ + " downloadVideo : " + video['Title']
@@ -656,27 +622,12 @@ class YouTubeCore(object):
 				failed.append(item)
 				
 			if ( counter > 9 or item == items[len(items)-1] ):
-				#link += "&restriction=US"
-				url = urllib2.Request("http://gdata.youtube.com/feeds/api/videos?q=" + link);
-				url.add_header('User-Agent', self.USERAGENT);
-				url.add_header('GData-Version', 2)
-
-				try:
-					con = urllib2.urlopen(url);
-					value = con.read()
-					con.close()
-				except urllib2.HTTPError, e:
-					if self.__dbg__:
-						print self.__plugin__ + " _get_batch_details except: " + str(e)
-					return ( str(e), 303 )
-				except:
-					if self.__dbg__:
-						print self.__plugin__ + " _get_batch_details caught unknown exception"
-						print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
-										   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
-					return ( "", 500 )
+				( result, status ) = self._fetchPageAPI("http://gdata.youtube.com/feeds/api/videos?q=" + link)
 				
-				temp = self._getvideoinfo(value)
+				if status != 200:
+					return ( result, status )
+				
+				temp = self._getvideoinfo(result)
 				ytobjects += temp[0:counter]
 				counter = 0
 				link = ""
@@ -704,66 +655,97 @@ class YouTubeCore(object):
 	#
 	#===============================================================================
 
+	def _fetchPage(self, link):
+		if self.__dbg__:
+			print self.__plugin__ + " fetching page : " + link
+			
+		request = urllib2.Request(link)
+		request.add_header('User-Agent', 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; .NET CLR 1.1.4322; .NET CLR 2.0.50727)')
+		
+		try:
+			con = urllib2.urlopen(request)
+			result = con.read()
+			con.close()
+			return ( result, 200 )
+		except urllib2.HTTPError, e:
+			error = str(e)
+			if self.__dbg__:
+				print self.__plugin__ + " _fetchPage except HTTPError: " + error
+			return ( error, 303 )
+		except:
+			if self.__dbg__:
+				print self.__plugin__ + ' _fetchPage ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
+												 , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
+				
+			return ( '', 500 )
+			
+        def _fetchPageAPI(self, link):
+		if self.__dbg__:
+			print self.__plugin__ + " fetching API : " + link
+			
+		request = urllib2.Request(link)
+		request.add_header('User-Agent', 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; .NET CLR 1.1.4322; .NET CLR 2.0.50727)')
+		request.add_header('GData-Version', 2)
+		
+		try:
+			con = urllib2.urlopen(request)
+			result = con.read()
+			con.close()
+			return ( result, 200 )
+		except urllib2.HTTPError, e:
+			error = str(e)
+			if self.__dbg__:
+				print self.__plugin__ + " _fetchPage except HTTPError: " + error
+			return ( error, 303 )
+		except:
+			if self.__dbg__:
+				print self.__plugin__ + ' _fetchPage ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
+												 , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
+			return ( '', 500 )
+		
 	def _extractVariables(self, videoid, login = False):
 		if self.__dbg__:
 			print self.__plugin__ + " extractVariables : " + repr(videoid)
 		htmlSource = ""
-				
-		try:
-			link = 'http://www.youtube.com/watch?v=' +videoid + "&safeSearch=none&restriction=US&hl=en_US"
-			request = urllib2.Request(link);
-			request.add_header('User-Agent', 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; .NET CLR 1.1.4322; .NET CLR 2.0.50727)');
-			
-			if ( login ):
-				# Get a new LOGIN_INFO cookie (for some reason the old one will fail) and use request url again.
-				if ( self._httpLogin() ):
-					request.add_header('Cookie', 'LOGIN_INFO=' + self.__settings__.getSetting( "login_info" ) )
-				else:
-					if self.__dbg__:
-						print self.__plugin__ + " _extractVariables login failed"
-				
-			con = urllib2.urlopen(request);
-			htmlSource = con.read();
-			con.close()
-			if self.__dbgv__:
-				print self.__plugin__ + " _extractVariables result: " + repr(htmlSource)
 
-			swf_url = False
-			fmtSource = re.findall('"fmt_url_map": "([^"]+)"', htmlSource);
-			if fmtSource:
-				stream_map = "False"
+		if ( login ):
+			# Get a new LOGIN_INFO cookie (for some reason the old one will fail) and use request url again.
+			if ( self._httpLogin() ):
+				request.add_header('Cookie', 'LOGIN_INFO=' + self.__settings__.getSetting( "login_info" ) )
 			else:
-				# Release
-				#if self.__dbg__:
-				#	print self.__plugin__ + " _extractVariables exited. RTMP disabled."
-				#return ( self.__language__(30608), self.__language__(30608), 303 )
+				if self.__dbg__:
+					print self.__plugin__ + " _extractVariables login failed"
 				
-				# Development
-				swfConfig = re.findall('var swfConfig = {"url": "(.*)", "min.*};', htmlSource)
-				if len(swfConfig) > 0:
-					swf_url = swfConfig[0].replace("\\", "")
-						
-				fmtSource = re.findall('"fmt_stream_map": "([^"]+)"', htmlSource);
-			       	stream_map = 'True'
+		( htmlSource, status ) = self._fetchPage('http://www.youtube.com/watch?v=' +videoid + "&safeSearch=none&hl=en_US")
+
+		if status != 200:
+			return ( htmlSource, status, status )
+		
+		if self.__dbgv__:
+			print self.__plugin__ + " _extractVariables result: " + repr(htmlSource)
+
+		swf_url = False
+		fmtSource = re.findall('"fmt_url_map": "([^"]+)"', htmlSource);
+		if fmtSource:
+			stream_map = "False"
+		else:
+			# Release
+			#if self.__dbg__:
+			#	print self.__plugin__ + " _extractVariables exited. RTMP disabled."
+			#return ( self.__language__(30608), self.__language__(30608), 303 )
+				
+			# Development
+			swfConfig = re.findall('var swfConfig = {"url": "(.*)", "min.*};', htmlSource)
+			if len(swfConfig) > 0:
+				swf_url = swfConfig[0].replace("\\", "")
+				
+			fmtSource = re.findall('"fmt_stream_map": "([^"]+)"', htmlSource);
+			stream_map = 'True'
 			
-			if self.__dbg__:
-				print self.__plugin__ + " extractVariables done"
+		if self.__dbg__:
+			print self.__plugin__ + " extractVariables done"
 				
-			return (fmtSource, swf_url, stream_map)
-				
-		except urllib2.HTTPError, e:
-			error = str(e)
-			if self.__dbg__:
-				print self.__plugin__ + " scrapeVideos except: " + error
-			return ( error, 303 )
-		except:
-			if self.__dbg__:
-				print self.__plugin__ + " _extractVariables uncaught exception dumping htmlSource"
-				print self.__plugin__ + " _extractVariables result: " + repr(htmlSource)
-				print self.__plugin__ + ' _extractVariables ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
-								   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
-				
-			return ( '', 500 )
+		return (fmtSource, swf_url, stream_map)
 
 	def _getAuth(self):
 		if self.__dbg__:
@@ -1036,7 +1018,7 @@ class YouTubeCore(object):
 		if self.__dbg__:
 			print self.__plugin__ + " _get_details: " + repr(videoid)
 
-		link = "http://gdata.youtube.com/feeds/api/videos/" + videoid + "?restriction=89.150.119.145"
+		link = "http://gdata.youtube.com/feeds/api/videos/" + videoid
 		url = urllib2.Request(link);
 		url.add_header('User-Agent', self.USERAGENT);
 		url.add_header('GData-Version', 2)
