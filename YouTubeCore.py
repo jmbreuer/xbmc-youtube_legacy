@@ -209,7 +209,7 @@ class YouTubeCore(object):
 			if (region):
 				feed = feed.replace("/standardfeeds/", "/standardfeeds/"+ region + "/")
 
-                ( result, status ) = self._fetchPage(feed, api = True)
+				( result, status ) = self._fetchPage(feed, api = True)
 
 		if status != 200:
 			return ( result, status )
@@ -600,7 +600,7 @@ class YouTubeCore(object):
 		else:
 			request.add_header('User-Agent', 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; .NET CLR 1.1.4322; .NET CLR 2.0.50727)')
 
-                if ( login ):
+		if ( login ):
 			# Get a new LOGIN_INFO cookie (for some reason the old one will fail) 
 			if ( self._httpLogin() ):
 				request.add_header('Cookie', 'LOGIN_INFO=' + self.__settings__.getSetting( "login_info" ) )
@@ -626,7 +626,6 @@ class YouTubeCore(object):
 			return ( result, 200 )
 		
 		except urllib2.HTTPError, e:
-			import time
 			err = str(e)
 			
 			if ( err.find("401") > 0 and error == 0 ):
@@ -841,7 +840,7 @@ class YouTubeCore(object):
 			for node in entries:
 				video = {};
 
-                                video['videoid'] = self._getNodeValue(node, "yt:videoid", "missing")
+				video['videoid'] = self._getNodeValue(node, "yt:videoid", "missing")
 				
 				# http://code.google.com/intl/en/apis/youtube/2.0/reference.html#youtube_data_api_tag_yt:state <- more reason codes
 				# requesterRegion - This video is not available in your region. <- fails
@@ -874,7 +873,7 @@ class YouTubeCore(object):
 							if self.__dbg__:
 								print self.__plugin__ + " _getvideoinfo hit else"
 							video['reasonCode'] = reason
-						       	video['reasonValue'] = value
+							video['reasonValue'] = value
 							
 				if ( video['videoid'] == "missing" ):
 					video['videolink'] = node.getElementsByTagName("link").item(0).getAttribute('href')
