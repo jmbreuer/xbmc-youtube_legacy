@@ -1,5 +1,5 @@
 [B]TODO:[/B]
-- Add Play all where we currently have queue folder.. (function basically queues alle video items and starts playback of the first) - tobias
+- Add Play all where we currently have queue folder.. (function basically queues all video-items and starts playback of the first) - tobias
 - Scraper for exploring youtube categories - tobias
 - Scraper for YouTube Trailers - Basic done
 - Scraper for YouTube Disco - Basic done
