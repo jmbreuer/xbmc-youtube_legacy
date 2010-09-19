@@ -119,7 +119,7 @@
     <string id="30505">Refine to user</string>
     <string id="30506">Delete from My Favorites</string>
     <string id="30507">Queue folder</string>
-    <string id="30508">Delete saved search</string>
+    <string id="30508">Delete search</string>
     <string id="30509">More Results</string>
     <string id="30510">Change subscription to favorites</string>
     <string id="30511">Change subscription to uploads</string>
@@ -135,6 +135,8 @@
     <string id="30521">Play 720p</string>
     <string id="30522">Play SD only</string>
     <string id="30523">%s Disco!</string>
+    <string id="30524">Edit disco search</string>
+    <string id="30525">Delete disco search</string>
 
     <!-- messages -->
     <string id="30600">Error</string>
