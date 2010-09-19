@@ -30,8 +30,8 @@
     <string id="30027">Login..</string>
     <string id="30028">Change plugin settings</string>
     <string id="30029">Contact</string>
-    <string id="30030">Logged in</string>
-    <string id="30031">Login</string>
+    <string id="30030">Refreshing folder..</string>
+    <string id="30031">Login success</string>
     <string id="30032">YouTube Trailers</string>
     <string id="30033">Popular</string>
     <string id="30034">In Theaters</string>
@@ -39,7 +39,8 @@
     <string id="30036">Opening Soon</string>
     <string id="30037">YouTube Disco!</string>
     <string id="30038">Top 25</string>
-    <string id="30039">Most Popular Artists</string>
+    <string id="30039">Most popular artists</string>
+    <string id="30040">Disco search...</string>
 
      
     <!-- Plugin settings strings -->
@@ -134,6 +135,7 @@
     <string id="30520">Play 1080p</string>
     <string id="30521">Play 720p</string>
     <string id="30522">Play SD only</string>
+    <string id="30523">%s Disco!</string>
 
     <!-- messages -->
     <string id="30600">Error</string>
