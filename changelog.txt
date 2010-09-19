@@ -1,5 +1,6 @@
 [B]TODO:[/B]
 - Add Play all where we currently have queue folder.. (function basically queues all video-items and starts playback of the first) - tobias
+- The folders settings tab is reversed ie "Hide Feeds" (disabled) instead of Show Feeds (Enabled) this should be reversed (suggested by spiff, - and i agree Henrik)
 - Tobias broke listing of feeds :P
 - Scraper for exploring youtube categories - tobias
 - Scraper for YouTube Trailers - Basic done
@@ -15,10 +16,7 @@
 - playback of rtmpe streams not supported in release (Request by Team XBMC due to DMCA restrictions imposed by US Law).
 
 [B]Youtube 1.8.1[/B]
-- Refactored core functions for stability and readability.
-- Loop all url requests 5 times.
-- Added timeout option in settings
-- Remove remapping of variable names between core and navigation
+- Added timeout option in advanced settings
 - Added sorting options (title, upload date, rating, runtime)
 - Added Scraper for YouTube Disco music searches
 - Added "More videos by User" option as requested by spiff
@@ -27,10 +25,13 @@
 - Added advanced setting to enable users to select playback quality pr video item in the context menu as requested by Nektarios
 - Added Nicer default icons for video items
 - Added Nicer default icons for searches
-- Refactor of navigation layer
+- Refactored core functions for stability and readability.
+- Loop all url requests upto 5 times, should increase stability.
+- Refactor of navigation layer, hopefully simplifying maintainance
+- Removed unnessecary remapping of variable names between core and navigation
 
 [B]Version 1.8.0[/B]
-- Solved confusion cause by multiple licens files (removed GPL v2 license and renamed GPL v3 to LICENSE.txt)
+- Solved confusion caused by multiple licens files (removed GPL v2 license and renamed GPL v3 to LICENSE.txt)
 - Version bump to replace old YouTube plugin
 
 [B]Version 1.1.0[/B]
