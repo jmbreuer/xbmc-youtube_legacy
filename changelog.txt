@@ -8,12 +8,11 @@
 - Procratinator - check up on thread
 
 [B]Errata[/B]
-- [XBMC] Can't replay a video that has already been played, unless the folder is refreshed.
-- [XBMC] Thumbnails sometimes turns into folders.
-- [XBMC] When sorting items, it's impossible to get them to return to their original order, despite this being 
+- [XBMC] Thumbnails sometimes turns into black box or Folder (XBMC not detecting when thumbnail is set and defaulting to icon?)
+- [XBMC] When sorting items, it's impossible to get them to return to their original order.
+- [XBMC] has Excessive Memory use after running the plugin for prolonged periods of time 
 - Download of rtmpe streams not supported.
 - playback of rtmpe streams not supported in release (Request by Team XBMC due to DMCA restrictions imposed by US Law).
-- XBMC has Excessive Memory use after running the plugin for prolonged periods of time
 
 [B]Youtube 1.8.1[/B]
 - Refactored core functions for stability and readability.
