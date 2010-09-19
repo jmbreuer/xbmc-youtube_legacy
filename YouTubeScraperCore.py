@@ -270,9 +270,12 @@ class YouTubeScraperCore:
 				item = {}
 				item["search"] = artist.contents[0]
 				item["Title"] = artist.contents[0]
-				item["thumbnail"] = "discoball"
+				if (self.__settings__.getSetting("disco_search_" + artist.contents[0] + "_thumb")):
+					item["thumbnail"] = self.__settings__.getSetting("disco_search_" + artist.contents[0] + "_thumb")
+				else:
+					item["thumbnail"] = "discoball"
 				item["path"] = get("path")
-				item["action"] = "disco_search"
+				item["action"] = "search_disco"
 				yobjects.append(item)
 				
 		return (yobjects, 200)

@@ -709,14 +709,13 @@ class YouTubeNavigation:
 	def addActionListItem(self, params = {}, item_params = {}, size = 0):
 		get = params.get
 		item = item_params.get
-		folder = False
+		folder = True
 		icon = "DefaultFolder.png"
 		thumbnail = self.getThumbnail(item("thumbnail"))
 		listitem=xbmcgui.ListItem( item("Title"), iconImage=icon, thumbnailImage=thumbnail )
 		
-		if (item("action") == "search" or item("action") == "settings" or item("action") == "search_disco"):
-			folder = True
-		else:
+		if (item("action") == "playbyid"):
+			folder = False
 			listitem.setProperty('IsPlayable', 'true');
 			
 		url = '%s?path=%s&' % ( sys.argv[0], item("path") )
