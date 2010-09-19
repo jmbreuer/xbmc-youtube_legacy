@@ -12,7 +12,7 @@
   </extension>
   <extension point="xbmc.addon.metadata">
     <platform>all</platform>
-    <summary>You Tube</summary>
-    <description>Plugin that allows you to browse and view videos from everybodys favorite video site!</description>
+    <summary>YouTube video plugin</summary>
+    <description>Plugin that let's you to browse and play videos from everybody's favorite video site!</description>
   </extension>
 </addon>
