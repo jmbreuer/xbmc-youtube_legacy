@@ -103,8 +103,9 @@ class YouTubeScraperCore:
 				print self.__plugin__ + " _scrapeYouTubeData result: " + repr(result)
 			return ( "", 500 )
 	
-	def scrapeTrailersGridFormat (self, page, params = {}):
+	def scrapeTrailersGridFormat (self, params = {}):
 		get = params.get
+		page = int(get("page", "0"))
 		yobjects = []
 
 		list = SoupStrainer(id="popular-column", name="div")
@@ -133,23 +134,38 @@ class YouTubeScraperCore:
 		
 		return (yobjects, 200)
 	
-	def searchDisco(self, query, params = {}):
+	def searchDisco(self, params = {}):
 		get = params.get
-		url = self.urls["disco_search"] % urllib.quote_plus(query)
-		print "search url " + url
-		page = self._fetchPage(url)
 		
-		if (page.find("a=") != -1):
-			print "disco response"
-			page = page[page.find("a=") + 2:]
-			mix_list_id = page[:page.find("&")]
-			url = self.urls["disco_mix_list"] % mix_list_id
-			print url
-			page = self._fetchPage(url)
-			
-			return self._get_disco_list(page)
-		return ("", 500)
-
+		query = get("search")
+		query = urllib.unquote_plus(query)
+		
+		page = int(get("page", "0"))
+		per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
+		
+		existingVideos = self.__settings__.getSetting("disco_%s" % query)
+		
+		if ( page == 0 or existingVideos == ""):
+			( videos, result)  = self._get_disco_list(query)
+			if (result == 200):
+				self.__settings__.setSetting("disco_%s" % query, self.core.arrayToPipe(videos))
+		else:
+			videos = existingVideos.split("|")
+		
+		if ( per_page * ( page + 1 ) < len(videos) ):
+			next = 'true'
+		else:
+			next = 'false'
+		
+		subitems = videos[(per_page * page):(per_page * (page + 1))]
+		
+		( ytobjects, status ) = self.core._get_batch_details(subitems)
+		
+		if status == 200:
+			if (len(ytobjects) > 0):
+				ytobjects[len(ytobjects)-1]['next'] = next
+		
+		return (ytobjects, status)
 		
 	def scrapeTrailersListFormat (self, page, params = {}):
 		get = params.get		 
@@ -189,28 +205,39 @@ class YouTubeScraperCore:
 		con.close()
 		return page
 	
-	def _get_disco_list(self, page):
+	def _get_disco_list(self, query):
 		if self.__dbg__:
 			print self.__plugin__ + " _get_disco_list"
-				
-		try:
-			match = re.findall('.*?v=(.*)\&amp;a.*', page)
-			if match:
-				return self.core._get_batch_details(match)
-			else:
-				print self.__plugin__ + " _get_disco_list no match"
-				return ( self.__language__(30601), 303)
+			
+		url = self.urls["disco_search"] % urllib.quote_plus(query)
+		if (self.__dbg__):
+			print "Disco search url %s" % url
+		page = self._fetchPage(url)
 		
-		except urllib2.HTTPError, e:
-			if self.__dbg__:
-				print self.__plugin__ + " _get_disco_list except: " + str(e)
-			return ( str(e), 303 )
-		except:
-			if self.__dbg__:
-				print self.__plugin__ + " _get_disco_list caught unknown exception"
-				print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
-								   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
-			return ( "", 500 )
+		if (page.find("a=") != -1):
+			page = page[page.find("a=") + 2:]
+			mix_list_id = page[:page.find("&")]
+			url = self.urls["disco_mix_list"] % mix_list_id
+			if (self.__dbg__):
+				print "Disco respsonse url: %s" % url
+								
+			try:
+				page = self._fetchPage(url)
+				match = re.findall('.*?v=(.*)\&amp;a.*', page)
+				if match:
+					return (match, 200)
+				else:
+					return ( self.__language__(30601), 303)
+			except:
+				if self.__dbg__:
+					print self.__plugin__ + " _get_disco_list caught unknown exception"
+					print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__, sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
+				return ( "", 500 )
+		
+		if (self.__dbg__):
+			print self.__plugin__ + " _get_disco_list no match"
+			
+		return ( self.__language__(30601), 303)
 	
 	def scrapeDiscoTop25(self, params = {}):
 		get = params.get
