@@ -103,13 +103,12 @@ class YouTubeScraperCore:
 				print self.__plugin__ + " _scrapeYouTubeData result: " + repr(result)
 			return ( "", 500 )
 	
-	def scrapeTrailersGridFormat (self, params = {}):
+	def scrapeTrailersGridFormat(self, html, params = {}):
 		get = params.get
-		page = int(get("page", "0"))
 		yobjects = []
 
 		list = SoupStrainer(id="popular-column", name="div")
-		trailers = BeautifulSoup(page, parseOnlyThese=list)
+		trailers = BeautifulSoup(html, parseOnlyThese=list)
 		
 		if (len(trailers) > 0):
 			trailer = trailers.div.div
@@ -286,11 +285,11 @@ class YouTubeScraperCore:
 			url = self.urls[get("scraper")]
 		else :
 			url = self.urls["trailers"]
-		page = self._fetchPage(url, params)
+		html = self._fetchPage(url, params)
 		if (get("scraper") == "latest_trailers"):
-			return self.scrapeTrailersListFormat(page, params)
+			return self.scrapeTrailersListFormat(html, params)
 		else:
-			return self.scrapeTrailersGridFormat(page, params)
+			return self.scrapeTrailersGridFormat(html, params)
 		
 	def scrape(self, params = {}):
 		get = params.get
