@@ -76,7 +76,7 @@ class YouTubeNavigation:
 				  {'Title':__language__( 30036 )  ,'path':"/root/trailers/upcoming" , 'thumbnail':"trailers"		 , 'login':"false" , 'scraper':"upcoming_trailers" },
 				  {'Title':__language__( 30033 )  ,'path':"/root/trailers/popular"  , 'thumbnail':"trailers"		 , 'login':"false" , 'scraper':"popular_trailers" },
 				  {'Title':__language__( 30037 )  ,'path':"/root/disco"			 , 'thumbnail':"discoball"		, 'login':"false" },
-				  {'Title':__language__( 30007 )  ,'path':"/root/disco/search"	  , 'thumbnail':"search"		   , 'login':"false" , 'action':"disco_search"},
+				  {'Title':__language__( 30040 )  ,'path':"/root/disco/search"	  , 'thumbnail':"search"		   , 'login':"false" , 'action':"disco_search"},
 				  {'Title':__language__( 30038 )  ,'path':"/root/disco/top_25"	  , 'thumbnail':"discoball"		, 'login':"false" , 'scraper':"disco_top_25"},
 				  {'Title':__language__( 30039 )  ,'path':"/root/disco/popular"	 , 'thumbnail':"discoball"		, 'login':"false" , 'scraper':"disco_top_artist"},
 				  {'Title':__language__( 30019 )  ,'path':"/root/recommended"	   , 'thumbnail':"recommended"	  , 'login':"true"  , 'scraper':"recommended" },
@@ -370,12 +370,10 @@ class YouTubeNavigation:
 	def searchDisco(self, params = {}):
 		get = params.get
 		
-		if (get("search")):
-			query = urllib.unquote_plus(get("search"))
-		else:
-			query = self.getUserInput(self.__language__(30006), '')
+		if (not get("search")):
+			params["search"] = self.getUserInput(self.__language__(30006), '')
 			
-		(result, status) = scraper.searchDisco(query, params)
+		(result, status) = scraper.searchDisco(params)
 			
 		if (status != 200):
 			self.errorHandling(self.__language__(30006), result, status)
@@ -905,10 +903,16 @@ class YouTubeNavigation:
 					cm.append( ( self.__language__( 30503 ), 'XBMC.RunPlugin(%s?path=%s&action=add_favorite&videoid=%s&)' % ( sys.argv[0],  item("path"), item("videoid") ) ) )
 				if (get("external") == "true" or (get("feed") != "subscriptions_favorites" and get("feed") != "subscriptions_uploads")):
 					cm.append( ( self.__language__( 30512 ) % item("Studio"), 'XBMC.RunPlugin(%s?path=%s&channel=%s&action=add_subscription)' % ( sys.argv[0], item("path"), item("Studio") ) ) )		
+
+			studio = self.makeAscii(item("Studio"))
+			url_studio = urllib.quote_plus(studio)
 			
 			if (get("feed") != "subscriptions_favorites" and get("feed") != "subscriptions_uploads"):
-				cm.append( ( self.__language__( 30516 ) % item("Studio"), "XBMC.Container.Update(%s?path=%s&login=true&feed=subscriptions_uploads&view_mode=subscriptions_uploads&channel=%s)" % ( sys.argv[0],  get("path"), item("Studio") ) ) )
-							
+				cm.append( ( self.__language__( 30516 ) % studio, "XBMC.Container.Update(%s?path=%s&login=true&feed=subscriptions_uploads&view_mode=subscriptions_uploads&channel=%s)" % ( sys.argv[0],  get("path"), url_studio ) ) )
+			
+			if (get("action") == "disco_search"):
+				cm.append( ( self.__language__( 30523 ) % title, "XBMC.Container.Update(%s?path=%s&action=disco_search&search=%s)" % ( sys.argv[0],  get("path"), url_title ) ) )
+			
 			cm.append( ( self.__language__( 30514 ), "XBMC.Container.Update(%s?path=%s&action=search&search=%s)" % ( sys.argv[0],  get("path"), url_title ) ) )
 			cm.append( ( self.__language__( 30504 ), "XBMC.Action(Queue)", ) )
 			cm.append( ( self.__language__( 30502 ), "XBMC.Action(Info)", ) )
