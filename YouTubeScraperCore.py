@@ -18,9 +18,9 @@ class YouTubeScraperCore:
 	urls['disco_mix_list'] = "http://www.youtube.com/list_ajax?a=%s&action_get_mixlist=1"
 	urls['main'] = "http://www.youtube.com"
 	urls['trailers'] = "http://www.youtube.com/trailers?s=tr"
-	urls['current_trailers'] = "http://www.youtube.com/trailers?s=trit"
-	urls['upcoming_trailers'] = "http://www.youtube.com/trailers?s=tros"
-	urls['popular_trailers'] = "http://www.youtube.com/trailers?s=trp"
+	urls['current_trailers'] = "http://www.youtube.com/trailers?s=trit&p=%s&hl=en"
+	urls['upcoming_trailers'] = "http://www.youtube.com/trailers?s=tros&p=%s&hl=en"
+	urls['popular_trailers'] = "http://www.youtube.com/trailers?s=trp&p=%s&hl=en"
 	urls['recommended'] = "http://www.youtube.com/videos?r=1";
 	
 	def scrapeRecommended(self, params = {}):
@@ -113,7 +113,8 @@ class YouTubeScraperCore:
 
 		if (len(pagination) > 0):
 			tmp = str(pagination)
-			if (tmp.find("Next")):
+			print "pagination scraper returned: " + str(pagination)
+			if (tmp.find("Next") > 0):
 				next = "true"
 			
 		list = SoupStrainer(id="popular-column", name="div")
@@ -289,17 +290,77 @@ class YouTubeScraperCore:
 				
 		return (yobjects, 200)
 	
-	def scrapeTrailers(self, params = {}):
+	def createUrl(self, params = {}):
 		get = params.get
+		page = get("page")
 		if (get("scraper") in self.urls):
 			url = self.urls[get("scraper")]
+			url = url % page
 		else :
 			url = self.urls["trailers"]
-		html = self._fetchPage(url, params)
-		if (get("scraper") == "latest_trailers"):
-			return self.scrapeTrailersListFormat(html, params)
-		else:
-			return self.scrapeTrailersGridFormat(html, params)
+		return url
+		
+	def scrapeTrailers(self, params = {}):
+		get = params.get
+		scraper_per_page = 0
+		result = []
+		
+		if (get("scraper") in self.urls):
+			scraper_per_page = 40
+		
+		if (scraper_per_page > 0):
+			# begin dark magic
+			request_page = int(get("page", "0"))
+			page_count = request_page
+			per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
+			xbmc_index = page_count * per_page 
+			
+			begin_page = (xbmc_index / scraper_per_page) + 1
+			begin_index = (xbmc_index % scraper_per_page)
+			
+			params["page"] = str(begin_page)
+			url = self.createUrl(params)
+			
+			html = self._fetchPage(url, params)
+			
+			url = self.createUrl(params)
+			if (self.__dbg__):
+				print "requesting url " + url
+			html = self._fetchPage(url, params)
+			(result, status)  = self.scrapeTrailersGridFormat(html, params)
+			print " length result " + str(len(result))
+			result = result[begin_index:]
+			page_count = begin_page + 1
+			params["page"] = str(page_count)
+			
+			i = 1
+			while (len(result) <  per_page and result[len(result)-1]["next"] == "true"):
+				url = self.createUrl(params)
+				if (self.__dbg__):
+					print "requesting url " + url
+				html = self._fetchPage(url, params)
+				(new_result, status) = self.scrapeTrailersGridFormat(html, params)
+				result = result + new_result 
+				page_count = page_count + 1
+				params["page"] = str(page_count)
+				
+				i = i+1
+				if (i > 9):
+					if (self.__dbg__):
+						print "Scraper pagination failed, requested more than 10 pages which should never happen."
+					return False
+				
+			if (result):
+				result = result[:per_page]
+				params["page"] = request_page
+				print result
+				return (result, status)
+			else:
+				return ([], 303)
+		else :
+			url = self.createUrl(params)
+			html = self._fetchPage(url, params)	
+			return self.scrapeTrailersListFormat(html, params)	
 		
 	def scrape(self, params = {}):
 		get = params.get
@@ -307,11 +368,11 @@ class YouTubeScraperCore:
 			return self.scrapeDiscoTop25(params)
 		if (get("scraper") == "disco_top_artist"):
 			return self.scrapeDiscoTopArtist(params)
-		if (get("scraper", "").find("trailers") > -1):
-			return self.scrapeTrailers(params)
 		if (get("scraper") == "recommended"):
 			return self.scrapeRecommended(params)
+		
+		return self.scrapeTrailers(params)
 	
 if __name__ == '__main__':
-
+	
 	sys.exit(0);

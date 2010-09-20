@@ -729,6 +729,8 @@ class YouTubeNavigation:
 		item = item_params.get
 		
 		icon = "default"
+		if (get("scraper", "").find("trailers") > 0):
+			icon = "trailers"
 		icon = self.getThumbnail(icon)
 		
 		listitem=xbmcgui.ListItem(item("Title"), iconImage=icon, thumbnailImage=item("thumbnail") )
