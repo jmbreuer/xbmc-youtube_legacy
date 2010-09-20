@@ -133,7 +133,9 @@ class YouTubeScraperCore:
 					
 					item["videoid"] = videoid
 					item["thumbnail"] = trailer.div.a.span.img['src'] 
-					item["Title"] = trailer.div.a.span.img['title']
+					title = trailer.div.a.span.img['title']
+					title = title.replace("&amp;","&")
+					item["Title"] = title
 					item["next"] = next
 
 					yobjects.append(item)
@@ -290,7 +292,7 @@ class YouTubeScraperCore:
 				
 		return (yobjects, 200)
 	
-	def createUrl(self, params = {}):
+	def createTrailersUrl(self, params = {}):
 		get = params.get
 		page = get("page")
 		if (get("scraper") in self.urls):
@@ -319,11 +321,11 @@ class YouTubeScraperCore:
 			begin_index = (xbmc_index % scraper_per_page)
 			
 			params["page"] = str(begin_page)
-			url = self.createUrl(params)
+			url = self.createTrailersUrl(params)
 			
 			html = self._fetchPage(url, params)
 			
-			url = self.createUrl(params)
+			url = self.createTrailersUrl(params)
 			if (self.__dbg__):
 				print "requesting url " + url
 			html = self._fetchPage(url, params)
@@ -335,7 +337,7 @@ class YouTubeScraperCore:
 			
 			i = 1
 			while (len(result) <  per_page and result[len(result)-1]["next"] == "true"):
-				url = self.createUrl(params)
+				url = self.createTrailersUrl(params)
 				if (self.__dbg__):
 					print "requesting url " + url
 				html = self._fetchPage(url, params)
@@ -358,9 +360,63 @@ class YouTubeScraperCore:
 			else:
 				return ([], 303)
 		else :
-			url = self.createUrl(params)
+			url = self.createTrailersUrl(params)
 			html = self._fetchPage(url, params)	
 			return self.scrapeTrailersListFormat(html, params)	
+	
+	def createCategoriesUrl(self, params = {}):
+		get = params.get
+		category = get("category")
+		if (category.find("/") != -1):
+			url = self.urls["main"] + category
+		else:
+			url = self.urls["main"] + "/videos" + category
+			
+		html = self._fetchPage(url, params)
+		return self.scrapeCategoriesGrid(html, params)
+	
+	def scrapeCategoriesGrid(self, html, params = {}):
+		return (self.__language__(30601), 200)
+	
+	def scrapeCategoryList(self, html, params = {}):
+		get = params.get
+		
+		url = self.urls["recommended"] + "&hl=en"
+		html = self._fetchPage(url, params)
+		
+		list = SoupStrainer(name="div", attrs = {"class":"browse-side-column"})
+		categories = BeautifulSoup(html, parseOnlyThese=list)
+		
+		yobjects = []
+		status = 200
+		if (len(categories) > 0):
+			category = categories.ul.li
+			while (category != None):
+				print str(len(str(category["class"])))
+				if (len(str(category["class"])) < 10):
+					item = {}
+					title = category.a.contents[0]
+					title = title.replace("&amp;", "&")
+					item['Title'] = title
+					cat = category.a["href"]
+					cat = urllib.quote_plus(cat)
+					item['category'] = cat
+					item["thumbnail"] = "explore"
+					yobjects.append(item)
+				
+				category = category.findNextSibling(name = "li")
+		
+		if (not yobjects):
+			return (self.__language__(30601), 303)
+		
+		return (yobjects, status)
+	
+	def scrapeCategories(self, params = {}):
+		get = params.get
+		if (not get("category")):
+			return self.scrapeCategoryList(params)
+		
+		
 		
 	def scrape(self, params = {}):
 		get = params.get
@@ -370,6 +426,8 @@ class YouTubeScraperCore:
 			return self.scrapeDiscoTopArtist(params)
 		if (get("scraper") == "recommended"):
 			return self.scrapeRecommended(params)
+		if (get("scraper") == "categories"):
+			return self.scrapeCategories(params)
 		
 		return self.scrapeTrailers(params)
 	
