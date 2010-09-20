@@ -69,8 +69,8 @@ class YouTubeNavigation:
 	# we fill the list with category definitions, with labels from the appropriate language file
 	#			   label						 , path							, thumbnail					  ,  login		  ,  feed / action
 	categories = (
-				  {'Title':__language__( 30001 )  ,'path':"/root/feeds"			 	, 'thumbnail':"feeds"			 , 'login':"false" },
 				  {'Title':__language__( 30041 )  ,'path':"/root/categories"		, 'thumbnail':"explore"			 , 'login':"false" , 'scraper':'categories'},
+				  {'Title':__language__( 30001 )  ,'path':"/root/feeds"			 	, 'thumbnail':"feeds"			 , 'login':"false" },
 				  {'Title':__language__( 30032 )  ,'path':"/root/trailers"		  	, 'thumbnail':"trailers"		 , 'login':"false" },
 				  {'Title':__language__( 30035 )  ,'path':"/root/trailers/latest"   , 'thumbnail':"trailers"		 , 'login':"false" , 'scraper':"latest_trailers" },
 				  {'Title':__language__( 30034 )  ,'path':"/root/trailers/current"  , 'thumbnail':"trailers"		 , 'login':"false" , 'scraper':"current_trailers" },
