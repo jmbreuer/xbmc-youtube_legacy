@@ -3,7 +3,7 @@
 - The folders settings tab is reversed ie "Hide Feeds" (disabled) instead of Show Feeds (Enabled) this should be reversed (suggested by spiff, - and i agree Henrik)
 - Tobias broke listing of feeds :P
 - Scraper for exploring youtube categories - tobias
-- Scraper for YouTube Trailers - Basic done
+- We should probably call get batch details for trailers video items but this needs a special function..
 - Test refactor of YouTube Navigation - henrik and tobias that lazy bastard..
 - Change interfaces in core to use params (this would again reduce much of the unnessecary remapping logic in navigation and reduce code duplication in core)? - henrik
 - Procratinator - check up on thread
@@ -18,6 +18,7 @@
 [B]Youtube 1.8.1[/B]
 - Added timeout option in advanced settings
 - Added sorting options (title, upload date, rating, runtime)
+- Added Scraper for YouTube Trailers
 - Added Scraper for YouTube Disco music searches
 - Added "More videos by User" option as requested by spiff
 - Added edit search feature, pops up with search in question and allows you to change it..
