@@ -106,7 +106,16 @@ class YouTubeScraperCore:
 	def scrapeTrailersGridFormat(self, html, params = {}):
 		get = params.get
 		yobjects = []
+		next = "false"
+		
+		pager = SoupStrainer(name="div", attrs = {'class':"yt-uix-pager"})
+		pagination = BeautifulSoup(html, parseOnlyThese=pager)
 
+		if (len(pagination) > 0):
+			tmp = str(pagination)
+			if (tmp.find("Next")):
+				next = "true"
+			
 		list = SoupStrainer(id="popular-column", name="div")
 		trailers = BeautifulSoup(html, parseOnlyThese=list)
 		
@@ -124,6 +133,7 @@ class YouTubeScraperCore:
 					item["videoid"] = videoid
 					item["thumbnail"] = trailer.div.a.span.img['src'] 
 					item["Title"] = trailer.div.a.span.img['title']
+					item["next"] = next
 
 					yobjects.append(item)
 				trailer = trailer.findNextSibling(name="div", attrs = { 'class':"trailer-cell *vl" })

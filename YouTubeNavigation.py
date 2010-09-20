@@ -727,7 +727,7 @@ class YouTubeNavigation:
 	def addVideoListItem(self, params = {}, item_params = {}, listSize = 0): 
 		get = params.get
 		item = item_params.get
-
+		
 		icon = "default"
 		icon = self.getThumbnail(icon)
 		
@@ -741,7 +741,6 @@ class YouTubeNavigation:
 
 		listitem.setProperty( "Video", "true" )
 		listitem.setProperty( "IsPlayable", "true")
-		#listitem.setProperty( "ProgramCount", item("viewCount"))
 		listitem.setInfo(type='Video', infoLabels=item_params)
 		xbmcplugin.setContent( handle=int( sys.argv[ 1 ] ), content="movies" )
 		xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url, listitem=listitem, isFolder=False, totalItems=listSize + 1)
@@ -858,7 +857,7 @@ class YouTubeNavigation:
 	def getThumbnail( self, title ):
 		if (not title):
 			title = "DefaultFolder.png"
-			
+		
 		thumbnail = os.path.join( sys.modules[ "__main__" ].__plugin__, title + ".png" )
 		
 		if ( not xbmc.skinHasImage( thumbnail ) ):
