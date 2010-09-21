@@ -549,11 +549,8 @@ class YouTubeCore(object):
 		
 		for ( videoid, thumb ) in items:
 			# Dashes break with google, fetch all video's with a dash in the videoid seperatly.
-			if (videoid.find('-') == -1):
-				link += videoid + "|"
-				counter += 1;
-			else:
-				failed.append(videoid)
+			link += '"%s"|' % videoid 
+			counter += 1
 				
 			if ( counter > 9 or videoid == items[len(items)-1] ):
 				( result, status ) = self._fetchPage("http://gdata.youtube.com/feeds/api/videos?q=" + link, api = True)
@@ -584,7 +581,7 @@ class YouTubeCore(object):
 				if item['videoid'] == videoid:
 					item['thumbnails'] = thumbnail
 					ytobjects.append(item)
-				
+		
 		if self.__dbg__:
 			print self.__plugin__ + " scrapeVideos done"
 
@@ -601,11 +598,8 @@ class YouTubeCore(object):
 		
 		for item in items:
 			# Dashes break with google, fetch all video's with a dash in the videoid seperatly.
-			if (item.find('-') == -1):
-				link += item + "|"
-				counter += 1;
-			else:
-				failed.append(item)
+			link += '"%s"|' % item
+			counter += 1;
 
 			if ( counter > 9 or item == items[len(items)-1] ):
 				( result, status ) = self._fetchPage("http://gdata.youtube.com/feeds/api/videos?q=" + link, api = True)
@@ -617,15 +611,6 @@ class YouTubeCore(object):
 				ytobjects += temp[0:counter]
 				counter = 0
 				link = ""
-
-		for item in failed:
-			videoitem = self._get_details(item)
-			if videoitem:
-				if ( 'apierror' not in videoitem):
-					ytobjects.append(videoitem)
-				else:
-					if self.__dbg__:
-						print self.__plugin__ + " scrapeVideos, got apierror: " + videoitem['apierror']
 
                 tempobjects = ytobjects
 		ytobjects = []
