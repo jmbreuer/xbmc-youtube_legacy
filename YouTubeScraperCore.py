@@ -292,24 +292,18 @@ class YouTubeScraperCore:
 				yobjects.append(item)
 				
 		return (yobjects, 200)
-	
-	def createTrailersUrl(self, params = {}):
-		get = params.get
-		page = get("page")
-		if (get("scraper") in self.urls):
-			url = self.urls[get("scraper")]
-			url = url % page
-		else :
-			url = self.urls["trailers"]
-		return url
-		
-	def scrapeTrailers(self, params = {}):
+			
+	def scrapePageinator(self, params = {}):
 		get = params.get
 		scraper_per_page = 0
 		result = []
 		
 		if (get("scraper") in self.urls):
 			scraper_per_page = 40
+		elif ( get("scraper") == "categories" and get("category")):
+			scraper_per_page = 23
+		
+		print "scraper per page " + str(scraper_per_page) 
 		
 		if (scraper_per_page > 0):
 			# begin dark magic
@@ -322,33 +316,38 @@ class YouTubeScraperCore:
 			begin_index = (xbmc_index % scraper_per_page)
 			
 			params["page"] = str(begin_page)
-			url = self.createTrailersUrl(params)
-			
+			url = self.createUrl(params)
 			html = self._fetchPage(url, params)
-			
-			url = self.createTrailersUrl(params)
 			if (self.__dbg__):
 				print "requesting url " + url
-			html = self._fetchPage(url, params)
-			(result, status)  = self.scrapeTrailersGridFormat(html, params)
-			print " length result " + str(len(result))
+
+			if (get("scraper") == "categories"):
+				(result, status) = self.scrapeCategoriesGrid(html, params)	
+			else:
+				(result, status) = self.scrapeTrailersGridFormat(html, params)
+			
 			result = result[begin_index:]
 			page_count = begin_page + 1
 			params["page"] = str(page_count)
 			
 			i = 1
 			while (len(result) <  per_page and result[len(result)-1]["next"] == "true"):
-				url = self.createTrailersUrl(params)
+				url = self.createUrl(params)
 				if (self.__dbg__):
 					print "requesting url " + url
 				html = self._fetchPage(url, params)
-				(new_result, status) = self.scrapeTrailersGridFormat(html, params)
+
+				if (get("scraper") == "categories"):
+					(new_result, status) = self.scrapeCategoriesGrid(html, params)	
+				else:
+					(new_result, status) = self.scrapeTrailersGridFormat(html, params)
+				
 				result = result + new_result 
 				page_count = page_count + 1
 				params["page"] = str(page_count)
 				
 				i = i+1
-				if (i > 9):
+				if (i > 9):	
 					if (self.__dbg__):
 						print "Scraper pagination failed, requested more than 10 pages which should never happen."
 					return False
@@ -356,25 +355,39 @@ class YouTubeScraperCore:
 			if (result):
 				result = result[:per_page]
 				params["page"] = request_page
-				#print result
 				return (result, status)
 			else:
 				return ([], 303)
 		else :
-			url = self.createTrailersUrl(params)
-			html = self._fetchPage(url, params)	
-			return self.scrapeTrailersListFormat(html, params)	
+			url = self.createUrl(params)
+			html = self._fetchPage(url, params)
+			if (get("scraper") == "categories" and not get("category"))	:
+				return self.scrapeCategoryList(html, params)
+			elif (get("scraper") == "categories" and get("category")):
+				return self.scrapeCategoriesGrid(html, params)
+			else:
+				return self.scrapeTrailersListFormat(html, params)	
 	
-	def createCategoriesUrl(self, params = {}):
+	def createUrl(self, params = {}):
 		get = params.get
-		category = get("category")
-		category = urllib.unquote_plus(category)
-		
-		if (category.find("/") != -1):
-			url = self.urls["main"] + category
+		page = get("page")
+		if (get("scraper") == "categories" and get("category")):
+			category = get("category")
+			category = urllib.unquote_plus(category)
+			
+			if (category.find("/") != -1):
+				url = self.urls["main"] + category + "?hl=en" + "&p=" + page
+			else:
+				url = self.urls["main"] + "/videos" + category + "&hl=en" + "&p=" + page
+		elif(get("scraper") == "categories"):
+			url = self.urls["recommended"] + "&hl=en"
 		else:
-			url = self.urls["main"] + "/videos" + category
-					
+			if (get("scraper") in self.urls):
+				url = self.urls[get("scraper")]
+				url = url % page
+			else :
+				url = self.urls["trailers"]
+				
 		return url
 	
 	def scrapeCategoriesGrid(self, html, params = {}): # 23 pr side
@@ -385,9 +398,10 @@ class YouTubeScraperCore:
 		pagination = BeautifulSoup(html, parseOnlyThese=pager)
 
 		if (len(pagination) > 0):
+			print "pageinator found"
 			tmp = str(pagination)
-			print "pagination scraper returned: " + str(pagination)
 			if (tmp.find("Next") > 0):
+				print "next found"
 				next = "true"
 		
 		list = SoupStrainer(name="div", id="browse-video-data")
@@ -412,10 +426,7 @@ class YouTubeScraperCore:
 	
 	def scrapeCategoryList(self, html, params = {}):
 		get = params.get
-		
-		url = self.urls["recommended"] + "&hl=en"
-		html = self._fetchPage(url, params)
-		
+				
 		list = SoupStrainer(name="div", attrs = {"class":"browse-side-column"})
 		categories = BeautifulSoup(html, parseOnlyThese=list)
 		
@@ -445,12 +456,11 @@ class YouTubeScraperCore:
 	
 	def scrapeCategories(self, params = {}):
 		get = params.get
+		
 		if (not get("category")):
 			return self.scrapeCategoryList(params)
 		else:
-			print "category found"
-			url = self.createCategoriesUrl(params)
-			print url
+			url = self.createUrl(params)
 			html = self._fetchPage(url, params)
 			return self.scrapeCategoriesGrid(html, params)
 		
@@ -462,10 +472,8 @@ class YouTubeScraperCore:
 			return self.scrapeDiscoTopArtist(params)
 		if (get("scraper") == "recommended"):
 			return self.scrapeRecommended(params)
-		if (get("scraper") == "categories"):
-			return self.scrapeCategories(params)
 		
-		return self.scrapeTrailers(params)
+		return self.scrapePageinator(params)
 	
 if __name__ == '__main__':
 	
