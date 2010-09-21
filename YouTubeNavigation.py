@@ -133,7 +133,9 @@ class YouTubeNavigation:
 			cat_get = category.get 
 			if (cat_get("path").find(path +"/") > -1 ):
 				if (cat_get("path").rfind("/") <= len(path +"/")):
-					if self.__settings__.getSetting( cat_get("path").replace("/root/", "") ) == "true":
+					setting = self.__settings__.getSetting( cat_get("path").replace("/root/", "") )
+					
+					if not setting or setting == "true":
 						self.addListItem(params, category)
 		
 		if (get("store") == "searches" or get("store") == "disco_searches"):
@@ -698,7 +700,6 @@ class YouTubeNavigation:
 			
 		listitem=xbmcgui.ListItem( item("Title"), iconImage=icon, thumbnailImage=thumbnail )
 		url = '%s?path=%s&' % ( sys.argv[0], item("path") )
-		
 		url = self.buildItemUrl(item_params, url)
 		
 		if len(cm) > 0:
@@ -818,10 +819,6 @@ class YouTubeNavigation:
 			result_params["path"] = get("path")
 			result = result_params.get
 			next = result("next") == "true"
-			
-			if ( result('reasonCode') ):
-				if result('reasonCode') == 'requesterRegion':
-					continue;
 			
 			self.addVideoListItem( params, result_params, listSize)
 		
@@ -991,6 +988,8 @@ class YouTubeNavigation:
 			if ( item("feed") == "favorites"  or get("feed") == "playlists" or item("feed") == "uploads" ):
 				# Enters folder instead of Playing folder
 				#cm.append( ( self.__language__( 30523 ), "XBMC.Action(Play)" ) )
+				#cm.append( ( self.__language__( 30523 ) , "xbmc.Player( xbmc.PLAYER_CORE_MPLAYER ).play(url, listitem, windowed)" ))
+				#xbmc.executebuiltin("xbmc.PlayMedia('plugin://plugin.video.youtube/?path=/root/search&action=search&search=miley+cyrus')")
 				cm.append( ( self.__language__( 30507 ), "XBMC.Action(Queue)" ) )
 			
 		return cm

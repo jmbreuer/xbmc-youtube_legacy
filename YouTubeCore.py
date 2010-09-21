@@ -166,10 +166,13 @@ class YouTubeCore(object):
 
 		link = "http://gdata.youtube.com/feeds/api/videos?q=%s&safeSearch=%s&start-index=%s&max-results=%s" % ( urllib.quote_plus(query), safe_search, start_index, per_page)
 
-		authors = eval(self.__settings__.getSetting("stored_searches_author"))
-		if len(authors) > 0:
-			if query in authors:
-				link += "&" + urllib.urlencode({'author': authors[query]})
+		try:
+			authors = eval(self.__settings__.getSetting("stored_searches_author"))
+			if len(authors) > 0:
+				if query in authors:
+					link += "&" + urllib.urlencode({'author': authors[query]})
+		except:
+			print self.__plugin__ + " search - something stupid happened"
 				
 		( result, status ) = self._fetchPage(link, api = True)
 
