@@ -21,6 +21,7 @@
 
   <!-- Folders -->
   <category label="30248">
+    <setting id="categories" type="bool" label="30266" default="false" />
     <setting id="feeds" type="bool" label="30249" default="true" />
     <setting id="trailers" type="bool" label="30264" default="true" />
     <setting id="disco" type="bool" label="30263" default="true" />
