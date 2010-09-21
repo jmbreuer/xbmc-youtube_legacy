@@ -989,6 +989,8 @@ class YouTubeNavigation:
 						cm.append( (self.__language__(30025), 'XBMC.RunPlugin(%s?path=%s&action=remove_contact&contact=%s&)' % ( sys.argv[0], item("path"), item("Title") ) ) )
 							
 			if ( item("feed") == "favorites"  or get("feed") == "playlists" or item("feed") == "uploads" ):
+				# Enters folder instead of Playing folder
+				#cm.append( ( self.__language__( 30523 ), "XBMC.Action(Play)" ) )
 				cm.append( ( self.__language__( 30507 ), "XBMC.Action(Queue)" ) )
 			
 		return cm

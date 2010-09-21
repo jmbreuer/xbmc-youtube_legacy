@@ -538,6 +538,69 @@ class YouTubeCore(object):
 			pipedItems += item + "|"
 		return pipedItems
 
+	def _get_batch_details_thumbnails(self, items, next ):
+		if self.__dbg__:
+			print self.__plugin__ + " _get_batch_details_thumbnails"
+			
+		ytobjects = []
+		failed = []
+		counter = 0
+		link = ""
+		
+		for key in items:
+			# Dashes break with google, fetch all video's with a dash in the videoid seperatly.
+			if (key.find('-') == -1):
+				link += key + "|"
+				counter += 1;
+			else:
+				failed.append(key)
+				
+			#if ( counter > 9 or key == items[len(items)-1] ):
+			if ( counter > 9 ):
+				( result, status ) = self._fetchPage("http://gdata.youtube.com/feeds/api/videos?q=" + link, api = True)
+					
+				if status != 200:
+					return ( result, status )
+
+				temp = self._getvideoinfo(result)
+				ytobjects += temp[0:counter]
+				counter = 0
+				link = ""
+
+		( result, status ) = self._fetchPage("http://gdata.youtube.com/feeds/api/videos?q=" + link, api = True)
+
+		if status != 200:
+			return ( result, status )
+
+		temp = self._getvideoinfo(result)
+		ytobjects += temp[0:counter]
+		counter = 0
+		link = ""
+			
+		for item in failed:
+			videoitem = self._get_details(item)
+			
+			if videoitem:
+				if ( 'apierror' not in videoitem):
+					ytobjects.append(videoitem)
+			else:
+				if self.__dbg__:
+					print self.__plugin__ + " _get_batch_details_thumbnails, got apierror: " + videoitem['apierror']
+
+		# Use provided thumbnails
+		if len(items) > 0:
+			for item in ytobjects:
+				#if self.__dbg__:
+				#	print self.__plugin__ + " _get_batch_details_thumbnails replace thumbnail : " + item['videoid'] + " - " + items[item['videoid']]
+				if item['videoid'] in items:
+					item['thumbnail'] = items[item['videoid']]
+				item['next'] = next
+				
+		if self.__dbg__:
+			print self.__plugin__ + " scrapeVideos done"
+
+		return ( ytobjects, 200 )
+			
 	def _get_batch_details(self, items):
 		if self.__dbg__:
 			print self.__plugin__ + " _get_batch_details"
@@ -554,13 +617,13 @@ class YouTubeCore(object):
 				counter += 1;
 			else:
 				failed.append(item)
-				
+
 			if ( counter > 9 or item == items[len(items)-1] ):
 				( result, status ) = self._fetchPage("http://gdata.youtube.com/feeds/api/videos?q=" + link, api = True)
 				
 				if status != 200:
 					return ( result, status )
-				
+					
 				temp = self._getvideoinfo(result)
 				ytobjects += temp[0:counter]
 				counter = 0
@@ -574,6 +637,7 @@ class YouTubeCore(object):
 				else:
 					if self.__dbg__:
 						print self.__plugin__ + " scrapeVideos, got apierror: " + videoitem['apierror']
+
 
 		if self.__dbg__:
 			print self.__plugin__ + " scrapeVideos done"

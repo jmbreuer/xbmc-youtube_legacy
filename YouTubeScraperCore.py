@@ -104,6 +104,7 @@ class YouTubeScraperCore:
 			return ( "", 500 )
 	
 	def scrapeTrailersGridFormat(self, html, params = {}):
+		print self.__plugin__ + " scrapeTrailersGridFormat"
 		get = params.get
 		yobjects = []
 		next = "false"
@@ -119,31 +120,30 @@ class YouTubeScraperCore:
 			
 		list = SoupStrainer(id="popular-column", name="div")
 		trailers = BeautifulSoup(html, parseOnlyThese=list)
-		
+				
 		if (len(trailers) > 0):
 			trailer = trailers.div.div
-			
-			while (trailer != None):
-				item ={}
-				videoid = trailer.div.a['href']
 
+			item = {}
+			while ( trailer != None ):
+				videoid = trailer.div.a['href']
+				print self.__plugin__ + " scrapeTrailersGridFormat video : " + videoid
+						
 				if (videoid):
 					if (videoid.find("=") > -1):
 						videoid = videoid[videoid.find("=")+1:]
-					
-					item["videoid"] = videoid
-					item["thumbnail"] = trailer.div.a.span.img['src'] 
-					title = trailer.div.a.span.img['title']
-					title = title.replace("&amp;","&")
-					item["Title"] = title
-					item["next"] = next
 
-					yobjects.append(item)
+					item[videoid] = trailer.div.a.span.img['src']
 				trailer = trailer.findNextSibling(name="div", attrs = { 'class':"trailer-cell *vl" })
-		
+
+			(yobjects, result ) = self.core._get_batch_details_thumbnails(item, next);
+			
+			if result != 200:
+				return (yobjects, 303)
+
 		if (not yobjects):
 			return (yobjects, 500)
-		
+
 		return (yobjects, 200)
 	
 	def searchDisco(self, params = {}):
@@ -355,7 +355,7 @@ class YouTubeScraperCore:
 			if (result):
 				result = result[:per_page]
 				params["page"] = request_page
-				print result
+				#print result
 				return (result, status)
 			else:
 				return ([], 303)
