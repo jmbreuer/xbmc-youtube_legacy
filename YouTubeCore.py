@@ -209,7 +209,7 @@ class YouTubeCore(object):
 			if (region):
 				feed = feed.replace("/standardfeeds/", "/standardfeeds/"+ region + "/")
 
-				( result, status ) = self._fetchPage(feed, api = True)
+		( result, status ) = self._fetchPage(feed, api = True)
 
 		if status != 200:
 			return ( result, status )
@@ -540,7 +540,7 @@ class YouTubeCore(object):
 
 	def _get_batch_details_thumbnails(self, items):
 		if self.__dbg__:
-			print self.__plugin__ + " _get_batch_details_thumbnails"
+			print self.__plugin__ + " _get_batch_details_thumbnai3ls"
 			
 		ytobjects = []
 		failed = []
