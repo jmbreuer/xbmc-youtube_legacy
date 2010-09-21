@@ -93,22 +93,22 @@
     <string id="30246">Debug</string>
     <string id="30247">General</string>
     <string id="30248">Folder</string>
-    <string id="30249">Hide Feeds</string>
-    <string id="30250">Hide Youtube Suggests</string>
-    <string id="30251">Hide Contacts</string>
-    <string id="30252">Hide Favorites</string>
-    <string id="30253">Hide Playlists</string>
-    <string id="30254">Hide Subscriptions</string>
-    <string id="30255">Hide Uploads</string>
-    <string id="30256">Hide Search</string>
-    <string id="30257">Hide Play Video by ID</string>
+    <string id="30249">Show Feeds</string>
+    <string id="30250">Show Youtube Suggests</string>
+    <string id="30251">Show Contacts</string>
+    <string id="30252">Show Favorites</string>
+    <string id="30253">Show Playlists</string>
+    <string id="30254">Show Subscriptions</string>
+    <string id="30255">Show Uploads</string>
+    <string id="30256">Show Search</string>
+    <string id="30257">Show Play Video by ID</string>
     <string id="30258">Set thumbnail view for videos in Confluence</string>
     <string id="30259">Advanced</string>
     <string id="30260">Download quality (if available)</string>
     <string id="30261">Same as playback</string>
     <string id="30262">Playback quality selection on video items</string> 
-    <string id="30263">Hide Youtube Disco!</string>
-    <string id="30264">Hide Youtube Trailers</string>
+    <string id="30263">Show Youtube Disco!</string>
+    <string id="30264">Show Youtube Trailers</string>
     <string id="30265">Timeout (in seconds)</string>
 
     <!-- Menu strings -->

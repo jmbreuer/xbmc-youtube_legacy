@@ -21,17 +21,17 @@
 
   <!-- Folders -->
   <category label="30248">
-    <setting id="feeds" type="bool" label="30249" default="false" />
-    <setting id="trailers" type="bool" label="30264" default="false" />
-    <setting id="disco" type="bool" label="30263" default="false" />
-    <setting id="recommended" type="bool" label="30250" default="false" />
-    <setting id="contacts" type="bool" label="30251" default="false" />
-    <setting id="favorites" type="bool" label="30252" default="false" />
-    <setting id="playlists" type="bool" label="30253" default="false" />
-    <setting id="subscriptions" type="bool" label="30254" default="false" />
-    <setting id="uploads" type="bool" label="30255" default="false" />
-    <setting id="search" type="bool" label="30256" default="false" />
-    <setting id="playbyid" type="bool" label="30257" default="false" />
+    <setting id="feeds" type="bool" label="30249" default="true" />
+    <setting id="trailers" type="bool" label="30264" default="true" />
+    <setting id="disco" type="bool" label="30263" default="true" />
+    <setting id="recommended" type="bool" label="30250" default="true" />
+    <setting id="contacts" type="bool" label="30251" default="true" />
+    <setting id="favorites" type="bool" label="30252" default="true" />
+    <setting id="playlists" type="bool" label="30253" default="true" />
+    <setting id="subscriptions" type="bool" label="30254" default="true" />
+    <setting id="uploads" type="bool" label="30255" default="true" />
+    <setting id="search" type="bool" label="30256" default="true" />
+    <setting id="playbyid" type="bool" label="30257" default="true" />
   </category>
 
   <!-- Advanced -->
