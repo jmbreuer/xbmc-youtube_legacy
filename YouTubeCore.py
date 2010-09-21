@@ -163,14 +163,14 @@ class YouTubeCore(object):
 		safe_search = ("none", "moderate", "strict" ) [int( self.__settings__.getSetting( "safe_search" ) ) ]
 		start_index = per_page * int(page) + 1
 	
-		try:
-			authors = eval(self.__settings__.getSetting("stored_searches_author"))
-			if query in authors:
-				author = "&" + urllib.urlencode({'author': authors[query]})
-		except:
-			author = ""
 
 		link = "http://gdata.youtube.com/feeds/api/videos?q=%s&safeSearch=%s&start-index=%s&max-results=%s" % ( urllib.quote_plus(query), safe_search, start_index, per_page)
+
+		authors = eval(self.__settings__.getSetting("stored_searches_author"))
+		if len(authors) > 0:
+			if query in authors:
+				link += "&" + urllib.urlencode({'author': authors[query]})
+				
 		( result, status ) = self._fetchPage(link, api = True)
 
 		if status != 200:
@@ -538,7 +538,7 @@ class YouTubeCore(object):
 			pipedItems += item + "|"
 		return pipedItems
 
-	def _get_batch_details_thumbnails(self, items, next ):
+	def _get_batch_details_thumbnails(self, items):
 		if self.__dbg__:
 			print self.__plugin__ + " _get_batch_details_thumbnails"
 			
@@ -547,16 +547,15 @@ class YouTubeCore(object):
 		counter = 0
 		link = ""
 		
-		for key in items:
+		for ( videoid, thumb ) in items:
 			# Dashes break with google, fetch all video's with a dash in the videoid seperatly.
-			if (key.find('-') == -1):
-				link += key + "|"
+			if (videoid.find('-') == -1):
+				link += videoid + "|"
 				counter += 1;
 			else:
-				failed.append(key)
+				failed.append(videoid)
 				
-			#if ( counter > 9 or key == items[len(items)-1] ):
-			if ( counter > 9 ):
+			if ( counter > 9 or videoid == items[len(items)-1] ):
 				( result, status ) = self._fetchPage("http://gdata.youtube.com/feeds/api/videos?q=" + link, api = True)
 					
 				if status != 200:
@@ -567,16 +566,6 @@ class YouTubeCore(object):
 				counter = 0
 				link = ""
 
-		( result, status ) = self._fetchPage("http://gdata.youtube.com/feeds/api/videos?q=" + link, api = True)
-
-		if status != 200:
-			return ( result, status )
-
-		temp = self._getvideoinfo(result)
-		ytobjects += temp[0:counter]
-		counter = 0
-		link = ""
-			
 		for item in failed:
 			videoitem = self._get_details(item)
 			
@@ -587,14 +576,14 @@ class YouTubeCore(object):
 				if self.__dbg__:
 					print self.__plugin__ + " _get_batch_details_thumbnails, got apierror: " + videoitem['apierror']
 
-		# Use provided thumbnails
-		if len(items) > 0:
-			for item in ytobjects:
-				#if self.__dbg__:
-				#	print self.__plugin__ + " _get_batch_details_thumbnails replace thumbnail : " + item['videoid'] + " - " + items[item['videoid']]
-				if item['videoid'] in items:
-					item['thumbnail'] = items[item['videoid']]
-				item['next'] = next
+		tempobjects = ytobjects
+		ytobjects = []
+		for i in range(0, len(items)):
+			( videoid, thumbnail ) = items[i]
+			for item in tempobjects:
+				if item['videoid'] == videoid:
+					item['thumbnails'] = thumbnail
+					ytobjects.append(item)
 				
 		if self.__dbg__:
 			print self.__plugin__ + " scrapeVideos done"
@@ -638,6 +627,13 @@ class YouTubeCore(object):
 					if self.__dbg__:
 						print self.__plugin__ + " scrapeVideos, got apierror: " + videoitem['apierror']
 
+                tempobjects = ytobjects
+		ytobjects = []
+		for i in range(0, len(items)):
+			videoid = items[i]
+			for item in tempobjects:
+				if item['videoid'] == videoid:
+					ytobjects.append(item)
 
 		if self.__dbg__:
 			print self.__plugin__ + " scrapeVideos done"
@@ -883,7 +879,6 @@ class YouTubeCore(object):
 	def _getvideoinfo(self, value):
 		if self.__dbg__:
 			print self.__plugin__ + " _getvideoinfo: " + str(len(value))
-
 		try:
 			dom = parseString(value);
 			links = dom.getElementsByTagName("link");
@@ -975,8 +970,8 @@ class YouTubeCore(object):
 				video['next'] = next
 				ytobjects.append(video);
 
-				if self.__dbg__:
-					print self.__plugin__ + " _getvideoinfo done"
+			if self.__dbg__:
+				print self.__plugin__ + " _getvideoinfo done"
 			return ytobjects;
 		except:
 			if self.__dbg__:

@@ -38,7 +38,7 @@ class YouTubeScraperCore:
 		if ( page == 0 or oldVideos == ""):
 			( videos, result)  = self._scrapeYouTubeData(url)
 			if (result == 200):
-				self.__settings__.setSetting("recommendedVideos", self.core.arrayToPipe(videos))									
+				self.__settings__.setSetting("recommendedVideos", self.core.arrayToPipe(videos))
 			else:
 				return ( videos, result )
 		else:
@@ -52,10 +52,9 @@ class YouTubeScraperCore:
 		subitems = videos[(per_page * page):(per_page * (page + 1))]
 		
 		( ytobjects, status ) = self.core._get_batch_details(subitems)
-		
-		if status == 200:
-			if (len(ytobjects) > 0):
-				ytobjects[len(ytobjects)-1]['next'] = next
+
+		if (len(ytobjects) > 0):
+			ytobjects[len(ytobjects)-1]['next'] = next
 		
 		return (ytobjects, status)
 	
@@ -104,7 +103,6 @@ class YouTubeScraperCore:
 			return ( "", 500 )
 	
 	def scrapeTrailersGridFormat(self, html, params = {}):
-		print self.__plugin__ + " scrapeTrailersGridFormat"
 		get = params.get
 		yobjects = []
 		next = "false"
@@ -124,7 +122,7 @@ class YouTubeScraperCore:
 		if (len(trailers) > 0):
 			trailer = trailers.div.div
 
-			item = {}
+			item = []
 			while ( trailer != None ):
 				videoid = trailer.div.a['href']
 				print self.__plugin__ + " scrapeTrailersGridFormat video : " + videoid
@@ -133,16 +131,19 @@ class YouTubeScraperCore:
 					if (videoid.find("=") > -1):
 						videoid = videoid[videoid.find("=")+1:]
 
-					item[videoid] = trailer.div.a.span.img['src']
+					item.append( (videoid, trailer.div.a.span.img['src']) )
+					
 				trailer = trailer.findNextSibling(name="div", attrs = { 'class':"trailer-cell *vl" })
 
-			(yobjects, result ) = self.core._get_batch_details_thumbnails(item, next);
+			(yobjects, result ) = self.core._get_batch_details_thumbnails(item);
 			
 			if result != 200:
-				return (yobjects, 303)
+				return (yobjects, result)
 
 		if (not yobjects):
 			return (yobjects, 500)
+		
+		yobjects[len(yobjects)-1]['next'] = next
 
 		return (yobjects, 200)
 	
