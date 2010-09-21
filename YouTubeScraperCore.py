@@ -367,15 +367,46 @@ class YouTubeScraperCore:
 	def createCategoriesUrl(self, params = {}):
 		get = params.get
 		category = get("category")
+		category = urllib.unquote_plus(category)
+		
 		if (category.find("/") != -1):
 			url = self.urls["main"] + category
 		else:
 			url = self.urls["main"] + "/videos" + category
-			
-		html = self._fetchPage(url, params)
-		return self.scrapeCategoriesGrid(html, params)
+					
+		return url
 	
-	def scrapeCategoriesGrid(self, html, params = {}):
+	def scrapeCategoriesGrid(self, html, params = {}): # 23 pr side
+		get = params.get
+		
+		next = "false"
+		pager = SoupStrainer(name="div", attrs = {'class':"yt-uix-pager"})
+		pagination = BeautifulSoup(html, parseOnlyThese=pager)
+
+		if (len(pagination) > 0):
+			tmp = str(pagination)
+			print "pagination scraper returned: " + str(pagination)
+			if (tmp.find("Next") > 0):
+				next = "true"
+		
+		list = SoupStrainer(name="div", id="browse-video-data")
+		videos = BeautifulSoup(html, parseOnlyThese=list)
+		
+		items = []
+		if (len(videos) > 0):
+			video = videos.div.div
+			while (video != None):
+				id = video.div.a["href"]
+				if (id.find("/watch?v=") != -1):
+					id = id[id.find("=") + 1:id.find("&")]
+					items.append(id)
+				video = video.findNextSibling(name="div", attrs = {'class':"video-cell *vl"})
+		
+		if (items):
+			(results, status) = self.core._get_batch_details(items)
+			results[len(results) -1]["next"] = next
+			return (results, status)
+		
 		return (self.__language__(30601), 200)
 	
 	def scrapeCategoryList(self, html, params = {}):
@@ -392,7 +423,6 @@ class YouTubeScraperCore:
 		if (len(categories) > 0):
 			category = categories.ul.li
 			while (category != None):
-				print str(len(str(category["class"])))
 				if (len(str(category["class"])) < 10):
 					item = {}
 					title = category.a.contents[0]
@@ -401,6 +431,7 @@ class YouTubeScraperCore:
 					cat = category.a["href"]
 					cat = urllib.quote_plus(cat)
 					item['category'] = cat
+					item['scraper'] = "categories"
 					item["thumbnail"] = "explore"
 					yobjects.append(item)
 				
@@ -415,8 +446,12 @@ class YouTubeScraperCore:
 		get = params.get
 		if (not get("category")):
 			return self.scrapeCategoryList(params)
-		
-		
+		else:
+			print "category found"
+			url = self.createCategoriesUrl(params)
+			print url
+			html = self._fetchPage(url, params)
+			return self.scrapeCategoriesGrid(html, params)
 		
 	def scrape(self, params = {}):
 		get = params.get

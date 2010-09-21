@@ -362,8 +362,6 @@ class YouTubeNavigation:
 		else:
 			self.showMessage(self.__language__(30600), self.__language__(30606))
 
-			
-
 	#================================== Plugin Actions =========================================
 
 	def playVideoById(self, params = {}):
