@@ -1,6 +1,6 @@
 [B]TODO:[/B]
 - Add Play all where we currently have queue folder.. (function basically queues all video-items and starts playback of the first) - tobias
-- The folders settings tab is reversed ie "Hide Feeds" (disabled) instead of Show Feeds (Enabled) this should be reversed (suggested by spiff, - and i agree Henrik)
+- Video info now giving unknown uploader for all videos?? <-- TOBIAS FIX THIS, and check all info lables are extracted correctly :D
 - Scraper for exploring youtube categories - tobias
 - Test refactor of YouTube Navigation - henrik and tobias that lazy bastard..
 - Change interfaces in core to use params (this would again reduce much of the unnessecary remapping logic in navigation and reduce code duplication in core)? - henrik
@@ -24,6 +24,7 @@
 - Added advanced setting to enable users to select playback quality pr video item in the context menu as requested by Nektarios
 - Added Nicer default icons for video items
 - Added Nicer default icons for searches
+- Reversed the "folders" settings tab ie Show Feeds (Enabled) instead of "Hide Feeds" (Disabled)
 - Refactored core functions for stability and readability.
 - Loop all url requests upto 5 times, should increase stability.
 - Refactor of navigation layer, hopefully simplifying maintainance
