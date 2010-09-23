@@ -241,16 +241,6 @@ class YouTubeScraperCore:
 		
 		return (yobjects, status)
 	
-	def scrapeCategories(self, params = {}):
-		get = params.get
-		
-		if (not get("category")):
-			return self.scrapeCategoryList(params)
-		else:
-			url = self.createUrl(params)
-			html = self._fetchPage(url, params)
-			return self.scrapeCategoriesGrid(html, params)
-
 #=================================== Disco  ============================================
 
 	def searchDisco(self, params = {}):
