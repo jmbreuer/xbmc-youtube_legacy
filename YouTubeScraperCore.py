@@ -205,7 +205,9 @@ class YouTubeScraperCore:
 				video = video.findNextSibling(name="div", attrs = {'class':"video-cell *vl"})
 		
 		if (items):
+			print "sending " + str(len(items)) + " items to core.." 
 			(results, status) = self.core._get_batch_details(items)
+			print "got " + str(len(results)) + " items back"
 			results[len(results) -1]["next"] = next
 			return (results, status)
 		
@@ -232,7 +234,8 @@ class YouTubeScraperCore:
 					item['category'] = cat
 					item['scraper'] = "categories"
 					item["thumbnail"] = "explore"
-					yobjects.append(item)
+					if (title != "Music"):
+						yobjects.append(item)
 				
 				category = category.findNextSibling(name = "li")
 		
@@ -369,7 +372,7 @@ class YouTubeScraperCore:
 		if (get("scraper") in self.urls):
 			scraper_per_page = 40
 		elif ( get("scraper") == "categories" and get("category")):
-			scraper_per_page = 22
+			scraper_per_page = 23
 		
 		print "scraper per page " + str(scraper_per_page) 
 		
@@ -395,7 +398,6 @@ class YouTubeScraperCore:
 				(result, status) = self.scrapeTrailersGridFormat(html, params)
 			
 			next = "false"
-			print "length " + repr(len(result))
 			next = result[len(result) -1]["next"]
 			result = result[begin_index:]
 			
@@ -413,9 +415,7 @@ class YouTubeScraperCore:
 					(new_result, status) = self.scrapeCategoriesGrid(html, params)	
 				else:
 					(new_result, status) = self.scrapeTrailersGridFormat(html, params)
-				
-				print "length " + repr(len(new_result))
-				
+								
 				next = new_result[len(new_result) - 1]["next"]
 				result = result + new_result 
 				page_count = page_count + 1
@@ -429,10 +429,7 @@ class YouTubeScraperCore:
 				
 			if (result):
 				result = result[:per_page]
-				tom = result[len(result) - 1]
-				print 'last item set to ' + repr(tom) 
-				print 'next set to ' + repr(next)
-				tom["next"] = next
+				result[len(result) - 1]["next"] = next
 				params["page"] = request_page
 				return (result, status)
 			else:
