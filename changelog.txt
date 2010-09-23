@@ -1,7 +1,7 @@
 [B]TODO:[/B]
 - Add Play all where we currently have queue folder.. (function basically queues all video-items and starts playback of the first) - tobias
 - Video info now giving unknown uploader for all videos?? <-- TOBIAS FIX THIS, and check all info lables are extracted correctly :D
-- Scraper for exploring youtube categories - tobias
+- Test if regex's are faster for trailers and categories - tobias
 - Test refactor of YouTube Navigation - henrik and tobias that lazy bastard..
 - Change interfaces in core to use params (this would again reduce much of the unnessecary remapping logic in navigation and reduce code duplication in core)? - henrik
 
@@ -16,6 +16,7 @@
 - Added support for trailer thumbnails.
 - Added timeout option in advanced settings
 - Added sorting options (title, upload date, rating, runtime)
+- Added Scraper for YouTube categories (1 level only)
 - Added Scraper for YouTube Trailers
 - Added Scraper for YouTube Disco music searches
 - Added "More videos by User" option as requested by spiff
