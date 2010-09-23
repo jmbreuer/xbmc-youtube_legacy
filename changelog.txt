@@ -1,9 +1,7 @@
 [B]TODO:[/B]
-- Add Play all where we currently have queue folder.. (function basically queues all video-items and starts playback of the first) - tobias
 - Video info now giving unknown uploader for all videos?? <-- TOBIAS FIX THIS, and check all info lables are extracted correctly :D
 - Test if regex's are faster for trailers and categories - tobias
 - Test refactor of YouTube Navigation - henrik and tobias that lazy bastard..
-- Change interfaces in core to use params (this would again reduce much of the unnessecary remapping logic in navigation and reduce code duplication in core)? - henrik
 
 [B]Errata[/B]
 - [XBMC] Thumbnails sometimes turns into black box or Folder (XBMC not detecting when thumbnail is set and defaulting to icon?)
