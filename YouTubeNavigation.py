@@ -548,7 +548,7 @@ class YouTubeNavigation:
 				self.errorHandling(self.__language__(30006), result, status)
 				return False
 			
-			thumbnail = result[0].get('thumbnail')
+			thumbnail = result[0].get('thumbnail', "")
 			
 			if (thumbnail and query):
 				if (get("action") == "search_disco"):
@@ -819,7 +819,12 @@ class YouTubeNavigation:
 			result_params["path"] = get("path")
 			result = result_params.get
 			next = result("next") == "true"
-			
+
+			if result("videoid") == "false":
+				if self.__dbg__:
+					print self.__plugin__ + " parseVideoList, got videoid false"
+				continue
+									
 			self.addVideoListItem( params, result_params, listSize)
 		
 		if next:

@@ -617,12 +617,13 @@ class YouTubeCore(object):
 
                 tempobjects = ytobjects
 		ytobjects = []
+		
 		for i in range(0, len(items)):
 			videoid = items[i]
 			for item in tempobjects:
 				if item['videoid'] == videoid:
 					ytobjects.append(item)
-
+					
 		if self.__dbg__:
 			print self.__plugin__ + " scrapeVideos done"
 		return ( ytobjects, 200 )
@@ -892,35 +893,30 @@ class YouTubeCore(object):
 				# http://code.google.com/intl/en/apis/youtube/2.0/reference.html#youtube_data_api_tag_yt:state <- more reason codes
 				# requesterRegion - This video is not available in your region. <- fails
 				# limitedSyndication - Syndication of this video was restricted by its owner. <- works
-			
+
 				if node.getElementsByTagName("yt:state").item(0):
 				
 					state = self._getNodeAttribute(node, "yt:state", 'name', 'Unknown Name')
 
 					# Ignore unplayable items.
 					if ( state == 'deleted' or state == 'rejected'):
-						continue
+						video['videoid'] = "false"
 					
 					# Get reason for why we can't playback the file.		
 					if node.getElementsByTagName("yt:state").item(0).hasAttribute('reasonCode'):
 						reason = self._getNodeAttribute(node, "yt:state", 'reasonCode', 'Unknown reasonCode')
 						value = self._getNodeValue(node, "yt:state", "Unknown reasonValue").encode('utf-8')
-
-						if self.__dbg__:
-							print self.__plugin__ + " _getvideoinfo %s reasonCode: [%s] %s " % ( video['videoid'], reason, value )
-
 						if reason == "private":
-							continue
+							video['videoid'] = "false"
 						elif reason == 'requesterRegion':
-							continue
+							video['videoid'] = "false"
 						elif reason == 'limitedSyndication':
 							if self.__dbg__:
-								print self.__plugin__ + " _getvideoinfo hit limitedsyndication"
+								print "" #print self.__plugin__ + " _getvideoinfo hit limitedsyndication"
 						else:
 							if self.__dbg__:
-								print self.__plugin__ + " _getvideoinfo hit else"
-							video['reasonCode'] = reason
-							video['reasonValue'] = value
+								print self.__plugin__ + " _getvideoinfo hit else : %s - %s" % ( reason, value)
+							video['videoid'] = "false";
 							
 				if ( video['videoid'] == "missing" ):
 					video['videolink'] = node.getElementsByTagName("link").item(0).getAttribute('href')
@@ -928,7 +924,7 @@ class YouTubeCore(object):
 					if match:
 						video['videoid'] = match.group(1)
 					else:
-						continue
+						video['videoid'] = "false"
 				
 				video['Title'] = self._getNodeValue(node, "media:title", "Unknown Title").encode('utf-8') # Convert from utf-16 to combat breakage
 				video['Plot'] = self._getNodeValue(node, "media:description", "Unknown Plot").encode( "utf-8" )
@@ -956,10 +952,16 @@ class YouTubeCore(object):
 					video['Overlay'] = int(overlay)
 				
 				video['next'] = next
+				
+				if video['videoid'] == "false":
+					if self.__dbg__:
+						print self.__plugin__ + " _getvideoinfo videoid set to false"
+														
+				
 				ytobjects.append(video);
 
 			if self.__dbg__:
-				print self.__plugin__ + " _getvideoinfo done"
+				print self.__plugin__ + " _getvideoinfo done : " + str(len(ytobjects))
 			return ytobjects;
 		except:
 			if self.__dbg__:
