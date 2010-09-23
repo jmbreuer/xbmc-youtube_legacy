@@ -800,7 +800,7 @@ class YouTubeNavigation:
 			self.addFolderListItem( params, result_params, listSize + 1)
 			
 		if next:
-			item = {"Title":self.__language__( 30509 ), "thumbnail":"next", "page":str(int(get("page", "0")) + 1)} 
+			item = {"Title":self.__language__( 30509 ), "thumbnail":"next", "next":"true", "page":str(int(get("page", "0")) + 1)} 
 			for k, v in params.items():
 				if (k != "thumbnail" and k != "Title" and k != "page"):
 					item[k] = v
@@ -828,7 +828,7 @@ class YouTubeNavigation:
 			self.addVideoListItem( params, result_params, listSize)
 		
 		if next:
-			item = {"Title":self.__language__( 30509 ), "thumbnail":"next", "page":str(int(get("page", "0")) + 1)} 
+			item = {"Title":self.__language__( 30509 ), "thumbnail":"next", "next":"true", "page":str(int(get("page", "0")) + 1)} 
 			for k, v in params.items():
 				if ( k != "thumbnail" and k != "Title" and k != "page"):
 					item[k] = v
@@ -947,7 +947,7 @@ class YouTubeNavigation:
 			cm.append( ( self.__language__( 30514 ), "XBMC.Container.Update(%s?path=%s&action=search&search=%s)" % ( sys.argv[0],  get("path"), url_title ) ) )
 			cm.append( ( self.__language__( 30504 ), "XBMC.Action(Queue)", ) )
 			cm.append( ( self.__language__( 30502 ), "XBMC.Action(Info)", ) )
-		elif (not item("next")):
+		elif (item("next") == "false"):
 			if (item("action") == "search"):
 				cm.append( ( self.__language__( 30515 ), 'XBMC.Container.Update(%s?path=%s&action=edit_search&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
 				cm.append( ( self.__language__( 30505 ), 'XBMC.RunPlugin(%s?path=%s&action=refine_user&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
@@ -991,10 +991,6 @@ class YouTubeNavigation:
 						cm.append( (self.__language__(30025), 'XBMC.RunPlugin(%s?path=%s&action=remove_contact&contact=%s&)' % ( sys.argv[0], item("path"), item("Title") ) ) )
 							
 			if ( item("feed") == "favorites"  or get("feed") == "playlists" or item("feed") == "uploads" ):
-				# Enters folder instead of Playing folder
-				#cm.append( ( self.__language__( 30523 ), "XBMC.Action(Play)" ) )
-				#cm.append( ( self.__language__( 30523 ) , "xbmc.Player( xbmc.PLAYER_CORE_MPLAYER ).play(url, listitem, windowed)" ))
-				#xbmc.executebuiltin("xbmc.PlayMedia('plugin://plugin.video.youtube/?path=/root/search&action=search&search=miley+cyrus')")
 				cm.append( ( self.__language__( 30507 ), "XBMC.Action(Queue)" ) )
 			
 		return cm
