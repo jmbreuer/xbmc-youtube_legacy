@@ -301,7 +301,7 @@ class YouTubeScraperCore:
 		if (get("scraper") in self.urls):
 			scraper_per_page = 40
 		elif ( get("scraper") == "categories" and get("category")):
-			scraper_per_page = 23
+			scraper_per_page = 22
 		
 		print "scraper per page " + str(scraper_per_page) 
 		
@@ -326,7 +326,11 @@ class YouTubeScraperCore:
 			else:
 				(result, status) = self.scrapeTrailersGridFormat(html, params)
 			
+			next = "false"
+			print "length " + repr(len(result))
+			next = result[len(result) -1]["next"]
 			result = result[begin_index:]
+			
 			page_count = begin_page + 1
 			params["page"] = str(page_count)
 			
@@ -342,6 +346,9 @@ class YouTubeScraperCore:
 				else:
 					(new_result, status) = self.scrapeTrailersGridFormat(html, params)
 				
+				print "length " + repr(len(new_result))
+				
+				next = new_result[len(new_result) - 1]["next"]
 				result = result + new_result 
 				page_count = page_count + 1
 				params["page"] = str(page_count)
@@ -354,6 +361,10 @@ class YouTubeScraperCore:
 				
 			if (result):
 				result = result[:per_page]
+				tom = result[len(result) - 1]
+				print 'last item set to ' + repr(tom) 
+				print 'next set to ' + repr(next)
+				tom["next"] = next
 				params["page"] = request_page
 				return (result, status)
 			else:
@@ -390,7 +401,7 @@ class YouTubeScraperCore:
 				
 		return url
 	
-	def scrapeCategoriesGrid(self, html, params = {}): # 23 pr side
+	def scrapeCategoriesGrid(self, html, params = {}):
 		get = params.get
 		
 		next = "false"
@@ -398,10 +409,8 @@ class YouTubeScraperCore:
 		pagination = BeautifulSoup(html, parseOnlyThese=pager)
 
 		if (len(pagination) > 0):
-			print "pageinator found"
 			tmp = str(pagination)
 			if (tmp.find("Next") > 0):
-				print "next found"
 				next = "true"
 		
 		list = SoupStrainer(name="div", id="browse-video-data")
@@ -422,7 +431,7 @@ class YouTubeScraperCore:
 			results[len(results) -1]["next"] = next
 			return (results, status)
 		
-		return (self.__language__(30601), 200)
+		return ([], 303)
 	
 	def scrapeCategoryList(self, html, params = {}):
 		get = params.get
