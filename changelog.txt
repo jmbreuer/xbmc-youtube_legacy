@@ -1,5 +1,4 @@
 [B]TODO:[/B]
-- Video info now giving unknown uploader for all videos?? <-- TOBIAS FIX THIS, and check all info lables are extracted correctly :D
 - Test if regex's are faster for trailers and categories - tobias
 - Test refactor of YouTube Navigation - henrik and tobias that lazy bastard..
 
@@ -28,6 +27,7 @@
 - Loop all url requests upto 5 times, should increase stability.
 - Refactor of navigation layer, hopefully simplifying maintainance
 - Removed unnessecary remapping of variable names between core and navigation
+- Fixed "Unknown Uploader" for some folders"
 
 [B]Version 1.8.0[/B]
 - Solved confusion caused by multiple licens files (removed GPL v2 license and renamed GPL v3 to LICENSE.txt)

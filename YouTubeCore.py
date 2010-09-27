@@ -930,7 +930,13 @@ class YouTubeCore(object):
 				video['Plot'] = self._getNodeValue(node, "media:description", "Unknown Plot").encode( "utf-8" )
 				video['Date'] = self._getNodeValue(node, "published", "Unknown Date").encode( "utf-8" )
 				video['user'] = self._getNodeValue(node, "name", "Unknown Name").encode( "utf-8" )
-				video['Studio'] = self._getNodeValue(node, "media:credit", "Unknown Uploader").encode( "utf-8" )
+				
+				# media:credit is not set for favorites, playlists or inbox
+				video['Studio'] = self._getNodeValue(node, "media:credit", "").encode( "utf-8" )
+				if video['Studio'] == "":
+					video['Studio'] = self._getNodeValue(node, "name", "Unknown Uploader").encode( "utf-8" )
+					
+
 				duration = int(self._getNodeAttribute(node, "yt:duration", 'seconds', '0'))
 				video['Duration'] = "%02d:%02d" % ( duration / 60, duration % 60 )
 				video['Rating'] = float(self._getNodeAttribute(node,"gd:rating", 'average', "0.0"))
