@@ -410,16 +410,14 @@ class YouTubeNavigation:
 					self.errorHandling(self.__language__( 30501 ), video, status)
 				return False
 
-			video['Title'] = self.makeAscii(video['Title'])
-			
 			item = video.get
 					
-			self.showMessage(self.__language__(30612), item("Title", "Unknown Title"))
+			self.showMessage(self.__language__(30612), self.makeAscii(item("Title", "Unknown Title")))
 			
 			( video, status ) = core.downloadVideo(video)
 					
 			if status == 200:
-				self.showMessage(self.__language__( 30604 ), item("Title"))
+				self.showMessage(self.__language__( 30604 ), self.makeAscii(item("Title")))
 
 	def addToFavorites(self, params = {}):
 		get = params.get
