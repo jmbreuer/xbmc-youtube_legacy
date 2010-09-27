@@ -1,5 +1,4 @@
 [B]TODO:[/B]
-- Test if regex's are faster for trailers and categories - tobias
 - Test refactor of YouTube Navigation - henrik and tobias that lazy bastard..
 
 [B]Errata[/B]
@@ -30,6 +29,7 @@
 - Fixed "Unknown Uploader" for some folders"
 - Added dummy video items in batch requests for when youtube removed an item.
 - Loop on 503: Service Unavailable errors.
+- Updated Browse Youtube to use regex.
 
 [B]Version 1.8.0[/B]
 - Solved confusion caused by multiple licens files (removed GPL v2 license and renamed GPL v3 to LICENSE.txt)

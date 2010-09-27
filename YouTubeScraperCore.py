@@ -180,6 +180,8 @@ class YouTubeScraperCore:
 #=================================== Categories  ============================================
 
 	def scrapeCategoriesGrid(self, html, params = {}):
+		print self.__plugin__ + " scrapeCategoriesGrid"
+		print html
 		get = params.get
 		
 		next = "false"
@@ -190,24 +192,16 @@ class YouTubeScraperCore:
 			tmp = str(pagination)
 			if (tmp.find("Next") > 0):
 				next = "true"
-		
-		list = SoupStrainer(name="div", id="browse-video-data")
-		videos = BeautifulSoup(html, parseOnlyThese=list)
-		
+
 		items = []
-		if (len(videos) > 0):
-			video = videos.div.div
-			while (video != None):
-				id = video.div.a["href"]
-				if (id.find("/watch?v=") != -1):
-					id = id[id.find("=") + 1:id.find("&")]
-					items.append(id)
-				video = video.findNextSibling(name="div", attrs = {'class':"video-cell *vl"})
+		result = re.compile('<div id="video-description-(.*)" dir="ltr" class="video-description">').findall(html)
 		
+		if len(result) > 0:
+			for videoid in result:
+				items.append(videoid)
+
 		if (items):
-			#print self.__plugin__ + " AAAAAAAAAAAAAAAAAA sending " + str(len(items)) + " items to core.." 
 			(results, status) = self.core._get_batch_details(items)
-			#print self.__plugin__ + " BBBBBBBBBBBBBBBBBB got " + str(len(results)) + " items back"
 			results[len(results) -1]["next"] = next
 			return (results, status)
 		
