@@ -166,13 +166,16 @@ class YouTubeCore(object):
 
 		link = "http://gdata.youtube.com/feeds/api/videos?q=%s&safeSearch=%s&start-index=%s&max-results=%s" % ( urllib.quote_plus(query), safe_search, start_index, per_page)
 
-		try:
-			authors = eval(self.__settings__.getSetting("stored_searches_author"))
-			if len(authors) > 0:
+
+		authors = self.__settings__.getSetting("stored_searches_author")
+		
+		if len(authors) > 0:
+			try:
+				authors = eval(authors)
 				if query in authors:
 					link += "&" + urllib.urlencode({'author': authors[query]})
-		except:
-			print self.__plugin__ + " search - something stupid happened"
+			except:
+				print self.__plugin__ + " search - eval failed "
 				
 		( result, status ) = self._fetchPage(link, api = True)
 
@@ -543,7 +546,7 @@ class YouTubeCore(object):
 
 	def _get_batch_details_thumbnails(self, items):
 		if self.__dbg__:
-			print self.__plugin__ + " _get_batch_details_thumbnai3ls"
+			print self.__plugin__ + " _get_batch_details_thumbnails: "
 			
 		ytobjects = []
 		failed = []
@@ -551,7 +554,6 @@ class YouTubeCore(object):
 		link = ""
 		
 		for ( videoid, thumb ) in items:
-			# Dashes break with google, fetch all video's with a dash in the videoid seperatly.
 			link += '"%s"|' % videoid 
 			counter += 1
 				
@@ -582,11 +584,15 @@ class YouTubeCore(object):
 			( videoid, thumbnail ) = items[i]
 			for item in tempobjects:
 				if item['videoid'] == videoid:
-					item['thumbnails'] = thumbnail
-					ytobjects.append(item)
+					item['thumbnail'] = thumbnail
+					ytobjects.append(item)					
+
+                while len(items) > len(ytobjects):
+			#print self.__plugin__ + "_get_batch_details adding videoid false"
+			ytobjects.append({'videoid': 'false'});
 		
 		if self.__dbg__:
-			print self.__plugin__ + " scrapeVideos done"
+			print self.__plugin__ + " _get_batch_details_thumbnails done"
 
 		return ( ytobjects, 200 )
 			
@@ -600,7 +606,6 @@ class YouTubeCore(object):
 		link = ""
 		
 		for item in items:
-			# Dashes break with google, fetch all video's with a dash in the videoid seperatly.
 			link += '"%s"|' % item
 			counter += 1;
 
@@ -617,15 +622,21 @@ class YouTubeCore(object):
 
                 tempobjects = ytobjects
 		ytobjects = []
-		
+
+		#print self.__plugin__ + " _get_batch_details %s - %s " % ( str(len(items)), str(len(tempobjects)) )
 		for i in range(0, len(items)):
 			videoid = items[i]
 			for item in tempobjects:
 				if item['videoid'] == videoid:
+					#print self.__plugin__ + " _get_batch_details adding videoid: [%s] %s " % ( str(i), videoid)
 					ytobjects.append(item)
+
+		while len(items) > len(ytobjects):
+			#print self.__plugin__ + "_get_batch_details adding videoid false"
+			ytobjects.append({'videoid': 'false'});
 					
 		if self.__dbg__:
-			print self.__plugin__ + " scrapeVideos done"
+			print self.__plugin__ + " _get_batch_details done"
 		return ( ytobjects, 200 )
 
 	#===============================================================================
@@ -662,8 +673,9 @@ class YouTubeCore(object):
 			if ( not authkey ):
 				if self.__dbg__:
 					print self.__plugin__ + " _fetchPage couldn't set auth "
-				# Lets see if it isn't better to just let it try without auth. 
-				#return ( self.__language__(30609) , 303 )
+					
+			# Lets see if it isn't better to just let it try without auth. 
+			#return ( self.__language__(30609) , 303 )
 													
 			request.add_header('Authorization', 'GoogleLogin auth=' + authkey)
 			request.add_header('X-GData-Key', 'key=' + self.APIKEY)
@@ -676,12 +688,18 @@ class YouTubeCore(object):
 		
 		except urllib2.HTTPError, e:
 			err = str(e)
+			if self.__dbg__:
+				print self.__plugin__ + " _fetchPage HTTPError : " + err
 			
 			if ( err.find("401") > 0 and error == 0 ):
 				if self.__dbg__:
-					print self.__plugin__ + " _fetchPage retrying on 401"
+					print self.__plugin__ + " _fetchPage retrying"
 
 				self.login()
+				return self._fetchPage(link, api, auth, login, error +1)
+			elif ( err.find("503") > 0 and error > 3):
+				if self.__dbg__:
+					print self.__plugin__ + " _fetchPage retrying"
 				return self._fetchPage(link, api, auth, login, error +1)
 			elif ( err.find("403") > 0 ):
 				if self.__dbg__:
@@ -689,7 +707,7 @@ class YouTubeCore(object):
 				return (self.__language__(30601), 303)
 			else:
 				if self.__dbg__:
-					print self.__plugin__ + " _fetchPage HTTPError: " + err
+					print self.__plugin__ + " _fetchPage returning error"
 				return ( err, 303 )
 							
 		except:

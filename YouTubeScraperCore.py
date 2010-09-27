@@ -205,9 +205,9 @@ class YouTubeScraperCore:
 				video = video.findNextSibling(name="div", attrs = {'class':"video-cell *vl"})
 		
 		if (items):
-			print "sending " + str(len(items)) + " items to core.." 
+			#print self.__plugin__ + " AAAAAAAAAAAAAAAAAA sending " + str(len(items)) + " items to core.." 
 			(results, status) = self.core._get_batch_details(items)
-			print "got " + str(len(results)) + " items back"
+			#print self.__plugin__ + " BBBBBBBBBBBBBBBBBB got " + str(len(results)) + " items back"
 			results[len(results) -1]["next"] = next
 			return (results, status)
 		
