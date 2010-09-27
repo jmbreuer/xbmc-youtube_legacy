@@ -1,4 +1,4 @@
-import sys, urllib, urllib2, re, string, cookielib
+import sys, urllib, urllib2, re
 from BeautifulSoup import BeautifulSoup, SoupStrainer
 import YouTubeCore
 
