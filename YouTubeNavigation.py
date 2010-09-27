@@ -402,14 +402,16 @@ class YouTubeNavigation:
 				self.__settings__.openSettings()
 				path = self.__settings__.getSetting( "downloadPath" )
 
-			( video, status )  = core.construct_video_url(params)
+			( video, status ) = core.construct_video_url(params)
 				
 			if status != 200:
 				if self.__dbg__:
 					print self.__plugin__ + " downloadVideo got error from construct_video_url: [%s] %s" % ( status, video)
 					self.errorHandling(self.__language__( 30501 ), video, status)
 				return False
-				
+
+			video['Title'] = self.makeAscii(video['Title'])
+			
 			item = video.get
 					
 			self.showMessage(self.__language__(30612), item("Title", "Unknown Title"))
@@ -417,7 +419,7 @@ class YouTubeNavigation:
 			( video, status ) = core.downloadVideo(video)
 					
 			if status == 200:
-				self.showMessage(self.__language__( 30604 ), video['Title'])
+				self.showMessage(self.__language__( 30604 ), item("Title"))
 
 	def addToFavorites(self, params = {}):
 		get = params.get
