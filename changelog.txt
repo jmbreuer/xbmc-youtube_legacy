@@ -8,6 +8,10 @@
 - [XBMC] has Excessive Memory use after running the plugin for prolonged periods of time 
 - Download of rtmpe streams not supported.
 
+[B]Youtube 1.9.1[/B]
+- Loop on 500, don't know how i missed this.
+- Minor cleanup
+
 [B]Youtube 1.9.0[/B]
 - Plugin can now confirm that the user is above 18 ( will only try if safe_search is disabled )
 - Added support for trailer thumbnails.
@@ -32,7 +36,6 @@
 - Fixed "Unknown Uploader" for some folders"
 - Added dummy video items in batch requests for when youtube removed an item.
 - Loop on 503: Service Unavailable errors.
-- Loop on 500
 - Updated Browse Youtube to use regex.
 
 [B]Version 1.8.1[/B]

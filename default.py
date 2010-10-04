@@ -19,7 +19,7 @@
 import sys, xbmc, xbmcaddon
 
 # plugin constants
-__version__ = "1.9.0"
+__version__ = "1.9.1"
 __plugin__ = "YouTube-" + __version__
 __author__ = "TheCollective"
 __url__ = "www.xbmc.com"
