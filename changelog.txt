@@ -32,6 +32,7 @@
 - Fixed "Unknown Uploader" for some folders"
 - Added dummy video items in batch requests for when youtube removed an item.
 - Loop on 503: Service Unavailable errors.
+- Loop on 500
 - Updated Browse Youtube to use regex.
 
 [B]Version 1.8.1[/B]

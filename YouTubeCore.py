@@ -116,18 +116,18 @@ class YouTubeCore(object):
 			return ( self.__language__(30609), 303 )
 			
 		except urllib2.HTTPError, e:
-			error = str(e)
+			err = str(e)
 			if self.__dbg__:
-				print self.__plugin__ + " login failed, hit http except: " + error
+				print self.__plugin__ + " login failed, hit http except: " + err
 			if e.code == 403:
 				return ( self.__language__(30621), 303 )
-			return ( error, 303 )
+			return ( err, 303 )
 		
 		except ValueError, e:
-			error = repr(e)
+			err = repr(e)
 			if self.__dbg__:
-				print self.__plugin__ + " login failed, hit valueerror except: " + error
-			return ( error, 303 )
+				print self.__plugin__ + " login failed, hit valueerror except: " + err
+			return ( err, 303 )
 		
 		except IOError, e:
 			# http://bytes.com/topic/python/answers/33770-error-codes-urlerror
@@ -138,17 +138,17 @@ class YouTubeCore(object):
 				print self.interrogate(e)
 
 			if error < 9:
+				# Check if there is a timeout here.
 				import time
 				time.sleep(1)
 				return self.login( error + 1 )
-			
 			return ( "IOERROR", 303 )
 		
 		except urllib2.URLError, e:
-			error = repr(e)
+			err = repr(e)
 			if self.__dbg__:
-				print self.__plugin__ + " login failed, hit url except: " + error
-			return ( error, 303 )										
+				print self.__plugin__ + " login failed, hit url except: " + err
+			return ( err, 303 )										
 		except:
 			if self.__dbg__:
 				print self.__plugin__ + " login failed uncaught exception"
@@ -229,7 +229,7 @@ class YouTubeCore(object):
 				print self.__plugin__ + " feeds done with no results"
 			return (self.__language__(30602), 303)
 	
-	def list(self, feed, page = "0", retry = True):
+	def list(self, feed, page = "0"):
 		if self.__dbg__:
 			print self.__plugin__ + " list: " + repr(feed) + " - page: " + repr(page)
 		result = ""
@@ -293,7 +293,7 @@ class YouTubeCore(object):
 		add_request = '<?xml version="1.0" encoding="UTF-8"?><entry xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://gdata.youtube.com/schemas/2007"> <category scheme="http://gdata.youtube.com/schemas/2007/subscriptiontypes.cat" term="user"/><yt:username>%s</yt:username></entry>' % (user_id)
 		return self._youTubeAdd(url, add_request)
 
-	def playlists(self, link, page = '0', retry = True):
+	def playlists(self, link, page = '0'):
 		if self.__dbg__:
 			print self.__plugin__ + " playlists " + repr(link) + " - page: " + repr(page)
 		result = ""
@@ -726,24 +726,35 @@ class YouTubeCore(object):
 			err = str(e)
 			if self.__dbg__:
 				print self.__plugin__ + " _fetchPage HTTPError : " + err
-			
-			if ( err.find("401") > 0 and error == 0 ):
+
+			# 400 (Bad request) - A 400 response code indicates that a request was poorly formed or contained invalid data. The API response content will explain the reason wny the API returned a 400 response code.
+                        if ( err.find("400") > -1 ):
+				return ( err, 303 )
+			# 401 (Not authorized) - A 401 response code indicates that a request did not contain an Authorization header, that the format of the Authorization header was invalid, or that the authentication token supplied in the header was invalid.
+			elif ( err.find("401") > -1 ):
 				if self.__dbg__:
-					print self.__plugin__ + " _fetchPage retrying"
+					print self.__plugin__ + " _fetchPage login and retry."
 
 				self.login()
 				return self._fetchPage(link, api, auth, login, error +1)
-			elif ( err.find("503") > 0 and error > 3):
+			# 403 (Forbidden) - A 403 response code indicates that you have submitted a request that is not properly authenticated for the requested operation.
+			# Test all cases that cause 403 before 2.0, and verify the above statement.
+			elif ( err.find("403") > -1 ):
 				if self.__dbg__:
-					print self.__plugin__ + " _fetchPage retrying"
-				return self._fetchPage(link, api, auth, login, error +1)
-			elif ( err.find("403") > 0 ):
-				if self.__dbg__:
-					print self.__plugin__ + " _fetchPage HTTPError 403 - got empty results back: " + err
+					print self.__plugin__ + " _fetchPage got empty results back "
 				return (self.__language__(30601), 303)
+			# 501 (Not implemented) - A 501 response code indicates that you have tried to execute an unsupported operation.
+			elif ( err.find("501") > -1):
+				return ( err, 303 )
+			#500 (Internal error) - A 500 response code indicates that YouTube experienced an error handling a request. You could retry the request at a later time.
+			#503 (Service unavailable) - A 503 response code indicates that the YouTube Data API service can not be reached. You could retry your request at a later time.
+			elif ( err.find("500") > -1 or err.find("503") > -1 ):
+				if self.__dbg__:
+					print self.__plugin__ + " _fetchPage retry: " + error
+				return self._fetchPage(link, api, auth, login, error +1)
 			else:
 				if self.__dbg__:
-					print self.__plugin__ + " _fetchPage returning error"
+					print self.__plugin__ + " _fetchPage unknown error"
 				return ( err, 303 )
 							
 		except:
@@ -824,7 +835,7 @@ class YouTubeCore(object):
 			usock = urllib2.urlopen(request)
 		except urllib2.HTTPError, e:
 			error = str(e)
-			if ( error.find("201") > 0):
+			if ( error.find("201") > -1):
 				if self.__dbg__:
 					print self.__plugin__ + " _youTubeAdd: Done"
 				return ( "", 200)
@@ -832,7 +843,7 @@ class YouTubeCore(object):
 				if self.__dbg__:
 					print self.__plugin__ + " _youTubeAdd: " + self.__language__(30615)
 				return ( self.__language__(30615), 303 )
-			elif ( error.find("401") > 0 and retry ):
+			elif ( error.find("401") > -1 and retry ):
 				if self.login():
 					if self.__dbg__:
 						print self.__plugin__ + " _youTubeAdd: retry"
