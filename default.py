@@ -26,7 +26,7 @@ __url__ = "www.xbmc.com"
 __svn_url__ = ""
 __svn_revision__ = "$Revision$"
 __XBMC_Revision__ = "33324"
-__settings__ = xbmcaddon.Addon(id='plugin.video.youtube')
+__settings__ = xbmcaddon.Addon(id='plugin.video.youtube.beta')
 __language__ = __settings__.getLocalizedString
 __dbg__ = __settings__.getSetting( "debug" ) == "true"
 
