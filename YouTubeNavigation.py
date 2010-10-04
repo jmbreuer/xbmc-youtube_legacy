@@ -1011,7 +1011,7 @@ class YouTubeNavigation:
 				else:
 					s += i
 			return s
-																																		
+
 	def errorHandling(self, title = "", result = "", status = 500):
 		if title == "":
 			title = self.__language__(30600)

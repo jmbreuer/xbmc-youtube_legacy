@@ -150,7 +150,7 @@
     <string id="30605">YouTube not answering</string>
     <string id="30606">Uncaught error:</string>
     <string id="30607">No suitable resolution found</string>
-    <string id="30608"></string> <!-- empty -->
+    <string id="30608">Sorry - you must be 18 or over to view this video</string>
     <string id="30609">Login Failed</string>
     <string id="30610">Refinement cleared</string>
     <string id="30611">Download folder not set</string>

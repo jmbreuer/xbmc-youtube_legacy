@@ -1,5 +1,6 @@
 [B]TODO:[/B]
 - Test refactor of YouTube Navigation - henrik and tobias that lazy bastard..
+- Plugin still have a few "Unknown uploader" hanging around, being fixed.
 
 [B]Errata[/B]
 - [XBMC] Thumbnails sometimes turns into black box or Folder (XBMC not detecting when thumbnail is set and defaulting to icon?)
@@ -8,6 +9,7 @@
 - Download of rtmpe streams not supported.
 
 [B]Youtube 1.9.0[/B]
+- Plugin can now confirm that the user is above 18 ( will only try if safe_search is disabled )
 - Added support for trailer thumbnails.
 - Added timeout option in advanced settings
 - Added sorting options (title, upload date, rating, runtime)

@@ -154,7 +154,7 @@ class YouTubeCore(object):
 				print self.__plugin__ + " login failed uncaught exception"
 				print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
 								   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
-			return ( self.__language__(30609), 500 );
+			return ( self.__language__(30609), 500 )
 	
 	def search(self, query, page = "0"):
 		if self.__dbg__:
@@ -165,8 +165,6 @@ class YouTubeCore(object):
 	
 
 		link = "http://gdata.youtube.com/feeds/api/videos?q=%s&safeSearch=%s&start-index=%s&max-results=%s" % ( urllib.quote_plus(query), safe_search, start_index, per_page)
-
-
 		authors = self.__settings__.getSetting("stored_searches_author")
 		
 		if len(authors) > 0:
@@ -404,7 +402,7 @@ class YouTubeCore(object):
 		if not video:
 			if self.__dbg__:
 				print self.__plugin__ + " construct_video_url failed because of missing video from _get_details"
-			return ("", 500)
+			return ( "", 500 )
 		
 		if ( 'apierror' in video):
 			if self.__dbg__:
@@ -431,18 +429,10 @@ class YouTubeCore(object):
 		try:
 			(fmtSource, swfConfig, video['stream_map']) = self._extractVariables(videoid)
 			
-			if not fmtSource:
+			if ( not fmtSource ):
 				if self.__dbg__:
-					print self.__plugin__ + " construct_video_url Hopefully this extra if check is now legacy"
-					
-				(fmtSource, swfConfig, video['stream_map']) = self._extractVariables(videoid, True)
-				
-				if not fmtSource:
-					print self.__plugin__ + " IMPORTANT : " + videoid
-					if self.__dbg__:
-						print self.__plugin__ + " construct_video_url failed, empty fmtSource after trying with cookie"
-					
-					return (self.__language__(30618), 303)
+					print self.__plugin__ + " construct_video_url Hopefully this extra if check is now legacy THIS SHOULD NOT HAPPEN ANYMORE"
+				return ( "", 500 ) 
 			
 			if ( video['stream_map'] == 303 ):
 				return (fmtSource, 303)
@@ -535,7 +525,7 @@ class YouTubeCore(object):
 			if self.__dbg__:
 				print self.__plugin__ + " construct_video_url uncaught exception"
 				print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__ , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
-			return ('', 500)
+			return ( "", 500 )
 
 
 	def arrayToPipe(self, input):
@@ -678,9 +668,9 @@ class YouTubeCore(object):
 				if self.__dbg__:
 					print self.__plugin__ + " _fetchPage couldn't set auth "
 					
-			# Lets see if it isn't better to just let it try without auth. 
-			#return ( self.__language__(30609) , 303 )
-
+				# Lets see if it isn't better to just let it try without auth.
+				#return ( self.__language__(30609) , 303 )
+				
 			request.add_header('Authorization', 'GoogleLogin auth=' + authkey)
 			request.add_header('X-GData-Key', 'key=' + self.APIKEY)
 		
@@ -690,25 +680,53 @@ class YouTubeCore(object):
 			new_url = con.geturl()
 			con.close()
 
-			if result.find("confirm-age-form") > 0:
-				if self.__dbg__:
-					print self.__plugin__ + " _fetchPage Video age restricted: " + new_url
+			# Review this before 2.0
+			if ( result.find("verify-age-actions") == -1):
+				return ( result, 200 )		
+			elif ( error < 3 ):
+				# This function needs tobe called with login enabled for verification to work
+				if not login:
+					if self.__dbg__:
+						print self.__plugin__ + " _fetchPage age verification required, retrying with login"
+					return self._fetchPage(link, api, auth, login = True, error = error)
+				else:
+					if self.__dbg__:
+						print self.__plugin__ + " _fetchPage Video age restricted - login url: " + new_url
 
+				# Fallback for missing confirm form.
+				if result.find("confirm-age-form") == -1:
+					if self.__dbg__:
+						print self.__plugin__ + " _fetchPage: Sorry - you must be 18 or over to view this video or group"
+					return ( self.__language__( 30608 ) , 303 )
+								
 				request = urllib2.Request(new_url)
 				request.add_header('User-Agent', self.USERAGENT)
 				request.add_header('Cookie', 'LOGIN_INFO=' + self.__settings__.getSetting( "login_info" ) )
 
-				values = { "next_url": "http://www.youtube.com/watch?v=lvU_gXC0u0Y&amp;has_verified=1", "action_confirm": "1", "confirm-age-form": "" }
+				# This really should be a regex, but the regex kept failing.
+				temp = result[result.find("verify-age-actions"):(result.find("verify-age-actions") + 600)]
+				next_url = temp[( temp.find('"next_url" value="') + len('"next_url" value="')):]
+				next_url = next_url[:next_url.find('"')] 
+					
+				if self.__settings__.getSetting( "safe_search" ) == "0":
+					confirmed = 1
+				else:
+					confirmed = 0
+			
+				values = { "next_url": next_url, "action_confirm": confirmed }
+
 				con = urllib2.urlopen(request, urllib.urlencode(values))
 				result = con.read()
-				new_url2 = con.geturl()
 				con.close()
 				
 				if self.__dbg__:
-					print self.__plugin__ + " _fetchPage, tried to verify age: " + new_url2
-			
-				
-			return ( result, 200 )
+					print self.__plugin__ + " _fetchPage. Age should now be verified, calling _fetchPage again"
+					
+				return self._fetchPage(link, api, auth, login = True, error = error + 1)
+
+			if self.__dbg__:
+				print self.__plugin__ + " _fetchPage. Too many errors"
+			return ( "", 500 )
 		
 		except urllib2.HTTPError, e:
 			err = str(e)
@@ -739,14 +757,14 @@ class YouTubeCore(object):
 				print self.__plugin__ + ' _fetchPage ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
 												 , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
 				
-			return ( '', 500 )
+			return ( "", 500 )
 		
-	def _extractVariables(self, videoid, login = False):
+	def _extractVariables(self, videoid):
 		if self.__dbg__:
 			print self.__plugin__ + " extractVariables : " + repr(videoid)
 
 		# Should hl=en_US be there?
-		( htmlSource, status ) = self._fetchPage('http://www.youtube.com/watch?v=' +videoid + "&safeSearch=none&hl=en_us", login = login)
+		( htmlSource, status ) = self._fetchPage('http://www.youtube.com/watch?v=' +videoid + "&safeSearch=none&hl=en_us")
 
 		if status != 200:
 			return ( htmlSource, status, status )
@@ -885,7 +903,7 @@ class YouTubeCore(object):
 				print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
 								   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
 				
-			return ( "" , 500)
+			return ( "", 500 )
 	
 	def _getNodeAttribute(self, node, tag, attribute, default = ""):
 		if node.getElementsByTagName(tag).item(0):
