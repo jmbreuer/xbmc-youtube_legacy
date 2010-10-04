@@ -411,7 +411,13 @@ class YouTubeCore(object):
 				print self.__plugin__ + " construct_video_url, got apierror: " + video['apierror']
 			return (video['apierror'], 303)
 
-		if not download:
+		if download:
+			hd_quality = int(self.__settings__.getSetting( "hd_videos_download" ))
+			if ( hd_quality == 0 ):
+				hd_quality = int(self.__settings__.getSetting( "hd_videos" ))
+			else:
+				hd_quality -= 1
+		else:
 			if (not get("quality")):
 				hd_quality = int(self.__settings__.getSetting( "hd_videos" ))
 			else:
@@ -421,12 +427,6 @@ class YouTubeCore(object):
 					hd_quality = 1
 				else: 
 					hd_quality = 0
-		else:
-			hd_quality = int(self.__settings__.getSetting( "hd_videos_download" ))
-			if ( hd_quality == 0 ):
-				hd_quality = int(self.__settings__.getSetting( "hd_videos" ))
-			else:
-				hd_quality -= 1
 		
 		try:
 			(fmtSource, swfConfig, video['stream_map']) = self._extractVariables(videoid)
@@ -652,21 +652,25 @@ class YouTubeCore(object):
 	def _fetchPage(self, link, api = False, auth=False, login=False, error = 0):
 		if self.__dbg__:
 			print self.__plugin__ + " fetching page : " + link
-			
+
+
 		request = urllib2.Request(link)
 
 		if api:
 			request.add_header('GData-Version', 2)
 		else:
-			request.add_header('User-Agent', 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; .NET CLR 1.1.4322; .NET CLR 2.0.50727)')
+			request.add_header('User-Agent', self.USERAGENT)
 
-		if ( login ):
+		if ( login and False):
 			# Get a new LOGIN_INFO cookie (for some reason the old one will fail) 
 			if ( self._httpLogin() ):
 				request.add_header('Cookie', 'LOGIN_INFO=' + self.__settings__.getSetting( "login_info" ) )
 			else:
 				if self.__dbg__:
 					print self.__plugin__ + " _fetchPage _httpLogin failed"
+					
+		if ( login ):
+			request.add_header('Cookie', 'LOGIN_INFO=' + self.__settings__.getSetting( "login_info" ) )
 
 		if auth:
 			authkey = self._getAuth()
@@ -676,14 +680,34 @@ class YouTubeCore(object):
 					
 			# Lets see if it isn't better to just let it try without auth. 
 			#return ( self.__language__(30609) , 303 )
-													
+
 			request.add_header('Authorization', 'GoogleLogin auth=' + authkey)
 			request.add_header('X-GData-Key', 'key=' + self.APIKEY)
 		
 		try:
 			con = urllib2.urlopen(request)
 			result = con.read()
+			new_url = con.geturl()
 			con.close()
+
+			if result.find("confirm-age-form") > 0:
+				if self.__dbg__:
+					print self.__plugin__ + " _fetchPage Video age restricted: " + new_url
+
+				request = urllib2.Request(new_url)
+				request.add_header('User-Agent', self.USERAGENT)
+				request.add_header('Cookie', 'LOGIN_INFO=' + self.__settings__.getSetting( "login_info" ) )
+
+				values = { "next_url": "http://www.youtube.com/watch?v=lvU_gXC0u0Y&amp;has_verified=1", "action_confirm": "1", "confirm-age-form": "" }
+				con = urllib2.urlopen(request, urllib.urlencode(values))
+				result = con.read()
+				new_url2 = con.geturl()
+				con.close()
+				
+				if self.__dbg__:
+					print self.__plugin__ + " _fetchPage, tried to verify age: " + new_url2
+			
+				
 			return ( result, 200 )
 		
 		except urllib2.HTTPError, e:
@@ -722,7 +746,7 @@ class YouTubeCore(object):
 			print self.__plugin__ + " extractVariables : " + repr(videoid)
 
 		# Should hl=en_US be there?
-		( htmlSource, status ) = self._fetchPage('http://www.youtube.com/watch?v=' +videoid + "&safeSearch=none&hl=en_US", login = True)
+		( htmlSource, status ) = self._fetchPage('http://www.youtube.com/watch?v=' +videoid + "&safeSearch=none&hl=en_us", login = login)
 
 		if status != 200:
 			return ( htmlSource, status, status )

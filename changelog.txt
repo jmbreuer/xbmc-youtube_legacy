@@ -7,7 +7,7 @@
 - [XBMC] has Excessive Memory use after running the plugin for prolonged periods of time 
 - Download of rtmpe streams not supported.
 
-[B]Youtube 1.8.1[/B]
+[B]Youtube 1.9.0[/B]
 - Added support for trailer thumbnails.
 - Added timeout option in advanced settings
 - Added sorting options (title, upload date, rating, runtime)
@@ -20,6 +20,8 @@
 - Added advanced setting to enable users to select playback quality pr video item in the context menu as requested by Nektarios
 - Added Nicer default icons for video items
 - Added Nicer default icons for searches
+- Added useragent to requests send by XBMC.
+- Enabled RTMP support in release code.
 - Reversed the "folders" settings tab ie Show Feeds (Enabled) instead of "Hide Feeds" (Disabled)
 - Refactored core functions for stability and readability.
 - Loop all url requests upto 5 times, should increase stability.
@@ -29,6 +31,9 @@
 - Added dummy video items in batch requests for when youtube removed an item.
 - Loop on 503: Service Unavailable errors.
 - Updated Browse Youtube to use regex.
+
+[B]Version 1.8.1[/B]
+- Enable RTMP support
 
 [B]Version 1.8.0[/B]
 - Solved confusion caused by multiple licens files (removed GPL v2 license and renamed GPL v3 to LICENSE.txt)

@@ -381,7 +381,9 @@ class YouTubeNavigation:
 
 		if ( 'swf_config' in video ):
 			video['video_url'] += " swfurl=%s swfvfy=1" % video['swf_config']
-
+			
+		video['video_url'] += " | " + core.USERAGENT
+		
 		listitem=xbmcgui.ListItem(label=video['Title'], iconImage=video['thumbnail'], thumbnailImage=video['thumbnail'], path=video['video_url']);
 		
 		listitem.setInfo(type='Video', infoLabels=video)
