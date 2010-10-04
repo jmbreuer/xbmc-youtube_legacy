@@ -536,7 +536,7 @@ class YouTubeCore(object):
 
 	def _get_batch_details_thumbnails(self, items):
 		if self.__dbg__:
-			print self.__plugin__ + " _get_batch_details_thumbnails: "
+			print self.__plugin__ + " _get_batch_details_thumbnails: " + str(len(items))
 			
 		ytobjects = []
 		failed = []
@@ -546,8 +546,11 @@ class YouTubeCore(object):
 		for ( videoid, thumb ) in items:
 			link += '"%s"|' % videoid 
 			counter += 1
-				
-			if ( counter > 9 or videoid == items[len(items)-1] ):
+
+			print self.__plugin__
+			print videoid
+			print items[len(items)-1]
+			if ( counter > 9 or videoid == items[len(items)-1][0] ):
 				( result, status ) = self._fetchPage("http://gdata.youtube.com/feeds/api/videos?q=" + link, api = True)
 					
 				if status != 200:
@@ -558,18 +561,9 @@ class YouTubeCore(object):
 				counter = 0
 				link = ""
 
-		for item in failed:
-			videoitem = self._get_details(item)
-			
-			if videoitem:
-				if ( 'apierror' not in videoitem):
-					ytobjects.append(videoitem)
-			else:
-				if self.__dbg__:
-					print self.__plugin__ + " _get_batch_details_thumbnails, got apierror: " + videoitem['apierror']
-
 		tempobjects = ytobjects
 		ytobjects = []
+		print self.__plugin__ 
 		for i in range(0, len(items)):
 			( videoid, thumbnail ) = items[i]
 			for item in tempobjects:
