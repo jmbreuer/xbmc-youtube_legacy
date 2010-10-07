@@ -19,8 +19,6 @@
 import sys, urllib, urllib2, re, os, cookielib, string, socket
 from xml.dom.minidom import parseString
 
-#import elementtree
-
 # ERRORCODES:
 # 200 = OK
 # 303 = See other (returned an error message)
@@ -116,18 +114,18 @@ class YouTubeCore(object):
 			return ( self.__language__(30609), 303 )
 			
 		except urllib2.HTTPError, e:
-			err = str(e)
+			str_err = str(e)
 			if self.__dbg__:
-				print self.__plugin__ + " login failed, hit http except: " + err
+				print self.__plugin__ + " login failed, hit http except: " + str_err
 			if e.code == 403:
 				return ( self.__language__(30621), 303 )
-			return ( err, 303 )
+			return ( str_err, 303 )
 		
 		except ValueError, e:
-			err = repr(e)
+			str_err = repr(e)
 			if self.__dbg__:
-				print self.__plugin__ + " login failed, hit valueerror except: " + err
-			return ( err, 303 )
+				print self.__plugin__ + " login failed, hit valueerror except: " + str_err
+			return ( str_err, 303 )
 		
 		except IOError, e:
 			# http://bytes.com/topic/python/answers/33770-error-codes-urlerror
@@ -145,10 +143,10 @@ class YouTubeCore(object):
 			return ( "IOERROR", 303 )
 		
 		except urllib2.URLError, e:
-			err = repr(e)
+			str_err = repr(e)
 			if self.__dbg__:
-				print self.__plugin__ + " login failed, hit url except: " + err
-			return ( err, 303 )										
+				print self.__plugin__ + " login failed, hit url except: " + str_err
+			return ( str_err, 303 )										
 		except:
 			if self.__dbg__:
 				print self.__plugin__ + " login failed uncaught exception"
