@@ -46,7 +46,7 @@ class YouTubeCore(object):
 		timeout = self.__settings__.getSetting( "timeout" )
 		if not timeout:
 			timeout = "5"
-		socket.setdefaulttimeout(float(timeout))
+		#socket.setdefaulttimeout(float(timeout))
 		return None
 		
 	def interrogate(self, item):
@@ -114,18 +114,18 @@ class YouTubeCore(object):
 			return ( self.__language__(30609), 303 )
 			
 		except urllib2.HTTPError, e:
-			str_err = str(e)
+			err = str(e)
 			if self.__dbg__:
-				print self.__plugin__ + " login failed, hit http except: " + str_err
+				print self.__plugin__ + " login failed, hit http except: " + err
 			if e.code == 403:
 				return ( self.__language__(30621), 303 )
-			return ( str_err, 303 )
+			return ( err, 303 )
 		
 		except ValueError, e:
-			str_err = repr(e)
+			err = repr(e)
 			if self.__dbg__:
-				print self.__plugin__ + " login failed, hit valueerror except: " + str_err
-			return ( str_err, 303 )
+				print self.__plugin__ + " login failed, hit valueerror except: " + err
+			return ( err, 303 )
 		
 		except IOError, e:
 			# http://bytes.com/topic/python/answers/33770-error-codes-urlerror
@@ -143,10 +143,10 @@ class YouTubeCore(object):
 			return ( "IOERROR", 303 )
 		
 		except urllib2.URLError, e:
-			str_err = repr(e)
+			err = repr(e)
 			if self.__dbg__:
-				print self.__plugin__ + " login failed, hit url except: " + str_err
-			return ( str_err, 303 )										
+				print self.__plugin__ + " login failed, hit url except: " + err
+			return ( err, 303 )										
 		except:
 			if self.__dbg__:
 				print self.__plugin__ + " login failed uncaught exception"
