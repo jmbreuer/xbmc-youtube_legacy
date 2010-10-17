@@ -352,7 +352,7 @@ class YouTubeNavigation:
 		get = params.get
 
 		( results, status ) = scraper.scrape(params)
-		if ( status == 200 ):
+		if ( len(results) > 0 and status == 200 ):
 			if (get("scraper") == "disco_top_artist"):
 				self.parseFolderList(params, results)
 			elif (get("scraper") == "categories" and not get("category")):
@@ -948,7 +948,7 @@ class YouTubeNavigation:
 			cm.append( ( self.__language__( 30514 ), "XBMC.Container.Update(%s?path=%s&action=search&search=%s)" % ( sys.argv[0],  get("path"), url_title ) ) )
 			cm.append( ( self.__language__( 30504 ), "XBMC.Action(Queue)", ) )
 			cm.append( ( self.__language__( 30502 ), "XBMC.Action(Info)", ) )
-		elif (item("next") == "false"):
+		elif (item("next","false") == "false"):
 			if (item("action") == "search"):
 				cm.append( ( self.__language__( 30515 ), 'XBMC.Container.Update(%s?path=%s&action=edit_search&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
 				cm.append( ( self.__language__( 30505 ), 'XBMC.RunPlugin(%s?path=%s&action=refine_user&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
