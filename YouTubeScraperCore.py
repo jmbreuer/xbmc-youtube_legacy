@@ -15,7 +15,7 @@ class YouTubeScraperCore:
 	urls = {}
 	urls['disco_main'] = "http://www.youtube.com/disco" 
 	urls['disco_search'] = "http://www.youtube.com/disco?action_search=1&query=%s"
-	urls['disco_mix_list'] = "http://www.youtube.com/list_ajax?a=%s&action_get_mixlist=1"
+	urls['disco_mix_list'] = "http://www.youtube.com/list_ajax?a=%s&action_get_mixlist=1&amp;v=%s&amp;style=bottomfeedr"
 	urls['main'] = "http://www.youtube.com"
 	urls['trailers'] = "http://www.youtube.com/trailers?s=tr"
 	urls['current_trailers'] = "http://www.youtube.com/trailers?s=trit&p=%s&hl=en"
@@ -281,11 +281,14 @@ class YouTubeScraperCore:
 		if (self.__dbg__):
 			print "Disco search url %s" % url
 		page = self._fetchPage(url)
-		
+				
 		if (page.find("a=") != -1):
-			page = page[page.find("a=") + 2:]
-			mix_list_id = page[:page.find("&")]
-			url = self.urls["disco_mix_list"] % mix_list_id
+			mix_list_id = page[page.find("a=") + 2:]
+			mix_list_id = mix_list_id[:mix_list_id.find("&")]
+			video_id = page[page.find("v=") + 2:]
+			video_id = video_id[:video_id.find("&")]
+			
+			url = self.urls["disco_mix_list"] % (mix_list_id, video_id)
 			if (self.__dbg__):
 				print "Disco respsonse url: %s" % url
 								
