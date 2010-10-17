@@ -569,7 +569,7 @@ class YouTubeCore(object):
 					item['thumbnail'] = thumbnail
 					ytobjects.append(item)					
 
-                while len(items) > len(ytobjects):
+		while len(items) > len(ytobjects):
 			#print self.__plugin__ + "_get_batch_details adding videoid false"
 			ytobjects.append({'videoid': 'false'});
 		
@@ -601,8 +601,8 @@ class YouTubeCore(object):
 				ytobjects += temp[0:counter]
 				counter = 0
 				link = ""
-
-                tempobjects = ytobjects
+				
+				tempobjects = ytobjects
 		ytobjects = []
 
 		#print self.__plugin__ + " _get_batch_details %s - %s " % ( str(len(items)), str(len(tempobjects)) )
