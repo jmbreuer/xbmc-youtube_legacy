@@ -127,16 +127,16 @@ class YouTubeScraperCore:
 			item = []
 			while ( trailer != None ):
 				videoid = trailer.div.a['href']
-				print self.__plugin__ + " scrapeTrailersGridFormat video : " + videoid
 						
 				if (videoid):
 					if (videoid.find("=") > -1):
 						videoid = videoid[videoid.find("=")+1:]
-
+						print self.__plugin__ + " scrapeTrailersGridFormat video : " + videoid
+					
 					item.append( (videoid, trailer.div.a.span.img['src']) )
 					
 				trailer = trailer.findNextSibling(name="div", attrs = { 'class':"trailer-cell *vl" })
-
+			
 			(yobjects, result ) = self.core._get_batch_details_thumbnails(item);
 			
 			if result != 200:
@@ -158,14 +158,14 @@ class YouTubeScraperCore:
 		
 		if (len(trailers) > 0):
 			trailer = trailers.div.div
+			item = []
 			
 			while (trailer != None):
-				item ={}
 				videoid = trailer.div.div.a['href']
 
 				if (videoid):
 					if (videoid.find("=") > -1):
-						videoid = videoid[videoid.find("=")+1:]
+						videoid = videoid[videoid.find("=")+1:]  
 					item = self.core._get_details(videoid)
 					
 					if (item):
