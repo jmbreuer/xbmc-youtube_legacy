@@ -70,16 +70,17 @@ class YouTubeNavigation:
 	#			   label						 , path							, thumbnail					  ,  login		  ,  feed / action
 	categories = (
 				  {'Title':__language__( 30041 )  ,'path':"/root/categories"		, 'thumbnail':"explore"			 , 'login':"false" , 'scraper':'categories'},
+				  {'Title':__language__( 30037 )  ,'path':"/root/disco"			 	, 'thumbnail':"discoball"		 , 'login':"false" , 'store':"disco_searches" },
+				  {'Title':__language__( 30040 )  ,'path':"/root/disco/search"	  	, 'thumbnail':"search"		   	 , 'login':"false" , 'action':"search_disco"},
+				  {'Title':__language__( 30038 )  ,'path':"/root/disco/top_25"	  	, 'thumbnail':"discoball"		 , 'login':"false" , 'scraper':"disco_top_25"},
+				  {'Title':__language__( 30039 )  ,'path':"/root/disco/popular"	 	, 'thumbnail':"discoball"		 , 'login':"false" , 'scraper':"disco_top_artist"},
 				  {'Title':__language__( 30001 )  ,'path':"/root/feeds"			 	, 'thumbnail':"feeds"			 , 'login':"false" },
+				  {'Title':__language__( 30042 )  ,'path':"/root/shows"        		, 'thumbnail':"shows"            , 'login':"false" , 'scraper':'shows'},
 				  {'Title':__language__( 30032 )  ,'path':"/root/trailers"		  	, 'thumbnail':"trailers"		 , 'login':"false" },
 				  {'Title':__language__( 30035 )  ,'path':"/root/trailers/latest"   , 'thumbnail':"trailers"		 , 'login':"false" , 'scraper':"latest_trailers" },
 				  {'Title':__language__( 30034 )  ,'path':"/root/trailers/current"  , 'thumbnail':"trailers"		 , 'login':"false" , 'scraper':"current_trailers" },
 				  {'Title':__language__( 30036 )  ,'path':"/root/trailers/upcoming" , 'thumbnail':"trailers"		 , 'login':"false" , 'scraper':"upcoming_trailers" },
 				  {'Title':__language__( 30033 )  ,'path':"/root/trailers/popular"  , 'thumbnail':"trailers"		 , 'login':"false" , 'scraper':"popular_trailers" },
-				  {'Title':__language__( 30037 )  ,'path':"/root/disco"			 	, 'thumbnail':"discoball"		 , 'login':"false" , 'store':"disco_searches" },
-				  {'Title':__language__( 30040 )  ,'path':"/root/disco/search"	  	, 'thumbnail':"search"		   	 , 'login':"false" , 'action':"search_disco"},
-				  {'Title':__language__( 30038 )  ,'path':"/root/disco/top_25"	  	, 'thumbnail':"discoball"		 , 'login':"false" , 'scraper':"disco_top_25"},
-				  {'Title':__language__( 30039 )  ,'path':"/root/disco/popular"	 	, 'thumbnail':"discoball"		 , 'login':"false" , 'scraper':"disco_top_artist"},
 				  {'Title':__language__( 30019 )  ,'path':"/root/recommended"	   	, 'thumbnail':"recommended"	  	 , 'login':"true"  , 'scraper':"recommended" },
 				  {'Title':__language__( 30018 )  ,'path':"/root/contacts"		  	, 'thumbnail':"contacts"		 , 'login':"true"  , 'feed':"contacts" },
 				  {'Title':__language__( 30002 )  ,'path':"/root/favorites"		 	, 'thumbnail':"favorites"		 , 'login':"true"  , 'feed':"favorites" },
@@ -105,7 +106,7 @@ class YouTubeNavigation:
 	#==================================== Main Entry Points===========================================
 	def listMenu(self, params = {}):
 		get = params.get
-
+		cache = True
 		if (get("scraper")):
 			self.scrape(params)
 			return
@@ -140,8 +141,9 @@ class YouTubeNavigation:
 		
 		if (get("store") == "searches" or get("store") == "disco_searches"):
 				self.listStoredSearches(params)
-				
-		xbmcplugin.endOfDirectory( handle=int( sys.argv[ 1 ] ), succeeded=True, cacheToDisc=True )
+				cache = False
+
+		xbmcplugin.endOfDirectory( handle=int( sys.argv[ 1 ] ), succeeded=True, cacheToDisc=cache )
 
 	def executeAction(self, params = {}):
 		get = params.get
