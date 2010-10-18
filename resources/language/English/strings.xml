@@ -160,10 +160,11 @@
     <string id="30614">Removed contact</string>
     <string id="30615">Not found</string>
     <string id="30616">Refinement added</string>
-    <string id="30617">Unkown error</string>
+    <string id="30617">Unknown error</string>
     <string id="30618">Couldn't extract video url</string>
     <string id="30619">Couldn't scrape YouTube</string>
     <string id="30620">Stream type not supported</string>
     <string id="30621">Bad username or password</string>
     <string id="30622">Playback failed, try logging in</string>
+    <string id="30623">Maximum login attempts tried.</string>
 </strings>

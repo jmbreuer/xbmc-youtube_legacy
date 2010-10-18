@@ -20,6 +20,7 @@ import sys, urllib, urllib2, re, os, cookielib, string, socket
 from xml.dom.minidom import parseString
 
 # ERRORCODES:
+# 0 = Ignore
 # 200 = OK
 # 303 = See other (returned an error message)
 # 500 = uncaught error
@@ -81,10 +82,10 @@ class YouTubeCore(object):
 		self.__settings__.setSetting('auth', "")
 		self.__settings__.setSetting('nick', "")
 		
-		if ( uname == "" and passwd == "" ):
+		if ( uname == "" or passwd == "" ):
 			if self.__dbg__:
 				print self.__plugin__ + " login no username or password set "
-			return ( "", 200 )
+			return ( "", 0 )
 
 		url = urllib2.Request("https://www.google.com/youtube/accounts/ClientLogin")
 
@@ -92,25 +93,26 @@ class YouTubeCore(object):
 		url.add_header('GData-Version', 2)
 		
 		data = urllib.urlencode({'Email': uname, 'Passwd': passwd, 'service': 'youtube', 'source': 'YouTube plugin'})
-	
+		
 		try:
 			con = urllib2.urlopen(url, data);
 				
 			value = con.read()
 			con.close()
-
+		
 			result = re.compile('Auth=(.*)\nYouTubeUser=(.*)').findall(value)
 					
 			if len(result) > 0:
 				( auth, nick ) = result[0]
 				self.__settings__.setSetting('auth', auth)
 				self.__settings__.setSetting('nick', nick)
-				self._httpLogin()
 
 				if self.__dbg__:
 					print self.__plugin__ + " login done: " + nick
 				return ( self.__language__(30030), 200 )
-			
+
+			print self.__plugin__ + " ABCD"
+					
 			return ( self.__language__(30609), 303 )
 			
 		except urllib2.HTTPError, e:
@@ -136,11 +138,15 @@ class YouTubeCore(object):
 				print self.interrogate(e)
 
 			if error < 9:
+				if self.__dbg__:
+					print self.__plugin__ + " login pre sleep"
 				# Check if there is a timeout here.
 				import time
-				time.sleep(1)
+				time.sleep(3)
+				if self.__dbg__:
+					print self.__plugin__ + " login post sleep"
 				return self.login( error + 1 )
-			return ( "IOERROR", 303 )
+			return ( self.__language__(30623), 303 )
 		
 		except urllib2.URLError, e:
 			err = repr(e)
@@ -643,16 +649,15 @@ class YouTubeCore(object):
 		else:
 			request.add_header('User-Agent', self.USERAGENT)
 
-		if ( login and False):
-			# Get a new LOGIN_INFO cookie (for some reason the old one will fail) 
-			if ( self._httpLogin() ):
-				request.add_header('Cookie', 'LOGIN_INFO=' + self.__settings__.getSetting( "login_info" ) )
-			else:
-				if self.__dbg__:
-					print self.__plugin__ + " _fetchPage _httpLogin failed"
-					
 		if ( login ):
-			request.add_header('Cookie', 'LOGIN_INFO=' + self.__settings__.getSetting( "login_info" ) )
+			if ( self.__settings__.getSetting( "username" ) == "" or self.__settings__.getSetting( "user_password" ) == "" ):
+				if self.__dbg__:
+					print self.__plugin__ + " _fetchPage, login required but no credentials provided"
+				return ( self.__language__( 30608 ) , 303 )
+
+			if self.__dbg__:
+				print self.__plugin__ +  " _fetchPage adding cookie"
+			request.add_header('Cookie', 'LOGIN_INFO=' + self._httpLogin() )
 
 		if auth:
 			authkey = self._getAuth()
@@ -672,18 +677,22 @@ class YouTubeCore(object):
 			new_url = con.geturl()
 			con.close()
 
-			# Review this before 2.0
+			# Return result if it isn't age restricted
 			if ( result.find("verify-age-actions") == -1):
-				return ( result, 200 )		
-			elif ( error < 3 ):
-				# This function needs tobe called with login enabled for verification to work
+				return ( result, 200 )
+			
+			# review this before 2.0 final
+			elif ( error < 10 ):
+				
+				# We need login to verify age.	     
 				if not login:
 					if self.__dbg__:
 						print self.__plugin__ + " _fetchPage age verification required, retrying with login"
+					error = error + 0
 					return self._fetchPage(link, api, auth, login = True, error = error)
-				else:
-					if self.__dbg__:
-						print self.__plugin__ + " _fetchPage Video age restricted - login url: " + new_url
+
+				if self.__dbg__:
+					print self.__plugin__ + " _fetchPage Video age restricted, trying to verify for url: " + new_url
 
 				# Fallback for missing confirm form.
 				if result.find("confirm-age-form") == -1:
@@ -693,7 +702,7 @@ class YouTubeCore(object):
 								
 				request = urllib2.Request(new_url)
 				request.add_header('User-Agent', self.USERAGENT)
-				request.add_header('Cookie', 'LOGIN_INFO=' + self.__settings__.getSetting( "login_info" ) )
+				request.add_header('Cookie', 'LOGIN_INFO=' + self._httpLogin(True) )
 
 				# This really should be a regex, but the regex kept failing.
 				temp = result[result.find("verify-age-actions"):(result.find("verify-age-actions") + 600)]
@@ -730,11 +739,17 @@ class YouTubeCore(object):
 				return ( err, 303 )
 			# 401 (Not authorized) - A 401 response code indicates that a request did not contain an Authorization header, that the format of the Authorization header was invalid, or that the authentication token supplied in the header was invalid.
 			elif ( err.find("401") > -1 ):
-				if self.__dbg__:
-					print self.__plugin__ + " _fetchPage login and retry."
+				# If login credentials are given, try again.
+				if ( self.__settings__.getSetting( "username" ) == "" or self.__settings__.getSetting( "user_password" ) == "" ):
+					if self.__dbg__:
+						print self.__plugin__ + " _fetchPage trying again with login "
 
-				self.login()
-				return self._fetchPage(link, api, auth, login, error +1)
+					self.login()
+					return self._fetchPage(link, api, auth, login, error +1)
+				else:
+					if self.__dbg__:
+						print self.__plugin__ + " _fetchPage 401 Not Authorized and no login credentials written in settings"
+					return ( self.__language__(30622), 303)
 			# 403 (Forbidden) - A 403 response code indicates that you have submitted a request that is not properly authenticated for the requested operation.
 			# Test all cases that cause 403 before 2.0, and verify the above statement.
 			elif ( err.find("403") > -1 ):
@@ -803,10 +818,11 @@ class YouTubeCore(object):
 				print self.__plugin__ + " _getAuth returning stored auth"
 			return auth
 		else:
-			if self.login():
+			(result, status ) =  self.login()
+			if status == 200:
 				if self.__dbg__:
 					print self.__plugin__ + " _getAuth returning new auth"
-
+					
 				return self.__settings__.getSetting( "auth" )
 			else:
 				if self.__dbg__:
@@ -833,6 +849,9 @@ class YouTubeCore(object):
 			usock = urllib2.urlopen(request)
 		except urllib2.HTTPError, e:
 			error = str(e)
+			if self.__dbg__:
+				print self.__plugin__ + " _youTubeAdd exception: " + error
+				
 			if ( error.find("201") > -1):
 				if self.__dbg__:
 					print self.__plugin__ + " _youTubeAdd: Done"
@@ -842,17 +861,20 @@ class YouTubeCore(object):
 					print self.__plugin__ + " _youTubeAdd: " + self.__language__(30615)
 				return ( self.__language__(30615), 303 )
 			elif ( error.find("401") > -1 and retry ):
-				if self.login():
+				# If login credentials are given, try again.
+				if ( self.__settings__.getSetting( "username" ) == "" or self.__settings__.getSetting( "user_password" ) == "" ):
 					if self.__dbg__:
-						print self.__plugin__ + " _youTubeAdd: retry"
-					return self.youTubeAdd(url, add_request, False)
+						print self.__plugin__ + " _youTubeAdd trying again with login "
+						
+					self.login()
+					return self._fetchPage(link, api, auth, login, error +1)
 				else:
 					if self.__dbg__:
-						print self.__plugin__ + " _youTubeAdd: " + error
-					return ( error, 303 )
+						print self.__plugin__ + " _youTubeAdd 401 Not Authorized and no login credentials written in settings"
+					return ( self.__language__(30622), 303)
 			else:
 				if self.__dbg__:
-					print self.__plugin__ + " _youTubeAdd: " + error
+					print self.__plugin__ + " _youTubeAdd error not caught " 
 				return ( error, 303 )
 	
 	def _youTubeDel(self, delete_url, retry = True):
@@ -882,15 +904,17 @@ class YouTubeCore(object):
 					print self.__plugin__ + " _youTubeDel: done"
 				return ( "", 200 )
 			elif (response.status == 401 and retry):
-				if self.login():
+                                # If login credentials are given, try again.
+				if ( self.__settings__.getSetting( "username" ) == "" or self.__settings__.getSetting( "user_password" ) == "" ):
 					if self.__dbg__:
-						print self.__plugin__ + " _youTubeDel: retrying"
-					return self._youTubeDel(delete_url, False)
+						print self.__plugin__ + " _youTubeDel trying again with login "
+						
+					self.login()
+					return self._fetchPage(link, api, auth, login, error +1)
 				else:
-					resp = str(response.read())
 					if self.__dbg__:
-						print self.__plugin__ + " _youTubeDel: " + resp
-					return ( resp, 303 )
+						print self.__plugin__ + " _youTubeDel 401 Not Authorized and no login credentials written in settings"
+					return ( self.__language__(30622), 303)
 			else:
 				resp = str(response.read())
 				if self.__dbg__:
@@ -1094,15 +1118,26 @@ class YouTubeCore(object):
 				video['apierror'] = self.__language__(30606) + str(status)
 				return video
 		
-	def _httpLogin(self, error = 0):
+	def _httpLogin(self, new = False, error = 0):
 		if self.__dbg__:
-			print self.__plugin__ + " _httpLogin - errors: " + str(error)
+			print self.__plugin__ + " _httpLogin errors: " + str(error)
 
 		uname = self.__settings__.getSetting( "username" )
 		pword = self.__settings__.getSetting( "user_password" )
+		
 		if ( uname == "" and pword == "" ):
-			return False
+			return ""
 
+		if ( new ):
+			if self.__dbg__:
+				print self.__plugin__ + " _httpLogin clearing login_info"
+			self.__settings__.setSetting( "login_info", "" )
+		elif ( self.__settings__.getSetting( "login_info" ) != "" ):
+			if self.__dbg__:
+				print self.__plugin__ + " _httpLogin returning stored login_info"
+				
+			return self.__settings__.getSetting( "login_info" )
+								
 		cj = cookielib.LWPCookieJar()
 		
 		opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
@@ -1114,7 +1149,7 @@ class YouTubeCore(object):
 
 		try:
 			if self.__dbg__:
-				print self.__plugin__ + " _httpLogin: step 1"
+				print self.__plugin__ + " _httpLogin: getting new login_info"
 			con = urllib2.urlopen(url)
 			header = con.info()
 			galx = re.compile('Set-Cookie: GALX=(.*);Path=/accounts;Secure').findall(str(header))[0]
@@ -1128,8 +1163,8 @@ class YouTubeCore(object):
 						   'continue': cont})
 
 			# Login to Google
-			if self.__dbg__:
-				print self.__plugin__ + " _httpLogin: step 2"
+			#if self.__dbg__:
+			#	print self.__plugin__ + " _httpLogin: step 2"
 			url = urllib2.Request('https://www.google.com/accounts/ServiceLoginAuth?service=youtube', params)
 			url.add_header('User-Agent', self.USERAGENT)
 		
@@ -1141,8 +1176,8 @@ class YouTubeCore(object):
 			url.add_header('User-Agent', self.USERAGENT)
 			
 			# Login to youtube
-			if self.__dbg__:
-				print self.__plugin__ + " _httpLogin: step 3"
+			#if self.__dbg__:
+			#	print self.__plugin__ + " _httpLogin: step 3"
 			con = urllib2.urlopen(newurl)
 			
 			# Save cookiefile in settings
@@ -1152,9 +1187,9 @@ class YouTubeCore(object):
 			self.__settings__.setSetting( "login_info", login_info )
 			
 			if self.__dbg__:
-				print self.__plugin__ + " _httpLogin: Logged in on attempt %s with login_info cookie: %s " % ( str(error + 1), login_info)
+				print self.__plugin__ + " _httpLogin done"
 
-			return True
+			return self.__settings__.getSetting( "login_info" )
 		
 		except IOError, e:
 			# http://bytes.com/topic/python/answers/33770-error-codes-urlerror
@@ -1165,14 +1200,21 @@ class YouTubeCore(object):
 				print self.interrogate(e)
 				
 				if error < 9:
+					if self.__dbg__:
+						print self.__plugin__ + " login pre sleep"
+					# Check if there is a timeout here.
 					import time
-					time.sleep(1)
-					return self._httpLogin( error + 1 )
+					time.sleep(3)
+					if self.__dbg__:
+						print self.__plugin__ + " login post sleep"
+
+					return self._httpLogin( new, error + 1 )
 				
-				return ( "IOERROR", 303 )
+				return ""
 		except:
 			if self.__dbg__:
 				print self.__plugin__ + " _httpLogin: uncaught exception"
 				print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
 								   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
-			return False
+			return ""
+		

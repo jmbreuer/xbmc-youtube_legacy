@@ -8,6 +8,13 @@
 - [XBMC] has Excessive Memory use after running the plugin for prolonged periods of time 
 - Download of rtmpe streams not supported.
 
+[B]Youtube 1.9.3[/B]
+- VERSION NUMBER NOT UPDATED
+- Improved api login
+- Improved http login
+- Hardened handling of age restricted videos
+- No longer try login when no credentials have been provided.
+
 [B]Youtube 1.9.2[/B]
 - Disable socket timeout since that makes login fail on windows.
 
