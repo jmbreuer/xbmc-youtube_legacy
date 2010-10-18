@@ -131,7 +131,6 @@ class YouTubeScraperCore:
 				if (videoid):
 					if (videoid.find("=") > -1):
 						videoid = videoid[videoid.find("=")+1:]
-						print self.__plugin__ + " scrapeTrailersGridFormat video : " + videoid
 					
 					item.append( (videoid, trailer.div.a.span.img['src']) )
 					
@@ -158,7 +157,7 @@ class YouTubeScraperCore:
 		
 		if (len(trailers) > 0):
 			trailer = trailers.div.div
-			item = []
+			items = []
 			
 			while (trailer != None):
 				videoid = trailer.div.div.a['href']
@@ -166,17 +165,17 @@ class YouTubeScraperCore:
 				if (videoid):
 					if (videoid.find("=") > -1):
 						videoid = videoid[videoid.find("=")+1:]  
-					item = self.core._get_details(videoid)
-					
-					if (item):
-						item["thumbnail"] = trailer.div.div.a.span.img['src'] 
-						yobjects.append(item)
-						
+						items.append( (videoid, trailer.div.div.a.span.img['src']) )
+				
 				trailer = trailer.findNextSibling(name="div")
+			
+		if (items):
+			(yobjects, status) = self.core._get_batch_details_thumbnails(items)
+			
 		if (not yobjects):
 			return (yobjects, 500)
 		
-		return (yobjects, 200)
+		return (yobjects, status)
 #=================================== Categories  ============================================
 
 	def scrapeCategoriesGrid(self, html, params = {}):
@@ -350,6 +349,156 @@ class YouTubeScraperCore:
 				yobjects.append(item)
 				
 		return (yobjects, 200)
+	
+#=================================== Shows ============================================
+
+	def scrapeShowCategories(self, html, params = {}):
+		if self.__dbg__:
+			print self.__plugin__ + "scrapeShowCategories " 
+		
+		get = params.get
+				
+		list = SoupStrainer(name="div", attrs = {"class":"yt-uix-expander-body"})
+		categories = BeautifulSoup(html, parseOnlyThese=list)
+		
+		yobjects = []
+		status = 200
+		
+		if (len(categories) > 0):
+			ul = categories.ul
+			while (ul != None):
+				category = ul.li
+				while (category != None):
+					if (category.a):
+						item = {}
+						title = category.a.contents[0]
+						title = title.replace("&amp;", "&")
+						item['Title'] = title
+						cat = category.a["href"].replace("/shows/", "")
+						cat = urllib.quote_plus(cat)
+						item['category'] = cat
+						item['scraper'] = "shows"
+						item["thumbnail"] = "explore"
+						if self.__dbg__:
+							print "adding item ", item['Title'], " url ", item['category']
+						if (title != "Music"):
+							yobjects.append(item)
+					
+					category = category.findNextSibling(name = "li")
+				ul = ul.findNextSibling(name = "ul")
+		
+		if (not yobjects):
+			return (self.__language__(30601), 303)
+		
+		return (yobjects, status)
+	
+	def scrapeShowEpisodes(self, html, params = {}):
+		get = params.get
+		if self.__dbg__:
+			print self.__plugin__ + " scrapeShowEpisodes"
+		
+		#Need to get the "seasons" paging - by default it shows the latest.
+		
+		#For each season, need to get the episodes.
+		list = SoupStrainer(name="div", attrs = {"class":"shows-table-content"})
+		episodetable = BeautifulSoup(html, parseOnlyThese=list)
+		
+		yobjects = []
+		status = 200
+		
+		if (len(episodetable) > 0):
+			episodes = []
+			if (self.__dbg__):
+				print self.__plugin__ + " found episodes ", len(episodetable), " tr ", len(episodetable.table.tr)
+			
+			episode = episodetable.table.tr
+
+			while (episode != None):
+				link = episode.find(name="a", attrs= {"class":"yt-uix-hovercard-target"})
+
+				if (link):					
+					videoid = link['href']
+					
+					if (videoid):
+						if (videoid.find("=") > -1):
+							videoid = videoid[videoid.find("=")+1:]
+						if (videoid.find("&amp") > -1):
+							videoid = videoid[0:videoid.find("&amp")]
+
+						episodes.append(episode)				
+				episode = episode.findNextSibling(name="tr")
+		
+		if (episodes):
+			(yobjects, status) = self.core._get_batch_details(episodes)
+			
+		if (not yobjects):
+			return (self.__language__(30601), 303)
+		
+		#yobjects[len(yobjects) -1]["next"] = next
+		
+		return (yobjects, status)
+	
+	def scrapeRecommendedShows(self, html, params = {}):
+		#Need to pull the top 3 "recommended" shows from the chosen "category" page.
+		return ([], 303)
+	
+	def scrapeShowsGrid(self, html, params = {}):
+		get = params.get
+		if self.__dbg__:
+			print self.__plugin__ + " scrapeShowsGrid"
+		
+		next = "false"
+		pager = SoupStrainer(name="div", attrs = {'class':"yt-uix-pager"})
+		pagination = BeautifulSoup(html, parseOnlyThese=pager)
+
+		if (len(pagination) > 0):
+			tmp = str(pagination)
+			if (tmp.find("Next") > 0):
+				next = "true"
+
+		#Now look for the shows in the list.
+		list = SoupStrainer(name="div", attrs = {"class":"popular-show-list"})
+		shows = BeautifulSoup(html, parseOnlyThese=list)
+		
+		#print "categories ", categories
+		yobjects = []
+		status = 200
+		
+		if (len(shows) > 0):
+			
+			show = shows.div.div
+			
+			while (show != None):
+				
+				if (show.a):
+					item = {}
+					episodes = show.find(name = "div", attrs= {'class':"show-extrainfo"})
+					title = show.div.h3.contents[0]
+					if (episodes and episodes.span):
+						title = title + " (" + episodes.span.contents[0].lstrip().rstrip() + ")"
+					
+					title = title.replace("&amp;", "&")
+					item['Title'] = title
+					cat = show.a["href"].replace("/show/", "")
+					cat = urllib.quote_plus(cat)
+					item['category'] = cat
+					item['scraper'] = "show"
+					item["thumbnail"] = show.a.span.img['src'] 
+					
+					if self.__dbg__:
+						print "adding show ", item['Title'], " url ", item['category']
+					if (title != "Music"):
+						yobjects.append(item)
+				
+				show = show.findNextSibling(name="div", attrs = { 'class':"show-cell *vl yt-uix-hovercard" })
+			
+		if (not yobjects):
+			return (self.__language__(30601), 303)
+		
+		yobjects[len(yobjects) -1]["next"] = next
+		
+		return (yobjects, status)
+
 #=================================== Common ============================================		
 
 	def _fetchPage(self, feed, params = {}):
@@ -371,7 +520,8 @@ class YouTubeScraperCore:
 		elif ( get("scraper") == "categories" and get("category")):
 			scraper_per_page = 23
 		
-		print "scraper per page " + str(scraper_per_page) 
+		if (self.__dbg__):
+			print self.__plugin__ + " scraper per page " + str(scraper_per_page) 
 		
 		if (scraper_per_page > 0):
 			# begin dark magic
@@ -390,7 +540,9 @@ class YouTubeScraperCore:
 				print "requesting url " + url
 
 			if (get("scraper") == "categories"):
-				(result, status) = self.scrapeCategoriesGrid(html, params)	
+				(result, status) = self.scrapeCategoriesGrid(html, params)
+			elif (get("scraper") == "shows"):
+				(result, status) = self.scrapeShowsGrid(html, params)	
 			else:
 				(result, status) = self.scrapeTrailersGridFormat(html, params)
 			
