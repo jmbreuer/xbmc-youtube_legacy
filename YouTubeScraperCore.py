@@ -642,16 +642,18 @@ class YouTubeScraperCore:
 		else :
 			url = self.createUrl(params)
 			html = self._fetchPage(url, params)
-			if (get("scraper") == "categories" and not get("category"))	:
-				return self.scrapeCategoryList(html, params)
-			elif (get("scraper") == "categories" and get("category")):
-				return self.scrapeCategoriesGrid(html, params)
+			if (get("scraper") == "categories" )	:
+				if (get("category")):
+					return self.scrapeCategoriesGrid(html, params)
+				else:
+					return self.scrapeCategoryList(html, params)
 			elif (get("show") == "show"):
 				return self.scrapeShow(html, params)
-			elif (get("scraper") == "shows" and not get("category")):
-				return self.scrapeShowCategories(html, params)
-			elif (get("scraper") == "shows" and get("category")):
-				return self.scrapeShowsGrid(html, params)
+			elif (get("scraper") == "shows"):
+				if (get("category")):
+					return self.scrapeShowsGrid(html, params)
+				else:
+					return self.scrapeShowCategories(html, params)
 			else:
 				return self.scrapeTrailersListFormat(html, params)
 	
