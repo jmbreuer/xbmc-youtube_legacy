@@ -13,6 +13,8 @@ class YouTubeScraperCore:
 	USERAGENT = "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-GB; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8"
 	
 	urls = {}
+	urls['shows'] = "http://www.youtube.com/shows" 
+	urls['show'] = "http://www.youtube.com/show"
 	urls['disco_main'] = "http://www.youtube.com/disco" 
 	urls['disco_search'] = "http://www.youtube.com/disco?action_search=1&query=%s"
 	urls['disco_mix_list'] = "http://www.youtube.com/list_ajax?a=%s&action_get_mixlist=1&amp;v=%s&amp;style=bottomfeedr"
@@ -378,9 +380,9 @@ class YouTubeScraperCore:
 						cat = urllib.quote_plus(cat)
 						item['category'] = cat
 						item['scraper'] = "shows"
-						item["thumbnail"] = "explore"
+						item["thumbnail"] = "shows"
 						if self.__dbg__:
-							print "adding item ", item['Title'], " url ", item['category']
+							print self.__plugin__ + "adding item ", item['Title'], " url ", item['category']
 						if (title != "Music"):
 							yobjects.append(item)
 					
@@ -479,14 +481,23 @@ class YouTubeScraperCore:
 					
 					title = title.replace("&amp;", "&")
 					item['Title'] = title
-					cat = show.a["href"].replace("/show/", "")
-					cat = urllib.quote_plus(cat)
-					item['category'] = cat
+					
+					show_url = show.a["href"].replace("/show/", "")
+					show_url = urllib.quote_plus(show_url)
+					item['show'] = show_url
+					
 					item['scraper'] = "show"
-					item["thumbnail"] = show.a.span.img['src'] 
+					print "show page html " + repr(show.a.span)
+					thumbnail = show.a.span.img['src']
+					if ( thumbnail.find("_thumb.") > 0):
+						thumbnail = thumbnail.replace("_thumb.",".")
+					else:
+						thumbnail = "show"
+					
+					item["thumbnail"] = thumbnail
 					
 					if self.__dbg__:
-						print "adding show ", item['Title'], " url ", item['category']
+						print "adding show " + item['Title'] + ", url: " + item['show']
 					if (title != "Music"):
 						yobjects.append(item)
 				
@@ -515,9 +526,11 @@ class YouTubeScraperCore:
 		scraper_per_page = 0
 		result = []
 		
-		if (get("scraper") in self.urls):
+		if (get("scraper") != "shows" and get("scraper") in self.urls):
 			scraper_per_page = 40
 		elif ( get("scraper") == "categories" and get("category")):
+			scraper_per_page = 23
+		elif ( get("scraper") == "shows" and get("category")):
 			scraper_per_page = 23
 		
 		if (self.__dbg__):
@@ -561,7 +574,9 @@ class YouTubeScraperCore:
 				html = self._fetchPage(url, params)
 
 				if (get("scraper") == "categories"):
-					(new_result, status) = self.scrapeCategoriesGrid(html, params)	
+					(new_result, status) = self.scrapeCategoriesGrid(html, params)
+				elif (get("scraper") == "shows"):
+					(new_result, status) = self.scrapeShowsGrid(html, params)	
 				else:
 					(new_result, status) = self.scrapeTrailersGridFormat(html, params)
 								
@@ -590,8 +605,14 @@ class YouTubeScraperCore:
 				return self.scrapeCategoryList(html, params)
 			elif (get("scraper") == "categories" and get("category")):
 				return self.scrapeCategoriesGrid(html, params)
+			elif (get("scraper") == "shows" and not get("category")):
+				return self.scrapeShowCategories(html, params)
+			elif (get("scraper") == "shows" and get("category")):
+				return self.scrapeShowsGrid(html, params)
+			elif (get("scraper") == "show"):
+				return self.scrapeShowEpisodes(html, params)
 			else:
-				return self.scrapeTrailersListFormat(html, params)	
+				return self.scrapeTrailersListFormat(html, params)
 	
 	def createUrl(self, params = {}):
 		get = params.get
@@ -604,8 +625,23 @@ class YouTubeScraperCore:
 				url = self.urls["main"] + category + "?hl=en" + "&p=" + page
 			else:
 				url = self.urls["main"] + "/videos" + category + "&hl=en" + "&p=" + page
+			
 		elif(get("scraper") == "categories"):
 			url = self.urls["recommended"] + "&hl=en"
+		
+		elif (get("scraper") == "shows" and get("category")):
+			category = get("category")
+			category = urllib.unquote_plus(category)
+			
+			url = self.urls["shows"] + "/" + category + "?p=" + page + "&hl=en"
+			
+		elif (get("scraper") == "show" and get("show")):
+			url = self.urls["show"] + "/" +  get("show") + "?p=" + page + "&hl=en"
+			print "show url " + url
+			
+		elif (get("scraper") == "shows" and not get("category","")):		
+			url = self.urls['shows'] + "?hl=en"
+			print self.__plugin__ + " " + url
 		else:
 			if (get("scraper") in self.urls):
 				url = self.urls[get("scraper")]

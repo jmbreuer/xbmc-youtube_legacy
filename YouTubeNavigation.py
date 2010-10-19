@@ -358,9 +358,10 @@ class YouTubeNavigation:
 
 		( results, status ) = scraper.scrape(params)
 		if ( len(results) > 0 and status == 200 ):
-			if (get("scraper") == "disco_top_artist"):
-				self.parseFolderList(params, results)
-			elif (get("scraper") == "categories" and not get("category")):
+			if (get("scraper") == "disco_top_artist" 
+				or get("scraper") == "shows"
+				or (get("scraper") == "categories" and not get("category"))
+				):
 				self.parseFolderList(params, results)
 			else:
 				self.parseVideoList(params, results)
