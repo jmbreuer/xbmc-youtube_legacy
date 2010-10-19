@@ -14,7 +14,7 @@ class YouTubeScraperCore:
 	
 	urls = {}
 	urls['shows'] = "http://www.youtube.com/shows" 
-	urls['show'] = "http://www.youtube.com/show"
+	urls['show_list'] = "http://www.youtube.com/show"
 	urls['disco_main'] = "http://www.youtube.com/disco" 
 	urls['disco_search'] = "http://www.youtube.com/disco?action_search=1&query=%s"
 	urls['disco_mix_list'] = "http://www.youtube.com/list_ajax?a=%s&action_get_mixlist=1&amp;v=%s&amp;style=bottomfeedr"
@@ -382,9 +382,8 @@ class YouTubeScraperCore:
 						item['scraper'] = "shows"
 						item["thumbnail"] = "shows"
 						if self.__dbg__:
-							print self.__plugin__ + "adding item ", item['Title'], " url ", item['category']
-						if (title != "Music"):
-							yobjects.append(item)
+							print self.__plugin__ + "adding item: " + item['Title'] + ", url: " + item['category']
+						yobjects.append(item)
 					
 					category = category.findNextSibling(name = "li")
 				ul = ul.findNextSibling(name = "ul")
@@ -440,8 +439,52 @@ class YouTubeScraperCore:
 		
 		return (yobjects, status)
 	
-	def scrapeRecommendedShows(self, html, params = {}):
-		#Need to pull the top 3 "recommended" shows from the chosen "category" page.
+		# Ii the show has more than one season the function returns a list folder
+		# listing of all seasons, otherwise (only 1 season) a paginated list of video items is returned
+	def scrapeShow(self, html, params = {}):
+		get = params.get
+		if (html.find("page not-selected") == -1):
+			return self.scrapeShowEpisodes(self, html, params)
+		
+		yobjects = []
+		
+		list = SoupStrainer(name="div", attrs = {'class':"shows-episodes-sort browse-pager"})
+		seasons = BeautifulSoup(html, parseOnlyThese=list)
+		
+		if (len(seasons) > 0):
+			season = seasons.div.a
+			while (season != None):
+				item = {}
+				if (season["href"].find("&s=") > 0):
+					season_url = season["href"][season["href"].find("&s=") + 3:]
+					item["Title"] = season_url 
+					item["season"] = season_url
+					item["Thumbnail"] = "show"
+					item["scraper"] = "show"
+					item["show"] = get("show")
+					yobjects.append(item)
+				
+				new_season = season.findNextSibling(name="a", attrs = { 'class':"page not-selected"})
+				
+				if (new_season != None):
+					season = new_season
+				else: 
+					season = season.findNextSibling(name="span", attrs = {'class':"page selected"})
+					
+					if (season != None):
+						item = {}
+						if (len(season.contents[0]) > 0):
+							season_url = season.contents[0]
+							item["Title"] = season_url
+							item["season"] = season_url
+							item["Thumbnail"] = "show"
+							item["scraper"] = "show"
+							item["show"] = get("show")
+							yobjects.append(item)
+		
+		if (yobjects):
+			return ( yobjects, 200 )
+				
 		return ([], 303)
 	
 	def scrapeShowsGrid(self, html, params = {}):
@@ -462,7 +505,6 @@ class YouTubeScraperCore:
 		list = SoupStrainer(name="div", attrs = {"class":"popular-show-list"})
 		shows = BeautifulSoup(html, parseOnlyThese=list)
 		
-		#print "categories ", categories
 		yobjects = []
 		status = 200
 		
@@ -487,7 +529,6 @@ class YouTubeScraperCore:
 					item['show'] = show_url
 					
 					item['scraper'] = "show"
-					print "show page html " + repr(show.a.span)
 					thumbnail = show.a.span.img['src']
 					if ( thumbnail.find("_thumb.") > 0):
 						thumbnail = thumbnail.replace("_thumb.",".")
@@ -497,9 +538,9 @@ class YouTubeScraperCore:
 					item["thumbnail"] = thumbnail
 					
 					if self.__dbg__:
-						print "adding show " + item['Title'] + ", url: " + item['show']
-					if (title != "Music"):
-						yobjects.append(item)
+						print self.__plugin__ + " adding show " + item['Title'] + ", url: " + item['show']
+					
+					yobjects.append(item)
 				
 				show = show.findNextSibling(name="div", attrs = { 'class':"show-cell *vl yt-uix-hovercard" })
 			
@@ -526,7 +567,7 @@ class YouTubeScraperCore:
 		scraper_per_page = 0
 		result = []
 		
-		if (get("scraper") != "shows" and get("scraper") in self.urls):
+		if (get("scraper") != "shows" and get("scraper") != "show" and get("scraper") in self.urls):
 			scraper_per_page = 40
 		elif ( get("scraper") == "categories" and get("category")):
 			scraper_per_page = 23
@@ -605,12 +646,12 @@ class YouTubeScraperCore:
 				return self.scrapeCategoryList(html, params)
 			elif (get("scraper") == "categories" and get("category")):
 				return self.scrapeCategoriesGrid(html, params)
+			elif (get("show") == "show"):
+				return self.scrapeShow(html, params)
 			elif (get("scraper") == "shows" and not get("category")):
 				return self.scrapeShowCategories(html, params)
 			elif (get("scraper") == "shows" and get("category")):
 				return self.scrapeShowsGrid(html, params)
-			elif (get("scraper") == "show"):
-				return self.scrapeShowEpisodes(html, params)
 			else:
 				return self.scrapeTrailersListFormat(html, params)
 	
@@ -629,19 +670,17 @@ class YouTubeScraperCore:
 		elif(get("scraper") == "categories"):
 			url = self.urls["recommended"] + "&hl=en"
 		
-		elif (get("scraper") == "shows" and get("category")):
-			category = get("category")
-			category = urllib.unquote_plus(category)
+		elif (get("scraper") == "shows"):
+			if (get("category")):
+				category = get("category")
+				category = urllib.unquote_plus(category)
+				url = self.urls["shows"] + "/" + category + "?p=" + page + "&hl=en"
+			else:
+				url = self.urls['shows'] + "?hl=en"	
 			
-			url = self.urls["shows"] + "/" + category + "?p=" + page + "&hl=en"
+		elif (get("show")):
+			url = self.urls["show_list"] + "/" +  get("show") + "?&hl=en"
 			
-		elif (get("scraper") == "show" and get("show")):
-			url = self.urls["show"] + "/" +  get("show") + "?p=" + page + "&hl=en"
-			print "show url " + url
-			
-		elif (get("scraper") == "shows" and not get("category","")):		
-			url = self.urls['shows'] + "?hl=en"
-			print self.__plugin__ + " " + url
 		else:
 			if (get("scraper") in self.urls):
 				url = self.urls[get("scraper")]

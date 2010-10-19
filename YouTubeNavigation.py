@@ -698,6 +698,8 @@ class YouTubeNavigation:
 			icon = self.getThumbnail("discoball")
 		elif (item("action") == "search"):
 			icon = self.getThumbnail("search")
+		elif (item("show") or get("scraper") == "shows"):
+			icon = self.getThumbnail("shows")
 		
 		thumbnail = item("thumbnail")
 		
