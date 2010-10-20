@@ -398,91 +398,75 @@ class YouTubeScraperCore:
 		if self.__dbg__:
 			print self.__plugin__ + " scrapeShowEpisodes"
 		
-		#Need to get the "seasons" paging - by default it shows the latest.
-		
-		#For each season, need to get the episodes.
-		list = SoupStrainer(name="div", attrs = {"class":"shows-table-content"})
-		episodetable = BeautifulSoup(html, parseOnlyThese=list)
-		
 		yobjects = []
 		status = 200
 		
-		if (len(episodetable) > 0):
-			episodes = []
-			if (self.__dbg__):
-				print self.__plugin__ + " found episodes ", len(episodetable), " tr ", len(episodetable.table.tr)
-			
-			episode = episodetable.table.tr
-
-			while (episode != None):
-				link = episode.find(name="a", attrs= {"class":"yt-uix-hovercard-target"})
-
-				if (link):					
-					videoid = link['href']
-					
-					if (videoid):
-						if (videoid.find("=") > -1):
-							videoid = videoid[videoid.find("=")+1:]
-						if (videoid.find("&amp") > -1):
-							videoid = videoid[0:videoid.find("&amp")]
-
-						episodes.append(episode)				
-				episode = episode.findNextSibling(name="tr")
+		videos = re.compile('<a href="/watch\?v=(.*)&amp;list=SL">').findall(html);
 		
-		if (episodes):
-			(yobjects, status) = self.core._get_batch_details(episodes)
-			
+		if (videos):
+			(yobjects, status) = self.core._get_batch_details(videos)
+		
 		if (not yobjects):
-			return (self.__language__(30601), 303)
+			status = 303
 		
+		## we need to locally cache the season episode list and find a way to determine if its still valid (needs to be refreshed).. 
 		#yobjects[len(yobjects) -1]["next"] = next
-		
+				
 		return (yobjects, status)
 	
-		# Ii the show has more than one season the function returns a list folder
-		# listing of all seasons, otherwise (only 1 season) a paginated list of video items is returned
+		# If the show contains more than one season the function will returns a list of folder items,
+		# otherwise a paginated list of video items is returned
 	def scrapeShow(self, html, params = {}):
 		get = params.get
-		if (html.find("page not-selected") == -1):
-			return self.scrapeShowEpisodes(self, html, params)
-		
 		yobjects = []
 		
+		if ((html.find("page not-selected") == -1) or get("season")):
+			if self.__dbg__:
+				print self.__plugin__ + " parsing videolist for single season"
+			(yobjects, status) = self.scrapeShowEpisodes(html, params)
+			
+			if (yobjects):
+				yobjects[0]["folder"] = "false"
+			
+			return (yobjects, status)
+				
 		list = SoupStrainer(name="div", attrs = {'class':"shows-episodes-sort browse-pager"})
 		seasons = BeautifulSoup(html, parseOnlyThese=list)
 		
 		if (len(seasons) > 0):
-			season = seasons.div.a
+			season = seasons.div.span.findNextSibling()
+			
+			print self.__plugin__ + " season " + str(season)
 			while (season != None):
 				item = {}
-				if (season["href"].find("&s=") > 0):
-					season_url = season["href"][season["href"].find("&s=") + 3:]
-					item["Title"] = season_url 
-					item["season"] = season_url
-					item["Thumbnail"] = "show"
-					item["scraper"] = "show"
-					item["show"] = get("show")
-					yobjects.append(item)
-				
-				new_season = season.findNextSibling(name="a", attrs = { 'class':"page not-selected"})
-				
-				if (new_season != None):
-					season = new_season
-				else: 
-					season = season.findNextSibling(name="span", attrs = {'class':"page selected"})
+				if (str(season).find("page not-selected") > 0):
+					season_url = season["href"]
 					
-					if (season != None):
-						item = {}
-						if (len(season.contents[0]) > 0):
-							season_url = season.contents[0]
-							item["Title"] = season_url
-							item["season"] = season_url
-							item["Thumbnail"] = "show"
-							item["scraper"] = "show"
-							item["show"] = get("show")
-							yobjects.append(item)
+					if (season_url.find("&amp;s=") > 0):
+						season_url = season_url[season_url.find("&amp;s=") + 7:]
+						if (season_url.find("&amp;")):
+							season_url = season_url[:season_url.find("&amp;")]
+						item["Title"] = "Season " + season_url.encode("utf-8")
+						item["season"] = season_url.encode("utf-8")
+						item["thumbnail"] = "shows"
+						item["scraper"] = "show"
+						item["show"] = get("show")
+						yobjects.append(item)
+				else:
+					if (len(season.contents[0]) > 0):
+						season_url = season.contents[0]
+						item["Title"] = "Season " + season_url.encode("utf-8")
+						item["season"] = season_url.encode("utf-8")
+						item["thumbnail"] = "shows"
+						item["scraper"] = "show"
+						item["show"] = get("show")
+						yobjects.append(item)
+				
+				season = season.findNextSibling()					
 		
 		if (yobjects):
+			yobjects[0]["folder"] = "true"
+			print self.__plugin__ + " found seasons: " + repr(yobjects)
 			return ( yobjects, 200 )
 				
 		return ([], 303)
@@ -500,7 +484,7 @@ class YouTubeScraperCore:
 			tmp = str(pagination)
 			if (tmp.find("Next") > 0):
 				next = "true"
-
+		
 		#Now look for the shows in the list.
 		list = SoupStrainer(name="div", attrs = {"class":"popular-show-list"})
 		shows = BeautifulSoup(html, parseOnlyThese=list)
@@ -641,13 +625,16 @@ class YouTubeScraperCore:
 				return ([], 303)
 		else :
 			url = self.createUrl(params)
+			print self.__plugin__ + " fetching url: " + url 
 			html = self._fetchPage(url, params)
+			
 			if (get("scraper") == "categories" )	:
 				if (get("category")):
 					return self.scrapeCategoriesGrid(html, params)
 				else:
 					return self.scrapeCategoryList(html, params)
-			elif (get("show") == "show"):
+			elif (get("show")):
+				print self.__plugin__ + " parsing show listing"
 				return self.scrapeShow(html, params)
 			elif (get("scraper") == "shows"):
 				if (get("category")):
@@ -680,8 +667,10 @@ class YouTubeScraperCore:
 			else:
 				url = self.urls['shows'] + "?hl=en"	
 			
-		elif (get("show")):
+		elif (get("show")):			
 			url = self.urls["show_list"] + "/" +  get("show") + "?&hl=en"
+			if (get("season")):
+				url = url + "&s=" + get("season")
 			
 		else:
 			if (get("scraper") in self.urls):
