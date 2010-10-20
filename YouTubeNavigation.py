@@ -363,6 +363,11 @@ class YouTubeNavigation:
 				or (get("scraper") == "categories" and not get("category"))
 				):
 				self.parseFolderList(params, results)
+			elif( get("scraper") == "show"):
+				if (results[0].get("folder") == "true"):
+					self.parseFolderList(params, results)
+				else:
+					self.parseVideoList(params, results)
 			else:
 				self.parseVideoList(params, results)
 		elif ( status == 303):
