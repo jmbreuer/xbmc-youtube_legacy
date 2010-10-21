@@ -16,6 +16,10 @@ Author: Sean Poon - http://gakuseisean.deviantart.com
 License: Free for personal desktop use only.
 http://www.iconarchive.com/show/radium-icons-by-gakuseisean/Key-icon.html
 
+shows.png
+Author: DBGthekafu - "Black-white 2 Vista" icon theme
+License: Reuse of the file allowed under the GPL
+http://commons.wikimedia.org/wiki/File:Tv_bw.png
 
 playlists.png
 Author: IconShock
