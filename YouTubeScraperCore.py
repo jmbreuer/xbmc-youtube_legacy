@@ -398,22 +398,34 @@ class YouTubeScraperCore:
 		if self.__dbg__:
 			print self.__plugin__ + " scrapeShowEpisodes"
 		
-		yobjects = []
-		status = 200
+		page = int(get("page", "0"))
+		per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
 		
-		videos = re.compile('<a href="/watch\?v=(.*)&amp;list=SL">').findall(html);
+		oldVideos = self.__settings__.getSetting("show_" + get("show") + "_season_" + get("season","0") )
 		
-		if (videos):
-			(yobjects, status) = self.core._get_batch_details(videos)
+		if ( page == 0 or not oldVideos):
+			videos = re.compile('<a href="/watch\?v=(.*)&amp;list=SL">').findall(html)
+			if (not videos):
+				videos = re.compile('<a class="yt-uix-hovercard-target" href="/watch\?v=(.*)&amp;list=SL"').findall(html)
+			
+			self.__settings__.setSetting("show_" + get("show") + "_season_" + get("season","0"), self.core.arrayToPipe(videos))
+		else:
+			videos = oldVideos.split("|")
 		
-		if (not yobjects):
-			status = 303
+		if ( per_page * ( page + 1 ) < len(videos) ):
+			next = 'true'
+		else:
+			next = 'false'
 		
-		## we need to locally cache the season episode list and find a way to determine if its still valid (needs to be refreshed).. 
-		#yobjects[len(yobjects) -1]["next"] = next
-				
-		return (yobjects, status)
-	
+		subitems = videos[(per_page * page):(per_page * (page + 1))]
+		
+		( ytobjects, status ) = self.core._get_batch_details(subitems)
+
+		if (len(ytobjects) > 0):
+			ytobjects[len(ytobjects)-1]['next'] = next
+		
+		return (ytobjects, status)
+		
 		# If the show contains more than one season the function will returns a list of folder items,
 		# otherwise a paginated list of video items is returned
 	def scrapeShow(self, html, params = {}):
@@ -444,7 +456,7 @@ class YouTubeScraperCore:
 					
 					if (season_url.find("&amp;s=") > 0):
 						season_url = season_url[season_url.find("&amp;s=") + 7:]
-						if (season_url.find("&amp;")):
+						if (season_url.find("&amp;") > 0):
 							season_url = season_url[:season_url.find("&amp;")]
 						item["Title"] = "Season " + season_url.encode("utf-8")
 						item["season"] = season_url.encode("utf-8")
@@ -508,7 +520,12 @@ class YouTubeScraperCore:
 					title = title.replace("&amp;", "&")
 					item['Title'] = title
 					
-					show_url = show.a["href"].replace("/show/", "")
+					show_url = show.a["href"]
+					if (show_url.find("?p=") > 0):
+						show_url = show_url[show_url.find("?p=") + 1:]
+					else :
+						show_url = show_url.replace("/show/", "")
+					
 					show_url = urllib.quote_plus(show_url)
 					item['show'] = show_url
 					
@@ -668,7 +685,11 @@ class YouTubeScraperCore:
 				url = self.urls['shows'] + "?hl=en"	
 			
 		elif (get("show")):			
-			url = self.urls["show_list"] + "/" +  get("show") + "?&hl=en"
+			show = urllib.unquote_plus(get("show"))
+			if (show.find("p=") > 0):
+				url = self.urls["show_list"] + "/" +   + "?&hl=en"
+			else:
+				url = self.urls["show_list"] + "?" + show + "&hl=en"
 			if (get("season")):
 				url = url + "&s=" + get("season")
 			
