@@ -13,7 +13,6 @@
 - Download of rtmpe streams not supported.
 
 [B]Youtube 1.9.3[/B]
-- VERSION NUMBER NOT UPDATED
 - Improved api login
 - Improved http login
 - Added YouTube Show Scraper
