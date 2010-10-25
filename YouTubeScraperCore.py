@@ -686,8 +686,8 @@ class YouTubeScraperCore:
 			
 		elif (get("show")):			
 			show = urllib.unquote_plus(get("show"))
-			if (show.find("p=") > 0):
-				url = self.urls["show_list"] + "/" +   + "?&hl=en"
+			if (show.find("p=") < 0):
+				url = self.urls["show_list"] + "/" + show + "?hl=en"
 			else:
 				url = self.urls["show_list"] + "?" + show + "&hl=en"
 			if (get("season")):
