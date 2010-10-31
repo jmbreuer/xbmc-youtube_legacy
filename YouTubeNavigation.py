@@ -959,6 +959,7 @@ class YouTubeNavigation:
 				cm.append( ( self.__language__( 30523 ) % title, "XBMC.Container.Update(%s?path=%s&action=search_disco&search=%s)" % ( sys.argv[0],  get("path"), url_title ) ) )
 			
 			cm.append( ( self.__language__( 30514 ), "XBMC.Container.Update(%s?path=%s&action=search&search=%s)" % ( sys.argv[0],  get("path"), url_title ) ) )
+			cm.append( ( self.__language__( 30527 ), "XBMC.ActivateWindow(MusicPlaylist)"))
 			cm.append( ( self.__language__( 30504 ), "XBMC.Action(Queue)", ) )
 			cm.append( ( self.__language__( 30502 ), "XBMC.Action(Info)", ) )
 		elif (item("next","false") == "false"):
@@ -1004,9 +1005,10 @@ class YouTubeNavigation:
 					else:
 						cm.append( (self.__language__(30025), 'XBMC.RunPlugin(%s?path=%s&action=remove_contact&contact=%s&)' % ( sys.argv[0], item("path"), item("Title") ) ) )
 							
-			if ( item("feed") == "favorites"  or get("feed") == "playlists" or item("feed") == "uploads" ):
+			if ( item("feed") == "favorites"  or get("feed") == "playlists" or item("feed") == "uploads" or (item("action") == "search_disco" and not get("scraper"))):
 				cm.append( ( self.__language__( 30507 ), "XBMC.Action(Queue)" ) )
 			
+			cm.append( ( self.__language__( 30527 ), "XBMC.ActivateWindow(MusicPlaylist)"))
 		return cm
 
 	def makeAscii(self, str):
