@@ -295,7 +295,7 @@ class YouTubeScraperCore:
 								
 			try:
 				page = self._fetchPage(url)
-				match = re.findall('.*?v=(.*)\&amp;a.*', page)
+				match = re.findall('.*v=([^&]*).*', page)
 				if match:
 					return (match, 200)
 				else:
