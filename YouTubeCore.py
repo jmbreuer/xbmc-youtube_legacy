@@ -319,7 +319,7 @@ class YouTubeCore(object):
 
 		if status != 200:
 			return ( result, status )
-
+		
 		dom = parseString(result);
 		links = dom.getElementsByTagName("link");
 		entries = dom.getElementsByTagName("entry");
