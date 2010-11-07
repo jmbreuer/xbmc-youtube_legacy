@@ -4,13 +4,17 @@
 - Plugin still has a few "Unknown uploader" errors hanging around, being fixed.
 - Decide if YouTube show listing should be shown in thumbnail view (look pretty icons :) )
 - Video Filtering still not working properly, needs fix for disco search "abba" problem
-- Implement proper, youtube video info batch requesting, current version "looses" videos, documentation: http://code.google.com/apis/youtube/2.0/developers_guide_protocol.html#Batch_processing_for_additional_event_metadata
+- Implement proper, youtube video info batch requesting, current version "looses" videos, documentation: http://gdata.youtube.com/feeds/api/videos/batch 
 
 [B]Errata[/B]
 - [XBMC] Thumbnails sometimes turns into black box or Folder (XBMC not detecting when thumbnail is set and defaulting to icon?)
 - [XBMC] When sorting items, it's impossible to get them to return to their original order.
 - [XBMC] has Excessive Memory use after running the plugin for prolonged periods of time 
 - Download of rtmpe streams not supported.
+
+[B]Youtube 1.9.4[/B]
+- Batch processing functions now running against the official youtube API
+- Fixed Disco search (again) as YouTube broke it (again)...
 
 [B]Youtube 1.9.3[/B]
 - Improved api login
