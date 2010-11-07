@@ -54,8 +54,10 @@ class YouTubeScraperCore:
 		
 		subitems = videos[(per_page * page):(per_page * (page + 1))]
 		
-		( ytobjects, status ) = self.core._get_batch_details(subitems)
-
+		print self.__plugin__ + " get batch: "
+		( ytobjects, status ) = self.core._get_batch_details_proper(subitems)
+		
+		print self.__plugin__ + " hom hom hom "
 		if (len(ytobjects) > 0):
 			ytobjects[len(ytobjects)-1]['next'] = next
 		

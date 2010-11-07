@@ -584,6 +584,27 @@ class YouTubeCore(object):
 
 		return ( ytobjects, 200 )
 			
+	def _get_batch_details_proper(self, items):
+		
+		request_start = "<feed xmlns='http://www.w3.org/2005/Atom'\n xmlns:media='http://search.yahoo.com/mrss/'\n xmlns:batch='http://schemas.google.com/gdata/batch'\n xmlns:yt='http://gdata.youtube.com/schemas/2007'>\n <batch:operation type='query'/> \n"
+		request_end = "</feed>"
+		video_request = ""
+		for videoid in items:
+			video_request +=	"<entry> \n <id>http://gdata.youtube.com/feeds/api/videos/" + videoid+ "</id>\n</entry> \n"
+		
+		final_request = request_start + video_request + request_end
+		request = urllib2.Request("http://gdata.youtube.com/feeds/api/videos/batch")
+		request.add_data(final_request)
+		
+		con = urllib2.urlopen(request)
+		result = con.read()
+		print self.__plugin__ + " smok smom" 
+		(ytobjects, status) = self._getVideoInfoBatch(result)
+		
+		print self.__plugin__ + " objects: " + repr(ytobjects)
+		
+		return ( ytobjects, 200)
+		
 	def _get_batch_details(self, items):
 		if self.__dbg__:
 			print self.__plugin__ + " _get_batch_details"
@@ -664,9 +685,6 @@ class YouTubeCore(object):
 			if ( not authkey ):
 				if self.__dbg__:
 					print self.__plugin__ + " _fetchPage couldn't set auth "
-					
-				# Lets see if it isn't better to just let it try without auth.
-				#return ( self.__language__(30609) , 303 )
 				
 			request.add_header('Authorization', 'GoogleLogin auth=' + authkey)
 			request.add_header('X-GData-Key', 'key=' + self.APIKEY)
@@ -735,7 +753,7 @@ class YouTubeCore(object):
 				print self.__plugin__ + " _fetchPage HTTPError : " + err
 
 			# 400 (Bad request) - A 400 response code indicates that a request was poorly formed or contained invalid data. The API response content will explain the reason wny the API returned a 400 response code.
-                        if ( err.find("400") > -1 ):
+			if ( err.find("400") > -1 ):
 				return ( err, 303 )
 			# 401 (Not authorized) - A 401 response code indicates that a request did not contain an Authorization header, that the format of the Authorization header was invalid, or that the authentication token supplied in the header was invalid.
 			elif ( err.find("401") > -1 ):
@@ -904,7 +922,7 @@ class YouTubeCore(object):
 					print self.__plugin__ + " _youTubeDel: done"
 				return ( "", 200 )
 			elif (response.status == 401 and retry):
-                                # If login credentials are given, try again.
+				# If login credentials are given, try again.
 				if ( self.__settings__.getSetting( "username" ) == "" or self.__settings__.getSetting( "user_password" ) == "" ):
 					if self.__dbg__:
 						print self.__plugin__ + " _youTubeDel trying again with login "
@@ -946,6 +964,95 @@ class YouTubeCore(object):
 		
 		return default;
 
+	def _getVideoInfoBatch(self, value):
+		if self.__dbg__:
+			print self.__plugin__ + " _getvideoinfo: " + str(len(value))
+
+		dom = parseString(value);
+		links = dom.getElementsByTagName("atom:link");
+		entries = dom.getElementsByTagName("atom:entry");
+		next = "false"
+			
+		if (len(links)):
+			for link in links:
+				lget = link.attributes.get
+				if (lget("rel").value == "next"):
+					next = "true"
+					break
+
+		ytobjects = [];
+		for node in entries:
+			video = {};
+
+			video['videoid'] = self._getNodeValue(node, "yt:videoid", "missing")
+			if node.getElementsByTagName("yt:state").item(0):
+				state = self._getNodeAttribute(node, "yt:state", 'name', 'Unknown Name')
+
+				if ( state == 'deleted' or state == 'rejected'):
+					video['videoid'] = "false"
+					
+				# Get reason for why we can't playback the file.		
+				if node.getElementsByTagName("yt:state").item(0).hasAttribute('reasonCode'):
+					reason = self._getNodeAttribute(node, "yt:state", 'reasonCode', 'Unknown reasonCode')
+					value = self._getNodeValue(node, "yt:state", "Unknown reasonValue").encode('utf-8')
+					if reason == "private":
+						video['videoid'] = "false"
+					elif reason == 'requesterRegion':
+						video['videoid'] = "false"
+					elif reason == 'limitedSyndication':
+						if self.__dbg__:
+							print "" #print self.__plugin__ + " _getvideoinfo hit limitedsyndication"
+					else:
+						video['videoid'] = "false";
+							
+			if ( video['videoid'] == "missing" ):
+				video['videolink'] = node.getElementsByTagName("atom:link").item(0).getAttribute('href')
+				match = re.match('.*?v=(.*)\&.*', video['videolink'])
+				if match:
+					video['videoid'] = match.group(1)
+				else:
+					video['videoid'] = "false"
+			
+			video['Title'] = self._getNodeValue(node, "media:title", "Unknown Title").encode('utf-8') # Convert from utf-16 to combat breakage
+			video['Plot'] = self._getNodeValue(node, "media:description", "Unknown Plot").encode( "utf-8" )
+			video['Date'] = self._getNodeValue(node, "atom:published", "Unknown Date").encode( "utf-8" )
+			video['user'] = self._getNodeValue(node, "atom:name", "Unknown Name").encode( "utf-8" )
+			
+			# media:credit is not set for favorites, playlists or inbox
+			video['Studio'] = self._getNodeValue(node, "media:credit", "").encode( "utf-8" )
+			if video['Studio'] == "":
+				video['Studio'] = self._getNodeValue(node, "atom:name", "Unknown Uploader").encode( "utf-8" )
+				
+
+			duration = int(self._getNodeAttribute(node, "yt:duration", 'seconds', '0'))
+			video['Duration'] = "%02d:%02d" % ( duration / 60, duration % 60 )
+			video['Rating'] = float(self._getNodeAttribute(node,"gd:rating", 'average', "0.0"))
+			video['count'] = int(self._getNodeAttribute(node, "yt:statistics", 'viewCount', "0"))
+			video['Genre'] = self._getNodeAttribute(node, "media:category", "label", "Unknown Genre").encode( "utf-8" )
+
+			if node.getElementsByTagName("atom:link"):
+				link = node.getElementsByTagName("atom:link")
+				for i in range(len(link)):
+					if link.item(i).getAttribute('rel') == 'edit':
+						obj = link.item(i).getAttribute('href')
+						video['editid'] = obj[obj.rfind('/')+1:]
+
+			video['thumbnail'] = "http://i.ytimg.com/vi/" + video['videoid'] + "/0.jpg"
+			
+			overlay = self.__settings__.getSetting( "vidstatus-" + video['videoid'] )
+
+			if overlay:
+				video['Overlay'] = int(overlay)
+			
+			video['next'] = next
+			
+			ytobjects.append(video);
+				
+		if (ytobjects):
+			return (ytobjects, 200);
+		
+		return ( "", 500 )
+	
 	def _getvideoinfo(self, value):
 		if self.__dbg__:
 			print self.__plugin__ + " _getvideoinfo: " + str(len(value))
@@ -953,6 +1060,8 @@ class YouTubeCore(object):
 			dom = parseString(value);
 			links = dom.getElementsByTagName("link");
 			entries = dom.getElementsByTagName("entry");
+			if (not entries):
+				entries = dom.getElementsByTagName("atom:entry");
 			next = "false"
 
 			#find out if there are more pages
