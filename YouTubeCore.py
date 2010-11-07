@@ -590,19 +590,23 @@ class YouTubeCore(object):
 		request_end = "</feed>"
 		video_request = ""
 		for videoid in items:
-			video_request +=	"<entry> \n <id>http://gdata.youtube.com/feeds/api/videos/" + videoid+ "</id>\n</entry> \n"
+			if videoid:
+				video_request +=	"<entry> \n <id>http://gdata.youtube.com/feeds/api/videos/" + videoid+ "</id>\n</entry> \n"
 		
 		final_request = request_start + video_request + request_end
 		request = urllib2.Request("http://gdata.youtube.com/feeds/api/videos/batch")
 		request.add_data(final_request)
 		
+		if (self.__dbg__):
+			print self.__plugin__ + " batch request: " + final_request
 		con = urllib2.urlopen(request)
 		result = con.read()
-		print self.__plugin__ + " smok smom" 
+		
+		if (self.__dbg__):
+			print self.__plugin__ + " batch response: " + repr(result) 
+		
 		(ytobjects, status) = self._getVideoInfoBatch(result)
-		
-		print self.__plugin__ + " objects: " + repr(ytobjects)
-		
+				
 		return ( ytobjects, 200)
 		
 	def _get_batch_details(self, items):
