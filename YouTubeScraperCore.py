@@ -55,9 +55,8 @@ class YouTubeScraperCore:
 		subitems = videos[(per_page * page):(per_page * (page + 1))]
 		
 		print self.__plugin__ + " get batch: "
-		( ytobjects, status ) = self.core._get_batch_details_proper(subitems)
+		( ytobjects, status ) = self.core._get_batch_details(subitems)
 		
-		print self.__plugin__ + " hom hom hom "
 		if (len(ytobjects) > 0):
 			ytobjects[len(ytobjects)-1]['next'] = next
 		
@@ -118,7 +117,6 @@ class YouTubeScraperCore:
 
 		if (len(pagination) > 0):
 			tmp = str(pagination)
-			print "pagination scraper returned: " + str(pagination)
 			if (tmp.find("Next") > 0):
 				next = "true"
 			
@@ -183,8 +181,9 @@ class YouTubeScraperCore:
 #=================================== Categories  ============================================
 
 	def scrapeCategoriesGrid(self, html, params = {}):
-		print self.__plugin__ + " scrapeCategoriesGrid"
-		print html
+		if self.__dbg__:
+			print self.__plugin__ + " scrapeCategoriesGrid"
+			
 		get = params.get
 		
 		next = "false"
@@ -200,6 +199,7 @@ class YouTubeScraperCore:
 		result = re.compile('<div id="video-description-(.*)" dir="ltr" class="video-description">').findall(html)
 		
 		if len(result) > 0:
+			print "found items: " + repr(result)
 			for videoid in result:
 				items.append(videoid)
 
@@ -480,7 +480,6 @@ class YouTubeScraperCore:
 		
 		if (yobjects):
 			yobjects[0]["folder"] = "true"
-			print self.__plugin__ + " found seasons: " + repr(yobjects)
 			return ( yobjects, 200 )
 				
 		return ([], 303)
@@ -593,8 +592,8 @@ class YouTubeScraperCore:
 			params["page"] = str(begin_page)
 			url = self.createUrl(params)
 			html = self._fetchPage(url, params)
-			if (self.__dbg__):
-				print "requesting url " + url
+			#if (self.__dbg__):
+			print "requesting url " + url
 
 			if (get("scraper") == "categories"):
 				(result, status) = self.scrapeCategoriesGrid(html, params)
@@ -613,8 +612,8 @@ class YouTubeScraperCore:
 			i = 1
 			while (len(result) <  per_page and result[len(result)-1]["next"] == "true"):
 				url = self.createUrl(params)
-				if (self.__dbg__):
-					print "requesting url " + url
+				#if (self.__dbg__):
+				print "requesting url " + url
 				html = self._fetchPage(url, params)
 
 				if (get("scraper") == "categories"):
