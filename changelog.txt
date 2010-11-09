@@ -4,7 +4,9 @@
 - Plugin still has a few "Unknown uploader" errors hanging around, being fixed.
 - Decide if YouTube show listing should be shown in thumbnail view (look pretty icons :) )
 - Video Filtering still not working properly, needs fix for disco search "abba" problem
+- Check if its possible to get plugin to handle user activating html5 setting.
 - Implement proper, youtube video info batch requesting, current version "looses" videos, documentation: http://gdata.youtube.com/feeds/api/videos/batch 
+- Regex for categories scraper is broken (also includes links that aren't part of the main content)..
 
 [B]Errata[/B]
 - [XBMC] Thumbnails sometimes turns into black box or Folder (XBMC not detecting when thumbnail is set and defaulting to icon?)
