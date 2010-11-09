@@ -195,13 +195,18 @@ class YouTubeScraperCore:
 			if (tmp.find("Next") > 0):
 				next = "true"
 
-		items = []
-		result = re.compile('<div id="video-description-(.*)" dir="ltr" class="video-description">').findall(html)
+		list = SoupStrainer(name="div", id="browse-video-data")
+		videos = BeautifulSoup(html, parseOnlyThese=list)
 		
-		if len(result) > 0:
-			print "found items: " + repr(result)
-			for videoid in result:
-				items.append(videoid)
+		items = []
+		if (len(videos) > 0):
+			video = videos.div.div
+			while (video != None):
+				id = video.div.a["href"]
+				if (id.find("/watch?v=") != -1):
+					id = id[id.find("=") + 1:id.find("&")]
+					items.append(id)
+				video = video.findNextSibling(name="div", attrs = {'class':"video-cell *vl"})
 
 		if (items):
 			(results, status) = self.core._get_batch_details(items)
