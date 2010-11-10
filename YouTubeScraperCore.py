@@ -214,7 +214,8 @@ class YouTubeScraperCore:
 		
 		if (items):
 			(results, status) = self.core._get_batch_details(items)
-			results[len(results) -1]["next"] = next
+			if (status == 200):
+				results[len(results) -1]["next"] = next
 			return (results, status)
 		
 		return ([], 303)
@@ -532,8 +533,8 @@ class YouTubeScraperCore:
 			params["page"] = str(begin_page)
 			url = self.createUrl(params)
 			html = self._fetchPage(url, params)
-			#if (self.__dbg__):
-			print "requesting url " + url
+			if (self.__dbg__):
+				print "fetching url " + url
 
 			if (get("scraper") == "categories"):
 				(result, status) = self.scrapeCategoriesGrid(html, params)
@@ -543,49 +544,55 @@ class YouTubeScraperCore:
 				(result, status) = self.scrapeTrailersGridFormat(html, params)
 			
 			next = "false"
-			next = result[len(result) -1]["next"]
-			result = result[begin_index:]
+			if (result):
+				next = result[len(result) -1]["next"]
+				result = result[begin_index:]
 			
-			page_count = begin_page + 1
-			params["page"] = str(page_count)
-			
-			i = 1
-			while (len(result) <  per_page and result[len(result)-1]["next"] == "true"):
-				url = self.createUrl(params)
-				#if (self.__dbg__):
-				print "requesting url " + url
-				html = self._fetchPage(url, params)
-
-				if (get("scraper") == "categories"):
-					(new_result, status) = self.scrapeCategoriesGrid(html, params)
-				elif (get("scraper") == "shows"):
-					(new_result, status) = self.scrapeShowsGrid(html, params)	
-				else:
-					(new_result, status) = self.scrapeTrailersGridFormat(html, params)
-								
-				next = new_result[len(new_result) - 1]["next"]
-				result = result + new_result 
-				page_count = page_count + 1
+				page_count = begin_page + 1
 				params["page"] = str(page_count)
 				
-				i = i+1
-				if (i > 9):	
+				i = 1
+				while (len(result) <  per_page and result[len(result)-1]["next"] == "true"):
+					url = self.createUrl(params)
 					if (self.__dbg__):
-						print "Scraper pagination failed, requested more than 10 pages which should never happen."
-					return False
+						print "fetching url: " + url
+					html = self._fetchPage(url, params)
+	
+					if (get("scraper") == "categories"):
+						(new_result, status) = self.scrapeCategoriesGrid(html, params)
+					elif (get("scraper") == "shows"):
+						(new_result, status) = self.scrapeShowsGrid(html, params)	
+					else:
+						(new_result, status) = self.scrapeTrailersGridFormat(html, params)
+					
+					if (new_result):
+						next = new_result[len(new_result) - 1]["next"]
+					else: 
+						next = "false"
+					
+					result = result + new_result 
+					page_count = page_count + 1
+					params["page"] = str(page_count)
+					
+					i = i+1
+					if (i > 9):	
+						if (self.__dbg__):
+							print "Scraper pagination failed, requested more than 10 pages which should never happen."
+						return False
 				
-			if (result):
 				result = result[:per_page]
 				result[len(result) - 1]["next"] = next
 				params["page"] = request_page
 				return (result, status)
 			else:
 				return ([], 303)
-		else :
+		else:
 			url = self.createUrl(params)
-			print self.__plugin__ + " fetching url: " + url 
-			html = self._fetchPage(url, params)
 			
+			if self.__dbg__:
+				print self.__plugin__ + " fetching url: " + url 
+				
+			html = self._fetchPage(url, params)
 			if (get("scraper") == "categories" )	:
 				if (get("category")):
 					return self.scrapeCategoriesGrid(html, params)
