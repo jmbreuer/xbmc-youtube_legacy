@@ -13,7 +13,9 @@ class YouTubeScraperCore:
 	USERAGENT = "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-GB; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8"
 	
 	urls = {}
-	urls['shows'] = "http://www.youtube.com/shows" 
+	urls['categories'] = "http://www.youtube.com/videos"
+	urls['movies'] = "http://www.youtube.com/movies"
+	urls['shows'] = "http://www.youtube.com/shows"
 	urls['show_list'] = "http://www.youtube.com/show"
 	urls['disco_main'] = "http://www.youtube.com/disco" 
 	urls['disco_search'] = "http://www.youtube.com/disco?action_search=1&query=%s"
@@ -209,7 +211,7 @@ class YouTubeScraperCore:
 					id = id[id.find("=") + 1:id.find("&")]
 					items.append(id)
 				video = video.findNextSibling(name="div", attrs = {'class':"video-cell *vl"})
-
+		
 		if (items):
 			(results, status) = self.core._get_batch_details(items)
 			results[len(results) -1]["next"] = next
@@ -509,7 +511,7 @@ class YouTubeScraperCore:
 		scraper_per_page = 0
 		result = []
 		
-		if (get("scraper") != "shows" and get("scraper") != "show" and get("scraper") in self.urls):
+		if (get("scraper") != "shows" and get("scraper") != "show" and get("scraper") != "categories" and get("scraper") in self.urls):
 			scraper_per_page = 40
 		elif ( (get("scraper") == "shows" or get("scraper") == "categories" or get("scraper") == "shows") and get("category")):
 			scraper_per_page = 23
@@ -596,24 +598,23 @@ class YouTubeScraperCore:
 				if (get("category")):
 					return self.scrapeShowsGrid(html, params)
 				else:
-					return self.scrapeMoviesShowsCategories(html, params)
+					return self.scrapeCategoryList(html, params, "shows")
 			else:
 				return self.scrapeTrailersListFormat(html, params)
 	
 	def createUrl(self, params = {}):
 		get = params.get
 		page = get("page")
-		if (get("scraper") == "categories" and get("category")):
-			category = get("category")
-			category = urllib.unquote_plus(category)
-			
-			if (category.find("/") != -1):
-				url = self.urls["main"] + category + "?hl=en" + "&p=" + page
+		if (get("scraper") == "categories"):
+			if (get("category")):
+				category = get("category")
+				category = urllib.unquote_plus(category)  
+				if (category.find("/") != -1):
+					url = self.urls["main"] + category + "?hl=en" + "&p=" + page
+				else:
+					url = self.urls["main"] + "/videos" + category + "&hl=en" + "&p=" + page
 			else:
-				url = self.urls["main"] + "/videos" + category + "&hl=en" + "&p=" + page
-			
-		elif(get("scraper") == "categories"):
-			url = self.urls["recommended"] + "&hl=en"
+				url = self.urls["categories"] + "?hl=en"
 		
 		elif (get("scraper") == "shows"):
 			if (get("category")):
@@ -669,6 +670,13 @@ class YouTubeScraperCore:
 						title = title.replace("&amp;", "&")
 						item['Title'] = title
 						cat = category.a["href"].replace("/" + tag + "/", "")
+						if get("scraper") == "categories":
+							if title == "Music":
+								category = category.findNextSibling(name = "li")
+								continue
+							if cat.find("?") != -1:
+								cat = cat[cat.find("?"):]
+						
 						cat = urllib.quote_plus(cat)
 						item['category'] = cat
 						item['scraper'] = scraper
