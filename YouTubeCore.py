@@ -961,7 +961,7 @@ class YouTubeCore(object):
 	def _getVideoInfoBatch(self, value):
 		if self.__dbg__:
 			print self.__plugin__ + " _getvideoinfo: " + str(len(value))
-
+		print "xml: "  + value
 		dom = parseString(value);
 		links = dom.getElementsByTagName("atom:link");
 		entries = dom.getElementsByTagName("atom:entry");
@@ -977,71 +977,74 @@ class YouTubeCore(object):
 		ytobjects = [];
 		for node in entries:
 			video = {};
-
-			video['videoid'] = self._getNodeValue(node, "yt:videoid", "missing")
-			if node.getElementsByTagName("yt:state").item(0):
-				state = self._getNodeAttribute(node, "yt:state", 'name', 'Unknown Name')
-
-				if ( state == 'deleted' or state == 'rejected'):
-					video['videoid'] = "false"
+			videoid = self._getNodeValue(node, "atom:id", "")
+			
+			if (not videoid):
+				if node.getElementsByTagName("link").item(0):
+					videoid = node.getElementsByTagName("link").item(0).getAttribute('href')
+					match = re.match('.*?v=(.*)\&.*', videoid)
+					if match:
+						videoid = match.group(1)
+			
+			if (videoid):
+				if (videoid.rfind("/") != -1):
+					video['videoid'] = videoid[videoid.rfind("/") + 1:]
 					
-				# Get reason for why we can't playback the file.		
-				if node.getElementsByTagName("yt:state").item(0).hasAttribute('reasonCode'):
-					reason = self._getNodeAttribute(node, "yt:state", 'reasonCode', 'Unknown reasonCode')
-					value = self._getNodeValue(node, "yt:state", "Unknown reasonValue").encode('utf-8')
-					if reason == "private":
+				if node.getElementsByTagName("yt:state").item(0):
+					state = self._getNodeAttribute(node, "yt:state", 'name', 'Unknown Name')
+	
+					if ( state == 'deleted' or state == 'rejected'):
 						video['videoid'] = "false"
-					elif reason == 'requesterRegion':
-						video['videoid'] = "false"
-					elif reason == 'limitedSyndication':
-						if self.__dbg__:
-							print "" #print self.__plugin__ + " _getvideoinfo hit limitedsyndication"
-					else:
-						video['videoid'] = "false";
-							
-			if ( video['videoid'] == "missing" ):
-				video['videolink'] = node.getElementsByTagName("atom:link").item(0).getAttribute('href')
-				match = re.match('.*?v=(.*)\&.*', video['videolink'])
-				if match:
-					video['videoid'] = match.group(1)
-				else:
-					video['videoid'] = "false"
-			
-			video['Title'] = self._getNodeValue(node, "media:title", "Unknown Title").encode('utf-8') # Convert from utf-16 to combat breakage
-			video['Plot'] = self._getNodeValue(node, "media:description", "Unknown Plot").encode( "utf-8" )
-			video['Date'] = self._getNodeValue(node, "atom:published", "Unknown Date").encode( "utf-8" )
-			video['user'] = self._getNodeValue(node, "atom:name", "Unknown Name").encode( "utf-8" )
-			
-			# media:credit is not set for favorites, playlists or inbox
-			video['Studio'] = self._getNodeValue(node, "media:credit", "").encode( "utf-8" )
-			if video['Studio'] == "":
-				video['Studio'] = self._getNodeValue(node, "atom:name", "Unknown Uploader").encode( "utf-8" )
+						
+					# Get reason for why we can't playback the file.		
+					if node.getElementsByTagName("yt:state").item(0).hasAttribute('reasonCode'):
+						reason = self._getNodeAttribute(node, "yt:state", 'reasonCode', 'Unknown reasonCode')
+						value = self._getNodeValue(node, "yt:state", "Unknown reasonValue").encode('utf-8')
+						if reason == "private":
+							video['videoid'] = "false"
+						elif reason == 'requesterRegion':
+							video['videoid'] = "false"
+						elif reason == 'limitedSyndication':
+							if self.__dbg__:
+								print "" #print self.__plugin__ + " _getvideoinfo hit limitedsyndication"
+						else:
+							video['videoid'] = "false";
 				
-
-			duration = int(self._getNodeAttribute(node, "yt:duration", 'seconds', '0'))
-			video['Duration'] = "%02d:%02d" % ( duration / 60, duration % 60 )
-			video['Rating'] = float(self._getNodeAttribute(node,"gd:rating", 'average', "0.0"))
-			video['count'] = int(self._getNodeAttribute(node, "yt:statistics", 'viewCount', "0"))
-			video['Genre'] = self._getNodeAttribute(node, "media:category", "label", "Unknown Genre").encode( "utf-8" )
-
-			if node.getElementsByTagName("atom:link"):
-				link = node.getElementsByTagName("atom:link")
-				for i in range(len(link)):
-					if link.item(i).getAttribute('rel') == 'edit':
-						obj = link.item(i).getAttribute('href')
-						video['editid'] = obj[obj.rfind('/')+1:]
-
-			video['thumbnail'] = "http://i.ytimg.com/vi/" + video['videoid'] + "/0.jpg"
-			
-			overlay = self.__settings__.getSetting( "vidstatus-" + video['videoid'] )
-
-			if overlay:
-				video['Overlay'] = int(overlay)
-			
-			video['next'] = next
-			
-			ytobjects.append(video);
+				video['Title'] = self._getNodeValue(node, "media:title", "Unknown Title").encode('utf-8') # Convert from utf-16 to combat breakage
+				video['Plot'] = self._getNodeValue(node, "media:description", "Unknown Plot").encode( "utf-8" )
+				video['Date'] = self._getNodeValue(node, "atom:published", "Unknown Date").encode( "utf-8" )
+				video['user'] = self._getNodeValue(node, "atom:name", "Unknown Name").encode( "utf-8" )
 				
+				# media:credit is not set for favorites, playlists or inbox
+				video['Studio'] = self._getNodeValue(node, "media:credit", "").encode( "utf-8" )
+				if video['Studio'] == "":
+					video['Studio'] = self._getNodeValue(node, "atom:name", "Unknown Uploader").encode( "utf-8" )
+					
+	
+				duration = int(self._getNodeAttribute(node, "yt:duration", 'seconds', '0'))
+				video['Duration'] = "%02d:%02d" % ( duration / 60, duration % 60 )
+				video['Rating'] = float(self._getNodeAttribute(node,"gd:rating", 'average', "0.0"))
+				video['count'] = int(self._getNodeAttribute(node, "yt:statistics", 'viewCount', "0"))
+				video['Genre'] = self._getNodeAttribute(node, "media:category", "label", "Unknown Genre").encode( "utf-8" )
+	
+				if node.getElementsByTagName("atom:link"):
+					link = node.getElementsByTagName("atom:link")
+					for i in range(len(link)):
+						if link.item(i).getAttribute('rel') == 'edit':
+							obj = link.item(i).getAttribute('href')
+							video['editid'] = obj[obj.rfind('/')+1:]
+	
+				video['thumbnail'] = "http://i.ytimg.com/vi/" + video['videoid'] + "/0.jpg"
+				
+				overlay = self.__settings__.getSetting( "vidstatus-" + video['videoid'] )
+	
+				if overlay:
+					video['Overlay'] = int(overlay)
+				
+				video['next'] = next
+				
+				ytobjects.append(video);
+					
 		if (ytobjects):
 			return (ytobjects, 200);
 		
