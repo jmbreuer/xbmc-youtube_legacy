@@ -3,6 +3,11 @@ Author: IconShock
 License: Free for commercial use
 http://www.iconfinder.com/icondetails/49221/256/youtube_icon
 
+movies.png
+Author: IconsEtc
+License: Royalty free and free for commercial and personal use.
+License: http://icons.mysitemyway.com/free-clipart-icons/1/lights-and-camera-icon-id/41809/style-id/319/3d-glossy-blue-orbs-icons/sports-hobbies/
+
 add_user.png
 Modified version of User icon by VisualPharm, modified by HenrikDK
 Author: VisualPharm
