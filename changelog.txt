@@ -12,10 +12,12 @@
 - Download of rtmpe streams not supported.
 
 [B]Youtube 1.9.4[/B]
+- Updated icon for YouTube Trailers
+- Added icon for YouTube Movies
 - Fixed Browse YouTube scraper (broken due to bad regex)
 - Switched to Thumbnail mode for tv show icons, cause it looks better
 - Batch processing functions now running against the official youtube API
-- Fixed Disco search (again) as YouTube broke it (again)...
+- Fixed Disco search (again) as YouTube broke it (again)... x2
 
 [B]Youtube 1.9.3[/B]
 - Improved api login
