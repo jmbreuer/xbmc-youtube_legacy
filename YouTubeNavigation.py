@@ -76,6 +76,7 @@ class YouTubeNavigation:
 				  {'Title':__language__( 30039 )  ,'path':"/root/disco/popular"	 	, 'thumbnail':"discoball"		 , 'login':"false" , 'scraper':"disco_top_artist"},
 				  {'Title':__language__( 30001 )  ,'path':"/root/feeds"			 	, 'thumbnail':"feeds"			 , 'login':"false" },
 				  {'Title':__language__( 30042 )  ,'path':"/root/shows"        		, 'thumbnail':"shows"            , 'login':"false" , 'scraper':'shows'},
+				  {'Title':__language__( 30043 )  ,'path':"/root/movies"        	, 'thumbnail':"movies"           , 'login':"false" , 'scraper':'movies'},
 				  {'Title':__language__( 30032 )  ,'path':"/root/trailers"		  	, 'thumbnail':"trailers"		 , 'login':"false" },
 				  {'Title':__language__( 30035 )  ,'path':"/root/trailers/latest"   , 'thumbnail':"trailers"		 , 'login':"false" , 'scraper':"latest_trailers" },
 				  {'Title':__language__( 30034 )  ,'path':"/root/trailers/current"  , 'thumbnail':"trailers"		 , 'login':"false" , 'scraper':"current_trailers" },
