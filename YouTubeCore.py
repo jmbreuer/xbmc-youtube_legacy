@@ -539,29 +539,41 @@ class YouTubeCore(object):
 		return pipedItems
 
 	def _get_batch_details_thumbnails(self, items):
-		if self.__dbg__:
-			print self.__plugin__ + " _get_batch_details_thumbnails: " + str(len(items))
-			
-		ytobjects = []
-		failed = []
-		counter = 0
-		link = ""
+		request_start = "<feed xmlns='http://www.w3.org/2005/Atom'\n xmlns:media='http://search.yahoo.com/mrss/'\n xmlns:batch='http://schemas.google.com/gdata/batch'\n xmlns:yt='http://gdata.youtube.com/schemas/2007'>\n <batch:operation type='query'/> \n"
+		request_end = "</feed>"
 		
-		for ( videoid, thumb ) in items:
-			link += '"%s"|' % videoid 
-			counter += 1
-
-			if ( counter > 9 or videoid == items[len(items)-1][0] ):
-				( result, status ) = self._fetchPage("http://gdata.youtube.com/feeds/api/videos?q=" + link, api = True)
+		video_request = ""
+		
+		ytobjects = []
+		i = 1
+		for (videoid, thumbs) in items:
+			if videoid:
+				video_request +=	"<entry> \n <id>http://gdata.youtube.com/feeds/api/videos/" + videoid+ "</id>\n</entry> \n"
+				if i == 50:
+					final_request = request_start + video_request + request_end
+					request = urllib2.Request("http://gdata.youtube.com/feeds/api/videos/batch")
+					request.add_data(final_request)
+					con = urllib2.urlopen(request)
+					result = con.read()
+					(temp, status) = self._getVideoInfoBatch(result)
+					ytobjects += temp
+					if status != 200:
+						return (ytobjects, status)
+					video_request = ""
+					i = 1
+				i+=1
+		
+		
+		final_request = request_start + video_request + request_end
+		request = urllib2.Request("http://gdata.youtube.com/feeds/api/videos/batch")
+		request.add_data(final_request)
 					
-				if status != 200:
-					return ( result, status )
-
-				temp = self._getvideoinfo(result)
-				ytobjects += temp[0:counter]
-				counter = 0
-				link = ""
-
+		con = urllib2.urlopen(request)
+		result = con.read()
+				
+		(temp, status) = self._getVideoInfoBatch(result)
+		ytobjects += temp
+		
 		tempobjects = ytobjects
 		ytobjects = []
 		for i in range(0, len(items)):
@@ -574,19 +586,33 @@ class YouTubeCore(object):
 		while len(items) > len(ytobjects):
 			ytobjects.append({'videoid': 'false'});
 		
-		if self.__dbg__:
-			print self.__plugin__ + " _get_batch_details_thumbnails done"
-
-		return ( ytobjects, 200 )
-			
+		return ( ytobjects, 200)
+	
 	def _get_batch_details(self, items):
-		
 		request_start = "<feed xmlns='http://www.w3.org/2005/Atom'\n xmlns:media='http://search.yahoo.com/mrss/'\n xmlns:batch='http://schemas.google.com/gdata/batch'\n xmlns:yt='http://gdata.youtube.com/schemas/2007'>\n <batch:operation type='query'/> \n"
 		request_end = "</feed>"
+		
 		video_request = ""
+		
+		ytobjects = []
+		i = 1
 		for videoid in items:
 			if videoid:
 				video_request +=	"<entry> \n <id>http://gdata.youtube.com/feeds/api/videos/" + videoid+ "</id>\n</entry> \n"
+				if i == 50:
+					final_request = request_start + video_request + request_end
+					request = urllib2.Request("http://gdata.youtube.com/feeds/api/videos/batch")
+					request.add_data(final_request)
+					con = urllib2.urlopen(request)
+					result = con.read()
+					(temp, status) = self._getVideoInfoBatch(result)
+					ytobjects += temp
+					if status != 200:
+						return (ytobjects, status)
+					video_request = ""
+					i = 1
+				i+=1
+		
 		
 		final_request = request_start + video_request + request_end
 		request = urllib2.Request("http://gdata.youtube.com/feeds/api/videos/batch")
@@ -595,53 +621,11 @@ class YouTubeCore(object):
 		con = urllib2.urlopen(request)
 		result = con.read()
 				
-		(ytobjects, status) = self._getVideoInfoBatch(result)
+		(temp, status) = self._getVideoInfoBatch(result)
+		ytobjects += temp
 				
 		return ( ytobjects, 200)
 		
-	def _get_batch_details_old(self, items):
-		if self.__dbg__:
-			print self.__plugin__ + " _get_batch_details"
-			
-		ytobjects = []
-		failed = []
-		counter = 0
-		link = ""
-		
-		for item in items:
-			link += '"%s"|' % item
-			counter += 1;
-
-			if ( counter > 9 or item == items[len(items)-1] ):
-				( result, status ) = self._fetchPage("http://gdata.youtube.com/feeds/api/videos?q=" + link, api = True)
-				
-				if status != 200:
-					return ( result, status )
-					
-				temp = self._getvideoinfo(result)
-				ytobjects += temp[0:counter]
-				counter = 0
-				link = ""
-				
-				tempobjects = ytobjects
-		ytobjects = []
-
-		#print self.__plugin__ + " _get_batch_details %s - %s " % ( str(len(items)), str(len(tempobjects)) )
-		for i in range(0, len(items)):
-			videoid = items[i]
-			for item in tempobjects:
-				if item['videoid'] == videoid:
-					#print self.__plugin__ + " _get_batch_details adding videoid: [%s] %s " % ( str(i), videoid)
-					ytobjects.append(item)
-
-		while len(items) > len(ytobjects):
-			#print self.__plugin__ + "_get_batch_details adding videoid false"
-			ytobjects.append({'videoid': 'false'});
-					
-		if self.__dbg__:
-			print self.__plugin__ + " _get_batch_details done"
-		return ( ytobjects, 200 )
-
 	#===============================================================================
 	#
 	# Internal functions to YouTubeCore.py
