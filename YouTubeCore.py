@@ -640,7 +640,6 @@ class YouTubeCore(object):
 		if self.__dbg__:
 			print self.__plugin__ + " fetching page : " + link
 
-
 		request = urllib2.Request(link)
 
 		if api:
