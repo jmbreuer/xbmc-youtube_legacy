@@ -142,7 +142,13 @@ class YouTubeNavigation:
 		if (get("store") == "searches" or get("store") == "disco_searches"):
 				self.listStoredSearches(params)
 				cache = False
-
+		
+		if (get("scraper") == "shows" and get("category")):
+			video_view = self.__settings__.getSetting("video_view") == "true"
+			
+			if (video_view):
+				xbmc.executebuiltin("Container.SetViewMode(500)")
+		
 		xbmcplugin.endOfDirectory( handle=int( sys.argv[ 1 ] ), succeeded=True, cacheToDisc=cache )
 
 	def executeAction(self, params = {}):
