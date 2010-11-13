@@ -19,7 +19,7 @@ class YouTubeScraperCore:
 	urls['show_list'] = "http://www.youtube.com/show"
 	urls['disco_main'] = "http://www.youtube.com/disco" 
 	urls['disco_search'] = "http://www.youtube.com/disco?action_search=1&query=%s"
-	urls['disco_mix_list'] = "http://www.youtube.com/list_ajax?a=%s&action_get_mixlist=1&amp;v=%s&amp;style=bottomfeedr"
+	urls['disco_mix_list'] = "http://www.youtube.com/watch?v=%s&feature=disco&playnext=1&list=%s"
 	urls['main'] = "http://www.youtube.com"
 	urls['trailers'] = "http://www.youtube.com/trailers?s=tr"
 	urls['current_trailers'] = "http://www.youtube.com/trailers?s=trit&p=%s&hl=en"
@@ -238,6 +238,7 @@ class YouTubeScraperCore:
 			if (result == 200):
 				self.__settings__.setSetting("disco_%s" % query, self.core.arrayToPipe(videos))
 		else:
+			result = 200
 			videos = existingVideos.split("|")
 		
 		if ( per_page * ( page + 1 ) < len(videos) ):
@@ -247,13 +248,16 @@ class YouTubeScraperCore:
 		
 		subitems = videos[(per_page * page):(per_page * (page + 1))]
 		
-		( ytobjects, status ) = self.core._get_batch_details(subitems)
+		if (result == 200):
+			( ytobjects, status ) = self.core._get_batch_details(subitems)
 		
-		if status == 200:
-			if (len(ytobjects) > 0):
-				ytobjects[len(ytobjects)-1]['next'] = next
+			if status == 200:
+				if (len(ytobjects) > 0):
+					ytobjects[len(ytobjects)-1]['next'] = next
 		
-		return (ytobjects, status)
+			return (ytobjects, status)
+		
+		return ([], 500)
 		
 	def _get_disco_list(self, query):
 		if self.__dbg__:
@@ -263,29 +267,30 @@ class YouTubeScraperCore:
 		if (self.__dbg__):
 			print "Disco search url %s" % url
 		page = self._fetchPage(url)
-				
-		if (page.find("a=") != -1):
-			mix_list_id = page[page.find("a=") + 2:]
-			mix_list_id = mix_list_id[:mix_list_id.find("&")]
+		if (page.find("list=") != -1):
+			mix_list_id = page[page.find("list=") + 5:]
+			if (mix_list_id.find("&") != -1):
+				mix_list_id = mix_list_id[:mix_list_id.find("&")]
+			elif (mix_list_id.find('"') != -1):
+				mix_list_id = mix_list_id[:mix_list_id.find('"')]
+			
 			video_id = page[page.find("v=") + 2:]
 			video_id = video_id[:video_id.find("&")]
 			
-			url = self.urls["disco_mix_list"] % (mix_list_id, video_id)
-			if (self.__dbg__):
-				print "Disco respsonse url: %s" % url
-								
-			try:
-				page = self._fetchPage(url)
-				match = re.findall('.*v=([^&]*).*', page)
+			url = self.urls["disco_mix_list"] % (video_id, mix_list_id)
+										
+			page = self._fetchPage(url)
+			
+			list = SoupStrainer(name="div", id ="quicklist")
+			mix_list = BeautifulSoup(page, parseOnlyThese=list)
+			if (len(mix_list) > 0):
+				print self.__plugin__ + " sok " + repr(mix_list)
+				match = mix_list.div["data-video-ids"].split(",")
+
 				if match:
 					return (match, 200)
 				else:
 					return ( self.__language__(30601), 303)
-			except:
-				if self.__dbg__:
-					print self.__plugin__ + " _get_disco_list caught unknown exception"
-					print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__, sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
-				return ( "", 500 )
 		
 		if (self.__dbg__):
 			print self.__plugin__ + " _get_disco_list no match"
