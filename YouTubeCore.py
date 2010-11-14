@@ -369,11 +369,14 @@ class YouTubeCore(object):
 			url.add_header('User-Agent', self.USERAGENT);
 			valid_chars = "-_.() %s%s" % (string.ascii_letters, string.digits)
 			
-			filename = "%s/%s.mp4" % ( path, ''.join(c for c in video['Title'] if c in valid_chars) )
-			file = open(filename, "wb")
+			filename_incomplete = "%s/%s-incomplete.mp4" % ( path, ''.join(c for c in video['Title'] if c in valid_chars) )
+			filename_complete = "%s/%s.mp4" % ( path, ''.join(c for c in video['Title'] if c in valid_chars) )
+			file = open(filename_incomplete, "wb")
 			con = urllib2.urlopen(url);
 			file.write(con.read())
 			con.close()
+			
+			os.rename(filename_incomplete, filename_complete)
 			
 			self.__settings__.setSetting( "vidstatus-" + video['videoid'], "1" )
 		except urllib2.HTTPError, e:
