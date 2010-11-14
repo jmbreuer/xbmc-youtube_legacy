@@ -1,8 +1,6 @@
 [B]TODO:[/B]
-- Use Temporary filename while downloading, marking download as incomplete ex. video-incomplete.mp4 -> video.mp4
 - Adding to playlist possible? xbmc doable?
-- Plugin still has a few "Unknown uploader" errors hanging around, being fixed.
-- Video Filtering still not working properly, needs fix for disco search "abba" problem
+- Plugin still has a few "Unknown uploader" errors hanging around, being fixed. <-- is this still relevant
 - Check if its possible to get plugin to handle user activating html5 setting.
 
 [B]Errata[/B]
@@ -12,6 +10,8 @@
 - Download of rtmpe streams not supported.
 
 [B]Youtube 1.9.4[/B]
+- Restructured main folder structure to seperate scraper functions and feeds from user specific functions 
+- Changed download function to use Temporary filename while downloading, marking download as incomplete ex. video-incomplete.mp4 -> video.mp4
 - Added Scraper for YouTube Movies
 - Added icon for YouTube Movies
 - Updated icon for YouTube Trailers
