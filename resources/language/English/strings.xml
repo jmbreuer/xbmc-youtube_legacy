@@ -41,9 +41,10 @@
     <string id="30038">Top 25</string>
     <string id="30039">Most popular artists</string>
     <string id="30040">Disco search...</string>
-    <string id="30041">Browse YouTube</string>
+    <string id="30041">YouTube Categories</string>
     <string id="30042">YouTube Shows</string>
     <string id="30043">YouTube Movies</string>
+    <string id="30044">Explore YouTube</string>
     
     <!-- Plugin settings strings -->
     <string id="30200">Username</string>
@@ -113,7 +114,11 @@
     <string id="30264">Show Youtube Trailers</string>
     <string id="30265">Timeout (in seconds)</string>
     <string id="30266">Show Browse YouTube</string>
-
+    <string id="30267">Show YouTube Shows</string>
+    <string id="30268">Show YouTube Movies</string>
+    <string id="30269">Show Explore YouTube</string>
+    <string id="30270">Explore YouTube</string>
+	
     <!-- Menu strings -->
     <string id="30500">Clear refinements</string>
     <string id="30501">Download video</string>

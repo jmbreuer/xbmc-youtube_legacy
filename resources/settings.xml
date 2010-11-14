@@ -21,10 +21,7 @@
 
   <!-- Folders -->
   <category label="30248">
-    <setting id="categories" type="bool" label="30266" default="true" />
-    <setting id="feeds" type="bool" label="30249" default="true" />
-    <setting id="trailers" type="bool" label="30264" default="true" />
-    <setting id="disco" type="bool" label="30263" default="true" />
+	<setting id="explore" type="bool" label="30269" default="true" />
     <setting id="recommended" type="bool" label="30250" default="true" />
     <setting id="contacts" type="bool" label="30251" default="true" />
     <setting id="favorites" type="bool" label="30252" default="true" />
@@ -35,6 +32,16 @@
     <setting id="playbyid" type="bool" label="30257" default="true" />
   </category>
 
+  <!-- Explore YouTube -->
+  <category label="30270">
+    <setting id="categories" type="bool" label="30266" default="true" />
+    <setting id="feeds" type="bool" label="30249" default="true" />
+    <setting id="trailers" type="bool" label="30264" default="true" />
+    <setting id="shows" type="bool" label="30267" default="true" />
+    <setting id="movies" type="bool" label="30268" default="true" /> 
+    <setting id="disco" type="bool" label="30263" default="true" />
+  </category>
+  
   <!-- Advanced -->
   <category label="30259">
     <setting id="video_view" type="bool" label="30258" default="true" />
