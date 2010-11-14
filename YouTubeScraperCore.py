@@ -26,7 +26,6 @@ class YouTubeScraperCore:
 	urls['upcoming_trailers'] = "http://www.youtube.com/trailers?s=tros&p=%s&hl=en"
 	urls['popular_trailers'] = "http://www.youtube.com/trailers?s=trp&p=%s&hl=en"
 	urls['recommended'] = "http://www.youtube.com/videos?r=1"
-	urls['movies'] = "http://www.youtube.com/shows"
 	urls['movies_list'] = ""
 
 #=================================== Recommended ============================================
@@ -111,49 +110,6 @@ class YouTubeScraperCore:
 			return ( "", 500 )
 
 #=================================== Trailers ============================================
-	def scrapeTrailersGridFormat(self, html, params = {}):
-		get = params.get
-		yobjects = []
-		next = "false"
-		
-		pager = SoupStrainer(name="div", attrs = {'class':"yt-uix-pager"})
-		pagination = BeautifulSoup(html, parseOnlyThese=pager)
-
-		if (len(pagination) > 0):
-			tmp = str(pagination)
-			if (tmp.find("Next") > 0):
-				next = "true"
-			
-		list = SoupStrainer(id="popular-column", name="div")
-		trailers = BeautifulSoup(html, parseOnlyThese=list)
-				
-		if (len(trailers) > 0):
-			trailer = trailers.div.div
-
-			item = []
-			while ( trailer != None ):
-				videoid = trailer.div.a['href']
-						
-				if (videoid):
-					if (videoid.find("=") > -1):
-						videoid = videoid[videoid.find("=")+1:]
-					
-					item.append( (videoid, trailer.div.a.span.img['src']) )
-					
-				trailer = trailer.findNextSibling(name="div", attrs = { 'class':"trailer-cell *vl" })
-			
-			(yobjects, result ) = self.core._get_batch_details_thumbnails(item);
-			
-			if result != 200:
-				return (yobjects, result)
-
-		if (not yobjects):
-			return (yobjects, 500)
-		
-		yobjects[len(yobjects)-1]['next'] = next
-
-		return (yobjects, 200)
-	
 	def scrapeTrailersListFormat (self, page, params = {}):
 		get = params.get		 
 		yobjects = []
@@ -517,7 +473,7 @@ class YouTubeScraperCore:
 		scraper_per_page = 0
 		result = []
 		
-		if (get("scraper") != "shows" and get("scraper") != "show" and get("scraper") != "categories" and get("scraper") in self.urls):
+		if (get("scraper") != "shows" and get("scraper") != "show" and get("scraper") != "categories" and (get("scraper") != "movies" or (get("scraper") == "movies" and get("category"))) and get("scraper") in self.urls):
 			scraper_per_page = 40
 		elif ( (get("scraper") == "shows" or get("scraper") == "categories" or get("scraper") == "shows") and get("category")):
 			scraper_per_page = 23
@@ -546,7 +502,7 @@ class YouTubeScraperCore:
 			elif (get("scraper") == "shows"):
 				(result, status) = self.scrapeShowsGrid(html, params)	
 			else:
-				(result, status) = self.scrapeTrailersGridFormat(html, params)
+				(result, status) = self.scrapeGridFormat(html, params)
 			
 			next = "false"
 			if (result):
@@ -568,7 +524,7 @@ class YouTubeScraperCore:
 					elif (get("scraper") == "shows"):
 						(new_result, status) = self.scrapeShowsGrid(html, params)	
 					else:
-						(new_result, status) = self.scrapeTrailersGridFormat(html, params)
+						(new_result, status) = self.scrapeGridFormat(html, params)
 					
 					if (new_result):
 						next = new_result[len(new_result) - 1]["next"]
@@ -604,19 +560,24 @@ class YouTubeScraperCore:
 				else:
 					return self.scrapeCategoryList(html, params)
 			elif (get("show")):
-				print self.__plugin__ + " parsing show listing"
 				return self.scrapeShow(html, params)
 			elif (get("scraper") == "shows"):
 				if (get("category")):
 					return self.scrapeShowsGrid(html, params)
 				else:
 					return self.scrapeCategoryList(html, params, "shows")
+			elif (get("scraper") == "movies"):
+				if (get("category")):
+					return self.scrapeGridFormat(html, params)
+				else: 
+					return self.scrapeCategoryList(html, params, "movies")
 			else:
 				return self.scrapeTrailersListFormat(html, params)
 	
 	def createUrl(self, params = {}):
 		get = params.get
 		page = get("page")
+		
 		if (get("scraper") == "categories"):
 			if (get("category")):
 				category = get("category")
@@ -628,14 +589,14 @@ class YouTubeScraperCore:
 			else:
 				url = self.urls["categories"] + "?hl=en"
 		
-		elif (get("scraper") == "shows"):
+		elif (get("scraper") == "shows" or get("scraper") == "movies"):
 			if (get("category")):
 				category = get("category")
 				category = urllib.unquote_plus(category)
-				url = self.urls["shows"] + "/" + category + "?p=" + page + "&hl=en"
+				url = self.urls[get("scraper")] + "/" + category + "?p=" + page + "&hl=en"
 			else:
-				url = self.urls['shows'] + "?hl=en"	
-			
+				url = self.urls[get("scraper")] + "?hl=en"	
+				
 		elif (get("show")):			
 			show = urllib.unquote_plus(get("show"))
 			if (show.find("p=") < 0):
@@ -653,6 +614,55 @@ class YouTubeScraperCore:
 				url = self.urls["trailers"]
 				
 		return url
+	
+	def scrapeGridFormat(self, html, params = {}):
+		get = params.get
+		yobjects = []
+		next = "false"
+		
+		pager = SoupStrainer(name="div", attrs = {'class':"yt-uix-pager"})
+		pagination = BeautifulSoup(html, parseOnlyThese=pager)
+
+		if (len(pagination) > 0):
+			tmp = str(pagination)
+			if (tmp.find("Next") > 0):
+				next = "true"
+			
+		list = SoupStrainer(id="popular-column", name="div")
+		trailers = BeautifulSoup(html, parseOnlyThese=list)
+		
+		if (len(trailers) > 0):
+			trailer = trailers.div.div
+			if (get("scraper") == "movies"):
+				trailer = trailers.div.div.div
+			
+			cell = "trailer-cell *vl"
+			if (get("scraper") == "movies"):
+				cell = "movie-cell *vl"
+			
+			item = []
+			while ( trailer != None ):
+				videoid = trailer.div.a['href']
+						
+				if (videoid):
+					if (videoid.find("=") > -1):
+						videoid = videoid[videoid.find("=")+1:]
+					
+					item.append( (videoid, trailer.div.a.span.img['src']) )
+				
+				trailer = trailer.findNextSibling(name="div", attrs = { 'class':cell })
+			
+			(yobjects, result ) = self.core._get_batch_details_thumbnails(item);
+			
+			if result != 200:
+				return (yobjects, result)
+
+		if (not yobjects):
+			return (yobjects, 500)
+		
+		yobjects[len(yobjects)-1]['next'] = next
+
+		return (yobjects, 200)
 	
 	def scrapeCategoryList(self, html, params = {}, tag = ""):
 		get = params.get
