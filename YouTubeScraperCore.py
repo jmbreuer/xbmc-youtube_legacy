@@ -83,7 +83,7 @@ class YouTubeScraperCore:
 			con = urllib2.urlopen(url)
 			result = con.read()
 			if self.__dbg__:
-				print self.__plugin__ + " _scrapeYouTubeData result: " + repr(result)
+				print self.__plugin__ + " _scrapeYouTubeData result: "
 			con.close()
 
 			videos = re.compile('<a href="/watch\?v=(.*)&amp;feature=grec_browse" class=').findall(result);

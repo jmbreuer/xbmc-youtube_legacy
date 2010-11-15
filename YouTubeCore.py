@@ -618,11 +618,12 @@ class YouTubeCore(object):
 		
 		
 		final_request = request_start + video_request + request_end
-		request = urllib2.Request("http://gdata.youtube.com/feeds/api/videos/batch")
+		request = urllib2.Request("http://gdata.youtube.com/feeds/api/videos/batch?v=2&alt=json")
 		request.add_data(final_request)
 					
 		con = urllib2.urlopen(request)
 		result = con.read()
+		print self.__plugin__ + "_ JSON " + repr(result);
 				
 		(temp, status) = self._getVideoInfoBatch(result)
 		ytobjects += temp
@@ -858,14 +859,16 @@ class YouTubeCore(object):
 				if self.__dbg__:
 					print self.__plugin__ + " _youTubeAdd: " + self.__language__(30615)
 				return ( self.__language__(30615), 303 )
-			elif ( error.find("401") > -1 and retry ):
+			elif ( error.find("401") > -1 and retry):
 				# If login credentials are given, try again.
 				if ( self.__settings__.getSetting( "username" ) == "" or self.__settings__.getSetting( "user_password" ) == "" ):
 					if self.__dbg__:
 						print self.__plugin__ + " _youTubeAdd trying again with login "
 						
 					self.login()
-					return self._fetchPage(link, api, auth, login, error +1)
+					#def _fetchPage(self, link, api = False, auth=False, login=False, error = 0):
+					return self._youTubeAdd(url, add_request, False)
+					#return self._fetchPage(link, api, auth, login, error + 1)
 				else:
 					if self.__dbg__:
 						print self.__plugin__ + " _youTubeAdd 401 Not Authorized and no login credentials written in settings"
@@ -908,7 +911,8 @@ class YouTubeCore(object):
 						print self.__plugin__ + " _youTubeDel trying again with login "
 						
 					self.login()
-					return self._fetchPage(link, api, auth, login, error +1)
+					return self._youTubeDel(delete_url, False);
+					#return self._fetchPage(link, api, auth, login, error +1)
 				else:
 					if self.__dbg__:
 						print self.__plugin__ + " _youTubeDel 401 Not Authorized and no login credentials written in settings"

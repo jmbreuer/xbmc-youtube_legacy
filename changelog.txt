@@ -1,6 +1,5 @@
 [B]TODO:[/B]
-- Adding to playlist possible? xbmc doable? <-- no
-- Plugin still has a few "Unknown uploader" errors hanging around, being fixed. <-- is this still relevant
+- Adding to playlist possible? xbmc doable? <-- trac
 - Check if its possible to get plugin to handle user activating html5 setting.
 
 [B]Errata[/B]
