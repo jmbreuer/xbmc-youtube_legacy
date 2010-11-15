@@ -270,7 +270,7 @@ class YouTubeCore(object):
 			return (self.__language__(30602), 303)
 
 	def delete_favorite(self, obj):
-		delete_url = "http://gdata.youtube.com/feeds/api/users/default/favorites/%s" % obj
+		delete_url = "http://gdata.youtube.com/feeds/api/users/%s/favorites/%s" % ( self.__settings__.getSetting( "nick" ), obj )
 		return self._youTubeDel(delete_url)
 	
 	def remove_contact(self, obj):

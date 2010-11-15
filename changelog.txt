@@ -6,9 +6,11 @@
 - [XBMC] Thumbnails sometimes turns into black box or Folder (XBMC not detecting when thumbnail is set and defaulting to icon?)
 - [XBMC] When sorting items, it's impossible to get them to return to their original order.
 - [XBMC] has Excessive Memory use after running the plugin for prolonged periods of time 
+- [YOUTUBE] Can't delete favorites (YouTube gives video id, not favorite id).
 - Download of rtmpe streams not supported.
 
 [B]Youtube 1.9.4[/B]
+- Add to favorites works again.
 - Restructured main folder structure to seperate scraper functions and feeds from user specific functions 
 - Changed download function to use Temporary filename while downloading, marking download as incomplete ex. video-incomplete.mp4 -> video.mp4
 - Added Scraper for YouTube Movies
