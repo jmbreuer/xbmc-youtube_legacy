@@ -1013,7 +1013,7 @@ class YouTubeNavigation:
 					else:
 						cm.append( (self.__language__(30025), 'XBMC.RunPlugin(%s?path=%s&action=remove_contact&contact=%s&)' % ( sys.argv[0], item("path"), item("Title") ) ) )
 							
-			if ( item("feed") == "favorites"  or get("feed") == "playlists" or item("feed") == "uploads" or (item("action") == "search_disco" and not get("scraper"))):
+			if ( item("feed") == "favorites"  or get("feed") == "playlists" or item("feed") == "uploads" or item("feed") == "newsubscriptions" or (item("action") == "search_disco" and not get("scraper"))):
 				cm.append( ( self.__language__( 30507 ), "XBMC.Action(Queue)" ) )
 			
 			cm.append( ( self.__language__( 30527 ), "XBMC.ActivateWindow(MusicPlaylist)"))
