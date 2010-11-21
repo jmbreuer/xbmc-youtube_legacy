@@ -82,8 +82,6 @@ class YouTubeScraperCore:
 		try:
 			con = urllib2.urlopen(url)
 			result = con.read()
-			if self.__dbg__:
-				print self.__plugin__ + " _scrapeYouTubeData result: "
 			con.close()
 
 			videos = re.compile('<a href="/watch\?v=(.*)&amp;feature=grec_browse" class=').findall(result);
@@ -205,6 +203,7 @@ class YouTubeScraperCore:
 		subitems = videos[(per_page * page):(per_page * (page + 1))]
 		
 		if (result == 200):
+			print subitems
 			( ytobjects, status ) = self.core._get_batch_details(subitems)
 		
 			if status == 200:
@@ -242,7 +241,7 @@ class YouTubeScraperCore:
 			if (len(mix_list) > 0):
 				print self.__plugin__ + " sok " + repr(mix_list)
 				match = mix_list.div["data-video-ids"].split(",")
-
+				
 				if match:
 					return (match, 200)
 				else:
