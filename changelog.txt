@@ -9,6 +9,11 @@
 - [YOUTUBE] Can't delete favorites (YouTube gives video id, not favorite id).
 - Download of rtmpe streams not supported.
 
+[B]Youtube 1.9.5[/B]
+- VERSION NUMBER NOT UPDATED
+- Added queue folder option to newsubscription videos
+- Fixed Disco search after batch query JSON experimentation broke it 
+
 [B]Youtube 1.9.4[/B]
 - Add to favorites works again.
 - Restructured main folder structure to seperate scraper functions and feeds from user specific functions 
