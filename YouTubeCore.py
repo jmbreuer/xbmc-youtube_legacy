@@ -618,7 +618,7 @@ class YouTubeCore(object):
 		
 		
 		final_request = request_start + video_request + request_end
-		request = urllib2.Request("http://gdata.youtube.com/feeds/api/videos/batch?v=2&alt=json")
+		request = urllib2.Request("http://gdata.youtube.com/feeds/api/videos/batch")
 		request.add_data(final_request)
 					
 		con = urllib2.urlopen(request)
