@@ -1,6 +1,7 @@
 [B]TODO:[/B]
 - Adding to playlist possible? xbmc doable? <-- trac
 - Check if its possible to get plugin to handle user activating html5 setting.
+- Add "find related" to context menu
 
 [B]Errata[/B]
 - [XBMC] Thumbnails sometimes turns into black box or Folder (XBMC not detecting when thumbnail is set and defaulting to icon?)
