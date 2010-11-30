@@ -3,10 +3,15 @@ Author: IconShock
 License: Free for commercial use
 http://www.iconfinder.com/icondetails/49221/256/youtube_icon
 
+download.png
+Author: Bobbyperux (MISTO icon pack)
+License: Freeware Non-commercial
+http://findicons.com/icon/85798/arrow_down?id=85798
+
 movies.png
 Author: Sebastiaan de With
 License: Freeware Non-commercial
-License: http://findicons.com/icon/35690/sidebar_movies_blue
+http://findicons.com/icon/35690/sidebar_movies_blue
 
 add_user.png
 Modified version of User icon by VisualPharm, modified by HenrikDK
