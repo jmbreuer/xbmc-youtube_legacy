@@ -122,6 +122,7 @@
     <string id="30271">Video Thumbnails</string>
     <string id="30272">Thumbnails Everywhere</string>
     <string id="30273">XBMC Default</string>
+	<string id="30274">Show Downloads</string>
 	
     <!-- Menu strings -->
     <string id="30500">Clear refinements</string>
