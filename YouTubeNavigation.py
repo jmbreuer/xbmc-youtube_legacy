@@ -65,6 +65,7 @@ class YouTubeNavigation:
 	feeds['feed_featured'] = "http://gdata.youtube.com/feeds/api/standardfeeds/recently_featured"; # doesn't work with time
 	feeds['subscriptions_uploads'] = "http://gdata.youtube.com/feeds/api/users/%s/uploads";
 	feeds['subscriptions_favorites'] = "http://gdata.youtube.com/feeds/api/users/%s/favorites";
+	feeds['subscriptions_playlists'] = "http://gdata.youtube.com/feeds/api/users/%s/playlists";
 
 	# we fill the list with category definitions, with labels from the appropriate language file
 	#			   label						  , path								    , thumbnail					  ,  login		  ,  feed / action
@@ -117,7 +118,7 @@ class YouTubeNavigation:
 			self.listOptionFolder(params)
 			
 		if (get("login") == "true"):
-			if (get('feed') == 'subscriptions' or get('feed') == 'playlists' or get('feed') == 'contacts' ):
+			if (get('feed') == 'subscriptions' or get('feed') == 'playlists' or get('feed') == 'contacts' or get("feed") == "subscriptions_playlists" ):
 				self.listUserFolder(params)				  
 			elif ( get("feed") in self.feeds):
 				self.listUserFolderFeeds(params)
@@ -800,6 +801,9 @@ class YouTubeNavigation:
 				if (self.__settings__.getSetting(viewmode) == "subscriptions_favorites"):
 					result_params["feed"] = "subscriptions_favorites"
 					result_params["view_mode"] = "subscriptions_uploads"
+				elif(self.__settings__.getSetting(viewmode) == "subscriptions_playlists"):
+					result_params["feed"] = "subscriptions_playlists"
+					result_params["view_mode"] = "subscriptions_playlists"
 				else:
 					result_params["feed"] = "subscriptions_uploads"  
 					result_params["view_mode"] = "subscriptions_favorites"
@@ -955,13 +959,13 @@ class YouTubeNavigation:
 					cm.append( ( self.__language__( 30506 ), 'XBMC.RunPlugin(%s?path=%s&action=remove_favorite&editid=%s&)' % ( sys.argv[0], item("path"), item("editid") ) ) )
 				else:
 					cm.append( ( self.__language__( 30503 ), 'XBMC.RunPlugin(%s?path=%s&action=add_favorite&videoid=%s&)' % ( sys.argv[0],  item("path"), item("videoid") ) ) )
-				if (get("external") == "true" or (get("feed") != "subscriptions_favorites" and get("feed") != "subscriptions_uploads")):
+				if (get("external") == "true" or (get("feed") != "subscriptions_favorites" and get("feed") != "subscriptions_uploads" and get("feed") != "subscriptions_playlists")):
 					cm.append( ( self.__language__( 30512 ) % item("Studio"), 'XBMC.RunPlugin(%s?path=%s&channel=%s&action=add_subscription)' % ( sys.argv[0], item("path"), item("Studio") ) ) )		
 
 			studio = self.makeAscii(item("Studio","Unknown Author"))
 			url_studio = urllib.quote_plus(studio)
 			
-			if (get("feed") != "subscriptions_favorites" and get("feed") != "subscriptions_uploads"):
+			if (get("feed") != "subscriptions_favorites" and get("feed") != "subscriptions_uploads" and get("feed") != "subscriptions_playlists"):
 				cm.append( ( self.__language__( 30516 ) % studio, "XBMC.Container.Update(%s?path=%s&login=true&feed=subscriptions_uploads&view_mode=subscriptions_uploads&channel=%s)" % ( sys.argv[0],  get("path"), url_studio ) ) )
 			
 			if (get("action") == "search_disco"):
@@ -989,15 +993,20 @@ class YouTubeNavigation:
 				cm.append( ( self.__language__( 30525 ), 'XBMC.RunPlugin(%s?path=%s&action=delete_disco&delete=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )								
 
 			if (item("view_mode")):
-				cm_url = 'XBMC.RunPlugin(%s?path=%s&channel=%s&action=change_subscription_view&view_mode=%s&' % ( sys.argv[0], item("path"), item("channel"), item("view_mode") )
+				cm_url = 'XBMC.RunPlugin(%s?path=%s&channel=%s&action=change_subscription_view&view_mode=%s&' % ( sys.argv[0], item("path"), item("channel"), "%s")
 				if (item("external")):
 					cm_url += "external=true&contact=" + get("contact") + "&"
 				cm_url +=")"
 			
 				if (item("feed") == "subscriptions_favorites"):
-					cm.append( (self.__language__( 30511 ), cm_url) )
+					cm.append ( (self.__language__( 30511 ), cm_url % ("subscriptions_uploads")))
+					cm.append( (self.__language__( 30528 ), cm_url % ("subscriptions_playlists")))
+				elif(item("feed") == "subscriptions_playlists"):
+					cm.append( (self.__language__( 30511 ), cm_url % ("subscriptions_uploads"))) 
+					cm.append ( (self.__language__( 30510 ), cm_url % ("subscriptions_favorites")))
 				elif (item("feed") == "subscriptions_uploads"):
-					cm.append ( (self.__language__( 30510 ), cm_url) )
+					cm.append ( (self.__language__( 30510 ), cm_url % ("subscriptions_favorites")))
+					cm.append( (self.__language__( 30528 ), cm_url % ("subscriptions_playlists")))
 
 			if (item("channel")):
 				if ( self.__settings__.getSetting( "username" ) != "" and self.__settings__.getSetting( "auth" ) ):
