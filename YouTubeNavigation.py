@@ -138,7 +138,7 @@ class YouTubeNavigation:
 			cat_get = category.get 
 			if (cat_get("path").find(path +"/") > -1 ):
 				if (cat_get("path").rfind("/") <= len(path +"/")):
-					setting = self.__settings__.getSetting( cat_get("path").replace("/root/", "") )
+					setting = self.__settings__.getSetting( cat_get("path").replace("/root/explore/","").replace("/root/", "") )
 					
 					if not setting or setting == "true":
 						if (get("feed") == "downloads"):
