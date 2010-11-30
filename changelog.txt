@@ -1,9 +1,9 @@
 [B]TODO:[/B]
 - Adding to playlist possible? xbmc doable? <-- trac
-- Check if its possible to get plugin to handle user activating html5 setting.
+- Check if its possible to get plugin to handle user activating html5 setting. <-- still can't reproduce 
 - Add link to Download folder from within plugin? <-- don't know if im happy with it yet.. 
-- Add "find related" to context menu
-- Play video from file-system if Download exists  
+- Add "find related" to context menu <-- tobias fix this in core
+- Play video from file-system if Download exists  <-- post version 2.0 if we do it
 
 [B]Errata[/B]
 - [XBMC] Thumbnails sometimes turns into black box or Folder (XBMC not detecting when thumbnail is set and defaulting to icon?)
@@ -14,6 +14,8 @@
 
 [B]Youtube 1.9.5[/B]
 - VERSION NUMBER NOT UPDATED
+- Update icon and thumbnail licensing
+- Fixed folder visibility settings for Explore YouTube Category
 - Allow user to select view modes between "Video Thumbnails", "Thumbnails Everywhere" and "XBMC Default" for listings
 - Added option to access Download folder from within the plugin 
 - Added support for viewing Subscription Playlists
