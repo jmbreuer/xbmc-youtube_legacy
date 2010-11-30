@@ -28,6 +28,7 @@
     <setting id="playlists" type="bool" label="30253" default="true" />
     <setting id="subscriptions" type="bool" label="30254" default="true" />
     <setting id="uploads" type="bool" label="30255" default="true" />
+    <setting id="downloads" type="bool" label="30274" default="true" />
     <setting id="search" type="bool" label="30256" default="true" />
     <setting id="playbyid" type="bool" label="30257" default="true" />
   </category>
