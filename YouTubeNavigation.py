@@ -99,6 +99,7 @@ class YouTubeNavigation:
 				  {'Title':__language__( 30003 )  ,'path':"/root/subscriptions"	 			, 'thumbnail':"subscriptions"		, 'login':"true"  , 'feed':"subscriptions" },
 				  {'Title':__language__( 30004 )  ,'path':"/root/subscriptions/new" 		, 'thumbnail':"newsubscriptions"	, 'login':"true"  , 'feed':"newsubscriptions" },
 				  {'Title':__language__( 30005 )  ,'path':"/root/uploads"					, 'thumbnail':"uploads"				, 'login':"true"  , 'feed':"uploads" },
+				  {'Title':__language__( 30045 )  ,'path':"/root/downloads"					, 'thumbnail':"downloads"			, 'login':"false" , 'feed':"downloads" },
 				  {'Title':__language__( 30006 )  ,'path':"/root/search"					, 'thumbnail':"search"				, 'login':"false" , 'store':"searches" },
 				  {'Title':__language__( 30007 )  ,'path':"/root/search/new"				, 'thumbnail':"search"				, 'login':"false" , 'action':"search" },
 				  {'Title':__language__( 30008 )  ,'path':"/root/playbyid"		  			, 'thumbnail':"playbyid"			, 'login':"false" , 'action':"playbyid" },
@@ -140,17 +141,22 @@ class YouTubeNavigation:
 					setting = self.__settings__.getSetting( cat_get("path").replace("/root/", "") )
 					
 					if not setting or setting == "true":
-						self.addListItem(params, category)
+						if (get("feed") == "downloads"):
+							if (self.__settings__.getSetting("downloadPath")):
+								self.addListItem(params, category)
+						else:
+							self.addListItem(params, category)
 		
 		if (get("store") == "searches" or get("store") == "disco_searches"):
 				self.listStoredSearches(params)
 				cache = False
 		
+		video_view = self.__settings__.getSetting("list_view") == "1"
 		if (get("scraper") == "shows" and get("category")):
-			video_view = self.__settings__.getSetting("video_view") == "true"
+			video_view = self.__settings__.getSetting("list_view") == "0"
 			
-			if (video_view):
-				xbmc.executebuiltin("Container.SetViewMode(500)")
+		if (video_view):
+			xbmc.executebuiltin("Container.SetViewMode(500)")
 		
 		xbmcplugin.endOfDirectory( handle=int( sys.argv[ 1 ] ), succeeded=True, cacheToDisc=cache )
 
@@ -730,6 +736,8 @@ class YouTubeNavigation:
 		if len(cm) > 0:
 			listitem.addContextMenuItems( cm, replaceItems=True )
 		listitem.setProperty( "Folder", "true" )
+		if (item("feed") == "downloads"):
+			url = self.__settings__.getSetting("downloadPath")
 		xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url, listitem=listitem, isFolder=True, totalItems=size)
 	
 	# common function for adding action items

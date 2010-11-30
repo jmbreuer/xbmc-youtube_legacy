@@ -45,6 +45,7 @@
     <string id="30042">YouTube Shows</string>
     <string id="30043">YouTube Movies</string>
     <string id="30044">Explore YouTube</string>
+    <string id="30045">My Downloads</string>
     
     <!-- Plugin settings strings -->
     <string id="30200">Username</string>
@@ -105,7 +106,7 @@
     <string id="30255">Show Uploads</string>
     <string id="30256">Show Search</string>
     <string id="30257">Show Play Video by ID</string>
-    <string id="30258">Set thumbnail view for videos in Confluence</string>
+    <string id="30258">View mode in Confluence</string>
     <string id="30259">Advanced</string>
     <string id="30260">Download quality (if available)</string>
     <string id="30261">Same as playback</string>
@@ -118,6 +119,9 @@
     <string id="30268">Show YouTube Movies</string>
     <string id="30269">Show Explore YouTube</string>
     <string id="30270">Explore YouTube</string>
+    <string id="30271">Video Thumbnails</string>
+    <string id="30272">Thumbnails Everywhere</string>
+    <string id="30273">XBMC Default</string>
 	
     <!-- Menu strings -->
     <string id="30500">Clear refinements</string>
