@@ -1,10 +1,9 @@
 [B]TODO:[/B]
 - Adding to playlist possible? xbmc doable? <-- trac
 - Check if its possible to get plugin to handle user activating html5 setting.
-- Add link to Download folder from within plugin?
+- Add link to Download folder from within plugin? <-- don't know if im happy with it yet.. 
 - Add "find related" to context menu
-- Play video from file-system if Download exists
-- Change to 3 viewmodes, Always thumbnails view, list view, thumbnails for videos and shows.  
+- Play video from file-system if Download exists  
 
 [B]Errata[/B]
 - [XBMC] Thumbnails sometimes turns into black box or Folder (XBMC not detecting when thumbnail is set and defaulting to icon?)
@@ -15,6 +14,9 @@
 
 [B]Youtube 1.9.5[/B]
 - VERSION NUMBER NOT UPDATED
+- Allow user to select view modes between "Video Thumbnails", "Thumbnails Everywhere" and "XBMC Default" for listings
+- Added option to access Download folder from within the plugin 
+- Added support for viewing Subscription Playlists
 - Added queue folder option to newsubscription videos
 - Fixed Disco search after batch query JSON experimentation broke it 
 
