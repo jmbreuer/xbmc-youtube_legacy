@@ -152,10 +152,15 @@ class YouTubeNavigation:
 				cache = False
 		
 		video_view = self.__settings__.getSetting("list_view") == "1"
-		if (get("scraper") == "shows" and get("category")):
+		if (self.__dbg__):
+			print self.__plugin__ + " view mode: " + self.__settings__.getSetting("list_view")
+		
+		if (get("scraper") == "shows" and get("category") and not video_view):
 			video_view = self.__settings__.getSetting("list_view") == "0"
 			
 		if (video_view):
+			if (self.__dbg__):
+				print self.__plugin__ + " setting view mode"
 			xbmc.executebuiltin("Container.SetViewMode(500)")
 		
 		xbmcplugin.endOfDirectory( handle=int( sys.argv[ 1 ] ), succeeded=True, cacheToDisc=cache )
@@ -871,9 +876,13 @@ class YouTubeNavigation:
 			
 			self.addFolderListItem(params, item)
 		
-		video_view = self.__settings__.getSetting("video_view") == "true"
+		video_view = int(self.__settings__.getSetting("list_view")) <= 1
+		if (self.__dbg__):
+			print self.__plugin__ + " view mode set to: " + self.__settings__.getSetting("list_view")
 		
 		if (video_view):
+			if (self.__dbg__):
+				print self.__plugin__ + " setting view mode"
 			xbmc.executebuiltin("Container.SetViewMode(500)")
 		
 		xbmcplugin.addSortMethod( handle=int( sys.argv[ 1 ] ), sortMethod=xbmcplugin.SORT_METHOD_UNSORTED )
