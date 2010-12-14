@@ -195,9 +195,10 @@ class YouTubeCore(object):
 				print self.__plugin__ + " search done with no results"
 			return (self.__language__(30601), 303)
 
-	def feeds(self, feed, page = "0" ):
+	def feeds(self, feed, params ={} ):
+		get = params.get
 		if self.__dbg__:
-			print self.__plugin__ + " feeds : " + repr(feed) + " page: " + repr(page)
+			print self.__plugin__ + " feeds : " + repr(feed) + " page: " + repr(get("page","0"))
 		result = ""
 		per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
 		
@@ -210,7 +211,7 @@ class YouTubeCore(object):
 		else:
 			feed += "&"
 			
-		feed += "start-index=" + str( per_page * int(page) + 1) + "&max-results=" + repr(per_page)
+		feed += "start-index=" + str( per_page * int(get("page","0")) + 1) + "&max-results=" + repr(per_page)
 			
 		if (feed.find("standardfeeds") > 0):
 			region = ('', 'AU', 'BR', 'CA', 'CZ', 'FR', 'DE', 'GB', 'NL', 'HK', 'IN', 'IE', 'IL', 'IT', 'JP', 'MX', 'NZ', 'PL', 'RU', 'KR', 'ES','SE', 'TW', 'US', 'ZA' )[ int( self.__settings__.getSetting( "region_id" ) ) ]
@@ -233,7 +234,9 @@ class YouTubeCore(object):
 				print self.__plugin__ + " feeds done with no results"
 			return (self.__language__(30602), 303)
 	
-	def list(self, feed, page = "0"):
+	def list(self, feed, params ={}):
+		get = params.get
+		page = get("page","0")
 		if self.__dbg__:
 			print self.__plugin__ + " list: " + repr(feed) + " - page: " + repr(page)
 		result = ""
@@ -297,9 +300,10 @@ class YouTubeCore(object):
 		add_request = '<?xml version="1.0" encoding="UTF-8"?><entry xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://gdata.youtube.com/schemas/2007"> <category scheme="http://gdata.youtube.com/schemas/2007/subscriptiontypes.cat" term="user"/><yt:username>%s</yt:username></entry>' % (user_id)
 		return self._youTubeAdd(url, add_request)
 
-	def playlists(self, link, page = '0'):
+	def playlists(self, link, params = {}):
+		get = params.get
 		if self.__dbg__:
-			print self.__plugin__ + " playlists " + repr(link) + " - page: " + repr(page)
+			print self.__plugin__ + " playlists " + repr(link) + " - page: " + repr(get("page","0"))
 		result = ""
 
 		auth = self._getAuth()
@@ -313,8 +317,12 @@ class YouTubeCore(object):
 			link += "?"
 		else:
 			link += "&"
-		link += "start-index=" + str( per_page * int(page) + 1) + "&max-results=" + repr(per_page)
+		link += "start-index=" + str( per_page * int(get("page","0")) + 1) + "&max-results=" + repr(per_page)
 		
+		if get("feed") == "playlists" or get("feed") == "subscriptions":
+			link += "&orderby=published"
+
+
 		( result, status ) = self._fetchPage(link, auth = True)
 
 		if status != 200:
@@ -1016,7 +1024,11 @@ class YouTubeCore(object):
 				video['Rating'] = float(self._getNodeAttribute(node,"gd:rating", 'average', "0.0"))
 				video['count'] = int(self._getNodeAttribute(node, "yt:statistics", 'viewCount', "0"))
 				video['Genre'] = self._getNodeAttribute(node, "media:category", "label", "Unknown Genre").encode( "utf-8" )
-	
+				infoString =""
+				if video['Date'] != "Unknown Date":
+					infoString += "Date Uploaded: " + video['Date'][:video['Date'].find("T")] + ", "				
+				infoString += "View count: " + str(video['count'])
+				
 				if node.getElementsByTagName("atom:link"):
 					link = node.getElementsByTagName("atom:link")
 					for i in range(len(link)):
@@ -1113,11 +1125,18 @@ class YouTubeCore(object):
 				if video['Studio'] == "":
 					video['Studio'] = self._getNodeValue(node, "name", "Unknown Uploader").encode( "utf-8" )
 					
+					
 
 				duration = int(self._getNodeAttribute(node, "yt:duration", 'seconds', '0'))
 				video['Duration'] = "%02d:%02d" % ( duration / 60, duration % 60 )
 				video['Rating'] = float(self._getNodeAttribute(node,"gd:rating", 'average', "0.0"))
 				video['count'] = int(self._getNodeAttribute(node, "yt:statistics", 'viewCount', "0"))
+				infoString =""
+				if video['Date'] != "Unknown Date":
+					infoString += "Date Uploaded: " + video['Date'][:video['Date'].find("T")] + ", "				
+				infoString += "View count: " + str(video['count'])
+				video['Plot'] = infoString + "\n" + video['Plot']
+				print "plot updated"
 				video['Genre'] = self._getNodeAttribute(node, "media:category", "label", "Unknown Genre").encode( "utf-8" )
 
 				if node.getElementsByTagName("link"):
