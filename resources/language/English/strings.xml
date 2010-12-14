@@ -134,7 +134,7 @@
     <string id="30506">Delete from My Favorites</string>
     <string id="30507">Queue folder</string>
     <string id="30508">Delete search</string>
-    <string id="30509">More Results</string>
+    <string id="30509">More results</string>
     <string id="30510">Change subscription to favorites</string>
     <string id="30511">Change subscription to uploads</string>
     <string id="30512">Subscribe to %s</string>
@@ -154,6 +154,7 @@
     <string id="30526">Play folder</string>
     <string id="30527">Now Playing...</string>
     <string id="30528">Change subscription to playlists</string>
+    <string id="30529">Related videos</string>
 
     <!-- messages -->
     <string id="30600">Error</string>
