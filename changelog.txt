@@ -13,7 +13,6 @@
 - Download of rtmpe streams not supported.
 
 [B]Youtube 1.9.5[/B]
-- VERSION NUMBER NOT UPDATED
 - Update icon and thumbnail licensing
 - Fixed folder visibility settings for Explore YouTube Category
 - Allow user to select view modes between "Video Thumbnails", "Thumbnails Everywhere" and "XBMC Default" for listings
