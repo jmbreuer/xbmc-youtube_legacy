@@ -52,6 +52,7 @@ class YouTubeNavigation:
 	feeds['favorites'] = "http://gdata.youtube.com/feeds/api/users/%s/favorites"
 	feeds['playlists'] = "http://gdata.youtube.com/feeds/api/users/%s/playlists"
 	feeds['playlist_root'] = "http://gdata.youtube.com/feeds/api/playlists/%s"
+	feeds['list_related'] = "http://gdata.youtube.com/feeds/api/videos/%s/related"
 	feeds['newsubscriptions'] = "http://gdata.youtube.com/feeds/api/users/%s/newsubscriptionvideos";
 	feeds['contacts'] = "http://gdata.youtube.com/feeds/api/users/default/contacts";
 	feeds['subscriptions'] = "http://gdata.youtube.com/feeds/api/users/%s/subscriptions";
@@ -195,6 +196,8 @@ class YouTubeNavigation:
 			self.addSubscription(params)
 		if (get("action") == "download"):
 			self.downloadVideo(params)
+		if (get("action") == "list_related"):
+			self.listRelated(params)
 		if (get("action") == "play_video"):
 			self.playVideo(params)
 		if (get("action") == "change_subscription_view"):
@@ -244,7 +247,7 @@ class YouTubeNavigation:
 				
 		feed = self.parseFeeds(params)
 		
-		(result, status) = core.playlists(feed, get("page", "0"))
+		(result, status) = core.playlists(feed, params)
 		if status != 200:
 			feed_label = ""
 			for category in self.categories:
@@ -284,7 +287,7 @@ class YouTubeNavigation:
 		feed = self.parseFeeds(params)
 		
 		if ( get('login') and feed):
-			( result, status ) = core.list(feed, get("page", "0"));
+			( result, status ) = core.list(feed, params);
 			if status != 200:
 				feed_label = ""
 				for category in self.categories:
@@ -350,7 +353,7 @@ class YouTubeNavigation:
 
 		feed = self.feeds[get("feed")]
 									
-		( result, status ) = core.feeds(feed, get("page", "0"))
+		( result, status ) = core.feeds(feed, params)
 		if status != 200:
 			feed_label = ""
 			for category in self.categories:
@@ -538,6 +541,19 @@ class YouTubeNavigation:
 				return False
 												
 			xbmc.executebuiltin( "Container.Refresh" )
+		return True
+	
+	def listRelated(self, params={}):
+		get = params.get
+		if (get("videoid")):
+			feed = self.feeds["list_related"] % get("videoid")
+			(results, status) = core.list(feed, params)
+			
+			if status != 200:
+				self.errorHandling(self.__language__(30529), results, status)
+				return False
+			
+			self.parseVideoList(params, results)
 		return True
 	
 	#================================== Searching =========================================
@@ -989,6 +1005,7 @@ class YouTubeNavigation:
 				cm.append( ( self.__language__( 30523 ) % title, "XBMC.Container.Update(%s?path=%s&action=search_disco&search=%s)" % ( sys.argv[0],  get("path"), url_title ) ) )
 			
 			cm.append( ( self.__language__( 30514 ), "XBMC.Container.Update(%s?path=%s&action=search&search=%s)" % ( sys.argv[0],  get("path"), url_title ) ) )
+			cm.append( ( self.__language__( 30529 ), "XBMC.Container.Update(%s?path=%s&action=list_related&videoid=%s)" % ( sys.argv[0],  get("path"), item("videoid") ) ) )
 			cm.append( ( self.__language__( 30527 ), "XBMC.ActivateWindow(MusicPlaylist)"))
 			cm.append( ( self.__language__( 30504 ), "XBMC.Action(Queue)", ) )
 			cm.append( ( self.__language__( 30502 ), "XBMC.Action(Info)", ) )
