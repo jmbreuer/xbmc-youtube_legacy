@@ -1,14 +1,14 @@
 [B]TODO:[/B]
-- Adding to playlist possible? xbmc doable? <-- trac
-- Check if its possible to get plugin to handle user activating html5 setting. <-- still can't reproduce 
-- Add link to Download folder from within plugin? <-- don't know if im happy with it yet.. 
-- Add "find related" to context menu <-- tobias fix this in core
+- Adding to playlist possible? xbmc doable? <-- requires trac, and xbmc changes etc
 - Play video from file-system if Download exists  <-- post version 2.0 if we do it
+- Locally cache playlist contents and reverse the order cause the current implementation is annoying..
+- Improve Upload date to also include time in video info pane <-- tobias halp!
 
 [B]Errata[/B]
 - [XBMC] Thumbnails sometimes turns into black box or Folder (XBMC not detecting when thumbnail is set and defaulting to icon?)
 - [XBMC] When sorting items, it's impossible to get them to return to their original order.
 - [XBMC] has Excessive Memory use after running the plugin for prolonged periods of time 
+- [YOUTUBE] API doesnt allow proper sorting of playlists and subscriptions (Video order when listing a playlists is broken and orderby when listing all subscriptions just doesn't work)
 - [YOUTUBE] Can't delete favorites (YouTube gives video id, not favorite id).
 - Download of rtmpe streams not supported.
 
@@ -17,10 +17,13 @@
 - Update icon and thumbnail licensing
 - Fixed folder visibility settings for Explore YouTube Category
 - Allow user to select view modes between "Video Thumbnails", "Thumbnails Everywhere" and "XBMC Default" for listings
+- Added Upload Date and view count to video info pane 
+- Added "Related videos" to context menu
 - Added option to access Download folder from within the plugin 
 - Added support for viewing Subscription Playlists
 - Added queue folder option to newsubscription videos
-- Fixed Disco search after batch query JSON experimentation broke it 
+- Fixed Disco search after batch query JSON experimentation broke it
+- Fixed some minor errors in show scraper
 
 [B]Youtube 1.9.4[/B]
 - Add to favorites works again.
