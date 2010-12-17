@@ -529,7 +529,7 @@ class YouTubeCore(object):
 			
 			if (video['stream_map'] == 'True'):
 				video['swf_config'] = swfConfig
-				
+			
 			video['video_url'] = video_url;
 
 			if self.__dbg__:
