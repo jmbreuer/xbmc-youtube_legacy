@@ -203,7 +203,6 @@ class YouTubeScraperCore:
 		subitems = videos[(per_page * page):(per_page * (page + 1))]
 		
 		if (result == 200):
-			print subitems
 			( ytobjects, status ) = self.core._get_batch_details(subitems)
 		
 			if status == 200:
@@ -239,7 +238,6 @@ class YouTubeScraperCore:
 			list = SoupStrainer(name="div", id ="quicklist")
 			mix_list = BeautifulSoup(page, parseOnlyThese=list)
 			if (len(mix_list) > 0):
-				print self.__plugin__ + " sok " + repr(mix_list)
 				match = mix_list.div["data-video-ids"].split(",")
 				
 				if match:
@@ -350,7 +348,7 @@ class YouTubeScraperCore:
 		if (len(seasons) > 0):
 			season = seasons.div.span.findNextSibling()
 			
-			print self.__plugin__ + " season " + str(season)
+			print self.__plugin__ + " season " + repr(season)
 			while (season != None):
 				item = {}
 				if (str(season).find("page not-selected") > 0):
@@ -440,7 +438,7 @@ class YouTubeScraperCore:
 					item["thumbnail"] = thumbnail
 					
 					if self.__dbg__:
-						print self.__plugin__ + " adding show " + item['Title'] + ", url: " + item['show']
+						print self.__plugin__ + " adding show " + repr(item['Title']) + ", url: " + repr(item['show'])
 					
 					yobjects.append(item)
 				
@@ -452,9 +450,6 @@ class YouTubeScraperCore:
 		yobjects[len(yobjects) -1]["next"] = next
 		
 		return (yobjects, status)
-
-#=================================== Movies ============================================
-
 
 #=================================== Common ============================================		
 
