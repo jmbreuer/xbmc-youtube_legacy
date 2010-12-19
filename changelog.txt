@@ -12,6 +12,9 @@
 - [YOUTUBE] Can't delete favorites (YouTube gives video id, not favorite id).
 - Download of rtmpe streams not supported.
 
+[B]Youtube 1.9.6[/B]
+- Fixed zip file to make install from zip possible again, and reduced install size by 50%
+
 [B]Youtube 1.9.5[/B]
 - Update icon and thumbnail licensing
 - Fixed folder visibility settings for Explore YouTube Category
