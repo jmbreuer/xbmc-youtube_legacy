@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, urllib, urllib2, re, os, cookielib, string, socket
+import sys, urllib, urllib2, re, os, cookielib, string
 from xml.dom.minidom import parseString
 
 # ERRORCODES:
@@ -631,7 +631,6 @@ class YouTubeCore(object):
 					
 		con = urllib2.urlopen(request)
 		result = con.read()
-		print self.__plugin__ + "_ JSON " + repr(result);
 				
 		(temp, status) = self._getVideoInfoBatch(result)
 		ytobjects += temp
@@ -959,7 +958,8 @@ class YouTubeCore(object):
 	def _getVideoInfoBatch(self, value):
 		if self.__dbg__:
 			print self.__plugin__ + " _getvideoinfo: " + str(len(value))
-		print "xml: "  + value
+			print "xml: "  + value
+		
 		dom = parseString(value);
 		links = dom.getElementsByTagName("atom:link");
 		entries = dom.getElementsByTagName("atom:entry");
