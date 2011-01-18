@@ -19,7 +19,6 @@
 import sys
 import os
 import xbmc
-import xbmcaddon
 import xbmcgui
 import xbmcplugin
 import urllib
@@ -35,7 +34,7 @@ class YouTubeNavigation:
 	__plugin__ = sys.modules[ "__main__"].__plugin__	
 	__dbg__ = sys.modules[ "__main__" ].__dbg__
 	
-	plugin_thumbnail_path = os.path.join( os.getcwd(), "thumbnails" )
+	plugin_thumbnail_path = os.path.join( __settings__.getAddonInfo('path'), "thumbnails" )
 	pr_video_quality = __settings__.getSetting("pr_video_quality") == "true"
 
 	#===============================================================================
@@ -572,6 +571,7 @@ class YouTubeNavigation:
 	
 	def search(self, params = {}):
 		get = params.get
+				
 		if (get("search")):
 			query = get("search")
 			query = urllib.unquote_plus(query)
@@ -663,7 +663,6 @@ class YouTubeNavigation:
 				self.saveSearch(old_query, new_query, "stored_disco_searches")
 				
 			self.search(params)
-			
 
 	def refineSearch(self, params = {}):
 		get = params.get
@@ -745,7 +744,7 @@ class YouTubeNavigation:
 		
 		thumbnail = item("thumbnail")
 		
-		cm = self.addContextMenuItems(params, item_params)
+		cm = self.addFolderContextMenuItems(params, item_params)
 		
 		if (item("thumbnail", "DefaultFolder.png").find("http://") == -1):	
 			thumbnail = self.getThumbnail(item("thumbnail"))
@@ -793,7 +792,7 @@ class YouTubeNavigation:
 
 		url = '%s?path=%s&action=play_video&videoid=%s' % ( sys.argv[0], item("path"), item("videoid"));
 			
-		cm = self.addContextMenuItems(params, item_params)
+		cm = self.addVideoContextMenuItems(params, item_params)
 				
 		listitem.addContextMenuItems( cm, replaceItems=True )
 
@@ -971,7 +970,7 @@ class YouTubeNavigation:
 				url += k + "=" + v + "&"
 		return url
 
-	def addContextMenuItems(self, params = {}, item_params = {}):
+	def addVideoContextMenuItems(self, params = {}, item_params = {}):
 		cm = []
 		get = params.get
 		item = item_params.get
@@ -979,87 +978,97 @@ class YouTubeNavigation:
 		title = self.makeAscii(item("Title"))
 		url_title = urllib.quote_plus(title)
 		
-		if (item("videoid")): 
-			if (self.pr_video_quality):
-				cm.append( (self.__language__(30520), "XBMC.PlayMedia(%s?path=%s&action=play_video&quality=1080p&videoid=%s)" % ( sys.argv[0],  item("path"), item("videoid") ) ) )
-				cm.append( (self.__language__(30521), "XBMC.PlayMedia(%s?path=%s&action=play_video&quality=720p&videoid=%s)" % ( sys.argv[0],  item("path"), item("videoid") ) ) )
-				cm.append( (self.__language__(30522), "XBMC.PlayMedia(%s?path=%s&action=play_video&quality=SD&videoid=%s)" % ( sys.argv[0],  item("path"), item("videoid") ) ) )
+		cm.append( ( self.__language__( 30504 ), "XBMC.Action(Queue)", ) )
+		
+		if (self.pr_video_quality):
+			cm.append( (self.__language__(30520), "XBMC.PlayMedia(%s?path=%s&action=play_video&quality=1080p&videoid=%s)" % ( sys.argv[0],  item("path"), item("videoid") ) ) )
+			cm.append( (self.__language__(30521), "XBMC.PlayMedia(%s?path=%s&action=play_video&quality=720p&videoid=%s)" % ( sys.argv[0],  item("path"), item("videoid") ) ) )
+			cm.append( (self.__language__(30522), "XBMC.PlayMedia(%s?path=%s&action=play_video&quality=SD&videoid=%s)" % ( sys.argv[0],  item("path"), item("videoid") ) ) )
 			
-			cm.append( ( self.__language__(30501), "XBMC.RunPlugin(%s?path=%s&action=download&videoid=%s)" % ( sys.argv[0],  item("path"), item("videoid") ) ) )
+		cm.append( ( self.__language__(30501), "XBMC.RunPlugin(%s?path=%s&action=download&videoid=%s)" % ( sys.argv[0],  item("path"), item("videoid") ) ) )
 
-			if ( self.__settings__.getSetting( "username" ) != "" and self.__settings__.getSetting( "auth" ) ):
-				if ( get("feed") == "favorites" and not get("contact") ):
-					cm.append( ( self.__language__( 30506 ), 'XBMC.RunPlugin(%s?path=%s&action=remove_favorite&editid=%s&)' % ( sys.argv[0], item("path"), item("editid") ) ) )
-				else:
-					cm.append( ( self.__language__( 30503 ), 'XBMC.RunPlugin(%s?path=%s&action=add_favorite&videoid=%s&)' % ( sys.argv[0],  item("path"), item("videoid") ) ) )
-				if (get("external") == "true" or (get("feed") != "subscriptions_favorites" and get("feed") != "subscriptions_uploads" and get("feed") != "subscriptions_playlists")):
-					cm.append( ( self.__language__( 30512 ) % item("Studio"), 'XBMC.RunPlugin(%s?path=%s&channel=%s&action=add_subscription)' % ( sys.argv[0], item("path"), item("Studio") ) ) )		
+		if ( self.__settings__.getSetting( "username" ) != "" and self.__settings__.getSetting( "auth" ) ):
+			if ( get("feed") == "favorites" and not get("contact") ):
+				cm.append( ( self.__language__( 30506 ), 'XBMC.RunPlugin(%s?path=%s&action=remove_favorite&editid=%s&)' % ( sys.argv[0], item("path"), item("editid") ) ) )
+			else:
+				cm.append( ( self.__language__( 30503 ), 'XBMC.RunPlugin(%s?path=%s&action=add_favorite&videoid=%s&)' % ( sys.argv[0],  item("path"), item("videoid") ) ) )
+			if (get("external") == "true" or (get("feed") != "subscriptions_favorites" and get("feed") != "subscriptions_uploads" and get("feed") != "subscriptions_playlists")):
+				cm.append( ( self.__language__( 30512 ) % item("Studio"), 'XBMC.RunPlugin(%s?path=%s&channel=%s&action=add_subscription)' % ( sys.argv[0], item("path"), item("Studio") ) ) )		
 
-			studio = self.makeAscii(item("Studio","Unknown Author"))
-			url_studio = urllib.quote_plus(studio)
+		studio = self.makeAscii(item("Studio","Unknown Author"))
+		url_studio = urllib.quote_plus(studio)
 			
-			if (get("feed") != "subscriptions_favorites" and get("feed") != "subscriptions_uploads" and get("feed") != "subscriptions_playlists"):
-				cm.append( ( self.__language__( 30516 ) % studio, "XBMC.Container.Update(%s?path=%s&login=true&feed=subscriptions_uploads&view_mode=subscriptions_uploads&channel=%s)" % ( sys.argv[0],  get("path"), url_studio ) ) )
+		if (get("feed") != "subscriptions_favorites" and get("feed") != "subscriptions_uploads" and get("feed") != "subscriptions_playlists"):
+			cm.append( ( self.__language__( 30516 ) % studio, "XBMC.Container.Update(%s?path=%s&login=true&feed=subscriptions_uploads&view_mode=subscriptions_uploads&channel=%s)" % ( sys.argv[0],  get("path"), url_studio ) ) )
 			
-			if (get("action") == "search_disco"):
-				cm.append( ( self.__language__( 30523 ) % title, "XBMC.Container.Update(%s?path=%s&action=search_disco&search=%s)" % ( sys.argv[0],  get("path"), url_title ) ) )
+		if (get("action") == "search_disco"):
+			cm.append( ( self.__language__( 30523 ) % title, "XBMC.Container.Update(%s?path=%s&action=search_disco&search=%s)" % ( sys.argv[0],  get("path"), url_title ) ) )
 			
-			cm.append( ( self.__language__( 30514 ), "XBMC.Container.Update(%s?path=%s&action=search&search=%s)" % ( sys.argv[0],  get("path"), url_title ) ) )
-			cm.append( ( self.__language__( 30529 ), "XBMC.Container.Update(%s?path=%s&action=list_related&videoid=%s)" % ( sys.argv[0],  get("path"), item("videoid") ) ) )
-			cm.append( ( self.__language__( 30527 ), "XBMC.ActivateWindow(MusicPlaylist)"))
-			cm.append( ( self.__language__( 30504 ), "XBMC.Action(Queue)", ) )
-			cm.append( ( self.__language__( 30502 ), "XBMC.Action(Info)", ) )
-		elif (item("next","false") == "false"):
-			if (item("action") == "search"):
-				cm.append( ( self.__language__( 30515 ), 'XBMC.Container.Update(%s?path=%s&action=edit_search&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
-				cm.append( ( self.__language__( 30505 ), 'XBMC.RunPlugin(%s?path=%s&action=refine_user&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
-				cm.append( ( self.__language__( 30508 ), 'XBMC.RunPlugin(%s?path=%s&action=delete_search&delete=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
-				try:
-					searches = eval(self.__settings__.getSetting("stored_searches_author"))
-				except :
-					searches = {}
-				
-				if item("Title") in searches:
-					cm.append( ( self.__language__( 30500 ), 'XBMC.RunPlugin(%s?path=%s&action=delete_refinements&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
-
-			if (item("action") == "search_disco" and not get("scraper")):
-				cm.append( ( self.__language__( 30524 ), 'XBMC.Container.Update(%s?path=%s&action=edit_disco&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
-				cm.append( ( self.__language__( 30525 ), 'XBMC.RunPlugin(%s?path=%s&action=delete_disco&delete=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )								
-
-			if (item("view_mode")):
-				cm_url = 'XBMC.RunPlugin(%s?path=%s&channel=%s&action=change_subscription_view&view_mode=%s&' % ( sys.argv[0], item("path"), item("channel"), "%s")
-				if (item("external")):
-					cm_url += "external=true&contact=" + get("contact") + "&"
-				cm_url +=")"
-			
-				if (item("feed") == "subscriptions_favorites"):
-					cm.append ( (self.__language__( 30511 ), cm_url % ("subscriptions_uploads")))
-					cm.append( (self.__language__( 30528 ), cm_url % ("subscriptions_playlists")))
-				elif(item("feed") == "subscriptions_playlists"):
-					cm.append( (self.__language__( 30511 ), cm_url % ("subscriptions_uploads"))) 
-					cm.append ( (self.__language__( 30510 ), cm_url % ("subscriptions_favorites")))
-				elif (item("feed") == "subscriptions_uploads"):
-					cm.append ( (self.__language__( 30510 ), cm_url % ("subscriptions_favorites")))
-					cm.append( (self.__language__( 30528 ), cm_url % ("subscriptions_playlists")))
-
-			if (item("channel")):
-				if ( self.__settings__.getSetting( "username" ) != "" and self.__settings__.getSetting( "auth" ) ):
-					if (get("external")):
-						cm.append( ( self.__language__( 30512 ) % item("channel"), 'XBMC.RunPlugin(%s?path=%s&channel=%s&action=add_subscription)' % ( sys.argv[0], item("path"), item("channel") ) ) )
-					else:
-						cm.append( ( self.__language__( 30513 ) % item("channel"), 'XBMC.RunPlugin(%s?path=%s&editid=%s&action=remove_subscription)' % ( sys.argv[0], item("path"), item("editid") ) ) )
+		cm.append( ( self.__language__( 30514 ), "XBMC.Container.Update(%s?path=%s&action=search&search=%s)" % ( sys.argv[0],  get("path"), url_title ) ) )
+		cm.append( ( self.__language__( 30529 ), "XBMC.Container.Update(%s?path=%s&action=list_related&videoid=%s)" % ( sys.argv[0],  get("path"), item("videoid") ) ) )
+		cm.append( ( self.__language__( 30527 ), "XBMC.ActivateWindow(MusicPlaylist)"))
+		cm.append( ( self.__language__( 30502 ), "XBMC.Action(Info)", ) )
+		
+		return cm
+		
+	def addFolderContextMenuItems(self, params = {}, item_params = {}):
+		cm = []
+		get = params.get
+		item = item_params.get
 					
-			if (item("contact")):
-				if ( self.__settings__.getSetting( "username" ) != "" and self.__settings__.getSetting( "auth" ) ):
-					if (item("external")):
-						cm.append( (self.__language__(30026), 'XBMC.RunPlugin(%s?path=%s&action=add_contact&)' % ( sys.argv[0], item("path") ) ) )
-					else:
-						cm.append( (self.__language__(30025), 'XBMC.RunPlugin(%s?path=%s&action=remove_contact&contact=%s&)' % ( sys.argv[0], item("path"), item("Title") ) ) )
-							
-			if ( item("feed") == "favorites"  or get("feed") == "playlists" or item("feed") == "uploads" or item("feed") == "newsubscriptions" or (item("action") == "search_disco" and not get("scraper"))):
-				cm.append( ( self.__language__( 30507 ), "XBMC.Action(Queue)" ) )
+		if (item("next","false") == "true"):
+			return cm
+		
+		if (item("action") == "search"):
+			cm.append( ( self.__language__( 30515 ), 'XBMC.Container.Update(%s?path=%s&action=edit_search&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
+			cm.append( ( self.__language__( 30505 ), 'XBMC.RunPlugin(%s?path=%s&action=refine_user&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
+			cm.append( ( self.__language__( 30508 ), 'XBMC.RunPlugin(%s?path=%s&action=delete_search&delete=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
+			try:
+				searches = eval(self.__settings__.getSetting("stored_searches_author"))
+			except :
+				searches = {}
 			
-			cm.append( ( self.__language__( 30527 ), "XBMC.ActivateWindow(MusicPlaylist)"))
+			if item("Title") in searches:
+				cm.append( ( self.__language__( 30500 ), 'XBMC.RunPlugin(%s?path=%s&action=delete_refinements&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
+
+		if (item("action") == "search_disco" and not get("scraper")):
+			cm.append( ( self.__language__( 30524 ), 'XBMC.Container.Update(%s?path=%s&action=edit_disco&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
+			cm.append( ( self.__language__( 30525 ), 'XBMC.RunPlugin(%s?path=%s&action=delete_disco&delete=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )								
+
+		if (item("view_mode")):
+			cm_url = 'XBMC.RunPlugin(%s?path=%s&channel=%s&action=change_subscription_view&view_mode=%s&' % ( sys.argv[0], item("path"), item("channel"), "%s")
+			if (item("external")):
+				cm_url += "external=true&contact=" + get("contact") + "&"
+			cm_url +=")"
+			
+			if (item("feed") == "subscriptions_favorites"):
+				cm.append ( (self.__language__( 30511 ), cm_url % ("subscriptions_uploads")))
+				cm.append( (self.__language__( 30528 ), cm_url % ("subscriptions_playlists")))
+			elif(item("feed") == "subscriptions_playlists"):
+				cm.append( (self.__language__( 30511 ), cm_url % ("subscriptions_uploads"))) 
+				cm.append ( (self.__language__( 30510 ), cm_url % ("subscriptions_favorites")))
+			elif (item("feed") == "subscriptions_uploads"):
+				cm.append ( (self.__language__( 30510 ), cm_url % ("subscriptions_favorites")))
+				cm.append( (self.__language__( 30528 ), cm_url % ("subscriptions_playlists")))
+
+		if (item("channel")):
+			if ( self.__settings__.getSetting( "username" ) != "" and self.__settings__.getSetting( "auth" ) ):
+				if (get("external")):
+					cm.append( ( self.__language__( 30512 ) % item("channel"), 'XBMC.RunPlugin(%s?path=%s&channel=%s&action=add_subscription)' % ( sys.argv[0], item("path"), item("channel") ) ) )
+				else:
+					cm.append( ( self.__language__( 30513 ) % item("channel"), 'XBMC.RunPlugin(%s?path=%s&editid=%s&action=remove_subscription)' % ( sys.argv[0], item("path"), item("editid") ) ) )
+				
+		if (item("contact")):
+			if ( self.__settings__.getSetting( "username" ) != "" and self.__settings__.getSetting( "auth" ) ):
+				if (item("external")):
+					cm.append( (self.__language__(30026), 'XBMC.RunPlugin(%s?path=%s&action=add_contact&)' % ( sys.argv[0], item("path") ) ) )
+				else:
+					cm.append( (self.__language__(30025), 'XBMC.RunPlugin(%s?path=%s&action=remove_contact&contact=%s&)' % ( sys.argv[0], item("path"), item("Title") ) ) )
+							
+		if ( item("feed") == "favorites"  or get("feed") == "playlists" or item("feed") == "uploads" or item("feed") == "newsubscriptions" or (item("action") == "search_disco" and not get("scraper"))):
+			cm.append( ( self.__language__( 30507 ), "XBMC.Action(Queue)" ) )
+		
+		cm.append( ( self.__language__( 30527 ), "XBMC.ActivateWindow(MusicPlaylist)"))
 		return cm
 
 	def makeAscii(self, str):
