@@ -245,7 +245,7 @@ class YouTubeNavigation:
 				auth = self.__settings__.getSetting( "auth" )
 				
 		feed = self.parseFeeds(params)
-		
+
 		(result, status) = core.playlists(feed, params)
 		if status != 200:
 			feed_label = ""

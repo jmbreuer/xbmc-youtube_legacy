@@ -90,13 +90,13 @@ class YouTubeCore(object):
 		url = urllib2.Request("https://www.google.com/youtube/accounts/ClientLogin")
 
 		url.add_header('Content-Type', 'application/x-www-form-urlencoded')
-		url.add_header('GData-Version', 2)
+		url.add_header('GData-Version', '2')
 		
 		data = urllib.urlencode({'Email': uname, 'Passwd': passwd, 'service': 'youtube', 'source': 'YouTube plugin'})
 		
 		try:
 			con = urllib2.urlopen(url, data);
-				
+
 			value = con.read()
 			con.close()
 		
@@ -344,7 +344,7 @@ class YouTubeCore(object):
 		playobjects = [];
 		for node in entries:
 			video = {};
-			video['Title'] = str(node.getElementsByTagName("title").item(0).firstChild.nodeValue.replace('Activity of : ', '').replace('Videos published by : ', '')).encode( "utf-8" );
+			video['Title'] = node.getElementsByTagName("title").item(0).firstChild.nodeValue.replace('Activity of : ', '').replace('Videos published by : ', '').encode( "utf-8" );
 			
 			video['published'] = self._getNodeValue(node, "published", "2008-07-05T19:56:35.000-07:00")
 			video['summary'] = self._getNodeValue(node, 'summary', 'Unknown')
@@ -654,7 +654,7 @@ class YouTubeCore(object):
 		request = urllib2.Request(link)
 
 		if api:
-			request.add_header('GData-Version', 2)
+			request.add_header('GData-Version', '2')
 		else:
 			request.add_header('User-Agent', self.USERAGENT)
 
@@ -851,7 +851,7 @@ class YouTubeCore(object):
 			request.add_header('X-GData-Key', 'key=%s' % self.APIKEY)
 			request.add_header('Content-Type', 'application/atom+xml')
 			request.add_header('Content-Length', str(len(add_request)))
-			request.add_header('GData-Version', 2)
+			request.add_header('GData-Version', '2')
 			usock = urllib2.urlopen(request)
 		except urllib2.HTTPError, e:
 			error = str(e)
