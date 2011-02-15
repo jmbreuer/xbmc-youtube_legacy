@@ -410,6 +410,8 @@ class YouTubeNavigation:
 		get = params.get
 		(video, status) = core.construct_video_url(params);
 		if status != 200:
+			if self.__dbg__ : 
+				print self.__plugin__ + " construct video url failed contents of video item " + repr(video)
 			self.errorHandling(self.__language__(30603), video, status)
 			return False
 
