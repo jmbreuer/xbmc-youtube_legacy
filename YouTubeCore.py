@@ -110,8 +110,6 @@ class YouTubeCore(object):
 				if self.__dbg__:
 					print self.__plugin__ + " login done: " + nick
 				return ( self.__language__(30030), 200 )
-
-			print self.__plugin__ + " ABCD"
 					
 			return ( self.__language__(30609), 303 )
 			
@@ -419,7 +417,7 @@ class YouTubeCore(object):
 				print self.__plugin__ + " construct_video_url failed because of missing video from _get_details"
 			return ( "", 500 )
 		
-		if ( 'apierror' in video):
+		if ( 'apierror' in video ):
 			if self.__dbg__:
 				print self.__plugin__ + " construct_video_url, got apierror: " + video['apierror']
 			return (video['apierror'], 303)
@@ -787,25 +785,35 @@ class YouTubeCore(object):
 		if self.__dbg__:
 			print self.__plugin__ + " extractVariables : " + repr(videoid)
 
-		# Should hl=en_US be there?
 		( htmlSource, status ) = self._fetchPage('http://www.youtube.com/watch?v=' +videoid + "&safeSearch=none&hl=en_us")
 
 		if status != 200:
+			if self.__dbg__:
+				print self.__plugin__ + " extractVariables failed"
 			return ( htmlSource, status, status )
 		
-		if self.__dbgv__:
-			print self.__plugin__ + " _extractVariables result: " + repr(htmlSource)
+		if self.__dbg__:
+			print self.__plugin__ + " _fetchPage returned " + repr(htmlSource)
 
 		swf_url = False
 		fmtSource = re.findall('"fmt_url_map": "([^"]+)"', htmlSource);
+		
 		if fmtSource:
+			if self.__dbg__:
+				print self.__plugin__ + " fmt_url_map found"
 			stream_map = "False"
 		else:
+			if self.__dbg__:
+				print self.__plugin__ + " fmt_url_map not found, searching for stream map"
+				
 			swfConfig = re.findall('var swfConfig = {"url": "(.*)", "min.*};', htmlSource)
 			if len(swfConfig) > 0:
 				swf_url = swfConfig[0].replace("\\", "")
 				
 			fmtSource = re.findall('"fmt_stream_map": "([^"]+)"', htmlSource);
+			if not fmtSource:
+				print self.__plugin__ + " couldn't locate fmt_stream_map"
+			
 			stream_map = 'True'
 			
 		if self.__dbg__:
@@ -958,7 +966,6 @@ class YouTubeCore(object):
 	def _getVideoInfoBatch(self, value):
 		if self.__dbg__:
 			print self.__plugin__ + " _getvideoinfo: " + str(len(value))
-			print "xml: "  + value
 		
 		dom = parseString(value);
 		links = dom.getElementsByTagName("atom:link");
@@ -1216,6 +1223,7 @@ class YouTubeCore(object):
 		else:
 			if self.__dbg__:
 				print self.__plugin__ + " _get_details got bad status: " + str(status)
+				print self.__plugin__ + "_fetchPage returned: " + repr(result)
 			video = {}
 			video['Title'] = "Error"
 			video['videoid'] = videoid
