@@ -30,10 +30,10 @@
 - Updated Changelog
 - Changed Name to remove beta tag 
 
-[B]Youtube 1.9.6[/B]
+[B]Version 1.9.6[/B]
 - Fixed zip file to make install from zip possible again, and reduced install size by 50%
 
-[B]Youtube 1.9.5[/B]
+[B]Version 1.9.5[/B]
 - Update icon and thumbnail licensing
 - Fixed folder visibility settings for Explore YouTube Category
 - Allow user to select view modes between "Video Thumbnails", "Thumbnails Everywhere" and "XBMC Default" for listings
@@ -45,7 +45,7 @@
 - Fixed Disco search after batch query JSON experimentation broke it
 - Fixed some minor errors in show scraper
 
-[B]Youtube 1.9.4[/B]
+[B]Version 1.9.4[/B]
 - Add to favorites works again.
 - Restructured main folder structure to seperate scraper functions and feeds from user specific functions 
 - Changed download function to use Temporary filename while downloading, marking download as incomplete ex. video-incomplete.mp4 -> video.mp4
@@ -57,7 +57,7 @@
 - Batch processing functions now running against the official youtube API
 - Fixed Disco search (again) as YouTube broke it (again)... x2
 
-[B]Youtube 1.9.3[/B]
+[B]Version 1.9.3[/B]
 - Improved api login
 - Improved http login
 - Added YouTube Show Scraper
@@ -66,14 +66,14 @@
 - Hardened handling of age restricted videos
 - No longer try login when no credentials have been provided.
 
-[B]Youtube 1.9.2[/B]
+[B]Version 1.9.2[/B]
 - Disable socket timeout since that makes login fail on windows.
 
-[B]Youtube 1.9.1[/B]
+[B]Version 1.9.1[/B]
 - Loop on 500, don't know how i missed this.
 - Minor cleanup
 
-[B]Youtube 1.9.0[/B]
+[B]Version 1.9.0[/B]
 - Plugin can now confirm that the user is above 18 ( will only try if safe_search is disabled )
 - Added support for trailer thumbnails.
 - Added timeout option in advanced settings
