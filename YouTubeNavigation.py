@@ -111,6 +111,7 @@ class YouTubeNavigation:
 	def listMenu(self, params = {}):
 		get = params.get
 		cache = True
+		
 		if (get("scraper")):
 			self.scrape(params)
 			return
