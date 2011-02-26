@@ -460,7 +460,7 @@ class YouTubeScraperCore:
 					
 					yobjects.append(item)
 				
-				show = show.findNextSibling(name="div", attrs = { 'class':"show-cell *vl yt-uix-hovercard" })
+				show = show.findNextSibling(name="div", attrs = { 'class':re.compile("show-cell .") })
 			
 		if (not yobjects):
 			return (self.__language__(30601), 303)
@@ -484,11 +484,15 @@ class YouTubeScraperCore:
 		get = params.get
 		scraper_per_page = 0
 		result = []
-		
-		if (get("scraper") != "shows" and get("scraper") != "show" and get("scraper") != "categories" and (get("scraper") != "movies" or (get("scraper") == "movies" and get("category"))) and get("scraper") in self.urls):
-			scraper_per_page = 40
-		elif ( (get("scraper") == "shows" or get("scraper") == "categories" or get("scraper") == "shows") and get("category")):
+
+		if ( get("scraper") == "categories" and get("category")):
 			scraper_per_page = 23
+		elif ( get("scraper") == "shows" and get("category")):
+			scraper_per_page = 44
+		elif ( get("scraper") == "movies" and get("category")):
+			scraper_per_page = 60		
+		elif (get("scraper") != "shows" and get("scraper") != "show" and get("scraper") != "categories" and get("scraper") != "movies" and get("scraper") in self.urls):
+			scraper_per_page = 40
 		
 		if (self.__dbg__):
 			print self.__plugin__ + " scraper per page " + str(scraper_per_page) 
