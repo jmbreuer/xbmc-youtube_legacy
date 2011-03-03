@@ -842,17 +842,16 @@ class YouTubeCore(object):
 			print self.__plugin__ + " _fetchPage returned " + repr(htmlSource)
 
 		swf_url = False
-		fmtSource = re.findall('"fmt_url_map": "([^"]+)"', htmlSource);
-		
-		temp_url = re.findall('"ttsurl": "(.*)", "fexp".*', htmlSource)
-		print self.__plugin__ + " subtitles1: " + repr(temp_url);
 
-		if len(temp_url) == 0:
-			print self.__plugin__ + " subtitles2: " + repr(temp_url);
-			temp_url = re.findall('.*&amp;ttsurl=(.*)&amp;fexp.*', htmlSource)
+		fmtSource = re.findall('"fmt_url_map": "([^"]+)"', htmlSource);
+
+		#tempSource = htmlSource[htmlSource.find("&amp;ttsurl="):htmlSource.find("&amp;fexp=",htmlSource.find("&amp;ttsurl="))+20 ]
+		tempSource1 = htmlSource[htmlSource.find("ttsurl="):len(htmlSource)]
+		tempSource = tempSource1[0:tempSource1.find("&amp;")+5]
+
+		temp_url = re.findall('.*ttsurl=(.*)&amp;.*', tempSource)
 
 		if len(temp_url) > 0:
-			#http://www.youtube.com/api/timedtext?caps=asr&kind=asr&type=track&key=yttt1&expire=" + expire + "&sparams=caps%2Cexpire%2Cv&v=" + v + "&signature=" + sig + "&lang=en
 			temp_url = urllib.unquote(temp_url[0]).replace("\\", "")
 			temp_url = temp_url.split("&")
 			for item in temp_url: 
@@ -864,11 +863,6 @@ class YouTubeCore(object):
 			trans_url = "http://www.youtube.com/api/timedtext?caps=asr&kind=asr&type=track&key=yttt1&expire=" + expire + "&sparams=caps%2Cexpire%2Cv&v=" + videoid + "&signature=" + signature + "&lang=en"
 		else :
 			trans_url = ""
-
-		if trans_url == "":
-			import time
-			print self.__plugin__ + " subtitles3: " + repr(temp_url) + " - url: " + trans_url + " " + str(htmlSource.find("ttsurl"))
-			time.sleep(2)
 
 		if fmtSource:
 			if self.__dbg__:
