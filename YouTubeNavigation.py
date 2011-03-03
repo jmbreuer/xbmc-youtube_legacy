@@ -401,6 +401,16 @@ class YouTubeNavigation:
 
 	#================================== Plugin Actions =========================================
 
+	def addSubtitles(self, params = {}):
+		print "YouTube --> addSubtitles: " + params['trans_url']
+		if ( core.saveSubtitle(params) ):
+			print "YouTube --> Setting subtitles: " + params['trans_url']
+			xbmc.Player().setSubtitles('special://temp/'+ params['videoid'] + '.srt')
+			import time
+			time.sleep(5)
+			print "YouTube --> Setting subtitles2: " + params['trans_url']
+			xbmc.Player().setSubtitles('special://temp/'+ params['videoid'] + '.srt')
+
 	def playVideoById(self, params = {}):
 		result = self.getUserInput(self.__language__(30518), '')
 		params["videoid"] = result 
@@ -410,6 +420,7 @@ class YouTubeNavigation:
 	def playVideo(self, params = {}):
 		get = params.get
 		(video, status) = core.construct_video_url(params);
+		params['trans_url'] = video['trans_url']
 		if status != 200:
 			if self.__dbg__ : 
 				print self.__plugin__ + " construct video url failed contents of video item " + repr(video)
@@ -429,6 +440,7 @@ class YouTubeNavigation:
 			print self.__plugin__ + " - Playing video: " + video['Title'] + " - " + get('videoid') + " - " + video['video_url']
 
 		xbmcplugin.setResolvedUrl(handle=int(sys.argv[1]), succeeded=True, listitem=listitem)
+		self.addSubtitles(params);
 		
 		self.__settings__.setSetting( "vidstatus-" + video['videoid'], "7" )
 						

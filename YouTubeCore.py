@@ -400,6 +400,52 @@ class YouTubeCore(object):
 			print self.__plugin__ + " downloadVideo done"
 		return ( video, 200 )
 	
+	def saveSubtitle(self, params = {}):
+		import datetime, xbmc
+		#params['videoid'] = "XraeBDMm2PM"
+		#http://www.youtube.com/api/timedtext?type=list&v=XraeBDMm2PM
+		#http://www.youtube.com/api/timedtext?type=track&v=" + params['videoid'] +"&name=English&lang=en"
+		f = open("http://www.youtube.com/api/timedtext?type=list&v=" + params['videoid'], "r")
+		dom = parseString(f.read())
+		f.close()
+		entries = dom.getElementsByTagName("track")
+		name = "";
+		for node in entries:
+			if ( node.getAttribute("lang_code") == "de" ):
+				name = node.getAttribute("name").replace(" ", "%20")
+
+		if ( name == "" ):
+			# Get transcoded
+			if params['trans_url'] == "":
+				return False
+
+			print self.__plugin__ + " OPENING OPENING OPENING subtitles: " + params['trans_url']
+			f = open(params['trans_url'], "r")
+			dom = parseString(f.read())
+			f.close()
+		else:
+			f = open("http://www.youtube.com/api/timedtext?type=track&v=" + params['videoid'] +"&name=" + name + "&lang=de", "r")
+			dom = parseString(f.read())
+			f.close()
+		entries = dom.getElementsByTagName("text")
+		i = 0;
+		ret = ""
+		for node in entries:
+			text = node.firstChild.nodeValue
+			start = str(datetime.timedelta(seconds=float(node.getAttribute("start")))).replace("000", "")
+			if ( start.find(".") == -1 ):
+				start += ".000"
+			dur = str(datetime.timedelta(seconds=float(node.getAttribute("start")) + float(node.getAttribute("dur")))).replace("000", "")
+			if ( dur.find(".") == -1 ):
+				dur += ".000"
+			ret += start + " --> " + ( dur ) + "\n" + text + "\n\n"
+		path = os.path.join( xbmc.translatePath( "special://temp" ), params['videoid'] + ".srt" )
+		w = open(path, "w")
+		ret = ret.replace("&#39;", "'")
+		w.write(ret.encode('utf-8'))
+		w.close()
+		return True
+
 	def construct_video_url(self, params, encoding = 'utf-8', download = False):
 		get = params.get
 		if ( not get("videoid") ):
@@ -440,7 +486,7 @@ class YouTubeCore(object):
 					hd_quality = 0
 		
 		try:
-			(fmtSource, swfConfig, video['stream_map']) = self._extractVariables(videoid)
+			(fmtSource, swfConfig, video['stream_map'], video['trans_url']) = self._extractVariables(videoid)
 			
 			if ( not fmtSource ):
 				if self.__dbg__:
@@ -798,6 +844,32 @@ class YouTubeCore(object):
 		swf_url = False
 		fmtSource = re.findall('"fmt_url_map": "([^"]+)"', htmlSource);
 		
+		temp_url = re.findall('"ttsurl": "(.*)", "fexp".*', htmlSource)
+		print self.__plugin__ + " subtitles1: " + repr(temp_url);
+
+		if len(temp_url) == 0:
+			print self.__plugin__ + " subtitles2: " + repr(temp_url);
+			temp_url = re.findall('.*&amp;ttsurl=(.*)&amp;fexp.*', htmlSource)
+
+		if len(temp_url) > 0:
+			#http://www.youtube.com/api/timedtext?caps=asr&kind=asr&type=track&key=yttt1&expire=" + expire + "&sparams=caps%2Cexpire%2Cv&v=" + v + "&signature=" + sig + "&lang=en
+			temp_url = urllib.unquote(temp_url[0]).replace("\\", "")
+			temp_url = temp_url.split("&")
+			for item in temp_url: 
+				if ( item.find("expire") == 0 ):
+					expire = item[item.find("expire")+7:len(item)]
+				if ( item.find("signature") == 0 ):
+					signature = item[item.find("signature")+10:len(item)]
+
+			trans_url = "http://www.youtube.com/api/timedtext?caps=asr&kind=asr&type=track&key=yttt1&expire=" + expire + "&sparams=caps%2Cexpire%2Cv&v=" + videoid + "&signature=" + signature + "&lang=en"
+		else :
+			trans_url = ""
+
+		if trans_url == "":
+			import time
+			print self.__plugin__ + " subtitles3: " + repr(temp_url) + " - url: " + trans_url + " " + str(htmlSource.find("ttsurl"))
+			time.sleep(2)
+
 		if fmtSource:
 			if self.__dbg__:
 				print self.__plugin__ + " fmt_url_map found"
@@ -806,6 +878,7 @@ class YouTubeCore(object):
 			if self.__dbg__:
 				print self.__plugin__ + " fmt_url_map not found, searching for stream map"
 				
+
 			swfConfig = re.findall('var swfConfig = {"url": "(.*)", "min.*};', htmlSource)
 			if len(swfConfig) > 0:
 				swf_url = swfConfig[0].replace("\\", "")
@@ -819,7 +892,7 @@ class YouTubeCore(object):
 		if self.__dbg__:
 			print self.__plugin__ + " extractVariables done"
 				
-		return (fmtSource, swf_url, stream_map)
+		return (fmtSource, swf_url, stream_map, trans_url)
 
 	def _getAuth(self):
 		if self.__dbg__:
