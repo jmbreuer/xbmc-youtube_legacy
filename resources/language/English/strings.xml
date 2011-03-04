@@ -122,8 +122,18 @@
     <string id="30271">Video Thumbnails</string>
     <string id="30272">Thumbnails Everywhere</string>
     <string id="30273">XBMC Default</string>
-	<string id="30274">Show Downloads</string>
-	
+    <string id="30274">Show Downloads</string>
+     <string id="30275">Subtitles</string>
+     <string id="30276">Subtitle Language</string>
+     <string id="30277">Off</string>
+     <string id="30278">en</string>
+     <string id="30279">es</string>
+     <string id="30280">de</string>
+     <string id="30281">fr</string>
+     <string id="30282">it</string>
+     <string id="30283">ja</string>
+     <string id="30284">Transcode</string>
+
     <!-- Menu strings -->
     <string id="30500">Clear refinements</string>
     <string id="30501">Download video</string>

@@ -406,22 +406,40 @@ class YouTubeCore(object):
 		dom = parseString(f.read())
 		f.close()
 		entries = dom.getElementsByTagName("track")
-		name = "";
+		name = ""
+		ename = ""
+		lang_code = [ self.__language__( 30277 ), self.__language__( 30278  ), self.__language__( 30279 ), self.__language__( 30280 ), self.__language__( 30281 ), self.__language__( 30282 ), self.__language__( 30283 )][int(self.__settings__.getSetting("lang_code"))]
 		for node in entries:
-			if ( node.getAttribute("lang_code") == "de" ):
+			if node.getAttribute("lang_code") == lang_code:
 				name = node.getAttribute("name").replace(" ", "%20")
+			if node.getAttribute("lang_code") == "en":
+				ename = node.getAttribute("name").replace(" ", "%20")
+		if self.__dbg__:
+			print self.__plugin__ + " lang_code: " + lang_code + " - name: " + name + " - ename: " + ename + " - transcode: " + self.__settings__.getSetting("transcode")
 
-		if ( name == "" ):
-			# Get transcoded
-			if params['trans_url'] == "":
+		if name == "" and ename == "":
+			if self.__settings__.getSetting("transcode") == "false":
 				return False
-
-			print self.__plugin__ + " OPENING OPENING OPENING subtitles: " + params['trans_url']
+			if params['trans_url'] == "":
+				if self.__dbg__:
+					print self.__plugin__ + " Neither subtitles nor transcode available"
+				return False
+			
+			if self.__dbg__:
+				print self.__plugin__ + " Getting transcription: " + params['trans_url']
 			f = open(params['trans_url'], "r")
 			dom = parseString(f.read())
 			f.close()
 		else:
-			f = open("http://www.youtube.com/api/timedtext?type=track&v=" + params['videoid'] +"&name=" + name + "&lang=de", "r")
+			if name == "":
+				if self.__dbg__:
+					print self.__plugin__ + " Getting default subtitles"
+				f = open("http://www.youtube.com/api/timedtext?type=track&v=" + params['videoid'] +"&name=" + ename + "&lang=en", "r")
+			else:
+				if self.__dbg__:
+					print self.__plugin__ + " Getting " + name + " subtitles"
+				f = open("http://www.youtube.com/api/timedtext?type=track&v=" + params['videoid'] +"&name=" + name + "&lang=" + lang_code, "r")
+
 			dom = parseString(f.read())
 			f.close()
 		entries = dom.getElementsByTagName("text")
@@ -848,18 +866,20 @@ class YouTubeCore(object):
 
 		temp_url = re.findall('.*ttsurl=(.*)&amp;.*', tempSource)
 
+		trans_url = ""
 		if len(temp_url) > 0:
 			temp_url = urllib.unquote(temp_url[0]).replace("\\", "")
 			temp_url = temp_url.split("&")
+			expire = ""
+			signature = ""
+
 			for item in temp_url: 
 				if ( item.find("expire") == 0 ):
 					expire = item[item.find("expire")+7:len(item)]
 				if ( item.find("signature") == 0 ):
 					signature = item[item.find("signature")+10:len(item)]
-
-			trans_url = "http://www.youtube.com/api/timedtext?caps=asr&kind=asr&type=track&key=yttt1&expire=" + expire + "&sparams=caps%2Cexpire%2Cv&v=" + videoid + "&signature=" + signature + "&lang=en"
-		else :
-			trans_url = ""
+			if expire != "" and signature != "":
+				trans_url = "http://www.youtube.com/api/timedtext?caps=asr&kind=asr&type=track&key=yttt1&expire=" + expire + "&sparams=caps%2Cexpire%2Cv&v=" + videoid + "&signature=" + signature + "&lang=en"
 
 		if fmtSource:
 			if self.__dbg__:
