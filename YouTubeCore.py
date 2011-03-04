@@ -399,9 +399,6 @@ class YouTubeCore(object):
 	
 	def saveSubtitle(self, params = {}):
 		import datetime, xbmc
-		#params['videoid'] = "XraeBDMm2PM"
-		#http://www.youtube.com/api/timedtext?type=list&v=XraeBDMm2PM
-		#http://www.youtube.com/api/timedtext?type=track&v=" + params['videoid'] +"&name=English&lang=en"
 		f = open("http://www.youtube.com/api/timedtext?type=list&v=" + params['videoid'], "r")
 		dom = parseString(f.read())
 		f.close()
@@ -414,30 +411,28 @@ class YouTubeCore(object):
 				name = node.getAttribute("name").replace(" ", "%20")
 			if node.getAttribute("lang_code") == "en":
 				ename = node.getAttribute("name").replace(" ", "%20")
+
 		if self.__dbg__:
-			print self.__plugin__ + " lang_code: " + lang_code + " - name: " + name + " - ename: " + ename + " - transcode: " + self.__settings__.getSetting("transcode")
+			print self.__plugin__ + " saveSubtitle: lang_code: " + lang_code + " - name: " + name + " - ename: " + ename + " - transcode: " + self.__settings__.getSetting("transcode") + " - trans_url: " + params['trans_url']
 
 		if name == "" and ename == "":
-			if self.__settings__.getSetting("transcode") == "false":
+			if params['trans_url'] == "" or self.__settings__.getSetting("transcode") == "false":
 				return False
-			if params['trans_url'] == "":
-				if self.__dbg__:
-					print self.__plugin__ + " Neither subtitles nor transcode available"
-				return False
-			
+
 			if self.__dbg__:
-				print self.__plugin__ + " Getting transcription: " + params['trans_url']
+				print self.__plugin__ + " saveSubtitle: Getting transcription: " + params['trans_url']
+
 			f = open(params['trans_url'], "r")
 			dom = parseString(f.read())
 			f.close()
 		else:
 			if name == "":
 				if self.__dbg__:
-					print self.__plugin__ + " Getting default subtitles"
+					print self.__plugin__ + " saveSubtitle: Getting default subtitles"
 				f = open("http://www.youtube.com/api/timedtext?type=track&v=" + params['videoid'] +"&name=" + ename + "&lang=en", "r")
 			else:
 				if self.__dbg__:
-					print self.__plugin__ + " Getting " + name + " subtitles"
+					print self.__plugin__ + " saveSubtitle: Getting " + name + " subtitles"
 				f = open("http://www.youtube.com/api/timedtext?type=track&v=" + params['videoid'] +"&name=" + name + "&lang=" + lang_code, "r")
 
 			dom = parseString(f.read())
