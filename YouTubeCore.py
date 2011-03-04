@@ -88,10 +88,7 @@ class YouTubeCore(object):
 			return ( "", 0 )
 
 		url = urllib2.Request("https://www.google.com/youtube/accounts/ClientLogin")
-
 		url.add_header('Content-Type', 'application/x-www-form-urlencoded')
-		url.add_header('GData-Version', '2')
-		
 		data = urllib.urlencode({'Email': uname, 'Passwd': passwd, 'service': 'youtube', 'source': 'YouTube plugin'})
 		
 		try:
@@ -790,7 +787,7 @@ class YouTubeCore(object):
 			# 401 (Not authorized) - A 401 response code indicates that a request did not contain an Authorization header, that the format of the Authorization header was invalid, or that the authentication token supplied in the header was invalid.
 			elif ( err.find("401") > -1 ):
 				# If login credentials are given, try again.
-				if ( self.__settings__.getSetting( "username" ) == "" or self.__settings__.getSetting( "user_password" ) == "" ):
+				if ( self.__settings__.getSetting( "username" ) != "" and self.__settings__.getSetting( "user_password" ) != "" ):
 					if self.__dbg__:
 						print self.__plugin__ + " _fetchPage trying again with login "
 
