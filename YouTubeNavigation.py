@@ -267,12 +267,13 @@ class YouTubeNavigation:
 			item_add_user = {'Title':self.__language__( 30024 ), 'path':get("path"), 'login':"true", 'thumbnail':"add_user", 'action':"add_contact"}
 			self.addFolderListItem(params, item_add_user,  1)
 						
-		if ( get('feed') == 'subscriptions' ) :
-			item = {"Title":self.__language__( 30004 ), "path":"/root/subscriptions/new", "thumbnail":"newsubscriptions", "login":"true", "feed":"newsubscriptions"}
-			if (get("contact")):
-				item["contact"] = get("contact")
-			
-			self.addFolderListItem(params, item)
+		if ( get('feed') == 'subscriptions' ):
+			if (not get("page")):
+				item = {"Title":self.__language__( 30004 ), "path":"/root/subscriptions/new", "thumbnail":"newsubscriptions", "login":"true", "feed":"newsubscriptions"}
+				if (get("contact")):
+					item["contact"] = get("contact")
+				
+				self.addFolderListItem(params, item)
 							
 		self.parseFolderList(params, result)
 								
