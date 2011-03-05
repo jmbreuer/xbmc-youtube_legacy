@@ -27,6 +27,7 @@ import YouTubeScraperCore
 
 core = YouTubeCore.YouTubeCore();
 scraper = YouTubeScraperCore.YouTubeScraperCore();
+playlist = YouTubePlaylistControl.YouTubePlaylistControl();
 	
 class YouTubeNavigation:	 
 	__settings__ = sys.modules[ "__main__" ].__settings__
@@ -205,6 +206,8 @@ class YouTubeNavigation:
 			self.playVideo(params)
 		if (get("action") == "change_subscription_view"):
 			self.changeSubscriptionView(params)
+		if (get("action") == "play_all"):
+			playlist.playAll(params)
 
 	def listOptionFolder(self, params = {}):
 		get = params.get

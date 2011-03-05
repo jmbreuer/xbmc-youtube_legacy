@@ -24,7 +24,8 @@ import xbmcplugin
 import urllib
 import YouTubeCore
 
-core = YouTubeCore.YouTubeCore();
+core = YouTubeCore.YouTubeCore()
+scraper = YouTubeScraperCore.YouTubeScraperCore()
 
 class YouTubePlaylistControl:
 	__settings__ = sys.modules[ "__main__" ].__settings__
@@ -37,9 +38,46 @@ class YouTubePlaylistControl:
 	
 	def playAll(self, params={}):
 		get = params.get
-		
+
+		result = []
+		# fetch the video entries
 		if get("playlistId"):
-			self.queuePlayList(params)
+			result = self.getPlayList(params)
+		elif get("search_disco"):
+			result = self.getDiscoSearch(params)
+		elif get("feed") == "favorites":
+			result = self.getFavorites(params)
+		else:
+			return
+
+		player = xbmc.Player()
+		if (player.isPlaying()):
+			player.stop()
+		
+		playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
+		playlist.clear()
+		
+		video_url = "%s?path=/root&action=play_video&videoid=%s"  
+		# queue all entries
+		for entry in result:
+			video = entry.get
+			listitem=xbmcgui.ListItem(label=video("Title"), iconImage=video("thumbnail"), thumbnailImage=video("thumbnail"))
+			listitem.setProperty('IsPlayable', 'true')
+			listitem.setProperty( "Video", "true" )
+			listitem.setInfo(type='Video', infoLabels=entry)
+			playlist.add(video_url % (sys.argv[0], video("videoid") ), listitem)
 			
-	def queuePlayList(self, params = {}):
+		if (get("shuffle")):
+			playlist.shuffle()
+			
+		player.playnext()
+		
+	def getPlayList(self, params = {}):
+		mom = "kso"
+	
+	def getDiscoSearch(self, params = {}):
+		fko = "kso"
+		
+	def getFavorites(self, params = {}):
+		fkdo = "skdfj"
 		
