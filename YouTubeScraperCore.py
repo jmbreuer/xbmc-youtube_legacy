@@ -40,9 +40,12 @@ class YouTubeScraperCore:
 	urls['disco_mix_list'] = "http://www.youtube.com/watch?v=%s&feature=disco&playnext=1&list=%s"
 	urls['main'] = "http://www.youtube.com"
 	urls['trailers'] = "http://www.youtube.com/trailers?s=tr"
+	urls['game_trailers'] = "http://www.youtube.com/trailers?s=gtcs"
 	urls['current_trailers'] = "http://www.youtube.com/trailers?s=trit&p=%s&hl=en"
 	urls['upcoming_trailers'] = "http://www.youtube.com/trailers?s=tros&p=%s&hl=en"
 	urls['popular_trailers'] = "http://www.youtube.com/trailers?s=trp&p=%s&hl=en"
+	urls['popular_game_trailers'] = "http://www.youtube.com/trailers?s=gtp&p=%s&hl=en"
+	urls['upcoming_game_trailers'] = "http://www.youtube.com/trailers?s=gtcs&p=%s&hl=en"
 	urls['recommended'] = "http://www.youtube.com/videos?r=1"
 	urls['movies_list'] = ""
 
@@ -631,7 +634,10 @@ class YouTubeScraperCore:
 				url = self.urls[get("scraper")]
 				url = url % page
 			else :
-				url = self.urls["trailers"]
+				if (get("scraper") == "latest_trailers"):					
+					url = self.urls["trailers"]
+				else:
+					url = self.urls["game_trailers"]
 				
 		return url
 	
