@@ -16,8 +16,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, urllib, urllib2, re, os, cookielib, string
+import sys, urllib, urllib2, re, os, cookielib, string, os.path
 from xml.dom.minidom import parseString
+from DialogAddonScan import AddonScan, xbmcguiWindowError
 
 # ERRORCODES:
 # 0 = Ignore
@@ -352,20 +353,25 @@ class YouTubeCore(object):
 					if link.item(i).getAttribute('rel') == 'edit':
 						obj = link.item(i).getAttribute('href')
 						video['editid'] = obj[obj.rfind('/')+1:]
-										
-			video['next'] = next
-
+			
 			playobjects.append(video);
+			
+		if len(playobjects) > 0:
+			playobjects[len(playobjects) - 1]['next'] = next
 			
 		if self.__dbg__:
 			print self.__plugin__ + " playlist done"
 				
 		return ( playobjects, 200 );
 	
-	def downloadVideo(self, video):
+	def downloadVideo(self, video, params = {}):
+		get = params.get
+		item = video.get
+		
 		if self.__dbg__:
 			print self.__plugin__ + " downloadVideo : " + video['Title']
-			
+		bytes_so_far = 0
+		chunk_size = 8192
 		path = self.__settings__.getSetting( "downloadPath" )
 		try:
 			url = urllib2.Request(video['video_url'])
@@ -374,14 +380,32 @@ class YouTubeCore(object):
 			
 			filename_incomplete = "%s/%s-incomplete.mp4" % ( path, ''.join(c for c in video['Title'] if c in valid_chars) )
 			filename_complete = "%s/%s.mp4" % ( path, ''.join(c for c in video['Title'] if c in valid_chars) )
+						
 			file = open(filename_incomplete, "wb")
 			con = urllib2.urlopen(url);
-			file.write(con.read())
-			con.close()
+			total_size = 8192 * 25
 			
+			if con.info().getheader('Content-Length').strip():			
+				total_size = int(con.info().getheader('Content-Length').strip())
+			
+			chunk_size = int(total_size) / 25
+			
+			scan = AddonScan()
+			scan.create( line1=self.__language__(30624), line2=item("Title", "Unknown Title"))
+			while 1:
+				chunk = con.read(chunk_size)
+				bytes_so_far += len(chunk)
+				file.write(chunk)
+				scan.update(percent1= (bytes_so_far / total_size * 100))
+		 		if not chunk:
+		 			break
+		 	
+			con.close()
+			scan.close()
 			os.rename(filename_incomplete, filename_complete)
 			
 			self.__settings__.setSetting( "vidstatus-" + video['videoid'], "1" )
+					
 		except urllib2.HTTPError, e:
 			if self.__dbg__:
 				print self.__plugin__ + " downloadVideo except: " + str(e)
@@ -1289,6 +1313,9 @@ class YouTubeCore(object):
 		( result, status ) = self._fetchPage("http://gdata.youtube.com/feeds/api/videos/" + videoid, api = True)
 
 		if status == 200:
+			if self.__dbg__:
+				print self.__plugin__ + "_get_details youtube Page result: " + repr(result)
+				
 			result = self._getvideoinfo(result)
 		
 			if len(result) == 0:
