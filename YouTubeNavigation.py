@@ -1044,6 +1044,13 @@ class YouTubeNavigation:
 		if (item("next","false") == "true"):
 			return cm
 		
+		if ( item("feed") == "favorites"  or get("feed") == "playlists" or item("feed") == "uploads" or item("feed") == "newsubscriptions" or item("action") == "search_disco"):
+			if (item("feed") == "favorites" or item("feed") == "newsubscriptions"):
+				cm.append ( (self.__language__(30530), "XBMC.RunPlugin(%s?path=%s&action=play_all&feed=%s&)" % ( sys.argv[0], item("path"), item("feed") ) ) )
+			if (item("action") == "search_disco"):
+				cm.append( (self.__language__( 30530 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&search_disco=%s&)" % ( sys.argv[0], item("path"), item("search") ) ) )
+			cm.append( ( self.__language__( 30507 ), "XBMC.Action(Queue)" ) )
+		
 		if (item("action") == "search"):
 			cm.append( ( self.__language__( 30515 ), 'XBMC.Container.Update(%s?path=%s&action=edit_search&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
 			cm.append( ( self.__language__( 30505 ), 'XBMC.RunPlugin(%s?path=%s&action=refine_user&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
@@ -1056,14 +1063,11 @@ class YouTubeNavigation:
 			if item("Title") in searches:
 				cm.append( ( self.__language__( 30500 ), 'XBMC.RunPlugin(%s?path=%s&action=delete_refinements&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
 		
-		if (item("action") == "search_disco"):
-			cm.append( (self.__language__( 30530 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&search_disco=%s&)" % ( sys.argv[0], item("path"), item("search") ) ) )
-			if not get("scraper"):
-				cm.append( ( self.__language__( 30524 ), 'XBMC.Container.Update(%s?path=%s&action=edit_disco&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
-				cm.append( ( self.__language__( 30525 ), 'XBMC.RunPlugin(%s?path=%s&action=delete_disco&delete=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )								
+		if item("action") == "search_disco" and not get("scraper"):			
+			cm.append( ( self.__language__( 30524 ), 'XBMC.Container.Update(%s?path=%s&action=edit_disco&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
+			cm.append( ( self.__language__( 30525 ), 'XBMC.RunPlugin(%s?path=%s&action=delete_disco&delete=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )								
 		
 		if (item("view_mode")):
-			print "subscription view mode found"
 			cm_url = 'XBMC.RunPlugin(%s?path=%s&channel=%s&action=change_subscription_view&view_mode=%s&' % ( sys.argv[0], item("path"), item("channel"), "%s")
 			if (item("external")):
 				cm_url += "external=true&contact=" + get("contact") + "&"
@@ -1092,10 +1096,7 @@ class YouTubeNavigation:
 					cm.append( (self.__language__(30026), 'XBMC.RunPlugin(%s?path=%s&action=add_contact&)' % ( sys.argv[0], item("path") ) ) )
 				else:
 					cm.append( (self.__language__(30025), 'XBMC.RunPlugin(%s?path=%s&action=remove_contact&contact=%s&)' % ( sys.argv[0], item("path"), item("Title") ) ) )
-		
-		if ( item("feed") == "favorites"  or get("feed") == "playlists" or item("feed") == "uploads" or item("feed") == "newsubscriptions" or (item("action") == "search_disco" and not get("scraper"))):
-			cm.append( ( self.__language__( 30507 ), "XBMC.Action(Queue)" ) )
-		
+				
 		cm.append( ( self.__language__( 30527 ), "XBMC.ActivateWindow(VideoPlaylist)"))
 		return cm
 

@@ -50,6 +50,8 @@ class YouTubePlaylistControl:
 			result = self.getDiscoSearch(params)
 		elif get("feed") == "favorites":
 			result = self.getFavorites(params)
+		elif get("feed") == "newsubscriptions":
+			result = self.getNewSubscriptions(params)
 		else:
 			return
 
@@ -91,4 +93,7 @@ class YouTubePlaylistControl:
 		
 	def getFavorites(self, params = {}):
 		fkdo = "skdfj"
+		
+	def getNewSubscriptions(self, params = {}):
+		fds = "sodf"
 		
