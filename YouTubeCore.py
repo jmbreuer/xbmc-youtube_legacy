@@ -230,6 +230,50 @@ class YouTubeCore(object):
 				print self.__plugin__ + " feeds done with no results"
 			return (self.__language__(30602), 303)
 	
+	def listAll(self, feed, params ={}):
+		get = params.get
+		
+		result = ""
+		auth = self._getAuth()
+		
+		if ( not auth ):
+			if self.__dbg__:
+				print self.__plugin__ + " playlists auth wasn't set "
+			return ( self.__language__(30609) , 303 )
+				
+		index = 1
+		url = feed + "start-index=" + str(index) + "&max-results=" + repr(50)
+		url = url.replace(" ", "+")
+		
+		( result, status ) = self._fetchPage(url, auth = False)
+				
+		ytobjects = self._getvideoinfo(result)
+		
+		if len(ytobjects) == 0:
+			return ([], 303)
+		
+		next = ytobjects[len(ytobjects)-1].get("next","false") 
+		
+		while next == "true":
+			index += 50
+			url = feed + "start-index=" + str(index) + "&max-results=" + repr(50)
+			url = url.replace(" ", "+")
+			(result, status) = self._fetchPage(url, auth = False)
+			if status != 200:
+				break
+			temp_objects = self._getvideoinfo(result)
+			next = temp_objects[len(temp_objects)-1].get("next","false")
+			ytobjects += temp_objects
+				
+		if len(ytobjects) > 0:
+			if self.__dbg__:
+				print self.__plugin__ + " list done :" + str(len(ytobjects))
+			return (ytobjects, 200)
+		else:
+			if self.__dbg__:
+				print self.__plugin__ + " list done with no results"
+			return (self.__language__(30602), 303)
+	
 	def list(self, feed, params ={}):
 		get = params.get
 		page = get("page","0")

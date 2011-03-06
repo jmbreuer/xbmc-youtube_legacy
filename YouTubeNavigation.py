@@ -1046,7 +1046,9 @@ class YouTubeNavigation:
 		
 		if ( item("feed") == "favorites"  or get("feed") == "playlists" or item("feed") == "uploads" or item("feed") == "newsubscriptions" or item("action") == "search_disco"):
 			if (item("feed") == "favorites" or item("feed") == "newsubscriptions"):
-				cm.append ( (self.__language__(30530), "XBMC.RunPlugin(%s?path=%s&action=play_all&feed=%s&)" % ( sys.argv[0], item("path"), item("feed") ) ) )
+				cm.append ( (self.__language__(30530), "XBMC.RunPlugin(%s?path=%s&action=play_all&feed=%s&contact=%s&)" % ( sys.argv[0], item("path"), item("feed"), self.__settings__.getSetting("nick") ) ) )
+			if (get("feed") == "playlists" ):
+				cm.append ( (self.__language__(30530), "XBMC.RunPlugin(%s?path=%s&action=play_all&playlistId=%s&)" % ( sys.argv[0], item("path"), item("playlistId") ) ) )
 			if (item("action") == "search_disco"):
 				cm.append( (self.__language__( 30530 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&search_disco=%s&)" % ( sys.argv[0], item("path"), item("search") ) ) )
 			cm.append( ( self.__language__( 30507 ), "XBMC.Action(Queue)" ) )

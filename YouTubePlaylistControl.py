@@ -35,12 +35,14 @@ class YouTubePlaylistControl:
 	__dbg__ = sys.modules[ "__main__" ].__dbg__
 	
 	urls = {};
-	urls['playlists'] = "http://gdata.youtube.com/feeds/api/users/%s/playlists"
+	urls['playlists'] = "http://gdata.youtube.com/feeds/api/playlists/%s?"
+	urls['favorites'] = "http://gdata.youtube.com/feeds/api/users/%s/favorites?"
+	urls['newsubscriptions'] = "http://gdata.youtube.com/feeds/api/users/%s/newsubscriptionvideos?";
 	
 	
 	def playAll(self, params={}):
 		get = params.get
-
+		params["fetch_all"] = "true"
 		result = []
 		# fetch the video entries
 		if get("playlistId"):
@@ -58,7 +60,6 @@ class YouTubePlaylistControl:
 		if len(result) == 0:
 			return
 		
-		print self.__plugin__ + " play_all found items: " + repr(result)
 		player = xbmc.Player()
 		if (player.isPlaying()):
 			player.stop()
@@ -82,18 +83,27 @@ class YouTubePlaylistControl:
 		xbmc.executebuiltin('playlist.playoffset(video , 0)')
 		
 	def getPlayList(self, params = {}):
-		mom = "kso"
+		get = params.get
+		feed = self.urls["playlists"] % get("playlistId")
+		(result , status) = core.listAll(feed, params)
+		return result
 	
 	def getDiscoSearch(self, params = {}):
-		params["fetch_all"] = "true"
-		
 		(result, status) = scraper.searchDisco(params)
-		
 		return result
 		
 	def getFavorites(self, params = {}):
-		fkdo = "skdfj"
+		get = params.get
+		if not get("contact"):
+			return
+		feed = self.urls["favorites"] % get("contact") 
+		(result , status) = core.listAll(feed, params)
+		return result
 		
 	def getNewSubscriptions(self, params = {}):
-		fds = "sodf"
-		
+		get = params.get
+		if not get("contact"):
+			return
+		feed = self.urls["newsubscriptions"] % get("contact")
+		(result , status) = core.listAll(feed, params)
+		return result
