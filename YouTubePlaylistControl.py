@@ -23,6 +23,7 @@ import xbmcgui
 import xbmcplugin
 import urllib
 import YouTubeCore
+import YouTubeScraperCore
 
 core = YouTubeCore.YouTubeCore()
 scraper = YouTubeScraperCore.YouTubeScraperCore()
@@ -34,7 +35,8 @@ class YouTubePlaylistControl:
 	__dbg__ = sys.modules[ "__main__" ].__dbg__
 	
 	urls = {};
-	urls['playlists'] = "http://gdata.youtube.com/feeds/api/users/%s/playlists"	
+	urls['playlists'] = "http://gdata.youtube.com/feeds/api/users/%s/playlists"
+	
 	
 	def playAll(self, params={}):
 		get = params.get
@@ -44,12 +46,17 @@ class YouTubePlaylistControl:
 		if get("playlistId"):
 			result = self.getPlayList(params)
 		elif get("search_disco"):
+			params["search"] = params["search_disco"]
 			result = self.getDiscoSearch(params)
 		elif get("feed") == "favorites":
 			result = self.getFavorites(params)
 		else:
 			return
 
+		if len(result) == 0:
+			return
+		
+		print self.__plugin__ + " play_all found items: " + repr(result)
 		player = xbmc.Player()
 		if (player.isPlaying()):
 			player.stop()
@@ -69,14 +76,18 @@ class YouTubePlaylistControl:
 			
 		if (get("shuffle")):
 			playlist.shuffle()
-			
-		player.playnext()
+
+		xbmc.executebuiltin('playlist.playoffset(video , 0)')
 		
 	def getPlayList(self, params = {}):
 		mom = "kso"
 	
 	def getDiscoSearch(self, params = {}):
-		fko = "kso"
+		params["fetch_all"] = "true"
+		
+		(result, status) = scraper.searchDisco(params)
+		
+		return result
 		
 	def getFavorites(self, params = {}):
 		fkdo = "skdfj"

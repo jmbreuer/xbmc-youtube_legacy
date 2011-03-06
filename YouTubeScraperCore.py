@@ -223,6 +223,9 @@ class YouTubeScraperCore:
 		
 		subitems = videos[(per_page * page):(per_page * (page + 1))]
 		
+		if (get("fetch_all") == "true"):
+			subitems = videos
+		
 		if (result == 200):
 			( ytobjects, status ) = self.core._get_batch_details(subitems)
 		

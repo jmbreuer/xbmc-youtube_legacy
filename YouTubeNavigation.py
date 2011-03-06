@@ -24,6 +24,7 @@ import xbmcplugin
 import urllib
 import YouTubeCore
 import YouTubeScraperCore
+import YouTubePlaylistControl
 
 core = YouTubeCore.YouTubeCore();
 scraper = YouTubeScraperCore.YouTubeScraperCore();
@@ -1055,9 +1056,11 @@ class YouTubeNavigation:
 			if item("Title") in searches:
 				cm.append( ( self.__language__( 30500 ), 'XBMC.RunPlugin(%s?path=%s&action=delete_refinements&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
 		
-		if (item("action") == "search_disco" and not get("scraper")):
-			cm.append( ( self.__language__( 30524 ), 'XBMC.Container.Update(%s?path=%s&action=edit_disco&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
-			cm.append( ( self.__language__( 30525 ), 'XBMC.RunPlugin(%s?path=%s&action=delete_disco&delete=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )								
+		if (item("action") == "search_disco"):
+			cm.append( (self.__language__( 30530 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&search_disco=%s&)" % ( sys.argv[0], item("path"), item("search") ) ) )
+			if not get("scraper"):
+				cm.append( ( self.__language__( 30524 ), 'XBMC.Container.Update(%s?path=%s&action=edit_disco&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
+				cm.append( ( self.__language__( 30525 ), 'XBMC.RunPlugin(%s?path=%s&action=delete_disco&delete=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )								
 		
 		if (item("view_mode")):
 			print "subscription view mode found"
