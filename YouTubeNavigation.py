@@ -447,7 +447,9 @@ class YouTubeNavigation:
 			print self.__plugin__ + " - Playing video: " + video['Title'] + " - " + get('videoid') + " - " + video['video_url']
 
 		xbmcplugin.setResolvedUrl(handle=int(sys.argv[1]), succeeded=True, listitem=listitem)
-		self.addSubtitles(video)
+
+		if self.__settings__.getSetting("lang_code") != "0":
+			self.addSubtitles(video)
 		
 		self.__settings__.setSetting( "vidstatus-" + video['videoid'], "7" )
 						
