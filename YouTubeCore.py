@@ -18,7 +18,6 @@
 
 import sys, urllib, urllib2, re, os, cookielib, string, os.path
 from xml.dom.minidom import parseString
-from DialogAddonScan import AddonScan, xbmcguiWindowError
 
 # ERRORCODES:
 # 0 = Ignore
@@ -35,7 +34,7 @@ class YouTubeCore(object):
 	
 	APIKEY = "AI39si6hWF7uOkKh4B9OEAX-gK337xbwR9Vax-cdeF9CF9iNAcQftT8NVhEXaORRLHAmHxj6GjM-Prw04odK4FxACFfKkiH9lg";
 	USERAGENT = "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-GB; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8"
-
+	VALID_CHARS = "-_.() %s%s" % (string.ascii_letters, string.digits)
 	#===============================================================================
 	#
 	# External functions called by YouTubeNavigation.py
@@ -420,10 +419,9 @@ class YouTubeCore(object):
 		try:
 			url = urllib2.Request(video['video_url'])
 			url.add_header('User-Agent', self.USERAGENT);
-			valid_chars = "-_.() %s%s" % (string.ascii_letters, string.digits)
 			
-			filename_incomplete = "%s/%s-incomplete.mp4" % ( path, ''.join(c for c in video['Title'] if c in valid_chars) )
-			filename_complete = "%s/%s.mp4" % ( path, ''.join(c for c in video['Title'] if c in valid_chars) )
+			filename_incomplete = "%s/%s-[%s]incomplete.mp4" % ( path, ''.join(c for c in video['Title'] if c in self.VALID_CHARS), video["videoid"] )
+			filename_complete = "%s/%s-[%s].mp4" % ( path, ''.join(c for c in video['Title'] if c in self.VALID_CHARS), video["videoid"])
 						
 			file = open(filename_incomplete, "wb")
 			con = urllib2.urlopen(url);
@@ -434,18 +432,14 @@ class YouTubeCore(object):
 			
 			chunk_size = int(total_size) / 25
 			
-			scan = AddonScan()
-			scan.create( line1=self.__language__(30624), line2=item("Title", "Unknown Title"))
 			while 1:
 				chunk = con.read(chunk_size)
 				bytes_so_far += len(chunk)
 				file.write(chunk)
-				scan.update(percent1= (bytes_so_far / total_size * 100))
 		 		if not chunk:
 		 			break
 		 	
 			con.close()
-			scan.close()
 			os.rename(filename_incomplete, filename_complete)
 			
 			self.__settings__.setSetting( "vidstatus-" + video['videoid'], "1" )
@@ -545,7 +539,16 @@ class YouTubeCore(object):
 			if self.__dbg__:
 				print self.__plugin__ + " construct_video_url, got apierror: " + video['apierror']
 			return (video['apierror'], 303)
-
+		
+		#Check if file has been downloaded locally and use that as a source instead
+		path = self.__settings__.getSetting( "downloadPath" )
+		path = "%s%s-[%s].mp4" % (path, ''.join(c for c in video['Title'] if c in self.VALID_CHARS), video["videoid"])
+		if os.path.exists(path):
+			video['video_url'] = path
+			video['local'] = "true"
+			print "sokokok"
+			return (video, 200)
+		
 		if download:
 			hd_quality = int(self.__settings__.getSetting( "hd_videos_download" ))
 			if ( hd_quality == 0 ):

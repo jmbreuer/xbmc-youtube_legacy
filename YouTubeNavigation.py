@@ -433,11 +433,12 @@ class YouTubeNavigation:
 				print self.__plugin__ + " construct video url failed contents of video item " + repr(video)
 			self.errorHandling(self.__language__(30603), video, status)
 			return False
-
-		if ( 'swf_config' in video ):
-			video['video_url'] += " swfurl=%s swfvfy=1" % video['swf_config']
+		
+		if ('local' not in video):
+			if ( 'swf_config' in video ):
+				video['video_url'] += " swfurl=%s swfvfy=1" % video['swf_config']
 			
-		video['video_url'] += " | " + core.USERAGENT
+			video['video_url'] += " | " + core.USERAGENT
 		
 		listitem=xbmcgui.ListItem(label=video['Title'], iconImage=video['thumbnail'], thumbnailImage=video['thumbnail'], path=video['video_url']);
 		
@@ -448,7 +449,7 @@ class YouTubeNavigation:
 
 		xbmcplugin.setResolvedUrl(handle=int(sys.argv[1]), succeeded=True, listitem=listitem)
 
-		if self.__settings__.getSetting("lang_code") != "0":
+		if self.__settings__.getSetting("lang_code") != "0" and not video["local"]:
 			self.addSubtitles(video)
 		
 		self.__settings__.setSetting( "vidstatus-" + video['videoid'], "7" )
