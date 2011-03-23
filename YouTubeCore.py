@@ -593,6 +593,7 @@ class YouTubeCore(object):
 					if (len(fmt_url) > 7 and fmt_url.find(":\\/\\/") > 0):
 						if (fmt_url.rfind(',') > fmt_url.rfind('\/id\/')):
 							final_url = fmt_url[:fmt_url.rfind(',')]
+							final_url = final_url.replace('\u0026','&')
 							if (final_url.rfind('\/itag\/') > 0):
 								quality = final_url[final_url.rfind('\/itag\/') + 8:]
 							else :
@@ -600,6 +601,7 @@ class YouTubeCore(object):
 							links[int(quality)] = final_url.replace('\/','/')
 						else :
 							final_url = fmt_url
+							final_url = final_url.replace('\u0026','&')
 							if (final_url.rfind('\/itag\/') > 0):
 								quality = final_url[final_url.rfind('\/itag\/') + 8:]
 							else :
