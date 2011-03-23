@@ -449,7 +449,7 @@ class YouTubeNavigation:
 
 		xbmcplugin.setResolvedUrl(handle=int(sys.argv[1]), succeeded=True, listitem=listitem)
 
-		if self.__settings__.getSetting("lang_code") != "0" and not video["local"]:
+		if self.__settings__.getSetting("lang_code") != "0" and "local" not in video:
 			self.addSubtitles(video)
 		
 		self.__settings__.setSetting( "vidstatus-" + video['videoid'], "7" )
