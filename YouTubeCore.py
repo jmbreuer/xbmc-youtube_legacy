@@ -613,6 +613,7 @@ class YouTubeCore(object):
 					if (len(fmt_url) > 7):
 						if (fmt_url.rfind(',') > fmt_url.rfind('&id=')): 
 							final_url = fmt_url[:fmt_url.rfind(',')]
+							final_url = final_url.replace('\u0026','&')
 							if (final_url.rfind('itag=') > 0):
 								quality = final_url[final_url.rfind('itag=') + 5:]
 								quality = quality[:quality.find('&')]
