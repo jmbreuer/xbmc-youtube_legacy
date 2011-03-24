@@ -12,9 +12,6 @@
 - [YOUTUBE] Can't delete favorites (YouTube gives video id, not favorite id).
 - Download of rtmpe streams not supported.
 
-[B]Version 2.0.3[/B]
-- Fixed YouTube changed Character encoding of their html which messed up the playback code.
-
 [B]Version 2.0.2[/B]
 - Fixed problem with "Now Playing" context menu item showing the Music Playlist and not the Video Playlist
 - Fixed Issue preventing the plugin running on XBMC builds using external python (ie. v2.7)
