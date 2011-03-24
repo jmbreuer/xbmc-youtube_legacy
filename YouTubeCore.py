@@ -417,6 +417,7 @@ class YouTubeCore(object):
 		chunk_size = 8192
 		path = self.__settings__.getSetting( "downloadPath" )
 		try:
+			
 			url = urllib2.Request(video['video_url'])
 			url.add_header('User-Agent', self.USERAGENT);
 			
