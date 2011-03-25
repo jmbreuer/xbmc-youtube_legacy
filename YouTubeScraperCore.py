@@ -246,6 +246,7 @@ class YouTubeScraperCore:
 			print "Disco search url %s" % url
 		page = self._fetchPage(url)
 		if (page.find("list=") != -1):
+			page = page.replace("\u0026", "&")
 			mix_list_id = page[page.find("list=") + 5:]
 			if (mix_list_id.find("&") != -1):
 				mix_list_id = mix_list_id[:mix_list_id.find("&")]
