@@ -173,10 +173,11 @@ class YouTubeScraperCore:
 			tmp = str(pagination)
 			if (tmp.find("Next") > 0):
 				next = "true"
-
+		
 		list = SoupStrainer(name="div", id="browse-video-data")
 		videos = BeautifulSoup(html, parseOnlyThese=list)
 		
+		print self.__plugin__ + " smokey: " + str(videos)
 		items = []
 		if (len(videos) > 0):
 			video = videos.div.div
@@ -186,6 +187,17 @@ class YouTubeScraperCore:
 					id = id[id.find("=") + 1:id.find("&")]
 					items.append(id)
 				video = video.findNextSibling(name="div", attrs = {'class':"video-cell *vl"})
+		else:
+			list = SoupStrainer(name="div", attrs = {'class':"most-viewed-list paginated"})
+			videos = BeautifulSoup(html, parseOnlyThese=list)
+			if (len(videos) > 0):
+				video = videos.div.div.findNextSibling(name="div", attrs={'class':"video-cell"})
+				while (video != None):
+					id = video.div.a["href"]
+					if (id.find("/watch?v=") != -1):
+						id = id[id.find("=") + 1:id.find("&")]
+						items.append(id)
+						video = video.findNextSibling(name="div", attrs = {'class':"video-cell"})
 		
 		if (items):
 			(results, status) = self.core._get_batch_details(items)
@@ -493,7 +505,10 @@ class YouTubeScraperCore:
 		result = []
 
 		if ( get("scraper") == "categories" and get("category")):
-			scraper_per_page = 23
+			if urllib.unquote_plus(get("category")).find("/") != -1:
+				scraper_per_page = 23
+			else:
+				scraper_per_page = 36
 		elif ( get("scraper") == "shows" and get("category")):
 			scraper_per_page = 44
 		elif ( get("scraper") == "movies" and get("category")):
@@ -612,7 +627,7 @@ class YouTubeScraperCore:
 				if (category.find("/") != -1):
 					url = self.urls["main"] + category + "?hl=en" + "&p=" + page
 				else:
-					url = self.urls["main"] + "/videos" + category + "&hl=en" + "&p=" + page
+					url = self.urls["main"] + "/categories" + category + "&hl=en" + "&p=" + page
 			else:
 				url = self.urls["categories"] + "?hl=en"
 		
@@ -669,6 +684,8 @@ class YouTubeScraperCore:
 			cell = "trailer-cell *vl"
 			if (get("scraper") == "movies"):
 				cell = "movie-cell *vl"
+			if (get("scraper") == "categories"):
+				cell = "video-cell"
 			
 			item = []
 			while ( trailer != None ):
@@ -728,6 +745,10 @@ class YouTubeScraperCore:
 								continue
 							if cat.find("?") != -1:
 								cat = cat[cat.find("?"):]
+							if cat.find("comedy") > 0:
+								cat = "?c=23"
+							if cat.find("gaming") > 0:
+								cat = "?c=20"
 						
 						cat = urllib.quote_plus(cat)
 						item['category'] = cat
