@@ -504,14 +504,18 @@ class YouTubeCore(object):
 		i = 0;
 		ret = ""
 		for node in entries:
-			text = node.firstChild.nodeValue
-			start = str(datetime.timedelta(seconds=float(node.getAttribute("start")))).replace("000", "")
-			if ( start.find(".") == -1 ):
-				start += ".000"
-			dur = str(datetime.timedelta(seconds=float(node.getAttribute("start")) + float(node.getAttribute("dur")))).replace("000", "")
-			if ( dur.find(".") == -1 ):
-				dur += ".000"
-			ret += start + " --> " + ( dur ) + "\n" + text + "\n\n"
+			if node:
+				if node.firstChild:
+					if node.firstChild.nodeValue:
+						text = node.firstChild.nodeValue
+						start = str(datetime.timedelta(seconds=float(node.getAttribute("start")))).replace("000", "")
+						if ( start.find(".") == -1 ):
+							start += ".000"
+						dur = str(datetime.timedelta(seconds=float(node.getAttribute("start")) + float(node.getAttribute("dur")))).replace("000", "")
+						if ( dur.find(".") == -1 ):
+							dur += ".000"
+						ret += start + " --> " + ( dur ) + "\n" + text + "\n\n"
+
 		path = os.path.join( xbmc.translatePath( "special://temp" ), params['videoid'] + ".srt" )
 		w = open(path, "w")
 		ret = ret.replace("&#39;", "'")
@@ -924,7 +928,7 @@ class YouTubeCore(object):
 			return ( htmlSource, status, status )
 		
 		if self.__dbg__:
-			print self.__plugin__ + " _fetchPage returned " + repr(htmlSource)
+			print self.__plugin__ + " _fetchPage returned " #+ repr(htmlSource)
 
 		swf_url = False
 
@@ -1365,7 +1369,7 @@ class YouTubeCore(object):
 
 		if status == 200:
 			if self.__dbg__:
-				print self.__plugin__ + "_get_details youtube Page result: " + repr(result)
+				print self.__plugin__ + "_get_details youtube Page result: " #+ repr(result)
 				
 			result = self._getvideoinfo(result)
 		
@@ -1380,7 +1384,7 @@ class YouTubeCore(object):
 		else:
 			if self.__dbg__:
 				print self.__plugin__ + " _get_details got bad status: " + str(status)
-				print self.__plugin__ + "_fetchPage returned: " + repr(result)
+				#print self.__plugin__ + "_fetchPage returned: " + repr(result)
 			video = {}
 			video['Title'] = "Error"
 			video['videoid'] = videoid
