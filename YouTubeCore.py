@@ -508,6 +508,9 @@ class YouTubeCore(object):
 				if node.firstChild:
 					if node.firstChild.nodeValue:
 						text = node.firstChild.nodeValue
+						text = text.replace("&amp;", "&")
+						text = text.replace("&quot;", '"')
+						text = text.replace("&hellip;", "...")
 						start = str(datetime.timedelta(seconds=float(node.getAttribute("start")))).replace("000", "")
 						if ( start.find(".") == -1 ):
 							start += ".000"
