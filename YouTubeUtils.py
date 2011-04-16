@@ -19,8 +19,10 @@
 import sys, os
 import xbmc
 
-class YouTubeUtils:	 
+class YouTubeUtils:
 	__settings__ = sys.modules[ "__main__" ].__settings__
+	__plugin__ = sys.modules[ "__main__" ].__plugin__
+	
 	plugin_thumbnail_path = os.path.join( __settings__.getAddonInfo('path'), "thumbnails" )
 	
 	# This function raises a keyboard for user input

@@ -17,19 +17,18 @@
 '''
 
 import sys, xbmcaddon
+
 # plugin constants
 __version__ = "2.1.0"
 __plugin__ = "YouTube Beta-" + __version__
 __author__ = "TheCollective"
 __url__ = "www.xbmc.com"
-__svn_url__ = ""
-__svn_revision__ = "$Revision$"
 __XBMC_Revision__ = "34731"
 
 # xbmc hooks
 __settings__ = xbmcaddon.Addon(id='plugin.video.youtube.beta')
 __language__ = __settings__.getLocalizedString
-__dbg__ = __settings__.getSetting( "debug" ) == "true"
+__dbg__ = __settings__.getSetting("debug") == "true"
 
 # plugin structure
 __utils__ = "" 
@@ -38,11 +37,14 @@ __scraper__ = ""
 __playlist__ = ""
 __navigation__ = ""
 __downloader__ = ""
-
+__storage__ = ""
+__login__ = ""
 
 if (__name__ == "__main__" ):
 	import YouTubeUtils as utils
 	__utils__ = utils.YouTubeUtils()
+	import YouTubeLogin as login
+	__login__ = login.YouTubeLogin()
 	import YouTubeCore as core
 	__core__ = core.YouTubeCore()
 	import YouTubeDownloader as downloader
@@ -53,12 +55,14 @@ if (__name__ == "__main__" ):
 	__playlist__ = playlist.YouTubePlaylistControl()
 	import YouTubeNavigation as navigation
 	__navigation__ = navigation.YouTubeNavigation()
-	
+	import YouTubePluginStorage as storage
+	__storage__ = storage.YouTubePluginStorage()
+
 	if __dbg__:
 		print __plugin__ + " ARGV: " + repr(sys.argv)
 	else:
 		print __plugin__
-		
+	
 	if ( not __settings__.getSetting( "firstrun" ) ):
 		__navigation__.login()
 		__settings__.setSetting( "firstrun", '1' )
