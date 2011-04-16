@@ -649,7 +649,6 @@ class YouTubeCore(object):
 
 		return (video, 200);
 
-
 	def arrayToPipe(self, input):
 		pipedItems = ""
 		for item in input:
@@ -908,7 +907,6 @@ class YouTubeCore(object):
 
 		fmtSource = re.findall('"fmt_url_map": "([^"]+)"', htmlSource);
 
-		#tempSource = htmlSource[htmlSource.find("&amp;ttsurl="):htmlSource.find("&amp;fexp=",htmlSource.find("&amp;ttsurl="))+20 ]
 		tempSource1 = htmlSource[htmlSource.find("ttsurl="):len(htmlSource)]
 		tempSource = tempSource1[0:tempSource1.find("&amp;")+5]
 
@@ -1141,10 +1139,7 @@ class YouTubeCore(object):
 							video['videoid'] = "false"
 						elif reason == 'requesterRegion':
 							video['videoid'] = "false"
-						elif reason == 'limitedSyndication':
-							if self.__dbg__:
-								print "" #print self.__plugin__ + " _getvideoinfo hit limitedsyndication"
-						else:
+						elif reason != 'limitedSyndication':
 							video['videoid'] = "false";
 				
 				video['Title'] = self._getNodeValue(node, "media:title", "Unknown Title").encode('utf-8') # Convert from utf-16 to combat breakage
@@ -1194,123 +1189,116 @@ class YouTubeCore(object):
 	def _getvideoinfo(self, value):
 		if self.__dbg__:
 			print self.__plugin__ + " _getvideoinfo: " + str(len(value))
-		try:
-			dom = parseString(value);
-			links = dom.getElementsByTagName("link");
-			entries = dom.getElementsByTagName("entry");
-			if (not entries):
-				entries = dom.getElementsByTagName("atom:entry");
-			next = "false"
+		
+		dom = parseString(value);
+		links = dom.getElementsByTagName("link");
+		entries = dom.getElementsByTagName("entry");
+		if (not entries):
+			entries = dom.getElementsByTagName("atom:entry");
+		next = "false"
 
-			#find out if there are more pages
+		#find out if there are more pages
+		
+		if (len(links)):
+			for link in links:
+				lget = link.attributes.get
+				if (lget("rel").value == "next"):
+					next = "true"
+					break
+
+		#construct list of video objects					
+		ytobjects = [];
+		for node in entries:
+			video = {};
+
+			video['videoid'] = self._getNodeValue(node, "yt:videoid", "missing")
 			
-			if (len(links)):
-				for link in links:
-					lget = link.attributes.get
-					if (lget("rel").value == "next"):
-						next = "true"
-						break
+			# http://code.google.com/intl/en/apis/youtube/2.0/reference.html#youtube_data_api_tag_yt:state <- more reason codes
+			# requesterRegion - This video is not available in your region. <- fails
+			# limitedSyndication - Syndication of this video was restricted by its owner. <- works
 
-			#construct list of video objects					
-			ytobjects = [];
-			for node in entries:
-				video = {};
+			if node.getElementsByTagName("yt:state").item(0):
+			
+				state = self._getNodeAttribute(node, "yt:state", 'name', 'Unknown Name')
 
-				video['videoid'] = self._getNodeValue(node, "yt:videoid", "missing")
+				# Ignore unplayable items.
+				if ( state == 'deleted' or state == 'rejected'):
+					video['videoid'] = "false"
 				
-				# http://code.google.com/intl/en/apis/youtube/2.0/reference.html#youtube_data_api_tag_yt:state <- more reason codes
-				# requesterRegion - This video is not available in your region. <- fails
-				# limitedSyndication - Syndication of this video was restricted by its owner. <- works
-
-				if node.getElementsByTagName("yt:state").item(0):
-				
-					state = self._getNodeAttribute(node, "yt:state", 'name', 'Unknown Name')
-
-					# Ignore unplayable items.
-					if ( state == 'deleted' or state == 'rejected'):
+				# Get reason for why we can't playback the file.		
+				if node.getElementsByTagName("yt:state").item(0).hasAttribute('reasonCode'):
+					reason = self._getNodeAttribute(node, "yt:state", 'reasonCode', 'Unknown reasonCode')
+					value = self._getNodeValue(node, "yt:state", "Unknown reasonValue").encode('utf-8')
+					if reason == "private":
 						video['videoid'] = "false"
-					
-					# Get reason for why we can't playback the file.		
-					if node.getElementsByTagName("yt:state").item(0).hasAttribute('reasonCode'):
-						reason = self._getNodeAttribute(node, "yt:state", 'reasonCode', 'Unknown reasonCode')
-						value = self._getNodeValue(node, "yt:state", "Unknown reasonValue").encode('utf-8')
-						if reason == "private":
-							video['videoid'] = "false"
-						elif reason == 'requesterRegion':
-							video['videoid'] = "false"
-						elif reason == 'limitedSyndication':
-							if self.__dbg__:
-								print "" #print self.__plugin__ + " _getvideoinfo hit limitedsyndication"
-						else:
-							if self.__dbg__:
-								print self.__plugin__ + " _getvideoinfo hit else : %s - %s" % ( reason, value)
-							video['videoid'] = "false";
-							
-				if ( video['videoid'] == "missing" ):
-					video['videolink'] = node.getElementsByTagName("link").item(0).getAttribute('href')
-					match = re.match('.*?v=(.*)\&.*', video['videolink'])
-					if match:
-						video['videoid'] = match.group(1)
+					elif reason == 'requesterRegion':
+						video['videoid'] = "false"
+					elif reason == 'limitedSyndication':
+						if self.__dbg__:
+							print "" #print self.__plugin__ + " _getvideoinfo hit limitedsyndication"
 					else:
-						video['videoid'] = "false"
-				
-				video['Title'] = self._getNodeValue(node, "media:title", "Unknown Title").encode('utf-8') # Convert from utf-16 to combat breakage
-				video['Plot'] = self._getNodeValue(node, "media:description", "Unknown Plot").encode( "utf-8" )
-				video['Date'] = self._getNodeValue(node, "published", "Unknown Date").encode( "utf-8" )
-				video['user'] = self._getNodeValue(node, "name", "Unknown Name").encode( "utf-8" )
-				
-				# media:credit is not set for favorites, playlists or inbox
-				video['Studio'] = self._getNodeValue(node, "media:credit", "").encode( "utf-8" )
-				if video['Studio'] == "":
-					video['Studio'] = self._getNodeValue(node, "name", "Unknown Uploader").encode( "utf-8" )
-					
-					
-
-				duration = int(self._getNodeAttribute(node, "yt:duration", 'seconds', '0'))
-				video['Duration'] = "%02d:%02d" % ( duration / 60, duration % 60 )
-				video['Rating'] = float(self._getNodeAttribute(node,"gd:rating", 'average', "0.0"))
-				video['count'] = int(self._getNodeAttribute(node, "yt:statistics", 'viewCount', "0"))
-				infoString =""
-				if video['Date'] != "Unknown Date":
-					infoString += "Date Uploaded: " + video['Date'][:video['Date'].find("T")] + ", "				
-				infoString += "View count: " + str(video['count'])
-				video['Plot'] = infoString + "\n" + video['Plot']
-				print "plot updated"
-				video['Genre'] = self._getNodeAttribute(node, "media:category", "label", "Unknown Genre").encode( "utf-8" )
-
-				if node.getElementsByTagName("link"):
-					link = node.getElementsByTagName("link")
-					for i in range(len(link)):
-						if link.item(i).getAttribute('rel') == 'edit':
-							obj = link.item(i).getAttribute('href')
-							video['editid'] = obj[obj.rfind('/')+1:]
-
-				video['thumbnail'] = "http://i.ytimg.com/vi/" + video['videoid'] + "/0.jpg"
+						if self.__dbg__:
+							print self.__plugin__ + " _getvideoinfo hit else : %s - %s" % ( reason, value)
+						video['videoid'] = "false";
+						
+			if ( video['videoid'] == "missing" ):
+				video['videolink'] = node.getElementsByTagName("link").item(0).getAttribute('href')
+				match = re.match('.*?v=(.*)\&.*', video['videolink'])
+				if match:
+					video['videoid'] = match.group(1)
+				else:
+					video['videoid'] = "false"
 			
-				overlay = self.__settings__.getSetting( "vidstatus-" + video['videoid'] )
+			video['Title'] = self._getNodeValue(node, "media:title", "Unknown Title").encode('utf-8') # Convert from utf-16 to combat breakage
+			video['Plot'] = self._getNodeValue(node, "media:description", "Unknown Plot").encode( "utf-8" )
+			video['Date'] = self._getNodeValue(node, "published", "Unknown Date").encode( "utf-8" )
+			video['user'] = self._getNodeValue(node, "name", "Unknown Name").encode( "utf-8" )
+			
+			# media:credit is not set for favorites, playlists or inbox
+			video['Studio'] = self._getNodeValue(node, "media:credit", "").encode( "utf-8" )
+			if video['Studio'] == "":
+				video['Studio'] = self._getNodeValue(node, "name", "Unknown Uploader").encode( "utf-8" )
+				
+				
 
-				if overlay:
-					video['Overlay'] = int(overlay)
-				
-				video['next'] = next
-				
-				if video['videoid'] == "false":
-					if self.__dbg__:
-						print self.__plugin__ + " _getvideoinfo videoid set to false"
-														
-				
-				ytobjects.append(video);
+			duration = int(self._getNodeAttribute(node, "yt:duration", 'seconds', '0'))
+			video['Duration'] = "%02d:%02d" % ( duration / 60, duration % 60 )
+			video['Rating'] = float(self._getNodeAttribute(node,"gd:rating", 'average', "0.0"))
+			video['count'] = int(self._getNodeAttribute(node, "yt:statistics", 'viewCount', "0"))
+			infoString =""
+			if video['Date'] != "Unknown Date":
+				infoString += "Date Uploaded: " + video['Date'][:video['Date'].find("T")] + ", "				
+			infoString += "View count: " + str(video['count'])
+			video['Plot'] = infoString + "\n" + video['Plot']
+			print "plot updated"
+			video['Genre'] = self._getNodeAttribute(node, "media:category", "label", "Unknown Genre").encode( "utf-8" )
 
-			if self.__dbg__:
-				print self.__plugin__ + " _getvideoinfo done : " + str(len(ytobjects))
-			return ytobjects;
-		except:
-			if self.__dbg__:
-				print self.__plugin__ + " _getvideoinfo uncaught exception"
-				print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
-								   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
-				
-			return ( "", 500 )
+			if node.getElementsByTagName("link"):
+				link = node.getElementsByTagName("link")
+				for i in range(len(link)):
+					if link.item(i).getAttribute('rel') == 'edit':
+						obj = link.item(i).getAttribute('href')
+						video['editid'] = obj[obj.rfind('/')+1:]
+
+			video['thumbnail'] = "http://i.ytimg.com/vi/" + video['videoid'] + "/0.jpg"
+		
+			overlay = self.__settings__.getSetting( "vidstatus-" + video['videoid'] )
+
+			if overlay:
+				video['Overlay'] = int(overlay)
+			
+			video['next'] = next
+			
+			if video['videoid'] == "false":
+				if self.__dbg__:
+					print self.__plugin__ + " _getvideoinfo videoid set to false"
+													
+			
+			ytobjects.append(video);
+
+		if self.__dbg__:
+			print self.__plugin__ + " _getvideoinfo done : " + str(len(ytobjects))
+		return ytobjects;
 
 	def _getAlert(self, videoid):
 		if self.__dbg__:
@@ -1370,69 +1358,3 @@ class YouTubeCore(object):
 			else:
 				video['apierror'] = self.__language__(30606) + str(status)
 				return video
-		
-	def _httpLogin(self, new = False, error = 0):
-		if self.__dbg__:
-			print self.__plugin__ + " _httpLogin errors: " + str(error)
-
-		uname = self.__settings__.getSetting( "username" )
-		pword = self.__settings__.getSetting( "user_password" )
-		
-		if ( uname == "" and pword == "" ):
-			return ""
-
-		if ( new ):
-			self.__settings__.setSetting( "login_info", "" )
-		elif ( self.__settings__.getSetting( "login_info" ) != "" ):
-			return self.__settings__.getSetting( "login_info" )
-								
-		cj = cookielib.LWPCookieJar()
-		
-		opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
-		urllib2.install_opener(opener)
-
-		# Get GALX
-		url = urllib2.Request(urllib.unquote("https://www.google.com/accounts/ServiceLogin?service=youtube"))
-		url.add_header('User-Agent', self.USERAGENT)
-
-		try:
-			if self.__dbg__:
-				print self.__plugin__ + " _httpLogin: getting new login_info"
-			con = urllib2.urlopen(url)
-			header = con.info()
-			galx = re.compile('Set-Cookie: GALX=(.*);Path=/accounts;Secure').findall(str(header))[0]
-
-			cont = urllib.unquote("http%3A%2F%2Fwww.youtube.com%2Fsignin%3Faction_handle_signin%3Dtrue%26nomobiletemp%3D1%26hl%3Den_US%26next%3D%252Findex&hl=en_US&ltmpl=sso")
-			print self.__plugin__ + "cont " + cont
-			params = urllib.urlencode({'GALX': galx,
-						   'Email': uname,
-						   'Passwd': pword,
-						   'PersistentCookie': 'yes',
-						   'continue': cont})
-
-			# Login to Google
-			url = urllib2.Request('https://www.google.com/accounts/ServiceLoginAuth?service=youtube', params)
-			url.add_header('User-Agent', self.USERAGENT)
-			
-			con = urllib2.urlopen(url)
-			result = con.read()
-
-			newurl = re.compile('<meta http-equiv="refresh" content="0; url=&#39;(.*)&#39;"></head>').findall(result)[0].replace("&amp;", "&")
-			url = urllib2.Request(newurl)
-			url.add_header('User-Agent', self.USERAGENT)
-			
-			# Login to youtube
-			con = urllib2.urlopen(newurl)
-			
-			# Save cookiefile in settings
-			cookies = repr(cj)
-			start = cookies.find("name='LOGIN_INFO', value='") + len("name='LOGIN_INFO', value='")
-			login_info = cookies[start:cookies.find("', port=None", start)]
-			self.__settings__.setSetting( "login_info", login_info )
-			
-			if self.__dbg__:
-				print self.__plugin__ + " _httpLogin done"
-			
-			return self.__settings__.getSetting( "login_info" )
-		except:
-			print self.__plugin__ + " crappy shit"
