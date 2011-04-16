@@ -16,19 +16,9 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys
-import os
-import xbmc
-import xbmcgui
-import xbmcplugin
+import time, sys
+import xbmc, xbmcgui, xbmcplugin
 import urllib
-import YouTubeCore
-import YouTubeScraperCore
-import YouTubePlaylistControl
-
-core = YouTubeCore.YouTubeCore();
-scraper = YouTubeScraperCore.YouTubeScraperCore();
-playlist = YouTubePlaylistControl.YouTubePlaylistControl();
 	
 class YouTubeNavigation:	 
 	__settings__ = sys.modules[ "__main__" ].__settings__
@@ -36,41 +26,22 @@ class YouTubeNavigation:
 	__plugin__ = sys.modules[ "__main__"].__plugin__	
 	__dbg__ = sys.modules[ "__main__" ].__dbg__
 	
-	plugin_thumbnail_path = os.path.join( __settings__.getAddonInfo('path'), "thumbnails" )
-	pr_video_quality = __settings__.getSetting("pr_video_quality") == "true"
-
-	#===============================================================================
-	# The time parameter restricts the search to videos uploaded within the specified time. 
-	# Valid values for this parameter are today (1 day), this_week (7 days), this_month (1 month) and all_time. 
-	# The default value for this parameter is all_time.
-	# 
-	# This parameter is supported for search feeds as well as for the top_rated, top_favorites, most_viewed, 
-	# most_popular, most_discussed and most_responded standard feeds.
-	#===============================================================================
-
-	feeds = {};
-	feeds['uploads'] = "http://gdata.youtube.com/feeds/api/users/%s/uploads"
-	feeds['favorites'] = "http://gdata.youtube.com/feeds/api/users/%s/favorites"
-	feeds['playlists'] = "http://gdata.youtube.com/feeds/api/users/%s/playlists"
-	feeds['playlist_root'] = "http://gdata.youtube.com/feeds/api/playlists/%s"
-	feeds['list_related'] = "http://gdata.youtube.com/feeds/api/videos/%s/related"
-	feeds['newsubscriptions'] = "http://gdata.youtube.com/feeds/api/users/%s/newsubscriptionvideos";
-	feeds['contacts'] = "http://gdata.youtube.com/feeds/api/users/default/contacts";
-	feeds['subscriptions'] = "http://gdata.youtube.com/feeds/api/users/%s/subscriptions";
-	feeds['feed_rated'] = "http://gdata.youtube.com/feeds/api/standardfeeds/top_rated?time=%s";
-	feeds['feed_favorites'] = "http://gdata.youtube.com/feeds/api/standardfeeds/top_favorites?time=%s";
-	feeds['feed_viewed'] = "http://gdata.youtube.com/feeds/api/standardfeeds/most_viewed?time=%s";
-	feeds['feed_linked'] = "http://gdata.youtube.com/feeds/api/standardfeeds/most_popular?time=%s"; 
-	feeds['feed_recent'] = "http://gdata.youtube.com/feeds/api/standardfeeds/most_recent"; # doesn't work with time
-	feeds['feed_discussed'] = "http://gdata.youtube.com/feeds/api/standardfeeds/most_discussed?time=%s";
-	feeds['feed_responded'] = "http://gdata.youtube.com/feeds/api/standardfeeds/most_responded?time=%s";
-	feeds['feed_featured'] = "http://gdata.youtube.com/feeds/api/standardfeeds/recently_featured"; # doesn't work with time
-	feeds['subscriptions_uploads'] = "http://gdata.youtube.com/feeds/api/users/%s/uploads";
-	feeds['subscriptions_favorites'] = "http://gdata.youtube.com/feeds/api/users/%s/favorites";
-	feeds['subscriptions_playlists'] = "http://gdata.youtube.com/feeds/api/users/%s/playlists";
-
-	# we fill the list with category definitions, with labels from the appropriate language file
-	#			   label						  , path									    , thumbnail					  ,  login		  ,  feed / action
+	__scraper__ = sys.modules[ "__main__" ].__scraper__
+	__utils__ = sys.modules[ "__main__" ].__utils__
+	__playlist__ = sys.modules[ "__main__" ].__playlist__
+	__core__ = sys.modules[ "__main__" ].__core__
+		
+	# This list contains the list options a user sees when indexing a contact 
+	#				label					  , external		 , login		 ,	thumbnail					, feed
+	user_options = (
+				{'Title':__language__( 30020 ), 'external':"true", 'login':"true", 'thumbnail':"favorites", 	'feed':"favorites"},
+				{'Title':__language__( 30023 ), 'external':"true", 'login':"true", 'thumbnail':"playlists", 	'feed':"playlists"},
+				{'Title':__language__( 30021 ), 'external':"true", 'login':"true", 'thumbnail':"subscriptions", 'feed':"subscriptions"},
+				{'Title':__language__( 30022 ), 'external':"true", 'login':"true", 'thumbnail':"uploads", 		'feed':"uploads"},
+				)
+	
+	# This list contains the main menu structure the user first encounters when running the plugin
+	#			   label						  , path									        , thumbnail					  		,  login		  ,  feed / action
 	categories = (
 				  {'Title':__language__( 30044 )  ,'path':"/root/explore"			 				, 'thumbnail':"explore"				, 'login':"false" },
 				  {'Title':__language__( 30041 )  ,'path':"/root/explore/categories"				, 'thumbnail':"explore"				, 'login':"false" , 'scraper':'categories'},
@@ -123,14 +94,13 @@ class YouTubeNavigation:
 		
 		if (get("options") == "contact_options"):
 			self.listOptionFolder(params)
+			return
 			
 		if (get("login") == "true"):
 			if (get('feed') == 'subscriptions' or get('feed') == 'playlists' or get('feed') == 'contacts' or get("feed") == "subscriptions_playlists" ):
 				self.listUserFolder(params)				  
 			elif ( get("feed") in self.feeds):
 				self.listUserFolderFeeds(params)
-			elif (get("feed") == "contact_option_list"):
-				self.listOptionFolder(params)
 			return
 
 		if (get("feed")):
@@ -154,8 +124,8 @@ class YouTubeNavigation:
 							self.addListItem(params, category)
 		
 		if (get("store") == "searches" or get("store") == "disco_searches"):
-				self.listStoredSearches(params)
-				cache = False
+			self.listStoredSearches(params)
+			cache = False
 		
 		video_view = self.__settings__.getSetting("list_view") == "1"
 		if (self.__dbg__):
@@ -208,7 +178,13 @@ class YouTubeNavigation:
 		if (get("action") == "change_subscription_view"):
 			self.changeSubscriptionView(params)
 		if (get("action") == "play_all"):
-			playlist.playAll(params)
+			self.__playlist__.playAll(params)
+		
+	def listFolder(self, params = {}):
+		get = params.get
+		
+		xbmcplugin.endOfDirectory( handle=int( sys.argv[ 1 ] ), succeeded=True, cacheToDisc=False)
+
 
 	def listOptionFolder(self, params = {}):
 		get = params.get
@@ -217,33 +193,14 @@ class YouTubeNavigation:
 			if ( not auth ) :
 				self.login()
 				auth = self.__settings__.getSetting( "auth" )
-
-		item_favorites = {'Title':self.__language__( 30020 ), 'path':get("path"), 'external':"true", 'login':"true", 'thumbnail':"favorites", 'feed':"favorites", "contact":get("contact")}
-		self.addFolderListItem(params, item_favorites, 1)
-		item_playlists = {'Title':self.__language__( 30023 ), 'path':get("path"), 'external':"true", 'login':"true", 'thumbnail':"playlists", 'feed':"playlists", "contact":get("contact")}
-		self.addFolderListItem(params, item_playlists, 2)
-		item_subscriptions = {'Title':self.__language__( 30021 ), 'path':get("path"), 'external':"true", 'login':"true", 'thumbnail':"subscriptions", 'feed':"subscriptions", "contact":get("contact")}
-		self.addFolderListItem(params, item_subscriptions, 3)
-		item_uploads = {'Title':self.__language__( 30022 ), 'path':get("path"), 'external':"true", 'login':"true", 'thumbnail':"uploads", 'feed':"uploads", "contact":get("contact") }
-		self.addFolderListItem(params, item_uploads, 4)
 		
-		xbmcplugin.endOfDirectory( handle=int( sys.argv[ 1 ] ), succeeded=True, cacheToDisc=False)
-
-	def parseFeeds(self, params):
-		get = params.get
+		for index, item in enumerate(self.user_options):
+			item["path"] = get("path")
+			item["contact"] = get("contact")
+			self.addFolderListItem(params, item, index)
 				
-		feed = self.feeds[get("feed")]
-		if (feed.find("%s") > 0):
-			if ( get("contact") and not (get("external") and get("channel"))):
-				feed = feed % get("contact")
-			elif ( get("channel")):
-				feed = feed % get("channel")
-			elif ( get("playlist")):
-				feed = feed % get("playlist")
-			elif ( get("feed") == "uploads" or get("feed") == "favorites" or  get("feed") == "playlists" or get("feed") == "subscriptions" or get("feed") == "newsubscriptions"):
-				feed = feed % self.__settings__.getSetting( "nick" )
-		return feed
-	
+		xbmcplugin.endOfDirectory( handle=int( sys.argv[ 1 ] ), succeeded=True, cacheToDisc=False)
+			
 	def listUserFolder(self, params = {}):
 		get = params.get
 		if ( get('login') and self.__settings__.getSetting( "username" ) != "" ):
@@ -253,8 +210,9 @@ class YouTubeNavigation:
 				auth = self.__settings__.getSetting( "auth" )
 				
 		feed = self.parseFeeds(params)
-
-		(result, status) = core.playlists(feed, params)
+		
+		(result, status) = self.__core__.playlists(feed, params)
+		
 		if status != 200:
 			feed_label = ""
 			for category in self.categories:
@@ -264,9 +222,9 @@ class YouTubeNavigation:
 					break
 			
 			if (feed_label != ""):
-				self.errorHandling(feed_label, result, status)
+				self.showErrorMessage(feed_label, result, status)
 			else:
-				self.errorHandling(get("feed"), result, status)
+				self.showErrorMessage(get("feed"), result, status)
 				
 			return False
 			
@@ -283,7 +241,7 @@ class YouTubeNavigation:
 				self.addFolderListItem(params, item)
 							
 		self.parseFolderList(params, result)
-								
+		
 	def listUserFolderFeeds(self, params = {}):
 		get = params.get
 		if ( get('login') and self.__settings__.getSetting( "username" ) != "" ):
@@ -295,7 +253,7 @@ class YouTubeNavigation:
 		feed = self.parseFeeds(params)
 		
 		if ( get('login') and feed):
-			( result, status ) = core.list(feed, params);
+			( result, status ) = self.__core__.list(feed, params);
 			if status != 200:
 				feed_label = ""
 				for category in self.categories:
@@ -305,9 +263,9 @@ class YouTubeNavigation:
 						break
 					
 				if (feed_label != ""):
-					self.errorHandling(feed_label, result, status)
+					self.showErrorMessage(feed_label, result, status)
 				else:
-					self.errorHandling(get("feed"), result, status)
+					self.showErrorMessage(get("feed"), result, status)
 				return False
 		
 		if ( get("channel") or get("playlist") ):
@@ -318,17 +276,17 @@ class YouTubeNavigation:
 				if (get("playlist")):
 					self.__settings__.setSetting("playlists_" + get("playlist") + "_thumb", thumbnail)
 
-		self.parseVideoList(params, result);
-		
+		self.parseVideoList(params, result)
+	
 	def login(self, params = {}):
 		self.__settings__.openSettings()
 						
-		(result, status) = core.login()
+		(result, status) = self.__core__.login()
 				
 		if status == 200:
-			self.errorHandling(self.__language__(30031), result, 303)
+			self.showErrorMessage(self.__language__(30031), result, 303)
 		else:
-			self.errorHandling(self.__language__(30609), result, status)
+			self.showErrorMessage(self.__language__(30609), result, status)
 				
 		xbmc.executebuiltin( "Container.Refresh" )
 
@@ -355,39 +313,11 @@ class YouTubeNavigation:
 				item["thumbnail"] = self.__settings__.getSetting("disco_search_" + search + "_thumb")
 			
 			self.addFolderListItem(params, item, len(searches))
-
-	def listFeedFolder(self, params = {}):
-		get = params.get
-
-		feed = self.feeds[get("feed")]
-									
-		( result, status ) = core.feeds(feed, params)
-		if status != 200:
-			feed_label = ""
-			for category in self.categories:
-				cat_get = category.get
-				if (cat_get("action") == get("feed")):
-					feed_label = cat_get("Title")
-					break
-				
-			if (feed_label != ""):
-				self.errorHandling(feed_label, result, status)
-			else:
-				self.errorHandling(get("feed"), result, status)
-				
-			return False
-		
-		if ( get("search")):
-			thumbnail = result[0].get("thumbnail")
-			if (thumbnail and get("search")):
-				self.__settings__.setSetting("search_" + get("search") + "_thumb", thumbnail)
-
-		self.parseVideoList(params, result);
-
+	
 	def scrape(self, params):
 		get = params.get
 
-		( results, status ) = scraper.scrape(params)
+		( results, status ) = self.__scraper__.scrape(params)
 		if ( len(results) > 0 and status == 200 ):
 			if (get("scraper") == "disco_top_artist" 
 				or get("scraper") == "shows"
@@ -403,19 +333,22 @@ class YouTubeNavigation:
 			else:
 				self.parseVideoList(params, results)
 		elif ( status == 303):
-			self.showMessage(self.__language__(30600), results)
+			self.__utils__.showMessage(self.__language__(30600), results)
 		else:
-			self.showMessage(self.__language__(30600), self.__language__(30606))
+			self.__utils__.showMessage(self.__language__(30600), self.__language__(30606))
 
 	#================================== Plugin Actions =========================================
 
 	def addSubtitles(self, video = {}):
-		if ( core.saveSubtitle(video) ):
-			#print "YouTube --> Setting subtitles: " + video['trans_url']
+		if ( self.__core__.saveSubtitle(video) ):
+			if self.__dbg__:
+				print self.__plugin__ + " Setting subtitles: " + video['trans_url']
+			
 			xbmc.Player().setSubtitles('special://temp/'+ video['videoid'] + '.srt')
-			import time
 			time.sleep(5)
-			#print "YouTube --> Setting subtitles2: " + video['trans_url']
+			
+			if self.__dbg__:
+				print self.__plugin__ + " Setting subtitles: " + video['trans_url']
 			xbmc.Player().setSubtitles('special://temp/'+ video['videoid'] + '.srt')
 
 	def playVideoById(self, params = {}):
@@ -426,19 +359,21 @@ class YouTubeNavigation:
 		
 	def playVideo(self, params = {}):
 		get = params.get
-		(video, status) = core.construct_video_url(params);
+		(video, status) = self.__core__.construct_video_url(params);
 
 		if status != 200:
 			if self.__dbg__ : 
 				print self.__plugin__ + " construct video url failed contents of video item " + repr(video)
-			self.errorHandling(self.__language__(30603), video, status)
+			self.showErrorMessage(self.__language__(30603), video, status)
 			return False
 		
+		# this shit should happen in core
 		if ('local' not in video):
 			if ( 'swf_config' in video ):
 				video['video_url'] += " swfurl=%s swfvfy=1" % video['swf_config']
 			
-			video['video_url'] += " | " + core.USERAGENT
+			video['video_url'] += " | " + self.__core__.USERAGENT
+		# end of core shit
 		
 		listitem=xbmcgui.ListItem(label=video['Title'], iconImage=video['thumbnail'], thumbnailImage=video['thumbnail'], path=video['video_url']);
 		
@@ -459,34 +394,34 @@ class YouTubeNavigation:
 		if (get("videoid")):
 			path = self.__settings__.getSetting( "downloadPath" )
 			if (not path):
-				self.showMessage(self.__language__(30600), self.__language__(30611))
+				self.__utils__.showMessage(self.__language__(30600), self.__language__(30611))
 				self.__settings__.openSettings()
 				path = self.__settings__.getSetting( "downloadPath" )
 
-			( video, status ) = core.construct_video_url(params)
+			( video, status ) = self.__core__.construct_video_url(params)
 				
 			if status != 200:
 				if self.__dbg__:
 					print self.__plugin__ + " downloadVideo got error from construct_video_url: [%s] %s" % ( status, video)
-					self.errorHandling(self.__language__( 30501 ), video, status)
+					self.showErrorMessage(self.__language__( 30501 ), video, status)
 				return False
 
 			item = video.get
 					
-			self.showMessage(self.__language__(30612), self.makeAscii(item("Title", "Unknown Title")))
+			self.__utils__.showMessage(self.__language__(30612), self.__utils__.makeAscii(item("Title", "Unknown Title")))
 			
-			( video, status ) = core.downloadVideo(video)
+			( video, status ) = self.__core__.downloadVideo(video)
 					
 			if status == 200:
-				self.showMessage(self.__language__( 30604 ), self.makeAscii(item("Title")))
+				self.__utils__.showMessage(self.__language__( 30604 ), self.__utils__.makeAscii(item("Title")))
 
 	def addToFavorites(self, params = {}):
 		get = params.get
 		
 		if (get("videoid")):
-			(message, status) = core.add_favorite(get("videoid"))
+			(message, status) = self.__core__.add_favorite(get("videoid"))
 			if status != 200:
-				self.errorHandling(self.__language__(30020), message, status)
+				self.showErrorMessage(self.__language__(30020), message, status)
 				return False
 
 			return True
@@ -495,9 +430,9 @@ class YouTubeNavigation:
 		get = params.get
 		
 		if (get("editid")):
-			(message, status ) = core.delete_favorite(get('editid'))
+			(message, status ) = self.__core__.delete_favorite(get('editid'))
 			if status != 200:
-				self.errorHandling(self.__language__(30020), message, status)
+				self.showErrorMessage(self.__language__(30020), message, status)
 				return False
 
 			xbmc.executebuiltin( "Container.Refresh" )
@@ -511,12 +446,12 @@ class YouTubeNavigation:
 			contact = self.getUserInput(self.__language__(30519), '')
 			
 		if (contact):
-			(result, status) = core.add_contact(contact)
+			(result, status) = self.__core__.add_contact(contact)
 			if status != 200:
-				self.errorHandling(self.__language__(30029), result, status)
+				self.showErrorMessage(self.__language__(30029), result, status)
 				return False
 
-			self.showMessage(self.__language__(30613), contact)
+			self.__utils__.showMessage(self.__language__(30613), contact)
 			xbmc.executebuiltin( "Container.Refresh" )
 
 		return True
@@ -525,12 +460,12 @@ class YouTubeNavigation:
 		get = params.get
 
 		if (get("contact")):
-			(result, status) = core.remove_contact(get("contact"))
+			(result, status) = self.__core__.remove_contact(get("contact"))
 			if status != 200:
-				self.errorHandling(self.__language__(30029), result, status)
+				self.showErrorMessage(self.__language__(30029), result, status)
 				return False
 
-			self.showMessage(self.__language__(30614), get("contact"))
+			self.__utils__.showMessage(self.__language__(30614), get("contact"))
 			xbmc.executebuiltin( "Container.Refresh" )
 	
 	def changeSubscriptionView(self, params = {}):
@@ -549,9 +484,9 @@ class YouTubeNavigation:
 	def addSubscription(self, params = {}):
 		get = params.get
 		if (get("channel")):
-			(message, status) = core.add_subscription(get("channel"))
+			(message, status) = self.__core__.add_subscription(get("channel"))
 			if status != 200:
-				self.errorHandling(self.__language__(30021), message, status)
+				self.showErrorMessage(self.__language__(30021), message, status)
 				return False
 			
 		return True
@@ -559,9 +494,9 @@ class YouTubeNavigation:
 	def removeSubscription(self, params = {}):
 		get = params.get
 		if (get("editid")):
-			(message, status) = core.remove_subscription(get("editid"))
+			(message, status) = self.__core__.remove_subscription(get("editid"))
 			if status != 200:
-				self.errorHandling(self.__language__(30021), message, status)
+				self.showErrorMessage(self.__language__(30021), message, status)
 				return False
 												
 			xbmc.executebuiltin( "Container.Refresh" )
@@ -571,10 +506,10 @@ class YouTubeNavigation:
 		get = params.get
 		if (get("videoid")):
 			feed = self.feeds["list_related"] % get("videoid")
-			(results, status) = core.list(feed, params)
+			(results, status) = self.__core__.list(feed, params)
 			
 			if status != 200:
-				self.errorHandling(self.__language__(30529), results, status)
+				self.showErrorMessage(self.__language__(30529), results, status)
 				return False
 			
 			self.parseVideoList(params, results)
@@ -587,10 +522,10 @@ class YouTubeNavigation:
 		if (not get("search")):
 			params["search"] = self.getUserInput(self.__language__(30006), '')
 			
-		(result, status) = scraper.searchDisco(params)
+		(result, status) = self.__scraper__.searchDisco(params)
 			
 		if (status != 200):
-			self.errorHandling(self.__language__(30006), result, status)
+			self.showErrorMessage(self.__language__(30006), result, status)
 		else:
 			self.parseVideoList(params, result)
 	
@@ -615,12 +550,12 @@ class YouTubeNavigation:
 		
 		if (query):
 			if (get("action") == "search_disco"):
-				( result, status ) = scraper.searchDisco(params)
+				( result, status ) = self.__scraper__.searchDisco(params)
 			else:
-				( result, status ) = core.search(query, get("page", "0"));
+				( result, status ) = self.__core__.search(params);
 				
 			if status != 200:
-				self.errorHandling(self.__language__(30006), result, status)
+				self.showErrorMessage(self.__language__(30006), result, status)
 				return False
 			
 			thumbnail = result[0].get('thumbnail', "")
@@ -712,7 +647,7 @@ class YouTubeNavigation:
 			searches[query] = author
 			
 			self.__settings__.setSetting("stored_searches_author", repr(searches))
-			self.showMessage(self.__language__(30006), self.__language__(30616))
+			self.__utils__.showMessage(self.__language__(30006), self.__language__(30616))
 			xbmc.executebuiltin( "Container.Refresh" )
 		
 	def deleteRefinements(self, params = {}):
@@ -727,7 +662,7 @@ class YouTubeNavigation:
 		if query in searches:
 			del searches[query]
 			self.__settings__.setSetting("stored_searches_author", repr(searches))
-			self.showMessage(self.__language__(30006), self.__language__(30610))
+			self.__utils__.showMessage(self.__language__(30006), self.__language__(30610))
 			xbmc.executebuiltin( "Container.Refresh" )
 
 	#================================== List Item manipulation =========================================	
@@ -761,18 +696,18 @@ class YouTubeNavigation:
 		icon = "DefaultFolder.png"
 		
 		if (item("action") == "search_disco"):
-			icon = self.getThumbnail("discoball")
+			icon = self.__utils__.getThumbnail("discoball")
 		elif (item("action") == "search"):
-			icon = self.getThumbnail("search")
+			icon = self.__utils__.getThumbnail("search")
 		elif (item("show") or get("scraper") == "shows"):
-			icon = self.getThumbnail("shows")
+			icon = self.__utils__.getThumbnail("shows")
 		
 		thumbnail = item("thumbnail")
 		
 		cm = self.addFolderContextMenuItems(params, item_params)
 		
 		if (item("thumbnail", "DefaultFolder.png").find("http://") == -1):	
-			thumbnail = self.getThumbnail(item("thumbnail"))
+			thumbnail = self.__utils__.getThumbnail(item("thumbnail"))
 			
 		listitem=xbmcgui.ListItem( item("Title"), iconImage=icon, thumbnailImage=thumbnail )
 		url = '%s?path=%s&' % ( sys.argv[0], item("path") )
@@ -792,7 +727,7 @@ class YouTubeNavigation:
 		item = item_params.get
 		folder = True
 		icon = "DefaultFolder.png"
-		thumbnail = self.getThumbnail(item("thumbnail"))
+		thumbnail = self.__utils__.getThumbnail(item("thumbnail"))
 		listitem=xbmcgui.ListItem( item("Title"), iconImage=icon, thumbnailImage=thumbnail )
 		
 		if (item("action") == "playbyid"):
@@ -812,7 +747,7 @@ class YouTubeNavigation:
 		icon = "default"
 		if (get("scraper", "").find("trailers") > 0):
 			icon = "trailers"
-		icon = self.getThumbnail(icon)
+		icon = self.__utils__.getThumbnail(icon)
 		
 		listitem=xbmcgui.ListItem(item("Title"), iconImage=icon, thumbnailImage=item("thumbnail") )
 
@@ -938,64 +873,12 @@ class YouTubeNavigation:
 		
 		xbmcplugin.endOfDirectory( handle=int( sys.argv[ 1 ] ), succeeded=True, cacheToDisc=True )
 
-		
-	#=================================== Tool Box ======================================= 
-	# shows a more userfriendly notification
-	def showMessage(self, heading, message):
-		duration = ([5, 10, 15, 20, 25, 30][int(self.__settings__.getSetting( 'notification_length' ))]) * 1000
-		xbmc.executebuiltin('XBMC.Notification("%s", "%s", %s)' % ( heading, message, duration) )
-
-	# create the full thumbnail path for skins directory
-	def getThumbnail( self, title ):
-		if (not title):
-			title = "DefaultFolder.png"
-		
-		thumbnail = os.path.join( sys.modules[ "__main__" ].__plugin__, title + ".png" )
-		
-		if ( not xbmc.skinHasImage( thumbnail ) ):
-			thumbnail = os.path.join( self.plugin_thumbnail_path, title + ".png" )
-			if ( not os.path.isfile( thumbnail ) ):
-				thumbnail = "DefaultFolder.png"	
-		
-		return thumbnail
-
-	# raise a keyboard for user input
-	def getUserInput(self, title = "Input", default="", hidden=False):
-		result = None
-
-		# Fix for when this functions is called with default=None
-		if not default:
-			default = ""
-			
-		keyboard = xbmc.Keyboard(default, title)
-		keyboard.setHiddenInput(hidden)
-		keyboard.doModal()
-		
-		if keyboard.isConfirmed():
-			result = keyboard.getText()
-		
-		return result
-
-	# converts the request url passed on by xbmc to our plugin into a dict  
-	def getParameters(self, parameterString):
-		commands = {}
-		splitCommands = parameterString[parameterString.find('?')+1:].split('&')
-		
-		for command in splitCommands: 
-			if (len(command) > 0):
-				splitCommand = command.split('=')
-				name = splitCommand[0]
-				value = splitCommand[1]
-				commands[name] = value
-		
-		return commands
-
 	# generic function for building the item url filters out many item params to reduce unicode problems
 	def buildItemUrl(self, item_params = {}, url = ""):
-		for k, v in item_params.items():
-			if (k != "path" and k != "thumbnail" and k!= "playlistId" and k!= "next" and k != "content" and k!= "editid"
-				and k!= "summary" and k!= "published" and k!="Title" and k!= "Title" ):
-				url += k + "=" + v + "&"
+		blacklist = ("path","thumbnail","playlistId", "next", "content" , "editid", "summary", "published" , "Title")
+		for key, value in item_params.items():
+			if key not in blacklist:
+				url += key + "=" + value + "&"
 		return url
 
 	def addVideoContextMenuItems(self, params = {}, item_params = {}):
@@ -1003,8 +886,10 @@ class YouTubeNavigation:
 		get = params.get
 		item = item_params.get
 
-		title = self.makeAscii(item("Title"))
+		title = self.__utils__.makeAscii(item("Title"))
 		url_title = urllib.quote_plus(title)
+		studio = self.__utils__.makeAscii(item("Studio","Unknown Author"))
+		url_studio = urllib.quote_plus(studio)
 		
 		cm.append( ( self.__language__( 30504 ), "XBMC.Action(Queue)", ) )
 		
@@ -1022,9 +907,6 @@ class YouTubeNavigation:
 				cm.append( ( self.__language__( 30503 ), 'XBMC.RunPlugin(%s?path=%s&action=add_favorite&videoid=%s&)' % ( sys.argv[0],  item("path"), item("videoid") ) ) )
 			if (get("external") == "true" or (get("feed") != "subscriptions_favorites" and get("feed") != "subscriptions_uploads" and get("feed") != "subscriptions_playlists")):
 				cm.append( ( self.__language__( 30512 ) % item("Studio"), 'XBMC.RunPlugin(%s?path=%s&channel=%s&action=add_subscription)' % ( sys.argv[0], item("path"), item("Studio") ) ) )		
-
-		studio = self.makeAscii(item("Studio","Unknown Author"))
-		url_studio = urllib.quote_plus(studio)
 			
 		if (get("feed") != "subscriptions_favorites" and get("feed") != "subscriptions_uploads" and get("feed") != "subscriptions_playlists"):
 			cm.append( ( self.__language__( 30516 ) % studio, "XBMC.Container.Update(%s?path=%s&login=true&feed=subscriptions_uploads&view_mode=subscriptions_uploads&channel=%s)" % ( sys.argv[0],  get("path"), url_studio ) ) )
@@ -1105,31 +987,15 @@ class YouTubeNavigation:
 		cm.append( ( self.__language__( 30527 ), "XBMC.ActivateWindow(VideoPlaylist)"))
 		return cm
 
-	def makeAscii(self, str):
-		try:
-			return str.encode('ascii')
-		except:
-			if self.__dbg__:
-				print self.__plugin__ + " makeAscii hit except on : " + repr(str)
-			s = ""
-			for i in str:
-				try:
-					i.encode("ascii")
-				except:
-					continue
-				else:
-					s += i
-			return s
-
-	def errorHandling(self, title = "", result = "", status = 500):
+	def showErrorMessage(self, title = "", result = "", status = 500):
 		if title == "":
 			title = self.__language__(30600)
 		if result == "":
 			result = self.__language__(30617)
 			
 		if ( status == 303):
-			self.showMessage(title, result)
+			self.__utils__.showMessage(title, result)
 		elif ( status == 500):
-			self.showMessage(title, self.__language__(30606))
+			self.__utils__.showMessage(title, self.__language__(30606))
 		elif ( status != 0):
-			self.showMessage(title, self.__language__(30617))
+			self.__utils__.showMessage(title, self.__language__(30617))

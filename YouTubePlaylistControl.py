@@ -17,22 +17,16 @@
 '''
 
 import sys
-import os
 import xbmc
 import xbmcgui
-import xbmcplugin
-import urllib
-import YouTubeCore
-import YouTubeScraperCore
-
-core = YouTubeCore.YouTubeCore()
-scraper = YouTubeScraperCore.YouTubeScraperCore()
 
 class YouTubePlaylistControl:
 	__settings__ = sys.modules[ "__main__" ].__settings__
 	__language__ = sys.modules[ "__main__" ].__language__
 	__plugin__ = sys.modules[ "__main__"].__plugin__	
 	__dbg__ = sys.modules[ "__main__" ].__dbg__
+	__core__ = sys.modules[ "__main__" ].__core__
+	__scraper__ = sys.modules[ "__main__" ].__scraper__
 	
 	urls = {};
 	urls['playlists'] = "http://gdata.youtube.com/feeds/api/playlists/%s?"
@@ -85,11 +79,11 @@ class YouTubePlaylistControl:
 	def getPlayList(self, params = {}):
 		get = params.get
 		feed = self.urls["playlists"] % get("playlistId")
-		(result , status) = core.listAll(feed, params)
+		(result , status) = self.__core__.listAll(feed, params)
 		return result
 	
 	def getDiscoSearch(self, params = {}):
-		(result, status) = scraper.searchDisco(params)
+		(result, status) = self.__scraper__.searchDisco(params)
 		return result
 		
 	def getFavorites(self, params = {}):
@@ -97,7 +91,7 @@ class YouTubePlaylistControl:
 		if not get("contact"):
 			return
 		feed = self.urls["favorites"] % get("contact") 
-		(result , status) = core.listAll(feed, params)
+		(result , status) = self.__core__.listAll(feed, params)
 		return result
 		
 	def getNewSubscriptions(self, params = {}):
@@ -105,5 +99,5 @@ class YouTubePlaylistControl:
 		if not get("contact"):
 			return
 		feed = self.urls["newsubscriptions"] % get("contact")
-		(result , status) = core.listAll(feed, params)
+		(result , status) = self.__core__.listAll(feed, params)
 		return result

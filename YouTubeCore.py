@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, urllib, urllib2, re, os, cookielib, string, os.path
+import sys, urllib, urllib2, re, cookielib, string, os.path
 from xml.dom.minidom import parseString
 
 # ERRORCODES:
@@ -43,11 +43,54 @@ class YouTubeCore(object):
 	# 
 	#===============================================================================
 	
+	#===============================================================================
+	# The time parameter restricts the search to videos uploaded within the specified time. 
+	# Valid values for this parameter are today (1 day), this_week (7 days), this_month (1 month) and all_time. 
+	# The default value for this parameter is all_time.
+	# 
+	# This parameter is supported for search feeds as well as for the top_rated, top_favorites, most_viewed, 
+	# most_popular, most_discussed and most_responded standard feeds.
+	#===============================================================================
+
+	urls = {};
+	urls['uploads'] = "http://gdata.youtube.com/feeds/api/users/%s/uploads"
+	urls['favorites'] = "http://gdata.youtube.com/feeds/api/users/%s/favorites"
+	urls['playlists'] = "http://gdata.youtube.com/feeds/api/users/%s/playlists"
+	urls['playlist_root'] = "http://gdata.youtube.com/feeds/api/playlists/%s"
+	urls['list_related'] = "http://gdata.youtube.com/feeds/api/videos/%s/related"
+	urls['newsubscriptions'] = "http://gdata.youtube.com/feeds/api/users/%s/newsubscriptionvideos"
+	urls['contacts'] = "http://gdata.youtube.com/feeds/api/users/default/contacts"
+	urls['subscriptions'] = "http://gdata.youtube.com/feeds/api/users/%s/subscriptions"
+	urls['feed_rated'] = "http://gdata.youtube.com/feeds/api/standardfeeds/top_rated?time=%s"
+	urls['feed_favorites'] = "http://gdata.youtube.com/feeds/api/standardfeeds/top_favorites?time=%s"
+	urls['feed_viewed'] = "http://gdata.youtube.com/feeds/api/standardfeeds/most_viewed?time=%s"
+	urls['feed_linked'] = "http://gdata.youtube.com/feeds/api/standardfeeds/most_popular?time=%s" 
+	urls['feed_recent'] = "http://gdata.youtube.com/feeds/api/standardfeeds/most_recent" # doesn't work with time
+	urls['feed_discussed'] = "http://gdata.youtube.com/feeds/api/standardfeeds/most_discussed?time=%s"
+	urls['feed_responded'] = "http://gdata.youtube.com/feeds/api/standardfeeds/most_responded?time=%s"
+	urls['feed_featured'] = "http://gdata.youtube.com/feeds/api/standardfeeds/recently_featured" # doesn't work with time
+	urls['subscriptions_uploads'] = "http://gdata.youtube.com/feeds/api/users/%s/uploads"
+	urls['subscriptions_favorites'] = "http://gdata.youtube.com/feeds/api/users/%s/favorites"
+	urls['subscriptions_playlists'] = "http://gdata.youtube.com/feeds/api/users/%s/playlists"
+	urls['http_login'] = "https://www.google.com/accounts/ServiceLogin?service=youtube"
+	urls['gdata_login'] = "https://www.google.com/youtube/accounts/ClientLogin"
+	
+	def _fetchPage(self, url, params = {}):
+		get = params.get
+		request = urllib2.Request(url)
+		request.add_header('User-Agent', self.USERAGENT);
+		if (get("login-info")):
+			request.add_header('Cookie', 'LOGIN_INFO=' + get("login_info"))
+			
+		connection = urllib2.urlopen(request);
+		contents = connection.read()
+		connection.close()
+		return contents
+
 	def __init__(self):
 		timeout = self.__settings__.getSetting( "timeout" )
 		if not timeout:
 			timeout = "5"
-		#socket.setdefaulttimeout(float(timeout))
 		return None
 		
 	def interrogate(self, item):
@@ -68,92 +111,9 @@ class YouTubeCore(object):
 		if hasattr(item, '__doc__'):
 			doc = getattr(item, '__doc__')
 			if doc:
-				doc = doc.strip() # Remove leading/trailing whitespace.
+				doc = doc.strip()
 				firstline = doc.split('\n')[0]
-				print "DOC:     ", firstline
-
-	def login(self, error = 0):
-		if self.__dbg__:
-			print self.__plugin__ + " login - errors: " + str(error)
-			
-		uname = self.__settings__.getSetting( "username" )
-		passwd = self.__settings__.getSetting( "user_password" )
-		
-		self.__settings__.setSetting('auth', "")
-		self.__settings__.setSetting('nick', "")
-		
-		if ( uname == "" or passwd == "" ):
-			if self.__dbg__:
-				print self.__plugin__ + " login no username or password set "
-			return ( "", 0 )
-
-		url = urllib2.Request("https://www.google.com/youtube/accounts/ClientLogin")
-		url.add_header('Content-Type', 'application/x-www-form-urlencoded')
-		data = urllib.urlencode({'Email': uname, 'Passwd': passwd, 'service': 'youtube', 'source': 'YouTube plugin'})
-		
-		try:
-			con = urllib2.urlopen(url, data);
-
-			value = con.read()
-			con.close()
-		
-			result = re.compile('Auth=(.*)\nYouTubeUser=(.*)').findall(value)
-					
-			if len(result) > 0:
-				( auth, nick ) = result[0]
-				self.__settings__.setSetting('auth', auth)
-				self.__settings__.setSetting('nick', nick)
-
-				if self.__dbg__:
-					print self.__plugin__ + " login done: " + nick
-				return ( self.__language__(30030), 200 )
-					
-			return ( self.__language__(30609), 303 )
-			
-		except urllib2.HTTPError, e:
-			err = str(e)
-			if self.__dbg__:
-				print self.__plugin__ + " login failed, hit http except: " + err
-			if e.code == 403:
-				return ( self.__language__(30621), 303 )
-			return ( err, 303 )
-		
-		except ValueError, e:
-			err = repr(e)
-			if self.__dbg__:
-				print self.__plugin__ + " login failed, hit valueerror except: " + err
-			return ( err, 303 )
-		
-		except IOError, e:
-			# http://bytes.com/topic/python/answers/33770-error-codes-urlerror
-			if self.__dbg__:
-				print self.__plugin__ + " login failed, hit ioerror except2: : " + repr(e)
-				print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
-								   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
-				print self.interrogate(e)
-
-			if error < 9:
-				if self.__dbg__:
-					print self.__plugin__ + " login pre sleep"
-				# Check if there is a timeout here.
-				import time
-				time.sleep(3)
-				if self.__dbg__:
-					print self.__plugin__ + " login post sleep"
-				return self.login( error + 1 )
-			return ( self.__language__(30623), 303 )
-		
-		except urllib2.URLError, e:
-			err = repr(e)
-			if self.__dbg__:
-				print self.__plugin__ + " login failed, hit url except: " + err
-			return ( err, 303 )										
-		except:
-			if self.__dbg__:
-				print self.__plugin__ + " login failed uncaught exception"
-				print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
-								   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
-			return ( self.__language__(30609), 500 )
+				print "DOC:     ", firstline		
 	
 	def search(self, query, page = "0"):
 		if self.__dbg__:
@@ -231,7 +191,6 @@ class YouTubeCore(object):
 	
 	def listAll(self, feed, params ={}):
 		get = params.get
-		
 		result = ""
 		auth = self._getAuth()
 		
@@ -272,6 +231,25 @@ class YouTubeCore(object):
 			if self.__dbg__:
 				print self.__plugin__ + " list done with no results"
 			return (self.__language__(30602), 303)
+	
+	def createUrl(self, params):
+		url = ""
+		return url
+	
+	def _parseFeeds(self, params):
+		get = params.get
+				
+		feed = self.feeds[get("feed")]
+		if (feed.find("%s") > 0):
+			if ( get("contact") and not (get("external") and get("channel"))):
+				feed = feed % get("contact")
+			elif ( get("channel")):
+				feed = feed % get("channel")
+			elif ( get("playlist")):
+				feed = feed % get("playlist")
+			elif ( get("feed") == "uploads" or get("feed") == "favorites" or  get("feed") == "playlists" or get("feed") == "subscriptions" or get("feed") == "newsubscriptions"):
+				feed = feed % self.__settings__.getSetting( "nick" )
+		return feed
 	
 	def list(self, feed, params ={}):
 		get = params.get
@@ -437,9 +415,9 @@ class YouTubeCore(object):
 				chunk = con.read(chunk_size)
 				bytes_so_far += len(chunk)
 				file.write(chunk)
-		 		if not chunk:
-		 			break
-		 	
+				if not chunk:
+					break
+			
 			con.close()
 			os.rename(filename_incomplete, filename_complete)
 			
@@ -554,7 +532,6 @@ class YouTubeCore(object):
 		if os.path.exists(path):
 			video['video_url'] = path
 			video['local'] = "true"
-			print "sokokok"
 			return (video, 200)
 		
 		if download:
@@ -574,109 +551,103 @@ class YouTubeCore(object):
 				else: 
 					hd_quality = 0
 		
-		try:
-			(fmtSource, swfConfig, video['stream_map'], video['trans_url']) = self._extractVariables(videoid)
-			
-			if ( not fmtSource ):
-				if self.__dbg__:
-					print self.__plugin__ + " construct_video_url Hopefully this extra if check is now legacy THIS SHOULD NOT HAPPEN ANYMORE"
-				return ( "", 500 ) 
-			
-			if ( video['stream_map'] == 303 ):
-				return (fmtSource, 303)
-			
-			fmt_url_map = urllib.unquote_plus(fmtSource[0]).split('|')
-			links = {};
-			video_url = False
-
-			print self.__plugin__ + " construct_video_url: stream_map : " + video['stream_map']
-			if (video['stream_map'] == 'True'):
-				if self.__dbg__:
-					print self.__plugin__ + " construct_video_url: stream map"
-					
-				for fmt_url in fmt_url_map:
-					if self.__dbg__:
-						print self.__plugin__ + " construct_video_url: fmt_url : " + repr(fmt_url)
-						
-					if (len(fmt_url) > 7 and fmt_url.find(":\\/\\/") > 0):
-						if (fmt_url.rfind(',') > fmt_url.rfind('\/id\/')):
-							final_url = fmt_url[:fmt_url.rfind(',')]
-							final_url = final_url.replace('\u0026','&')
-							if (final_url.rfind('\/itag\/') > 0):
-								quality = final_url[final_url.rfind('\/itag\/') + 8:]
-							else :
-								quality = "5"
-							links[int(quality)] = final_url.replace('\/','/')
-						else :
-							final_url = fmt_url
-							final_url = final_url.replace('\u0026','&')
-							if (final_url.rfind('\/itag\/') > 0):
-								quality = final_url[final_url.rfind('\/itag\/') + 8:]
-							else :
-								quality = "5"
-							links[int(quality)] = final_url.replace('\/','/')
-			
-			else:
-				if self.__dbg__:
-					print self.__plugin__ + " construct_video_url: non stream map" 
-				for fmt_url in fmt_url_map:
-					if (len(fmt_url) > 7):
-						if (fmt_url.rfind(',') > fmt_url.rfind('&id=')): 
-							final_url = fmt_url[:fmt_url.rfind(',')]
-							final_url = final_url.replace('\u0026','&')
-							if (final_url.rfind('itag=') > 0):
-								quality = final_url[final_url.rfind('itag=') + 5:]
-								quality = quality[:quality.find('&')]
-							else:
-								quality = "5"
-							links[int(quality)] = final_url.replace('\/','/')
-						else :
-							final_url = fmt_url
-							if (final_url.rfind('itag=') > 0):
-								quality = final_url[final_url.rfind('itag=') + 5:]
-								quality = quality[:quality.find('&')]
-							else :
-								quality = "5"
-							links[int(quality)] = final_url.replace('\/','/')
-			
-			get = links.get
-			
-			# SD videos are default, but we go for the highest res
-			if (get(35)):
-				video_url = get(35)
-			elif (get(34)):
-				video_url = get(34)
-			elif (get(18)):
-				video_url = get(18)
-			elif (get(5)):
-				video_url = get(5)
-			
-			if (hd_quality > 0): #<-- 720p
-				if (get(22)):
-					video_url = get(22)
-			if (hd_quality > 1): #<-- 1080p
-				if (get(37)):
-					video_url = get(37)
-					
-			if ( not video_url ):
-				if self.__dbg__:
-					print self.__plugin__ + " construct_video_url failed, video_url not set"
-				return (self.__language__(30607), 303)
-			
-			if (video['stream_map'] == 'True'):
-				video['swf_config'] = swfConfig
-			
-			video['video_url'] = video_url;
-
+		(fmtSource, swfConfig, video['stream_map'], video['trans_url']) = self._extractVariables(videoid)
+		
+		if ( not fmtSource ):
 			if self.__dbg__:
-				print self.__plugin__ + " construct_video_url done"
+				print self.__plugin__ + " construct_video_url Hopefully this extra if check is now legacy THIS SHOULD NOT HAPPEN ANYMORE"
+			return ( "", 500 ) 
+		
+		if ( video['stream_map'] == 303 ):
+			return (fmtSource, 303)
+		
+		fmt_url_map = urllib.unquote_plus(fmtSource[0]).split('|')
+		links = {};
+		video_url = False
 
-			return (video, 200);
-		except:
+		print self.__plugin__ + " construct_video_url: stream_map : " + video['stream_map']
+		if (video['stream_map'] == 'True'):
 			if self.__dbg__:
-				print self.__plugin__ + " construct_video_url uncaught exception"
-				print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__ , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
-			return ( "", 500 )
+				print self.__plugin__ + " construct_video_url: stream map"
+				
+			for fmt_url in fmt_url_map:
+				if self.__dbg__:
+					print self.__plugin__ + " construct_video_url: fmt_url : " + repr(fmt_url)
+					
+				if (len(fmt_url) > 7 and fmt_url.find(":\\/\\/") > 0):
+					if (fmt_url.rfind(',') > fmt_url.rfind('\/id\/')):
+						final_url = fmt_url[:fmt_url.rfind(',')]
+						final_url = final_url.replace('\u0026','&')
+						if (final_url.rfind('\/itag\/') > 0):
+							quality = final_url[final_url.rfind('\/itag\/') + 8:]
+						else :
+							quality = "5"
+						links[int(quality)] = final_url.replace('\/','/')
+					else :
+						final_url = fmt_url
+						final_url = final_url.replace('\u0026','&')
+						if (final_url.rfind('\/itag\/') > 0):
+							quality = final_url[final_url.rfind('\/itag\/') + 8:]
+						else :
+							quality = "5"
+						links[int(quality)] = final_url.replace('\/','/')
+		
+		else:
+			if self.__dbg__:
+				print self.__plugin__ + " construct_video_url: non stream map" 
+			for fmt_url in fmt_url_map:
+				if (len(fmt_url) > 7):
+					if (fmt_url.rfind(',') > fmt_url.rfind('&id=')): 
+						final_url = fmt_url[:fmt_url.rfind(',')]
+						final_url = final_url.replace('\u0026','&')
+						if (final_url.rfind('itag=') > 0):
+							quality = final_url[final_url.rfind('itag=') + 5:]
+							quality = quality[:quality.find('&')]
+						else:
+							quality = "5"
+						links[int(quality)] = final_url.replace('\/','/')
+					else :
+						final_url = fmt_url
+						if (final_url.rfind('itag=') > 0):
+							quality = final_url[final_url.rfind('itag=') + 5:]
+							quality = quality[:quality.find('&')]
+						else :
+							quality = "5"
+						links[int(quality)] = final_url.replace('\/','/')
+		
+		get = links.get
+		
+		# SD videos are default, but we go for the highest res
+		if (get(35)):
+			video_url = get(35)
+		elif (get(34)):
+			video_url = get(34)
+		elif (get(18)):
+			video_url = get(18)
+		elif (get(5)):
+			video_url = get(5)
+		
+		if (hd_quality > 0): #<-- 720p
+			if (get(22)):
+				video_url = get(22)
+		if (hd_quality > 1): #<-- 1080p
+			if (get(37)):
+				video_url = get(37)
+				
+		if ( not video_url ):
+			if self.__dbg__:
+				print self.__plugin__ + " construct_video_url failed, video_url not set"
+			return (self.__language__(30607), 303)
+		
+		if (video['stream_map'] == 'True'):
+			video['swf_config'] = swfConfig
+		
+		video['video_url'] = video_url;
+
+		if self.__dbg__:
+			print self.__plugin__ + " construct_video_url done"
+
+		return (video, 200);
 
 
 	def arrayToPipe(self, input):
@@ -1343,7 +1314,7 @@ class YouTubeCore(object):
 
 	def _getAlert(self, videoid):
 		if self.__dbg__:
-			print self.__plugin__ + " _getAlert"
+			print self.__plugin__ + " _getAlert begin"
 
 		http_result = self._fetchPage('http://www.youtube.com/watch?v=' +videoid + "&safeSearch=none", login = True)
 		
@@ -1354,13 +1325,8 @@ class YouTubeCore(object):
 		start += len('class="yt-alert-content">')
 		result = http_result[start: http_result.find('</div>', start)].strip()
 
-		# Why doesn't this work?
-		#result = result.replace("\n", "")
-		#alert = re.compile('class="yt-alert-content">(.*)</div>', re.M).findall(result);
-
 		if self.__dbg__:
-			print self.__plugin__ + " _getAlert : " + repr(start)
-			print self.__plugin__ + " _getAlert done"
+			print self.__plugin__ + " _getAlert done: " + repr(start)
 
 		return result
 	
@@ -1416,13 +1382,8 @@ class YouTubeCore(object):
 			return ""
 
 		if ( new ):
-			if self.__dbg__:
-				print self.__plugin__ + " _httpLogin clearing login_info"
 			self.__settings__.setSetting( "login_info", "" )
 		elif ( self.__settings__.getSetting( "login_info" ) != "" ):
-			if self.__dbg__:
-				print self.__plugin__ + " _httpLogin returning stored login_info"
-				
 			return self.__settings__.getSetting( "login_info" )
 								
 		cj = cookielib.LWPCookieJar()
@@ -1442,7 +1403,7 @@ class YouTubeCore(object):
 			galx = re.compile('Set-Cookie: GALX=(.*);Path=/accounts;Secure').findall(str(header))[0]
 
 			cont = urllib.unquote("http%3A%2F%2Fwww.youtube.com%2Fsignin%3Faction_handle_signin%3Dtrue%26nomobiletemp%3D1%26hl%3Den_US%26next%3D%252Findex&hl=en_US&ltmpl=sso")
-
+			print self.__plugin__ + "cont " + cont
 			params = urllib.urlencode({'GALX': galx,
 						   'Email': uname,
 						   'Passwd': pword,
@@ -1450,11 +1411,9 @@ class YouTubeCore(object):
 						   'continue': cont})
 
 			# Login to Google
-			#if self.__dbg__:
-			#	print self.__plugin__ + " _httpLogin: step 2"
 			url = urllib2.Request('https://www.google.com/accounts/ServiceLoginAuth?service=youtube', params)
 			url.add_header('User-Agent', self.USERAGENT)
-		
+			
 			con = urllib2.urlopen(url)
 			result = con.read()
 
@@ -1463,8 +1422,6 @@ class YouTubeCore(object):
 			url.add_header('User-Agent', self.USERAGENT)
 			
 			# Login to youtube
-			#if self.__dbg__:
-			#	print self.__plugin__ + " _httpLogin: step 3"
 			con = urllib2.urlopen(newurl)
 			
 			# Save cookiefile in settings
@@ -1475,33 +1432,7 @@ class YouTubeCore(object):
 			
 			if self.__dbg__:
 				print self.__plugin__ + " _httpLogin done"
-
+			
 			return self.__settings__.getSetting( "login_info" )
-		
-		except IOError, e:
-			# http://bytes.com/topic/python/answers/33770-error-codes-urlerror
-			if self.__dbg__:
-				print self.__plugin__ + " login failed, hit ioerror except2: : " + repr(e)
-				print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
-								   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
-				print self.interrogate(e)
-				
-				if error < 9:
-					if self.__dbg__:
-						print self.__plugin__ + " login pre sleep"
-					# Check if there is a timeout here.
-					import time
-					time.sleep(3)
-					if self.__dbg__:
-						print self.__plugin__ + " login post sleep"
-
-					return self._httpLogin( new, error + 1 )
-				
-				return ""
 		except:
-			if self.__dbg__:
-				print self.__plugin__ + " _httpLogin: uncaught exception"
-				print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
-								   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
-			return ""
-		
+			print self.__plugin__ + " crappy shit"

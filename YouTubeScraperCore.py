@@ -16,9 +16,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, urllib, urllib2, re
+import sys, urllib, re
 from BeautifulSoup import BeautifulSoup, SoupStrainer
-import YouTubeCore
 
 class YouTubeScraperCore:	 
 
@@ -27,7 +26,7 @@ class YouTubeScraperCore:
 	__plugin__ = sys.modules[ "__main__"].__plugin__	
 	__dbg__ = sys.modules[ "__main__" ].__dbg__
 	
-	core = YouTubeCore.YouTubeCore()
+	__core__ = sys.modules[ "__main__" ].__core__
 	USERAGENT = "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-GB; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8"
 	
 	urls = {}
@@ -46,7 +45,7 @@ class YouTubeScraperCore:
 	urls['popular_trailers'] = "http://www.youtube.com/trailers?s=trp&p=%s&hl=en"
 	urls['popular_game_trailers'] = "http://www.youtube.com/trailers?s=gtp&p=%s&hl=en"
 	urls['upcoming_game_trailers'] = "http://www.youtube.com/trailers?s=gtcs&p=%s&hl=en"
-	urls['recommended'] = "http://www.youtube.com/videos?r=1"
+	urls['recommended'] = "http://www.youtube.com/videos?r=1&hl=en"
 	urls['movies_list'] = ""
 
 #=================================== Recommended ============================================
@@ -63,7 +62,7 @@ class YouTubeScraperCore:
 		oldVideos = self.__settings__.getSetting("recommendedVideos")
 		
 		if ( page == 0 or oldVideos == ""):
-			( videos, result)  = self._scrapeYouTubeData(url)
+			( videos, result)  = self._scrapeYouTubeData(params)
 			if (result == 200):
 				self.__settings__.setSetting("recommendedVideos", self.core.arrayToPipe(videos))
 			else:
@@ -78,7 +77,9 @@ class YouTubeScraperCore:
 		
 		subitems = videos[(per_page * page):(per_page * (page + 1))]
 		
-		print self.__plugin__ + " get batch: "
+		if self.__dbg__:
+			print self.__plugin__ + " calling get batch"
+			
 		( ytobjects, status ) = self.core._get_batch_details(subitems)
 		
 		if (len(ytobjects) > 0):
@@ -86,48 +87,27 @@ class YouTubeScraperCore:
 		
 		return (ytobjects, status)
 	
-	def _scrapeYouTubeData(self, url, retry = True):
-		if self.__dbg__:
-			print self.__plugin__ + " _scrapeYouTubeData: " + url
-		result = ""
-
+	def _scrapeYouTubeData(self, params ={}):
+		get = params.get		
+		retry = 0; 
+		
 		login_info = self.__settings__.getSetting( "login_info" )
-		if ( not login_info ):
+		while not login_info and retry < 10:
 			if ( self.core._httpLogin() ):
 				login_info = self.__settings__.getSetting( "login_info" )
+			retry += 1
 		
-		url = urllib2.Request(url + "&hl=en")
-		url.add_header('User-Agent', self.USERAGENT)
-		url.add_header('Cookie', 'LOGIN_INFO=' + login_info)
+		params["login_info"] = login_info
+		url = self.createUrl(params)
+		result = self.__core__._fetchPage(url, params)
 
-		try:
-			con = urllib2.urlopen(url)
-			result = con.read()
-			con.close()
+		videos = re.compile('<a href="/watch\?v=(.*)&amp;feature=grec_browse" class=').findall(result);
 
-			videos = re.compile('<a href="/watch\?v=(.*)&amp;feature=grec_browse" class=').findall(result);
-
-			if len(videos) == 0:
-				videos = re.compile('<div id="reco-(.*)" class=').findall(result);
-
-			if ( len(videos) == 0 and retry ):
-				self.core._httpLogin()
-				videos = self._scrapeYouTubeData(url, False)
-			if self.__dbg__:
-				print self.__plugin__ + " _scrapeYouTubeData done"
-			return ( videos, 200 )
-		except urllib2.HTTPError, e:
-			if self.__dbg__:
-				print self.__plugin__ + " _scrapeYouTubeData exception: " + str(e)
-			return ( self.__language__(30619), "303" )
-		except:
-			if self.__dbg__:
-				print self.__plugin__ + " _scrapeYouTubeData uncaught exception"
-				print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
-								   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
-				print self.__plugin__ + " _scrapeYouTubeData result: " + repr(result)
-			return ( "", 500 )
-
+		if len(videos) == 0:
+			videos = re.compile('<div id="reco-(.*)" class=').findall(result);
+			
+		return ( videos, 200 )
+		
 #=================================== Trailers ============================================
 	def scrapeTrailersListFormat (self, page, params = {}):
 		get = params.get		 
@@ -157,8 +137,8 @@ class YouTubeScraperCore:
 			return (yobjects, 500)
 		
 		return (yobjects, status)
+	
 #=================================== Categories  ============================================
-
 	def scrapeCategoriesGrid(self, html, params = {}):
 		if self.__dbg__:
 			print self.__plugin__ + " scrapeCategoriesGrid"
@@ -256,7 +236,7 @@ class YouTubeScraperCore:
 		url = self.urls["disco_search"] % urllib.quote_plus(query)
 		if (self.__dbg__):
 			print "Disco search url %s" % url
-		page = self._fetchPage(url)
+		page = self.__core__._fetchPage(url)
 		if (page.find("list=") != -1):
 			page = page.replace("\u0026", "&")
 			mix_list_id = page[page.find("list=") + 5:]
@@ -270,7 +250,7 @@ class YouTubeScraperCore:
 			
 			url = self.urls["disco_mix_list"] % (video_id, mix_list_id)
 										
-			page = self._fetchPage(url)
+			page = self.__core__._fetchPage(url)
 			
 			list = SoupStrainer(name="div", id ="quicklist")
 			mix_list = BeautifulSoup(page, parseOnlyThese=list)
@@ -290,7 +270,7 @@ class YouTubeScraperCore:
 	def scrapeDiscoTop25(self, params = {}):
 		get = params.get
 		url = self.urls["disco_main"]
-		page = self._fetchPage(url, params)
+		page = self.__core__._fetchPage(url, params)
 		list = SoupStrainer(name="div", attrs = {"class":"popular-message"})
 		popular = BeautifulSoup(page, parseOnlyThese=list)
 		result = []
@@ -308,7 +288,7 @@ class YouTubeScraperCore:
 	def scrapeDiscoTopArtist(self, params = {}):
 		get = params.get
 		url = self.urls["disco_main"]
-		page = self._fetchPage(url, params)
+		page = self.__core__._fetchPage(url, params)
 		list = SoupStrainer(name="div", attrs = {"class":"popular-artists"})
 		popular = BeautifulSoup(page, parseOnlyThese=list)
 		if (len(popular)):
@@ -489,15 +469,6 @@ class YouTubeScraperCore:
 		return (yobjects, status)
 
 #=================================== Common ============================================		
-
-	def _fetchPage(self, feed, params = {}):
-		url = urllib2.Request(feed)
-		url.add_header('User-Agent', self.USERAGENT);
-		
-		con = urllib2.urlopen(url);
-		page = con.read()
-		con.close()
-		return page
 			
 	def scrapePageinator(self, params = {}):
 		get = params.get
@@ -531,7 +502,7 @@ class YouTubeScraperCore:
 			
 			params["page"] = str(begin_page)
 			url = self.createUrl(params)
-			html = self._fetchPage(url, params)
+			html = self.__core__._fetchPage(url, params)
 			if (self.__dbg__):
 				print "fetching url " + url
 
@@ -555,7 +526,7 @@ class YouTubeScraperCore:
 					url = self.createUrl(params)
 					if (self.__dbg__):
 						print "fetching url: " + url
-					html = self._fetchPage(url, params)
+					html = self.__core__._fetchPage(url, params)
 	
 					if (get("scraper") == "categories"):
 						(new_result, status) = self.scrapeCategoriesGrid(html, params)
@@ -595,7 +566,7 @@ class YouTubeScraperCore:
 			if self.__dbg__:
 				print self.__plugin__ + " fetching url: " + url 
 				
-			html = self._fetchPage(url, params)
+			html = self.__core__._fetchPage(url, params)
 			if (get("scraper") == "categories" )	:
 				if (get("category")):
 					return self.scrapeCategoriesGrid(html, params)
@@ -778,5 +749,4 @@ class YouTubeScraperCore:
 		return self.scrapePageinator(params)
 	
 if __name__ == '__main__':
-	
 	sys.exit(0);
