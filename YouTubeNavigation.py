@@ -477,40 +477,20 @@ class YouTubeNavigation:
 			xbmc.executebuiltin( "Container.Refresh" )
 		return True
 		
-	#================================== Searching =========================================
-	def searchDisco(self, params = {}):
-		get = params.get
-		
-		if (not get("search")):
-			params["search"] = self.getUserInput(self.__language__(30006), '')
-			
-		(result, status) = self.__scraper__.searchDisco(params)
-			
-		if (status != 200):
-			self.showErrorMessage(self.__language__(30006), result, status)
-		else:
-			self.parseVideoList(params, result)
-	
+	#================================== Searching =========================================	
 	def search(self, params = {}):
 		get = params.get
 				
 		if (get("search")):
 			query = get("search")
 			query = urllib.unquote_plus(query)
-			if (get("action") == "search_disco"):
-				self.saveSearch(query, query, "stored_disco_searches")
-			else:
-				self.saveSearch(query, query)
 		else :
 			query = self.getUserInput(self.__language__(30006), '')
-			if (query):
-				if (get("action") == "search_disco"):
-					self.saveSearch(query, query, "stored_disco_searches")
-				else:
-					self.saveSearch(query, query)
-				params["search"] = query
-		
+
 		if (query):
+			params["search"] = query
+			self.saveSearch(params)
+		
 			if (get("action") == "search_disco"):
 				( result, status ) = self.__scraper__.searchDisco(params)
 			else:

@@ -75,9 +75,17 @@ class YouTubePluginStorage:
 				
 		xbmc.executebuiltin( "Container.Refresh" )
 		
-	def saveSearch(self, old_query, new_query, store = "stored_searches"):
+	def saveSearch(self, params = {}):
+		get = params.get
+		
+		if (get("action") == "search_disco"):
+			store = "stored_searches"
+		else:
+			store = "stored_disco_searches"
+		
 		old_query = urllib.unquote_plus(old_query)
 		new_query = urllib.unquote_plus(new_query)
+		
 		try:
 			searches = eval(self.__settings__.getSetting(store))
 		except:
