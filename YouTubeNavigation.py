@@ -476,20 +476,7 @@ class YouTubeNavigation:
 												
 			xbmc.executebuiltin( "Container.Refresh" )
 		return True
-	
-	def listRelated(self, params={}):
-		get = params.get
-		if (get("videoid")):
-			
-			(results, status) = self.__core__.list(params)
-			
-			if status != 200:
-				self.showErrorMessage(self.__language__(30529), results, status)
-				return False
-			
-			self.parseVideoList(params, results)
-		return True
-	
+		
 	#================================== Searching =========================================
 	def searchDisco(self, params = {}):
 		get = params.get
@@ -542,104 +529,7 @@ class YouTubeNavigation:
 					self.__settings__.setSetting("search_" + query + "_thumb", thumbnail)
 				
 			self.parseVideoList(params, result)
-			
-	def deleteSearch(self, params = {}):
-		get = params.get
-		query = get("delete")
-		query = urllib.unquote_plus(query)
-		try:
-			if (get("action") == "delete_search"):
-				searches = eval(self.__settings__.getSetting("stored_searches"))
-			else:
-				searches = eval(self.__settings__.getSetting("stored_disco_searches"))
-		except:
-			searches = []
-			
-		for count, search in enumerate(searches):
-			if (search.lower() == query.lower()):
-				del(searches[count])
-				break
-		
-		if (get("action") == "delete_search"):
-			self.__settings__.setSetting("stored_searches", repr(searches))
-		else:
-			self.__settings__.setSetting("stored_disco_searches", repr(searches))
-				
-		xbmc.executebuiltin( "Container.Refresh" )
-		
-	def saveSearch(self, old_query, new_query, store = "stored_searches"):
-		old_query = urllib.unquote_plus(old_query)
-		new_query = urllib.unquote_plus(new_query)
-		try:
-			searches = eval(self.__settings__.getSetting(store))
-		except:
-			searches = []
-		
-		for count, search in enumerate(searches):
-			if (search.lower() == old_query.lower()):
-				del(searches[count])
-				break
-
-		searchCount = ( 10, 20, 30, 40, )[ int( self.__settings__.getSetting( "saved_searches" ) ) ]
-		searches = [new_query] + searches[:searchCount]
-		self.__settings__.setSetting(store, repr(searches))
 	
-	def editSearch(self, params = {}):
-		get = params.get
-		if (get("search")):
-			old_query = urllib.unquote_plus(get("search"))
-			new_query = self.getUserInput(self.__language__(30006), old_query)
-			params["search"] = new_query
-			
-			if (get("action") == "edit_search"):
-				self.saveSearch(old_query, new_query)
-			else:
-				params["action"] = "search_disco"
-				self.saveSearch(old_query, new_query, "stored_disco_searches")
-				
-			self.search(params)
-	
-	def refineSearch(self, params = {}):
-		get = params.get
-		query = get("search")
-		query = urllib.unquote_plus(query)
-		
-		try:
-			searches = eval(self.__settings__.getSetting("stored_searches_author"))
-		except :
-			searches = {}
-			
-		if query in searches:
-			author = self.getUserInput(self.__language__(30517), searches[query])
-		else:
-			author = self.getUserInput(self.__language__(30517), '')
-
-		if author == "":
-			if author in searches:
-				del searches[query]
-				xbmc.executebuiltin( "Container.Refresh" )
-		elif author:
-			searches[query] = author
-			
-			self.__settings__.setSetting("stored_searches_author", repr(searches))
-			self.__utils__.showMessage(self.__language__(30006), self.__language__(30616))
-			xbmc.executebuiltin( "Container.Refresh" )
-		
-	def deleteRefinements(self, params = {}):
-		get = params.get
-		query = get("search")
-		query = urllib.unquote_plus(query)
-		try:
-			searches = eval(self.__settings__.getSetting("stored_searches_author"))
-		except :
-			searches = {}
-			
-		if query in searches:
-			del searches[query]
-			self.__settings__.setSetting("stored_searches_author", repr(searches))
-			self.__utils__.showMessage(self.__language__(30006), self.__language__(30610))
-			xbmc.executebuiltin( "Container.Refresh" )
-
 	#================================== List Item manipulation =========================================	
 	# is only used by List Menu
 	def addListItem(self, params = {}, item_params = {}):

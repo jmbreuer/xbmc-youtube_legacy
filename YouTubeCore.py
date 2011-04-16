@@ -53,29 +53,32 @@ class YouTubeCore(object):
 	#===============================================================================
 
 	urls = {};
+	# YouTube General Feeds
+	urls['list_playlist'] = "http://gdata.youtube.com/feeds/api/playlists/%s"
+	urls['list_related'] = "http://gdata.youtube.com/feeds/api/videos/%s/related"
+	urls['search'] = "http://gdata.youtube.com/feeds/api/videos?q=%s&safeSearch=%s&start-index=%s&max-results=%s"
+
+	# YouTube User specific Feeds
 	urls['uploads'] = "http://gdata.youtube.com/feeds/api/users/%s/uploads"
 	urls['favorites'] = "http://gdata.youtube.com/feeds/api/users/%s/favorites"
 	urls['playlists'] = "http://gdata.youtube.com/feeds/api/users/%s/playlists"
-	urls['playlist_root'] = "http://gdata.youtube.com/feeds/api/playlists/%s"
-	urls['list_related'] = "http://gdata.youtube.com/feeds/api/videos/%s/related"
-	urls['search'] = "http://gdata.youtube.com/feeds/api/videos?q=%s&safeSearch=%s&start-index=%s&max-results=%s"
-	urls['newsubscriptions'] = "http://gdata.youtube.com/feeds/api/users/%s/newsubscriptionvideos"
 	urls['contacts'] = "http://gdata.youtube.com/feeds/api/users/default/contacts"
 	urls['subscriptions'] = "http://gdata.youtube.com/feeds/api/users/%s/subscriptions"
+	urls['newsubscriptions'] = "http://gdata.youtube.com/feeds/api/users/%s/newsubscriptionvideos"
+	
+	# YouTube Standard feeds
 	urls['feed_rated'] = "http://gdata.youtube.com/feeds/api/standardfeeds/top_rated?time=%s"
 	urls['feed_favorites'] = "http://gdata.youtube.com/feeds/api/standardfeeds/top_favorites?time=%s"
 	urls['feed_viewed'] = "http://gdata.youtube.com/feeds/api/standardfeeds/most_viewed?time=%s"
 	urls['feed_linked'] = "http://gdata.youtube.com/feeds/api/standardfeeds/most_popular?time=%s" 
-	urls['feed_recent'] = "http://gdata.youtube.com/feeds/api/standardfeeds/most_recent" # doesn't work with time
 	urls['feed_discussed'] = "http://gdata.youtube.com/feeds/api/standardfeeds/most_discussed?time=%s"
 	urls['feed_responded'] = "http://gdata.youtube.com/feeds/api/standardfeeds/most_responded?time=%s"
-	urls['feed_featured'] = "http://gdata.youtube.com/feeds/api/standardfeeds/recently_featured" # doesn't work with time
-	urls['subscriptions_uploads'] = "http://gdata.youtube.com/feeds/api/users/%s/uploads"
-	urls['subscriptions_favorites'] = "http://gdata.youtube.com/feeds/api/users/%s/favorites"
-	urls['subscriptions_playlists'] = "http://gdata.youtube.com/feeds/api/users/%s/playlists"
-	urls['http_login'] = "https://www.google.com/accounts/ServiceLogin?service=youtube"
-	urls['gdata_login'] = "https://www.google.com/youtube/accounts/ClientLogin"
 	
+	# Wont work with time parameter
+	urls['feed_recent'] = "http://gdata.youtube.com/feeds/api/standardfeeds/most_recent" 
+	urls['feed_featured'] = "http://gdata.youtube.com/feeds/api/standardfeeds/recently_featured"
+	urls['feed_trending'] = "http://gdata.youtube.com/feeds/api/standardfeeds/on_the_web"
+	urls['feed_shared'] = "http://gdata.youtube.com/feeds/api/standardfeeds/most_shared"	
 	
 #	def _fetchPage(self, url, params = {}):
 #		get = params.get
