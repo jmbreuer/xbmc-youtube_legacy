@@ -75,17 +75,17 @@ class YouTubeCore(object):
 	urls['http_login'] = "https://www.google.com/accounts/ServiceLogin?service=youtube"
 	urls['gdata_login'] = "https://www.google.com/youtube/accounts/ClientLogin"
 	
-	def _fetchPage(self, url, params = {}):
-		get = params.get
-		request = urllib2.Request(url)
-		request.add_header('User-Agent', self.USERAGENT);
-		if (get("login-info")):
-			request.add_header('Cookie', 'LOGIN_INFO=' + get("login_info"))
-			
-		connection = urllib2.urlopen(request);
-		contents = connection.read()
-		connection.close()
-		return contents
+#	def _fetchPage(self, url, params = {}):
+#		get = params.get
+#		request = urllib2.Request(url)
+#		request.add_header('User-Agent', self.USERAGENT);
+#		if (get("login-info")):
+#			request.add_header('Cookie', 'LOGIN_INFO=' + get("login_info"))
+#			
+#		connection = urllib2.urlopen(request);
+#		contents = connection.read()
+#		connection.close()
+#		return contents
 
 	def __init__(self):
 		timeout = self.__settings__.getSetting( "timeout" )
@@ -656,43 +656,14 @@ class YouTubeCore(object):
 		return pipedItems
 
 	def _get_batch_details_thumbnails(self, items):
-		request_start = "<feed xmlns='http://www.w3.org/2005/Atom'\n xmlns:media='http://search.yahoo.com/mrss/'\n xmlns:batch='http://schemas.google.com/gdata/batch'\n xmlns:yt='http://gdata.youtube.com/schemas/2007'>\n <batch:operation type='query'/> \n"
-		request_end = "</feed>"
-		
-		video_request = ""
-		
 		ytobjects = []
-		i = 1
-		for (videoid, thumbs) in items:
-			if videoid:
-				video_request +=	"<entry> \n <id>http://gdata.youtube.com/feeds/api/videos/" + videoid+ "</id>\n</entry> \n"
-				if i == 50:
-					final_request = request_start + video_request + request_end
-					request = urllib2.Request("http://gdata.youtube.com/feeds/api/videos/batch")
-					request.add_data(final_request)
-					con = urllib2.urlopen(request)
-					result = con.read()
-					(temp, status) = self._getVideoInfoBatch(result)
-					ytobjects += temp
-					if status != 200:
-						return (ytobjects, status)
-					video_request = ""
-					i = 1
-				i+=1
+		videoids = []
 		
+		for (videoid, thumb) in items:
+			videoids.append(videoid)
 		
-		final_request = request_start + video_request + request_end
-		request = urllib2.Request("http://gdata.youtube.com/feeds/api/videos/batch")
-		request.add_data(final_request)
-					
-		con = urllib2.urlopen(request)
-		result = con.read()
-				
-		(temp, status) = self._getVideoInfoBatch(result)
-		ytobjects += temp
+		(tempobjects, status) = self._get_batch_details(videoids)
 		
-		tempobjects = ytobjects
-		ytobjects = []
 		for i in range(0, len(items)):
 			( videoid, thumbnail ) = items[i]
 			for item in tempobjects:
