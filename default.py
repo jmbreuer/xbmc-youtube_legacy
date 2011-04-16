@@ -37,6 +37,7 @@ __core__ = ""
 __scraper__ = ""
 __playlist__ = ""
 __navigation__ = ""
+__downloader__ = ""
 
 
 if (__name__ == "__main__" ):
@@ -44,6 +45,8 @@ if (__name__ == "__main__" ):
 	__utils__ = utils.YouTubeUtils()
 	import YouTubeCore as core
 	__core__ = core.YouTubeCore()
+	import YouTubeDownloader as downloader
+	__downloader__ = downloader.YouTubeDownloader()
 	import YouTubeScraperCore as scraper
 	__scraper__ = scraper.YouTubeScraperCore()
 	import YouTubePlaylistControl as playlist

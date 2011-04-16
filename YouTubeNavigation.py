@@ -30,6 +30,7 @@ class YouTubeNavigation:
 	__utils__ = sys.modules[ "__main__" ].__utils__
 	__playlist__ = sys.modules[ "__main__" ].__playlist__
 	__core__ = sys.modules[ "__main__" ].__core__
+	__downloader__ = sys.modules[ "__main__" ].__downloader__
 		
 	# This list contains the list options a user sees when indexing a contact 
 	#				label					  , external		 , login		 ,	thumbnail					, feed
@@ -170,7 +171,7 @@ class YouTubeNavigation:
 		if (get("action") == "add_subscription"):
 			self.addSubscription(params)
 		if (get("action") == "download"):
-			self.downloadVideo(params)
+			self.__downloader__.downloadVideo(params)
 		if (get("action") == "list_related"):
 			self.listRelated(params)
 		if (get("action") == "play_video"):
@@ -388,32 +389,6 @@ class YouTubeNavigation:
 			self.addSubtitles(video)
 		
 		self.__settings__.setSetting( "vidstatus-" + video['videoid'], "7" )
-						
-	def downloadVideo(self, params = {}):
-		get = params.get
-		if (get("videoid")):
-			path = self.__settings__.getSetting( "downloadPath" )
-			if (not path):
-				self.__utils__.showMessage(self.__language__(30600), self.__language__(30611))
-				self.__settings__.openSettings()
-				path = self.__settings__.getSetting( "downloadPath" )
-
-			( video, status ) = self.__core__.construct_video_url(params)
-				
-			if status != 200:
-				if self.__dbg__:
-					print self.__plugin__ + " downloadVideo got error from construct_video_url: [%s] %s" % ( status, video)
-					self.showErrorMessage(self.__language__( 30501 ), video, status)
-				return False
-
-			item = video.get
-					
-			self.__utils__.showMessage(self.__language__(30612), self.__utils__.makeAscii(item("Title", "Unknown Title")))
-			
-			( video, status ) = self.__core__.downloadVideo(video)
-					
-			if status == 200:
-				self.__utils__.showMessage(self.__language__( 30604 ), self.__utils__.makeAscii(item("Title")))
 
 	def addToFavorites(self, params = {}):
 		get = params.get
@@ -589,7 +564,7 @@ class YouTubeNavigation:
 			self.__settings__.setSetting("stored_searches", repr(searches))
 		else:
 			self.__settings__.setSetting("stored_disco_searches", repr(searches))
-		
+				
 		xbmc.executebuiltin( "Container.Refresh" )
 		
 	def saveSearch(self, old_query, new_query, store = "stored_searches"):
@@ -623,7 +598,7 @@ class YouTubeNavigation:
 				self.saveSearch(old_query, new_query, "stored_disco_searches")
 				
 			self.search(params)
-
+	
 	def refineSearch(self, params = {}):
 		get = params.get
 		query = get("search")
