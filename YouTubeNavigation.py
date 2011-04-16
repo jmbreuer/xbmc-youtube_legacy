@@ -480,8 +480,8 @@ class YouTubeNavigation:
 	def listRelated(self, params={}):
 		get = params.get
 		if (get("videoid")):
-			feed = self.feeds["list_related"] % get("videoid")
-			(results, status) = self.__core__.list(feed, params)
+			
+			(results, status) = self.__core__.list(params)
 			
 			if status != 200:
 				self.showErrorMessage(self.__language__(30529), results, status)

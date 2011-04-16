@@ -58,6 +58,7 @@ class YouTubeCore(object):
 	urls['playlists'] = "http://gdata.youtube.com/feeds/api/users/%s/playlists"
 	urls['playlist_root'] = "http://gdata.youtube.com/feeds/api/playlists/%s"
 	urls['list_related'] = "http://gdata.youtube.com/feeds/api/videos/%s/related"
+	urls['search'] = "http://gdata.youtube.com/feeds/api/videos?q=%s&safeSearch=%s&start-index=%s&max-results=%s"
 	urls['newsubscriptions'] = "http://gdata.youtube.com/feeds/api/users/%s/newsubscriptionvideos"
 	urls['contacts'] = "http://gdata.youtube.com/feeds/api/users/default/contacts"
 	urls['subscriptions'] = "http://gdata.youtube.com/feeds/api/users/%s/subscriptions"
@@ -74,6 +75,7 @@ class YouTubeCore(object):
 	urls['subscriptions_playlists'] = "http://gdata.youtube.com/feeds/api/users/%s/playlists"
 	urls['http_login'] = "https://www.google.com/accounts/ServiceLogin?service=youtube"
 	urls['gdata_login'] = "https://www.google.com/youtube/accounts/ClientLogin"
+	
 	
 #	def _fetchPage(self, url, params = {}):
 #		get = params.get
@@ -115,26 +117,37 @@ class YouTubeCore(object):
 				firstline = doc.split('\n')[0]
 				print "DOC:     ", firstline		
 	
-	def search(self, query, page = "0"):
-		if self.__dbg__:
-			print self.__plugin__ + " search: " + repr(query) + " - page: " + repr(page)
+	def createUrl(self, params = {}):
+		get = params.get
 		per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
-		safe_search = ("none", "moderate", "strict" ) [int( self.__settings__.getSetting( "safe_search" ) ) ]
+		page = get("page","0")
 		start_index = per_page * int(page) + 1
-	
-
-		link = "http://gdata.youtube.com/feeds/api/videos?q=%s&safeSearch=%s&start-index=%s&max-results=%s" % ( urllib.quote_plus(query), safe_search, start_index, per_page)
-		authors = self.__settings__.getSetting("stored_searches_author")
 		
-		if len(authors) > 0:
-			try:
-				authors = eval(authors)
-				if query in authors:
-					link += "&" + urllib.urlencode({'author': authors[query]})
-			except:
-				print self.__plugin__ + " search - eval failed "
-				
-		( result, status ) = self._fetchPage(link, api = True)
+		if (get("action") == "search"): 
+			query = urllib.unquote_plus(get("query"))
+			safe_search = ("none", "moderate", "strict" ) [int( self.__settings__.getSetting( "safe_search" ) ) ]	
+			url = self.urls["search"] % ( query, safe_search, start_index, per_page)
+			authors = self.__settings__.getSetting("stored_searches_author")
+			if len(authors) > 0:
+				try:
+					authors = eval(authors)
+					if query in authors:
+						url += "&" + urllib.urlencode({'author': authors[query]})
+				except:
+					print self.__plugin__ + " search - eval failed "
+			return url
+		if (get("action") == "list_related"):
+			url = self.feeds["list_related"] % get("videoid")
+			
+		if (get("feed")):
+			url = self.urls[get("feed")]
+			if (get("feed") == )
+		
+	def search(self, params = {}):
+		get = params.get
+		url = self.createUrl(params)
+		
+		( result, status ) = self._fetchPage(url, api = True)
 
 		if status != 200:
 			return ( result, status )
@@ -251,7 +264,7 @@ class YouTubeCore(object):
 				feed = feed % self.__settings__.getSetting( "nick" )
 		return feed
 	
-	def list(self, feed, params ={}):
+	def list(self, params ={}):
 		get = params.get
 		page = get("page","0")
 		if self.__dbg__:
@@ -384,59 +397,6 @@ class YouTubeCore(object):
 			print self.__plugin__ + " playlist done"
 				
 		return ( playobjects, 200 );
-	
-	def downloadVideo(self, video, params = {}):
-		get = params.get
-		item = video.get
-		
-		if self.__dbg__:
-			print self.__plugin__ + " downloadVideo : " + video['Title']
-		bytes_so_far = 0
-		chunk_size = 8192
-		path = self.__settings__.getSetting( "downloadPath" )
-		try:
-			
-			url = urllib2.Request(video['video_url'])
-			url.add_header('User-Agent', self.USERAGENT);
-			
-			filename_incomplete = "%s/%s-[%s]incomplete.mp4" % ( path, ''.join(c for c in video['Title'] if c in self.VALID_CHARS), video["videoid"] )
-			filename_complete = "%s/%s-[%s].mp4" % ( path, ''.join(c for c in video['Title'] if c in self.VALID_CHARS), video["videoid"])
-						
-			file = open(filename_incomplete, "wb")
-			con = urllib2.urlopen(url);
-			total_size = 8192 * 25
-			
-			if con.info().getheader('Content-Length').strip():			
-				total_size = int(con.info().getheader('Content-Length').strip())
-			
-			chunk_size = int(total_size) / 25
-			
-			while 1:
-				chunk = con.read(chunk_size)
-				bytes_so_far += len(chunk)
-				file.write(chunk)
-				if not chunk:
-					break
-			
-			con.close()
-			os.rename(filename_incomplete, filename_complete)
-			
-			self.__settings__.setSetting( "vidstatus-" + video['videoid'], "1" )
-					
-		except urllib2.HTTPError, e:
-			if self.__dbg__:
-				print self.__plugin__ + " downloadVideo except: " + str(e)
-			return ( str(e), 303 )
-		except:
-			if self.__dbg__:
-				print self.__plugin__ + " downloadVideo uncaught exception"
-				print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__, sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
-				
-			return (self.__language__(30606), 303)
-
-		if self.__dbg__:
-			print self.__plugin__ + " downloadVideo done"
-		return ( video, 200 )
 	
 	def saveSubtitle(self, params = {}):
 		import datetime, xbmc
@@ -1274,7 +1234,7 @@ class YouTubeCore(object):
 	def _getAlert(self, videoid):
 		if self.__dbg__:
 			print self.__plugin__ + " _getAlert begin"
-
+		
 		http_result = self._fetchPage('http://www.youtube.com/watch?v=' +videoid + "&safeSearch=none", login = True)
 		
 		start = http_result.find('class="yt-alert-content">')
@@ -1283,10 +1243,10 @@ class YouTubeCore(object):
 		
 		start += len('class="yt-alert-content">')
 		result = http_result[start: http_result.find('</div>', start)].strip()
-
+		
 		if self.__dbg__:
 			print self.__plugin__ + " _getAlert done: " + repr(start)
-
+		
 		return result
 	
 	def _get_details(self, videoid):
@@ -1295,10 +1255,7 @@ class YouTubeCore(object):
 
 		( result, status ) = self._fetchPage("http://gdata.youtube.com/feeds/api/videos/" + videoid, api = True)
 
-		if status == 200:
-			if self.__dbg__:
-				print self.__plugin__ + "_get_details youtube Page result: " #+ repr(result)
-				
+		if status == 200:				
 			result = self._getvideoinfo(result)
 		
 			if len(result) == 0:
@@ -1312,7 +1269,7 @@ class YouTubeCore(object):
 		else:
 			if self.__dbg__:
 				print self.__plugin__ + " _get_details got bad status: " + str(status)
-				#print self.__plugin__ + "_fetchPage returned: " + repr(result)
+			
 			video = {}
 			video['Title'] = "Error"
 			video['videoid'] = videoid
