@@ -91,24 +91,11 @@ class YouTubeNavigation:
 		
 		if (get("scraper")):
 			self.scrape(params)
-			return
 		
 		if (get("options") == "contact_options"):
 			self.listOptionFolder(params)
 			return
-			
-		if (get("login") == "true"):
-			if (get('feed') == 'subscriptions' or get('feed') == 'playlists' or get('feed') == 'contacts' or get("feed") == "subscriptions_playlists" ):
-				self.listUserFolder(params)				  
-			elif ( get("feed") in self.feeds):
-				self.listUserFolderFeeds(params)
-			return
-
-		if (get("feed")):
-			if ( get("feed") in self.feeds):
-				self.listFeedFolder(params)
-			return
-		
+				
 		path = get("path", "/root")
 		
 		for category in self.categories:
@@ -172,8 +159,6 @@ class YouTubeNavigation:
 			self.addSubscription(params)
 		if (get("action") == "download"):
 			self.__downloader__.downloadVideo(params)
-		if (get("action") == "list_related"):
-			self.listRelated(params)
 		if (get("action") == "play_video"):
 			self.playVideo(params)
 		if (get("action") == "change_subscription_view"):
@@ -183,17 +168,13 @@ class YouTubeNavigation:
 		
 	def listFolder(self, params = {}):
 		get = params.get
+
 		
 		xbmcplugin.endOfDirectory( handle=int( sys.argv[ 1 ] ), succeeded=True, cacheToDisc=False)
 
 
 	def listOptionFolder(self, params = {}):
 		get = params.get
-		if ( get('login') and self.__settings__.getSetting( "username" ) != "" ):
-			auth = self.__settings__.getSetting( "auth" )
-			if ( not auth ) :
-				self.login()
-				auth = self.__settings__.getSetting( "auth" )
 		
 		for index, item in enumerate(self.user_options):
 			item["path"] = get("path")
@@ -293,27 +274,11 @@ class YouTubeNavigation:
 
 	def listStoredSearches(self, params = {}):
 		get = params.get
-		try:
-			if (get("store") == "searches"):
-				searches = eval(self.__settings__.getSetting("stored_searches"))
-			else:
-				searches = eval(self.__settings__.getSetting("stored_disco_searches"))
-		except:
-			searches = []
 		
-		for search in searches:
-			item = {}
-			item["path"] = get("path")
-			item["Title"] = search
-			item["search"] = urllib.quote_plus(search)
-			if (get("store") == "searches"):
-				item["action"] = "search"
-				item["thumbnail"] = self.__settings__.getSetting("search_" + search + "_thumb")
-			else:
-				item["action"] = "search_disco"
-				item["thumbnail"] = self.__settings__.getSetting("disco_search_" + search + "_thumb")
-			
-			self.addFolderListItem(params, item, len(searches))
+		(results, status) = self.__storage__.getStoredSearches(params)
+		
+		self.parseFolderList(params, results)
+		
 	
 	def scrape(self, params):
 		get = params.get
@@ -405,7 +370,7 @@ class YouTubeNavigation:
 		get = params.get
 		
 		if (get("editid")):
-			(message, status ) = self.__core__.delete_favorite(get('editid'))
+			(message, status ) = self.__core__.delete_favorite(params)
 			if status != 200:
 				self.showErrorMessage(self.__language__(30020), message, status)
 				return False
@@ -415,13 +380,12 @@ class YouTubeNavigation:
 	def addContact(self, params = {}):
 		get = params.get
 
-		if (get("contact")):
-			contact = get("contact")
-		else:
+		if not get("contact"):
 			contact = self.getUserInput(self.__language__(30519), '')
+			params["contact"] = contact
 			
-		if (contact):
-			(result, status) = self.__core__.add_contact(contact)
+		if (get("contact")):
+			(result, status) = self.__core__.add_contact(params)
 			if status != 200:
 				self.showErrorMessage(self.__language__(30029), result, status)
 				return False
@@ -435,7 +399,7 @@ class YouTubeNavigation:
 		get = params.get
 
 		if (get("contact")):
-			(result, status) = self.__core__.remove_contact(get("contact"))
+			(result, status) = self.__core__.remove_contact(params)
 			if status != 200:
 				self.showErrorMessage(self.__language__(30029), result, status)
 				return False
@@ -459,7 +423,7 @@ class YouTubeNavigation:
 	def addSubscription(self, params = {}):
 		get = params.get
 		if (get("channel")):
-			(message, status) = self.__core__.add_subscription(get("channel"))
+			(message, status) = self.__core__.add_subscription(params)
 			if status != 200:
 				self.showErrorMessage(self.__language__(30021), message, status)
 				return False
@@ -760,7 +724,7 @@ class YouTubeNavigation:
 			cm.append( ( self.__language__( 30523 ) % title, "XBMC.Container.Update(%s?path=%s&action=search_disco&search=%s)" % ( sys.argv[0],  get("path"), url_title ) ) )
 			
 		cm.append( ( self.__language__( 30514 ), "XBMC.Container.Update(%s?path=%s&action=search&search=%s)" % ( sys.argv[0],  get("path"), url_title ) ) )
-		cm.append( ( self.__language__( 30529 ), "XBMC.Container.Update(%s?path=%s&action=list_related&videoid=%s)" % ( sys.argv[0],  get("path"), item("videoid") ) ) )
+		cm.append( ( self.__language__( 30529 ), "XBMC.Container.Update(%s?path=%s&feed=related&videoid=%s)" % ( sys.argv[0],  get("path"), item("videoid") ) ) )
 		cm.append( ( self.__language__( 30527 ), "XBMC.ActivateWindow(VideoPlaylist)"))
 		cm.append( ( self.__language__( 30502 ), "XBMC.Action(Info)", ) )
 		

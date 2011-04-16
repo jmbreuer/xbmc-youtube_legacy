@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, urllib, urllib2, re, cookielib, string, os.path
+import sys, urllib, urllib2, re, string, os.path
 from xml.dom.minidom import parseString
 
 # ERRORCODES:
@@ -57,7 +57,7 @@ class YouTubeCore(object):
 	urls['list_playlist'] = "http://gdata.youtube.com/feeds/api/playlists/%s"
 	urls['list_related'] = "http://gdata.youtube.com/feeds/api/videos/%s/related"
 	urls['search'] = "http://gdata.youtube.com/feeds/api/videos?q=%s&safeSearch=%s&start-index=%s&max-results=%s"
-
+	
 	# YouTube User specific Feeds
 	urls['uploads'] = "http://gdata.youtube.com/feeds/api/users/%s/uploads"
 	urls['favorites'] = "http://gdata.youtube.com/feeds/api/users/%s/favorites"
@@ -139,12 +139,22 @@ class YouTubeCore(object):
 				except:
 					print self.__plugin__ + " search - eval failed "
 			return url
-		if (get("action") == "list_related"):
-			url = self.feeds["list_related"] % get("videoid")
-			
+		
 		if (get("feed")):
 			url = self.urls[get("feed")]
-			if (get("feed") == )
+			
+			if (url.find("%s") > 0):
+				if ( get("contact") and not (get("external") and get("channel"))):
+					url = url % get("contact")
+				elif ( get("videoid")):
+					url = url % get("videoid")
+				elif ( get("channel")):
+					url = url % get("channel")
+				elif ( get("playlist")):
+					url = url % get("playlist")
+				elif ( get("feed") == "uploads" or get("feed") == "favorites" or  get("feed") == "playlists" or get("feed") == "subscriptions" or get("feed") == "newsubscriptions"):
+					url = url % self.__settings__.getSetting( "nick" )
+			return url
 		
 	def search(self, params = {}):
 		get = params.get
@@ -247,26 +257,7 @@ class YouTubeCore(object):
 			if self.__dbg__:
 				print self.__plugin__ + " list done with no results"
 			return (self.__language__(30602), 303)
-	
-	def createUrl(self, params):
-		url = ""
-		return url
-	
-	def _parseFeeds(self, params):
-		get = params.get
-				
-		feed = self.feeds[get("feed")]
-		if (feed.find("%s") > 0):
-			if ( get("contact") and not (get("external") and get("channel"))):
-				feed = feed % get("contact")
-			elif ( get("channel")):
-				feed = feed % get("channel")
-			elif ( get("playlist")):
-				feed = feed % get("playlist")
-			elif ( get("feed") == "uploads" or get("feed") == "favorites" or  get("feed") == "playlists" or get("feed") == "subscriptions" or get("feed") == "newsubscriptions"):
-				feed = feed % self.__settings__.getSetting( "nick" )
-		return feed
-	
+		
 	def list(self, params ={}):
 		get = params.get
 		page = get("page","0")
@@ -305,32 +296,40 @@ class YouTubeCore(object):
 				print self.__plugin__ + " list done with no results"
 			return (self.__language__(30602), 303)
 
-	def delete_favorite(self, obj):
-		delete_url = "http://gdata.youtube.com/feeds/api/users/%s/favorites/%s" % ( self.__settings__.getSetting( "nick" ), obj )
+	def delete_favorite(self, params = {}):
+		get = params.get
+		delete_url = self.urls["favorites"] % self.__settings__.getSetting( "nick" )
+		delete_url += "/" + get('editid') 
 		return self._youTubeDel(delete_url)
 	
-	def remove_contact(self, obj):
-		delete_url = "http://gdata.youtube.com/feeds/api/users/default/contacts/%s" % obj
+	def remove_contact(self, params = {}):
+		get = params.get
+		delete_url = self.urls["contacts"] 
+		delete_url += "/" + get("contact")
 		return self._youTubeDel(delete_url)
 
-	def remove_subscription(self, obj):
-		delete_url = "http://gdata.youtube.com/feeds/api/users/%s/subscriptions/%s" % ( self.__settings__.getSetting( "nick" ), obj )
-		print self.__plugin__ + "remove : " + delete_url
+	def remove_subscription(self, params = {}):
+		get = params.get
+		delete_url = self.urls["subscriptions"] % self.__settings__.getSetting( "nick" )
+		delete_url += "/" + get("contact")
 		return self._youTubeDel(delete_url)
 
-	def add_contact(self, contact_id):
+	def add_contact(self, params = {}):
+		get = params.get
 		url = "http://gdata.youtube.com/feeds/api/users/default/contacts"
-		add_request = '<?xml version="1.0" encoding="UTF-8"?> <entry xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://gdata.youtube.com/schemas/2007"><yt:username>%s</yt:username></entry>' % contact_id
+		add_request = '<?xml version="1.0" encoding="UTF-8"?> <entry xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://gdata.youtube.com/schemas/2007"><yt:username>%s</yt:username></entry>' % get("contact")
 		return self._youTubeAdd(url, add_request)
 		
-	def add_favorite(self, video_id):
+	def add_favorite(self, params = {}):
+		get = params.get 
 		url = "http://gdata.youtube.com/feeds/api/users/default/favorites"
-		add_request = '<?xml version="1.0" encoding="UTF-8"?><entry xmlns="http://www.w3.org/2005/Atom"><id>%s</id></entry>' % (video_id)
+		add_request = '<?xml version="1.0" encoding="UTF-8"?><entry xmlns="http://www.w3.org/2005/Atom"><id>%s</id></entry>' % get("videoid")
 		return self._youTubeAdd(url, add_request)
 
-	def add_subscription(self, user_id):
+	def add_subscription(self, params = {}):
+		get = params.get
 		url = "http://gdata.youtube.com/feeds/api/users/default/subscriptions"
-		add_request = '<?xml version="1.0" encoding="UTF-8"?><entry xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://gdata.youtube.com/schemas/2007"> <category scheme="http://gdata.youtube.com/schemas/2007/subscriptiontypes.cat" term="user"/><yt:username>%s</yt:username></entry>' % (user_id)
+		add_request = '<?xml version="1.0" encoding="UTF-8"?><entry xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://gdata.youtube.com/schemas/2007"> <category scheme="http://gdata.youtube.com/schemas/2007/subscriptiontypes.cat" term="user"/><yt:username>%s</yt:username></entry>' % get("contact")
 		return self._youTubeAdd(url, add_request)
 
 	def playlists(self, link, params = {}):
