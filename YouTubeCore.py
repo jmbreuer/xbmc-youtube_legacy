@@ -80,18 +80,6 @@ class YouTubeCore(object):
 	urls['feed_trending'] = "http://gdata.youtube.com/feeds/api/standardfeeds/on_the_web"
 	urls['feed_shared'] = "http://gdata.youtube.com/feeds/api/standardfeeds/most_shared"	
 	
-#	def _fetchPage(self, url, params = {}):
-#		get = params.get
-#		request = urllib2.Request(url)
-#		request.add_header('User-Agent', self.USERAGENT);
-#		if (get("login-info")):
-#			request.add_header('Cookie', 'LOGIN_INFO=' + get("login_info"))
-#			
-#		connection = urllib2.urlopen(request);
-#		contents = connection.read()
-#		connection.close()
-#		return contents
-
 	def __init__(self):
 		timeout = self.__settings__.getSetting( "timeout" )
 		if not timeout:

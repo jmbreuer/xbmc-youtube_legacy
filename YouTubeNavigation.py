@@ -31,6 +31,7 @@ class YouTubeNavigation:
 	__playlist__ = sys.modules[ "__main__" ].__playlist__
 	__core__ = sys.modules[ "__main__" ].__core__
 	__downloader__ = sys.modules[ "__main__" ].__downloader__
+	__storage__ = sys.modules[ "__main__" ].__storage__
 		
 	# This list contains the list options a user sees when indexing a contact 
 	#				label					  , external		 , login		 ,	thumbnail					, feed
@@ -406,19 +407,6 @@ class YouTubeNavigation:
 
 			self.__utils__.showMessage(self.__language__(30614), get("contact"))
 			xbmc.executebuiltin( "Container.Refresh" )
-	
-	def changeSubscriptionView(self, params = {}):
-		get = params.get
-		
-		if (get("view_mode")):  
-			viewmode = ""
-			if (get("external")):
-				viewmode += "external_" + get("contact") + "_"
-			viewmode += "view_mode_" + get("channel")
-			
-			self.__settings__.setSetting(viewmode, get("view_mode"))
-		
-		xbmc.executebuiltin( "Container.Refresh" )
 	
 	def addSubscription(self, params = {}):
 		get = params.get

@@ -83,8 +83,11 @@ class YouTubePluginStorage:
 		else:
 			store = "stored_disco_searches"
 		
-		old_query = urllib.unquote_plus(old_query)
-		new_query = urllib.unquote_plus(new_query)
+		new_query = urllib.unquote_plus(get("search"))
+		old_query = new_query
+		
+		if get("old_search"):
+			old_query = urllib.unquote_plus(get("old_search"))
 		
 		try:
 			searches = eval(self.__settings__.getSetting(store))
@@ -155,3 +158,16 @@ class YouTubePluginStorage:
 			self.__settings__.setSetting("stored_searches_author", repr(searches))
 			self.__utils__.showMessage(self.__language__(30006), self.__language__(30610))
 			xbmc.executebuiltin( "Container.Refresh" )
+		
+	def changeSubscriptionView(self, params = {}):
+		get = params.get
+		
+		if (get("view_mode")):  
+			viewmode = ""
+			if (get("external")):
+				viewmode += "external_" + get("contact") + "_"
+			viewmode += "view_mode_" + get("channel")
+			
+			self.__settings__.setSetting(viewmode, get("view_mode"))
+		
+		xbmc.executebuiltin( "Container.Refresh" )

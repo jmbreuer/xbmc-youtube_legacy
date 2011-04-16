@@ -45,6 +45,8 @@ if (__name__ == "__main__" ):
 	__utils__ = utils.YouTubeUtils()
 	import YouTubeLogin as login
 	__login__ = login.YouTubeLogin()
+	import YouTubePluginStorage as storage
+	__storage__ = storage.YouTubePluginStorage()
 	import YouTubeCore as core
 	__core__ = core.YouTubeCore()
 	import YouTubeDownloader as downloader
@@ -55,8 +57,6 @@ if (__name__ == "__main__" ):
 	__playlist__ = playlist.YouTubePlaylistControl()
 	import YouTubeNavigation as navigation
 	__navigation__ = navigation.YouTubeNavigation()
-	import YouTubePluginStorage as storage
-	__storage__ = storage.YouTubePluginStorage()
 
 	if __dbg__:
 		print __plugin__ + " ARGV: " + repr(sys.argv)
