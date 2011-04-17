@@ -109,9 +109,7 @@ class YouTubeUtils:
 			
 		if ( status == 303):
 			self.showMessage(title, result)
-		elif ( status == 500):
-			self.showMessage(title, self.__language__(30606))
-		elif ( status != 0):
+		else :
 			self.showMessage(title, self.__language__(30617))
 
 if __name__ == '__main__':	

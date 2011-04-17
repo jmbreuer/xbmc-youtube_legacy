@@ -154,7 +154,7 @@ class YouTubePlayer(object):
 	def playVideo(self, params = {}):
 		get = params.get
 		
-		(video, status) = self.__core__.getVideoURL.construct_video_url(params);
+		(video, status) = self.getVideoObject(params);
 
 		if status != 200:
 			if self.__dbg__ : 
@@ -176,22 +176,19 @@ class YouTubePlayer(object):
 		
 		self.__settings__.setSetting( "vidstatus-" + video['videoid'], "7" )
 	
-	def getVideoStreamMap(self, html, params):
-		get = params.get
+	def getVideoStreamMap(self, html):
 		links = {}
+		fmt_url_map = []
 		if self.__dbg__:
 			print self.__plugin__ + " fmt_url_map not found, searching for stream map"
-				
-		swfConfig = re.findall('var swfConfig = {"url": "(.*)", "min.*};', html)
-		if len(swfConfig) > 0:
-			swf_url = swfConfig[0].replace("\\", "")
-				
+		
+		swf_url = ""		
 		fmtSource = re.findall('"fmt_stream_map": "([^"]+)"', html);
-		
-		fmt_url_map = urllib.unquote_plus(fmtSource[0]).split('|')
-		
 		if fmtSource:
-			
+			fmt_url_map = urllib.unquote_plus(fmtSource[0]).split('|')
+			swfConfig = re.findall('var swfConfig = {"url": "(.*)", "min.*};', html)
+			if len(swfConfig) > 0:
+				swf_url = swfConfig[0].replace("\\", "")
 		else:
 			print self.__plugin__ + " couldn't locate either fmt_url_map or fmt_stream_map, no videos on page?"
 			return links 
@@ -205,6 +202,8 @@ class YouTubePlayer(object):
 						quality = final_url[final_url.rfind('\/itag\/') + 8:]
 					else :
 						quality = "5"
+					if (swf_url):
+						final_url += " swfurl=%s swfvfy=1" % swf_url
 					links[int(quality)] = final_url.replace('\/','/')
 				else :
 					final_url = fmt_url
@@ -213,15 +212,16 @@ class YouTubePlayer(object):
 						quality = final_url[final_url.rfind('\/itag\/') + 8:]
 					else :
 						quality = "5"
+					if (swf_url):
+						final_url += " swfurl=%s swfvfy=1" % swf_url 
 					links[int(quality)] = final_url.replace('\/','/')
 		return links
 	
-	def getVideoUrlMap(self, html, params):
-		get = params.get
+	def getVideoUrlMap(self, html):
 		links = {}
 		fmtSource = re.findall('"fmt_url_map": "([^"]+)"', html);
 		
-		fmt_url_map []
+		fmt_url_map = []
 		if fmtSource:
 			if self.__dbg__:
 				print self.__plugin__ + " fmt_url_map found"
@@ -262,41 +262,22 @@ class YouTubePlayer(object):
 	def getVideoInfo(self, params):
 		get = params.get
 		
-		( result, status ) = self._fetchPage("http://gdata.youtube.com/feeds/api/videos/" + videoid, api = True)
+		( result, status ) = self._fetchPage(self.urls["video_info"] % get("videoid"), api = True)
 
 		if status == 200:				
 			result = self.__core__._getvideoinfo(result)
 		
 			if len(result) == 0:
 				if self.__dbg__:
-					print self.__plugin__ + " YouTube doesn't know this video id?"
-				return False
+					print self.__plugin__ + " Couldn't parse API output, YouTube doesn't seem to know this video id?"
+				return (result, 503)
 		else:
 			if self.__dbg__:
-				print self.__plugin__ + " _get_details got bad status: " + str(status)
-			
-			video = {}
-			video['Title'] = "Error"
-			video['videoid'] = get("videoid")
-			video['thumbnail'] = "Error"
-			video['video_url'] = False
-
-			if (status == 403):
-				# Override the 403 passed from _fetchPage with error provided by youtube.
-				video['apierror'] = self._getAlert(videoid)
-				return video
-			elif (status == 503):
-				video['apierror'] = self.__language__(30605)
-				return video
-			else:
-				video['apierror'] = self.__language__(30606) + str(status)
-				return video
-			
-		result = self._get_details(get("videoid"))
-		
-		return result
+				print self.__plugin__ + " Got API Error from YouTube!"
+				
+		return (result, status)
 	
-	def getVideoUrl(self, links, params):
+	def selectVideoQuality(self, links, params):
 		get = params.get
 		video_url = ""
 		
@@ -341,13 +322,29 @@ class YouTubePlayer(object):
 				print self.__plugin__ + " construct_video_url failed, video_url not set"
 			return (self.__language__(30607), 303)
 		
-		if link('type') == 'stream_map':
-			video_url += " swfurl=%s swfvfy=1" % link('swf_config')
-		
 		if len(video_url) > 0:
 			video_url += " | " + self.__utils__.USERAGENT
 
 		return video_url
+		
+	def getVideoObject(self, params):
+		get = params.get
+		
+		(video, status) = self.getVideoInfo(params)
+		html = self.getVideoHTML(params) 
+		
+		if (status == 403):
+			# Override the 403 passed from _fetchPage with error provided by youtube.
+			video['apierror'] = self.getAlert(html, params)
+			return video
+		elif (status == 503):
+			video['apierror'] = self.__language__(30605)
+			return video
+		else:
+			video['apierror'] = self.__language__(30606) + str(status)
+			return video
+
+		
 		
 	def construct_video_url(self, params):
 		get = params.get
