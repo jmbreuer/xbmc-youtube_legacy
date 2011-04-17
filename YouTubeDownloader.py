@@ -16,7 +16,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys
+import sys, urllib2, os
 	
 class YouTubeDownloader:	 
 	__settings__ = sys.modules[ "__main__" ].__settings__
@@ -24,6 +24,7 @@ class YouTubeDownloader:
 	__plugin__ = sys.modules[ "__main__"].__plugin__	
 	__dbg__ = sys.modules[ "__main__" ].__dbg__
 	
+	__player__ = sys.modules["__main__" ].__player__
 	__utils__ = sys.modules[ "__main__" ].__utils__
 						
 	def downloadVideo(self, params = {}):
@@ -47,7 +48,42 @@ class YouTubeDownloader:
 		
 		self.__utils__.showMessage(self.__language__(30612), self.__utils__.makeAscii(item("Title", "Unknown Title")))
 		
-		( video, status ) = self.__core__.downloadVideo(video)
+		( video, status ) = self._downloadVideo(video)
 				
 		if status == 200:
 			self.__utils__.showMessage(self.__language__( 30604 ), self.__utils__.makeAscii(item("Title")))
+			
+	def _downloadVideo(self, video):
+		if self.__dbg__:
+			print self.__plugin__ + " downloadVideo : " + video['Title']
+			
+		path = self.__settings__.getSetting( "downloadPath" )
+		try:
+			url = urllib2.Request(video['video_url'])
+			url.add_header('User-Agent', self.USERAGENT);
+			valid_chars = "-_.() %s%s" % (string.ascii_letters, string.digits)
+			
+			filename_incomplete = "%s/%s-incomplete.mp4" % ( path, ''.join(c for c in video['Title'] if c in valid_chars) )
+			filename_complete = "%s/%s.mp4" % ( path, ''.join(c for c in video['Title'] if c in valid_chars) )
+			file = open(filename_incomplete, "wb")
+			con = urllib2.urlopen(url);
+			file.write(con.read())
+			con.close()
+			
+			os.rename(filename_incomplete, filename_complete)
+			
+			self.__settings__.setSetting( "vidstatus-" + video['videoid'], "1" )
+		except urllib2.HTTPError, e:
+			if self.__dbg__:
+				print self.__plugin__ + " downloadVideo except: " + str(e)
+			return ( str(e), 303 )
+		except:
+			if self.__dbg__:
+				print self.__plugin__ + " downloadVideo uncaught exception"
+				print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__, sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
+				
+			return (self.__language__(30606), 303)
+
+		if self.__dbg__:
+			print self.__plugin__ + " downloadVideo done"
+		return ( video, 200 )

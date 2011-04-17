@@ -21,6 +21,7 @@ import xbmc
 
 class YouTubeUtils:
 	__settings__ = sys.modules[ "__main__" ].__settings__
+	__language__ = sys.modules[ "__main__" ].__language__
 	__plugin__ = sys.modules[ "__main__" ].__plugin__
 	
 	VALID_CHARS = "-_.() %s%s" % (string.ascii_letters, string.digits)
@@ -99,6 +100,19 @@ class YouTubeUtils:
 		for item in input:
 			pipedItems += item + "|"
 		return pipedItems
-		
+	
+	def showErrorMessage(self, title = "", result = "", status = 500):
+		if title == "":
+			title = self.__language__(30600)
+		if result == "":
+			result = self.__language__(30617)
+			
+		if ( status == 303):
+			self.showMessage(title, result)
+		elif ( status == 500):
+			self.showMessage(title, self.__language__(30606))
+		elif ( status != 0):
+			self.showMessage(title, self.__language__(30617))
+
 if __name__ == '__main__':	
 	sys.exit(0);

@@ -22,7 +22,6 @@ import urllib
 	
 class YouTubeNavigation:	 
 	__settings__ = sys.modules[ "__main__" ].__settings__
-	__language__ = sys.modules[ "__main__" ].__language__
 	__plugin__ = sys.modules[ "__main__"].__plugin__	
 	__dbg__ = sys.modules[ "__main__" ].__dbg__
 	
@@ -46,41 +45,41 @@ class YouTubeNavigation:
 	# This list contains the main menu structure the user first encounters when running the plugin
 	#			   label						  , path									        , thumbnail					  		,  login		  ,  feed / action
 	categories = (
-				  {'Title':__language__( 30044 )  ,'path':"/root/explore"			 				, 'thumbnail':"explore"				, 'login':"false" },
-				  {'Title':__language__( 30041 )  ,'path':"/root/explore/categories"				, 'thumbnail':"explore"				, 'login':"false" , 'scraper':'categories'},
-				  {'Title':__language__( 30037 )  ,'path':"/root/explore/disco"						, 'thumbnail':"discoball"		 	, 'login':"false" , 'store':"disco_searches" },
-				  {'Title':__language__( 30040 )  ,'path':"/root/explore/disco/search"				, 'thumbnail':"search"		   		, 'login':"false" , 'action':"search_disco"},
-				  {'Title':__language__( 30038 )  ,'path':"/root/explore/disco/top_25"				, 'thumbnail':"discoball"		 	, 'login':"false" , 'scraper':"disco_top_25"},
-				  {'Title':__language__( 30039 )  ,'path':"/root/explore/disco/popular"				, 'thumbnail':"discoball"		 	, 'login':"false" , 'scraper':"disco_top_artist"},
-				  {'Title':__language__( 30001 )  ,'path':"/root/explore/feeds"						, 'thumbnail':"feeds"			 	, 'login':"false" },
-				  {'Title':__language__( 30009 )  ,'path':"/root/explore/feeds/discussed"			, 'thumbnail':"most"			 	, 'login':"false" , 'feed':"feed_discussed" },
-				  {'Title':__language__( 30010 )  ,'path':"/root/explore/feeds/linked"				, 'thumbnail':"most"			 	, 'login':"false" , 'feed':"feed_linked" },
-				  {'Title':__language__( 30011 )  ,'path':"/root/explore/feeds/viewed"				, 'thumbnail':"most"			 	, 'login':"false" , 'feed':"feed_viewed" },
-				  {'Title':__language__( 30012 )  ,'path':"/root/explore/feeds/recent"				, 'thumbnail':"most"			 	, 'login':"false" , 'feed':"feed_recent" },
-				  {'Title':__language__( 30013 )  ,'path':"/root/explore/feeds/responded"			, 'thumbnail':"most"			 	, 'login':"false" , 'feed':"feed_responded" },
-				  {'Title':__language__( 30014 )  ,'path':"/root/explore/feeds/featured"			, 'thumbnail':"featured"		 	, 'login':"false" , 'feed':"feed_featured" },
-				  {'Title':__language__( 30015 )  ,'path':"/root/explore/feeds/favorites"			, 'thumbnail':"top"					, 'login':"false" , 'feed':"feed_favorites" },
-				  {'Title':__language__( 30016 )  ,'path':"/root/explore/feeds/rated"				, 'thumbnail':"top"					, 'login':"false" , 'feed':"feed_rated" },
-				  {'Title':__language__( 30043 )  ,'path':"/root/explore/movies"					, 'thumbnail':"movies"				, 'login':"false" , 'scraper':'movies'},
-				  {'Title':__language__( 30042 )  ,'path':"/root/explore/shows"						, 'thumbnail':"shows"				, 'login':"false" , 'scraper':'shows'},
-				  {'Title':__language__( 30032 )  ,'path':"/root/explore/trailers"					, 'thumbnail':"trailers"			, 'login':"false" },
-				  {'Title':__language__( 30035 )  ,'path':"/root/explore/trailers/latest"   		, 'thumbnail':"trailers"			, 'login':"false" , 'scraper':"latest_trailers" },
-				  {'Title':__language__( 30034 )  ,'path':"/root/explore/trailers/current"  		, 'thumbnail':"trailers"			, 'login':"false" , 'scraper':"current_trailers" },
-				  {'Title':__language__( 30036 )  ,'path':"/root/explore/trailers/upcoming" 		, 'thumbnail':"trailers"			, 'login':"false" , 'scraper':"upcoming_trailers" },
-				  {'Title':__language__( 30033 )  ,'path':"/root/explore/trailers/popular"  		, 'thumbnail':"trailers"			, 'login':"false" , 'scraper':"popular_trailers" },
-				  {'Title':__language__( 30047 )  ,'path':"/root/explore/trailers/latest_game"  	, 'thumbnail':"trailers"			, 'login':"false" , 'scraper':"latest_game_trailers" },
-				  {'Title':__language__( 30048 )  ,'path':"/root/explore/trailers/upcoming_game"  	, 'thumbnail':"trailers"			, 'login':"false" , 'scraper':"upcoming_game_trailers" },
-				  {'Title':__language__( 30046 )  ,'path':"/root/explore/trailers/popular_game"  	, 'thumbnail':"trailers"			, 'login':"false" , 'scraper':"popular_game_trailers" },
-				  {'Title':__language__( 30019 )  ,'path':"/root/recommended"						, 'thumbnail':"recommended"			, 'login':"true"  , 'scraper':"recommended" },
-				  {'Title':__language__( 30018 )  ,'path':"/root/contacts"			  				, 'thumbnail':"contacts"			, 'login':"true"  , 'feed':"contacts" },
-				  {'Title':__language__( 30002 )  ,'path':"/root/favorites"		 					, 'thumbnail':"favorites"			, 'login':"true"  , 'feed':"favorites" },
-				  {'Title':__language__( 30017 )  ,'path':"/root/playlists"		 					, 'thumbnail':"playlists"			, 'login':"true"  , 'feed':"playlists" },
-				  {'Title':__language__( 30003 )  ,'path':"/root/subscriptions"	 					, 'thumbnail':"subscriptions"		, 'login':"true"  , 'feed':"subscriptions" },
-				  {'Title':__language__( 30004 )  ,'path':"/root/subscriptions/new" 				, 'thumbnail':"newsubscriptions"	, 'login':"true"  , 'feed':"newsubscriptions" },
-				  {'Title':__language__( 30005 )  ,'path':"/root/uploads"							, 'thumbnail':"uploads"				, 'login':"true"  , 'feed':"uploads" },
-				  {'Title':__language__( 30045 )  ,'path':"/root/downloads"							, 'thumbnail':"downloads"			, 'login':"false" , 'feed':"downloads" },
-				  {'Title':__language__( 30006 )  ,'path':"/root/search"							, 'thumbnail':"search"				, 'login':"false" , 'store':"searches" },
-				  {'Title':__language__( 30007 )  ,'path':"/root/search/new"						, 'thumbnail':"search"				, 'login':"false" , 'action':"search" },
+#				  {'Title':__language__( 30044 )  ,'path':"/root/explore"			 				, 'thumbnail':"explore"				, 'login':"false" },
+#				  {'Title':__language__( 30041 )  ,'path':"/root/explore/categories"				, 'thumbnail':"explore"				, 'login':"false" , 'scraper':'categories'},
+#				  {'Title':__language__( 30037 )  ,'path':"/root/explore/disco"						, 'thumbnail':"discoball"		 	, 'login':"false" , 'store':"disco_searches" },
+#				  {'Title':__language__( 30040 )  ,'path':"/root/explore/disco/search"				, 'thumbnail':"search"		   		, 'login':"false" , 'action':"search_disco"},
+#				  {'Title':__language__( 30038 )  ,'path':"/root/explore/disco/top_25"				, 'thumbnail':"discoball"		 	, 'login':"false" , 'scraper':"disco_top_25"},
+#				  {'Title':__language__( 30039 )  ,'path':"/root/explore/disco/popular"				, 'thumbnail':"discoball"		 	, 'login':"false" , 'scraper':"disco_top_artist"},
+#				  {'Title':__language__( 30001 )  ,'path':"/root/explore/feeds"						, 'thumbnail':"feeds"			 	, 'login':"false" },
+#				  {'Title':__language__( 30009 )  ,'path':"/root/explore/feeds/discussed"			, 'thumbnail':"most"			 	, 'login':"false" , 'feed':"feed_discussed" },
+#				  {'Title':__language__( 30010 )  ,'path':"/root/explore/feeds/linked"				, 'thumbnail':"most"			 	, 'login':"false" , 'feed':"feed_linked" },
+#				  {'Title':__language__( 30011 )  ,'path':"/root/explore/feeds/viewed"				, 'thumbnail':"most"			 	, 'login':"false" , 'feed':"feed_viewed" },
+#				  {'Title':__language__( 30012 )  ,'path':"/root/explore/feeds/recent"				, 'thumbnail':"most"			 	, 'login':"false" , 'feed':"feed_recent" },
+#				  {'Title':__language__( 30013 )  ,'path':"/root/explore/feeds/responded"			, 'thumbnail':"most"			 	, 'login':"false" , 'feed':"feed_responded" },
+#				  {'Title':__language__( 30014 )  ,'path':"/root/explore/feeds/featured"			, 'thumbnail':"featured"		 	, 'login':"false" , 'feed':"feed_featured" },
+#				  {'Title':__language__( 30015 )  ,'path':"/root/explore/feeds/favorites"			, 'thumbnail':"top"					, 'login':"false" , 'feed':"feed_favorites" },
+#				  {'Title':__language__( 30016 )  ,'path':"/root/explore/feeds/rated"				, 'thumbnail':"top"					, 'login':"false" , 'feed':"feed_rated" },
+#				  {'Title':__language__( 30043 )  ,'path':"/root/explore/movies"					, 'thumbnail':"movies"				, 'login':"false" , 'scraper':'movies'},
+#				  {'Title':__language__( 30042 )  ,'path':"/root/explore/shows"						, 'thumbnail':"shows"				, 'login':"false" , 'scraper':'shows'},
+#				  {'Title':__language__( 30032 )  ,'path':"/root/explore/trailers"					, 'thumbnail':"trailers"			, 'login':"false" },
+#				  {'Title':__language__( 30035 )  ,'path':"/root/explore/trailers/latest"   		, 'thumbnail':"trailers"			, 'login':"false" , 'scraper':"latest_trailers" },
+#				  {'Title':__language__( 30034 )  ,'path':"/root/explore/trailers/current"  		, 'thumbnail':"trailers"			, 'login':"false" , 'scraper':"current_trailers" },
+#				  {'Title':__language__( 30036 )  ,'path':"/root/explore/trailers/upcoming" 		, 'thumbnail':"trailers"			, 'login':"false" , 'scraper':"upcoming_trailers" },
+#				  {'Title':__language__( 30033 )  ,'path':"/root/explore/trailers/popular"  		, 'thumbnail':"trailers"			, 'login':"false" , 'scraper':"popular_trailers" },
+#				  {'Title':__language__( 30047 )  ,'path':"/root/explore/trailers/latest_game"  	, 'thumbnail':"trailers"			, 'login':"false" , 'scraper':"latest_game_trailers" },
+#				  {'Title':__language__( 30048 )  ,'path':"/root/explore/trailers/upcoming_game"  	, 'thumbnail':"trailers"			, 'login':"false" , 'scraper':"upcoming_game_trailers" },
+#				  {'Title':__language__( 30046 )  ,'path':"/root/explore/trailers/popular_game"  	, 'thumbnail':"trailers"			, 'login':"false" , 'scraper':"popular_game_trailers" },
+#				  {'Title':__language__( 30019 )  ,'path':"/root/recommended"						, 'thumbnail':"recommended"			, 'login':"true"  , 'scraper':"recommended" },
+#				  {'Title':__language__( 30018 )  ,'path':"/root/contacts"			  				, 'thumbnail':"contacts"			, 'login':"true"  , 'feed':"contacts" },
+#				  {'Title':__language__( 30002 )  ,'path':"/root/favorites"		 					, 'thumbnail':"favorites"			, 'login':"true"  , 'feed':"favorites" },
+#				  {'Title':__language__( 30017 )  ,'path':"/root/playlists"		 					, 'thumbnail':"playlists"			, 'login':"true"  , 'feed':"playlists" },
+#				  {'Title':__language__( 30003 )  ,'path':"/root/subscriptions"	 					, 'thumbnail':"subscriptions"		, 'login':"true"  , 'feed':"subscriptions" },
+#				  {'Title':__language__( 30004 )  ,'path':"/root/subscriptions/new" 				, 'thumbnail':"newsubscriptions"	, 'login':"true"  , 'feed':"newsubscriptions" },
+#				  {'Title':__language__( 30005 )  ,'path':"/root/uploads"							, 'thumbnail':"uploads"				, 'login':"true"  , 'feed':"uploads" },
+#				  {'Title':__language__( 30045 )  ,'path':"/root/downloads"							, 'thumbnail':"downloads"			, 'login':"false" , 'feed':"downloads" },
+#				  {'Title':__language__( 30006 )  ,'path':"/root/search"							, 'thumbnail':"search"				, 'login':"false" , 'store':"searches" },
+#				  {'Title':__language__( 30007 )  ,'path':"/root/search/new"						, 'thumbnail':"search"				, 'login':"false" , 'action':"search" },
 				  {'Title':__language__( 30008 )  ,'path':"/root/playbyid"		  					, 'thumbnail':"playbyid"			, 'login':"false" , 'action':"playbyid" },
 				  {'Title':__language__( 30027 )  ,'path':"/root/login"			 					, 'thumbnail':"login"				, 'login':"false" , 'action':"settings" },
 				  {'Title':__language__( 30028 )  ,'path':"/root/settings"		  					, 'thumbnail':"settings"			, 'login':"true"  , 'action':"settings" }
@@ -752,16 +751,3 @@ class YouTubeNavigation:
 				
 		cm.append( ( self.__language__( 30527 ), "XBMC.ActivateWindow(VideoPlaylist)"))
 		return cm
-
-	def showErrorMessage(self, title = "", result = "", status = 500):
-		if title == "":
-			title = self.__language__(30600)
-		if result == "":
-			result = self.__language__(30617)
-			
-		if ( status == 303):
-			self.__utils__.showMessage(title, result)
-		elif ( status == 500):
-			self.__utils__.showMessage(title, self.__language__(30606))
-		elif ( status != 0):
-			self.__utils__.showMessage(title, self.__language__(30617))
