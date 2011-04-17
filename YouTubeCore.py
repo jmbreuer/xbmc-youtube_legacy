@@ -749,7 +749,7 @@ class YouTubeCore(object):
 				if (lget("rel").value == "next"):
 					next = "true"
 					break
-
+		
 		ytobjects = [];
 		for node in entries:
 			video = {};
@@ -892,9 +892,7 @@ class YouTubeCore(object):
 			video['Studio'] = self._getNodeValue(node, "media:credit", "").encode( "utf-8" )
 			if video['Studio'] == "":
 				video['Studio'] = self._getNodeValue(node, "name", "Unknown Uploader").encode( "utf-8" )
-				
-				
-
+			
 			duration = int(self._getNodeAttribute(node, "yt:duration", 'seconds', '0'))
 			video['Duration'] = "%02d:%02d" % ( duration / 60, duration % 60 )
 			video['Rating'] = float(self._getNodeAttribute(node,"gd:rating", 'average', "0.0"))
