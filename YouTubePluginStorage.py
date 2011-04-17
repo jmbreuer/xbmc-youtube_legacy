@@ -16,12 +16,13 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, urllib, os
+import sys, urllib
 import xbmc
 	
 class YouTubePluginStorage:
 	__settings__ = sys.modules[ "__main__"].__settings__ 
-	__plugin__ = sys.modules[ "__main__"].__plugin__	
+	__plugin__ = sys.modules[ "__main__"].__plugin__
+	__language__ = sys.modules[ "__main__" ].__language__
 	__utils__ = sys.modules[ "__main__" ].__utils__
 	
 	def getStoredSearches(self, params = {}):
