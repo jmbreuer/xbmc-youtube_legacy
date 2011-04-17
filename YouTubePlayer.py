@@ -143,10 +143,15 @@ class YouTubePlayer(object):
 		get = video.get
 		
 		filename = ''.join(c for c in video['Title'] if c in self.__utils__.VALID_CHARS) + " [" + get('videoid') + "]" + ".srt"
-		path = os.path.join( xbmc.translatePath( "special://temp" ), filename )
 		
+		download_path = os.path.join( self.__settings__.getSetting( "downloadPath" ), filename )
+		path = os.path.join( xbmc.translatePath( "special://temp" ), filename )
+
 		set_subtitle = False
-		if (os.path.exists(path)):
+		if (os.path.exists(download_path)):
+			path = download_path
+			set_subtitle = True
+		elif (os.path.exists(path)):
 			set_subtitle = True
 		elif (self.downloadSubtitle(html, video)): 
 			set_subtitle = True
