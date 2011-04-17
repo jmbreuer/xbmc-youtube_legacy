@@ -16,65 +16,108 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, urllib, urllib2, re, os.path, datetime
-from xml.dom.minidom import parseString
+import sys, urllib, re, os.path, datetime
 import xbmc
+from xml.dom.minidom import parseString
 
 class YouTubePlayer(object):
 	__settings__ = sys.modules[ "__main__" ].__settings__
 	__language__ = sys.modules[ "__main__" ].__language__
 	__plugin__ = sys.modules[ "__main__" ].__plugin__
 	__dbg__ = sys.modules[ "__main__" ].__dbg__
-	__dbgv__ = False
+	
+	__core__ = sys.modules[ "__main__" ].__core__
+	__utils__ = sys.modules[ "__main__" ].__utils__
 
 	urls = {};
 	# YouTube General Feeds
 	urls['video_stream'] = "http://gdata.youtube.com/feeds/api/playlists/%s"
 	urls['timed_text_index'] = "http://www.youtube.com/api/timedtext?type=list&v=%s"
 	urls['video_info'] = "http://gdata.youtube.com/feeds/api/videos/%s"
+	urls['close_caption_url'] = "http://www.youtube.com/api/timedtext?type=track&v=%s&name=%s&lang=%s"
+	urls['transcribtion_url'] = "http://www.youtube.com/api/timedtext?caps=asr&kind=asr&type=track&key=yttt1&expire=%s&sparams=caps,expire,v&v=%s&signature=%s&lang=en"
 	
-	def saveSubtitle(self, params = {}):
-		f = open("http://www.youtube.com/api/timedtext?type=list&v=" + params['videoid'], "r")
-		dom = parseString(f.read())
-		f.close()
+	# ================================ Subtitle Downloader ====================================
+	def downloadSubtitle(self, html, params = {}):
+		get = params.get
+		subtitle_url = self.getSubtitleUrl(params)
+		
+		if not subtitle_url and self.__settings__.getSetting("transcode") == "true":
+			subtitle_url = self.getTranscriptionUrl(html, params) 
+		
+		if subtitle_url:
+			srt = ""
+			xml = self.__core__._fetchPage(subtitle_url)
+			if len(xml) > 0:
+				srt = self.transformSubtitleXMLtoSRT(xml, params)
+			if len(srt) > 0:
+				self.saveSubtitle(srt, params)				
+		return True
+	
+	def saveSubtitle(self, srt, params = {}):
+		get = params.get
+		filename = get("Title") + " [" + get('videoid') + "]" + ".srt"
+		
+		path = os.path.join( xbmc.translatePath( "special://temp" ),  )
+		w = open(path, "w")
+		w.write(srt.encode('utf-8'))
+		w.close()
+		
+	def getSubtitleUrl(self, params = {}):
+		get = params.get
+		url = ""
+		
+		xml = self.__core__._fetchPage(self.urls["timed_text_index"] % get('videoid'))
+		dom = parseString(xml)
 		entries = dom.getElementsByTagName("track")
-		name = ""
-		ename = ""
+		
+		subtitle = ""
 		lang_code = [ self.__language__( 30277 ), self.__language__( 30278  ), self.__language__( 30279 ), self.__language__( 30280 ), self.__language__( 30281 ), self.__language__( 30282 ), self.__language__( 30283 )][int(self.__settings__.getSetting("lang_code"))]
+		code = ""
 		for node in entries:
 			if node.getAttribute("lang_code") == lang_code:
-				name = node.getAttribute("name").replace(" ", "%20")
+				subtitle = node.getAttribute("name").replace(" ", "%20")
+				code = lang_code
+				break
 			if node.getAttribute("lang_code") == "en":
-				ename = node.getAttribute("name").replace(" ", "%20")
+				subtitle = node.getAttribute("name").replace(" ", "%20")
+				code = "en"
+		
+		if subtitle and code:
+			url = self.urls["close_caption_url"] % ( get("videoid"), subtitle, code)
+		
+		return url
+	
+	def getTranscriptionUrl(self, html, params = {}):
+		get = params.get
+		trans_url = ""	
+		if (html.find("ttsurl=") > 0):	
+			html = html[html.find("ttsurl="):len(html)]
+			html = html[0:html.find("&amp;")+5]
 
-		if self.__dbg__:
-			print self.__plugin__ + " saveSubtitle: lang_code: " + lang_code + " - name: " + name + " - ename: " + ename + " - transcode: " + self.__settings__.getSetting("transcode") + " - trans_url: " + params['trans_url']
+			urls = re.findall('.*ttsurl=(.*)&amp;.*', html)
+		
+			if len(urls) > 0:
+				urls = urllib.unquote(urls[0]).replace("\\", "")
+				urls = urls.split("&")
+				expire = ""
+				signature = ""
 
-		if name == "" and ename == "":
-			if params['trans_url'] == "" or self.__settings__.getSetting("transcode") == "false":
-				return False
+				for item in urls: 
+					if ( item.find("expire") == 0 ):
+						expire = item[item.find("expire")+7:len(item)]
+					if ( item.find("signature") == 0 ):
+						signature = item[item.find("signature")+10:len(item)]
+				
+				if expire != "" and signature != "":
+					trans_url = self.urls["transcription_url"] % (expire, get("videoid"), signature)
+		return trans_url
 
-			if self.__dbg__:
-				print self.__plugin__ + " saveSubtitle: Getting transcription: " + params['trans_url']
-
-			f = open(params['trans_url'], "r")
-			dom = parseString(f.read())
-			f.close()
-		else:
-			if name == "":
-				if self.__dbg__:
-					print self.__plugin__ + " saveSubtitle: Getting default subtitles"
-				f = open("http://www.youtube.com/api/timedtext?type=track&v=" + params['videoid'] +"&name=" + ename + "&lang=en", "r")
-			else:
-				if self.__dbg__:
-					print self.__plugin__ + " saveSubtitle: Getting " + name + " subtitles"
-				f = open("http://www.youtube.com/api/timedtext?type=track&v=" + params['videoid'] +"&name=" + name + "&lang=" + lang_code, "r")
-
-			dom = parseString(f.read())
-			f.close()
+	def transformSubtitleXMLtoSRT(self, xml, params):
+		dom = parseString(xml)
 		entries = dom.getElementsByTagName("text")
-		i = 0;
-		ret = ""
+		
+		result = ""
 		for node in entries:
 			if node:
 				if node.firstChild:
@@ -89,15 +132,12 @@ class YouTubePlayer(object):
 						dur = str(datetime.timedelta(seconds=float(node.getAttribute("start")) + float(node.getAttribute("dur")))).replace("000", "")
 						if ( dur.find(".") == -1 ):
 							dur += ".000"
-						ret += start + " --> " + ( dur ) + "\n" + text + "\n\n"
-
-		path = os.path.join( xbmc.translatePath( "special://temp" ), params['videoid'] + ".srt" )
-		w = open(path, "w")
-		ret = ret.replace("&#39;", "'")
-		w.write(ret.encode('utf-8'))
-		w.close()
-		return True
-
+						result += start + " --> " + ( dur ) + "\n" + text + "\n\n"
+		result = result.replace("&#39;", "'")
+		
+		return result
+		
+	# ================================ Video Playback ====================================
 	def construct_video_url(self, params, encoding = 'utf-8', download = False):
 		get = params.get
 		if ( not get("videoid") ):
@@ -266,27 +306,7 @@ class YouTubePlayer(object):
 		swf_url = False
 
 		fmtSource = re.findall('"fmt_url_map": "([^"]+)"', htmlSource);
-
-		tempSource1 = htmlSource[htmlSource.find("ttsurl="):len(htmlSource)]
-		tempSource = tempSource1[0:tempSource1.find("&amp;")+5]
-
-		temp_url = re.findall('.*ttsurl=(.*)&amp;.*', tempSource)
-
-		trans_url = ""
-		if len(temp_url) > 0:
-			temp_url = urllib.unquote(temp_url[0]).replace("\\", "")
-			temp_url = temp_url.split("&")
-			expire = ""
-			signature = ""
-
-			for item in temp_url: 
-				if ( item.find("expire") == 0 ):
-					expire = item[item.find("expire")+7:len(item)]
-				if ( item.find("signature") == 0 ):
-					signature = item[item.find("signature")+10:len(item)]
-			if expire != "" and signature != "":
-				trans_url = "http://www.youtube.com/api/timedtext?caps=asr&kind=asr&type=track&key=yttt1&expire=" + expire + "&sparams=caps%2Cexpire%2Cv&v=" + videoid + "&signature=" + signature + "&lang=en"
-
+		
 		if fmtSource:
 			if self.__dbg__:
 				print self.__plugin__ + " fmt_url_map found"
