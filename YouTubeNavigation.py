@@ -23,6 +23,7 @@ import urllib
 class YouTubeNavigation:	 
 	__settings__ = sys.modules[ "__main__" ].__settings__
 	__plugin__ = sys.modules[ "__main__"].__plugin__	
+	__language__ = sys.modules[ "__main__" ].__language__
 	__dbg__ = sys.modules[ "__main__" ].__dbg__
 	
 	__utils__ = sys.modules[ "__main__" ].__utils__
@@ -117,8 +118,6 @@ class YouTubeNavigation:
 			cache = False
 		
 		video_view = self.__settings__.getSetting("list_view") == "1"
-		if (self.__dbg__):
-			print self.__plugin__ + " view mode: " + self.__settings__.getSetting("list_view")
 		
 		if (get("scraper") == "shows" and get("category") and not video_view):
 			video_view = self.__settings__.getSetting("list_view") == "0"
@@ -167,6 +166,7 @@ class YouTubeNavigation:
 		if (get("action") == "play_all"):
 			self.__playlist__.playAll(params)
 		
+	#==================================== Item Building and Listing ===========================================	
 	def listFolder(self, params = {}):
 		get = params.get
 
@@ -261,18 +261,6 @@ class YouTubeNavigation:
 
 		self.parseVideoList(params, result)
 	
-	def login(self, params = {}):
-		self.__settings__.openSettings()
-						
-		(result, status) = self.__core__.login()
-				
-		if status == 200:
-			self.showErrorMessage(self.__language__(30031), result, 303)
-		else:
-			self.showErrorMessage(self.__language__(30609), result, status)
-				
-		xbmc.executebuiltin( "Container.Refresh" )
-
 	def listStoredSearches(self, params = {}):
 		get = params.get
 		
@@ -305,18 +293,6 @@ class YouTubeNavigation:
 			self.__utils__.showMessage(self.__language__(30600), self.__language__(30606))
 
 	#================================== Plugin Actions =========================================
-
-	def addSubtitles(self, video = {}):
-		if ( self.__core__.saveSubtitle(video) ):
-			if self.__dbg__:
-				print self.__plugin__ + " Setting subtitles: " + video['trans_url']
-			
-			xbmc.Player().setSubtitles('special://temp/'+ video['videoid'] + '.srt')
-			time.sleep(5)
-			
-			if self.__dbg__:
-				print self.__plugin__ + " Setting subtitles: " + video['trans_url']
-			xbmc.Player().setSubtitles('special://temp/'+ video['videoid'] + '.srt')
 
 	def playVideoById(self, params = {}):
 		result = self.getUserInput(self.__language__(30518), '')
