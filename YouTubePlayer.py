@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, urllib, re, os.path, datetime
+import sys, urllib, re, os.path, datetime, time
 import xbmc, xbmcgui, xbmcplugin
 from xml.dom.minidom import parseString
 
@@ -30,8 +30,8 @@ class YouTubePlayer(object):
 	__utils__ = sys.modules[ "__main__" ].__utils__
 
 	urls = {};
-	# YouTube General Feeds
 	
+	# YouTube Playback Feeds
 	urls['video_stream'] = "http://www.youtube.com/watch?v=%s&safeSearch=none&hl=en_us"
 	urls['timed_text_index'] = "http://www.youtube.com/api/timedtext?type=list&v=%s"
 	urls['video_info'] = "http://gdata.youtube.com/feeds/api/videos/%s"
@@ -39,33 +39,34 @@ class YouTubePlayer(object):
 	urls['transcribtion_url'] = "http://www.youtube.com/api/timedtext?caps=asr&kind=asr&type=track&key=yttt1&expire=%s&sparams=caps,expire,v&v=%s&signature=%s&lang=en"
 	
 	# ================================ Subtitle Downloader ====================================
-	def downloadSubtitle(self, html, params = {}):
-		get = params.get
-		subtitle_url = self.getSubtitleUrl(params)
+	def downloadSubtitle(self, html, video = {}):
+		get = video.get
+		subtitle_url = self.getSubtitleUrl(video)
 		
 		if not subtitle_url and self.__settings__.getSetting("transcode") == "true":
-			subtitle_url = self.getTranscriptionUrl(html, params) 
+			subtitle_url = self.getTranscriptionUrl(html, video) 
 		
 		if subtitle_url:
 			srt = ""
 			xml = self.__core__._fetchPage(subtitle_url)
 			if len(xml) > 0:
-				srt = self.transformSubtitleXMLtoSRT(xml, params)
+				srt = self.transformSubtitleXMLtoSRT(xml)
 			if len(srt) > 0:
-				self.saveSubtitle(srt, params)				
-		return True
-	
-	def saveSubtitle(self, srt, params = {}):
-		get = params.get
-		filename = get("Title") + " [" + get('videoid') + "]" + ".srt"
+				self.saveSubtitle(srt, video)	
+				return True
 		
-		path = os.path.join( xbmc.translatePath( "special://temp" ),  )
+		return False
+	
+	def saveSubtitle(self, srt, video = {}):
+		get = video.get
+		filename = ''.join(c for c in video['Title'] if c in self.__utils__.VALID_CHARS) + " [" + get('videoid') + "]" + ".srt"
+		path = os.path.join( xbmc.translatePath( "special://temp" ), filename )
 		w = open(path, "w")
 		w.write(srt.encode('utf-8'))
 		w.close()
 		
-	def getSubtitleUrl(self, params = {}):
-		get = params.get
+	def getSubtitleUrl(self, video = {}):
+		get = video.get
 		url = ""
 		
 		xml = self.__core__._fetchPage(self.urls["timed_text_index"] % get('videoid'))
@@ -89,8 +90,8 @@ class YouTubePlayer(object):
 		
 		return url
 	
-	def getTranscriptionUrl(self, html, params = {}):
-		get = params.get
+	def getTranscriptionUrl(self, html, video = {}):
+		get = video.get
 		trans_url = ""	
 		if (html.find("ttsurl=") > 0):	
 			html = html[html.find("ttsurl="):len(html)]
@@ -113,8 +114,8 @@ class YouTubePlayer(object):
 				if expire != "" and signature != "":
 					trans_url = self.urls["transcription_url"] % (expire, get("videoid"), signature)
 		return trans_url
-
-	def transformSubtitleXMLtoSRT(self, xml, params):
+		
+	def transformSubtitleXMLtoSRT(self, xml):
 		dom = parseString(xml)
 		entries = dom.getElementsByTagName("text")
 		
@@ -138,11 +139,22 @@ class YouTubePlayer(object):
 		
 		return result
 		
+	def addSubtitles(self, html, video = {}):
+		if (self.downloadSubtitle(html, video)):
+		
+			xbmc.Player().setSubtitles('special://temp/'+ video['videoid'] + '.srt')
+			time.sleep(5)
+		
+			if self.__dbg__:
+				print self.__plugin__ + " Setting subtitles: " + video['trans_url']
+			xbmc.Player().setSubtitles('special://temp/'+ video['videoid'] + '.srt')
+
 	# ================================ Video Playback ====================================
 	
 	def playVideo(self, params = {}):
 		get = params.get
-		(video, status) = self.__core__.construct_video_url(params);
+		
+		(video, status) = self.__core__.getVideoURL.construct_video_url(params);
 
 		if status != 200:
 			if self.__dbg__ : 
@@ -164,9 +176,78 @@ class YouTubePlayer(object):
 		
 		self.__settings__.setSetting( "vidstatus-" + video['videoid'], "7" )
 	
+	def getVideoStreamMap(self, html, params):
+		get = params.get
+		links = {}
+		if self.__dbg__:
+			print self.__plugin__ + " fmt_url_map not found, searching for stream map"
+				
+		swfConfig = re.findall('var swfConfig = {"url": "(.*)", "min.*};', html)
+		if len(swfConfig) > 0:
+			swf_url = swfConfig[0].replace("\\", "")
+				
+		fmtSource = re.findall('"fmt_stream_map": "([^"]+)"', html);
+		
+		fmt_url_map = urllib.unquote_plus(fmtSource[0]).split('|')
+		
+		if fmtSource:
+			
+		else:
+			print self.__plugin__ + " couldn't locate either fmt_url_map or fmt_stream_map, no videos on page?"
+			return links 
+			
+		for fmt_url in fmt_url_map:				
+			if (len(fmt_url) > 7 and fmt_url.find(":\\/\\/") > 0):
+				if (fmt_url.rfind(',') > fmt_url.rfind('\/id\/')):
+					final_url = fmt_url[:fmt_url.rfind(',')]
+					final_url = final_url.replace('\u0026','&')
+					if (final_url.rfind('\/itag\/') > 0):
+						quality = final_url[final_url.rfind('\/itag\/') + 8:]
+					else :
+						quality = "5"
+					links[int(quality)] = final_url.replace('\/','/')
+				else :
+					final_url = fmt_url
+					final_url = final_url.replace('\u0026','&')
+					if (final_url.rfind('\/itag\/') > 0):
+						quality = final_url[final_url.rfind('\/itag\/') + 8:]
+					else :
+						quality = "5"
+					links[int(quality)] = final_url.replace('\/','/')
+		return links
+	
 	def getVideoUrlMap(self, html, params):
 		get = params.get
+		links = {}
+		fmtSource = re.findall('"fmt_url_map": "([^"]+)"', html);
 		
+		fmt_url_map []
+		if fmtSource:
+			if self.__dbg__:
+				print self.__plugin__ + " fmt_url_map found"
+			fmt_url_map = urllib.unquote_plus(fmtSource[0]).split('|')
+			
+		for fmt_url in fmt_url_map:
+			if (len(fmt_url) > 7):
+				if (fmt_url.rfind(',') > fmt_url.rfind('&id=')): 
+					final_url = fmt_url[:fmt_url.rfind(',')]
+					final_url = final_url.replace('\u0026','&')
+					if (final_url.rfind('itag=') > 0):
+						quality = final_url[final_url.rfind('itag=') + 5:]
+						quality = quality[:quality.find('&')]
+					else:
+						quality = "5"
+					links[int(quality)] = final_url.replace('\/','/')
+				else :
+					final_url = fmt_url
+					if (final_url.rfind('itag=') > 0):
+						quality = final_url[final_url.rfind('itag=') + 5:]
+						quality = quality[:quality.find('&')]
+					else :
+						quality = "5"
+					links[int(quality)] = final_url.replace('\/','/')
+					
+		return links
 	
 	def getAlert(self, html, params = {}):
 		get = params.get
@@ -179,12 +260,45 @@ class YouTubePlayer(object):
 		return result
 	
 	def getVideoInfo(self, params):
-		result = []
-		return result
-	
-	def getVideoUrl(self, params):
 		get = params.get
 		
+		( result, status ) = self._fetchPage("http://gdata.youtube.com/feeds/api/videos/" + videoid, api = True)
+
+		if status == 200:				
+			result = self.__core__._getvideoinfo(result)
+		
+			if len(result) == 0:
+				if self.__dbg__:
+					print self.__plugin__ + " YouTube doesn't know this video id?"
+				return False
+		else:
+			if self.__dbg__:
+				print self.__plugin__ + " _get_details got bad status: " + str(status)
+			
+			video = {}
+			video['Title'] = "Error"
+			video['videoid'] = get("videoid")
+			video['thumbnail'] = "Error"
+			video['video_url'] = False
+
+			if (status == 403):
+				# Override the 403 passed from _fetchPage with error provided by youtube.
+				video['apierror'] = self._getAlert(videoid)
+				return video
+			elif (status == 503):
+				video['apierror'] = self.__language__(30605)
+				return video
+			else:
+				video['apierror'] = self.__language__(30606) + str(status)
+				return video
+			
+		result = self._get_details(get("videoid"))
+		
+		return result
+	
+	def getVideoUrl(self, links, params):
+		get = params.get
+		video_url = ""
 		
 		if get("action") == "download":
 			hd_quality = int(self.__settings__.getSetting( "hd_videos_download" ))
@@ -203,12 +317,44 @@ class YouTubePlayer(object):
 				else: 
 					hd_quality = 0
 		
+		link = links.get
+		
+		# SD videos are default, but we go for the highest res
+		if (get(35)):
+			video_url = get(35)
+		elif (get(34)):
+			video_url = get(34)
+		elif (get(18)):
+			video_url = get(18)
+		elif (get(5)):
+			video_url = get(5)
+		
+		if hd_quality > 0: #<-- 720p
+			if (get(22)):
+				video_url = get(22)
+		if hd_quality > 1: #<-- 1080p
+			if (get(37)):
+				video_url = get(37)
+				
+		if not video_url:
+			if self.__dbg__:
+				print self.__plugin__ + " construct_video_url failed, video_url not set"
+			return (self.__language__(30607), 303)
+		
+		if link('type') == 'stream_map':
+			video_url += " swfurl=%s swfvfy=1" % link('swf_config')
+		
+		if len(video_url) > 0:
+			video_url += " | " + self.__utils__.USERAGENT
+
+		return video_url
+		
 	def construct_video_url(self, params):
 		get = params.get
 		
 		videoid = get("videoid")
 		
-		video = self._get_details(videoid)
+		
 		
 		if not video:
 			if self.__dbg__:
@@ -232,96 +378,6 @@ class YouTubePlayer(object):
 		
 		(fmtSource, swfConfig, video['stream_map']) = self._extractVariables(videoid)
 		
-		if ( not fmtSource ):
-			if self.__dbg__:
-				print self.__plugin__ + " construct_video_url Hopefully this extra if check is now legacy THIS SHOULD NOT HAPPEN ANYMORE"
-			return ( "", 500 ) 
-		
-		if ( video['stream_map'] == 303 ):
-			return (fmtSource, 303)
-		
-		fmt_url_map = urllib.unquote_plus(fmtSource[0]).split('|')
-		links = {};
-		video_url = False
-
-		print self.__plugin__ + " construct_video_url: stream_map : " + video['stream_map']
-		if (video['stream_map'] == 'true'):
-			if self.__dbg__:
-				print self.__plugin__ + " construct_video_url: stream map"
-				
-			for fmt_url in fmt_url_map:
-				if self.__dbg__:
-					print self.__plugin__ + " construct_video_url: fmt_url : " + repr(fmt_url)
-					
-				if (len(fmt_url) > 7 and fmt_url.find(":\\/\\/") > 0):
-					if (fmt_url.rfind(',') > fmt_url.rfind('\/id\/')):
-						final_url = fmt_url[:fmt_url.rfind(',')]
-						final_url = final_url.replace('\u0026','&')
-						if (final_url.rfind('\/itag\/') > 0):
-							quality = final_url[final_url.rfind('\/itag\/') + 8:]
-						else :
-							quality = "5"
-						links[int(quality)] = final_url.replace('\/','/')
-					else :
-						final_url = fmt_url
-						final_url = final_url.replace('\u0026','&')
-						if (final_url.rfind('\/itag\/') > 0):
-							quality = final_url[final_url.rfind('\/itag\/') + 8:]
-						else :
-							quality = "5"
-						links[int(quality)] = final_url.replace('\/','/')
-		
-		else:
-			if self.__dbg__:
-				print self.__plugin__ + " construct_video_url: non stream map" 
-			for fmt_url in fmt_url_map:
-				if (len(fmt_url) > 7):
-					if (fmt_url.rfind(',') > fmt_url.rfind('&id=')): 
-						final_url = fmt_url[:fmt_url.rfind(',')]
-						final_url = final_url.replace('\u0026','&')
-						if (final_url.rfind('itag=') > 0):
-							quality = final_url[final_url.rfind('itag=') + 5:]
-							quality = quality[:quality.find('&')]
-						else:
-							quality = "5"
-						links[int(quality)] = final_url.replace('\/','/')
-					else :
-						final_url = fmt_url
-						if (final_url.rfind('itag=') > 0):
-							quality = final_url[final_url.rfind('itag=') + 5:]
-							quality = quality[:quality.find('&')]
-						else :
-							quality = "5"
-						links[int(quality)] = final_url.replace('\/','/')
-		
-		get = links.get
-		
-		# SD videos are default, but we go for the highest res
-		if (get(35)):
-			video_url = get(35)
-		elif (get(34)):
-			video_url = get(34)
-		elif (get(18)):
-			video_url = get(18)
-		elif (get(5)):
-			video_url = get(5)
-		
-		if (hd_quality > 0): #<-- 720p
-			if (get(22)):
-				video_url = get(22)
-		if (hd_quality > 1): #<-- 1080p
-			if (get(37)):
-				video_url = get(37)
-				
-		if ( not video_url ):
-			if self.__dbg__:
-				print self.__plugin__ + " construct_video_url failed, video_url not set"
-			return (self.__language__(30607), 303)
-		
-		if (video['stream_map'] == 'true'):
-			video['swf_config'] = swfConfig
-		
-		video['video_url'] = video_url;
 
 		if self.__dbg__:
 			print self.__plugin__ + " construct_video_url done"
@@ -332,72 +388,4 @@ class YouTubePlayer(object):
 		get = params.get
 		( html, status ) = self._fetchPage("http://www.youtube.com/watch?v=%s&safeSearch=none&hl=en_us" % get("videoid"))
 		
-		
-	def _extractVariables(self, videoid):
-		if self.__dbg__:
-			print self.__plugin__ + " extractVariables : " + repr(videoid)
-		
-		swf_url = False
-		
-		fmtSource = re.findall('"fmt_url_map": "([^"]+)"', htmlSource);
-		
-		if fmtSource:
-			if self.__dbg__:
-				print self.__plugin__ + " fmt_url_map found"
-			stream_map = "False"
-		else:
-			if self.__dbg__:
-				print self.__plugin__ + " fmt_url_map not found, searching for stream map"
-				
-			swfConfig = re.findall('var swfConfig = {"url": "(.*)", "min.*};', htmlSource)
-			if len(swfConfig) > 0:
-				swf_url = swfConfig[0].replace("\\", "")
-				
-			fmtSource = re.findall('"fmt_stream_map": "([^"]+)"', htmlSource);
-			if not fmtSource:
-				print self.__plugin__ + " couldn't locate fmt_stream_map"
-			
-			stream_map = 'True'
-			
-		if self.__dbg__:
-			print self.__plugin__ + " extractVariables done"
-				
-		return (fmtSource, swf_url, stream_map)
-		
-	def _get_details(self, videoid):
-		if self.__dbg__:
-			print self.__plugin__ + " _get_details: " + repr(videoid)
-
-		( result, status ) = self._fetchPage("http://gdata.youtube.com/feeds/api/videos/" + videoid, api = True)
-
-		if status == 200:				
-			result = self._getvideoinfo(result)
-		
-			if len(result) == 0:
-				if self.__dbg__:
-					print self.__plugin__ + " _get_details result was empty"
-				return False
-			else:
-				if self.__dbg__:
-					print self.__plugin__ + " _get_details done"
-				return result[0];
-		else:
-			if self.__dbg__:
-				print self.__plugin__ + " _get_details got bad status: " + str(status)
-			
-			video = {}
-			video['Title'] = "Error"
-			video['videoid'] = videoid
-			video['thumbnail'] = "Error"
-			video['video_url'] = False
-
-			if (status == 403):
-				# Override the 403 passed from _fetchPage with error provided by youtube.
-				video['apierror'] = self._getAlert(videoid)
-				return video
-			elif (status == 503):
-				video['apierror'] = self.__language__(30605)
-				return video
-			else:
-				video['apierror'] = self.__language__(30606) + str(status)
-				return video
+		return (html, status)
