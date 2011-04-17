@@ -17,6 +17,7 @@
 '''
 
 import sys, urllib, urllib2, re, cookielib
+import xbmc
 
 # ERRORCODES:
 # 0 = Ignore
@@ -39,6 +40,18 @@ class YouTubeLogin(object):
 	urls['http_login_confirmation'] = "http://www.youtube.com/signin?action_handle_signin=true&nomobiletemp=1&hl=en_US&next=/index&hl=en_US&ltmpl=sso"
 	urls['gdata_login'] = "https://www.google.com/youtube/accounts/ClientLogin"
 	
+	def login(self, params = {}):
+		self.__settings__.openSettings()
+						
+		(result, status) = self._login()
+				
+		if status == 200:
+			self.showErrorMessage(self.__language__(30031), result, 303)
+		else:
+			self.showErrorMessage(self.__language__(30609), result, status)
+				
+		xbmc.executebuiltin( "Container.Refresh" )
+	
 	def _fetchPage(self, url, params = {}):
 		get = params.get
 		request = urllib2.Request(url)
@@ -51,7 +64,7 @@ class YouTubeLogin(object):
 		connection.close()
 		return contents
 		
-	def login(self, error = 0):
+	def _login(self, error = 0):
 		if self.__dbg__:
 			print self.__plugin__ + " login - errors: " + str(error)
 			
