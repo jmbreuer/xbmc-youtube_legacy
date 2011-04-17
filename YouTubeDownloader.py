@@ -61,10 +61,10 @@ class YouTubeDownloader:
 		try:
 			url = urllib2.Request(video['video_url'])
 			url.add_header('User-Agent', self.USERAGENT);
-			valid_chars = "-_.() %s%s" % (string.ascii_letters, string.digits)
 			
-			filename_incomplete = "%s/%s-incomplete.mp4" % ( path, ''.join(c for c in video['Title'] if c in valid_chars) )
-			filename_complete = "%s/%s.mp4" % ( path, ''.join(c for c in video['Title'] if c in valid_chars) )
+			
+			filename_incomplete = "%s/%s-incomplete.mp4" % ( path, ''.join(c for c in video['Title'] if c in self.__utils__.VALID_CHARS) )
+			filename_complete = "%s/%s.mp4" % ( path, ''.join(c for c in video['Title'] if c in self.__utils__.VALID_CHARS) )
 			file = open(filename_incomplete, "wb")
 			con = urllib2.urlopen(url);
 			file.write(con.read())
