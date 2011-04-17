@@ -16,13 +16,15 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, os
+import sys, os, string
 import xbmc
 
 class YouTubeUtils:
 	__settings__ = sys.modules[ "__main__" ].__settings__
 	__plugin__ = sys.modules[ "__main__" ].__plugin__
 	
+	VALID_CHARS = "-_.() %s%s" % (string.ascii_letters, string.digits)
+	USERAGENT = "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-GB; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8"
 	plugin_thumbnail_path = os.path.join( __settings__.getAddonInfo('path'), "thumbnails" )
 	
 	# This function raises a keyboard for user input
@@ -91,6 +93,12 @@ class YouTubeUtils:
 				thumbnail = "DefaultFolder.png"	
 		
 		return thumbnail
+	
+	def arrayToPipeDelimitedString(self, input):
+		pipedItems = ""
+		for item in input:
+			pipedItems += item + "|"
+		return pipedItems
 		
 if __name__ == '__main__':	
 	sys.exit(0);
