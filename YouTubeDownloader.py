@@ -34,8 +34,8 @@ class YouTubeDownloader:
 			self.__utils__.showMessage(self.__language__(30600), self.__language__(30611))
 			self.__settings__.openSettings()
 			path = self.__settings__.getSetting( "downloadPath" )
-
-		( video, status ) = self.__core__.construct_video_url(params)
+		
+		( video, status ) = self.__player__.construct_video_url(params)
 			
 		if status != 200:
 			self.showErrorMessage(self.__language__( 30501 ), video, status)

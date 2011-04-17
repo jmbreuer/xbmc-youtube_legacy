@@ -17,7 +17,7 @@
 '''
 
 import sys, urllib, re, os.path, datetime
-import xbmc
+import xbmc, xbmcgui, xbmcplugin
 from xml.dom.minidom import parseString
 
 class YouTubePlayer(object):
@@ -31,7 +31,8 @@ class YouTubePlayer(object):
 
 	urls = {};
 	# YouTube General Feeds
-	urls['video_stream'] = "http://gdata.youtube.com/feeds/api/playlists/%s"
+	
+	urls['video_stream'] = "http://www.youtube.com/watch?v=%s&safeSearch=none&hl=en_us"
 	urls['timed_text_index'] = "http://www.youtube.com/api/timedtext?type=list&v=%s"
 	urls['video_info'] = "http://gdata.youtube.com/feeds/api/videos/%s"
 	urls['close_caption_url'] = "http://www.youtube.com/api/timedtext?type=track&v=%s&name=%s&lang=%s"
@@ -138,16 +139,75 @@ class YouTubePlayer(object):
 		return result
 		
 	# ================================ Video Playback ====================================
-	def construct_video_url(self, params, encoding = 'utf-8', download = False):
+	
+	def playVideo(self, params = {}):
 		get = params.get
-		if ( not get("videoid") ):
-			return ( "", 200)
+		(video, status) = self.__core__.construct_video_url(params);
 
-		videoid = get("videoid")
+		if status != 200:
+			if self.__dbg__ : 
+				print self.__plugin__ + " construct video url failed contents of video item " + repr(video)
+			self.showErrorMessage(self.__language__(30603), video, status)
+			return False
+				
+		listitem=xbmcgui.ListItem(label=video['Title'], iconImage=video['thumbnail'], thumbnailImage=video['thumbnail'], path=video['video_url']);
+		
+		listitem.setInfo(type='Video', infoLabels=video)
 		
 		if self.__dbg__:
-			print self.__plugin__ + " construct_video_url : " + repr(videoid)
+			print self.__plugin__ + " - Playing video: " + video['Title'] + " - " + get('videoid') + " - " + video['video_url']
 
+		xbmcplugin.setResolvedUrl(handle=int(sys.argv[1]), succeeded=True, listitem=listitem)
+
+		if self.__settings__.getSetting("lang_code") != "0" and "local" not in video:
+			self.addSubtitles(video)
+		
+		self.__settings__.setSetting( "vidstatus-" + video['videoid'], "7" )
+	
+	def getVideoUrlMap(self, html, params):
+		get = params.get
+		
+	
+	def getAlert(self, html, params = {}):
+		get = params.get
+		result = self.__language__(30622)	
+		
+		search_string = 'class="yt-alert-content">'
+		if html.find(search_string) > 0:
+			result = html[html.find(search_string) + len(search_string): html.find('</div>', len(search_string))].strip()
+		
+		return result
+	
+	def getVideoInfo(self, params):
+		result = []
+		return result
+	
+	def getVideoUrl(self, params):
+		get = params.get
+		
+		
+		if get("action") == "download":
+			hd_quality = int(self.__settings__.getSetting( "hd_videos_download" ))
+			if ( hd_quality == 0 ):
+				hd_quality = int(self.__settings__.getSetting( "hd_videos" ))
+			else:
+				hd_quality -= 1
+		else:
+			if (not get("quality")):
+				hd_quality = int(self.__settings__.getSetting( "hd_videos" ))
+			else:
+				if (get("quality") == "1080p"):
+					hd_quality = 2
+				elif (get("quality") == "720p"):
+					hd_quality = 1
+				else: 
+					hd_quality = 0
+		
+	def construct_video_url(self, params):
+		get = params.get
+		
+		videoid = get("videoid")
+		
 		video = self._get_details(videoid)
 		
 		if not video:
@@ -168,24 +228,9 @@ class YouTubePlayer(object):
 			video['local'] = "true"
 			return (video, 200)
 		
-		if download:
-			hd_quality = int(self.__settings__.getSetting( "hd_videos_download" ))
-			if ( hd_quality == 0 ):
-				hd_quality = int(self.__settings__.getSetting( "hd_videos" ))
-			else:
-				hd_quality -= 1
-		else:
-			if (not get("quality")):
-				hd_quality = int(self.__settings__.getSetting( "hd_videos" ))
-			else:
-				if (get("quality") == "1080p"):
-					hd_quality = 2
-				elif (get("quality") == "720p"):
-					hd_quality = 1
-				else: 
-					hd_quality = 0
+
 		
-		(fmtSource, swfConfig, video['stream_map'], video['trans_url']) = self._extractVariables(videoid)
+		(fmtSource, swfConfig, video['stream_map']) = self._extractVariables(videoid)
 		
 		if ( not fmtSource ):
 			if self.__dbg__:
@@ -200,7 +245,7 @@ class YouTubePlayer(object):
 		video_url = False
 
 		print self.__plugin__ + " construct_video_url: stream_map : " + video['stream_map']
-		if (video['stream_map'] == 'True'):
+		if (video['stream_map'] == 'true'):
 			if self.__dbg__:
 				print self.__plugin__ + " construct_video_url: stream map"
 				
@@ -273,7 +318,7 @@ class YouTubePlayer(object):
 				print self.__plugin__ + " construct_video_url failed, video_url not set"
 			return (self.__language__(30607), 303)
 		
-		if (video['stream_map'] == 'True'):
+		if (video['stream_map'] == 'true'):
 			video['swf_config'] = swfConfig
 		
 		video['video_url'] = video_url;
@@ -282,29 +327,18 @@ class YouTubePlayer(object):
 			print self.__plugin__ + " construct_video_url done"
 
 		return (video, 200);
-
-	def arrayToPipe(self, input):
-		pipedItems = ""
-		for item in input:
-			pipedItems += item + "|"
-		return pipedItems
+		
+	def getVideoHTML(self, params = {}):
+		get = params.get
+		( html, status ) = self._fetchPage("http://www.youtube.com/watch?v=%s&safeSearch=none&hl=en_us" % get("videoid"))
+		
 		
 	def _extractVariables(self, videoid):
 		if self.__dbg__:
 			print self.__plugin__ + " extractVariables : " + repr(videoid)
-
-		( htmlSource, status ) = self._fetchPage('http://www.youtube.com/watch?v=' +videoid + "&safeSearch=none&hl=en_us")
-
-		if status != 200:
-			if self.__dbg__:
-				print self.__plugin__ + " extractVariables failed"
-			return ( htmlSource, status, status )
 		
-		if self.__dbg__:
-			print self.__plugin__ + " _fetchPage returned " #+ repr(htmlSource)
-
 		swf_url = False
-
+		
 		fmtSource = re.findall('"fmt_url_map": "([^"]+)"', htmlSource);
 		
 		if fmtSource:
@@ -315,7 +349,6 @@ class YouTubePlayer(object):
 			if self.__dbg__:
 				print self.__plugin__ + " fmt_url_map not found, searching for stream map"
 				
-
 			swfConfig = re.findall('var swfConfig = {"url": "(.*)", "min.*};', htmlSource)
 			if len(swfConfig) > 0:
 				swf_url = swfConfig[0].replace("\\", "")
@@ -329,26 +362,8 @@ class YouTubePlayer(object):
 		if self.__dbg__:
 			print self.__plugin__ + " extractVariables done"
 				
-		return (fmtSource, swf_url, stream_map, trans_url)
-	
-	def _getAlert(self, videoid):
-		if self.__dbg__:
-			print self.__plugin__ + " _getAlert begin"
+		return (fmtSource, swf_url, stream_map)
 		
-		http_result = self._fetchPage('http://www.youtube.com/watch?v=' +videoid + "&safeSearch=none", login = True)
-		
-		start = http_result.find('class="yt-alert-content">')
-		if start == -1:
-			return self.__language__(30622)
-		
-		start += len('class="yt-alert-content">')
-		result = http_result[start: http_result.find('</div>', start)].strip()
-		
-		if self.__dbg__:
-			print self.__plugin__ + " _getAlert done: " + repr(start)
-		
-		return result
-	
 	def _get_details(self, videoid):
 		if self.__dbg__:
 			print self.__plugin__ + " _get_details: " + repr(videoid)

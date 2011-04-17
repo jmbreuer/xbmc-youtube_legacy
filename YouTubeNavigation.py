@@ -26,12 +26,13 @@ class YouTubeNavigation:
 	__plugin__ = sys.modules[ "__main__"].__plugin__	
 	__dbg__ = sys.modules[ "__main__" ].__dbg__
 	
-	__scraper__ = sys.modules[ "__main__" ].__scraper__
 	__utils__ = sys.modules[ "__main__" ].__utils__
 	__playlist__ = sys.modules[ "__main__" ].__playlist__
 	__core__ = sys.modules[ "__main__" ].__core__
+	__player__ = sys.modules[ "__main__" ].__player__
 	__downloader__ = sys.modules[ "__main__" ].__downloader__
 	__storage__ = sys.modules[ "__main__" ].__storage__
+	__scraper__ = sys.modules[ "__main__" ].__scraper__
 		
 	# This list contains the list options a user sees when indexing a contact 
 	#				label					  , external		 , login		 ,	thumbnail					, feed
@@ -161,7 +162,7 @@ class YouTubeNavigation:
 		if (get("action") == "download"):
 			self.__downloader__.downloadVideo(params)
 		if (get("action") == "play_video"):
-			self.playVideo(params)
+			self.__player__.playVideo(params)
 		if (get("action") == "change_subscription_view"):
 			self.changeSubscriptionView(params)
 		if (get("action") == "play_all"):
@@ -322,39 +323,7 @@ class YouTubeNavigation:
 		result = self.getUserInput(self.__language__(30518), '')
 		params["videoid"] = result 
 		if (result):
-			self.playVideo(params);
-		
-	def playVideo(self, params = {}):
-		get = params.get
-		(video, status) = self.__core__.construct_video_url(params);
-
-		if status != 200:
-			if self.__dbg__ : 
-				print self.__plugin__ + " construct video url failed contents of video item " + repr(video)
-			self.showErrorMessage(self.__language__(30603), video, status)
-			return False
-		
-		# this shit should happen in core
-		if ('local' not in video):
-			if ( 'swf_config' in video ):
-				video['video_url'] += " swfurl=%s swfvfy=1" % video['swf_config']
-			
-			video['video_url'] += " | " + self.__core__.USERAGENT
-		# end of core shit
-		
-		listitem=xbmcgui.ListItem(label=video['Title'], iconImage=video['thumbnail'], thumbnailImage=video['thumbnail'], path=video['video_url']);
-		
-		listitem.setInfo(type='Video', infoLabels=video)
-		
-		if self.__dbg__:
-			print self.__plugin__ + " - Playing video: " + video['Title'] + " - " + get('videoid') + " - " + video['video_url']
-
-		xbmcplugin.setResolvedUrl(handle=int(sys.argv[1]), succeeded=True, listitem=listitem)
-
-		if self.__settings__.getSetting("lang_code") != "0" and "local" not in video:
-			self.addSubtitles(video)
-		
-		self.__settings__.setSetting( "vidstatus-" + video['videoid'], "7" )
+			self.__player__.playVideo(params);
 
 	def addToFavorites(self, params = {}):
 		get = params.get

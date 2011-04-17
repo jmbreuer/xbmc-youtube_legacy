@@ -39,12 +39,15 @@ __navigation__ = ""
 __downloader__ = ""
 __storage__ = ""
 __login__ = ""
+__player__ = ""
 
 if (__name__ == "__main__" ):
 	import YouTubeUtils as utils
 	__utils__ = utils.YouTubeUtils()
 	import YouTubeLogin as login
 	__login__ = login.YouTubeLogin()
+	import YouTubePlayer as player
+	__player__ = player.YouTubePlayer()
 	import YouTubePluginStorage as storage
 	__storage__ = storage.YouTubePluginStorage()
 	import YouTubeCore as core

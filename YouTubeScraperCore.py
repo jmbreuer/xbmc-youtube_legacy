@@ -281,7 +281,7 @@ class YouTubeScraperCore:
 				videos = videos.replace("&quot;","")
 				videos = videos.replace(" ","")
 				items = videos.split(",")
-				return self.core._get_batch_details(items)
+				return self.__core__._get_batch_details(items)
 
 		return ("Scraper failed", 500)
 		
