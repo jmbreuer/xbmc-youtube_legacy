@@ -39,12 +39,14 @@ class YouTubePlayer(object):
 	urls['transcribtion_url'] = "http://www.youtube.com/api/timedtext?caps=asr&kind=asr&type=track&key=yttt1&expire=%s&sparams=caps,expire,v&v=%s&signature=%s&lang=en"
 	
 	# ================================ Subtitle Downloader ====================================
-	def downloadSubtitle(self, html, video = {}):
+	def downloadSubtitle(self, video = {}):
 		get = video.get
 		subtitle_url = self.getSubtitleUrl(video)
 		
 		if not subtitle_url and self.__settings__.getSetting("transcode") == "true":
-			subtitle_url = self.getTranscriptionUrl(html, video) 
+			(html, status) = self._fetchPage(self.urls["video_stream"] % get("videoid"))
+			if status == 200:
+				subtitle_url = self.getTranscriptionUrl(html, video) 
 		
 		if subtitle_url:
 			srt = ""
@@ -139,7 +141,7 @@ class YouTubePlayer(object):
 		
 		return result
 		
-	def addSubtitles(self, html, video = {}):
+	def addSubtitles(self, video = {}):
 		get = video.get
 		
 		filename = ''.join(c for c in video['Title'] if c in self.__utils__.VALID_CHARS) + " [" + get('videoid') + "]" + ".srt"
@@ -153,7 +155,7 @@ class YouTubePlayer(object):
 			set_subtitle = True
 		elif (os.path.exists(path)):
 			set_subtitle = True
-		elif (self.downloadSubtitle(html, video)): 
+		elif (self.downloadSubtitle(video)): 
 			set_subtitle = True
 		
 		if set_subtitle:
