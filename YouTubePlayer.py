@@ -23,7 +23,7 @@ from xml.dom.minidom import parseString
 class YouTubePlayer(object):
 	__settings__ = sys.modules[ "__main__" ].__settings__
 	__language__ = sys.modules[ "__main__" ].__language__
-	__plugin__ = sys.modules[ "__main__" ].__plugin__
+	__plugin__ = sys.modules[ "__main__" ].__plugin__ 
 	__dbg__ = sys.modules[ "__main__" ].__dbg__
 	
 	__core__ = sys.modules[ "__main__" ].__core__
@@ -36,7 +36,7 @@ class YouTubePlayer(object):
 	urls['timed_text_index'] = "http://www.youtube.com/api/timedtext?type=list&v=%s"
 	urls['video_info'] = "http://gdata.youtube.com/feeds/api/videos/%s"
 	urls['close_caption_url'] = "http://www.youtube.com/api/timedtext?type=track&v=%s&name=%s&lang=%s"
-	urls['transcribtion_url'] = "http://www.youtube.com/api/timedtext?caps=asr&kind=asr&type=track&key=yttt1&expire=%s&sparams=caps,expire,v&v=%s&signature=%s&lang=en"
+	urls['transcription_url'] = "http://www.youtube.com/api/timedtext?caps=asr&kind=asr&type=track&key=yttt1&expire=%s&sparams=caps,expire,v&v=%s&signature=%s&lang=en"
 	
 	# ================================ Subtitle Downloader ====================================
 	def downloadSubtitle(self, video = {}):
@@ -44,14 +44,14 @@ class YouTubePlayer(object):
 		subtitle_url = self.getSubtitleUrl(video)
 		
 		if not subtitle_url and self.__settings__.getSetting("transcode") == "true":
-			(html, status) = self._fetchPage(self.urls["video_stream"] % get("videoid"))
+			(html, status) = self.__core__._fetchPage(self.urls["video_stream"] % get("videoid"))
 			if status == 200:
 				subtitle_url = self.getTranscriptionUrl(html, video) 
 		
 		if subtitle_url:
 			srt = ""
-			xml = self.__core__._fetchPage(subtitle_url)
-			if len(xml) > 0:
+			(xml, status) = self.__core__._fetchPage(subtitle_url)
+			if status == 200:
 				srt = self.transformSubtitleXMLtoSRT(xml)
 			if len(srt) > 0:
 				self.saveSubtitle(srt, video)	
@@ -71,7 +71,7 @@ class YouTubePlayer(object):
 		get = video.get
 		url = ""
 		
-		xml = self.__core__._fetchPage(self.urls["timed_text_index"] % get('videoid'))
+		(xml, status) = self.__core__._fetchPage(self.urls["timed_text_index"] % get('videoid'))
 		dom = parseString(xml)
 		entries = dom.getElementsByTagName("track")
 		
@@ -118,6 +118,7 @@ class YouTubePlayer(object):
 		return trans_url
 		
 	def transformSubtitleXMLtoSRT(self, xml):
+		print "komdmdm " + repr(xml)
 		dom = parseString(xml)
 		entries = dom.getElementsByTagName("text")
 		
@@ -169,18 +170,21 @@ class YouTubePlayer(object):
 		get = params.get
 		
 		(video, status) = self.getVideoObject(params);
-
+		
 		if status != 200:
 			if self.__dbg__ : 
 				print self.__plugin__ + " construct video url failed contents of video item " + repr(video)
-			self.showErrorMessage(self.__language__(30603), video, status)
+			self.__utils__.showErrorMessage(self.__language__(30603), video, status)
 			return False
+		
+		print "kom mo: " + repr(video)
 				
 		listitem=xbmcgui.ListItem(label=video['Title'], iconImage=video['thumbnail'], thumbnailImage=video['thumbnail'], path=video['video_url']);		
 		listitem.setInfo(type='Video', infoLabels=video)
 		
 		if self.__dbg__:
 			print self.__plugin__ + " - Playing video: " + video['Title'] + " - " + get('videoid') + " - " + video['video_url']
+		
 		xbmcplugin.setResolvedUrl(handle=int(sys.argv[1]), succeeded=True, listitem=listitem)
 
 		if self.__settings__.getSetting("lang_code") != "0":
@@ -199,8 +203,9 @@ class YouTubePlayer(object):
 		if fmtSource:
 			if self.__dbg__:
 				print self.__plugin__ + " fmt_stream_map found"
-			fmtSource = fmtSource.replace('\u0026','&')
-			fmt_url_map = urllib.unquote_plus(fmtSource[0]).split('|')
+			
+			fmtSource = fmtSource[0].replace('\u0026','&')
+			fmt_url_map = urllib.unquote_plus(fmtSource).split('|')
 			swfConfig = re.findall('var swfConfig = {"url": "(.*)", "min.*};', html)
 			if len(swfConfig) > 0:
 				swf_url = swfConfig[0].replace("\\", "")
@@ -239,8 +244,8 @@ class YouTubePlayer(object):
 		if fmtSource:
 			if self.__dbg__:
 				print self.__plugin__ + " fmt_url_map found"
-			fmtSource = fmtSource.replace('\u0026','&')
-			fmt_url_map = urllib.unquote_plus(fmtSource[0]).split('|')
+			fmtSource = fmtSource[0].replace('\u0026','&')
+			fmt_url_map = urllib.unquote_plus(fmtSource).split('|')
 			
 		for fmt_url in fmt_url_map:
 			if (len(fmt_url) > 7):
@@ -276,7 +281,7 @@ class YouTubePlayer(object):
 	def getVideoInfo(self, params):
 		get = params.get
 		
-		( result, status ) = self._fetchPage(self.urls["video_info"] % get("videoid"), api = True)
+		( result, status ) = self.__core__._fetchPage(self.urls["video_info"] % get("videoid"), api = True)
 
 		if status == 200:				
 			result = self.__core__._getvideoinfo(result)
@@ -288,8 +293,8 @@ class YouTubePlayer(object):
 		else:
 			if self.__dbg__:
 				print self.__plugin__ + " Got API Error from YouTube!"
-				
-		return (result, status)
+		
+		return (result[0], status)
 	
 	def selectVideoQuality(self, links, params):
 		get = params.get
@@ -314,21 +319,21 @@ class YouTubePlayer(object):
 					hd_quality = 0
 		
 		# SD videos are default, but we go for the highest res
-		if (get(35)):
-			video_url = get(35)
-		elif (get(34)):
-			video_url = get(34)
-		elif (get(18)):
-			video_url = get(18)
-		elif (get(5)):
-			video_url = get(5)
+		if (link(35)):
+			video_url = link(35)
+		elif (link(34)):
+			video_url = link(34)
+		elif (link(18)):
+			video_url = link(18)
+		elif (link(5)):
+			video_url = link(5)
 		
 		if hd_quality > 0: #<-- 720p
-			if (get(22)):
-				video_url = get(22)
+			if (link(22)):
+				video_url = link(22)
 		if hd_quality > 1: #<-- 1080p
-			if (get(37)):
-				video_url = get(37)
+			if (link(37)):
+				video_url = link(37)
 				
 		if len(video_url) > 0:
 			video_url += " | " + self.__utils__.USERAGENT
@@ -340,12 +345,12 @@ class YouTubePlayer(object):
 	def getVideoObject(self, params):
 		get = params.get
 		
-		(html, status) = self._fetchPage(self.urls["video_stream"] % get("videoid"))
+		(html, status) = self.__core__._fetchPage(self.urls["video_stream"] % get("videoid"))
 		(video, status) = self.getVideoInfo(params)
 		
 		#Check if file has been downloaded locally and use that as a source instead
 		path = self.__settings__.getSetting( "downloadPath" )
-		path = "%s%s-[%s].mp4" % (path, ''.join(c for c in video['Title'] if c in self.VALID_CHARS), video["videoid"])
+		path = "%s%s-[%s].mp4" % (path, ''.join(c for c in video['Title'] if c in self.__utils__.VALID_CHARS), video["videoid"])
 		if os.path.exists(path):
 			video['video_url'] = path
 			return (video, 200)
@@ -360,6 +365,7 @@ class YouTubePlayer(object):
 		if status == 200:
 			
 			links = self.getVideoUrlMap(html)
+			
 			if not links:
 				links = self.getVideoStreamMap(html)
 			if links:

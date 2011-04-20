@@ -296,7 +296,7 @@ class YouTubeNavigation:
 	#================================== Plugin Actions =========================================
 
 	def playVideoById(self, params = {}):
-		result = self.getUserInput(self.__language__(30518), '')
+		result = self.__utils__.getUserInput(self.__language__(30518), '')
 		params["videoid"] = result 
 		if (result):
 			self.__player__.playVideo(params);
