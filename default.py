@@ -67,7 +67,7 @@ if (__name__ == "__main__" ):
 		print __plugin__
 	
 	if ( not __settings__.getSetting( "firstrun" ) ):
-		__navigation__.login()
+		__login__.login()
 		__settings__.setSetting( "firstrun", '1' )
 	
 	if (not sys.argv[2]):

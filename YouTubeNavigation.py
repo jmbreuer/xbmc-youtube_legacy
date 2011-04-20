@@ -29,6 +29,7 @@ class YouTubeNavigation:
 	__utils__ = sys.modules[ "__main__" ].__utils__
 	__playlist__ = sys.modules[ "__main__" ].__playlist__
 	__core__ = sys.modules[ "__main__" ].__core__
+	__login__ = sys.modules[ "__main__" ].__login__
 	__player__ = sys.modules[ "__main__" ].__player__
 	__downloader__ = sys.modules[ "__main__" ].__downloader__
 	__storage__ = sys.modules[ "__main__" ].__storage__
@@ -140,7 +141,7 @@ class YouTubeNavigation:
 		if (get("action") == "delete_refinements"):
 			self.deleteRefinements(params)
 		if (get("action") == "settings"):
-			self.login(params)
+			self.__login__.login(params)
 		if (get("action") == "delete_search" or get("action") == "delete_disco"):
 			self.deleteSearch(params)
 		if (get("action") == "edit_search" or get("action") == "edit_disco"):

@@ -89,7 +89,7 @@ class YouTubeUtils:
 		thumbnail = os.path.join( sys.modules[ "__main__" ].__plugin__, title + ".png" )
 		
 		if ( not xbmc.skinHasImage( thumbnail ) ):
-			thumbnail = os.path.join( self.plugin_thumbnail_path, title + ".png" )
+			thumbnail = os.path.join( self.THUMBNAIL_PATH, title + ".png" )
 			if ( not os.path.isfile( thumbnail ) ):
 				thumbnail = "DefaultFolder.png"	
 		

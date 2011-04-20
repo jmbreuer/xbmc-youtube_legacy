@@ -29,8 +29,8 @@ class YouTubeLogin(object):
 	__settings__ = sys.modules[ "__main__" ].__settings__
 	__language__ = sys.modules[ "__main__" ].__language__
 	__plugin__ = sys.modules[ "__main__" ].__plugin__
+	__utils__ = sys.modules[ "__main__" ].__utils__
 	__dbg__ = sys.modules[ "__main__" ].__dbg__
-	__dbgv__ = False
 	
 	APIKEY = "AI39si6hWF7uOkKh4B9OEAX-gK337xbwR9Vax-cdeF9CF9iNAcQftT8NVhEXaORRLHAmHxj6GjM-Prw04odK4FxACFfKkiH9lg";
 	USERAGENT = "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-GB; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8"
@@ -46,9 +46,9 @@ class YouTubeLogin(object):
 		(result, status) = self._login()
 				
 		if status == 200:
-			self.showErrorMessage(self.__language__(30031), result, 303)
+			self.__utils__.showErrorMessage(self.__language__(30031), result, 303)
 		else:
-			self.showErrorMessage(self.__language__(30609), result, status)
+			self.__utils__.showErrorMessage(self.__language__(30609), result, status)
 				
 		xbmc.executebuiltin( "Container.Refresh" )
 	
