@@ -26,8 +26,8 @@ class YouTubeScraperCore:
 	__plugin__ = sys.modules[ "__main__"].__plugin__	
 	__dbg__ = sys.modules[ "__main__" ].__dbg__
 	
+	__utils__ = sys.modules[ "__main__" ].__utils__
 	__core__ = sys.modules[ "__main__" ].__core__
-	USERAGENT = "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-GB; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8"
 	
 	urls = {}
 	urls['categories'] = "http://www.youtube.com/videos"
@@ -51,20 +51,16 @@ class YouTubeScraperCore:
 #=================================== Recommended ============================================
 	def scrapeRecommended(self, params = {}):
 		get = params.get
-		url = self.urls["recommended"]
-		
-		if self.__dbg__:
-			print self.__plugin__ + " scrapeVideos: " + url + " - params: - " + repr(params)
-		
+				
 		page = int(get("page", "0"))
 		per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
 		
 		oldVideos = self.__settings__.getSetting("recommendedVideos")
 		
 		if ( page == 0 or oldVideos == ""):
-			( videos, result)  = self._scrapeYouTubeData(params)
+			( videos, result)  = self.scrapeYouTubeData(params)
 			if (result == 200):
-				self.__settings__.setSetting("recommendedVideos", self.core.arrayToPipe(videos))
+				self.__settings__.setSetting("recommendedVideos", self.__utils__.arrayToPipe(videos))
 			else:
 				return ( videos, result )
 		else:
@@ -80,20 +76,20 @@ class YouTubeScraperCore:
 		if self.__dbg__:
 			print self.__plugin__ + " calling get batch"
 			
-		( ytobjects, status ) = self.core._get_batch_details(subitems)
+		( ytobjects, status ) = self.__core__._get_batch_details(subitems)
 		
 		if (len(ytobjects) > 0):
 			ytobjects[len(ytobjects)-1]['next'] = next
 		
 		return (ytobjects, status)
 	
-	def _scrapeYouTubeData(self, params ={}):
+	def scrapeYouTubeData(self, params ={}):
 		get = params.get		
-		retry = 0; 
+		retry = 0
 		
 		login_info = self.__settings__.getSetting( "login_info" )
 		while not login_info and retry < 10:
-			if ( self.core._httpLogin() ):
+			if ( self.__core__._httpLogin() ):
 				login_info = self.__settings__.getSetting( "login_info" )
 			retry += 1
 		
@@ -180,7 +176,7 @@ class YouTubeScraperCore:
 						video = video.findNextSibling(name="div", attrs = {'class':"video-cell"})
 		
 		if (items):
-			(results, status) = self.core._get_batch_details(items)
+			(results, status) = self.__core__._get_batch_details(items)
 			if (status == 200):
 				results[len(results) -1]["next"] = next
 			return (results, status)

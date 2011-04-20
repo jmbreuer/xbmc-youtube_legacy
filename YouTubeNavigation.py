@@ -80,7 +80,7 @@ class YouTubeNavigation:
 #				  {'Title':__language__( 30004 )  ,'path':"/root/subscriptions/new" 				, 'thumbnail':"newsubscriptions"	, 'login':"true"  , 'feed':"newsubscriptions" },
 #				  {'Title':__language__( 30005 )  ,'path':"/root/uploads"							, 'thumbnail':"uploads"				, 'login':"true"  , 'feed':"uploads" },
 #				  {'Title':__language__( 30045 )  ,'path':"/root/downloads"							, 'thumbnail':"downloads"			, 'login':"false" , 'feed':"downloads" },
-#				  {'Title':__language__( 30006 )  ,'path':"/root/search"							, 'thumbnail':"search"				, 'login':"false" , 'store':"searches" },
+				  {'Title':__language__( 30006 )  ,'path':"/root/search"							, 'thumbnail':"search"				, 'login':"false" , 'store':"searches" },
 #				  {'Title':__language__( 30007 )  ,'path':"/root/search/new"						, 'thumbnail':"search"				, 'login':"false" , 'action':"search" },
 				  {'Title':__language__( 30008 )  ,'path':"/root/playbyid"		  					, 'thumbnail':"playbyid"			, 'login':"false" , 'action':"playbyid" },
 				  {'Title':__language__( 30027 )  ,'path':"/root/login"			 					, 'thumbnail':"login"				, 'login':"false" , 'action':"settings" },
@@ -137,15 +137,15 @@ class YouTubeNavigation:
 		if (get("action") == "search" or get("action") == "search_disco"):
 			self.search(params)
 		if (get("action") == "refine_user"):
-			self.refineSearch(params)
+			self.__storage__.refineSearch(params)
 		if (get("action") == "delete_refinements"):
-			self.deleteRefinements(params)
+			self.__storage__.deleteRefinements(params)
 		if (get("action") == "settings"):
 			self.__login__.login(params)
 		if (get("action") == "delete_search" or get("action") == "delete_disco"):
-			self.deleteSearch(params)
+			self.__storage__.deleteSearch(params)
 		if (get("action") == "edit_search" or get("action") == "edit_disco"):
-			self.editSearch(params)
+			self.__storage__.editSearch(params)
 		if (get("action") == "remove_favorite"):
 			self.removeFromFavorites(params)
 		if (get("action") == "add_favorite"):
@@ -170,10 +170,8 @@ class YouTubeNavigation:
 	#==================================== Item Building and Listing ===========================================	
 	def listFolder(self, params = {}):
 		get = params.get
-
 		
 		xbmcplugin.endOfDirectory( handle=int( sys.argv[ 1 ] ), succeeded=True, cacheToDisc=False)
-
 
 	def listOptionFolder(self, params = {}):
 		get = params.get
@@ -184,83 +182,6 @@ class YouTubeNavigation:
 			self.addFolderListItem(params, item, index)
 				
 		xbmcplugin.endOfDirectory( handle=int( sys.argv[ 1 ] ), succeeded=True, cacheToDisc=False)
-			
-	def listUserFolder(self, params = {}):
-		get = params.get
-		if ( get('login') and self.__settings__.getSetting( "username" ) != "" ):
-			auth = self.__settings__.getSetting( "auth" )
-			if ( not auth ) :
-				self.login()
-				auth = self.__settings__.getSetting( "auth" )
-				
-		feed = self.parseFeeds(params)
-		
-		(result, status) = self.__core__.playlists(feed, params)
-		
-		if status != 200:
-			feed_label = ""
-			for category in self.categories:
-				cat_get = category.get
-				if (cat_get("feed") == get("feed")):
-					feed_label = cat_get("Title")
-					break
-			
-			if (feed_label != ""):
-				self.showErrorMessage(feed_label, result, status)
-			else:
-				self.showErrorMessage(get("feed"), result, status)
-				
-			return False
-			
-		if ( get("feed") == "contacts"):
-			item_add_user = {'Title':self.__language__( 30024 ), 'path':get("path"), 'login':"true", 'thumbnail':"add_user", 'action':"add_contact"}
-			self.addFolderListItem(params, item_add_user,  1)
-						
-		if ( get('feed') == 'subscriptions' ):
-			if (not get("page")):
-				item = {"Title":self.__language__( 30004 ), "path":"/root/subscriptions/new", "thumbnail":"newsubscriptions", "login":"true", "feed":"newsubscriptions"}
-				if (get("contact")):
-					item["contact"] = get("contact")
-				
-				self.addFolderListItem(params, item)
-							
-		self.parseFolderList(params, result)
-		
-	def listUserFolderFeeds(self, params = {}):
-		get = params.get
-		if ( get('login') and self.__settings__.getSetting( "username" ) != "" ):
-			auth = self.__settings__.getSetting( "auth" )
-			if ( not auth ) :
-				self.login()
-				auth = self.__settings__.getSetting( "auth" )
-			
-		feed = self.parseFeeds(params)
-		
-		if ( get('login') and feed):
-			( result, status ) = self.__core__.list(feed, params);
-			if status != 200:
-				feed_label = ""
-				for category in self.categories:
-					cat_get = category.get
-					if (cat_get("feed") == get("feed")):
-						feed_label = cat_get("Title")
-						break
-					
-				if (feed_label != ""):
-					self.showErrorMessage(feed_label, result, status)
-				else:
-					self.showErrorMessage(get("feed"), result, status)
-				return False
-		
-		if ( get("channel") or get("playlist") ):
-			thumbnail = result[0].get("thumbnail")
-			if (thumbnail): 
-				if (get("channel")):
-					self.__settings__.setSetting("subscriptions_" + get("channel") + "_thumb", thumbnail)
-				if (get("playlist")):
-					self.__settings__.setSetting("playlists_" + get("playlist") + "_thumb", thumbnail)
-
-		self.parseVideoList(params, result)
 	
 	def listStoredSearches(self, params = {}):
 		get = params.get
@@ -268,31 +189,7 @@ class YouTubeNavigation:
 		(results, status) = self.__storage__.getStoredSearches(params)
 		
 		self.parseFolderList(params, results)
-		
 	
-	def scrape(self, params):
-		get = params.get
-
-		( results, status ) = self.__scraper__.scrape(params)
-		if ( len(results) > 0 and status == 200 ):
-			if (get("scraper") == "disco_top_artist" 
-				or get("scraper") == "shows"
-				or (get("scraper") == "movies" and not get("category"))
-				or (get("scraper") == "categories" and not get("category"))
-				):
-				self.parseFolderList(params, results)
-			elif( get("scraper") == "show"):
-				if (results[0].get("folder") == "true"):
-					self.parseFolderList(params, results)
-				else:
-					self.parseVideoList(params, results)
-			else:
-				self.parseVideoList(params, results)
-		elif ( status == 303):
-			self.__utils__.showMessage(self.__language__(30600), results)
-		else:
-			self.__utils__.showMessage(self.__language__(30600), self.__language__(30606))
-
 	#================================== Plugin Actions =========================================
 
 	def playVideoById(self, params = {}):
@@ -374,39 +271,6 @@ class YouTubeNavigation:
 			xbmc.executebuiltin( "Container.Refresh" )
 		return True
 		
-	#================================== Searching =========================================	
-	def search(self, params = {}):
-		get = params.get
-				
-		if (get("search")):
-			query = get("search")
-			query = urllib.unquote_plus(query)
-		else :
-			query = self.getUserInput(self.__language__(30006), '')
-
-		if (query):
-			params["search"] = query
-			self.saveSearch(params)
-		
-			if (get("action") == "search_disco"):
-				( result, status ) = self.__scraper__.searchDisco(params)
-			else:
-				( result, status ) = self.__core__.search(params);
-				
-			if status != 200:
-				self.showErrorMessage(self.__language__(30006), result, status)
-				return False
-			
-			thumbnail = result[0].get('thumbnail', "")
-			
-			if (thumbnail and query):
-				if (get("action") == "search_disco"):
-					self.__settings__.setSetting("disco_search_" + query + "_thumb", thumbnail)
-				else:
-					self.__settings__.setSetting("search_" + query + "_thumb", thumbnail)
-				
-			self.parseVideoList(params, result)
-	
 	#================================== List Item manipulation =========================================	
 	# is only used by List Menu
 	def addListItem(self, params = {}, item_params = {}):

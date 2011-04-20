@@ -174,7 +174,7 @@ class YouTubePlayer(object):
 		if status != 200:
 			if self.__dbg__ : 
 				print self.__plugin__ + " construct video url failed contents of video item " + repr(video)
-			self.__utils__.showErrorMessage(self.__language__(30603), video, status)
+			self.__utils__.showErrorMessage(self.__language__(30603), video["apierror"], status)
 			return False
 		
 		print "kom mo: " + repr(video)
@@ -280,6 +280,7 @@ class YouTubePlayer(object):
 	
 	def getVideoInfo(self, params):
 		get = params.get
+		video = {}
 		
 		( result, status ) = self.__core__._fetchPage(self.urls["video_info"] % get("videoid"), api = True)
 
@@ -289,12 +290,17 @@ class YouTubePlayer(object):
 			if len(result) == 0:
 				if self.__dbg__:
 					print self.__plugin__ + " Couldn't parse API output, YouTube doesn't seem to know this video id?"
-				return (result, 503)
+				video["apierror"] = "YouTube doesn't seem to know this video id!"
+				return (video, 303)
 		else:
 			if self.__dbg__:
 				print self.__plugin__ + " Got API Error from YouTube!"
-		
-		return (result[0], status)
+			print "dsfsd " + repr(result)
+			video["apierror"] = result
+			
+			return (video,303)
+		video = result[0]
+		return (video, status)
 	
 	def selectVideoQuality(self, links, params):
 		get = params.get
@@ -349,18 +355,18 @@ class YouTubePlayer(object):
 		(video, status) = self.getVideoInfo(params)
 		
 		#Check if file has been downloaded locally and use that as a source instead
-		path = self.__settings__.getSetting( "downloadPath" )
-		path = "%s%s-[%s].mp4" % (path, ''.join(c for c in video['Title'] if c in self.__utils__.VALID_CHARS), video["videoid"])
-		if os.path.exists(path):
-			video['video_url'] = path
-			return (video, 200)
+		if (status == 200):
+			path = self.__settings__.getSetting( "downloadPath" )
+			path = "%s%s-[%s].mp4" % (path, ''.join(c for c in video['Title'] if c in self.__utils__.VALID_CHARS), video["videoid"])
+			if os.path.exists(path):
+				video['video_url'] = path
+				return (video, 200)
 		
 		if status == 403:
 			video['apierror'] = self.getAlert(html, params)
-		elif status == 503:
-			video['apierror'] = self.__language__(30605)
-		elif status != 200:
-			video['apierror'] = self.__language__(30617)
+		else:
+			if not video['apierror']:
+				video['apierror'] = self.__language__(30617)
 		
 		if status == 200:
 			

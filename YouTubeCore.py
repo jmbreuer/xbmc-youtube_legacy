@@ -110,12 +110,14 @@ class YouTubeCore(object):
 	
 	def createUrl(self, params = {}):
 		get = params.get
+		time = ( "all_time", "today", "this_week", "this_month") [ int(self.__settings__.getSetting( "feed_time" ) ) ]
 		per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
+		region = ('', 'AU', 'BR', 'CA', 'CZ', 'FR', 'DE', 'GB', 'NL', 'HK', 'IN', 'IE', 'IL', 'IT', 'JP', 'MX', 'NZ', 'PL', 'RU', 'KR', 'ES','SE', 'TW', 'US', 'ZA' )[ int( self.__settings__.getSetting( "region_id" ) ) ]
 		page = get("page","0")
 		start_index = per_page * int(page) + 1
 		
 		if (get("action") == "search"): 
-			query = urllib.unquote_plus(get("query"))
+			query = urllib.unquote_plus(get("search"))
 			safe_search = ("none", "moderate", "strict" ) [int( self.__settings__.getSetting( "safe_search" ) ) ]	
 			url = self.urls["search"] % ( query, safe_search, start_index, per_page)
 			authors = self.__settings__.getSetting("stored_searches_author")
@@ -142,77 +144,57 @@ class YouTubeCore(object):
 					url = url % get("playlist")
 				elif ( get("feed") == "uploads" or get("feed") == "favorites" or  get("feed") == "playlists" or get("feed") == "subscriptions" or get("feed") == "newsubscriptions"):
 					url = url % self.__settings__.getSetting( "nick" )
+				
+			if (url.find("time") > 0 ):
+				url = url % time
+				
+			if ( url.find("?") == -1 ):
+				url += "?"
+			else:
+				url += "&"
+			url += "start-index=" + str( per_page * int(get("page","0")) + 1) + "&max-results=" + repr(per_page)
+			
+			if (url.find("standardfeeds") > 0 and region):
+				url = url.replace("/standardfeeds/", "/standardfeeds/"+ region + "/")
+			
+			url = url.replace(" ", "+")
 			return url
-		
-	def search(self, params = {}):
+	
+	def list(self, params = {}):
 		get = params.get
+		
+		if get("login") == "true":
+			if ( not self._getAuth() ):
+				if self.__dbg__:
+					print self.__plugin__ + " login required but auth wasn't set!"
+				return ( self.__language__(30609) , 303 )
+
 		url = self.createUrl(params)
 		
-		( result, status ) = self._fetchPage(url, api = True)
-
+		if get("search"):
+			( result, status ) = self._fetchPage(url, api = True)
+		
 		if status != 200:
 			return ( result, status )
 
 		result = self._getvideoinfo(result)
-		
-		if len(result) > 0:
+		if len(result == 0):
 			if self.__dbg__:
-				print self.__plugin__ + " search done :" + str(len(result))
-			return (result, 200)
-		else:
-			if self.__dbg__:
-				print self.__plugin__ + " search done with no results"
+				print self.__plugin__ + " listing failed with " + str(len(result)) + " results"
 			return (self.__language__(30601), 303)
-
-	def feeds(self, feed, params ={} ):
-		get = params.get
-		if self.__dbg__:
-			print self.__plugin__ + " feeds : " + repr(feed) + " page: " + repr(get("page","0"))
-		result = ""
-		per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
-		
-		if (feed.find("%s") > 0 ):
-			time = ( "all_time", "today", "this_week", "this_month") [ int(self.__settings__.getSetting( "feed_time" ) ) ]
-			feed = feed % time
-		
-		if ( feed.find("?") == -1 ):
-			feed += "?"
-		else:
-			feed += "&"
 			
-		feed += "start-index=" + str( per_page * int(get("page","0")) + 1) + "&max-results=" + repr(per_page)
-			
-		if (feed.find("standardfeeds") > 0):
-			region = ('', 'AU', 'BR', 'CA', 'CZ', 'FR', 'DE', 'GB', 'NL', 'HK', 'IN', 'IE', 'IL', 'IT', 'JP', 'MX', 'NZ', 'PL', 'RU', 'KR', 'ES','SE', 'TW', 'US', 'ZA' )[ int( self.__settings__.getSetting( "region_id" ) ) ]
-			if (region):
-				feed = feed.replace("/standardfeeds/", "/standardfeeds/"+ region + "/")
-
-		( result, status ) = self._fetchPage(feed, api = True)
-
-		if status != 200:
-			return ( result, status )
-
-		result = self._getvideoinfo(result)
-					
-		if len(result) > 0:
-			if self.__dbg__:
-				print self.__plugin__ + " feeds done : " + str(len(result))
-			return ( result, 200 )
-		else:
-			if self.__dbg__:
-				print self.__plugin__ + " feeds done with no results"
-			return (self.__language__(30602), 303)
+		return (result, 200)
 	
 	def listAll(self, feed, params ={}):
 		get = params.get
 		result = ""
-		auth = self._getAuth()
 		
-		if ( not auth ):
-			if self.__dbg__:
-				print self.__plugin__ + " playlists auth wasn't set "
-			return ( self.__language__(30609) , 303 )
-				
+		if get("login") == "true":
+			if ( not self._getAuth() ):
+				if self.__dbg__:
+					print self.__plugin__ + " login required but auth wasn't set!"
+				return ( self.__language__(30609) , 303 )
+		
 		index = 1
 		url = feed + "start-index=" + str(index) + "&max-results=" + repr(50)
 		url = url.replace(" ", "+")
@@ -246,43 +228,6 @@ class YouTubeCore(object):
 				print self.__plugin__ + " list done with no results"
 			return (self.__language__(30602), 303)
 		
-	def list(self, params ={}):
-		get = params.get
-		page = get("page","0")
-		if self.__dbg__:
-			print self.__plugin__ + " list: " + repr(feed) + " - page: " + repr(page)
-		result = ""
-		auth = self._getAuth()
-		if ( not auth ):
-			if self.__dbg__:
-				print self.__plugin__ + " playlists auth wasn't set "
-			return ( self.__language__(30609) , 303 )
-		
-		per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
-	
-		if ( feed.find("?") == -1 ):
-			feed += "?"
-		else:
-			feed += "&"
-
-		feed += "start-index=" + str( per_page * int(page) + 1) + "&max-results=" + repr(per_page)
-		feed = feed.replace(" ", "+")
-		
-		( result, status ) = self._fetchPage(feed, auth = True)
-
-		if status != 200:
-			return ( result, status)
-
-		result = self._getvideoinfo(result)
-
-		if len(result) > 0:
-			if self.__dbg__:
-				print self.__plugin__ + " list done :" + str(len(result))
-			return (result, 200)
-		else:
-			if self.__dbg__:
-				print self.__plugin__ + " list done with no results"
-			return (self.__language__(30602), 303)
 
 	def delete_favorite(self, params = {}):
 		get = params.get
@@ -326,11 +271,6 @@ class YouTubeCore(object):
 			print self.__plugin__ + " playlists " + repr(link) + " - page: " + repr(get("page","0"))
 		result = ""
 
-		auth = self._getAuth()
-		if ( not auth ):
-			if self.__dbg__:
-				print self.__plugin__ + " playlists auth wasn't set "
-			return ( self.__language__(30609) , 303 )
 		
 		per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
 		if ( link.find("?") == -1 ):
@@ -598,21 +538,13 @@ class YouTubeCore(object):
 
 		auth = self.__settings__.getSetting( "auth" )
 
-		if ( auth ):
-			if self.__dbg__:
-				print self.__plugin__ + " _getAuth returning stored auth"
-			return auth
-		else:
+		if ( not auth ):
 			(result, status ) =  self.login()
-			if status == 200:
-				if self.__dbg__:
-					print self.__plugin__ + " _getAuth returning new auth"
-					
-				return self.__settings__.getSetting( "auth" )
-			else:
+			if status != 200:
 				if self.__dbg__:
 					print self.__plugin__ + " _getAuth failed because login failed"
 				return False
+		return True
 	
 	def _youTubeAdd(self, url, add_request, retry = True):
 		if self.__dbg__:
@@ -698,7 +630,6 @@ class YouTubeCore(object):
 						
 					self.login()
 					return self._youTubeDel(delete_url, False);
-					#return self._fetchPage(link, api, auth, login, error +1)
 				else:
 					if self.__dbg__:
 						print self.__plugin__ + " _youTubeDel 401 Not Authorized and no login credentials written in settings"
