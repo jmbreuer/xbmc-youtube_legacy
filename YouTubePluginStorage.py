@@ -91,7 +91,7 @@ class YouTubePluginStorage:
 	def saveSearch(self, params = {}):
 		get = params.get
 		
-		if (get("action") == "search_disco"):
+		if (get("store") == "searches" or get("feed") == "search"):
 			store = "stored_searches"
 		else:
 			store = "stored_disco_searches"
@@ -101,7 +101,6 @@ class YouTubePluginStorage:
 		
 		if get("old_search"):
 			old_query = urllib.unquote_plus(get("old_search"))
-		
 		try:
 			searches = eval(self.__settings__.getSetting(store))
 		except:
@@ -111,27 +110,30 @@ class YouTubePluginStorage:
 			if (search.lower() == old_query.lower()):
 				del(searches[count])
 				break
-
+		
 		searchCount = ( 10, 20, 30, 40, )[ int( self.__settings__.getSetting( "saved_searches" ) ) ]
 		searches = [new_query] + searches[:searchCount]
 		self.__settings__.setSetting(store, repr(searches))
+		params["feed"] = "search"
+		params["old_search"] = ""
+		params["store"] = ""
 	
-	def editSearch(self, params = {}):
+	def editStoredSearch(self, params = {}):
 		get = params.get
 		if (get("search")):
 			old_query = urllib.unquote_plus(get("search"))
-			new_query = self.getUserInput(self.__language__(30006), old_query)
+			new_query = self.__utils__.getUserInput(self.__language__(30515), old_query)
 			params["search"] = new_query
+			params["old_search"] = old_query
 			
 			if (get("action") == "edit_search"):
-				self.saveSearch(old_query, new_query)
+				params["store"] = "searches"
+				self.saveSearch(params)
 			else:
-				params["action"] = "search_disco"
-				self.saveSearch(old_query, new_query, "stored_disco_searches")
-				
-			self.search(params)
+				params["scraper"] = "search_disco"
+				self.saveSearch(params)
 	
-	def refineSearch(self, params = {}):
+	def refineStoredSearch(self, params = {}):
 		get = params.get
 		query = get("search")
 		query = urllib.unquote_plus(query)
@@ -157,7 +159,7 @@ class YouTubePluginStorage:
 			self.__utils__.showMessage(self.__language__(30006), self.__language__(30616))
 			xbmc.executebuiltin( "Container.Refresh" )
 		
-	def deleteSearchRefinement(self, params = {}):
+	def deleteStoredSearchRefinement(self, params = {}):
 		get = params.get
 		query = get("search")
 		query = urllib.unquote_plus(query)
@@ -171,7 +173,7 @@ class YouTubePluginStorage:
 			self.__settings__.setSetting("stored_searches_author", repr(searches))
 			self.__utils__.showMessage(self.__language__(30006), self.__language__(30610))
 			xbmc.executebuiltin( "Container.Refresh" )
-	
+		
 	def getUserOptionFolder(self, params = {}):
 		get = params.get
 		result = []

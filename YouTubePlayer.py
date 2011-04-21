@@ -176,9 +176,7 @@ class YouTubePlayer(object):
 				print self.__plugin__ + " construct video url failed contents of video item " + repr(video)
 			self.__utils__.showErrorMessage(self.__language__(30603), video["apierror"], status)
 			return False
-		
-		print "kom mo: " + repr(video)
-				
+						
 		listitem=xbmcgui.ListItem(label=video['Title'], iconImage=video['thumbnail'], thumbnailImage=video['thumbnail'], path=video['video_url']);		
 		listitem.setInfo(type='Video', infoLabels=video)
 		

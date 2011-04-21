@@ -122,15 +122,19 @@ class YouTubeNavigation:
 		if (get("action") == "playbyid"):
 			self.playVideoById(params)
 		if (get("action") == "refine_user"):
-			self.__storage__.refineSearch(params)
+			self.__storage__.refineStoredSearch(params)
 		if (get("action") == "delete_refinements"):
-			self.__storage__.deleteRefinements(params)
+			self.__storage__.deleteStoredSearchRefinement(params)
 		if (get("action") == "settings"):
 			self.__login__.login(params)
 		if (get("action") == "delete_search" or get("action") == "delete_disco"):
-			self.__storage__.deleteSearch(params)
+			self.__storage__.deleteStoredSearch(params)
 		if (get("action") == "edit_search" or get("action") == "edit_disco"):
-			self.__storage__.editSearch(params)
+			self.__storage__.editStoredSearch(params)
+			if get("action") == "edit_search":
+				self.list(params)
+			else:
+				self.__scraper__.scraper(params)
 		if (get("action") == "remove_favorite"):
 			self.removeFromFavorites(params)
 		if (get("action") == "add_favorite"):
@@ -155,14 +159,7 @@ class YouTubeNavigation:
 	def search(self, params = {}):
 		get = params.get
 						
-#		if (get("search")):
-#			thumbnail = result[0].get('thumbnail', "")
-#			
-#			if (thumbnail and query):
-#				if (get("action") == "search_disco"):
-#					self.__settings__.setSetting("disco_search_" + query + "_thumb", thumbnail)
-#				else:
-#					self.__settings__.setSetting("search_" + query + "_thumb", thumbnail)
+#		
 				
 		self.parseVideoList(params, [])
 			
@@ -170,9 +167,11 @@ class YouTubeNavigation:
 	def list(self, params = {}):
 		get = params.get
 		
-		if (get("feed") == "search" and not get("search")):
-			query = self.__utils__.getUserInput(self.__language__(30006), '')
-			params["search"] = query
+		if (get("feed") == "search"):
+			if not get("search"):
+				query = self.__utils__.getUserInput(self.__language__(30006), '')
+				params["search"] = query
+			
 			self.__storage__.saveSearch(params)
 		
 		(results , status) = self.__core__.list(params)
@@ -199,6 +198,10 @@ class YouTubeNavigation:
 					):
 					label = cat_get("Title")
 			
+			if get("channel"):
+				label = get("channel")
+			if get("playlist"):
+				label = self.__language__(30627)
 			if label:
 				self.__utils__.showMessage(label, self.__language__(30601))
 		
@@ -386,9 +389,7 @@ class YouTubeNavigation:
 		get = params.get
 		
 		for result_params in results:
-			result = result_params.get
 			result_params["path"] = get("path")
-			result_params["login"] = "true"
 			self.addFolderListItem( params, result_params, listSize + 1)
 		
 		xbmcplugin.endOfDirectory( handle=int( sys.argv[ 1 ] ), succeeded=True, cacheToDisc=False )

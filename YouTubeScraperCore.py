@@ -46,6 +46,7 @@ class YouTubeScraperCore:
 	urls['popular_game_trailers'] = "http://www.youtube.com/trailers?s=gtp&p=%s&hl=en"
 	urls['upcoming_game_trailers'] = "http://www.youtube.com/trailers?s=gtcs&p=%s&hl=en"
 	urls['recommended'] = "http://www.youtube.com/videos?r=1&hl=en"
+	urls['watch_later'] = "http://www.youtube.com/my_watch_later_list"
 	urls['movies_list'] = ""
 
 #=================================== Recommended ============================================

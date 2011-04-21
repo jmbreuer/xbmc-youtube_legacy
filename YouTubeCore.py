@@ -49,7 +49,7 @@ class YouTubeCore(object):
 	# YouTube General Feeds
 	urls['playlist'] = "http://gdata.youtube.com/feeds/api/playlists/%s"
 	urls['related'] = "http://gdata.youtube.com/feeds/api/videos/%s/related"
-	urls['search'] = "http://gdata.youtube.com/feeds/api/videos?q=%s&safeSearch=%s&start-index=%s&max-results=%s"
+	urls['search'] = "http://gdata.youtube.com/feeds/api/videos?q=%s&safeSearch=%s"
 	
 	# YouTube User specific Feeds
 	urls['uploads'] = "http://gdata.youtube.com/feeds/api/users/%s/uploads"
@@ -72,38 +72,33 @@ class YouTubeCore(object):
 	urls['feed_featured'] = "http://gdata.youtube.com/feeds/api/standardfeeds/recently_featured"
 	urls['feed_trending'] = "http://gdata.youtube.com/feeds/api/standardfeeds/on_the_web"
 	urls['feed_shared'] = "http://gdata.youtube.com/feeds/api/standardfeeds/most_shared"	
-	
-	def __init__(self):
-		timeout = self.__settings__.getSetting( "timeout" )
-		if not timeout:
-			timeout = "5"
-		return None
-	
+		
 	def createUrl(self, params = {}):
 		get = params.get
 		time = ( "all_time", "today", "this_week", "this_month") [ int(self.__settings__.getSetting( "feed_time" ) ) ]
 		per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
 		region = ('', 'AU', 'BR', 'CA', 'CZ', 'FR', 'DE', 'GB', 'NL', 'HK', 'IN', 'IE', 'IL', 'IT', 'JP', 'MX', 'NZ', 'PL', 'RU', 'KR', 'ES','SE', 'TW', 'US', 'ZA' )[ int( self.__settings__.getSetting( "region_id" ) ) ]
+		
 		page = get("page","0")
 		start_index = per_page * int(page) + 1
 		url = ""
 		
-		if (get("action") == "search"): 
-			query = urllib.unquote_plus(get("search"))
-			safe_search = ("none", "moderate", "strict" ) [int( self.__settings__.getSetting( "safe_search" ) ) ]	
-			url = self.urls["search"] % ( query, safe_search, start_index, per_page)
-			authors = self.__settings__.getSetting("stored_searches_author")
-			if len(authors) > 0:
-				try:
-					authors = eval(authors)
-					if query in authors:
-						url += "&" + urllib.urlencode({'author': authors[query]})
-				except:
-					print self.__plugin__ + " search - eval failed "
-		
 		if (get("feed")):
 			url = self.urls[get("feed")]
-				
+			
+			if get("search"):
+				query = urllib.unquote_plus(get("search"))
+				safe_search = ("none", "moderate", "strict" ) [int( self.__settings__.getSetting( "safe_search" ) ) ]	
+				url = url % (query, safe_search)  
+				authors = self.__settings__.getSetting("stored_searches_author")
+				if len(authors) > 0:
+					try:
+						authors = eval(authors)
+						if query in authors:
+							url += "&" + urllib.urlencode({'author': authors[query]})
+					except:
+						print self.__plugin__ + " search - eval failed "	
+			
 			if (url.find("time") > 0 ):
 				url = url % time
 				
@@ -112,7 +107,7 @@ class YouTubeCore(object):
 			else:
 				url += "&"
 			
-			url += "start-index=" + str( per_page * int(get("page","0")) + 1) + "&max-results=" + repr(per_page)
+			url += "start-index=" + repr(start_index) + "&max-results=" + repr(per_page)
 			
 			if (url.find("standardfeeds") > 0 and region):
 				url = url.replace("/standardfeeds/", "/standardfeeds/"+ region + "/")
@@ -139,22 +134,19 @@ class YouTubeCore(object):
 			else:
 				url += "&"
 			
-			url += "start-index=" + str( per_page * int(get("page","0")) + 1) + "&max-results=" + repr(per_page)
-			
-			url = url.replace(" ", "+")
+			url += "start-index=" + repr(start_index) + "&max-results=" + repr(per_page)
 			
 			if get("feed") == "playlists" or get("feed") == "subscriptions":
 				url += "&orderby=published"
-			
 		
-		print self.__plugin__ + " smokey " + url
+		url = url.replace(" ", "+")
 		return url
 	
 	def list(self, params = {}):
 		get = params.get
 		result = []
 		status = 303
-		
+				
 		if get("store"): 
 			if get("store") == "contact_options":
 				return self.__storage__.getUserOptionFolder(params)
@@ -184,6 +176,12 @@ class YouTubeCore(object):
 		if len(result) == 0:
 			return (result, 303)
 		
+		if (get("search")):
+			thumbnail = result[0].get('thumbnail', "")
+			
+			if (thumbnail):
+				self.__settings__.setSetting("search_" + urllib.unquote_plus(get("search")) + "_thumb", thumbnail)
+			
 		return (result, 200)
 	
 	def delete_favorite(self, params = {}):
@@ -242,6 +240,7 @@ class YouTubeCore(object):
 		folders = [];
 		for node in entries:
 			folder = {};
+			folder["login"] = "true"
 			folder['Title'] = node.getElementsByTagName("title").item(0).firstChild.nodeValue.replace('Activity of : ', '').replace('Videos published by : ', '').encode( "utf-8" );
 			folder['published'] = self._getNodeValue(node, "published", "2008-07-05T19:56:35.000-07:00")
 			folder['playlist'] = self._getNodeValue(node, 'yt:playlistId', '')
@@ -253,9 +252,9 @@ class YouTubeCore(object):
 				folder["folder"] = "true"
 
 			if get("user_feed") == "subscriptions":
-				folder["channel"] = result("Title")
-				if (self.__settings__.getSetting(get("feed") + "_" + folder("channel") + "_thumb")):
-					folder["thumbnail"] = self.__settings__.getSetting(get("feed") + "_" + folder("channel") + "_thumb")
+				folder["channel"] = folder["Title"]
+				if (self.__settings__.getSetting(get("user_feed") + "_" + folder["channel"] + "_thumb")):
+					folder["thumbnail"] = self.__settings__.getSetting(get("user_feed") + "_" + folder["channel"] + "_thumb")
 					
 				viewmode = ""
 				if (get("external")):
@@ -265,13 +264,13 @@ class YouTubeCore(object):
 				viewmode += "view_mode_" + folder["Title"]
 				
 				if (self.__settings__.getSetting(viewmode) == "subscriptions_favorites"):
-					folder["feed"] = "subscriptions_favorites"
+					folder["user_feed"] = "favorites"
 					folder["view_mode"] = "subscriptions_uploads"
 				elif(self.__settings__.getSetting(viewmode) == "subscriptions_playlists"):
-					folder["feed"] = "subscriptions_playlists"
+					folder["user_feed"] = "playlists"
 					folder["view_mode"] = "subscriptions_playlists"
 				else:
-					folder["feed"] = "subscriptions_uploads"  
+					folder["user_feed"] = "uploads"  
 					folder["view_mode"] = "subscriptions_favorites"
 			
 			if get("user_feed") == "playlists":
@@ -372,6 +371,7 @@ class YouTubeCore(object):
 
 		if api:
 			request.add_header('GData-Version', '2')
+			request.add_header('X-GData-Key', 'key=' + self.APIKEY)
 		else:
 			request.add_header('User-Agent', self.__utils__.USERAGENT)
 		
@@ -389,8 +389,6 @@ class YouTubeCore(object):
 				request.add_header('Authorization', 'GoogleLogin auth=' + authkey)
 			else:
 				print self.__plugin__ + " _fetchPage couldn't get login token"
-		
-		request.add_header('X-GData-Key', 'key=' + self.APIKEY)
 		
 		try:
 			con = urllib2.urlopen(request)
@@ -625,17 +623,8 @@ class YouTubeCore(object):
 	def getVideoInfoBatch(self, xml, params = {}):
 		get = params.get
 		dom = parseString(xml);
-		links = dom.getElementsByTagName("atom:link");
 		entries = dom.getElementsByTagName("atom:entry");
-		next = "false"
-			
-		if (len(links)):
-			for link in links:
-				lget = link.attributes.get
-				if (lget("rel").value == "next"):
-					next = "true"
-					break
-		
+				
 		ytobjects = [];
 		for node in entries:
 			video = {};
@@ -661,7 +650,6 @@ class YouTubeCore(object):
 					# Get reason for why we can't playback the file.		
 					if node.getElementsByTagName("yt:state").item(0).hasAttribute('reasonCode'):
 						reason = self._getNodeAttribute(node, "yt:state", 'reasonCode', 'Unknown reasonCode')
-						value = self._getNodeValue(node, "yt:state", "Unknown reasonValue").encode('utf-8')
 						if reason == "private" or reason == 'requesterRegion':
 							video['videoid'] = "false"
 						elif reason != 'limitedSyndication':
@@ -701,14 +689,7 @@ class YouTubeCore(object):
 					video['Overlay'] = int(overlay)
 				
 				ytobjects.append(video);
-		
-		if next:
-			item = {"Title":self.__language__( 30509 ), "thumbnail":"next", "next":"true", "page":str(int(get("page", "0")) + 1)} 
-			for k, v in params.items():
-				if (k != "thumbnail" and k != "Title" and k != "page"):
-					item[k] = v
-			ytobjects.append(item)
-					
+							
 		if (ytobjects):
 			return (ytobjects, 200);
 		
@@ -812,5 +793,5 @@ class YouTubeCore(object):
 				if (k != "thumbnail" and k != "Title" and k != "page"):
 					item[k] = v
 			ytobjects.append(item)
-			
+		
 		return ytobjects;
