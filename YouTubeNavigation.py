@@ -103,7 +103,9 @@ class YouTubeNavigation:
 			self.scrape(params)
 		
 		if (get("feed") or get("user_feed") or get("options") or get("store")):
-			self.list(params)
+			result = self.list(params)
+			if not result:
+				return result
 				
 		video_view = self.__settings__.getSetting("list_view") == "1"
 		
