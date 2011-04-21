@@ -285,7 +285,7 @@ class YouTubePlayer(object):
 		( result, status ) = self.__core__._fetchPage(self.urls["video_info"] % get("videoid"), api = True)
 
 		if status == 200:				
-			result = self.__core__._getvideoinfo(result)
+			result = self.__core__.getVideoInfo(result, params)
 		
 			if len(result) == 0:
 				if self.__dbg__:
@@ -362,10 +362,11 @@ class YouTubePlayer(object):
 				video['video_url'] = path
 				return (video, 200)
 		
+		vget = video.get
 		if status == 403:
 			video['apierror'] = self.getAlert(html, params)
-		else:
-			if not video['apierror']:
+		elif status != 200:
+			if not vget('apierror'):
 				video['apierror'] = self.__language__(30617)
 		
 		if status == 200:

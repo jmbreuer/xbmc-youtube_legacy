@@ -231,7 +231,8 @@ class YouTubeScraperCore:
 			
 		url = self.urls["disco_search"] % urllib.quote_plus(query)
 		if (self.__dbg__):
-			print "Disco search url %s" % url
+			print self.__plugin__ + " Disco search url " + repr(url)
+		
 		page = self.__core__._fetchPage(url)
 		if (page.find("list=") != -1):
 			page = page.replace("\u0026", "&")
@@ -305,7 +306,6 @@ class YouTubeScraperCore:
 		return (yobjects, 200)
 	
 #=================================== Shows ============================================
-	
 	def scrapeShowEpisodes(self, html, params = {}):
 		get = params.get
 		if self.__dbg__:
@@ -375,6 +375,7 @@ class YouTubeScraperCore:
 						item["season"] = season_url.encode("utf-8")
 						item["thumbnail"] = "shows"
 						item["scraper"] = "show"
+						item["icon"] = self.__utils__.getThumbnail("shows")
 						item["show"] = get("show")
 						yobjects.append(item)
 				else:
@@ -383,6 +384,7 @@ class YouTubeScraperCore:
 						item["Title"] = "Season " + season_url.encode("utf-8")
 						item["season"] = season_url.encode("utf-8")
 						item["thumbnail"] = "shows"
+						item["icon"] = self.__utils__.getThumbnail("shows")
 						item["scraper"] = "show"
 						item["show"] = get("show")
 						yobjects.append(item)
@@ -440,7 +442,7 @@ class YouTubeScraperCore:
 					
 					show_url = urllib.quote_plus(show_url)
 					item['show'] = show_url
-					
+					item['icon'] = self.__utils__.getThumbnail("shows")
 					item['scraper'] = "show"
 					thumbnail = show.a.span.img['src']
 					if ( thumbnail.find("_thumb.") > 0):

@@ -23,7 +23,9 @@ class YouTubeUtils:
 	__settings__ = sys.modules[ "__main__" ].__settings__
 	__language__ = sys.modules[ "__main__" ].__language__
 	__plugin__ = sys.modules[ "__main__" ].__plugin__
+	__dbg__ = sys.modules[ "__main__" ].__dbg__
 	
+	PR_VIDEO_QUALITY = __settings__.getSetting("pr_video_quality") == "true"
 	VALID_CHARS = "-_.() %s%s" % (string.ascii_letters, string.digits)
 	USERAGENT = "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-GB; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8"
 	THUMBNAIL_PATH = os.path.join( __settings__.getAddonInfo('path'), "thumbnails" )

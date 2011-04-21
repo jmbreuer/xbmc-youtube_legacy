@@ -28,10 +28,10 @@ class YouTubePluginStorage:
 	# This list contains the list options a user sees when indexing a contact 
 	#				label					  , external		 , login		 ,	thumbnail					, feed
 	user_options = (
-				{'Title':__language__( 30020 ), 'external':"true", 'login':"true", 'thumbnail':"favorites", 	'feed':"favorites"},
-				{'Title':__language__( 30023 ), 'external':"true", 'login':"true", 'thumbnail':"playlists", 	'feed':"playlists"},
-				{'Title':__language__( 30021 ), 'external':"true", 'login':"true", 'thumbnail':"subscriptions", 'feed':"subscriptions"},
-				{'Title':__language__( 30022 ), 'external':"true", 'login':"true", 'thumbnail':"uploads", 		'feed':"uploads"},
+				{'Title':__language__( 30020 ), 'external':"true", 'login':"true", 'thumbnail':"favorites", 	'user_feed':"favorites"},
+				{'Title':__language__( 30023 ), 'external':"true", 'login':"true", 'thumbnail':"playlists", 	'user_feed':"playlists", 'folder':"true"},
+				{'Title':__language__( 30021 ), 'external':"true", 'login':"true", 'thumbnail':"subscriptions", 'user_feed':"subscriptions", 'folder':"true"},
+				{'Title':__language__( 30022 ), 'external':"true", 'login':"true", 'thumbnail':"uploads", 		'user_feed':"uploads"},
 				)
 
 	def getStoredSearches(self, params = {}):
@@ -50,11 +50,14 @@ class YouTubePluginStorage:
 			item["path"] = get("path")
 			item["Title"] = search
 			item["search"] = urllib.quote_plus(search)
+			
 			if (get("store") == "searches"):
-				item["action"] = "search"
+				item["feed"] = "search"
+				item["icon"] = self.__utils__.getThumbnail("search")
 				item["thumbnail"] = self.__settings__.getSetting("search_" + search + "_thumb")
 			else:
-				item["action"] = "search_disco"
+				item["feed"] = "search_disco"
+				item["icon"] = self.__utils__.getThumbnail("discoball")
 				item["thumbnail"] = self.__settings__.getSetting("disco_search_" + search + "_thumb")
 			
 			result.append(item)
@@ -176,7 +179,7 @@ class YouTubePluginStorage:
 			item["path"] = get("path")
 			item["contact"] = get("contact")
 			result.append(item)
-
+		
 		return (result, 200)
 	
 	def changeSubscriptionView(self, params = {}):

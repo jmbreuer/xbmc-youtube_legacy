@@ -47,8 +47,8 @@ class YouTubeCore(object):
 
 	urls = {};
 	# YouTube General Feeds
-	urls['list_playlist'] = "http://gdata.youtube.com/feeds/api/playlists/%s"
-	urls['list_related'] = "http://gdata.youtube.com/feeds/api/videos/%s/related"
+	urls['playlist'] = "http://gdata.youtube.com/feeds/api/playlists/%s"
+	urls['related'] = "http://gdata.youtube.com/feeds/api/videos/%s/related"
 	urls['search'] = "http://gdata.youtube.com/feeds/api/videos?q=%s&safeSearch=%s&start-index=%s&max-results=%s"
 	
 	# YouTube User specific Feeds
@@ -116,11 +116,6 @@ class YouTubeCore(object):
 			
 			if (url.find("standardfeeds") > 0 and region):
 				url = url.replace("/standardfeeds/", "/standardfeeds/"+ region + "/")
-			
-			url = url.replace(" ", "+")
-			
-			if get("feed") == "playlists" or get("feed") == "subscriptions":
-				url += "&orderby=published"
 		
 		if (get("user_feed")):
 			url = self.urls[get("user_feed")]
@@ -138,18 +133,36 @@ class YouTubeCore(object):
 					url = url % self.__settings__.getSetting( "nick" )
 				else: 
 					url = url % "default"
+			
+			if ( url.find("?") == -1 ):
+				url += "?"
+			else:
+				url += "&"
+			
+			url += "start-index=" + str( per_page * int(get("page","0")) + 1) + "&max-results=" + repr(per_page)
+			
+			url = url.replace(" ", "+")
+			
+			if get("feed") == "playlists" or get("feed") == "subscriptions":
+				url += "&orderby=published"
+			
 		
 		print self.__plugin__ + " smokey " + url
 		return url
 	
 	def list(self, params = {}):
 		get = params.get
+		result = []
+		status = 303
 		
-		if get("storage"):
-			return self.__storage__.getUserOptionFolder(params)
+		if get("store"): 
+			if get("store") == "contact_options":
+				return self.__storage__.getUserOptionFolder(params)
+			else:
+				return self.__storage__.getStoredSearches(params)
 		
 		authenticate = get("login") == "true"
-		if get("login") == "true":
+		if authenticate:
 			if ( not self._getAuth() ):
 				if self.__dbg__:
 					print self.__plugin__ + " login required but auth wasn't set!"
@@ -158,18 +171,19 @@ class YouTubeCore(object):
 		url = self.createUrl(params)
 		
 		if url:
-			( result, status ) = self._fetchPage(url, auth = authenticate, api = True)
+			( response, status ) = self._fetchPage(url, auth = authenticate, api = True)
 		
 		if status != 200:
 			return ( result, status )
-
-		result = self.getVideoInfo(result)
+		
+		if get("folder"):
+			result = self.getFolderInfo(response, params)
+		else:
+			result = self.getVideoInfo(response, params)
 		
 		if len(result) == 0:
-			if self.__dbg__:
-				print self.__plugin__ + " listing failed with " + str(len(result)) + " results"
-			return (self.__language__(30601), 303)
-			
+			return (result, 303)
+		
 		return (result, 200)
 	
 	def delete_favorite(self, params = {}):
@@ -208,33 +222,63 @@ class YouTubeCore(object):
 		add_request = '<?xml version="1.0" encoding="UTF-8"?><entry xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://gdata.youtube.com/schemas/2007"> <category scheme="http://gdata.youtube.com/schemas/2007/subscriptiontypes.cat" term="user"/><yt:username>%s</yt:username></entry>' % get("contact")
 		return self._youTubeAdd(url, add_request)
 		
-	def getFolderInfo(self, link, params = {}):
+	def getFolderInfo(self, xml, params = {}):
 		get = params.get
 		result = ""
 		
-		dom = parseString(result);
+		dom = parseString(xml);
 		links = dom.getElementsByTagName("link");
 		entries = dom.getElementsByTagName("entry");
-		next = "false"
+		next = False
 
 		#find out if there are more pages
 		if (len(links)):
 			for link in links:
 				lget = link.attributes.get
 				if (lget("rel").value == "next"):
-					next = "true"
+					next = True
 					break
 		
 		folders = [];
 		for node in entries:
 			folder = {};
 			folder['Title'] = node.getElementsByTagName("title").item(0).firstChild.nodeValue.replace('Activity of : ', '').replace('Videos published by : ', '').encode( "utf-8" );
-			
 			folder['published'] = self._getNodeValue(node, "published", "2008-07-05T19:56:35.000-07:00")
-			folder['summary'] = self._getNodeValue(node, 'summary', 'Unknown')
-			folder['content'] = self._getNodeAttribute(node, 'content', 'src', 'FAIL')
-			folder['playlistId'] = self._getNodeValue(node, 'yt:playlistId', '')
+			folder['playlist'] = self._getNodeValue(node, 'yt:playlistId', '')
 			
+			if get("user_feed") == "contacts":
+				folder["thumbnail"] = "user"
+				folder["contact"] = folder["Title"]
+				folder["store"] = "contact_options"
+				folder["folder"] = "true"
+
+			if get("user_feed") == "subscriptions":
+				folder["channel"] = result("Title")
+				if (self.__settings__.getSetting(get("feed") + "_" + folder("channel") + "_thumb")):
+					folder["thumbnail"] = self.__settings__.getSetting(get("feed") + "_" + folder("channel") + "_thumb")
+					
+				viewmode = ""
+				if (get("external")):
+					viewmode += "external_" + get("contact") + "_"
+					folder["external"] = "true"
+					folder["contact"] = get("contact")
+				viewmode += "view_mode_" + folder["Title"]
+				
+				if (self.__settings__.getSetting(viewmode) == "subscriptions_favorites"):
+					folder["feed"] = "subscriptions_favorites"
+					folder["view_mode"] = "subscriptions_uploads"
+				elif(self.__settings__.getSetting(viewmode) == "subscriptions_playlists"):
+					folder["feed"] = "subscriptions_playlists"
+					folder["view_mode"] = "subscriptions_playlists"
+				else:
+					folder["feed"] = "subscriptions_uploads"  
+					folder["view_mode"] = "subscriptions_favorites"
+			
+			if get("user_feed") == "playlists":
+				folder["user_feed"] = "playlist"
+				if (self.__settings__.getSetting(get("user_feed") + "_" + folder["playlist"] + "_thumb")):
+					folder["thumbnail"] = self.__settings__.getSetting(get("user_feed") + "_" + folder["playlist"] + "_thumb")
+				
 			if node.getElementsByTagName("link"):
 				link = node.getElementsByTagName("link")
 				for i in range(len(link)):
@@ -244,19 +288,23 @@ class YouTubeCore(object):
 			
 			folders.append(folder);
 			
-		if len(folders) > 0:
-			folders[len(folders) - 1]['next'] = next
+		if next:
+			item = {"Title":self.__language__( 30509 ), "thumbnail":"next", "next":"true", "page":str(int(get("page", "0")) + 1)} 
+			for k, v in params.items():
+				if (k != "thumbnail" and k != "Title" and k != "page"):
+					item[k] = v
+			folders.append(item)
+		
+		return folders;
 
-		return ( folders, 200 );
-
-	def getBatchDetailsThumbnails(self, items):
+	def getBatchDetailsThumbnails(self, items, params = {}):
 		ytobjects = []
 		videoids = []
 		
 		for (videoid, thumb) in items:
 			videoids.append(videoid)
 		
-		(tempobjects, status) = self._get_batch_details(videoids)
+		(tempobjects, status) = self._get_batch_details(videoids, params = {})
 		
 		for i in range(0, len(items)):
 			( videoid, thumbnail ) = items[i]
@@ -270,7 +318,7 @@ class YouTubeCore(object):
 		
 		return ( ytobjects, 200)
 	
-	def getBatchDetails(self, items):
+	def getBatchDetails(self, items, params = {}):
 		request_start = "<feed xmlns='http://www.w3.org/2005/Atom'\n xmlns:media='http://search.yahoo.com/mrss/'\n xmlns:batch='http://schemas.google.com/gdata/batch'\n xmlns:yt='http://gdata.youtube.com/schemas/2007'>\n <batch:operation type='query'/> \n"
 		request_end = "</feed>"
 		
@@ -287,7 +335,7 @@ class YouTubeCore(object):
 					request.add_data(final_request)
 					con = urllib2.urlopen(request)
 					result = con.read()
-					(temp, status) = self.getVideoInfoBatch(result)
+					(temp, status) = self.getVideoInfoBatch(result, params)
 					ytobjects += temp
 					if status != 200:
 						return (ytobjects, status)
@@ -301,7 +349,7 @@ class YouTubeCore(object):
 		con = urllib2.urlopen(request)
 		result = con.read()
 				
-		(temp, status) = self.getVideoInfoBatch(result)
+		(temp, status) = self.getVideoInfoBatch(result, params)
 		ytobjects += temp
 				
 		return ( ytobjects, 200)
@@ -574,11 +622,9 @@ class YouTubeCore(object):
 		
 		return default;
 
-	def getVideoInfoBatch(self, value):
-		if self.__dbg__:
-			print self.__plugin__ + " _getvideoinfo: " + str(len(value))
-		
-		dom = parseString(value);
+	def getVideoInfoBatch(self, xml, params = {}):
+		get = params.get
+		dom = parseString(xml);
 		links = dom.getElementsByTagName("atom:link");
 		entries = dom.getElementsByTagName("atom:entry");
 		next = "false"
@@ -595,7 +641,6 @@ class YouTubeCore(object):
 			video = {};
 			videoid = self._getNodeValue(node, "atom:id", "")
 			
-			#redo this shit
 			if (not videoid):
 				if node.getElementsByTagName("link").item(0):
 					videoid = node.getElementsByTagName("link").item(0).getAttribute('href')
@@ -655,31 +700,35 @@ class YouTubeCore(object):
 				if overlay:
 					video['Overlay'] = int(overlay)
 				
-				video['next'] = next
 				ytobjects.append(video);
 		
+		if next:
+			item = {"Title":self.__language__( 30509 ), "thumbnail":"next", "next":"true", "page":str(int(get("page", "0")) + 1)} 
+			for k, v in params.items():
+				if (k != "thumbnail" and k != "Title" and k != "page"):
+					item[k] = v
+			ytobjects.append(item)
+					
 		if (ytobjects):
 			return (ytobjects, 200);
 		
 		return ( "", 500 )
 	
-	def getVideoInfo(self, value):
-		if self.__dbg__:
-			print self.__plugin__ + " _getvideoinfo: " + str(len(value))
-		
-		dom = parseString(value);
+	def getVideoInfo(self, xml, params):
+		get = params.get
+		dom = parseString(xml);
 		links = dom.getElementsByTagName("link");
 		entries = dom.getElementsByTagName("entry");
 		if (not entries):
 			entries = dom.getElementsByTagName("atom:entry");
-		next = "false"
+		next = False
 
 		# find out if there are more pages
 		if (len(links)):
 			for link in links:
 				lget = link.attributes.get
 				if (lget("rel").value == "next"):
-					next = "true"
+					next = True
 					break
 
 		ytobjects = [];
@@ -688,10 +737,6 @@ class YouTubeCore(object):
 
 			video['videoid'] = self._getNodeValue(node, "yt:videoid", "missing")
 			
-			# http://code.google.com/intl/en/apis/youtube/2.0/reference.html#youtube_data_api_tag_yt:state <- more reason codes
-			# requesterRegion - This video is not available in your region. <- fails
-			# limitedSyndication - Syndication of this video was restricted by its owner. <- works
-
 			if node.getElementsByTagName("yt:state").item(0):			
 				state = self._getNodeAttribute(node, "yt:state", 'name', 'Unknown Name')
 
@@ -739,7 +784,6 @@ class YouTubeCore(object):
 				infoString += "Date Uploaded: " + video['Date'][:video['Date'].find("T")] + ", "				
 			infoString += "View count: " + str(video['count'])
 			video['Plot'] = infoString + "\n" + video['Plot']
-			print "plot updated"
 			video['Genre'] = self._getNodeAttribute(node, "media:category", "label", "Unknown Genre").encode( "utf-8" )
 
 			if node.getElementsByTagName("link"):
@@ -756,14 +800,17 @@ class YouTubeCore(object):
 			if overlay:
 				video['Overlay'] = int(overlay)
 			
-			video['next'] = next
-			
 			if video['videoid'] == "false":
 				if self.__dbg__:
 					print self.__plugin__ + " _getvideoinfo videoid set to false"
 						
 			ytobjects.append(video);
-
-		if self.__dbg__:
-			print self.__plugin__ + " _getvideoinfo done : " + str(len(ytobjects))
+		
+		if next:
+			item = {"Title":self.__language__( 30509 ), "thumbnail":"next", "next":"true", "page":str(int(get("page", "0")) + 1)} 
+			for k, v in params.items():
+				if (k != "thumbnail" and k != "Title" and k != "page"):
+					item[k] = v
+			ytobjects.append(item)
+			
 		return ytobjects;
