@@ -75,29 +75,62 @@ class YouTubePlaylistControl:
 			playlist.shuffle()
 
 		xbmc.executebuiltin('playlist.playoffset(video , 0)')
-		
+	
 	def getPlayList(self, params = {}):
 		get = params.get
 		feed = self.urls["playlists"] % get("playlistId")
-		(result , status) = self.__core__.listAll(feed, params)
-		return result
+		return self.listAll(feed, params)
 	
 	def getDiscoSearch(self, params = {}):
 		(result, status) = self.__scraper__.searchDisco(params)
 		return result
-		
+	
 	def getFavorites(self, params = {}):
 		get = params.get
 		if not get("contact"):
 			return
-		feed = self.urls["favorites"] % get("contact") 
-		(result , status) = self.__core__.listAll(feed, params)
-		return result
-		
+		feed = self.urls["favorites"] % get("contact")  
+		return self.listAll(feed, params)
+	
 	def getNewSubscriptions(self, params = {}):
 		get = params.get
 		if not get("contact"):
 			return
 		feed = self.urls["newsubscriptions"] % get("contact")
-		(result , status) = self.__core__.listAll(feed, params)
-		return result
+		return self.listAll(feed, params)
+	
+	def listAll(self, feed, params ={}):
+		get = params.get
+		result = ""
+		
+		if get("login") == "true":
+			if ( not self._getAuth() ):
+				if self.__dbg__:
+					print self.__plugin__ + " login required but auth wasn't set!"
+				return ( self.__language__(30609) , 303 )
+		
+		index = 1
+		url = feed + "start-index=" + str(index) + "&max-results=" + repr(50)
+		url = url.replace(" ", "+")
+		
+		( result, status ) = self.__core__._fetchPage(url, auth = False)
+				
+		ytobjects = self.__core__._getvideoinfo(result)
+		
+		if len(ytobjects) == 0:
+			return ytobjects
+		
+		next = ytobjects[len(ytobjects)-1].get("next","false") 
+		
+		while next == "true":
+			index += 50
+			url = feed + "start-index=" + str(index) + "&max-results=" + repr(50)
+			url = url.replace(" ", "+")
+			(result, status) = self.__core__._fetchPage(url, auth = False)
+			if status != 200:
+				break
+			temp_objects = self.__core__._getvideoinfo(result)
+			next = temp_objects[len(temp_objects)-1].get("next","false")
+			ytobjects += temp_objects
+		
+		return ytobjects

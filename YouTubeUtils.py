@@ -95,12 +95,14 @@ class YouTubeUtils:
 		
 		return thumbnail
 	
+	# Transforms a list of video id's to a pipe delimited string
 	def arrayToPipeDelimitedString(self, input):
 		pipedItems = ""
 		for item in input:
 			pipedItems += item + "|"
 		return pipedItems
 	
+	# Standardised error handler
 	def showErrorMessage(self, title = "", result = "", status = 500):
 		if title == "":
 			title = self.__language__(30600)
@@ -111,6 +113,28 @@ class YouTubeUtils:
 			self.showMessage(title, result)
 		else :
 			self.showMessage(title, self.__language__(30617))
-
+	
+	# Prints usefull information about and item
+	def interrogate(self, item):
+		if hasattr(item, '__name__'):
+			print "NAME:    ", item.__name__
+		if hasattr(item, '__class__'):
+			print "CLASS:   ", item.__class__.__name__
+		print "ID:      ", id(item)
+		print "TYPE:    ", type(item)
+		print "VALUE:   ", repr(item)
+		print "CALLABLE:",
+		if callable(item):
+			print "Yes"
+		else:
+			print "No"
+		
+		if hasattr(item, '__doc__'):
+			doc = getattr(item, '__doc__')
+			if doc:
+				doc = doc.strip()
+				firstline = doc.split('\n')[0]
+				print "DOC:     ", firstline
+				
 if __name__ == '__main__':	
 	sys.exit(0);

@@ -85,28 +85,6 @@ class YouTubeCore(object):
 		if not timeout:
 			timeout = "5"
 		return None
-		
-	def interrogate(self, item):
-		"""Print useful information about item."""
-		if hasattr(item, '__name__'):
-			print "NAME:    ", item.__name__
-		if hasattr(item, '__class__'):
-			print "CLASS:   ", item.__class__.__name__
-		print "ID:      ", id(item)
-		print "TYPE:    ", type(item)
-		print "VALUE:   ", repr(item)
-		print "CALLABLE:",
-		if callable(item):
-			print "Yes"
-		else:
-			print "No"
-		
-		if hasattr(item, '__doc__'):
-			doc = getattr(item, '__doc__')
-			if doc:
-				doc = doc.strip()
-				firstline = doc.split('\n')[0]
-				print "DOC:     ", firstline		
 	
 	def createUrl(self, params = {}):
 		get = params.get
@@ -152,12 +130,17 @@ class YouTubeCore(object):
 				url += "?"
 			else:
 				url += "&"
+			
 			url += "start-index=" + str( per_page * int(get("page","0")) + 1) + "&max-results=" + repr(per_page)
 			
 			if (url.find("standardfeeds") > 0 and region):
 				url = url.replace("/standardfeeds/", "/standardfeeds/"+ region + "/")
 			
 			url = url.replace(" ", "+")
+			
+			if get("feed") == "playlists" or get("feed") == "subscriptions":
+				url += "&orderby=published"
+			
 			return url
 	
 	def list(self, params = {}):
@@ -185,50 +168,6 @@ class YouTubeCore(object):
 			
 		return (result, 200)
 	
-	def listAll(self, feed, params ={}):
-		get = params.get
-		result = ""
-		
-		if get("login") == "true":
-			if ( not self._getAuth() ):
-				if self.__dbg__:
-					print self.__plugin__ + " login required but auth wasn't set!"
-				return ( self.__language__(30609) , 303 )
-		
-		index = 1
-		url = feed + "start-index=" + str(index) + "&max-results=" + repr(50)
-		url = url.replace(" ", "+")
-		
-		( result, status ) = self._fetchPage(url, auth = False)
-				
-		ytobjects = self._getvideoinfo(result)
-		
-		if len(ytobjects) == 0:
-			return ([], 303)
-		
-		next = ytobjects[len(ytobjects)-1].get("next","false") 
-		
-		while next == "true":
-			index += 50
-			url = feed + "start-index=" + str(index) + "&max-results=" + repr(50)
-			url = url.replace(" ", "+")
-			(result, status) = self._fetchPage(url, auth = False)
-			if status != 200:
-				break
-			temp_objects = self._getvideoinfo(result)
-			next = temp_objects[len(temp_objects)-1].get("next","false")
-			ytobjects += temp_objects
-				
-		if len(ytobjects) > 0:
-			if self.__dbg__:
-				print self.__plugin__ + " list done :" + str(len(ytobjects))
-			return (ytobjects, 200)
-		else:
-			if self.__dbg__:
-				print self.__plugin__ + " list done with no results"
-			return (self.__language__(30602), 303)
-		
-
 	def delete_favorite(self, params = {}):
 		get = params.get
 		delete_url = self.urls["favorites"] % self.__settings__.getSetting( "nick" )
@@ -258,35 +197,20 @@ class YouTubeCore(object):
 		url = "http://gdata.youtube.com/feeds/api/users/default/favorites"
 		add_request = '<?xml version="1.0" encoding="UTF-8"?><entry xmlns="http://www.w3.org/2005/Atom"><id>%s</id></entry>' % get("videoid")
 		return self._youTubeAdd(url, add_request)
-
+		
 	def add_subscription(self, params = {}):
 		get = params.get
 		url = "http://gdata.youtube.com/feeds/api/users/default/subscriptions"
 		add_request = '<?xml version="1.0" encoding="UTF-8"?><entry xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://gdata.youtube.com/schemas/2007"> <category scheme="http://gdata.youtube.com/schemas/2007/subscriptiontypes.cat" term="user"/><yt:username>%s</yt:username></entry>' % get("contact")
 		return self._youTubeAdd(url, add_request)
-
+		
 	def playlists(self, link, params = {}):
 		get = params.get
 		if self.__dbg__:
 			print self.__plugin__ + " playlists " + repr(link) + " - page: " + repr(get("page","0"))
 		result = ""
-
 		
-		per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
-		if ( link.find("?") == -1 ):
-			link += "?"
-		else:
-			link += "&"
-		link += "start-index=" + str( per_page * int(get("page","0")) + 1) + "&max-results=" + repr(per_page)
 		
-		if get("feed") == "playlists" or get("feed") == "subscriptions":
-			link += "&orderby=published"
-
-
-		( result, status ) = self._fetchPage(link, auth = True)
-
-		if status != 200:
-			return ( result, status )
 		
 		dom = parseString(result);
 		links = dom.getElementsByTagName("link");
@@ -765,8 +689,7 @@ class YouTubeCore(object):
 			entries = dom.getElementsByTagName("atom:entry");
 		next = "false"
 
-		#find out if there are more pages
-		
+		# find out if there are more pages
 		if (len(links)):
 			for link in links:
 				lget = link.attributes.get
@@ -774,7 +697,6 @@ class YouTubeCore(object):
 					next = "true"
 					break
 
-		#construct list of video objects					
 		ytobjects = [];
 		for node in entries:
 			video = {};
@@ -785,8 +707,7 @@ class YouTubeCore(object):
 			# requesterRegion - This video is not available in your region. <- fails
 			# limitedSyndication - Syndication of this video was restricted by its owner. <- works
 
-			if node.getElementsByTagName("yt:state").item(0):
-			
+			if node.getElementsByTagName("yt:state").item(0):			
 				state = self._getNodeAttribute(node, "yt:state", 'name', 'Unknown Name')
 
 				# Ignore unplayable items.
@@ -855,28 +776,9 @@ class YouTubeCore(object):
 			if video['videoid'] == "false":
 				if self.__dbg__:
 					print self.__plugin__ + " _getvideoinfo videoid set to false"
-													
-			
+						
 			ytobjects.append(video);
 
 		if self.__dbg__:
 			print self.__plugin__ + " _getvideoinfo done : " + str(len(ytobjects))
 		return ytobjects;
-
-	def _getAlert(self, videoid):
-		if self.__dbg__:
-			print self.__plugin__ + " _getAlert begin"
-		
-		http_result = self._fetchPage('http://www.youtube.com/watch?v=' +videoid + "&safeSearch=none", login = True)
-		
-		start = http_result.find('class="yt-alert-content">')
-		if start == -1:
-			return self.__language__(30622)
-		
-		start += len('class="yt-alert-content">')
-		result = http_result[start: http_result.find('</div>', start)].strip()
-		
-		if self.__dbg__:
-			print self.__plugin__ + " _getAlert done: " + repr(start)
-		
-		return result
