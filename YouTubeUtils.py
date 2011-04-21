@@ -114,6 +114,14 @@ class YouTubeUtils:
 		else :
 			self.showMessage(title, self.__language__(30617))
 	
+	# generic function for building the item url filters out many item params to reduce unicode problems
+	def buildItemUrl(self, item_params = {}, url = ""):
+		blacklist = ("path","thumbnail","playlistId", "next", "content" , "editid", "summary", "published" , "Title")
+		for key, value in item_params.items():
+			if key not in blacklist:
+				url += key + "=" + value + "&"
+		return url
+	
 	# Prints usefull information about and item
 	def interrogate(self, item):
 		if hasattr(item, '__name__'):

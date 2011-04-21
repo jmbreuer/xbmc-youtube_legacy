@@ -25,6 +25,15 @@ class YouTubePluginStorage:
 	__language__ = sys.modules[ "__main__" ].__language__
 	__utils__ = sys.modules[ "__main__" ].__utils__
 	
+	# This list contains the list options a user sees when indexing a contact 
+	#				label					  , external		 , login		 ,	thumbnail					, feed
+	user_options = (
+				{'Title':__language__( 30020 ), 'external':"true", 'login':"true", 'thumbnail':"favorites", 	'feed':"favorites"},
+				{'Title':__language__( 30023 ), 'external':"true", 'login':"true", 'thumbnail':"playlists", 	'feed':"playlists"},
+				{'Title':__language__( 30021 ), 'external':"true", 'login':"true", 'thumbnail':"subscriptions", 'feed':"subscriptions"},
+				{'Title':__language__( 30022 ), 'external':"true", 'login':"true", 'thumbnail':"uploads", 		'feed':"uploads"},
+				)
+
 	def getStoredSearches(self, params = {}):
 		get = params.get
 		try:
@@ -130,9 +139,9 @@ class YouTubePluginStorage:
 			searches = {}
 			
 		if query in searches:
-			author = self.getUserInput(self.__language__(30517), searches[query])
+			author = self.__utils__.getUserInput(self.__language__(30517), searches[query])
 		else:
-			author = self.getUserInput(self.__language__(30517), '')
+			author = self.__utils__.getUserInput(self.__language__(30517), '')
 
 		if author == "":
 			if author in searches:
@@ -159,7 +168,17 @@ class YouTubePluginStorage:
 			self.__settings__.setSetting("stored_searches_author", repr(searches))
 			self.__utils__.showMessage(self.__language__(30006), self.__language__(30610))
 			xbmc.executebuiltin( "Container.Refresh" )
-		
+	
+	def getUserOptionFolder(self, params = {}):
+		get = params.get
+		result = []
+		for item in self.user_options:
+			item["path"] = get("path")
+			item["contact"] = get("contact")
+			result.append(item)
+
+		return (result, 200)
+	
 	def changeSubscriptionView(self, params = {}):
 		get = params.get
 		

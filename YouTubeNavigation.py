@@ -35,35 +35,26 @@ class YouTubeNavigation:
 	__storage__ = sys.modules[ "__main__" ].__storage__
 	__scraper__ = sys.modules[ "__main__" ].__scraper__
 		
-	# This list contains the list options a user sees when indexing a contact 
-	#				label					  , external		 , login		 ,	thumbnail					, feed
-	user_options = (
-				{'Title':__language__( 30020 ), 'external':"true", 'login':"true", 'thumbnail':"favorites", 	'feed':"favorites"},
-				{'Title':__language__( 30023 ), 'external':"true", 'login':"true", 'thumbnail':"playlists", 	'feed':"playlists"},
-				{'Title':__language__( 30021 ), 'external':"true", 'login':"true", 'thumbnail':"subscriptions", 'feed':"subscriptions"},
-				{'Title':__language__( 30022 ), 'external':"true", 'login':"true", 'thumbnail':"uploads", 		'feed':"uploads"},
-				)
-	
 	# This list contains the main menu structure the user first encounters when running the plugin
 	#			   label						  , path									        , thumbnail					  		,  login		  ,  feed / action
 	categories = (
-#				  {'Title':__language__( 30044 )  ,'path':"/root/explore"			 				, 'thumbnail':"explore"				, 'login':"false" },
-#				  {'Title':__language__( 30041 )  ,'path':"/root/explore/categories"				, 'thumbnail':"explore"				, 'login':"false" , 'scraper':'categories'},
-#				  {'Title':__language__( 30037 )  ,'path':"/root/explore/disco"						, 'thumbnail':"discoball"		 	, 'login':"false" , 'store':"disco_searches" },
+				  {'Title':__language__( 30044 )  ,'path':"/root/explore"			 				, 'thumbnail':"explore"				, 'login':"false" },
+#				  {'Title':__language__( 30041 )  ,'path':"/root/explore/categories"				, 'thumbnail':"explore"				, 'login':"false" , 'scraper':'categories', 'folder':'true'},
+#				  {'Title':__language__( 30037 )  ,'path':"/root/explore/disco"						, 'thumbnail':"discoball"		 	, 'login':"false" , 'store':"disco_searches", 'folder':'true' },
 #				  {'Title':__language__( 30040 )  ,'path':"/root/explore/disco/new"					, 'thumbnail':"search"		   		, 'login':"false" , 'action':"search_disco"},
-#				  {'Title':__language__( 30038 )  ,'path':"/root/explore/disco/top_25"				, 'thumbnail':"discoball"		 	, 'login':"false" , 'scraper':"disco_top_25"},
-#				  {'Title':__language__( 30039 )  ,'path':"/root/explore/disco/popular"				, 'thumbnail':"discoball"		 	, 'login':"false" , 'scraper':"disco_top_artist"},
-#				  {'Title':__language__( 30001 )  ,'path':"/root/explore/feeds"						, 'thumbnail':"feeds"			 	, 'login':"false" },
-#				  {'Title':__language__( 30009 )  ,'path':"/root/explore/feeds/discussed"			, 'thumbnail':"most"			 	, 'login':"false" , 'feed':"feed_discussed" },
-#				  {'Title':__language__( 30010 )  ,'path':"/root/explore/feeds/linked"				, 'thumbnail':"most"			 	, 'login':"false" , 'feed':"feed_linked" },
-#				  {'Title':__language__( 30011 )  ,'path':"/root/explore/feeds/viewed"				, 'thumbnail':"most"			 	, 'login':"false" , 'feed':"feed_viewed" },
-#				  {'Title':__language__( 30012 )  ,'path':"/root/explore/feeds/recent"				, 'thumbnail':"most"			 	, 'login':"false" , 'feed':"feed_recent" },
-#				  {'Title':__language__( 30013 )  ,'path':"/root/explore/feeds/responded"			, 'thumbnail':"most"			 	, 'login':"false" , 'feed':"feed_responded" },
-#				  {'Title':__language__( 30014 )  ,'path':"/root/explore/feeds/featured"			, 'thumbnail':"featured"		 	, 'login':"false" , 'feed':"feed_featured" },
-#				  {'Title':__language__( 30015 )  ,'path':"/root/explore/feeds/favorites"			, 'thumbnail':"top"					, 'login':"false" , 'feed':"feed_favorites" },
-#				  {'Title':__language__( 30016 )  ,'path':"/root/explore/feeds/rated"				, 'thumbnail':"top"					, 'login':"false" , 'feed':"feed_rated" },
-#				  {'Title':__language__( 30043 )  ,'path':"/root/explore/movies"					, 'thumbnail':"movies"				, 'login':"false" , 'scraper':'movies'},
-#				  {'Title':__language__( 30042 )  ,'path':"/root/explore/shows"						, 'thumbnail':"shows"				, 'login':"false" , 'scraper':'shows'},
+#				  {'Title':__language__( 30038 )  ,'path':"/root/explore/disco/top_25"				, 'thumbnail':"discoball"		 	, 'login':"false" , 'scraper':"disco_top_25", 'folder':'true'},
+#				  {'Title':__language__( 30039 )  ,'path':"/root/explore/disco/popular"				, 'thumbnail':"discoball"		 	, 'login':"false" , 'scraper':"disco_top_artist", 'folder':'true'},
+				  {'Title':__language__( 30001 )  ,'path':"/root/explore/feeds"						, 'thumbnail':"feeds"			 	, 'login':"false" },
+				  {'Title':__language__( 30009 )  ,'path':"/root/explore/feeds/discussed"			, 'thumbnail':"most"			 	, 'login':"false" , 'feed':"feed_discussed" },
+				  {'Title':__language__( 30010 )  ,'path':"/root/explore/feeds/linked"				, 'thumbnail':"most"			 	, 'login':"false" , 'feed':"feed_linked" },
+				  {'Title':__language__( 30011 )  ,'path':"/root/explore/feeds/viewed"				, 'thumbnail':"most"			 	, 'login':"false" , 'feed':"feed_viewed" },
+				  {'Title':__language__( 30012 )  ,'path':"/root/explore/feeds/recent"				, 'thumbnail':"most"			 	, 'login':"false" , 'feed':"feed_recent" },
+				  {'Title':__language__( 30013 )  ,'path':"/root/explore/feeds/responded"			, 'thumbnail':"most"			 	, 'login':"false" , 'feed':"feed_responded" },
+				  {'Title':__language__( 30014 )  ,'path':"/root/explore/feeds/featured"			, 'thumbnail':"featured"		 	, 'login':"false" , 'feed':"feed_featured" },
+				  {'Title':__language__( 30015 )  ,'path':"/root/explore/feeds/favorites"			, 'thumbnail':"top"					, 'login':"false" , 'feed':"feed_favorites" },
+				  {'Title':__language__( 30016 )  ,'path':"/root/explore/feeds/rated"				, 'thumbnail':"top"					, 'login':"false" , 'feed':"feed_rated" },
+#				  {'Title':__language__( 30043 )  ,'path':"/root/explore/movies"					, 'thumbnail':"movies"				, 'login':"false" , 'scraper':'movies', 'folder':'true'},
+#				  {'Title':__language__( 30042 )  ,'path':"/root/explore/shows"						, 'thumbnail':"shows"				, 'login':"false" , 'scraper':'shows', 'folder':'true'},
 #				  {'Title':__language__( 30032 )  ,'path':"/root/explore/trailers"					, 'thumbnail':"trailers"			, 'login':"false" },
 #				  {'Title':__language__( 30035 )  ,'path':"/root/explore/trailers/latest"   		, 'thumbnail':"trailers"			, 'login':"false" , 'scraper':"latest_trailers" },
 #				  {'Title':__language__( 30034 )  ,'path':"/root/explore/trailers/current"  		, 'thumbnail':"trailers"			, 'login':"false" , 'scraper':"current_trailers" },
@@ -73,14 +64,14 @@ class YouTubeNavigation:
 #				  {'Title':__language__( 30048 )  ,'path':"/root/explore/trailers/upcoming_game"  	, 'thumbnail':"trailers"			, 'login':"false" , 'scraper':"upcoming_game_trailers" },
 #				  {'Title':__language__( 30046 )  ,'path':"/root/explore/trailers/popular_game"  	, 'thumbnail':"trailers"			, 'login':"false" , 'scraper':"popular_game_trailers" },
 #				  {'Title':__language__( 30019 )  ,'path':"/root/recommended"						, 'thumbnail':"recommended"			, 'login':"true"  , 'scraper':"recommended" },
-#				  {'Title':__language__( 30018 )  ,'path':"/root/contacts"			  				, 'thumbnail':"contacts"			, 'login':"true"  , 'user_feed':"contacts" },
-#				  {'Title':__language__( 30002 )  ,'path':"/root/favorites"		 					, 'thumbnail':"favorites"			, 'login':"true"  , 'user_feed':"favorites" },
-#				  {'Title':__language__( 30017 )  ,'path':"/root/playlists"		 					, 'thumbnail':"playlists"			, 'login':"true"  , 'user_feed':"playlists" },
-#				  {'Title':__language__( 30003 )  ,'path':"/root/subscriptions"	 					, 'thumbnail':"subscriptions"		, 'login':"true"  , 'user_feed':"subscriptions" },
+#				  {'Title':__language__( 30018 )  ,'path':"/root/contacts"			  				, 'thumbnail':"contacts"			, 'login':"true"  , 'user_feed':"contacts", 'folder':'true' },
+				  {'Title':__language__( 30002 )  ,'path':"/root/favorites"		 					, 'thumbnail':"favorites"			, 'login':"true"  , 'user_feed':"favorites" },
+#				  {'Title':__language__( 30017 )  ,'path':"/root/playlists"		 					, 'thumbnail':"playlists"			, 'login':"true"  , 'user_feed':"playlists", 'folder':'true' },
+#				  {'Title':__language__( 30003 )  ,'path':"/root/subscriptions"	 					, 'thumbnail':"subscriptions"		, 'login':"true"  , 'user_feed':"subscriptions", 'folder':'true' },
 #				  {'Title':__language__( 30004 )  ,'path':"/root/subscriptions/new" 				, 'thumbnail':"newsubscriptions"	, 'login':"true"  , 'user_feed':"newsubscriptions" },
 #				  {'Title':__language__( 30005 )  ,'path':"/root/uploads"							, 'thumbnail':"uploads"				, 'login':"true"  , 'user_feed':"uploads" },
 #				  {'Title':__language__( 30045 )  ,'path':"/root/downloads"							, 'thumbnail':"downloads"			, 'login':"false" , 'user_feed':"downloads" },
-				  {'Title':__language__( 30006 )  ,'path':"/root/search"							, 'thumbnail':"search"				, 'login':"false" , 'store':"searches" },
+				  {'Title':__language__( 30006 )  ,'path':"/root/search"							, 'thumbnail':"search"				, 'login':"false" , 'store':"searches", 'folder':'true' },
 #				  {'Title':__language__( 30007 )  ,'path':"/root/search/new"						, 'thumbnail':"search"				, 'login':"false" , 'action':"search" },
 				  {'Title':__language__( 30008 )  ,'path':"/root/playbyid"		  					, 'thumbnail':"playbyid"			, 'login':"false" , 'action':"playbyid" },
 				  {'Title':__language__( 30027 )  ,'path':"/root/login"			 					, 'thumbnail':"login"				, 'login':"false" , 'action':"settings" },
@@ -95,29 +86,25 @@ class YouTubeNavigation:
 		if (get("scraper")):
 			self.scrape(params)
 		
-		if (get("options") == "contact_options"):
-			self.listOptionFolder(params)
+		if (get("feed") or get("user_feed") or get("options") or get("store")):
+			self.list(params)
 			return
-				
-		path = get("path", "/root")
+		else:		
+			path = get("path", "/root")
 		
-		for category in self.categories:
-			cat_get = category.get 
-			if (cat_get("path").find(path +"/") > -1 ):
-				if (cat_get("path").rfind("/") <= len(path +"/")):
-					setting = self.__settings__.getSetting( cat_get("path").replace("/root/explore/","").replace("/root/", "") )
-					
-					if not setting or setting == "true":
-						if (get("feed") == "downloads"):
-							if (self.__settings__.getSetting("downloadPath")):
+			for category in self.categories:
+				cat_get = category.get 
+				if (cat_get("path").find(path +"/") > -1 ):
+					if (cat_get("path").rfind("/") <= len(path +"/")):
+						setting = self.__settings__.getSetting( cat_get("path").replace("/root/explore/","").replace("/root/", "") )
+						
+						if not setting or setting == "true":
+							if (get("feed") == "downloads"):
+								if (self.__settings__.getSetting("downloadPath")):
+									self.addListItem(params, category)
+							else:
 								self.addListItem(params, category)
-						else:
-							self.addListItem(params, category)
-		
-		if (get("store") == "searches" or get("store") == "disco_searches"):
-			self.listStoredSearches(params)
-			cache = False
-		
+				
 		video_view = self.__settings__.getSetting("list_view") == "1"
 		
 		if (get("scraper") == "shows" and get("category") and not video_view):
@@ -168,28 +155,34 @@ class YouTubeNavigation:
 			self.__playlist__.playAll(params)
 		
 	#==================================== Item Building and Listing ===========================================	
-	def listFolder(self, params = {}):
+	def list(self, params = {}):
 		get = params.get
+		(results , status) = self.__core__.list(params)
 		
-		xbmcplugin.endOfDirectory( handle=int( sys.argv[ 1 ] ), succeeded=True, cacheToDisc=False)
-
-	def listOptionFolder(self, params = {}):
-		get = params.get
-		
-		for index, item in enumerate(self.user_options):
-			item["path"] = get("path")
-			item["contact"] = get("contact")
-			self.addFolderListItem(params, item, index)
+		if status == 200: 
+			if get("folder"):
+				self.parseFolderList(params, results)
+			else:
+				self.parseVideoList(params, results)
+			xbmcplugin.endOfDirectory( handle=int( sys.argv[ 1 ] ), succeeded=True, cacheToDisc=False)
+		else:
+			label = ""
+			for category in self.categories:
+				cat_get = category.get
+				if (
+					(get("feed") and cat_get("feed") == get("feed")) or 
+					(get("user_feed") and cat_get("user_feed") == get("user_feed")) or
+					(get("scraper") and cat_get("scraper") == get("scraper")) or
+					(get("search") and cat_get("search") == get("search"))
+					):
+					label = cat_get("Title")
 				
-		xbmcplugin.endOfDirectory( handle=int( sys.argv[ 1 ] ), succeeded=True, cacheToDisc=False)
-	
-	def listStoredSearches(self, params = {}):
-		get = params.get
+				if label:
+					self.__utils__.showMessage(label, self.__language__(30601))
+					break
+							
+		return False
 		
-		(results, status) = self.__storage__.getStoredSearches(params)
-		
-		self.parseFolderList(params, results)
-	
 	#================================== Plugin Actions =========================================
 
 	def playVideoById(self, params = {}):
@@ -204,7 +197,7 @@ class YouTubeNavigation:
 		if (get("videoid")):
 			(message, status) = self.__core__.add_favorite(get("videoid"))
 			if status != 200:
-				self.showErrorMessage(self.__language__(30020), message, status)
+				self.__utils__.showErrorMessage(self.__language__(30020), message, status)
 				return False
 
 			return True
@@ -215,7 +208,7 @@ class YouTubeNavigation:
 		if (get("editid")):
 			(message, status ) = self.__core__.delete_favorite(params)
 			if status != 200:
-				self.showErrorMessage(self.__language__(30020), message, status)
+				self.__utils__.showErrorMessage(self.__language__(30020), message, status)
 				return False
 
 			xbmc.executebuiltin( "Container.Refresh" )
@@ -224,13 +217,13 @@ class YouTubeNavigation:
 		get = params.get
 
 		if not get("contact"):
-			contact = self.getUserInput(self.__language__(30519), '')
+			contact = self.__utils__.getUserInput(self.__language__(30519), '')
 			params["contact"] = contact
 			
 		if (get("contact")):
 			(result, status) = self.__core__.add_contact(params)
 			if status != 200:
-				self.showErrorMessage(self.__language__(30029), result, status)
+				self.__utils__.showErrorMessage(self.__language__(30029), result, status)
 				return False
 
 			self.__utils__.showMessage(self.__language__(30613), contact)
@@ -244,9 +237,9 @@ class YouTubeNavigation:
 		if (get("contact")):
 			(result, status) = self.__core__.remove_contact(params)
 			if status != 200:
-				self.showErrorMessage(self.__language__(30029), result, status)
+				self.__utils__.showErrorMessage(self.__language__(30029), result, status)
 				return False
-
+			
 			self.__utils__.showMessage(self.__language__(30614), get("contact"))
 			xbmc.executebuiltin( "Container.Refresh" )
 	
@@ -255,9 +248,9 @@ class YouTubeNavigation:
 		if (get("channel")):
 			(message, status) = self.__core__.add_subscription(params)
 			if status != 200:
-				self.showErrorMessage(self.__language__(30021), message, status)
+				self.__utils__.showErrorMessage(self.__language__(30021), message, status)
 				return False
-			
+		
 		return True
 	
 	def removeSubscription(self, params = {}):
@@ -265,7 +258,7 @@ class YouTubeNavigation:
 		if (get("editid")):
 			(message, status) = self.__core__.remove_subscription(get("editid"))
 			if status != 200:
-				self.showErrorMessage(self.__language__(30021), message, status)
+				self.__utils__.showErrorMessage(self.__language__(30021), message, status)
 				return False
 												
 			xbmc.executebuiltin( "Container.Refresh" )
@@ -317,7 +310,7 @@ class YouTubeNavigation:
 			
 		listitem=xbmcgui.ListItem( item("Title"), iconImage=icon, thumbnailImage=thumbnail )
 		url = '%s?path=%s&' % ( sys.argv[0], item("path") )
-		url = self.buildItemUrl(item_params, url)
+		url = self.__utils__.buildItemUrl(item_params, url)
 		
 		if len(cm) > 0:
 			listitem.addContextMenuItems( cm, replaceItems=False )
@@ -478,14 +471,6 @@ class YouTubeNavigation:
 		xbmcplugin.addSortMethod( handle=int( sys.argv[ 1 ] ), sortMethod=xbmcplugin.SORT_METHOD_GENRE )	   
 		
 		xbmcplugin.endOfDirectory( handle=int( sys.argv[ 1 ] ), succeeded=True, cacheToDisc=True )
-
-	# generic function for building the item url filters out many item params to reduce unicode problems
-	def buildItemUrl(self, item_params = {}, url = ""):
-		blacklist = ("path","thumbnail","playlistId", "next", "content" , "editid", "summary", "published" , "Title")
-		for key, value in item_params.items():
-			if key not in blacklist:
-				url += key + "=" + value + "&"
-		return url
 
 	def addVideoContextMenuItems(self, params = {}, item_params = {}):
 		cm = []

@@ -16,11 +16,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, urllib, urllib2, re, string, os.path
+import sys, urllib, urllib2, re
 from xml.dom.minidom import parseString
 
 # ERRORCODES:
-# 0 = Ignore
 # 200 = OK
 # 303 = See other (returned an error message)
 # 500 = uncaught error
@@ -30,18 +29,12 @@ class YouTubeCore(object):
 	__language__ = sys.modules[ "__main__" ].__language__
 	__plugin__ = sys.modules[ "__main__" ].__plugin__
 	__dbg__ = sys.modules[ "__main__" ].__dbg__
-	__dbgv__ = False
 	
+	__storage__ = sys.modules[ "__main__" ].__storage__
+	__utils__ = sys.modules[ "__main__" ].__utils__
+	__login__ = sys.modules[ "__main__" ].__login__
+
 	APIKEY = "AI39si6hWF7uOkKh4B9OEAX-gK337xbwR9Vax-cdeF9CF9iNAcQftT8NVhEXaORRLHAmHxj6GjM-Prw04odK4FxACFfKkiH9lg";
-	USERAGENT = "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-GB; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8"
-	VALID_CHARS = "-_.() %s%s" % (string.ascii_letters, string.digits)
-	#===============================================================================
-	#
-	# External functions called by YouTubeNavigation.py
-	#
-	# return MUST be a tupple of ( result[string or dict], status[int] )
-	# 
-	#===============================================================================
 	
 	#===============================================================================
 	# The time parameter restricts the search to videos uploaded within the specified time. 
@@ -93,6 +86,7 @@ class YouTubeCore(object):
 		region = ('', 'AU', 'BR', 'CA', 'CZ', 'FR', 'DE', 'GB', 'NL', 'HK', 'IN', 'IE', 'IL', 'IT', 'JP', 'MX', 'NZ', 'PL', 'RU', 'KR', 'ES','SE', 'TW', 'US', 'ZA' )[ int( self.__settings__.getSetting( "region_id" ) ) ]
 		page = get("page","0")
 		start_index = per_page * int(page) + 1
+		url = ""
 		
 		if (get("action") == "search"): 
 			query = urllib.unquote_plus(get("search"))
@@ -106,22 +100,9 @@ class YouTubeCore(object):
 						url += "&" + urllib.urlencode({'author': authors[query]})
 				except:
 					print self.__plugin__ + " search - eval failed "
-			return url
 		
 		if (get("feed")):
 			url = self.urls[get("feed")]
-			
-			if (url.find("%s") > 0):
-				if ( get("contact") and not (get("external") and get("channel"))):
-					url = url % get("contact")
-				elif ( get("videoid")):
-					url = url % get("videoid")
-				elif ( get("channel")):
-					url = url % get("channel")
-				elif ( get("playlist")):
-					url = url % get("playlist")
-				elif ( get("feed") == "uploads" or get("feed") == "favorites" or  get("feed") == "playlists" or get("feed") == "subscriptions" or get("feed") == "newsubscriptions"):
-					url = url % self.__settings__.getSetting( "nick" )
 				
 			if (url.find("time") > 0 ):
 				url = url % time
@@ -140,12 +121,34 @@ class YouTubeCore(object):
 			
 			if get("feed") == "playlists" or get("feed") == "subscriptions":
 				url += "&orderby=published"
+		
+		if (get("user_feed")):
+			url = self.urls[get("user_feed")]
 			
-			return url
+			if (url.find("%s") > 0):
+				if ( get("contact") and not (get("external") and get("channel"))):
+					url = url % get("contact")
+				elif ( get("videoid")):
+					url = url % get("videoid")
+				elif ( get("channel")):
+					url = url % get("channel")
+				elif ( get("playlist")):
+					url = url % get("playlist")
+				elif ( get("feed") == "uploads" or get("feed") == "favorites" or  get("feed") == "playlists" or get("feed") == "subscriptions" or get("feed") == "newsubscriptions"):
+					url = url % self.__settings__.getSetting( "nick" )
+				else: 
+					url = url % "default"
+		
+		print self.__plugin__ + " smokey " + url
+		return url
 	
 	def list(self, params = {}):
 		get = params.get
 		
+		if get("storage"):
+			return self.__storage__.getUserOptionFolder(params)
+		
+		authenticate = get("login") == "true"
 		if get("login") == "true":
 			if ( not self._getAuth() ):
 				if self.__dbg__:
@@ -154,14 +157,15 @@ class YouTubeCore(object):
 
 		url = self.createUrl(params)
 		
-		if get("search"):
-			( result, status ) = self._fetchPage(url, api = True)
+		if url:
+			( result, status ) = self._fetchPage(url, auth = authenticate, api = True)
 		
 		if status != 200:
 			return ( result, status )
 
-		result = self._getvideoinfo(result)
-		if len(result == 0):
+		result = self.getVideoInfo(result)
+		
+		if len(result) == 0:
 			if self.__dbg__:
 				print self.__plugin__ + " listing failed with " + str(len(result)) + " results"
 			return (self.__language__(30601), 303)
@@ -204,13 +208,9 @@ class YouTubeCore(object):
 		add_request = '<?xml version="1.0" encoding="UTF-8"?><entry xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://gdata.youtube.com/schemas/2007"> <category scheme="http://gdata.youtube.com/schemas/2007/subscriptiontypes.cat" term="user"/><yt:username>%s</yt:username></entry>' % get("contact")
 		return self._youTubeAdd(url, add_request)
 		
-	def playlists(self, link, params = {}):
+	def getFolderInfo(self, link, params = {}):
 		get = params.get
-		if self.__dbg__:
-			print self.__plugin__ + " playlists " + repr(link) + " - page: " + repr(get("page","0"))
 		result = ""
-		
-		
 		
 		dom = parseString(result);
 		links = dom.getElementsByTagName("link");
@@ -225,34 +225,31 @@ class YouTubeCore(object):
 					next = "true"
 					break
 		
-		playobjects = [];
+		folders = [];
 		for node in entries:
-			video = {};
-			video['Title'] = node.getElementsByTagName("title").item(0).firstChild.nodeValue.replace('Activity of : ', '').replace('Videos published by : ', '').encode( "utf-8" );
+			folder = {};
+			folder['Title'] = node.getElementsByTagName("title").item(0).firstChild.nodeValue.replace('Activity of : ', '').replace('Videos published by : ', '').encode( "utf-8" );
 			
-			video['published'] = self._getNodeValue(node, "published", "2008-07-05T19:56:35.000-07:00")
-			video['summary'] = self._getNodeValue(node, 'summary', 'Unknown')
-			video['content'] = self._getNodeAttribute(node, 'content', 'src', 'FAIL')
-			video['playlistId'] = self._getNodeValue(node, 'yt:playlistId', '')
+			folder['published'] = self._getNodeValue(node, "published", "2008-07-05T19:56:35.000-07:00")
+			folder['summary'] = self._getNodeValue(node, 'summary', 'Unknown')
+			folder['content'] = self._getNodeAttribute(node, 'content', 'src', 'FAIL')
+			folder['playlistId'] = self._getNodeValue(node, 'yt:playlistId', '')
 			
 			if node.getElementsByTagName("link"):
 				link = node.getElementsByTagName("link")
 				for i in range(len(link)):
 					if link.item(i).getAttribute('rel') == 'edit':
 						obj = link.item(i).getAttribute('href')
-						video['editid'] = obj[obj.rfind('/')+1:]
+						folder['editid'] = obj[obj.rfind('/')+1:]
 			
-			playobjects.append(video);
+			folders.append(folder);
 			
-		if len(playobjects) > 0:
-			playobjects[len(playobjects) - 1]['next'] = next
-			
-		if self.__dbg__:
-			print self.__plugin__ + " playlist done"
-				
-		return ( playobjects, 200 );
+		if len(folders) > 0:
+			folders[len(folders) - 1]['next'] = next
 
-	def _get_batch_details_thumbnails(self, items):
+		return ( folders, 200 );
+
+	def getBatchDetailsThumbnails(self, items):
 		ytobjects = []
 		videoids = []
 		
@@ -273,7 +270,7 @@ class YouTubeCore(object):
 		
 		return ( ytobjects, 200)
 	
-	def _get_batch_details(self, items):
+	def getBatchDetails(self, items):
 		request_start = "<feed xmlns='http://www.w3.org/2005/Atom'\n xmlns:media='http://search.yahoo.com/mrss/'\n xmlns:batch='http://schemas.google.com/gdata/batch'\n xmlns:yt='http://gdata.youtube.com/schemas/2007'>\n <batch:operation type='query'/> \n"
 		request_end = "</feed>"
 		
@@ -290,7 +287,7 @@ class YouTubeCore(object):
 					request.add_data(final_request)
 					con = urllib2.urlopen(request)
 					result = con.read()
-					(temp, status) = self._getVideoInfoBatch(result)
+					(temp, status) = self.getVideoInfoBatch(result)
 					ytobjects += temp
 					if status != 200:
 						return (ytobjects, status)
@@ -298,14 +295,13 @@ class YouTubeCore(object):
 					i = 1
 				i+=1
 		
-		
 		final_request = request_start + video_request + request_end
 		request = urllib2.Request("http://gdata.youtube.com/feeds/api/videos/batch")
 		request.add_data(final_request)
 		con = urllib2.urlopen(request)
 		result = con.read()
 				
-		(temp, status) = self._getVideoInfoBatch(result)
+		(temp, status) = self.getVideoInfoBatch(result)
 		ytobjects += temp
 				
 		return ( ytobjects, 200)
@@ -323,32 +319,30 @@ class YouTubeCore(object):
 	def _fetchPage(self, link, api = False, auth=False, login=False, error = 0):
 		if self.__dbg__:
 			print self.__plugin__ + " fetching page : " + link
-
+		
 		request = urllib2.Request(link)
 
 		if api:
 			request.add_header('GData-Version', '2')
 		else:
-			request.add_header('User-Agent', self.USERAGENT)
-
+			request.add_header('User-Agent', self.__utils__.USERAGENT)
+		
 		if ( login ):
 			if ( self.__settings__.getSetting( "username" ) == "" or self.__settings__.getSetting( "user_password" ) == "" ):
 				if self.__dbg__:
 					print self.__plugin__ + " _fetchPage, login required but no credentials provided"
 				return ( self.__language__( 30608 ) , 303 )
-
-			if self.__dbg__:
-				print self.__plugin__ +  " _fetchPage adding cookie"
-			request.add_header('Cookie', 'LOGIN_INFO=' + self._httpLogin() )
-
-		if auth:
-			authkey = self._getAuth()
-			if ( not authkey ):
-				if self.__dbg__:
-					print self.__plugin__ + " _fetchPage couldn't set auth "
-				
-			request.add_header('Authorization', 'GoogleLogin auth=' + authkey)
-			request.add_header('X-GData-Key', 'key=' + self.APIKEY)
+			
+			request.add_header('Cookie', 'LOGIN_INFO=' + self.__login__._httpLogin() )
+		
+		if auth: 
+			if self._getAuth():
+				authkey = self.__settings__.getSetting("auth")
+				request.add_header('Authorization', 'GoogleLogin auth=' + authkey)
+			else:
+				print self.__plugin__ + " _fetchPage couldn't get login token"
+		
+		request.add_header('X-GData-Key', 'key=' + self.APIKEY)
 		
 		try:
 			con = urllib2.urlopen(request)
@@ -361,18 +355,16 @@ class YouTubeCore(object):
 				return ( result, 200 )
 			
 			# review this before 2.0 final
-			elif ( error < 10 ):
+			elif ( error < 5 ):
 				
 				# We need login to verify age.	     
 				if not login:
-					if self.__dbg__:
-						print self.__plugin__ + " _fetchPage age verification required, retrying with login"
-					error = error + 0
+					error = error + 1
 					return self._fetchPage(link, api, auth, login = True, error = error)
 
 				if self.__dbg__:
 					print self.__plugin__ + " _fetchPage Video age restricted, trying to verify for url: " + new_url
-
+				
 				# Fallback for missing confirm form.
 				if result.find("confirm-age-form") == -1:
 					if self.__dbg__:
@@ -380,8 +372,8 @@ class YouTubeCore(object):
 					return ( self.__language__( 30608 ) , 303 )
 								
 				request = urllib2.Request(new_url)
-				request.add_header('User-Agent', self.USERAGENT)
-				request.add_header('Cookie', 'LOGIN_INFO=' + self._httpLogin(True) )
+				request.add_header('User-Agent', self.__utils__.USERAGENT)
+				request.add_header('Cookie', 'LOGIN_INFO=' + self.__login__._httpLogin(True) )
 
 				# This really should be a regex, but the regex kept failing.
 				temp = result[result.find("verify-age-actions"):(result.find("verify-age-actions") + 600)]
@@ -394,7 +386,7 @@ class YouTubeCore(object):
 					confirmed = 0
 			
 				values = { "next_url": next_url, "action_confirm": confirmed }
-
+				
 				con = urllib2.urlopen(request, urllib.urlencode(values))
 				result = con.read()
 				con.close()
@@ -463,7 +455,7 @@ class YouTubeCore(object):
 		auth = self.__settings__.getSetting( "auth" )
 
 		if ( not auth ):
-			(result, status ) =  self.login()
+			(result, status ) =  self.__login__.login()
 			if status != 200:
 				if self.__dbg__:
 					print self.__plugin__ + " _getAuth failed because login failed"
@@ -473,15 +465,15 @@ class YouTubeCore(object):
 	def _youTubeAdd(self, url, add_request, retry = True):
 		if self.__dbg__:
 			print self.__plugin__ + " _youTubeAdd: " + repr(url) + " add_request " + repr(add_request)
-		auth = self._getAuth()
-		if ( not auth ):
+		
+		if ( not self._getAuth() ):
 			if self.__dbg__:
 				print self.__plugin__ + " playlists auth wasn't set "
 			return ( self.__language__(30609) , 303 )
 		
 		try:
 			request = urllib2.Request(url, add_request)
-			request.add_header('Authorization', 'GoogleLogin auth=%s' % auth)
+			request.add_header('Authorization', 'GoogleLogin auth=%s' % self.__settings__.getSetting("auth"))
 			request.add_header('X-GData-Client', "")
 			request.add_header('X-GData-Key', 'key=%s' % self.APIKEY)
 			request.add_header('Content-Type', 'application/atom+xml')
@@ -508,9 +500,7 @@ class YouTubeCore(object):
 						print self.__plugin__ + " _youTubeAdd trying again with login "
 						
 					self.login()
-					#def _fetchPage(self, link, api = False, auth=False, login=False, error = 0):
 					return self._youTubeAdd(url, add_request, False)
-					#return self._fetchPage(link, api, auth, login, error + 1)
 				else:
 					if self.__dbg__:
 						print self.__plugin__ + " _youTubeAdd 401 Not Authorized and no login credentials written in settings"
@@ -523,16 +513,15 @@ class YouTubeCore(object):
 	def _youTubeDel(self, delete_url, retry = True):
 		if self.__dbg__:
 			print self.__plugin__ + " _youTubeDel: " + delete_url
-
-		auth = self._getAuth()
-		if ( not auth ):
+		
+		if ( not self._getAuth() ):
 			if self.__dbg__:
 				print self.__plugin__ + " _youTubeDel auth wasn't set "
 			return ( self.__language__(30609) , 303 )
 
 		try:
 			headers = {}
-			headers['Authorization'] = 'GoogleLogin auth=%s' % (auth)
+			headers['Authorization'] = 'GoogleLogin auth=%s' % (self.__settings__.getSetting("auth"))
 			headers['X-GData-Client'] = ""
 			headers['X-GData-Key'] = 'key=%s' % self.APIKEY
 			headers['Content-Type'] = 'application/atom+xml'
@@ -563,10 +552,6 @@ class YouTubeCore(object):
 				if self.__dbg__:
 					print self.__plugin__ + " _youTubeDel: [%s] %s" % ( response.status, resp )
 				return ( resp, 303 )
-		except urllib2.HTTPError, e:
-			if self.__dbg__:
-				print self.__plugin__ + " _youTubeDel except: " + str(e)
-			return ( str(e), 303 )
 		except:
 			if self.__dbg__:
 				print self.__plugin__ + " _youTubeDel uncaught exception"
@@ -589,7 +574,7 @@ class YouTubeCore(object):
 		
 		return default;
 
-	def _getVideoInfoBatch(self, value):
+	def getVideoInfoBatch(self, value):
 		if self.__dbg__:
 			print self.__plugin__ + " _getvideoinfo: " + str(len(value))
 		
@@ -678,7 +663,7 @@ class YouTubeCore(object):
 		
 		return ( "", 500 )
 	
-	def _getvideoinfo(self, value):
+	def getVideoInfo(self, value):
 		if self.__dbg__:
 			print self.__plugin__ + " _getvideoinfo: " + str(len(value))
 		
@@ -740,7 +725,7 @@ class YouTubeCore(object):
 			video['Date'] = self._getNodeValue(node, "published", "Unknown Date").encode( "utf-8" )
 			video['user'] = self._getNodeValue(node, "name", "Unknown Name").encode( "utf-8" )
 			
-			# media:credit is not set for favorites, playlists or inbox
+			# media:credit is not set for favorites, playlists
 			video['Studio'] = self._getNodeValue(node, "media:credit", "").encode( "utf-8" )
 			if video['Studio'] == "":
 				video['Studio'] = self._getNodeValue(node, "name", "Unknown Uploader").encode( "utf-8" )
