@@ -735,7 +735,7 @@ class YouTubeCore(object):
 						video['videoid'] = "false"
 					elif reason != 'limitedSyndication':
 						if self.__dbg__:
-							print self.__plugin__ + " _getvideoinfo hit else : %s - %s" % ( reason, value)
+							print self.__plugin__ + " _getvideoinfo removing video, reason: %s value: %s" % ( reason, value)
 						video['videoid'] = "false";
 						
 			if ( video['videoid'] == "missing" ):
