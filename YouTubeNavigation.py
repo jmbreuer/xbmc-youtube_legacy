@@ -16,9 +16,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import time, sys
+import sys, urllib
 import xbmc, xbmcgui, xbmcplugin
-import urllib
 	
 class YouTubeNavigation:	 
 	__settings__ = sys.modules[ "__main__" ].__settings__
@@ -152,7 +151,7 @@ class YouTubeNavigation:
 		if (get("action") == "play_video"):
 			self.__player__.playVideo(params)
 		if (get("action") == "change_subscription_view"):
-			self.changeSubscriptionView(params)
+			self.__storage__.changeSubscriptionView(params)
 		if (get("action") == "play_all"):
 			self.__playlist__.playAll(params)
 		
@@ -445,7 +444,7 @@ class YouTubeNavigation:
 		cm.append( ( self.__language__(30501), "XBMC.RunPlugin(%s?path=%s&action=download&videoid=%s)" % ( sys.argv[0],  item("path"), item("videoid") ) ) )
 
 		if ( self.__settings__.getSetting( "username" ) != "" and self.__settings__.getSetting( "auth" ) ):
-			if ( get("feed") == "favorites" and not get("contact") ):
+			if ( get("user_feed") == "favorites" and not get("contact") ):
 				cm.append( ( self.__language__( 30506 ), 'XBMC.RunPlugin(%s?path=%s&action=remove_favorite&editid=%s&)' % ( sys.argv[0], item("path"), item("editid") ) ) )
 			else:
 				cm.append( ( self.__language__( 30503 ), 'XBMC.RunPlugin(%s?path=%s&action=add_favorite&videoid=%s&)' % ( sys.argv[0],  item("path"), item("videoid") ) ) )
@@ -473,12 +472,12 @@ class YouTubeNavigation:
 		if (item("next","false") == "true"):
 			return cm
 		
-		if ( item("feed") == "favorites"  or get("feed") == "playlists" or item("feed") == "uploads" or item("feed") == "newsubscriptions" or item("action") == "search_disco"):
-			if (item("feed") == "favorites" or item("feed") == "newsubscriptions"):
-				cm.append ( (self.__language__(30530), "XBMC.RunPlugin(%s?path=%s&action=play_all&feed=%s&contact=%s&)" % ( sys.argv[0], item("path"), item("feed"), self.__settings__.getSetting("nick") ) ) )
-			if (get("feed") == "playlists" ):
-				cm.append ( (self.__language__(30530), "XBMC.RunPlugin(%s?path=%s&action=play_all&playlistId=%s&)" % ( sys.argv[0], item("path"), item("playlistId") ) ) )
-			if (item("action") == "search_disco"):
+		if ( item("user_feed") == "favorites"  or get("user_feed") == "playlists" or item("user_feed") == "uploads" or item("user_feed") == "newsubscriptions" or item("scraper") == "search_disco"):
+			if (item("user_feed") == "favorites" or item("user_feed") == "newsubscriptions"):
+				cm.append ( (self.__language__(30530), "XBMC.RunPlugin(%s?path=%s&action=play_all&user_feed=%s&contact=%s&)" % ( sys.argv[0], item("path"), item("user_feed"), self.__settings__.getSetting("nick") ) ) )
+			if (get("user_feed") == "playlists" ):
+				cm.append ( (self.__language__(30530), "XBMC.RunPlugin(%s?path=%s&action=play_all&playlist=%s&)" % ( sys.argv[0], item("path"), item("playlist") ) ) )
+			if (item("scraper") == "search_disco"):
 				cm.append( (self.__language__( 30530 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&search_disco=%s&)" % ( sys.argv[0], item("path"), item("search") ) ) )
 			cm.append( ( self.__language__( 30507 ), "XBMC.Action(Queue)" ) )
 		
@@ -504,13 +503,13 @@ class YouTubeNavigation:
 				cm_url += "external=true&contact=" + get("contact") + "&"
 			cm_url +=")"
 			
-			if (item("feed") == "subscriptions_favorites"):
+			if (item("user_feed") == "favorites"):
 				cm.append ( (self.__language__( 30511 ), cm_url % ("subscriptions_uploads")))
 				cm.append( (self.__language__( 30528 ), cm_url % ("subscriptions_playlists")))
-			elif(item("feed") == "subscriptions_playlists"):
+			elif(item("user_feed") == "playlists"):
 				cm.append( (self.__language__( 30511 ), cm_url % ("subscriptions_uploads"))) 
 				cm.append ( (self.__language__( 30510 ), cm_url % ("subscriptions_favorites")))
-			elif (item("feed") == "subscriptions_uploads"):
+			elif (item("user_feed") == "uploads"):
 				cm.append ( (self.__language__( 30510 ), cm_url % ("subscriptions_favorites")))
 				cm.append( (self.__language__( 30528 ), cm_url % ("subscriptions_playlists")))
 		
