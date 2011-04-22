@@ -38,7 +38,7 @@ class YouTubeNavigation:
 	#			   label						  , path									        , thumbnail					  		,  login		  ,  feed / action
 	categories = (
 				  {'Title':__language__( 30044 )  ,'path':"/root/explore"			 				, 'thumbnail':"explore"				, 'login':"false" },
-#				  {'Title':__language__( 30041 )  ,'path':"/root/explore/categories"				, 'thumbnail':"explore"				, 'login':"false" , 'scraper':'categories', 'folder':'true'},
+				  {'Title':__language__( 30041 )  ,'path':"/root/explore/categories"				, 'thumbnail':"explore"				, 'login':"false" , 'scraper':'categories', 'folder':'true'},
 #				  {'Title':__language__( 30037 )  ,'path':"/root/explore/disco"						, 'thumbnail':"discoball"		 	, 'login':"false" , 'store':"disco_searches", 'folder':'true' },
 #				  {'Title':__language__( 30040 )  ,'path':"/root/explore/disco/new"					, 'thumbnail':"search"		   		, 'login':"false" , 'scraper':"search_disco"},
 #				  {'Title':__language__( 30038 )  ,'path':"/root/explore/disco/top_25"				, 'thumbnail':"discoball"		 	, 'login':"false" , 'scraper':"disco_top_25", 'folder':'true'},
@@ -97,11 +97,8 @@ class YouTubeNavigation:
 									self.addListItem(params, category)
 							else:
 								self.addListItem(params, category)
-		
-		if (get("scraper")):
-			self.scrape(params)
-		
-		if (get("feed") or get("user_feed") or get("options") or get("store")):
+				
+		if (get("feed") or get("user_feed") or get("options") or get("store") or get("scraper")):
 			result = self.list(params)
 			if not result:
 				return result
@@ -154,18 +151,11 @@ class YouTubeNavigation:
 			self.__storage__.changeSubscriptionView(params)
 		if (get("action") == "play_all"):
 			self.__playlist__.playAll(params)
-		
-	def search(self, params = {}):
-		get = params.get
-						
-#		
-				
-		self.parseVideoList(params, [])
 			
 	#==================================== Item Building and Listing ===========================================	
 	def list(self, params = {}):
 		get = params.get
-		
+		results = []
 		if (get("feed") == "search"):
 			if not get("search"):
 				query = self.__utils__.getUserInput(self.__language__(30006), '')
@@ -173,7 +163,10 @@ class YouTubeNavigation:
 			
 			self.__storage__.saveSearch(params)
 		
-		(results , status) = self.__core__.list(params)
+		if get("scraper"):
+			(results , status) = self.__scraper__.scrape(params)
+		else:
+			(results , status) = self.__core__.list(params)
 				
 		if status == 200: 
 			if get("folder"):
@@ -435,6 +428,9 @@ class YouTubeNavigation:
 		url_studio = urllib.quote_plus(studio)
 		
 		cm.append( ( self.__language__( 30504 ), "XBMC.Action(Queue)", ) )
+		
+		if (get("playlist") and item("videoid")):
+			cm.append( (self.__language__(30531), "XBMC.RunPlugin(%s?path=%s&action=play_all&playlist=%s&videoid=%s&)" % ( sys.argv[0], item("path"), item("playlist"), item("videoid") ) ) )
 		
 		if (self.__utils__.PR_VIDEO_QUALITY):
 			cm.append( (self.__language__(30520), "XBMC.PlayMedia(%s?path=%s&action=play_video&quality=1080p&videoid=%s)" % ( sys.argv[0],  item("path"), item("videoid") ) ) )
