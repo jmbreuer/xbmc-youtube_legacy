@@ -77,10 +77,15 @@ class YouTubeScraperCore:
 		if self.__dbg__:
 			print self.__plugin__ + " calling get batch"
 			
-		( ytobjects, status ) = self.__core__._get_batch_details(subitems)
+		( ytobjects, status ) = self.__core__.getBatchDetails(subitems)
 		
 		if (len(ytobjects) > 0):
-			ytobjects[len(ytobjects)-1]['next'] = next
+			if (next == "true"):
+				item = {"Title":self.__language__( 30509 ), "thumbnail":"next", "next":"true", "page":str(int(get("page", "0")) + 1)} 
+				for k, v in params.items():
+					if (k != "thumbnail" and k != "Title" and k != "page"):
+						item[k] = v
+				ytobjects.append(item)
 		
 		return (ytobjects, status)
 	
@@ -96,8 +101,8 @@ class YouTubeScraperCore:
 		
 		params["login_info"] = login_info
 		url = self.createUrl(params)
-		result = self.__core__._fetchPage(url, params)
-
+		(result, status) = self.__core__._fetchPage(url, params)
+		
 		videos = re.compile('<a href="/watch\?v=(.*)&amp;feature=grec_browse" class=').findall(result);
 
 		if len(videos) == 0:
@@ -128,7 +133,7 @@ class YouTubeScraperCore:
 				trailer = trailer.findNextSibling(name="div")
 			
 		if (items):
-			(yobjects, status) = self.core._get_batch_details_thumbnails(items)
+			(yobjects, status) = self.core.getBatchDetailsThumbnails(items)
 			
 		if (not yobjects):
 			return (yobjects, 500)
@@ -137,10 +142,9 @@ class YouTubeScraperCore:
 	
 #=================================== Categories  ============================================
 	def scrapeCategoriesGrid(self, html, params = {}):
+		get = params.get
 		if self.__dbg__:
 			print self.__plugin__ + " scrapeCategoriesGrid"
-			
-		get = params.get
 		
 		next = "false"
 		pager = SoupStrainer(name="div", attrs = {'class':"yt-uix-pager"})
@@ -154,7 +158,6 @@ class YouTubeScraperCore:
 		list = SoupStrainer(name="div", id="browse-video-data")
 		videos = BeautifulSoup(html, parseOnlyThese=list)
 		
-		print self.__plugin__ + " smokey: " + str(videos)
 		items = []
 		if (len(videos) > 0):
 			video = videos.div.div
@@ -177,7 +180,7 @@ class YouTubeScraperCore:
 						video = video.findNextSibling(name="div", attrs = {'class':"video-cell"})
 		
 		if (items):
-			(results, status) = self.__core__._get_batch_details(items)
+			(results, status) = self.__core__.getBatchDetails(items)
 			if (status == 200):
 				results[len(results) -1]["next"] = next
 			return (results, status)
@@ -216,7 +219,7 @@ class YouTubeScraperCore:
 			subitems = videos
 		
 		if (result == 200):
-			( ytobjects, status ) = self.core._get_batch_details(subitems)
+			( ytobjects, status ) = self.core.getBatchDetails(subitems)
 		
 			if status == 200:
 				if (len(ytobjects) > 0):
@@ -234,7 +237,7 @@ class YouTubeScraperCore:
 		if (self.__dbg__):
 			print self.__plugin__ + " Disco search url " + repr(url)
 		
-		page = self.__core__._fetchPage(url)
+		(page, status) = self.__core__._fetchPage(url)
 		if (page.find("list=") != -1):
 			page = page.replace("\u0026", "&")
 			mix_list_id = page[page.find("list=") + 5:]
@@ -248,7 +251,7 @@ class YouTubeScraperCore:
 			
 			url = self.urls["disco_mix_list"] % (video_id, mix_list_id)
 										
-			page = self.__core__._fetchPage(url)
+			(page, status) = self.__core__._fetchPage(url)
 			
 			list = SoupStrainer(name="div", id ="quicklist")
 			mix_list = BeautifulSoup(page, parseOnlyThese=list)
@@ -268,7 +271,7 @@ class YouTubeScraperCore:
 	def scrapeDiscoTop25(self, params = {}):
 		get = params.get
 		url = self.urls["disco_main"]
-		page = self.__core__._fetchPage(url, params)
+		(page, status) = self.__core__._fetchPage(url, params)
 		list = SoupStrainer(name="div", attrs = {"class":"popular-message"})
 		popular = BeautifulSoup(page, parseOnlyThese=list)
 		result = []
@@ -279,14 +282,14 @@ class YouTubeScraperCore:
 				videos = videos.replace("&quot;","")
 				videos = videos.replace(" ","")
 				items = videos.split(",")
-				return self.__core__._get_batch_details(items)
+				return self.__core__.getBatchDetails(items)
 
 		return ("Scraper failed", 500)
 		
 	def scrapeDiscoTopArtist(self, params = {}):
 		get = params.get
 		url = self.urls["disco_main"]
-		page = self.__core__._fetchPage(url, params)
+		(page, status) = self.__core__._fetchPage(url, params)
 		list = SoupStrainer(name="div", attrs = {"class":"popular-artists"})
 		popular = BeautifulSoup(page, parseOnlyThese=list)
 		if (len(popular)):
@@ -333,7 +336,7 @@ class YouTubeScraperCore:
 		
 		subitems = videos[(per_page * page):(per_page * (page + 1))]
 		
-		( ytobjects, status ) = self.core._get_batch_details(subitems)
+		( ytobjects, status ) = self.core.getBatchDetails(subitems)
 
 		if (len(ytobjects) > 0):
 			ytobjects[len(ytobjects)-1]['next'] = next
@@ -501,7 +504,7 @@ class YouTubeScraperCore:
 			
 			params["page"] = str(begin_page)
 			url = self.createUrl(params)
-			html = self.__core__._fetchPage(url, params)
+			(html, status) = self.__core__._fetchPage(url, params)
 			if (self.__dbg__):
 				print "fetching url " + url
 
@@ -515,6 +518,7 @@ class YouTubeScraperCore:
 			next = "false"
 			if (result):
 				next = result[len(result) -1]["next"]
+				result[len(result) -1]["next"] = ""
 				result = result[begin_index:]
 			
 				page_count = begin_page + 1
@@ -525,7 +529,7 @@ class YouTubeScraperCore:
 					url = self.createUrl(params)
 					if (self.__dbg__):
 						print "fetching url: " + url
-					html = self.__core__._fetchPage(url, params)
+					(html, status) = self.__core__._fetchPage(url, params)
 	
 					if (get("scraper") == "categories"):
 						(new_result, status) = self.scrapeCategoriesGrid(html, params)
@@ -536,6 +540,7 @@ class YouTubeScraperCore:
 					
 					if (new_result):
 						next = new_result[len(new_result) - 1]["next"]
+						result[len(result) -1]["next"] = ""
 					else: 
 						next = "false"
 					
@@ -554,8 +559,12 @@ class YouTubeScraperCore:
 					
 				result = result[:per_page]
 				
-				result[len(result) - 1]["next"] = next
-				params["page"] = request_page
+				if (next == "true"):
+					item = {"Title":self.__language__( 30509 ), "thumbnail":"next", "next":"true", "page":str(int(get("page", "0")) + 1)} 
+					for k, v in params.items():
+						if (k != "thumbnail" and k != "Title" and k != "page"):
+							item[k] = v
+					result.append(item)
 				return (result, status)
 			else:
 				return ([], 303)
@@ -565,7 +574,7 @@ class YouTubeScraperCore:
 			if self.__dbg__:
 				print self.__plugin__ + " fetching url: " + url 
 				
-			html = self.__core__._fetchPage(url, params)
+			(html,status) = self.__core__._fetchPage(url, params)
 			if (get("scraper") == "categories" )	:
 				if (get("category")):
 					return self.scrapeCategoriesGrid(html, params)
@@ -669,7 +678,7 @@ class YouTubeScraperCore:
 				
 				trailer = trailer.findNextSibling(name="div", attrs = { 'class':cell })
 			
-			(yobjects, result ) = self.core._get_batch_details_thumbnails(item);
+			(yobjects, result ) = self.core.getBatchDetailsThumbnails(item);
 			
 			if result != 200:
 				return (yobjects, result)
@@ -681,7 +690,7 @@ class YouTubeScraperCore:
 
 		return (yobjects, 200)
 	
-	def scrapeCategoryList(self, html, params = {}, tag = ""):
+	def scrapeCategoryList(self, html = "", params = {}, tag = ""):
 		get = params.get
 		if self.__dbg__:
 			print self.__plugin__ + "scrapeCategories " 
@@ -691,7 +700,7 @@ class YouTubeScraperCore:
 		if (tag):
 			scraper = tag
 			thumbnail = tag
-				
+		
 		list = SoupStrainer(name="div", attrs = {"class":"yt-uix-expander-body"})
 		categories = BeautifulSoup(html, parseOnlyThese=list)
 		

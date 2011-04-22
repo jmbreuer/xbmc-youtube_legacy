@@ -85,7 +85,7 @@ class YouTubePluginStorage:
 			self.__settings__.setSetting("stored_searches", repr(searches))
 		else:
 			self.__settings__.setSetting("stored_disco_searches", repr(searches))
-				
+		
 		xbmc.executebuiltin( "Container.Refresh" )
 		
 	def saveSearch(self, params = {}):
@@ -114,9 +114,6 @@ class YouTubePluginStorage:
 		searchCount = ( 10, 20, 30, 40, )[ int( self.__settings__.getSetting( "saved_searches" ) ) ]
 		searches = [new_query] + searches[:searchCount]
 		self.__settings__.setSetting(store, repr(searches))
-		params["feed"] = "search"
-		params["old_search"] = ""
-		params["store"] = ""
 	
 	def editStoredSearch(self, params = {}):
 		get = params.get
@@ -132,6 +129,10 @@ class YouTubePluginStorage:
 			else:
 				params["scraper"] = "search_disco"
 				self.saveSearch(params)
+		params["feed"] = "search"
+		params["old_search"] = ""
+		params["store"] = ""
+		xbmc.executebuiltin( "Container.Refresh" )
 	
 	def refineStoredSearch(self, params = {}):
 		get = params.get

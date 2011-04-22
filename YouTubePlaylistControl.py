@@ -39,14 +39,22 @@ class YouTubePlaylistControl:
 		params["fetch_all"] = "true"
 		result = []
 		# fetch the video entries
-		if get("playlistId"):
+		if get("playlist"):
 			result = self.getPlayList(params)
+			if get("videoid"):
+				video_index = -1
+				for index, video in enumerate(result):
+					vget = video.get
+					if vget("videoid") == get("videoid"):
+						video_index = index
+				if video_index >= 0:
+					result = result[video_index:]
 		elif get("search_disco"):
 			params["search"] = params["search_disco"]
 			result = self.getDiscoSearch(params)
-		elif get("feed") == "favorites":
+		elif get("user_feed") == "favorites":
 			result = self.getFavorites(params)
-		elif get("feed") == "newsubscriptions":
+		elif get("user_feed") == "newsubscriptions":
 			result = self.getNewSubscriptions(params)
 		else:
 			return
@@ -78,7 +86,7 @@ class YouTubePlaylistControl:
 	
 	def getPlayList(self, params = {}):
 		get = params.get
-		feed = self.urls["playlists"] % get("playlistId")
+		feed = self.urls["playlists"] % get("playlist")
 		return self.listAll(feed, params)
 	
 	def getDiscoSearch(self, params = {}):
@@ -114,13 +122,15 @@ class YouTubePlaylistControl:
 		url = url.replace(" ", "+")
 		
 		( result, status ) = self.__core__._fetchPage(url, auth = False)
-				
-		ytobjects = self.__core__._getvideoinfo(result)
+		
+		ytobjects = self.__core__.getVideoInfo(result, params)
 		
 		if len(ytobjects) == 0:
 			return ytobjects
 		
-		next = ytobjects[len(ytobjects)-1].get("next","false") 
+		next = ytobjects[len(ytobjects)-1].get("next","false")
+		if next == "true": 
+			ytobjects = ytobjects[:len(ytobjects)-1]
 		
 		while next == "true":
 			index += 50
@@ -129,8 +139,10 @@ class YouTubePlaylistControl:
 			(result, status) = self.__core__._fetchPage(url, auth = False)
 			if status != 200:
 				break
-			temp_objects = self.__core__._getvideoinfo(result)
+			temp_objects = self.__core__.getVideoInfo(result, params)
 			next = temp_objects[len(temp_objects)-1].get("next","false")
+			if next == "true":
+				temp_objects += temp_objects[:len(temp_objects)-1]
 			ytobjects += temp_objects
 		
 		return ytobjects
