@@ -41,14 +41,6 @@ class YouTubePlaylistControl:
 		# fetch the video entries
 		if get("playlist"):
 			result = self.getPlayList(params)
-			if get("videoid"):
-				video_index = -1
-				for index, video in enumerate(result):
-					vget = video.get
-					if vget("videoid") == get("videoid"):
-						video_index = index
-				if video_index >= 0:
-					result = result[video_index:]
 		elif get("search_disco"):
 			params["search"] = params["search_disco"]
 			result = self.getDiscoSearch(params)
@@ -61,6 +53,15 @@ class YouTubePlaylistControl:
 
 		if len(result) == 0:
 			return
+
+		if get("videoid"):
+			video_index = -1
+			for index, video in enumerate(result):
+				vget = video.get
+				if vget("videoid") == get("videoid"):
+					video_index = index
+			if video_index >= 0:
+				result = result[video_index:]
 		
 		player = xbmc.Player()
 		if (player.isPlaying()):

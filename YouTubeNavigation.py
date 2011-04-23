@@ -200,9 +200,8 @@ class YouTubeNavigation:
 
 	def addToFavorites(self, params = {}):
 		get = params.get
-		
 		if (get("videoid")):
-			(message, status) = self.__core__.add_favorite(get("videoid"))
+			(message, status) = self.__core__.add_favorite(params)
 			if status != 200:
 				self.__utils__.showErrorMessage(self.__language__(30020), message, status)
 				return False
@@ -263,7 +262,7 @@ class YouTubeNavigation:
 	def removeSubscription(self, params = {}):
 		get = params.get
 		if (get("editid")):
-			(message, status) = self.__core__.remove_subscription(get("editid"))
+			(message, status) = self.__core__.remove_subscription(params)
 			if status != 200:
 				self.__utils__.showErrorMessage(self.__language__(30021), message, status)
 				return False
@@ -421,8 +420,14 @@ class YouTubeNavigation:
 		cm.append( ( self.__language__( 30504 ), "XBMC.Action(Queue)", ) )
 		
 		if (get("playlist") and item("videoid")):
-			cm.append( (self.__language__(30531), "XBMC.RunPlugin(%s?path=%s&action=play_all&playlist=%s&videoid=%s&)" % ( sys.argv[0], item("path"), item("playlist"), item("videoid") ) ) )
+			cm.append( (self.__language__(30531), "XBMC.RunPlugin(%s?path=%s&action=play_all&playlist=%s&videoid=%s&)" % ( sys.argv[0], item("path"), get("playlist"), item("videoid") ) ) )
 		
+		if (get("user_feed") == "newsubscriptions" or get("user_feed") == "favorites"):
+			contact = self.__settings__.getSetting("nick")
+			if get("contact"):
+				contact = get("contact") 
+			cm.append( (self.__language__(30531), "XBMC.RunPlugin(%s?path=%s&action=play_all&user_feed=%s&contact=%s&videoid=%s&)" % ( sys.argv[0], item("path"), get("user_feed"), contact, item("videoid") ) ) )
+			
 		if (self.__utils__.PR_VIDEO_QUALITY):
 			cm.append( (self.__language__(30520), "XBMC.PlayMedia(%s?path=%s&action=play_video&quality=1080p&videoid=%s)" % ( sys.argv[0],  item("path"), item("videoid") ) ) )
 			cm.append( (self.__language__(30521), "XBMC.PlayMedia(%s?path=%s&action=play_video&quality=720p&videoid=%s)" % ( sys.argv[0],  item("path"), item("videoid") ) ) )
