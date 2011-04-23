@@ -224,6 +224,9 @@ class YouTubeScraperCore:
 			( ytobjects, status ) = self.__core__.getBatchDetails(subitems)
 		
 			if (len(ytobjects) > 0):
+				if page == 0:
+					self.__settings__.setSetting("disco_search_" + query + "_thumb", ytobjects[0]["thumbnail"])
+				
 				if (next == "true"):
 					item = {"Title":self.__language__( 30509 ), "thumbnail":"next", "next":"true", "page":str(int(get("page", "0")) + 1)} 
 					for k, v in params.items():
