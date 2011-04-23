@@ -521,6 +521,7 @@ class YouTubeScraperCore:
 			
 	def scrapePageinator(self, params = {}):
 		get = params.get
+		original_page = int(get("page","0"))
 		scraper_per_page = 0
 		result = []
 
@@ -551,9 +552,9 @@ class YouTubeScraperCore:
 			
 			params["page"] = str(begin_page)
 			url = self.createUrl(params)
-			(html, status) = self.__core__._fetchPage(url, params)
 			if (self.__dbg__):
 				print "fetching url " + url
+			(html, status) = self.__core__._fetchPage(url, params)
 
 			if (get("scraper") == "categories"):
 				(result, status) = self.scrapeCategoriesGrid(html, params)
@@ -572,7 +573,7 @@ class YouTubeScraperCore:
 				params["page"] = str(page_count)
 				
 				i = 1
-				while (len(result) <  per_page and result[len(result)-1]["next"] == "true"):
+				while (len(result) <  per_page and next == "true"):
 					url = self.createUrl(params)
 					if (self.__dbg__):
 						print "fetching url: " + url
@@ -607,7 +608,7 @@ class YouTubeScraperCore:
 				result = result[:per_page]
 				
 				if (next == "true"):
-					item = {"Title":self.__language__( 30509 ), "thumbnail":"next", "next":"true", "page":str(int(get("page", "0")) + 1)} 
+					item = {"Title":self.__language__( 30509 ), "thumbnail":"next", "next":"true", "page":str(original_page + 1)} 
 					for k, v in params.items():
 						if (k != "thumbnail" and k != "Title" and k != "page"):
 							item[k] = v
