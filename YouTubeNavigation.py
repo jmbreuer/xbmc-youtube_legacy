@@ -52,7 +52,7 @@ class YouTubeNavigation:
 				  {'Title':__language__( 30014 )  ,'path':"/root/explore/feeds/featured"			, 'thumbnail':"featured"		 	, 'login':"false" , 'feed':"feed_featured" },
 				  {'Title':__language__( 30015 )  ,'path':"/root/explore/feeds/favorites"			, 'thumbnail':"top"					, 'login':"false" , 'feed':"feed_favorites" },
 				  {'Title':__language__( 30016 )  ,'path':"/root/explore/feeds/rated"				, 'thumbnail':"top"					, 'login':"false" , 'feed':"feed_rated" },
-#				  {'Title':__language__( 30043 )  ,'path':"/root/explore/movies"					, 'thumbnail':"movies"				, 'login':"false" , 'scraper':'movies', 'folder':'true'},
+				  {'Title':__language__( 30043 )  ,'path':"/root/explore/movies"					, 'thumbnail':"movies"				, 'login':"false" , 'scraper':'movies', 'folder':'true'},
 #				  {'Title':__language__( 30042 )  ,'path':"/root/explore/shows"						, 'thumbnail':"shows"				, 'login':"false" , 'scraper':'shows', 'folder':'true'},
 #				  {'Title':__language__( 30032 )  ,'path':"/root/explore/trailers"					, 'thumbnail':"trailers"			, 'login':"false" },
 #				  {'Title':__language__( 30035 )  ,'path':"/root/explore/trailers/latest"   		, 'thumbnail':"trailers"			, 'login':"false" , 'scraper':"latest_trailers" },
@@ -62,7 +62,7 @@ class YouTubeNavigation:
 #				  {'Title':__language__( 30047 )  ,'path':"/root/explore/trailers/latest_game"  	, 'thumbnail':"trailers"			, 'login':"false" , 'scraper':"latest_game_trailers" },
 #				  {'Title':__language__( 30048 )  ,'path':"/root/explore/trailers/upcoming_game"  	, 'thumbnail':"trailers"			, 'login':"false" , 'scraper':"upcoming_game_trailers" },
 #				  {'Title':__language__( 30046 )  ,'path':"/root/explore/trailers/popular_game"  	, 'thumbnail':"trailers"			, 'login':"false" , 'scraper':"popular_game_trailers" },
-#				  {'Title':__language__( 30019 )  ,'path':"/root/recommended"						, 'thumbnail':"recommended"			, 'login':"true"  , 'scraper':"recommended" },
+				  {'Title':__language__( 30019 )  ,'path':"/root/recommended"						, 'thumbnail':"recommended"			, 'login':"true"  , 'scraper':"recommended" },
 				  {'Title':__language__( 30018 )  ,'path':"/root/contacts"			  				, 'thumbnail':"contacts"			, 'login':"true"  , 'user_feed':"contacts", 'folder':'true' },
 				  {'Title':__language__( 30002 )  ,'path':"/root/favorites"		 					, 'thumbnail':"favorites"			, 'login':"true"  , 'user_feed':"favorites" },
 				  {'Title':__language__( 30017 )  ,'path':"/root/playlists"		 					, 'thumbnail':"playlists"			, 'login':"true"  , 'user_feed':"playlists", 'folder':'true' },
@@ -84,7 +84,7 @@ class YouTubeNavigation:
 		
 		path = get("path", "/root")
 		
-		if not get("feed") == "search" and get("page","0") == "0":
+		if not get("feed") == "search" and get("page","0") == "0" and not get("scraper") == "search_disco":
 			for category in self.categories:
 				cat_get = category.get 
 				if (cat_get("path").find(path +"/") > -1 ):
