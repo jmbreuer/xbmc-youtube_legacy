@@ -400,16 +400,13 @@ class YouTubeScraperCore:
 			if self.__dbg__:
 				print self.__plugin__ + " parsing videolist for single season"
 			(yobjects, status) = self.scrapeShowEpisodes(html, params)
-			
-			if (yobjects):
-				yobjects[0]["folder"] = "false"
-			
+						
 			return (yobjects, status)
 				
 		list = SoupStrainer(name="div", attrs = {'class':"shows-episodes-sort browse-pager"})
 		seasons = BeautifulSoup(html, parseOnlyThese=list)
-		
 		if (len(seasons) > 0):
+			params["folder"] = "true"
 			season = seasons.div.span.findNextSibling()
 			
 			print self.__plugin__ + " season " + repr(season)
@@ -440,16 +437,16 @@ class YouTubeScraperCore:
 						item["show"] = get("show")
 						yobjects.append(item)
 				
-				season = season.findNextSibling()					
+				season = season.findNextSibling()			
 		
 		if (yobjects):
-			yobjects[0]["folder"] = "true"
 			return ( yobjects, 200 )
 				
 		return ([], 303)
 	
 	def scrapeShowsGrid(self, html, params = {}):
 		get = params.get
+		params["folder"] = "true"
 		if self.__dbg__:
 			print self.__plugin__ + " scrapeShowsGrid"
 		
@@ -534,7 +531,11 @@ class YouTubeScraperCore:
 			scraper_per_page = 44
 		elif ( get("scraper") == "movies" and get("category")):
 			scraper_per_page = 60		
-		elif (get("scraper") != "shows" and get("scraper") != "show" and get("scraper") != "categories" and get("scraper") != "movies" and get("scraper") in self.urls):
+		elif (get("scraper") != "shows" and 
+			get("scraper") != "show" and 
+			get("scraper") != "categories" and 
+			get("scraper") != "movies" and 
+			get("scraper") in self.urls):
 			scraper_per_page = 40
 		
 		if (self.__dbg__):
