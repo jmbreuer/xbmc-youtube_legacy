@@ -48,7 +48,7 @@ class YouTubeDownloader:
 		
 		self.__utils__.showMessage(self.__language__(30612), self.__utils__.makeAscii(item("Title", "Unknown Title")))
 		
-		( video, status ) = self._downloadVideo(video)
+		( video, status ) = self.downloadVideoURL(video)
 				
 		if status == 200:
 			self.__utils__.showMessage(self.__language__( 30604 ), self.__utils__.makeAscii(item("Title")))
@@ -63,9 +63,9 @@ class YouTubeDownloader:
 		
 		path = self.__settings__.getSetting( "downloadPath" )
 		self.__player__.downloadSubtitle(video)
-		
+		print "smokey " + repr(video['video_url']) 
 		url = urllib2.Request(video['video_url'])
-		url.add_header('User-Agent', self.USERAGENT);
+		url.add_header('User-Agent', self.__utils__.USERAGENT);
 		
 		filename_incomplete = "%s/%s-incomplete.mp4" % ( path, ''.join(c for c in video['Title'] if c in self.__utils__.VALID_CHARS) )
 		filename_complete = "%s/%s.mp4" % ( path, ''.join(c for c in video['Title'] if c in self.__utils__.VALID_CHARS) )

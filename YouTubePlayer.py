@@ -339,11 +339,13 @@ class YouTubePlayer(object):
 			if (link(37)):
 				video_url = link(37)
 				
-		if len(video_url) > 0:
-			video_url += " | " + self.__utils__.USERAGENT
-		else:
+		if not len(video_url) > 0:
 			print self.__plugin__ + " construct_video_url failed, video_url not set"
-
+			return video_url
+		
+		if get("action") != "download":
+			video_url += " | " + self.__utils__.USERAGENT
+			
 		return video_url
 		
 	def getVideoObject(self, params):
@@ -353,7 +355,7 @@ class YouTubePlayer(object):
 		(video, status) = self.getVideoInfo(params)
 		
 		#Check if file has been downloaded locally and use that as a source instead
-		if (status == 200):
+		if (status == 200 and not get("action") == "download"):
 			path = self.__settings__.getSetting( "downloadPath" )
 			path = "%s%s-[%s].mp4" % (path, ''.join(c for c in video['Title'] if c in self.__utils__.VALID_CHARS), video["videoid"])
 			if os.path.exists(path):
