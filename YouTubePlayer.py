@@ -355,7 +355,7 @@ class YouTubePlayer(object):
 		(video, status) = self.getVideoInfo(params)
 		
 		#Check if file has been downloaded locally and use that as a source instead
-		if (status == 200 and not get("action") == "download"):
+		if (status == 200 and get("action","") != "download"):
 			path = self.__settings__.getSetting( "downloadPath" )
 			path = "%s%s-[%s].mp4" % (path, ''.join(c for c in video['Title'] if c in self.__utils__.VALID_CHARS), video["videoid"])
 			if os.path.exists(path):
