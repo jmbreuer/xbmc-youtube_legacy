@@ -71,8 +71,7 @@ class YouTubeNavigation:
 				  {'Title':__language__( 30005 )  ,'path':"/root/uploads"							, 'thumbnail':"uploads"				, 'login':"true"  , 'user_feed':"uploads" },
 				  {'Title':__language__( 30045 )  ,'path':"/root/downloads"							, 'thumbnail':"downloads"			, 'login':"false" , 'feed':"downloads" },
 				  {'Title':__language__( 30006 )  ,'path':"/root/search"							, 'thumbnail':"search"				, 'login':"false" , 'store':"searches", 'folder':'true' },
-				  {'Title':__language__( 30007 )  ,'path':"/root/search/new"						, 'thumbnail':"search"				, 'login':"false" , 'feed':"search" },
-				  {'Title':__language__( 30008 )  ,'path':"/root/playbyid"		  					, 'thumbnail':"playbyid"			, 'login':"false" , 'action':"playbyid" },
+				  {'Title':__language__( 30007 )  ,'path':"/root/search/new"						, 'thumbnail':"search"				, 'login':"false" , 'feed':"search" },				  
 				  {'Title':__language__( 30027 )  ,'path':"/root/login"			 					, 'thumbnail':"login"				, 'login':"false" , 'action':"settings" },
 				  {'Title':__language__( 30028 )  ,'path':"/root/settings"		  					, 'thumbnail':"settings"			, 'login':"true"  , 'action':"settings" }
 				  )
@@ -115,8 +114,6 @@ class YouTubeNavigation:
 
 	def executeAction(self, params = {}):
 		get = params.get
-		if (get("action") == "playbyid"):
-			self.playVideoById(params)
 		if (get("action") == "refine_user"):
 			self.__storage__.refineStoredSearch(params)
 		if (get("action") == "delete_refinements"):
@@ -130,7 +127,7 @@ class YouTubeNavigation:
 			if get("action") == "edit_search":
 				self.list(params)
 			else:
-				self.__scraper__.scraper(params)
+				self.__scraper__.scrape(params)
 		if (get("action") == "remove_favorite"):
 			self.removeFromFavorites(params)
 		if (get("action") == "add_favorite"):
@@ -200,12 +197,6 @@ class YouTubeNavigation:
 		return False
 		
 	#================================== Plugin Actions =========================================
-
-	def playVideoById(self, params = {}):
-		result = self.__utils__.getUserInput(self.__language__(30518), '')
-		params["videoid"] = result 
-		if (result):
-			self.__player__.playVideo(params);
 
 	def addToFavorites(self, params = {}):
 		get = params.get
