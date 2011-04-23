@@ -40,9 +40,9 @@ class YouTubeNavigation:
 				  {'Title':__language__( 30044 )  ,'path':"/root/explore"			 				, 'thumbnail':"explore"				, 'login':"false" },
 				  {'Title':__language__( 30041 )  ,'path':"/root/explore/categories"				, 'thumbnail':"explore"				, 'login':"false" , 'scraper':'categories', 'folder':'true'},
 				  {'Title':__language__( 30037 )  ,'path':"/root/explore/disco"						, 'thumbnail':"discoball"		 	, 'login':"false" , 'store':"disco_searches", 'folder':'true' },
-#				  {'Title':__language__( 30040 )  ,'path':"/root/explore/disco/new"					, 'thumbnail':"search"		   		, 'login':"false" , 'scraper':"search_disco"},
-#				  {'Title':__language__( 30038 )  ,'path':"/root/explore/disco/top_25"				, 'thumbnail':"discoball"		 	, 'login':"false" , 'scraper':"disco_top_25", 'folder':'true'},
-#				  {'Title':__language__( 30039 )  ,'path':"/root/explore/disco/popular"				, 'thumbnail':"discoball"		 	, 'login':"false" , 'scraper':"disco_top_artist", 'folder':'true'},
+				  {'Title':__language__( 30040 )  ,'path':"/root/explore/disco/new"					, 'thumbnail':"search"		   		, 'login':"false" , 'scraper':"search_disco"},
+				  {'Title':__language__( 30038 )  ,'path':"/root/explore/disco/top_50"				, 'thumbnail':"discoball"		 	, 'login':"false" , 'scraper':"disco_top_50"},
+				  {'Title':__language__( 30039 )  ,'path':"/root/explore/disco/popular"				, 'thumbnail':"discoball"		 	, 'login':"false" , 'scraper':"disco_top_artist", 'folder':'true'},
 				  {'Title':__language__( 30001 )  ,'path':"/root/explore/feeds"						, 'thumbnail':"feeds"			 	, 'login':"false" },
 				  {'Title':__language__( 30009 )  ,'path':"/root/explore/feeds/discussed"			, 'thumbnail':"most"			 	, 'login':"false" , 'feed':"feed_discussed" },
 				  {'Title':__language__( 30010 )  ,'path':"/root/explore/feeds/linked"				, 'thumbnail':"most"			 	, 'login':"false" , 'feed':"feed_linked" },
@@ -156,7 +156,7 @@ class YouTubeNavigation:
 	def list(self, params = {}):
 		get = params.get
 		results = []
-		if (get("feed") == "search"):
+		if (get("feed") == "search" or get("scraper") == "search_disco"):
 			if not get("search"):
 				query = self.__utils__.getUserInput(self.__language__(30006), '')
 				params["search"] = query
@@ -450,10 +450,10 @@ class YouTubeNavigation:
 		if (get("feed") != "subscriptions_favorites" and get("feed") != "subscriptions_uploads" and get("feed") != "subscriptions_playlists"):
 			cm.append( ( self.__language__( 30516 ) % studio, "XBMC.Container.Update(%s?path=%s&login=true&feed=subscriptions_uploads&view_mode=subscriptions_uploads&channel=%s)" % ( sys.argv[0],  get("path"), url_studio ) ) )
 			
-		if (get("action") == "search_disco"):
-			cm.append( ( self.__language__( 30523 ) % title, "XBMC.Container.Update(%s?path=%s&action=search_disco&search=%s)" % ( sys.argv[0],  get("path"), url_title ) ) )
+		if (get("scraper") == "search_disco"):
+			cm.append( ( self.__language__( 30523 ) % title, "XBMC.Container.Update(%s?path=%s&scraper=search_disco&search=%s)" % ( sys.argv[0],  get("path"), url_title ) ) )
 			
-		cm.append( ( self.__language__( 30514 ), "XBMC.Container.Update(%s?path=%s&action=search&search=%s)" % ( sys.argv[0],  get("path"), url_title ) ) )
+		cm.append( ( self.__language__( 30514 ), "XBMC.Container.Update(%s?path=%s&feed=search&search=%s)" % ( sys.argv[0],  get("path"), url_title ) ) )
 		cm.append( ( self.__language__( 30529 ), "XBMC.Container.Update(%s?path=%s&feed=related&videoid=%s)" % ( sys.argv[0],  get("path"), item("videoid") ) ) )
 		cm.append( ( self.__language__( 30527 ), "XBMC.ActivateWindow(VideoPlaylist)"))
 		cm.append( ( self.__language__( 30502 ), "XBMC.Action(Info)", ) )

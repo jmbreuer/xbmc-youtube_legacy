@@ -118,7 +118,7 @@ class YouTubeUtils:
 	
 	# generic function for building the item url filters out many item params to reduce unicode problems
 	def buildItemUrl(self, item_params = {}, url = ""):
-		blacklist = ("path","thumbnail","playlistId", "next", "content" , "editid", "summary", "published","count","rating","Title")
+		blacklist = ("path","thumbnail", "Overlay", "icon", "next", "content" , "editid", "summary", "published","count","Rating","Plot","Title")
 		for key, value in item_params.items():
 			if key not in blacklist:
 				url += key + "=" + value + "&"
