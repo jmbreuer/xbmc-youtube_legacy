@@ -47,7 +47,6 @@ class YouTubeScraperCore:
 	urls['upcoming_game_trailers'] = "http://www.youtube.com/trailers?s=gtcs&p=%s&hl=en"
 	urls['recommended'] = "http://www.youtube.com/videos?r=1&hl=en"
 	urls['watch_later'] = "http://www.youtube.com/my_watch_later_list"
-	urls['movies_list'] = ""
 
 #=================================== Recommended ============================================
 	def scrapeRecommended(self, params = {}):
@@ -76,8 +75,10 @@ class YouTubeScraperCore:
 		
 		if self.__dbg__:
 			print self.__plugin__ + " calling get batch"
-			
-		( ytobjects, status ) = self.__core__.getBatchDetails(subitems)
+		if len(subitems) > 0:
+			( ytobjects, status ) = self.__core__.getBatchDetails(subitems)
+		else:
+			return (subitems, 303)
 		
 		if (len(ytobjects) > 0):
 			if (next == "true"):
@@ -90,24 +91,25 @@ class YouTubeScraperCore:
 		return (ytobjects, status)
 	
 	def scrapeYouTubeData(self, params ={}):
-		get = params.get		
+		get = params.get
 		retry = 0
 		
 		login_info = self.__settings__.getSetting( "login_info" )
+		
 		while not login_info and retry < 10:
 			if ( self.__core__._httpLogin() ):
 				login_info = self.__settings__.getSetting( "login_info" )
 			retry += 1
 		
 		params["login_info"] = login_info
-		url = self.createUrl(params)
-		(result, status) = self.__core__._fetchPage(url, params)
+		url = self.urls[get("scraper")]
+		(result, status) = self.__core__._fetchPage(url, params, login = True)
 		
 		videos = re.compile('<a href="/watch\?v=(.*)&amp;feature=grec_browse" class=').findall(result);
-
+		
 		if len(videos) == 0:
 			videos = re.compile('<div id="reco-(.*)" class=').findall(result);
-			
+		
 		return ( videos, 200 )
 		
 #=================================== Trailers ============================================
