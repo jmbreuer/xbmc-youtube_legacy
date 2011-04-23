@@ -152,9 +152,8 @@ class YouTubeCore(object):
 				return self.__storage__.getUserOptionFolder(params)
 			else:
 				return self.__storage__.getStoredSearches(params)
-		
-		authenticate = get("login") == "true"
-		if authenticate:
+
+		if get("login") == "true":
 			if ( not self._getAuth() ):
 				if self.__dbg__:
 					print self.__plugin__ + " login required but auth wasn't set!"
@@ -163,7 +162,7 @@ class YouTubeCore(object):
 		url = self.createUrl(params)
 		
 		if url:
-			( response, status ) = self._fetchPage(url, auth = authenticate, api = True)
+			( response, status ) = self._fetchPage({"link": url, "auth": get("login"), "api": "true"})
 		
 		if status != 200:
 			return ( result, status )
@@ -209,7 +208,7 @@ class YouTubeCore(object):
 		return self._youTubeAdd(url, add_request)
 		
 	def add_favorite(self, params = {}):
-		get = params.get
+		get = params.get 
 		url = "http://gdata.youtube.com/feeds/api/users/default/favorites"
 		add_request = '<?xml version="1.0" encoding="UTF-8"?><entry xmlns="http://www.w3.org/2005/Atom"><id>%s</id></entry>' % get("videoid")
 		return self._youTubeAdd(url, add_request)
@@ -217,7 +216,7 @@ class YouTubeCore(object):
 	def add_subscription(self, params = {}):
 		get = params.get
 		url = "http://gdata.youtube.com/feeds/api/users/default/subscriptions"
-		add_request = '<?xml version="1.0" encoding="UTF-8"?><entry xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://gdata.youtube.com/schemas/2007"> <category scheme="http://gdata.youtube.com/schemas/2007/subscriptiontypes.cat" term="user"/><yt:username>%s</yt:username></entry>' % get("channel")
+		add_request = '<?xml version="1.0" encoding="UTF-8"?><entry xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://gdata.youtube.com/schemas/2007"> <category scheme="http://gdata.youtube.com/schemas/2007/subscriptiontypes.cat" term="user"/><yt:username>%s</yt:username></entry>' % get("contact")
 		return self._youTubeAdd(url, add_request)
 		
 	def getFolderInfo(self, xml, params = {}):
@@ -363,19 +362,20 @@ class YouTubeCore(object):
 	#
 	#===============================================================================
 
-	def _fetchPage(self, link, api = False, auth=False, login=False, error = 0):
+	def _fetchPage(self, params = {}):
+                get = params.get
 		if self.__dbg__:
-			print self.__plugin__ + " fetching page : " + link
+			print self.__plugin__ + " fetching page : " + repr(params)
 		
-		request = urllib2.Request(link)
+		request = urllib2.Request(get("link"))
 
-		if api:
+		if get("api", "false") == "true":
 			request.add_header('GData-Version', '2')
 			request.add_header('X-GData-Key', 'key=' + self.APIKEY)
 		else:
 			request.add_header('User-Agent', self.__utils__.USERAGENT)
 		
-		if ( login ):
+		if get("login", "false") == "true":
 			if ( self.__settings__.getSetting( "username" ) == "" or self.__settings__.getSetting( "user_password" ) == "" ):
 				if self.__dbg__:
 					print self.__plugin__ + " _fetchPage, login required but no credentials provided"
@@ -383,7 +383,7 @@ class YouTubeCore(object):
 			
 			request.add_header('Cookie', 'LOGIN_INFO=' + self.__login__._httpLogin() )
 		
-		if auth: 
+		if get("auth", "false") == "true":
 			if self._getAuth():
 				authkey = self.__settings__.getSetting("auth")
 				request.add_header('Authorization', 'GoogleLogin auth=' + authkey)
@@ -400,18 +400,23 @@ class YouTubeCore(object):
 			if ( result.find("verify-age-actions") == -1):
 				return ( result, 200 )
 			
-			# review this before 2.0 final
-			elif ( error < 5 ):
-				
-				# We need login to verify age.	     
-				if not login:
-					error = error + 1
-					return self._fetchPage(link, api, auth, login = True, error = error)
+			elif ( int(get("error", "0")) < 5 ):
+				# We need login to verify age
+				if not get("login"):
+					return self._fetchPage({"link": get("link"), "api": get("api"), "auth": get("auth"), "login": "true", "error": str(int(get("error", "0")) + 1) } )
 
 				if self.__dbg__:
 					print self.__plugin__ + " _fetchPage Video age restricted, trying to verify for url: " + new_url
+
+				# This seems like a bad implementation.
+				# THIS IS FORCED TRUE!!!!
+				if self.__settings__.getSetting( "safe_search" ) == "0" or True:
+					confirmed = 1
+				else:
+					confirmed = 0
 				
 				# Fallback for missing confirm form.
+				print self.__plugin__ + "TEST: " + str(result.find("confirm-age-form"))
 				if result.find("confirm-age-form") == -1:
 					if self.__dbg__:
 						print self.__plugin__ + " _fetchPage: Sorry - you must be 18 or over to view this video or group"
@@ -425,12 +430,7 @@ class YouTubeCore(object):
 				temp = result[result.find("verify-age-actions"):(result.find("verify-age-actions") + 600)]
 				next_url = temp[( temp.find('"next_url" value="') + len('"next_url" value="')):]
 				next_url = next_url[:next_url.find('"')] 
-					
-				if self.__settings__.getSetting( "safe_search" ) == "0":
-					confirmed = 1
-				else:
-					confirmed = 0
-			
+
 				values = { "next_url": next_url, "action_confirm": confirmed }
 				
 				con = urllib2.urlopen(request, urllib.urlencode(values))
@@ -440,7 +440,7 @@ class YouTubeCore(object):
 				if self.__dbg__:
 					print self.__plugin__ + " _fetchPage. Age should now be verified, calling _fetchPage again"
 					
-				return self._fetchPage(link, api, auth, login = True, error = error + 1)
+				return self._fetchPage({"link": get("link"), "api": get("api"), "auth": get("auth"), "login": true, "error": str(int(get("error", "0")) + 1) })
 
 			if self.__dbg__:
 				print self.__plugin__ + " _fetchPage. Too many errors"
@@ -459,10 +459,10 @@ class YouTubeCore(object):
 				# If login credentials are given, try again.
 				if ( self.__settings__.getSetting( "username" ) != "" and self.__settings__.getSetting( "user_password" ) != "" ):
 					if self.__dbg__:
-						print self.__plugin__ + " _fetchPage trying again with login "
+						print self.__plugin__ + " _fetchPage trying again with login"
 
 					self.login()
-					return self._fetchPage(link, api, auth, login, error +1)
+					return self._fetchPage({"link": get("link"), "api": get("api"), "auth": get("auth"), "login": get("login"), "error": str(int(get("error", "0")) + 1) });
 				else:
 					if self.__dbg__:
 						print self.__plugin__ + " _fetchPage 401 Not Authorized and no login credentials written in settings"
@@ -471,17 +471,17 @@ class YouTubeCore(object):
 			# Test all cases that cause 403 before 2.0, and verify the above statement.
 			elif ( err.find("403") > -1 ):
 				if self.__dbg__:
-					print self.__plugin__ + " _fetchPage got empty results back "
+					print self.__plugin__ + " _fetchPage got empty results back"
 				return (self.__language__(30601), 303)
 			# 501 (Not implemented) - A 501 response code indicates that you have tried to execute an unsupported operation.
 			elif ( err.find("501") > -1):
-				return ( err, 303 )
+				return ( err, 303 ) # Should we return this error?
 			#500 (Internal error) - A 500 response code indicates that YouTube experienced an error handling a request. You could retry the request at a later time.
 			#503 (Service unavailable) - A 503 response code indicates that the YouTube Data API service can not be reached. You could retry your request at a later time.
 			elif ( err.find("500") > -1 or err.find("503") > -1 ):
 				if self.__dbg__:
 					print self.__plugin__ + " _fetchPage retry: " + error
-				return self._fetchPage(link, api, auth, login, error +1)
+				return self._fetchPage({"link": get("link"), "api": get("api"), "auth": get("auth"), "login": get("login"), "error": str(int(get("error", "0")) + 1 ) })
 			else:
 				if self.__dbg__:
 					print self.__plugin__ + " _fetchPage unknown error"
@@ -493,6 +493,7 @@ class YouTubeCore(object):
 												 , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
 				
 			return ( "", 500 )
+
 		
 	def _getAuth(self):
 		if self.__dbg__:
@@ -535,6 +536,9 @@ class YouTubeCore(object):
 				if self.__dbg__:
 					print self.__plugin__ + " _youTubeAdd: Done"
 				return ( "", 200)
+			# 400 (Bad request) - A 400 response code indicates that a request was poorly formed or contained invalid data. The API response content will explain the reason wny the API returned a 400 response code.                                                                                      
+                        elif ( err.find("400") > -1 ):
+				return ( err, 303 )
 			elif (error.find("503") > -1):
 				if self.__dbg__:
 					print self.__plugin__ + " _youTubeAdd: " + self.__language__(30615)

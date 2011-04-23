@@ -101,9 +101,8 @@ class YouTubeScraperCore:
 				login_info = self.__settings__.getSetting( "login_info" )
 			retry += 1
 		
-		params["login_info"] = login_info
 		url = self.urls[get("scraper")]
-		(result, status) = self.__core__._fetchPage(url, params, login = True)
+		(result, status) = self.__core__._fetchPage({"link": url, "login": "true"})
 		
 		videos = re.compile('<a href="/watch\?v=(.*)&amp;feature=grec_browse" class=').findall(result);
 		
@@ -246,7 +245,7 @@ class YouTubeScraperCore:
 		if (self.__dbg__):
 			print self.__plugin__ + " Disco search url " + repr(url)
 		
-		(page, status) = self.__core__._fetchPage(url)
+		(page, status) = self.__core__._fetchPage({"link": url})
 		if (page.find("list=") != -1):
 			page = page.replace("\u0026", "&")
 			mix_list_id = page[page.find("list=") + 5:]
@@ -260,7 +259,7 @@ class YouTubeScraperCore:
 			
 			url = self.urls["disco_mix_list"] % (video_id, mix_list_id)
 										
-			(page, status) = self.__core__._fetchPage(url)
+			(page, status) = self.__core__._fetchPage({"link": url})
 			
 			list = SoupStrainer(name="div", id ="quicklist")
 			mix_list = BeautifulSoup(page, parseOnlyThese=list)
@@ -317,7 +316,7 @@ class YouTubeScraperCore:
 	
 	def scrapeDiscoTop50List(self, params = {}):
 		url = self.urls["disco_main"]
-		(page, status) = self.__core__._fetchPage(url, params)
+		(page, status) = self.__core__._fetchPage({"link": url})
 		list = SoupStrainer(name="div", attrs = {"class":"popular-message"})
 		popular = BeautifulSoup(page, parseOnlyThese=list)
 		items = []
@@ -336,7 +335,7 @@ class YouTubeScraperCore:
 	def scrapeDiscoTopArtist(self, params = {}):
 		get = params.get
 		url = self.urls["disco_main"]
-		(page, status) = self.__core__._fetchPage(url, params)
+		(page, status) = self.__core__._fetchPage({"link":url})
 		list = SoupStrainer(name="div", attrs = {"class":"popular-artists"})
 		popular = BeautifulSoup(page, parseOnlyThese=list)
 		if (len(popular)):
@@ -555,7 +554,7 @@ class YouTubeScraperCore:
 			url = self.createUrl(params)
 			if (self.__dbg__):
 				print "fetching url " + url
-			(html, status) = self.__core__._fetchPage(url, params)
+			(html, status) = self.__core__._fetchPage({"link": url})
 
 			if (get("scraper") == "categories"):
 				(result, status) = self.scrapeCategoriesGrid(html, params)
@@ -578,7 +577,7 @@ class YouTubeScraperCore:
 					url = self.createUrl(params)
 					if (self.__dbg__):
 						print "fetching url: " + url
-					(html, status) = self.__core__._fetchPage(url, params)
+					(html, status) = self.__core__._fetchPage({"link": url})
 	
 					if (get("scraper") == "categories"):
 						(new_result, status) = self.scrapeCategoriesGrid(html, params)
@@ -623,7 +622,7 @@ class YouTubeScraperCore:
 			if self.__dbg__:
 				print self.__plugin__ + " fetching url: " + url 
 				
-			(html,status) = self.__core__._fetchPage(url, params)
+			(html,status) = self.__core__._fetchPage({"link": url})
 			if (get("scraper") == "categories" )	:
 				if (get("category")):
 					return self.scrapeCategoriesGrid(html, params)

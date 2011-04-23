@@ -44,13 +44,13 @@ class YouTubePlayer(object):
 		subtitle_url = self.getSubtitleUrl(video)
 		
 		if not subtitle_url and self.__settings__.getSetting("transcode") == "true":
-			(html, status) = self.__core__._fetchPage(self.urls["video_stream"] % get("videoid"))
+			(html, status) = self.__core__._fetchPage({"link": self.urls["video_stream"] % get("videoid")})
 			if status == 200:
 				subtitle_url = self.getTranscriptionUrl(html, video) 
 		
 		if subtitle_url:
 			srt = ""
-			(xml, status) = self.__core__._fetchPage(subtitle_url)
+			(xml, status) = self.__core__._fetchPage({"link": subtitle_url})
 			if status == 200:
 				srt = self.transformSubtitleXMLtoSRT(xml)
 			if len(srt) > 0:
@@ -71,7 +71,7 @@ class YouTubePlayer(object):
 		get = video.get
 		url = ""
 		
-		(xml, status) = self.__core__._fetchPage(self.urls["timed_text_index"] % get('videoid'))
+		(xml, status) = self.__core__._fetchPage({"link": self.urls["timed_text_index"] % get('videoid')})
 		dom = parseString(xml)
 		entries = dom.getElementsByTagName("track")
 		
@@ -301,7 +301,7 @@ class YouTubePlayer(object):
 		get = params.get
 		video = {}
 		
-		( result, status ) = self.__core__._fetchPage(self.urls["video_info"] % get("videoid"), api = True)
+		( result, status ) = self.__core__._fetchPage({"link": self.urls["video_info"] % get("videoid"), "api": "true"})
 
 		if status == 200:				
 			result = self.__core__.getVideoInfo(result, params)
@@ -378,7 +378,7 @@ class YouTubePlayer(object):
 	def getVideoObject(self, params):
 		get = params.get
 		
-		(html, status) = self.__core__._fetchPage(self.urls["video_stream"] % get("videoid"))
+		(html, status) = self.__core__._fetchPage({"link": self.urls["video_stream"] % get("videoid")})
 		(video, status) = self.getVideoInfo(params)
 		
 		#Check if file has been downloaded locally and use that as a source instead

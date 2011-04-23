@@ -122,7 +122,7 @@ class YouTubePlaylistControl:
 		url = feed + "start-index=" + str(index) + "&max-results=" + repr(50)
 		url = url.replace(" ", "+")
 		
-		( result, status ) = self.__core__._fetchPage(url, auth = False)
+		( result, status ) = self.__core__._fetchPage({"link":url})
 		
 		ytobjects = self.__core__.getVideoInfo(result, params)
 		
@@ -137,7 +137,7 @@ class YouTubePlaylistControl:
 			index += 50
 			url = feed + "start-index=" + str(index) + "&max-results=" + repr(50)
 			url = url.replace(" ", "+")
-			(result, status) = self.__core__._fetchPage(url, auth = False)
+			(result, status) = self.__core__._fetchPage({"link": url})
 			if status != 200:
 				break
 			temp_objects = self.__core__.getVideoInfo(result, params)
