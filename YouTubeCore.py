@@ -209,7 +209,7 @@ class YouTubeCore(object):
 		return self._youTubeAdd(url, add_request)
 		
 	def add_favorite(self, params = {}):
-		get = params.get 
+		get = params.get
 		url = "http://gdata.youtube.com/feeds/api/users/default/favorites"
 		add_request = '<?xml version="1.0" encoding="UTF-8"?><entry xmlns="http://www.w3.org/2005/Atom"><id>%s</id></entry>' % get("videoid")
 		return self._youTubeAdd(url, add_request)
@@ -217,7 +217,7 @@ class YouTubeCore(object):
 	def add_subscription(self, params = {}):
 		get = params.get
 		url = "http://gdata.youtube.com/feeds/api/users/default/subscriptions"
-		add_request = '<?xml version="1.0" encoding="UTF-8"?><entry xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://gdata.youtube.com/schemas/2007"> <category scheme="http://gdata.youtube.com/schemas/2007/subscriptiontypes.cat" term="user"/><yt:username>%s</yt:username></entry>' % get("contact")
+		add_request = '<?xml version="1.0" encoding="UTF-8"?><entry xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://gdata.youtube.com/schemas/2007"> <category scheme="http://gdata.youtube.com/schemas/2007/subscriptiontypes.cat" term="user"/><yt:username>%s</yt:username></entry>' % get("channel")
 		return self._youTubeAdd(url, add_request)
 		
 	def getFolderInfo(self, xml, params = {}):
