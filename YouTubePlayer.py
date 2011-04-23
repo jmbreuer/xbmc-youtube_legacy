@@ -212,7 +212,7 @@ class YouTubePlayer(object):
 			return links 
 			
 		for fmt_url in fmt_url_map:				
-			if (len(fmt_url) > 7 and fmt_url.find(":\\/\\/") > 0):
+			if (len(fmt_url) > 7 and fmt_url.find(":\\/\\/") > 0 and fmt_url.find('liveplay?') < 0):
 				if (fmt_url.rfind(',') > fmt_url.rfind('\/id\/')):
 					final_url = fmt_url[:fmt_url.rfind(',')]
 					if (final_url.rfind('\/itag\/') > 0):
@@ -230,6 +230,27 @@ class YouTubePlayer(object):
 					else :
 						quality = "5"
 					if (swf_url):
+						final_url += " swfurl=%s swfvfy=1" % swf_url 
+					links[int(quality)] = final_url.replace('\/','/')
+			elif len(fmt_url) > 7 and fmt_url.find('liveplay?') > 0:
+				if (fmt_url.rfind(',') > fmt_url.rfind('&id=')): 
+					final_url = fmt_url[:fmt_url.rfind(',')]
+					if (final_url.rfind('itag=') > 0):
+						quality = final_url[final_url.rfind('itag=') + 5:]
+						quality = quality[:quality.find('&')]
+					else:
+						quality = "5"
+					if (final_url.find('rtmp') >= 0 and swf_url):
+						final_url += " swfurl=%s swfvfy=1" % swf_url 
+					links[int(quality)] = final_url.replace('\/','/')
+				else:
+					final_url = fmt_url
+					if (final_url.rfind('itag=') > 0):
+						quality = final_url[final_url.rfind('itag=') + 5:]
+						quality = quality[:quality.find('&')]
+					else :
+						quality = "5"
+					if (final_url.find('rtmp') >= 0 and swf_url):
 						final_url += " swfurl=%s swfvfy=1" % swf_url 
 					links[int(quality)] = final_url.replace('\/','/')
 		return links
@@ -327,6 +348,10 @@ class YouTubePlayer(object):
 			video_url = link(35)
 		elif (link(34)):
 			video_url = link(34)
+		elif (link(43)):
+			video_url = link(43)
+		elif (link(26)):
+			video_url = link(26)
 		elif (link(18)):
 			video_url = link(18)
 		elif (link(5)):
@@ -335,6 +360,8 @@ class YouTubePlayer(object):
 		if hd_quality > 0: #<-- 720p
 			if (link(22)):
 				video_url = link(22)
+			if (link(45)):
+				video_url = link(45)
 		if hd_quality > 1: #<-- 1080p
 			if (link(37)):
 				video_url = link(37)

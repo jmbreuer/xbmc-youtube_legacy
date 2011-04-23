@@ -63,6 +63,7 @@ class YouTubeNavigation:
 				  {'Title':__language__( 30048 )  ,'path':"/root/explore/trailers/upcoming_game"  	, 'thumbnail':"trailers"			, 'login':"false" , 'scraper':"upcoming_game_trailers" },
 				  {'Title':__language__( 30046 )  ,'path':"/root/explore/trailers/popular_game"  	, 'thumbnail':"trailers"			, 'login':"false" , 'scraper':"popular_game_trailers" },
 				  {'Title':__language__( 30019 )  ,'path':"/root/recommended"						, 'thumbnail':"recommended"			, 'login':"true"  , 'scraper':"recommended" },
+				  {"Title":"Tester"				  ,"path":"/root/test"								, "thumbnail":"disco"				, "action":"play_video"		,"videoid":"FVW7b8wBCPw"},
 				  {'Title':__language__( 30018 )  ,'path':"/root/contacts"			  				, 'thumbnail':"contacts"			, 'login':"true"  , 'user_feed':"contacts", 'folder':'true' },
 				  {'Title':__language__( 30002 )  ,'path':"/root/favorites"		 					, 'thumbnail':"favorites"			, 'login':"true"  , 'user_feed':"favorites" },
 				  {'Title':__language__( 30017 )  ,'path':"/root/playlists"		 					, 'thumbnail':"playlists"			, 'login':"true"  , 'user_feed':"playlists", 'folder':'true' },
@@ -290,6 +291,8 @@ class YouTubeNavigation:
 				else:
 					if (item("login") == "false"):
 						self.addActionListItem(params, item_params)
+			elif (item("action") == "play_video"):
+				self.addVideoListItem(params, item_params, 0)
 			else:
 				self.addActionListItem(params, item_params)
 	
