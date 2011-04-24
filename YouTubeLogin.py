@@ -52,18 +52,6 @@ class YouTubeLogin(object):
 				
 		xbmc.executebuiltin( "Container.Refresh" )
 	
-	def _fetchPage(self, url, params = {}):
-		get = params.get
-		request = urllib2.Request(url)
-		request.add_header('User-Agent', self.USERAGENT);
-		if (get("login-info")):
-			request.add_header('Cookie', 'LOGIN_INFO=' + get("login_info"))
-			
-		connection = urllib2.urlopen(request);
-		contents = connection.read()
-		connection.close()
-		return contents
-		
 	def _login(self, error = 0):
 		if self.__dbg__:
 			print self.__plugin__ + " login - errors: " + str(error)
@@ -177,7 +165,7 @@ class YouTubeLogin(object):
 		if self.__dbg__:
 			print self.__plugin__ + " _getAlert begin"
 
-		http_result = self._fetchPage('http://www.youtube.com/watch?v=' +videoid + "&safeSearch=none", login = True)
+		http_result = self.__core__._fetchPage({"link": 'http://www.youtube.com/watch?v=' +videoid + "&safeSearch=none", "login": "true"})
 		
 		start = http_result.find('class="yt-alert-content">')
 		if start == -1:
