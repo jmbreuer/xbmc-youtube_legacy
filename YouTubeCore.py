@@ -24,6 +24,20 @@ from xml.dom.minidom import parseString
 # 303 = See other (returned an error message)
 # 500 = uncaught error
 
+class url2request(urllib2.Request):
+    """Workaround for using DELETE with urllib2"""
+    def __init__(self, url, method, data=None, headers={},\
+        origin_req_host=None, unverifiable=False):
+        self._method = method
+        urllib2.Request.__init__(self, url, data, headers,\
+                 origin_req_host, unverifiable)
+
+    def get_method(self):
+        if self._method:
+            return self._method
+        else:
+            return urllib2.Request.get_method(self) 
+
 class YouTubeCore(object):
 	__settings__ = sys.modules[ "__main__" ].__settings__
 	__language__ = sys.modules[ "__main__" ].__language__
@@ -187,19 +201,19 @@ class YouTubeCore(object):
 		get = params.get
 		delete_url = self.urls["favorites"] % self.__settings__.getSetting( "nick" )
 		delete_url += "/" + get('editid') 
-		return self._youTubeDel(delete_url)
+		return self._fetchPage({"link": delete_url, "api": "true", "login": "true", "auth": "true", "method": "DELETE"})
 	
 	def remove_contact(self, params = {}):
 		get = params.get
 		delete_url = self.urls["contacts"] 
 		delete_url += "/" + get("contact")
-		return self._youTubeDel(delete_url)
+		return self._fetchPage({"link": delete_url, "api": "true", "login": "true", "auth": "true", "method": "DELETE"})
 
 	def remove_subscription(self, params = {}):
 		get = params.get
 		delete_url = self.urls["subscriptions"] % self.__settings__.getSetting( "nick" )
 		delete_url += "/" + get("editid")
-		return self._youTubeDel(delete_url)
+		return self._fetchPage({"link": delete_url, "api": "true", "login": "true", "auth": "true", "method": "DELETE"})
 
 	def add_contact(self, params = {}):
 		get = params.get
@@ -373,7 +387,8 @@ class YouTubeCore(object):
 			return ( "", 500 )
 
 		if get("request", "false") == "false":
-			request = urllib2.Request(get("link"))
+			#request = urllib2.Request(get("link"))
+			request = url2request(get("link"), get("method", "GET"));
 		else:
 			if self.__dbg__:
 				print self.__plugin__ + " got request"
@@ -532,55 +547,6 @@ class YouTubeCore(object):
 				return False
 		return True
 	
-	def _youTubeDel(self, delete_url, retry = True):
-		if self.__dbg__:
-			print self.__plugin__ + " _youTubeDel: " + delete_url
-		
-		if ( not self._getAuth() ):
-			if self.__dbg__:
-				print self.__plugin__ + " _youTubeDel auth wasn't set "
-			return ( self.__language__(30609) , 303 )
-
-		try:
-			headers = {}
-			headers['Authorization'] = 'GoogleLogin auth=%s' % (self.__settings__.getSetting("auth"))
-			headers['X-GData-Client'] = ""
-			headers['X-GData-Key'] = 'key=%s' % self.APIKEY
-			headers['Content-Type'] = 'application/atom+xml'
-			headers['Host'] = 'gdata.youtube.com'
-			headers['GData-Version'] = '2'
-			import httplib
-			conn = httplib.HTTPConnection('gdata.youtube.com')
-			conn.request('DELETE', delete_url, headers=headers)
-			response = conn.getresponse()
-			if (response.status == 200):
-				if self.__dbg__:
-					print self.__plugin__ + " _youTubeDel: done"
-				return ( "", 200 )
-			elif (response.status == 401 and retry):
-				# If login credentials are given, try again.
-				if ( self.__settings__.getSetting( "username" ) == "" or self.__settings__.getSetting( "user_password" ) == "" ):
-					if self.__dbg__:
-						print self.__plugin__ + " _youTubeDel trying again with login "
-						
-					self.__login__.login()
-					return self._youTubeDel(delete_url, False);
-				else:
-					if self.__dbg__:
-						print self.__plugin__ + " _youTubeDel 401 Not Authorized and no login credentials written in settings"
-					return ( self.__language__(30622), 303)
-			else:
-				resp = str(response.read())
-				if self.__dbg__:
-					print self.__plugin__ + " _youTubeDel: [%s] %s" % ( response.status, resp )
-				return ( resp, 303 )
-		except:
-			if self.__dbg__:
-				print self.__plugin__ + " _youTubeDel uncaught exception"
-				print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
-								   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
-				
-			return ( "", 500 )
 	
 	def _getNodeAttribute(self, node, tag, attribute, default = ""):
 		if node.getElementsByTagName(tag).item(0):
