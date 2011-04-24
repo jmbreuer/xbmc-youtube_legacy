@@ -63,7 +63,7 @@ class YouTubeNavigation:
 				  {'Title':__language__( 30048 )  ,'path':"/root/explore/trailers/upcoming_game"  	, 'thumbnail':"trailers"			, 'login':"false" , 'scraper':"upcoming_game_trailers" },
 				  {'Title':__language__( 30046 )  ,'path':"/root/explore/trailers/popular_game"  	, 'thumbnail':"trailers"			, 'login':"false" , 'scraper':"popular_game_trailers" },
 				  {'Title':__language__( 30019 )  ,'path':"/root/recommended"						, 'thumbnail':"recommended"			, 'login':"true"  , 'scraper':"recommended" },
-				  {"Title":"Live stream Tester"				  ,"path":"/root/test"								, "thumbnail":"disco"				, "action":"play_video"		,"videoid":"Zr9CHCH6dYE"},
+				  {"Title":"Live stream Tester"	  ,"path":"/root/test"								, "thumbnail":"disco"				, "action":"play_video"		,"videoid":"Zr9CHCH6dYE"},
 				  {'Title':__language__( 30018 )  ,'path':"/root/contacts"			  				, 'thumbnail':"contacts"			, 'login':"true"  , 'user_feed':"contacts", 'folder':'true' },
 				  {'Title':__language__( 30002 )  ,'path':"/root/favorites"		 					, 'thumbnail':"favorites"			, 'login':"true"  , 'user_feed':"favorites" },
 				  {'Title':__language__( 30017 )  ,'path':"/root/playlists"		 					, 'thumbnail':"playlists"			, 'login':"true"  , 'user_feed':"playlists", 'folder':'true' },
@@ -508,10 +508,13 @@ class YouTubeNavigation:
 				cm.append ( (self.__language__( 30510 ), cm_url % ("subscriptions_favorites")))
 				cm.append( (self.__language__( 30528 ), cm_url % ("subscriptions_playlists")))
 		
-		if (item("channel")):
+		if (item("channel") or item("contact")):
 			if ( self.__settings__.getSetting( "username" ) != "" and self.__settings__.getSetting( "auth" ) ):
 				if (get("external")):
-					cm.append( ( self.__language__( 30512 ) % item("channel"), 'XBMC.RunPlugin(%s?path=%s&channel=%s&action=add_subscription)' % ( sys.argv[0], item("path"), item("channel") ) ) )
+					channel = get("channel","")
+					if not channel:
+						channel = get("contact")
+					cm.append( ( self.__language__( 30512 ) % item("channel"), 'XBMC.RunPlugin(%s?path=%s&channel=%s&action=add_subscription)' % ( sys.argv[0], item("path"), channel ) ) )
 				else:
 					cm.append( ( self.__language__( 30513 ) % item("channel"), 'XBMC.RunPlugin(%s?path=%s&editid=%s&action=remove_subscription)' % ( sys.argv[0], item("path"), item("editid") ) ) )
 		
