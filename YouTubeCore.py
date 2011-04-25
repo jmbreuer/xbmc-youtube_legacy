@@ -25,18 +25,16 @@ from xml.dom.minidom import parseString
 # 500 = uncaught error
 
 class url2request(urllib2.Request):
-    """Workaround for using DELETE with urllib2"""
-    def __init__(self, url, method, data=None, headers={},\
-        origin_req_host=None, unverifiable=False):
-        self._method = method
-        urllib2.Request.__init__(self, url, data, headers,\
-                 origin_req_host, unverifiable)
+	"""Workaround for using DELETE with urllib2"""
+	def __init__(self, url, method, data=None, headers={},origin_req_host=None, unverifiable=False):
+		self._method = method
+		urllib2.Request.__init__(self, url, data, headers, origin_req_host, unverifiable)
 
-    def get_method(self):
-        if self._method:
-            return self._method
-        else:
-            return urllib2.Request.get_method(self) 
+	def get_method(self):
+		if self._method:
+			return self._method
+		else:
+			return urllib2.Request.get_method(self) 
 
 class YouTubeCore(object):
 	__settings__ = sys.modules[ "__main__" ].__settings__
@@ -241,7 +239,7 @@ class YouTubeCore(object):
 		links = dom.getElementsByTagName("link");
 		entries = dom.getElementsByTagName("entry");
 		next = False
-
+		
 		#find out if there are more pages
 		if (len(links)):
 			for link in links:
@@ -253,6 +251,7 @@ class YouTubeCore(object):
 		folders = [];
 		for node in entries:
 			folder = {};
+			
 			folder["login"] = "true"
 			folder['Title'] = node.getElementsByTagName("title").item(0).firstChild.nodeValue.replace('Activity of : ', '').replace('Videos published by : ', '').encode( "utf-8" );
 			folder['published'] = self._getNodeValue(node, "published", "2008-07-05T19:56:35.000-07:00")
@@ -299,6 +298,10 @@ class YouTubeCore(object):
 						folder['editid'] = obj[obj.rfind('/')+1:]
 			
 			folders.append(folder);
+		
+		if (get("user_feed")):
+			print "Sorting " 
+			folders.sort(key=lambda item:item["Title"].lower(), reverse=False)
 			
 		if next:
 			item = {"Title":self.__language__( 30509 ), "thumbnail":"next", "next":"true", "page":str(int(get("page", "0")) + 1)} 
@@ -377,7 +380,7 @@ class YouTubeCore(object):
 	#===============================================================================
 
 	def _fetchPage(self, params = {}):
-                get = params.get
+		get = params.get
 		if self.__dbg__:
 			print self.__plugin__ + " fetching page : " + repr(params)
 		
@@ -481,12 +484,10 @@ class YouTubeCore(object):
 			err = str(e)
 			if self.__dbg__:
 				print self.__plugin__ + " _fetchPage HTTPError : " + err
-
-                        if ( err.find("201") > -1):
-                                if self.__dbg__:
-                                        print self.__plugin__ + " _fetchPage request: Done"
-                                return ( "", 200)
-
+				if ( err.find("201") > -1):
+					if self.__dbg__:
+						print self.__plugin__ + " _fetchPage request: Done"
+						return ( "", 200)
 			# 400 (Bad request) - A 400 response code indicates that a request was poorly formed or contained invalid data. The API response content will explain the reason wny the API returned a 400 response code.
 			if ( err.find("400") > -1 ):
 				return ( err, 303 )
@@ -518,7 +519,7 @@ class YouTubeCore(object):
 			#503 (Service unavailable) - A 503 response code indicates that the YouTube Data API service can not be reached. You could retry your request at a later time.
 			elif ( err.find("500") > -1 or err.find("503") > -1 ):
 				if self.__dbg__:
-					print self.__plugin__ + " _fetchPage retry: " + error
+					print self.__plugin__ + " _fetchPage retry: " + err
 				params["error"] = str(int(get("error", "0")) + 1)
 				return self._fetchPage(params)
 			else:
