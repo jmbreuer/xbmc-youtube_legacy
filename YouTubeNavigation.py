@@ -49,7 +49,9 @@ class YouTubeNavigation:
 				  {'Title':__language__( 30011 )  ,'path':"/root/explore/feeds/viewed"				, 'thumbnail':"most"			 	, 'login':"false" , 'feed':"feed_viewed" },
 				  {'Title':__language__( 30012 )  ,'path':"/root/explore/feeds/recent"				, 'thumbnail':"most"			 	, 'login':"false" , 'feed':"feed_recent" },
 				  {'Title':__language__( 30013 )  ,'path':"/root/explore/feeds/responded"			, 'thumbnail':"most"			 	, 'login':"false" , 'feed':"feed_responded" },
+				  {'Title':__language__( 30050 )  ,'path':"/root/explore/feeds/shared"				, 'thumbnail':"most"				, 'login':"false" , 'feed':"feed_shared" },
 				  {'Title':__language__( 30014 )  ,'path':"/root/explore/feeds/featured"			, 'thumbnail':"featured"		 	, 'login':"false" , 'feed':"feed_featured" },
+				  {'Title':__language__( 30049 )  ,'path':"/root/explore/feeds/trending"			, 'thumbnail':"featured"			, 'login':"false" , 'feed':"feed_trending" },
 				  {'Title':__language__( 30015 )  ,'path':"/root/explore/feeds/favorites"			, 'thumbnail':"top"					, 'login':"false" , 'feed':"feed_favorites" },
 				  {'Title':__language__( 30016 )  ,'path':"/root/explore/feeds/rated"				, 'thumbnail':"top"					, 'login':"false" , 'feed':"feed_rated" },
 				  {'Title':__language__( 30043 )  ,'path':"/root/explore/movies"					, 'thumbnail':"movies"				, 'login':"false" , 'scraper':'movies', 'folder':'true'},
@@ -474,10 +476,13 @@ class YouTubeNavigation:
 		if ( item("user_feed") == "favorites"  or get("user_feed") == "playlists" or item("user_feed") == "uploads" or item("user_feed") == "newsubscriptions" or item("scraper") == "search_disco"):
 			if (item("user_feed") == "favorites" or item("user_feed") == "newsubscriptions"):
 				cm.append ( (self.__language__(30530), "XBMC.RunPlugin(%s?path=%s&action=play_all&user_feed=%s&contact=%s&)" % ( sys.argv[0], item("path"), item("user_feed"), self.__settings__.getSetting("nick") ) ) )
+				cm.append ( (self.__language__(30532), "XBMC.RunPlugin(%s?path=%s&action=play_all&shuffle=true&user_feed=%s&contact=%s&)" % ( sys.argv[0], item("path"), item("user_feed"), self.__settings__.getSetting("nick") ) ) )
 			if (get("user_feed") == "playlists" ):
 				cm.append ( (self.__language__(30530), "XBMC.RunPlugin(%s?path=%s&action=play_all&playlist=%s&)" % ( sys.argv[0], item("path"), item("playlist") ) ) )
+				cm.append ( (self.__language__(30532), "XBMC.RunPlugin(%s?path=%s&action=play_all&shuffle=true&playlist=%s&)" % ( sys.argv[0], item("path"), item("playlist") ) ) )
 			if (item("scraper") == "search_disco"):
 				cm.append( (self.__language__( 30530 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&search_disco=%s&)" % ( sys.argv[0], item("path"), item("search") ) ) )
+				cm.append( (self.__language__( 30532 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&shuffle=true&search_disco=%s&)" % ( sys.argv[0], item("path"), item("search") ) ) )
 			cm.append( ( self.__language__( 30507 ), "XBMC.Action(Queue)" ) )
 		
 		if (item("feed") == "search"):
