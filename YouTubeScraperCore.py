@@ -373,16 +373,27 @@ class YouTubeScraperCore:
 		if (len(live) > 0):
 			video = live.div.div
 			while (video != None):
-				#item = {}
+				item = {}
 				videoid = video.div.a["href"]
-				#item["videoid"] = videoid
-				#item["thumbnail"] = video.div.a.span.span.img["src"]
-				#videos.append(item)
-				videos.append(videoid)
+				videoid = videoid[videoid.rfind("/")+1:]
+				
+				item["videoid"] = videoid
+				
+				thumbnail = video.div.a.span.span.img["src"]
+				thumbnail = thumbnail.replace("default","0")
+				item["thumbnail"] = thumbnail
+				title = "Unknown Title"
+				
+				info = video.div.findNextSibling(name="div", attrs = {'class':"live-browse-info"})
+				if len(info) > 0: 
+					title = info.a.contents[0]
+				item["Studio"] = info.span.a["title"]
+				item ["Title"] = title
+				videos.append(item)
 				video = video.findNextSibling(name="div", attrs= {"class":"video-cell"})
 		
 		if videos:
-			return self.__core__.getBatchDetails(videos)
+			return (videos,200)
 		
 		return ([],303)	
 				
