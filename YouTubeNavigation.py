@@ -63,8 +63,10 @@ class YouTubeNavigation:
 				  {'Title':__language__( 30048 )  ,'path':"/root/explore/trailers/upcoming_game"  	, 'thumbnail':"trailers"			, 'login':"false" , 'scraper':"upcoming_game_trailers" },
 				  {'Title':__language__( 30046 )  ,'path':"/root/explore/trailers/popular_game"  	, 'thumbnail':"trailers"			, 'login':"false" , 'scraper':"popular_game_trailers" },
 				  {'Title':__language__( 30019 )  ,'path':"/root/recommended"						, 'thumbnail':"recommended"			, 'login':"true"  , 'scraper':"recommended" },
-				  {"Title":"Live stream Tester"	  ,"path":"/root/test"								, "thumbnail":"disco"				, "action":"play_video"		,"videoid":"Zr9CHCH6dYE"},
+				  {"Title":"Live stream Tester"	  ,"path":"/root/test"								, "thumbnail":"disco"				, "action":"play_video"		,"videoid":"mhAoxYBZ0MI"},
+				  {"Title":"Addonscan tester"	  ,"path":"/root/test"								, "thumbnail":"disco"				, "action":"test"},
 				  {'Title':__language__( 30018 )  ,'path':"/root/contacts"			  				, 'thumbnail':"contacts"			, 'login':"true"  , 'user_feed':"contacts", 'folder':'true' },
+				  {'Title':__language__( 30024 )  ,'path':"/root/contacts/new"						, 'thumbnail':"contacts"			, 'login':"true"  , 'action':"add_contact"},
 				  {'Title':__language__( 30002 )  ,'path':"/root/favorites"		 					, 'thumbnail':"favorites"			, 'login':"true"  , 'user_feed':"favorites" },
 				  {'Title':__language__( 30017 )  ,'path':"/root/playlists"		 					, 'thumbnail':"playlists"			, 'login':"true"  , 'user_feed':"playlists", 'folder':'true' },
 				  {'Title':__language__( 30003 )  ,'path':"/root/subscriptions"	 					, 'thumbnail':"subscriptions"		, 'login':"true"  , 'user_feed':"subscriptions", 'folder':'true' },
@@ -121,6 +123,8 @@ class YouTubeNavigation:
 			self.__storage__.deleteStoredSearchRefinement(params)
 		if (get("action") == "settings"):
 			self.__login__.login(params)
+		if (get("action") == "test"):
+			self.__downloader__.test(params)
 		if (get("action") == "delete_search" or get("action") == "delete_disco"):
 			self.__storage__.deleteStoredSearch(params)
 		if (get("action") == "edit_search" or get("action") == "edit_disco"):
@@ -435,7 +439,7 @@ class YouTubeNavigation:
 			cm.append( (self.__language__(30520), "XBMC.PlayMedia(%s?path=%s&action=play_video&quality=1080p&videoid=%s)" % ( sys.argv[0],  item("path"), item("videoid") ) ) )
 			cm.append( (self.__language__(30521), "XBMC.PlayMedia(%s?path=%s&action=play_video&quality=720p&videoid=%s)" % ( sys.argv[0],  item("path"), item("videoid") ) ) )
 			cm.append( (self.__language__(30522), "XBMC.PlayMedia(%s?path=%s&action=play_video&quality=SD&videoid=%s)" % ( sys.argv[0],  item("path"), item("videoid") ) ) )
-			
+		
 		cm.append( ( self.__language__(30501), "XBMC.RunPlugin(%s?path=%s&action=download&videoid=%s)" % ( sys.argv[0],  item("path"), item("videoid") ) ) )
 
 		if ( self.__settings__.getSetting( "username" ) != "" and self.__settings__.getSetting( "auth" ) ):
