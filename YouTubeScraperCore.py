@@ -38,6 +38,8 @@ class YouTubeScraperCore:
 	urls['disco_search'] = "http://www.youtube.com/disco?action_search=1&query=%s"
 	urls['disco_mix_list'] = "http://www.youtube.com/watch?v=%s&feature=disco&playnext=1&list=%s"
 	urls['main'] = "http://www.youtube.com"
+	urls['live'] = "http://www.youtube.com/live"
+	urls['watch_later'] = "http://www.youtube.com/my_watch_later_list"
 	urls['trailers'] = "http://www.youtube.com/trailers?s=tr"
 	urls['game_trailers'] = "http://www.youtube.com/trailers?s=gtcs"
 	urls['current_trailers'] = "http://www.youtube.com/trailers?s=trit&p=%s&hl=en"
@@ -354,7 +356,38 @@ class YouTubeScraperCore:
 				yobjects.append(item)
 				
 		return (yobjects, 200)
-	
+
+#=================================== Live ============================================
+	def scrapeLiveNow(self, params = {}):
+		get = params.get
+		if self.__dbg__:
+			print self.__plugin__ + " scrapeWatchLater"
+
+		url = self.urls[get("scraper")]
+		
+		(response , status) = self.__core__._fetchPage({"link": url})
+		
+		#live-now-list-container
+		
+#=================================== Watch Later ============================================
+	def scrapeWatchLater(self, params):	
+		get = params.get
+		if self.__dbg__:
+			print self.__plugin__ + " scrapeWatchLater"
+		
+		url = self.urls[get("scraper")]
+		
+		(response , status) = self.__core__._fetchPage({"link": url, "get_redirect":"true", "login": "true"})
+		
+		if status == 200:
+			if response.find("p=") > 0:
+				response = response[response.find("p=") + 2:]
+				playlist_id = response[:response.find("&")]
+				params["user_feed"] = "playlist"
+				params["playlist"] = playlist_id
+				return self.__core__.list(params)
+		
+		return ([], 303)
 #=================================== Shows ============================================
 	def scrapeShowEpisodes(self, html, params = {}):
 		get = params.get
@@ -798,6 +831,8 @@ class YouTubeScraperCore:
 		
 		if (get("scraper") == "search_disco"):
 			return self.searchDisco(params)
+		if (get("scraper") == "watch_later"):
+			return self.scrapeWatchLater(params)
 		if (get("scraper") == "disco_top_50"):
 			return self.scrapeDiscoTop50(params)
 		if (get("scraper") == "disco_top_artist"):

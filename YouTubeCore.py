@@ -466,7 +466,10 @@ class YouTubeCore(object):
 				values = { "next_url": next_url, "action_confirm": confirmed }
 				
 				con = urllib2.urlopen(request, urllib.urlencode(values))
+				
 				result = con.read()
+				if get("get_redirect"):	
+					result = con.geturl()
 				con.close()
 				
 				if self.__dbg__:
