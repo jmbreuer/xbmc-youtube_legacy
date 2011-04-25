@@ -367,8 +367,25 @@ class YouTubeScraperCore:
 		
 		(response , status) = self.__core__._fetchPage({"link": url})
 		
-		#live-now-list-container
+		list = SoupStrainer(name="div", id='live-now-list-container')
+		live = BeautifulSoup(response, parseOnlyThese=list)
+		videos = []
+		if (len(live) > 0):
+			video = live.div.div
+			while (video != None):
+				#item = {}
+				videoid = video.div.a["href"]
+				#item["videoid"] = videoid
+				#item["thumbnail"] = video.div.a.span.span.img["src"]
+				#videos.append(item)
+				videos.append(videoid)
+				video = video.findNextSibling(name="div", attrs= {"class":"video-cell"})
 		
+		if videos:
+			return self.__core__.getBatchDetails(videos)
+		
+		return ([],303)	
+				
 #=================================== Watch Later ============================================
 	def scrapeWatchLater(self, params):	
 		get = params.get
@@ -441,7 +458,6 @@ class YouTubeScraperCore:
 			params["folder"] = "true"
 			season = seasons.div.span.findNextSibling()
 			
-			print self.__plugin__ + " season " + repr(season)
 			while (season != None):
 				item = {}
 				if (str(season).find("page not-selected") > 0):
@@ -833,6 +849,8 @@ class YouTubeScraperCore:
 			return self.searchDisco(params)
 		if (get("scraper") == "watch_later"):
 			return self.scrapeWatchLater(params)
+		if (get("scraper") == "live"):
+			return self.scrapeLiveNow(params)
 		if (get("scraper") == "disco_top_50"):
 			return self.scrapeDiscoTop50(params)
 		if (get("scraper") == "disco_top_artist"):
