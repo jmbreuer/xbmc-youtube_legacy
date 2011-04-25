@@ -384,13 +384,12 @@ class YouTubeCore(object):
 		if self.__dbg__:
 			print self.__plugin__ + " fetching page : " + repr(params)
 		
-		if not get("link") or int(get("error", "0")) > 1 :
+		if not get("link") or int(get("error", "0")) > 3 :
 			if self.__dbg__:
 				print self.__plugin__ + " fetching page giving up "
 			return ( "", 500 )
 
 		if get("request", "false") == "false":
-			#request = urllib2.Request(get("link"))
 			request = url2request(get("link"), get("method", "GET"));
 		else:
 			if self.__dbg__:
@@ -433,22 +432,19 @@ class YouTubeCore(object):
 			else:
 				# We need login to verify age
 				if not get("login"):
-					params["error"] = str(int(get("error", "0")) + 1)
+					params["error"] = get("error", "0")
 					params["login"] = "true"
 					return self._fetchPage(params)
 
 				if self.__dbg__:
-					print self.__plugin__ + " _fetchPage Video age restricted, trying to verify for url: " + new_url
+					print self.__plugin__ + " _fetchPage Video age restricted, trying to verify for url: " + new_url + " saf_search " + self.__settings__.getSetting( "safe_search" )
 
-				# This seems like a bad implementation.
-				# THIS IS FORCED TRUE!!!!
-				if self.__settings__.getSetting( "safe_search" ) == "0" or True:
+				if self.__settings__.getSetting( "safe_search" ) != "2" :
 					confirmed = 1
 				else:
 					confirmed = 0
 				
 				# Fallback for missing confirm form.
-				print self.__plugin__ + "TEST: " + str(result.find("confirm-age-form"))
 				if result.find("confirm-age-form") == -1:
 					if self.__dbg__:
 						print self.__plugin__ + " _fetchPage: Sorry - you must be 18 or over to view this video or group"
@@ -478,57 +474,38 @@ class YouTubeCore(object):
 				params["error"] = str(int(get("error", "0")) + 1)
 				params["login"] = "true"
 				return self._fetchPage(params)
-
-			if self.__dbg__:
-				print self.__plugin__ + " _fetchPage. Too many errors"
-			return ( "", 500 )
 		
 		except urllib2.HTTPError, e:
 			err = str(e)
 			if self.__dbg__:
 				print self.__plugin__ + " _fetchPage HTTPError : " + err
-				if ( err.find("201") > -1):
-					if self.__dbg__:
-						print self.__plugin__ + " _fetchPage request: Done"
-						return ( "", 200)
-			# 400 (Bad request) - A 400 response code indicates that a request was poorly formed or contained invalid data. The API response content will explain the reason wny the API returned a 400 response code.
-			if ( err.find("400") > -1 ):
-				return ( err, 303 )
-			# 401 (Not authorized) - A 401 response code indicates that a request did not contain an Authorization header, that the format of the Authorization header was invalid, or that the authentication token supplied in the header was invalid.
-			elif ( err.find("401") > -1 ):
-				# If login credentials are given, try again.
-				if ( self.__settings__.getSetting( "username" ) != "" and self.__settings__.getSetting( "user_password" ) != "" ):
-					params["error"] = str(int(get("error", "0")) + 1)
-					params["login"] = "true"
-					if self.__dbg__:
-						print self.__plugin__ + " _fetchPage trying again with login: " + repr(params)
 
-					self.__login__.login()
-					return self._fetchPage(params);
-				else:
-					if self.__dbg__:
-						print self.__plugin__ + " _fetchPage 401 Not Authorized and no login credentials written in settings"
-					return ( self.__language__(30622), 303)
-			# 403 (Forbidden) - A 403 response code indicates that you have submitted a request that is not properly authenticated for the requested operation.
-			# Test all cases that cause 403 before 2.0, and verify the above statement.
-			elif ( err.find("403") > -1 ):
+
+			if ( err.find("201") > -1):
 				if self.__dbg__:
-					print self.__plugin__ + " _fetchPage got empty results back"
-				return (self.__language__(30601), 303)
-			# 501 (Not implemented) - A 501 response code indicates that you have tried to execute an unsupported operation.
-			elif ( err.find("501") > -1):
-				return ( err, 303 ) # Should we return this error?
-			#500 (Internal error) - A 500 response code indicates that YouTube experienced an error handling a request. You could retry the request at a later time.
-			#503 (Service unavailable) - A 503 response code indicates that the YouTube Data API service can not be reached. You could retry your request at a later time.
-			elif ( err.find("500") > -1 or err.find("503") > -1 ):
-				if self.__dbg__:
-					print self.__plugin__ + " _fetchPage retry: " + err
-				params["error"] = str(int(get("error", "0")) + 1)
-				return self._fetchPage(params)
+					print self.__plugin__ + " _fetchPage request: Done"
+				return ( "", 200)
+			
 			else:
-				if self.__dbg__:
-					print self.__plugin__ + " _fetchPage unknown error"
-				return ( err, 303 )
+				if int(get("error", "0")) < 2:
+					if self.__dbg__:
+						print self.__plugin__ + " _fetchPage retry: " + err
+
+					if ( self.__settings__.getSetting( "username" ) != "" and self.__settings__.getSetting( "user_password" ) != "" ):
+						params["login"] = "true"
+						self.__login__.login();
+
+					params["error"] = str(int(get("error", "0")) + 1)
+					return self._fetchPage(params)
+				else:
+					if ( err.find("401") > -1 ):
+						if self.__dbg__:
+							print self.__plugin__ + " _fetchPage 401 Not Authorized and no login credentials written in settings"
+							return ( self.__language__(30622), 303)
+					else:
+						if self.__dbg__:
+							print self.__plugin__ + " _fetchPage got empty results back"
+						return (self.__language__(30601), 303)
 							
 		except:
 			if self.__dbg__:
