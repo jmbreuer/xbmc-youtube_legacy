@@ -1,8 +1,18 @@
 [B]TODO:[/B]
-- Adding to playlist possible? xbmc doable? <-- requires trac, and xbmc changes etc
-- Play video from file-system if Download exists  <-- post version 2.0 if we do it
 - Locally cache playlist contents and reverse the order cause the current implementation is annoying..
 - Improve Upload date to also include time in video info pane <-- tobias halp!
+- "Play all" and "Play all shuffled" context menu on certain folders 
+- Fix add remove subscription
+- Play All Shuffled (Context menu implementation)
+- Implement new client login - theres a new url and google is disabling the old one.. 
+- Implement Re-login on token failure (If listing fails due to invalid token then retry 2-3 times)
+- Add 2 new feeds: Òmost sharedÓ and Òtrending videosÓ. 
+- Scrape Live feeds page and put it under explore youtube
+- Downloader should implement a queue, and show a progress bar for the current download
+- Check all context menu items again some seem to be broken
+- Utilise select dialog for playlist management for now (looks horrendous but its the best we can do for now)
+- Check out oauth 2 login and see if that's better
+- Listing of playlists, contacts and subscriptions need to be cached locally and sorted
 
 [B]Errata[/B]
 - [XBMC] Thumbnails sometimes turns into black box or Folder (XBMC not detecting when thumbnail is set and defaulting to icon?)
@@ -11,6 +21,16 @@
 - [YOUTUBE] API doesnt allow proper sorting of playlists and subscriptions (Video order when listing a playlists is broken and orderby when listing all subscriptions just doesn't work)
 - [YOUTUBE] Can't delete favorites (YouTube gives video id, not favorite id).
 - Download of rtmpe streams not supported.
+
+[B]Version 2.5.0 Beta[B]
+- "Play All from video position in certain folders (ie. non-infinite folders)
+- Enable playback of YouTube Live streams
+- Simplify playback code (and get low resolution videos working again)
+- Fixed Disco scraper it was broken again.
+- Updated Disco Top 25 to Top 50 scraper and fixed pagination.
+- Large scale refactor to make code more maintainable
+- Play video from file-system if Downloaded video exists (Partially working as this has revealed XBMC bug.)
+- Fixed remove from favorites
 
 [B]Version 2.0.4[/B]
 - Fixed Youtube character encoding changes broke disco scraper.
