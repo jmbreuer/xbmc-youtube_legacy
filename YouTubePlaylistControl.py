@@ -25,8 +25,10 @@ class YouTubePlaylistControl:
 	__language__ = sys.modules[ "__main__" ].__language__
 	__plugin__ = sys.modules[ "__main__"].__plugin__	
 	__dbg__ = sys.modules[ "__main__" ].__dbg__
+
 	__core__ = sys.modules[ "__main__" ].__core__
 	__scraper__ = sys.modules[ "__main__" ].__scraper__
+	__utils__ = sys.modules[ "__main__" ].__utils__
 	
 	urls = {};
 	urls['playlists'] = "http://gdata.youtube.com/feeds/api/playlists/%s?"
@@ -108,42 +110,17 @@ class YouTubePlaylistControl:
 		feed = self.urls["newsubscriptions"] % get("contact")
 		return self.listAll(feed, params)
 	
-	def listAll(self, feed, params ={}):
+	def addToPlaylist(self, params = {}):
 		get = params.get
-		result = ""
+		if (not get("playlist")):
+			dialog = xbmcgui.Dialog()
+			result = dialog.select('Smokey', ['The','Funsized','Bear'])
+	
+	def removeFromPlaylist(self, params = {}):
+		get = params.get
 		
-		if get("login") == "true":
-			if ( not self._getAuth() ):
-				if self.__dbg__:
-					print self.__plugin__ + " login required but auth wasn't set!"
-				return ( self.__language__(30609) , 303 )
-		
-		index = 1
-		url = feed + "start-index=" + str(index) + "&max-results=" + repr(50)
-		url = url.replace(" ", "+")
-		
-		( result, status ) = self.__core__._fetchPage({"link":url})
-		
-		ytobjects = self.__core__.getVideoInfo(result, params)
-		
-		if len(ytobjects) == 0:
-			return ytobjects
-		
-		next = ytobjects[len(ytobjects)-1].get("next","false")
-		if next == "true": 
-			ytobjects = ytobjects[:len(ytobjects)-1]
-		
-		while next == "true":
-			index += 50
-			url = feed + "start-index=" + str(index) + "&max-results=" + repr(50)
-			url = url.replace(" ", "+")
-			(result, status) = self.__core__._fetchPage({"link": url})
-			if status != 200:
-				break
-			temp_objects = self.__core__.getVideoInfo(result, params)
-			next = temp_objects[len(temp_objects)-1].get("next","false")
-			if next == "true":
-				temp_objects += temp_objects[:len(temp_objects)-1]
-			ytobjects += temp_objects
-		
-		return ytobjects
+		if get("playlist") and get("videoid"):
+			(message, status) = self.__core__.removeFromPlaylist(self, params = {})
+			
+			if (status != 200):
+				self.__utils__.showErrorMessage(self.__language__(30023), message, status)

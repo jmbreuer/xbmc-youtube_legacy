@@ -197,3 +197,20 @@ class YouTubePluginStorage:
 			self.__settings__.setSetting(viewmode, get("view_mode"))
 		
 		xbmc.executebuiltin( "Container.Refresh" )
+	
+	def reversePlaylistOrder(self, params = {}):
+		get = params.get
+		
+		if (get("playlist")):
+			sort = ""
+			if (get("external")):
+				sort += "external_" + get("contact") + "_"
+			sort += "view_mode_" + get("playlist")
+			
+			existing = self.__settings__.getSetting(sort)
+			if existing != "true":
+				self.__settings__.setSetting(sort, "true")
+			else:
+				self.__settings__.setSetting(sort, "false")
+		
+		xbmc.executebuiltin( "Container.Refresh" )

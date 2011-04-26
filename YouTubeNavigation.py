@@ -89,7 +89,7 @@ class YouTubeNavigation:
 		
 		path = get("path", "/root")
 		
-		if not get("feed") == "search" and get("page","0") == "0" and not get("scraper") == "search_disco":
+		if not get("feed") == "search" and not get("channel") and get("page","0") == "0" and not get("scraper") == "search_disco":
 			for category in self.categories:
 				cat_get = category.get 
 				if (cat_get("path").find(path +"/") > -1 ):
@@ -156,6 +156,12 @@ class YouTubeNavigation:
 			self.__storage__.changeSubscriptionView(params)
 		if (get("action") == "play_all"):
 			self.__playlist__.playAll(params)
+		if (get("action") == "add_to_playlist"):
+			self.__playlist__.addToPlaylist(params)
+		if (get("action") == "remove_from_playlist"):
+			self.__playlist__.removeFromPlaylist(params)
+		if (get("action") == "reverse_order"):
+			self.__storage__.reversePlaylistOrder(params)
 			
 	#==================================== Item Building and Listing ===========================================	
 	def list(self, params = {}):
@@ -429,8 +435,12 @@ class YouTubeNavigation:
 		
 		cm.append( ( self.__language__( 30504 ), "XBMC.Action(Queue)", ) )
 		
-		if (get("playlist") and item("videoid")):
+		if (get("playlist")):
 			cm.append( (self.__language__(30531), "XBMC.RunPlugin(%s?path=%s&action=play_all&playlist=%s&videoid=%s&)" % ( sys.argv[0], item("path"), get("playlist"), item("videoid") ) ) )
+			cm.append( ("Remove From Playlist TEST", "XBMC.RunPlugin(%s?path=%s&action=remove_from_playlist&playlist=%s&videoid=%s&)" % ( sys.argv[0], item("path"), get("playlist"), item("videoid") ) ) )
+		
+		if (not get("playlist")):
+			cm.append( ("Add To Playlist TEST", "XBMC.RunPlugin(%s?path=%s&action=add_to_playlist&videoid=%s&)" % ( sys.argv[0], item("path"), item("videoid") ) ) )
 		
 		if (get("user_feed") == "newsubscriptions" or get("user_feed") == "favorites"):
 			contact = self.__settings__.getSetting("nick")
@@ -479,6 +489,7 @@ class YouTubeNavigation:
 				cm.append ( (self.__language__(30530), "XBMC.RunPlugin(%s?path=%s&action=play_all&user_feed=%s&contact=%s&)" % ( sys.argv[0], item("path"), item("user_feed"), self.__settings__.getSetting("nick") ) ) )
 				cm.append ( (self.__language__(30532), "XBMC.RunPlugin(%s?path=%s&action=play_all&shuffle=true&user_feed=%s&contact=%s&)" % ( sys.argv[0], item("path"), item("user_feed"), self.__settings__.getSetting("nick") ) ) )
 			if (get("user_feed") == "playlists" ):
+				cm.append ( (self.__language__(30536), "XBMC.RunPlugin(%s?path=%s&action=reverse_order&playlist=%s&)" % ( sys.argv[0], item("path"), item("playlist") ) ) )
 				cm.append ( (self.__language__(30530), "XBMC.RunPlugin(%s?path=%s&action=play_all&playlist=%s&)" % ( sys.argv[0], item("path"), item("playlist") ) ) )
 				cm.append ( (self.__language__(30532), "XBMC.RunPlugin(%s?path=%s&action=play_all&shuffle=true&playlist=%s&)" % ( sys.argv[0], item("path"), item("playlist") ) ) )
 			if (item("scraper") == "search_disco"):
