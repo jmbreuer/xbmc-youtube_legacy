@@ -188,45 +188,47 @@ class YouTubeCore(object):
 	
 	def listFolder(self, params = {}):
 		get = params.get
+
 		if get("store"): 
 			if get("store") == "contact_options":
 				return self.__storage__.getUserOptionFolder(params)
 			else:
 				return self.__storage__.getStoredSearches(params)
+
+		page = int(get("page", "0"))
+		per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
 		
-	def listAllFolder(self, feed, params ={}):
-		get = params.get
-		result = ""
-				
-		index = 1
-		url = feed + "start-index=" + str(index) + "&max-results=" + repr(50)
-		url = url.replace(" ", "+")
+		user_feed = "" + get("user_feed")
+		if get("external"):
+			user_feed += "_external_" + get("contact") 
+
+		store = self.__settings__.getSetting(user_feed)
 		
-		( result, status ) = self._fetchPage({"link":url})
+		if ( page != 0 and store != ""):
+			folders = []
+			try:
+				folders = eval(store)
+			except:
+				print self.__plugin__ + " search - eval failed "	
+
+			if (len(folders) > 0):
+				if ( per_page * ( page + 1 ) < len(folders) ):
+					next = 'true'
+				else:
+					next = 'false'
+			
+			folders = folders[(per_page * page):(per_page * (page + 1))]
 		
-		ytobjects = self.getFolderInfo(result, params)
-		
-		if len(ytobjects) == 0:
-			return ytobjects
-		
-		next = ytobjects[len(ytobjects)-1].get("next","false")
-		if next == "true": 
-			ytobjects = ytobjects[:len(ytobjects)-1]
-		
-		while next == "true":
-			index += 50
-			url = feed + "start-index=" + str(index) + "&max-results=" + repr(50)
-			url = url.replace(" ", "+")
-			(result, status) = self._fetchPage({"link": url})
-			if status != 200:
-				break
-			temp_objects = self.getFolderInfo(result, params)
-			next = temp_objects[len(temp_objects)-1].get("next","false")
-			if next == "true":
-				temp_objects += temp_objects[:len(temp_objects)-1]
-			ytobjects += temp_objects
-		
-		return ytobjects		
+		if not get("page"):
+			url = self.createUrl(params)
+			
+			result = self.listAll(url, params)
+			
+			if len(result) == 0:
+				return (result, 303)
+			
+			
+			self.__settings__.setSettings(user_feed, repr(result))	
 
 	def listAll(self, feed, params ={}):
 		get = params.get
@@ -244,7 +246,12 @@ class YouTubeCore(object):
 		
 		( result, status ) = self._fetchPage({"link":url})
 		
-		ytobjects = self.getVideoInfo(result, params)
+		ytobjects = []
+		
+		if get("folder") == "true":
+			ytobjects = self.getFolderInfo(result, params)
+		else:
+			ytobjects = self.getVideoInfo(result, params)
 		
 		if len(ytobjects) == 0:
 			return ytobjects
@@ -260,7 +267,11 @@ class YouTubeCore(object):
 			(result, status) = self._fetchPage({"link": url})
 			if status != 200:
 				break
-			temp_objects = self.getVideoInfo(result, params)
+			temp_objects = []
+			if get("folder") == "true":
+				temp_objects = self.getFolderInfo(result, params)
+			else:
+				temp_objects = self.getVideoInfo(result, params)
 			next = temp_objects[len(temp_objects)-1].get("next","false")
 			if next == "true":
 				temp_objects += temp_objects[:len(temp_objects)-1]
@@ -377,11 +388,7 @@ class YouTubeCore(object):
 			folders.sort(key=lambda item:item["Title"].lower(), reverse=False)
 			
 		if next:
-			item = {"Title":self.__language__( 30509 ), "thumbnail":"next", "next":"true", "page":str(int(get("page", "0")) + 1)} 
-			for k, v in params.items():
-				if (k != "thumbnail" and k != "Title" and k != "page"):
-					item[k] = v
-			folders.append(item)
+			self.__storage__.addNextFolder(folders, params)
 		
 		return folders;
 
@@ -784,10 +791,6 @@ class YouTubeCore(object):
 			ytobjects.append(video);
 		
 		if next:
-			item = {"Title":self.__language__( 30509 ), "thumbnail":"next", "next":"true", "page":str(int(get("page", "0")) + 1)} 
-			for k, v in params.items():
-				if (k != "thumbnail" and k != "Title" and k != "page"):
-					item[k] = v
-			ytobjects.append(item)
-		
+			self.__storage__.addNextFolder(ytobjects,params)
+				
 		return ytobjects;
