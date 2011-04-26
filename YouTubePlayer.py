@@ -324,6 +324,8 @@ class YouTubePlayer(object):
 	def selectVideoQuality(self, links, params):
 		get = params.get
 		link = links.get
+		if self.__dbg__:
+			print self.__plugin__ + " url map: " + repr(links)
 		video_url = ""
 		
 		if get("action") == "download":
@@ -365,7 +367,7 @@ class YouTubePlayer(object):
 		if hd_quality > 1: #<-- 1080p
 			if (link(37)):
 				video_url = link(37)
-				
+			
 		if not len(video_url) > 0:
 			print self.__plugin__ + " construct_video_url failed, video_url not set"
 			return video_url
