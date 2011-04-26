@@ -28,6 +28,7 @@ class YouTubeScraperCore:
 	
 	__utils__ = sys.modules[ "__main__" ].__utils__
 	__core__ = sys.modules[ "__main__" ].__core__
+	__storage__ = sys.modules [ "__main__" ].__storage__
 	
 	urls = {}
 	urls['categories'] = "http://www.youtube.com/videos"
@@ -84,12 +85,8 @@ class YouTubeScraperCore:
 		
 		if (len(ytobjects) > 0):
 			if (next == "true"):
-				item = {"Title":self.__language__( 30509 ), "thumbnail":"next", "next":"true", "page":str(int(get("page", "0")) + 1)} 
-				for k, v in params.items():
-					if (k != "thumbnail" and k != "Title" and k != "page"):
-						item[k] = v
-				ytobjects.append(item)
-		
+				self.__storage__.addNextFolder(ytobjects, params)
+						
 		return (ytobjects, status)
 	
 	def scrapeYouTubeData(self, params ={}):
@@ -229,12 +226,8 @@ class YouTubeScraperCore:
 					self.__settings__.setSetting("disco_search_" + query + "_thumb", ytobjects[0]["thumbnail"])
 				
 				if (next == "true"):
-					item = {"Title":self.__language__( 30509 ), "thumbnail":"next", "next":"true", "page":str(int(get("page", "0")) + 1)} 
-					for k, v in params.items():
-						if (k != "thumbnail" and k != "Title" and k != "page"):
-							item[k] = v
-					ytobjects.append(item)
-					
+					self.__storage__.addNextFolder(ytobjects, params)
+								
 			return (ytobjects, status)
 		
 		return ([], 500)
@@ -307,11 +300,7 @@ class YouTubeScraperCore:
 			(result , status) = self.__core__.getBatchDetails(subitems)
 			if (status == 200):
 				if (next == "true"):
-					item = {"Title":self.__language__( 30509 ), "thumbnail":"next", "next":"true", "page":str(int(get("page", "0")) + 1)} 
-					for k, v in params.items():
-						if (k != "thumbnail" and k != "Title" and k != "page"):
-							item[k] = v
-					result.append(item)
+					self.__storage__.addNextFolder(result, params)
 			return (result, status) 
 
 		return ([], 500)
@@ -668,11 +657,8 @@ class YouTubeScraperCore:
 				result = result[:per_page]
 				
 				if (next == "true"):
-					item = {"Title":self.__language__( 30509 ), "thumbnail":"next", "next":"true", "page":str(original_page + 1)} 
-					for k, v in params.items():
-						if (k != "thumbnail" and k != "Title" and k != "page"):
-							item[k] = v
-					result.append(item)
+					self.__storage__.addNextFolder(result, params)
+				
 				return (result, status)
 			else:
 				return ([], 303)
