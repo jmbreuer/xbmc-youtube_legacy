@@ -90,7 +90,7 @@ class YouTubePlaylistControl:
 	def getPlayList(self, params = {}):
 		get = params.get
 		feed = self.urls["playlists"] % get("playlist")
-		return self.listAll(feed, params)
+		return self.__core__.listAll(feed, params)
 	
 	def getDiscoSearch(self, params = {}):
 		(result, status) = self.__scraper__.searchDisco(params)
@@ -101,14 +101,14 @@ class YouTubePlaylistControl:
 		if not get("contact"):
 			return
 		feed = self.urls["favorites"] % get("contact")  
-		return self.listAll(feed, params)
+		return self.__core__.listAll(feed, params)
 	
 	def getNewSubscriptions(self, params = {}):
 		get = params.get
 		if not get("contact"):
 			return
 		feed = self.urls["newsubscriptions"] % get("contact")
-		return self.listAll(feed, params)
+		return self.__core__.listAll(feed, params)
 	
 	def addToPlaylist(self, params = {}):
 		get = params.get
