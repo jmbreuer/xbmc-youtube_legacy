@@ -130,8 +130,6 @@ class YouTubeCore(object):
 			if (url.find("%s") > 0):
 				if ( get("contact") and not (get("external") and get("channel"))):
 					url = url % get("contact")
-				elif ( get("videoid")):
-					url = url % get("videoid")
 				elif ( get("channel")):
 					url = url % get("channel")
 				elif ( get("playlist")):
@@ -146,11 +144,9 @@ class YouTubeCore(object):
 			else:
 				url += "&"
 			
-			url += "start-index=" + repr(start_index) + "&max-results=" + repr(per_page)
-			
-			if get("feed") == "playlists" or get("feed") == "subscriptions":
-				url += "&orderby=published"
-		
+			if not get("folder"):
+				url += "start-index=" + repr(start_index) + "&max-results=" + repr(per_page)
+				
 		url = url.replace(" ", "+")
 		return url
 	
@@ -158,13 +154,10 @@ class YouTubeCore(object):
 		get = params.get
 		result = []
 		status = 303
-				
-		if get("store"): 
-			if get("store") == "contact_options":
-				return self.__storage__.getUserOptionFolder(params)
-			else:
-				return self.__storage__.getStoredSearches(params)
-
+		
+		if get("folder"):
+			self.listFolder(params)
+		
 		if get("login") == "true":
 			if ( not self._getAuth() ):
 				if self.__dbg__:
@@ -179,9 +172,7 @@ class YouTubeCore(object):
 		if status != 200:
 			return ( result, status )
 		
-		if get("folder"):
-			result = self.getFolderInfo(response, params)
-		else:
+		if not get("folder"):
 			result = self.getVideoInfo(response, params)
 		
 		if len(result) == 0:
@@ -195,6 +186,48 @@ class YouTubeCore(object):
 			
 		return (result, 200)
 	
+	def listFolder(self, params = {}):
+		get = params.get
+		if get("store"): 
+			if get("store") == "contact_options":
+				return self.__storage__.getUserOptionFolder(params)
+			else:
+				return self.__storage__.getStoredSearches(params)
+		
+	def listAllFolder(self, feed, params ={}):
+		get = params.get
+		result = ""
+				
+		index = 1
+		url = feed + "start-index=" + str(index) + "&max-results=" + repr(50)
+		url = url.replace(" ", "+")
+		
+		( result, status ) = self._fetchPage({"link":url})
+		
+		ytobjects = self.getFolderInfo(result, params)
+		
+		if len(ytobjects) == 0:
+			return ytobjects
+		
+		next = ytobjects[len(ytobjects)-1].get("next","false")
+		if next == "true": 
+			ytobjects = ytobjects[:len(ytobjects)-1]
+		
+		while next == "true":
+			index += 50
+			url = feed + "start-index=" + str(index) + "&max-results=" + repr(50)
+			url = url.replace(" ", "+")
+			(result, status) = self._fetchPage({"link": url})
+			if status != 200:
+				break
+			temp_objects = self.getFolderInfo(result, params)
+			next = temp_objects[len(temp_objects)-1].get("next","false")
+			if next == "true":
+				temp_objects += temp_objects[:len(temp_objects)-1]
+			ytobjects += temp_objects
+		
+		return ytobjects		
+
 	def listAll(self, feed, params ={}):
 		get = params.get
 		result = ""
@@ -209,49 +242,9 @@ class YouTubeCore(object):
 		url = feed + "start-index=" + str(index) + "&max-results=" + repr(50)
 		url = url.replace(" ", "+")
 		
-		( result, status ) = self.__core__._fetchPage({"link":url})
+		( result, status ) = self._fetchPage({"link":url})
 		
-		ytobjects = self.__core__.getVideoInfo(result, params)
-		
-		if len(ytobjects) == 0:
-			return ytobjects
-		
-		next = ytobjects[len(ytobjects)-1].get("next","false")
-		if next == "true": 
-			ytobjects = ytobjects[:len(ytobjects)-1]
-		
-		while next == "true":
-			index += 50
-			url = feed + "start-index=" + str(index) + "&max-results=" + repr(50)
-			url = url.replace(" ", "+")
-			(result, status) = self.__core__._fetchPage({"link": url})
-			if status != 200:
-				break
-			temp_objects = self.__core__.getVideoInfo(result, params)
-			next = temp_objects[len(temp_objects)-1].get("next","false")
-			if next == "true":
-				temp_objects += temp_objects[:len(temp_objects)-1]
-			ytobjects += temp_objects
-		
-		return ytobjects
-	
-	def listAllFolder(self, feed, params ={}):
-		get = params.get
-		result = ""
-		
-		if get("login") == "true":
-			if ( not self._getAuth() ):
-				if self.__dbg__:
-					print self.__plugin__ + " login required but auth wasn't set!"
-				return ( self.__language__(30609) , 303 )
-		
-		index = 1
-		url = feed + "start-index=" + str(index) + "&max-results=" + repr(50)
-		url = url.replace(" ", "+")
-		
-		( result, status ) = self.__core__._fetchPage({"link":url})
-		
-		ytobjects = self.__core__.getVideoInfo(result, params)
+		ytobjects = self.getVideoInfo(result, params)
 		
 		if len(ytobjects) == 0:
 			return ytobjects
@@ -264,10 +257,10 @@ class YouTubeCore(object):
 			index += 50
 			url = feed + "start-index=" + str(index) + "&max-results=" + repr(50)
 			url = url.replace(" ", "+")
-			(result, status) = self.__core__._fetchPage({"link": url})
+			(result, status) = self._fetchPage({"link": url})
 			if status != 200:
 				break
-			temp_objects = self.__core__.getVideoInfo(result, params)
+			temp_objects = self.getVideoInfo(result, params)
 			next = temp_objects[len(temp_objects)-1].get("next","false")
 			if next == "true":
 				temp_objects += temp_objects[:len(temp_objects)-1]
