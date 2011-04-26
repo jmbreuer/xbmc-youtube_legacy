@@ -16,7 +16,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, urllib2, os
+import sys, urllib2, os, time, math
+from DialogDownloadProgress import DownloadProgress
 	
 class YouTubeDownloader:	 
 	__settings__ = sys.modules[ "__main__" ].__settings__
@@ -46,14 +47,60 @@ class YouTubeDownloader:
 
 		item = video.get
 		
-		self.__utils__.showMessage(self.__language__(30612), self.__utils__.makeAscii(item("Title", "Unknown Title")))
+		#self.__utils__.showMessage(self.__language__(30612), self.__utils__.makeAscii(item("Title", "Unknown Title")))
 		
 		( video, status ) = self.downloadVideoURL(video)
 				
-		if status == 200:
-			self.__utils__.showMessage(self.__language__( 30604 ), self.__utils__.makeAscii(item("Title")))
+		#if status == 200:
+		#	self.__utils__.showMessage(self.__language__( 30604 ), self.__utils__.makeAscii(item("Title")))
 			
-	def downloadVideoURL(self, video):
+#	def downloadVideoURLD(self, video):
+#		if self.__dbg__:
+#			print self.__plugin__ + " downloadVideo : " + video['Title']
+#		
+#		if video["video_url"].find("swfurl") > 0:
+#			self.__utils__.showMessage(self.__language__( 30625 ), self.__language__(30626))
+#			return ([], 303)
+#		
+#		path = self.__settings__.getSetting( "downloadPath" )
+#		self.__player__.downloadSubtitle(video) 
+#		url = urllib2.Request(video['video_url'])
+#		url.add_header('User-Agent', self.__utils__.USERAGENT);
+#		
+#		filename_incomplete = "%s/%s-[%s]-incomplete.mp4" % ( path, ''.join(c for c in video['Title'] if c in self.__utils__.VALID_CHARS), video["videoid"] )
+#		filename_complete = "%s/%s-[%s].mp4" % ( path, ''.join(c for c in video['Title'] if c in self.__utils__.VALID_CHARS), video["videoid"] )
+#		file = open(filename_incomplete, "wb")
+#		con = urllib2.urlopen(url);
+#		file.write(con.read())
+#		con.close()
+#		
+#		os.rename(filename_incomplete, filename_complete)
+#		
+#		self.__settings__.setSetting( "vidstatus-" + video['videoid'], "1" )
+#		
+#		return ( video, 200 )
+		
+#	def downloadVideoTest(self, video, params = {}):
+#		scan = DownloadProgress()
+#		# create dialog
+#		scan.create( heading = self.__language__( 30624 ), label = video["Title"])
+#		pct = 1
+#		while pct < 100:
+#			pct += 1
+#			heading = self.__language__(30624) + " - " + str(pct) + "%"
+#			scan.update( pct, heading=heading)
+#			time.sleep( .25 )
+#		
+#		# close dialog and auto destroy all controls
+#		try:
+#			scan.close()
+#		except:
+#			print "error when closing"
+#		
+#		return ([],200)
+		
+	
+	def downloadVideoURL(self, video, params = {}):
 		if self.__dbg__:
 			print self.__plugin__ + " downloadVideo : " + video['Title']
 		
@@ -68,13 +115,42 @@ class YouTubeDownloader:
 		
 		filename_incomplete = "%s/%s-[%s]-incomplete.mp4" % ( path, ''.join(c for c in video['Title'] if c in self.__utils__.VALID_CHARS), video["videoid"] )
 		filename_complete = "%s/%s-[%s].mp4" % ( path, ''.join(c for c in video['Title'] if c in self.__utils__.VALID_CHARS), video["videoid"] )
+			
 		file = open(filename_incomplete, "wb")
 		con = urllib2.urlopen(url);
-		file.write(con.read())
-		con.close()
+		total_size = 8192 * 25
+		
+		if con.info().getheader('Content-Length').strip():			
+			total_size = int(con.info().getheader('Content-Length').strip())
+			
+		chunk_size = int(total_size / 25)
+		
+		try:
+			scan = DownloadProgress()
+			scan.create( heading = self.__language__( 30624 ), label = video["Title"])
+			bytes_so_far = 0
+			chunk_size = 8192
+			
+			while 1:
+				chunk = con.read(chunk_size)
+				bytes_so_far += len(chunk)
+				percent = int(float(bytes_so_far) / float(total_size) * 100)
+				file.write(chunk)
+				heading = self.__language__(30624) + " - " + str(percent) + "%"
+				scan.update(percent=percent, heading = heading)
+				if not chunk:
+					break
+			
+			con.close()
+			scan.close()
+		except:
+			print self.__plugin__ + " download failed unknown reason"
+			try:
+				scan.close()
+			except:
+				print self.__plugin__ + " failed to close download dialog"
 		
 		os.rename(filename_incomplete, filename_complete)
 		
 		self.__settings__.setSetting( "vidstatus-" + video['videoid'], "1" )
-		
 		return ( video, 200 )
