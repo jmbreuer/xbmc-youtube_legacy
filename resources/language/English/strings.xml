@@ -173,7 +173,11 @@
     <string id="30530">Play All</string>
     <string id="30531">Play from here</string>
     <string id="30532">Shuffle and Play All</string>
-
+    <string id="30533">Add to Playlist..</string>
+    <string id="30534">New Playlist..</string>
+    <string id="30535">Remove from Playlist</string>
+    <string id="30536">Reverse Playlist</string>
+	
     <!-- messages -->
     <string id="30600">Error</string>
     <string id="30601">No results!</string>
