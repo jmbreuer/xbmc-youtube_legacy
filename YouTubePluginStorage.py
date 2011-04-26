@@ -214,3 +214,11 @@ class YouTubePluginStorage:
 				self.__settings__.setSetting(sort, "false")
 		
 		xbmc.executebuiltin( "Container.Refresh" )
+	
+	def addNextFolder(self, items = [], params = {}):
+		get = params.get
+		item = {"Title":self.__language__( 30509 ), "thumbnail":"next", "next":"true", "page":str(int(get("page", "0")) + 1)} 
+		for k, v in params.items():
+			if (k != "thumbnail" and k != "Title" and k != "page"):
+				item[k] = v
+		items.append(item)
