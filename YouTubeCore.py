@@ -195,6 +195,86 @@ class YouTubeCore(object):
 			
 		return (result, 200)
 	
+	def listAll(self, feed, params ={}):
+		get = params.get
+		result = ""
+		
+		if get("login") == "true":
+			if ( not self._getAuth() ):
+				if self.__dbg__:
+					print self.__plugin__ + " login required but auth wasn't set!"
+				return ( self.__language__(30609) , 303 )
+		
+		index = 1
+		url = feed + "start-index=" + str(index) + "&max-results=" + repr(50)
+		url = url.replace(" ", "+")
+		
+		( result, status ) = self.__core__._fetchPage({"link":url})
+		
+		ytobjects = self.__core__.getVideoInfo(result, params)
+		
+		if len(ytobjects) == 0:
+			return ytobjects
+		
+		next = ytobjects[len(ytobjects)-1].get("next","false")
+		if next == "true": 
+			ytobjects = ytobjects[:len(ytobjects)-1]
+		
+		while next == "true":
+			index += 50
+			url = feed + "start-index=" + str(index) + "&max-results=" + repr(50)
+			url = url.replace(" ", "+")
+			(result, status) = self.__core__._fetchPage({"link": url})
+			if status != 200:
+				break
+			temp_objects = self.__core__.getVideoInfo(result, params)
+			next = temp_objects[len(temp_objects)-1].get("next","false")
+			if next == "true":
+				temp_objects += temp_objects[:len(temp_objects)-1]
+			ytobjects += temp_objects
+		
+		return ytobjects
+	
+	def listAllFolder(self, feed, params ={}):
+		get = params.get
+		result = ""
+		
+		if get("login") == "true":
+			if ( not self._getAuth() ):
+				if self.__dbg__:
+					print self.__plugin__ + " login required but auth wasn't set!"
+				return ( self.__language__(30609) , 303 )
+		
+		index = 1
+		url = feed + "start-index=" + str(index) + "&max-results=" + repr(50)
+		url = url.replace(" ", "+")
+		
+		( result, status ) = self.__core__._fetchPage({"link":url})
+		
+		ytobjects = self.__core__.getVideoInfo(result, params)
+		
+		if len(ytobjects) == 0:
+			return ytobjects
+		
+		next = ytobjects[len(ytobjects)-1].get("next","false")
+		if next == "true": 
+			ytobjects = ytobjects[:len(ytobjects)-1]
+		
+		while next == "true":
+			index += 50
+			url = feed + "start-index=" + str(index) + "&max-results=" + repr(50)
+			url = url.replace(" ", "+")
+			(result, status) = self.__core__._fetchPage({"link": url})
+			if status != 200:
+				break
+			temp_objects = self.__core__.getVideoInfo(result, params)
+			next = temp_objects[len(temp_objects)-1].get("next","false")
+			if next == "true":
+				temp_objects += temp_objects[:len(temp_objects)-1]
+			ytobjects += temp_objects
+		
+		return ytobjects
+	
 	def delete_favorite(self, params = {}):
 		get = params.get
 		delete_url = self.urls["favorites"] % self.__settings__.getSetting( "nick" )
@@ -547,7 +627,7 @@ class YouTubeCore(object):
 		get = params.get
 		dom = parseString(xml);
 		entries = dom.getElementsByTagName("atom:entry");
-				
+		
 		ytobjects = [];
 		for node in entries:
 			video = {};
