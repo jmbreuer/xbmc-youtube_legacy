@@ -119,7 +119,8 @@ class YouTubeCore(object):
 			else:
 				url += "&"
 			
-			url += "start-index=" + repr(start_index) + "&max-results=" + repr(per_page)
+			if not get("playlist"):
+				url += "start-index=" + repr(start_index) + "&max-results=" + repr(per_page)
 			
 			if (url.find("standardfeeds") > 0 and region):
 				url = url.replace("/standardfeeds/", "/standardfeeds/"+ region + "/")
@@ -144,7 +145,7 @@ class YouTubeCore(object):
 			else:
 				url += "&"
 			
-			if not get("folder"):
+			if not get("folder") and not get("playlist"):
 				url += "start-index=" + repr(start_index) + "&max-results=" + repr(per_page)
 				
 		url = url.replace(" ", "+")
@@ -158,6 +159,9 @@ class YouTubeCore(object):
 		if get("folder"):
 			return self.listFolder(params)
 		
+		if get("playlist"):
+			return self.listPlaylist(params)
+
 		if get("login") == "true":
 			if ( not self._getAuth() ):
 				if self.__dbg__:
@@ -186,6 +190,48 @@ class YouTubeCore(object):
 			
 		return (result, 200)
 	
+	def listPlaylist(self, params = {}):
+		get = params.get
+		page = int(get("page", "0"))
+		per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
+		
+		store_key = "playlist_result_" + get("playlist")
+		if get("external"):
+			store_key += "_external_" + get("contact") 
+
+		store = self.__settings__.getSetting(store_key)
+		
+		if ( page != 0 and store != ""):
+			try:
+				result = eval(store)
+			except:
+				print self.__plugin__ + " playlist - eval failed "
+		
+		if not get("page"):
+			url = self.createUrl(params)
+			
+			result = self.listAll(url, params)
+			
+			if len(result) == 0:
+				return (result, 303)
+			
+			self.__settings__.setSetting(store_key, repr(result))
+			thumbnail = result[0].get('thumbnail', "")
+			if thumbnail:
+				self.__settings__.setSetting("playlist_" + get("playlist") + "_thumb", thumbnail)
+		
+		next = 'false'	
+		if (len(result) > 0):
+			if ( per_page * ( page + 1 ) < len(result) ):
+				next = 'true'
+		
+		result = result[(per_page * page):(per_page * (page + 1))]
+		
+		if next == "true":
+			self.__storage__.addNextFolder(result, params)
+				
+		return (result, 200)
+	
 	def listFolder(self, params = {}):
 		get = params.get
 		result = []
@@ -209,7 +255,7 @@ class YouTubeCore(object):
 			try:
 				result = eval(store)
 			except:
-				print self.__plugin__ + " search - eval failed "	
+				print self.__plugin__ + " folder - eval failed "	
 		
 		if not get("page"):
 			url = self.createUrl(params)
@@ -249,11 +295,10 @@ class YouTubeCore(object):
 
 		ytobjects = []
 		
+		( result, status ) = self._fetchPage({"link":url, "auth":"true"})
 		if get("folder") == "true":
-			( result, status ) = self._fetchPage({"link":url, "auth":"true"})
 			ytobjects = self.getFolderInfo(result, params)
 		else:
-			( result, status ) = self._fetchPage({"link":url})
 			ytobjects = self.getVideoInfo(result, params)
 		
 		if len(ytobjects) == 0:
@@ -281,7 +326,11 @@ class YouTubeCore(object):
 			ytobjects += temp_objects
 		
 		if (get("user_feed")):
-			ytobjects.sort(key=lambda item:item["Title"].lower(), reverse=False)
+			if get("user_feed") != "playlist":
+				ytobjects.sort(key=lambda item:item["Title"].lower(), reverse=False)
+			else:
+				if (self.__storage__.getReversePlaylistOrder(params)):
+					ytobjects.reverse()
 		
 		return ytobjects
 	
@@ -377,9 +426,10 @@ class YouTubeCore(object):
 			
 			if get("user_feed") == "playlists":
 				folder["user_feed"] = "playlist"
-				if (self.__settings__.getSetting(get("user_feed") + "_" + folder["playlist"] + "_thumb")):
-					folder["thumbnail"] = self.__settings__.getSetting(get("user_feed") + "_" + folder["playlist"] + "_thumb")
-				
+				thumb = self.__settings__.getSetting("playlist_" + folder["playlist"] + "_thumb")
+				if thumb:
+					folder["thumbnail"] = thumb
+							
 			if node.getElementsByTagName("link"):
 				link = node.getElementsByTagName("link")
 				for i in range(len(link)):
