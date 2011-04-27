@@ -618,27 +618,25 @@ class YouTubeCore(object):
 					print self.__plugin__ + " _fetchPage request: Done"
 				return ( "", 200)
 			
+			if int(get("error", "0")) < 2:
+				if self.__dbg__:
+					print self.__plugin__ + " _fetchPage retry: " + err
+
+				if ( self.__settings__.getSetting( "username" ) != "" and self.__settings__.getSetting( "user_password" ) != "" ):
+					params["login"] = "true"
+					self.__login__._login();
+
+				params["error"] = str(int(get("error", "0")) + 1)
+				return self._fetchPage(params)
 			else:
-				if int(get("error", "0")) < 2:
+				if ( err.find("401") > -1 ):
 					if self.__dbg__:
-						print self.__plugin__ + " _fetchPage retry: " + err
-
-					if ( self.__settings__.getSetting( "username" ) != "" and self.__settings__.getSetting( "user_password" ) != "" ):
-						params["login"] = "true"
-						self.__login__.login();
-
-					params["error"] = str(int(get("error", "0")) + 1)
-					return self._fetchPage(params)
+						print self.__plugin__ + " _fetchPage 401 Not Authorized and no login credentials written in settings"
+						return ( self.__language__(30622), 303)
 				else:
-					if ( err.find("401") > -1 ):
-						if self.__dbg__:
-							print self.__plugin__ + " _fetchPage 401 Not Authorized and no login credentials written in settings"
-							return ( self.__language__(30622), 303)
-					else:
-						if self.__dbg__:
-							print self.__plugin__ + " _fetchPage got empty results back"
-						return (self.__language__(30601), 303)
-							
+					if self.__dbg__:
+						print self.__plugin__ + " _fetchPage got empty results back"
+					return (self.__language__(30601), 303)					
 		except:
 			if self.__dbg__:
 				print self.__plugin__ + ' _fetchPage ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
