@@ -67,7 +67,6 @@ class YouTubeNavigation:
 				  {'Title':__language__( 30051 )  ,'path':"/root/explore/live"  					, 'thumbnail':"live"				, 'login':"false" , 'scraper':"live" },
 				  {'Title':__language__( 30019 )  ,'path':"/root/recommended"						, 'thumbnail':"recommended"			, 'login':"true"  , 'scraper':"recommended" },
 				  {'Title':__language__( 30052 )  ,'path':"/root/watch_later"						, 'thumbnail':"watch_later"			, 'login':"true"  , 'scraper':"watch_later" },
-				  {"Title":"Addonscan tester"	  ,"path":"/root/test"								, "thumbnail":"disco"				, "action":"test"},
 				  {'Title':__language__( 30018 )  ,'path':"/root/contacts"			  				, 'thumbnail':"contacts"			, 'login':"true"  , 'user_feed':"contacts", 'folder':'true' },
 				  {'Title':__language__( 30024 )  ,'path':"/root/contacts/new"						, 'thumbnail':"contacts"			, 'login':"true"  , 'action':"add_contact"},
 				  {'Title':__language__( 30002 )  ,'path':"/root/favorites"		 					, 'thumbnail':"favorites"			, 'login':"true"  , 'user_feed':"favorites" },
@@ -89,7 +88,7 @@ class YouTubeNavigation:
 		
 		path = get("path", "/root")
 		
-		if not get("feed") == "search" and not get("channel") and get("page","0") == "0" and not get("scraper") == "search_disco":
+		if not get("feed") == "search" and not get("channel") and not get("contact") and not get("playlist") and get("page","0") == "0" and not get("scraper") == "search_disco":
 			for category in self.categories:
 				cat_get = category.get 
 				if (cat_get("path").find(path +"/") > -1 ):
