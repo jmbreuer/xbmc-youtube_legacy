@@ -23,6 +23,7 @@ class YouTubePluginStorage:
 	__settings__ = sys.modules[ "__main__"].__settings__ 
 	__plugin__ = sys.modules[ "__main__"].__plugin__
 	__language__ = sys.modules[ "__main__" ].__language__
+	
 	__utils__ = sys.modules[ "__main__" ].__utils__
 	
 	# This list contains the list options a user sees when indexing a contact 
@@ -227,8 +228,55 @@ class YouTubePluginStorage:
 				result = True
 		
 		return result
-
 	
+	def addVideoToDownloadQeueu(self, params = {}):
+		get = params.get
+		
+		videos = []
+		if get("video"):
+			queue = self.__settings__.getSetting("download_queue")
+			if queue:
+				try:
+					videos = eval(queue)
+				except:
+					videos = []
+		
+		if get("videoid") not in videos:
+			videos.append(get("videoid"))
+		
+		self.__settings__.setSetting("download_queue",repr(videos))
+		
+		if not get("silent"):
+			self.__utils__.showMessage(self.__language__(30630), self.__language__(30631))
+		
+	def removeVideoFromDownloadQueue(self, videoid):
+		videos = []
+		queue = self.__settings__.getSetting("download_queue")
+		if queue:
+			try:
+				videos = eval(queue)
+			except:
+				videos = []
+		
+		if videoid in videos:
+			videos.remove(videoid)
+			self.__settings__.setSetting("download_queue",repr(videos))
+		
+	def getNextVideoFromDownloadQueue(self):
+		videos = []
+		queue = self.__settings__.getSetting("download_queue")
+		if queue:
+			try:
+				videos = eval(queue)
+			except: 
+				videos = []
+		
+		videoid = ""
+		if videos:
+			videoid = videos[0]
+		
+		return videoid
+			
 	def addNextFolder(self, items = [], params = {}):
 		get = params.get
 		item = {"Title":self.__language__( 30509 ), "thumbnail":"next", "next":"true", "page":str(int(get("page", "0")) + 1)} 
