@@ -209,4 +209,7 @@
     <string id="30627">Playlist empty</string>
     <string id="30628">Live steam not available!</string>
     <string id="30629">YouTube doesn't seem to know this video id!</string>
+    <string id="30630">Download queued</string>
+    <string id="30631">Video added to download Queue</string>
+    <string id="30632">Skipping download</string> 
 </strings>
