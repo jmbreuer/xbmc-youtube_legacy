@@ -49,7 +49,7 @@ class YouTubeLogin(object):
 			self.__utils__.showErrorMessage(self.__language__(30031), result, 303)
 		else:
 			self.__utils__.showErrorMessage(self.__language__(30609), result, status)
-				
+		
 		xbmc.executebuiltin( "Container.Refresh" )
 	
 	def _login(self, error = 0):

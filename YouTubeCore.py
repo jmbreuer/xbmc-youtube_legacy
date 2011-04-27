@@ -156,7 +156,7 @@ class YouTubeCore(object):
 		status = 303
 		
 		if get("folder"):
-			self.listFolder(params)
+			return self.listFolder(params)
 		
 		if get("login") == "true":
 			if ( not self._getAuth() ):
@@ -188,7 +188,8 @@ class YouTubeCore(object):
 	
 	def listFolder(self, params = {}):
 		get = params.get
-
+		result = []
+		
 		if get("store"): 
 			if get("store") == "contact_options":
 				return self.__storage__.getUserOptionFolder(params)
@@ -198,26 +199,17 @@ class YouTubeCore(object):
 		page = int(get("page", "0"))
 		per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
 		
-		user_feed = "" + get("user_feed")
+		user_feed = "result_" + get("user_feed")
 		if get("external"):
 			user_feed += "_external_" + get("contact") 
 
 		store = self.__settings__.getSetting(user_feed)
 		
 		if ( page != 0 and store != ""):
-			folders = []
 			try:
-				folders = eval(store)
+				result = eval(store)
 			except:
 				print self.__plugin__ + " search - eval failed "	
-
-			if (len(folders) > 0):
-				if ( per_page * ( page + 1 ) < len(folders) ):
-					next = 'true'
-				else:
-					next = 'false'
-			
-			folders = folders[(per_page * page):(per_page * (page + 1))]
 		
 		if not get("page"):
 			url = self.createUrl(params)
@@ -227,8 +219,19 @@ class YouTubeCore(object):
 			if len(result) == 0:
 				return (result, 303)
 			
-			
-			self.__settings__.setSettings(user_feed, repr(result))	
+			self.__settings__.setSetting(user_feed, repr(result))
+		
+		next = 'false'	
+		if (len(result) > 0):
+			if ( per_page * ( page + 1 ) < len(result) ):
+				next = 'true'
+		
+		result = result[(per_page * page):(per_page * (page + 1))]
+		
+		if next == "true":
+			self.__storage__.addNextFolder(result, params)
+		
+		return (result,200)
 
 	def listAll(self, feed, params ={}):
 		get = params.get
@@ -243,14 +246,14 @@ class YouTubeCore(object):
 		index = 1
 		url = feed + "start-index=" + str(index) + "&max-results=" + repr(50)
 		url = url.replace(" ", "+")
-		
-		( result, status ) = self._fetchPage({"link":url})
-		
+
 		ytobjects = []
 		
 		if get("folder") == "true":
+			( result, status ) = self._fetchPage({"link":url, "auth":"true"})
 			ytobjects = self.getFolderInfo(result, params)
 		else:
+			( result, status ) = self._fetchPage({"link":url})
 			ytobjects = self.getVideoInfo(result, params)
 		
 		if len(ytobjects) == 0:
@@ -276,6 +279,9 @@ class YouTubeCore(object):
 			if next == "true":
 				temp_objects += temp_objects[:len(temp_objects)-1]
 			ytobjects += temp_objects
+		
+		if (get("user_feed")):
+			ytobjects.sort(key=lambda item:item["Title"].lower(), reverse=False)
 		
 		return ytobjects
 	
@@ -382,11 +388,7 @@ class YouTubeCore(object):
 						folder['editid'] = obj[obj.rfind('/')+1:]
 			
 			folders.append(folder);
-		
-		if (get("user_feed")):
-			print "Sorting " 
-			folders.sort(key=lambda item:item["Title"].lower(), reverse=False)
-			
+					
 		if next:
 			self.__storage__.addNextFolder(folders, params)
 		
@@ -601,7 +603,7 @@ class YouTubeCore(object):
 		auth = self.__settings__.getSetting( "auth" )
 
 		if ( not auth ):
-			(result, status ) =  self.__login__.login()
+			(result, status ) =  self.__login__._login()
 			if status != 200:
 				if self.__dbg__:
 					print self.__plugin__ + " _getAuth failed because login failed"
