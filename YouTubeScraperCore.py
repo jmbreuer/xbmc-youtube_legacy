@@ -365,9 +365,8 @@ class YouTubeScraperCore:
 				item = {}
 				videoid = video.div.a["href"]
 				videoid = videoid[videoid.rfind("/")+1:]
-				
 				item["videoid"] = videoid
-				
+								
 				thumbnail = video.div.a.span.span.img["src"]
 				thumbnail = thumbnail.replace("default","0")
 				item["thumbnail"] = thumbnail
