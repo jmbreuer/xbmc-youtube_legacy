@@ -197,7 +197,7 @@
     <string id="30615">Not found</string>
     <string id="30616">Refinement added</string>
     <string id="30617">Unknown error</string>
-    <string id="30618">Couldn't extract video url</string>
+    <string id="30618">Couldn't locate video url</string>
     <string id="30619">Couldn't scrape YouTube</string>
     <string id="30620">Stream type not supported</string>
     <string id="30621">Bad username or password</string>
@@ -207,4 +207,6 @@
     <string id="30625">Download Failed</string>
     <string id="30626">RTMPe download not supported</string> 
     <string id="30627">Playlist empty</string>
+    <string id="30628">Live steam not available!</string>
+    <string id="30629">YouTube doesn't seem to know this video id!</string>
 </strings>
