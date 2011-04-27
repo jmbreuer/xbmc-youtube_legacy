@@ -1,13 +1,12 @@
 [B]TODO:[/B]
-- Improve Upload date to also include time in video info pane <-- tobias halp!
-- Implement new client login - theres a new url and google is disabling the old one.. 
-- Implement Re-login on token failure (If listing fails due to invalid token then retry 2-3 times)
-- Downloader should implement a queue
-- Check all context menu items again some seem to be broken
-- Utilise select dialog for playlist management for now (looks horrendous but its the best we can do for now)
-- Check out oauth 2 login and see if that's better
-- Listing of playlists, contacts and subscriptions need to be cached locally and sorted
-- Locally cache playlist contents and give option to reverse the order cause the current implementation is annoying..
+- Improve Upload date to also include time in video info pane <-- Tobias
+- Implement Re-login on token failure (If listing fails due to invalid token then retry 2-3 times) <-- Tobias
+- Implement new client login - theres a new url and google is disabling the old one..  <-- Tobias
+- Downloader should implement a queue <-- Henrik
+- Utilise select dialog for playlist management for now (looks horrendous but its the best we can do for now) <-- Henrik
+- Implement playlist management support in core <-- Tobias
+- Check out oauth 2 login and see if that's better <-- Henrik
+- Check all context menu items again some seem to be broken <-- Henrik & Tobias
 
 [B]Errata[/B]
 - [XBMC] Thumbnails sometimes turns into black box or Folder (XBMC not detecting when thumbnail is set and defaulting to icon?)
@@ -16,12 +15,15 @@
 - Download of rtmpe streams not supported.
 
 [B]Version 2.5.0 Beta[B]
+- Added Caching and alphabetically sorting of My playlists, My contacts and My subscriptions 
 - Added "Play all" context menu on certain folders 
 - Added "Shuffle and Play All" Context menu on certain folders
 - Added "Play All from video position in certain folders (ie. playlists and other non-infinite folders)
-- Added playback of YouTube Live streams
+- Added Playback of YouTube Live streams 
+- Added Caching of playlist and option to reverse playlist order
 - Added playback of WebM streams if user enables it on his/her profile
-- Changed download function to shows a progress-bar
+- Changed Playback function now shows a more user friendly error message on failure
+- Changed Download function now shows a progress-bar
 - Changed "Disco Top 25" to "Disco Top 50" scraper 
 - Changed plugin will now play a video from file-system if the file is still in the download folder (Partially working as this has revealed XBMC bug.)
 - Added 2 new feeds: Òmost sharedÓ and Òtrending videosÓ that gives a better "pulse" of youtube videos.
