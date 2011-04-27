@@ -118,7 +118,6 @@ class YouTubePlayer(object):
 		return trans_url
 		
 	def transformSubtitleXMLtoSRT(self, xml):
-		print "komdmdm " + repr(xml)
 		dom = parseString(xml)
 		entries = dom.getElementsByTagName("text")
 		
@@ -190,14 +189,18 @@ class YouTubePlayer(object):
 		
 		self.__settings__.setSetting( "vidstatus-" + video['videoid'], "7" )
 	
-	def getVideoStreamMap(self, html):
+	def getVideoStreamMap(self, html, video = {}):
 		links = {}
 		fmt_url_map = []
 		if self.__dbg__:
 			print self.__plugin__ + " fmt_url_map not found, searching for stream map"
 		
 		swf_url = ""		
-		fmtSource = re.findall('"fmt_stream_map": "([^"]+)"', html);
+		video["stream_map"] = "true"
+		if (html.find("live_playback") > 0):
+			video["live_play"] = "true"
+		
+		fmtSource = re.findall('"fmt_stream_map": "([^"]+)"', html);			
 		if fmtSource:
 			if self.__dbg__:
 				print self.__plugin__ + " fmt_stream_map found"
@@ -253,9 +256,10 @@ class YouTubePlayer(object):
 					if (final_url.find('rtmp') >= 0 and swf_url):
 						final_url += " swfurl=%s swfvfy=1" % swf_url 
 					links[int(quality)] = final_url.replace('\/','/')
+				
 		return links
 	
-	def getVideoUrlMap(self, html):
+	def getVideoUrlMap(self, html, video = {}):
 		links = {}
 		fmtSource = re.findall('"fmt_url_map": "([^"]+)"', html);
 		
@@ -284,7 +288,10 @@ class YouTubePlayer(object):
 					else :
 						quality = "5"
 					links[int(quality)] = final_url.replace('\/','/')
-					
+		
+		if len(links) > 0:
+			video["url_map"] = "true"
+		
 		return links
 	
 	def getAlert(self, html, params = {}):
@@ -309,12 +316,11 @@ class YouTubePlayer(object):
 			if len(result) == 0:
 				if self.__dbg__:
 					print self.__plugin__ + " Couldn't parse API output, YouTube doesn't seem to know this video id?"
-				video["apierror"] = "YouTube doesn't seem to know this video id!"
+				video["apierror"] = self.__language__(30629)
 				return (video, 303)
 		else:
 			if self.__dbg__:
 				print self.__plugin__ + " Got API Error from YouTube!"
-			print "dsfsd " + repr(result)
 			video["apierror"] = result
 			
 			return (video,303)
@@ -398,13 +404,22 @@ class YouTubePlayer(object):
 			if not vget('apierror'):
 				video['apierror'] = self.__language__(30617)
 		
-		if status == 200:
+		if status == 200:			
+			links = self.getVideoUrlMap(html, video)
 			
-			links = self.getVideoUrlMap(html)
-			
-			if not links:
-				links = self.getVideoStreamMap(html)
-			if links:
-				video["video_url"] = self.selectVideoQuality(links, params)
+			if len(links) == 0:
+				links= self.getVideoStreamMap(html, video)
+		
+		if not links:
+			status = 303
+			vget = video.get
+			if vget("live_play"):
+				video['apierror'] = self.__language__(30628)
+			elif vget("stream_map"):
+				video['apierror'] = self.__language__(30620)
+			else:
+				video['apierror'] = self.__language__(30618)
+		else:
+			video["video_url"] = self.selectVideoQuality(links, params)
 		
 		return (video, status)
