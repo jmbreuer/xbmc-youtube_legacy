@@ -202,10 +202,9 @@ class YouTubePluginStorage:
 		get = params.get
 		
 		if (get("playlist")):
-			sort = ""
+			sort = "reverse_playlist_" + get("playlist")
 			if (get("external")):
-				sort += "external_" + get("contact") + "_"
-			sort += "view_mode_" + get("playlist")
+				sort += "_external_" + get("contact") 
 			
 			existing = self.__settings__.getSetting(sort)
 			if existing != "true":
@@ -214,6 +213,21 @@ class YouTubePluginStorage:
 				self.__settings__.setSetting(sort, "false")
 		
 		xbmc.executebuiltin( "Container.Refresh" )
+		
+	def getReversePlaylistOrder(self, params = {}):
+		get = params.get 
+		result = False
+		if (get("playlist")):
+			sort = "reverse_playlist_" + get("playlist")
+			if (get("external")):
+				sort += "_external_" + get("contact") 
+			
+			existing = self.__settings__.getSetting(sort)
+			if existing == "true":
+				result = True
+		
+		return result
+
 	
 	def addNextFolder(self, items = [], params = {}):
 		get = params.get
