@@ -670,7 +670,7 @@ class YouTubeCore(object):
 		next_url = next_url[:next_url.find('"')]
 
 		values = { "next_url": next_url, "action_confirm": confirmed }
-		values = { "next_url": next_url, "action_confirmd: "1" }
+		values = { "next_url": next_url, "action_confirmd": "1" }
 
 		if self.__dbg__ or True:
 			print self.__plugin__ + " _verifyAge. next_url: " + next_url + " - " + urllib.urlencode(values)
