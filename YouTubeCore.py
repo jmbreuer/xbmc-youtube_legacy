@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, urllib, urllib2, re
+import sys, urllib, urllib2, re, time
 from xml.dom.minidom import parseString
 
 # ERRORCODES:
@@ -726,6 +726,8 @@ class YouTubeCore(object):
 				infoString =""
 				if video['Date'] != "Unknown Date":
 					infoString += "Date Uploaded: " + video['Date'][:video['Date'].find("T")] + ", "				
+					c = time.strptime(video['Date'][:video['Date'].find("T")], "%Y-%m-%d")
+					video['Date'] = time.strftime("%d-%m-%Y",c)
 				infoString += "View count: " + str(video['count'])
 				
 				if node.getElementsByTagName("atom:link"):
@@ -816,6 +818,8 @@ class YouTubeCore(object):
 			infoString =""
 			if video['Date'] != "Unknown Date":
 				infoString += "Date Uploaded: " + video['Date'][:video['Date'].find("T")] + ", "				
+				c = time.strptime(video['Date'][:video['Date'].find("T")], "%Y-%m-%d")
+				video['Date'] = time.strftime("%d-%m-%Y",c)
 			infoString += "View count: " + str(video['count'])
 			video['Plot'] = infoString + "\n" + video['Plot']
 			video['Genre'] = self._getNodeAttribute(node, "media:category", "label", "Unknown Genre").encode( "utf-8" )

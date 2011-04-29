@@ -1,5 +1,4 @@
 [B]TODO:[/B]
-- Improve Upload date to also include time in video info pane <-- Tobias
 - Downloader should implement a queue <-- Henrik
 - Utilise select dialog for playlist management for now (looks horrendous but its the best we can do for now) <-- Henrik
 - Implement playlist management support in core <-- Tobias
@@ -20,6 +19,7 @@
 - Added Playback of YouTube Live streams 
 - Added Caching of playlist and option to reverse playlist order
 - Added playback of WebM streams if user enables it on his/her profile
+- Added Date for sorting
 - Changed Playback function now shows a more user friendly error message on failure
 - Changed Download function now shows a progress-bar
 - Changed "Disco Top 25" to "Disco Top 50" scraper 
