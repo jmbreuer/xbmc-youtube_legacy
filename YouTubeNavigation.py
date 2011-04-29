@@ -442,7 +442,7 @@ class YouTubeNavigation:
 			cm.append( ("Add To Playlist TEST", "XBMC.RunPlugin(%s?path=%s&action=add_to_playlist&videoid=%s&)" % ( sys.argv[0], item("path"), item("videoid") ) ) )
 		
 		if (get("user_feed") == "newsubscriptions" or get("user_feed") == "favorites"):
-			contact = self.__settings__.getSetting("nick")
+			contact = "default"
 			if get("contact"):
 				contact = get("contact") 
 			cm.append( (self.__language__(30531), "XBMC.RunPlugin(%s?path=%s&action=play_all&user_feed=%s&contact=%s&videoid=%s&)" % ( sys.argv[0], item("path"), get("user_feed"), contact, item("videoid") ) ) )
@@ -485,8 +485,8 @@ class YouTubeNavigation:
 		
 		if ( item("user_feed") == "favorites"  or get("user_feed") == "playlists" or item("user_feed") == "uploads" or item("user_feed") == "newsubscriptions" or item("scraper") == "search_disco"):
 			if (item("user_feed") == "favorites" or item("user_feed") == "newsubscriptions"):
-				cm.append ( (self.__language__(30530), "XBMC.RunPlugin(%s?path=%s&action=play_all&user_feed=%s&contact=%s&)" % ( sys.argv[0], item("path"), item("user_feed"), self.__settings__.getSetting("nick") ) ) )
-				cm.append ( (self.__language__(30532), "XBMC.RunPlugin(%s?path=%s&action=play_all&shuffle=true&user_feed=%s&contact=%s&)" % ( sys.argv[0], item("path"), item("user_feed"), self.__settings__.getSetting("nick") ) ) )
+				cm.append ( (self.__language__(30530), "XBMC.RunPlugin(%s?path=%s&action=play_all&user_feed=%s&contact=%s&)" % ( sys.argv[0], item("path"), item("user_feed"), "default" ) ) )
+				cm.append ( (self.__language__(30532), "XBMC.RunPlugin(%s?path=%s&action=play_all&shuffle=true&user_feed=%s&contact=%s&)" % ( sys.argv[0], item("path"), item("user_feed"), "default" ) ) )
 			if (get("user_feed") == "playlists" ):
 				cm.append ( (self.__language__(30536), "XBMC.RunPlugin(%s?path=%s&action=reverse_order&playlist=%s&)" % ( sys.argv[0], item("path"), item("playlist") ) ) )
 				cm.append ( (self.__language__(30530), "XBMC.RunPlugin(%s?path=%s&action=play_all&playlist=%s&)" % ( sys.argv[0], item("path"), item("playlist") ) ) )

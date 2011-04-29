@@ -38,7 +38,7 @@ class YouTubeLogin(object):
 	urls = {};
 	urls['http_login'] = "https://www.google.com/accounts/ServiceLogin?service=youtube"
 	urls['http_login_confirmation'] = "http://www.youtube.com/signin?action_handle_signin=true&nomobiletemp=1&hl=en_US&next=/index&hl=en_US&ltmpl=sso"
-	urls['gdata_login'] = "https://www.google.com/youtube/accounts/ClientLogin"
+	urls['gdata_login'] = "https://www.google.com/accounts/ClientLogin"
 	
 	def login(self, params = {}):
 		self.__settings__.openSettings()
@@ -60,14 +60,13 @@ class YouTubeLogin(object):
 		passwd = self.__settings__.getSetting( "user_password" )
 		
 		self.__settings__.setSetting('auth', "")
-		self.__settings__.setSetting('nick', "")
 		
 		if ( uname == "" or passwd == "" ):
 			if self.__dbg__:
 				print self.__plugin__ + " login no username or password set "
 			return ( "", 0 )
 
-		url = urllib2.Request("https://www.google.com/youtube/accounts/ClientLogin")
+		url = urllib2.Request(self.urls['gdata_login'])
 		url.add_header('Content-Type', 'application/x-www-form-urlencoded')
 		data = urllib.urlencode({'Email': uname, 'Passwd': passwd, 'service': 'youtube', 'source': 'YouTube plugin'})
 		
@@ -77,15 +76,13 @@ class YouTubeLogin(object):
 			value = con.read()
 			con.close()
 			
-			result = re.compile('Auth=(.*)\nYouTubeUser=(.*)').findall(value)
+			result = re.compile('Auth=(.*)').findall(value)
 					
 			if len(result) > 0:
-				( auth, nick ) = result[0]
-				self.__settings__.setSetting('auth', auth)
-				self.__settings__.setSetting('nick', nick)
+				self.__settings__.setSetting('auth', result[0])
 
 				if self.__dbg__:
-					print self.__plugin__ + " login done: " + nick
+					print self.__plugin__ + " login done: " + uname
 				return ( self.__language__(30030), 200 )
 					
 			return ( self.__language__(30609), 303 )

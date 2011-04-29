@@ -1,7 +1,5 @@
 [B]TODO:[/B]
 - Improve Upload date to also include time in video info pane <-- Tobias
-- Implement Re-login on token failure (If listing fails due to invalid token then retry 2-3 times) <-- Tobias
-- Implement new client login - theres a new url and google is disabling the old one..  <-- Tobias
 - Downloader should implement a queue <-- Henrik
 - Utilise select dialog for playlist management for now (looks horrendous but its the best we can do for now) <-- Henrik
 - Implement playlist management support in core <-- Tobias

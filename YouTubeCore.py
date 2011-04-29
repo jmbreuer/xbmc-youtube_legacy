@@ -136,7 +136,7 @@ class YouTubeCore(object):
 				elif ( get("playlist")):
 					url = url % get("playlist")
 				elif ( get("feed") == "uploads" or get("feed") == "favorites" or  get("feed") == "playlists" or get("feed") == "subscriptions" or get("feed") == "newsubscriptions"):
-					url = url % self.__settings__.getSetting( "nick" )
+					url = url % "default"
 				else: 
 					url = url % "default"
 			
@@ -336,7 +336,7 @@ class YouTubeCore(object):
 	
 	def delete_favorite(self, params = {}):
 		get = params.get
-		delete_url = self.urls["favorites"] % self.__settings__.getSetting( "nick" )
+		delete_url = self.urls["favorites"] % "default"
 		delete_url += "/" + get('editid') 
 		return self._fetchPage({"link": delete_url, "api": "true", "login": "true", "auth": "true", "method": "DELETE"})
 	
@@ -348,7 +348,7 @@ class YouTubeCore(object):
 
 	def remove_subscription(self, params = {}):
 		get = params.get
-		delete_url = self.urls["subscriptions"] % self.__settings__.getSetting( "nick" )
+		delete_url = self.urls["subscriptions"] % "default"
 		delete_url += "/" + get("editid")
 		return self._fetchPage({"link": delete_url, "api": "true", "login": "true", "auth": "true", "method": "DELETE"})
 
