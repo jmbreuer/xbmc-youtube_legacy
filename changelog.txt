@@ -20,6 +20,8 @@
 - Added Caching of playlist and option to reverse playlist order
 - Added playback of WebM streams if user enables it on his/her profile
 - Added Date for sorting
+- Added Auto-magic re-login on token verfication failure
+- Changed Login to use new Client Login url
 - Changed Playback function now shows a more user friendly error message on failure
 - Changed Download function now shows a progress-bar
 - Changed "Disco Top 25" to "Disco Top 50" scraper 
