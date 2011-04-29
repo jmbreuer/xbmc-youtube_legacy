@@ -29,6 +29,8 @@ class YouTubeDownloader:
 	__player__ = sys.modules["__main__" ].__player__
 	__utils__ = sys.modules[ "__main__" ].__utils__
 	__storage__ = sys.modules[ "__main__" ].__storage__
+	
+	dialog = ""
 						
 	def downloadVideo(self, params = {}):
 		get = params.get
@@ -39,37 +41,52 @@ class YouTubeDownloader:
 			self.__settings__.openSettings()
 			path = self.__settings__.getSetting( "downloadPath" )
 		
-		
-		
 		if xbmc.getInfoLabel( "Window.Property(DialogDownloadProgress.IsAlive)" ) == "true":
+			if self.__dbg__:
+				print self.__plugin__ + " Downloader is active Queueing video "
+				print self.__plugin__ + " XBMC info label " + xbmc.getInfoLabel( "Window.Property(DialogDownloadProgress.IsAlive)" )
 			self.__storage__.addVideoToDownloadQeueu(params)
 		else:
 			params["silent"] = "true"
+			if self.__plugin__:
+				print self.__plugin__ + " Downloader not active, intialising downloader"
+				print self.__plugin__ + " XBMC info label " + xbmc.getInfoLabel( "Window.Property(DialogDownloadProgress.IsAlive)" )
+			
 			self.__storage__.addVideoToDownloadQeueu(params)
-			self.processQueue(params)		
+			self.processQueue(params)
 		
 	def processQueue(self, params):
 		
 		videoid = self.__storage__.getNextVideoFromDownloadQueue()
 		
-		while videoid:
-			params["videoid"] = videoid
-			( video, status ) = self.__player__.getVideoObject(params)
-			if status != 200:
-				self.__utils__.showMessage(self.__language__(30625), video["apierror"])
-				self.__storage__.removeVideoFromDownloadQueue(videoid)
-				videoid = self.__storage__.getNextVideoFromDownloadQueue()
-				continue
-			item = video.get
-			if item("stream_map"):
-				self.__utils__.showMessage(self.__language__(30632), self.__language__("30626"))
-				self.__storage__.removeVideoFromDownloadQueue(videoid)
-				videoid = self.__storage__.getNextVideoFromDownloadQueue()
-				continue
+		if videoid:
+			print self.__plugin__ + " Creating Dialog"
+			self.dialog = DownloadProgress()
+			print self.__plugin__ + " Created Dialog"
+			self.dialog.create( heading = self.__language__( 30624 ), label = "")
+			print self.__plugin__ + " Updated headline Dialog"
+	
+			while videoid:
+				params["videoid"] = videoid
+				( video, status ) = self.__player__.getVideoObject(params)
+				if status != 200:
+					self.__utils__.showMessage(self.__language__(30625), video["apierror"])
+					self.__storage__.removeVideoFromDownloadQueue(videoid)
+					videoid = self.__storage__.getNextVideoFromDownloadQueue()
+					continue
+				item = video.get
+				if item("stream_map"):
+					self.__utils__.showMessage(self.__language__(30632), self.__language__("30626"))
+					self.__storage__.removeVideoFromDownloadQueue(videoid)
+					videoid = self.__storage__.getNextVideoFromDownloadQueue()
+					continue
 				
-			( video, status ) = self.downloadVideoURL(video)
-			self.__storage__.removeVideoFromDownloadQueue(videoid)
-			videoid = self.__storage__.getNextVideoFromDownloadQueue()
+				( video, status ) = self.downloadVideoURL(video)
+				self.__storage__.removeVideoFromDownloadQueue(videoid)
+				videoid = self.__storage__.getNextVideoFromDownloadQueue()
+				
+			self.dialog.close()
+			self.dialog = ""
 			
 	def downloadVideoURL(self, video, params = {}):
 		if self.__dbg__:
@@ -97,8 +114,6 @@ class YouTubeDownloader:
 		chunk_size = int(total_size / 25)
 		
 		try:
-			scan = DownloadProgress()
-			scan.create( heading = self.__language__( 30624 ), label = video["Title"])
 			bytes_so_far = 0
 			chunk_size = 8192
 			
@@ -108,20 +123,18 @@ class YouTubeDownloader:
 				percent = int(float(bytes_so_far) / float(total_size) * 100)
 				file.write(chunk)
 				heading = self.__language__(30624) + " - " + str(percent) + "%"
-				scan.update(percent=percent, heading = heading)
+				self.dialog.update(percent=percent, heading = heading, label=video["Title"])
 				if not chunk:
 					break
 			
 			con.close()
-			scan.close()
 		except:
-			print self.__plugin__ + " download failed unknown reason"
 			try:
-				scan.close()
+				con.close()
 			except:
-				print self.__plugin__ + " failed to close download dialog"
+				print self.__player__ + " Failed to close download stream"	
 		
 		os.rename(filename_incomplete, filename_complete)
-		
+		self.dialog.update(heading = self.__language__(30604), label=video["Title"])
 		self.__settings__.setSetting( "vidstatus-" + video['videoid'], "1" )
 		return ( video, 200 )

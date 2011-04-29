@@ -169,7 +169,7 @@ class Window:
 	def __init__( self, parent_win=None, **kwargs ):
 		if xbmc.getInfoLabel( "Window.Property(DialogDownloadProgress.IsAlive)" ) == "true":
 			raise xbmcguiWindowError( "DialogDownloadProgress IsAlive: Not possible to overscan!" )
-
+		
 		windowXml = DialogDownloadProgressXML( "DialogDownloadProgress.xml", __addonDir__, ADDON_SKIN )
 		self.controls = windowXml.controls
 		del windowXml
@@ -192,7 +192,7 @@ class Window:
 		except: currentWindowId = self.window
 
 		if hasattr( self.window, "setProperty" ):
-			self.window.setProperty( "DownloadProgress.Hide", __settings__.getSetting( "hidedialog" ) )
+			self.window.setProperty( "DialogDownloadProgress.Hide", __settings__.getSetting( "hidedialog" ) )
 
 		#if self.window is None and hasattr( currentWindowId, "__int__" ):
 		#	self.window = xbmcgui.Window( currentWindowId )
@@ -205,14 +205,12 @@ class Window:
 		if not self.window or not hasattr( self.window, "addControl" ):
 			self.removeControls()
 			error = 1
-
-		self.window.setProperty( "DownloadProgress.Hide", __settings__.getSetting( "hidedialog" ) )
+		self.window.setProperty( "DialogDownloadProgress.Hide", __settings__.getSetting( "hidedialog" ) )
 		xbmcgui.unlock()
 		if error:
 			raise xbmcguiWindowError( "xbmcgui.Window(%s)" % repr( currentWindowId ) )
-
-		#self.canceled = ( self.window.getProperty( "DialogAddonScan.Cancel" ) == "true" )
-		self.window.setProperty( "DownloadProgress.IsAlive", "true" )
+		
+		self.window.setProperty( "DialogDownloadProgress.IsAlive", "true" )
 
 	def initialize( self ):
 		try:
@@ -276,10 +274,7 @@ class DownloadProgress( Window ):
 		self.header = heading
 		self.line   = label
 		self.update( 0, heading, label)
-		
-	def isActive(self):
-		return xbmc.getInfoLabel( "Window.Property(DialogDownloadProgress.IsAlive)" ) == "true"
-	
+			
 	def iscanceled( self ):
 		return self.canceled
 
