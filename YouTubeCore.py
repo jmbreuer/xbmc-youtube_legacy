@@ -725,11 +725,12 @@ class YouTubeCore(object):
 				video['Genre'] = self._getNodeAttribute(node, "media:category", "label", "Unknown Genre").encode( "utf-8" )
 				infoString =""
 				if video['Date'] != "Unknown Date":
-					infoString += "Date Uploaded: " + video['Date'][:video['Date'].find("T")] + ", "				
-					c = time.strptime(video['Date'][:video['Date'].find("T")], "%Y-%m-%d")
+					c = time.strptime(video['Date'][:video['Date'].find(".000Z")], "%Y-%m-%dT%H:%M:%S")
 					video['Date'] = time.strftime("%d-%m-%Y",c)
+					infoString += "Date Uploaded: " + time.strftime("%Y-%m-%d %H:%M:%S",c) + ", "
 				infoString += "View count: " + str(video['count'])
-				
+				video['Plot'] = infoString + "\n" + video['Plot']
+
 				if node.getElementsByTagName("atom:link"):
 					link = node.getElementsByTagName("atom:link")
 					for i in range(len(link)):
@@ -817,9 +818,9 @@ class YouTubeCore(object):
 			video['count'] = int(self._getNodeAttribute(node, "yt:statistics", 'viewCount', "0"))
 			infoString =""
 			if video['Date'] != "Unknown Date":
-				infoString += "Date Uploaded: " + video['Date'][:video['Date'].find("T")] + ", "				
-				c = time.strptime(video['Date'][:video['Date'].find("T")], "%Y-%m-%d")
+				c = time.strptime(video['Date'][:video['Date'].find(".000Z")], "%Y-%m-%dT%H:%M:%S")
 				video['Date'] = time.strftime("%d-%m-%Y",c)
+				infoString += "Date Uploaded: " + time.strftime("%Y-%m-%d %H:%M:%S",c) + ", "
 			infoString += "View count: " + str(video['count'])
 			video['Plot'] = infoString + "\n" + video['Plot']
 			video['Genre'] = self._getNodeAttribute(node, "media:category", "label", "Unknown Genre").encode( "utf-8" )
