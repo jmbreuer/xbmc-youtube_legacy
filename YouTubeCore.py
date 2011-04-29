@@ -399,7 +399,7 @@ class YouTubeCore(object):
                 add_request = '<?xml version="1.0" encoding="UTF-8"?><entry xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://gdata.youtube.com/schemas/2007"><yt:position>%s</yt:position></entry>' % get("position")
                 return self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true", "request": add_request})
 
-	def del_from_playlist(self, params = {}):
+	def remove_from_playlist(self, params = {}):
 		get = params.get
                 url = "http://gdata.youtube.com/feeds/api/users/default/playlists/%s/%s" % ( get("playlist_id"), get("entry_id") )
                 return self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true", "method": "DELETE"})
@@ -585,99 +585,113 @@ class YouTubeCore(object):
 			else:
 				print self.__plugin__ + " _fetchPage couldn't get login token"
 		
-		try:
-			con = urllib2.urlopen(request)
-			result = con.read()
-			new_url = con.geturl()
-			con.close()
+		#try:
+		con = urllib2.urlopen(request)
+		result = con.read()
+		new_url = con.geturl()
+		con.close()
 			
-			# Return result if it isn't age restricted
-			if ( result.find("verify-age-actions") == -1):
-				return ( result, 200 )
+		# Return result if it isn't age restricted
+		if ( result.find("verify-age-actions") == -1):
+			return ( result, 200 )
 			
-			else:
-				# We need login to verify age
-				if not get("login"):
-					params["error"] = get("error", "0")
-					params["login"] = "true"
-					return self._fetchPage(params)
-
-				if self.__dbg__:
-					print self.__plugin__ + " _fetchPage Video age restricted, trying to verify for url: " + new_url + " saf_search " + self.__settings__.getSetting( "safe_search" )
-
-				if self.__settings__.getSetting( "safe_search" ) != "2" :
-					confirmed = 1
-				else:
-					confirmed = 0
-				
-				# Fallback for missing confirm form.
-				if result.find("confirm-age-form") == -1:
-					if self.__dbg__:
-						print self.__plugin__ + " _fetchPage: Sorry - you must be 18 or over to view this video or group"
-					return ( self.__language__( 30608 ) , 303 )
-								
-				request = urllib2.Request(new_url)
-				request.add_header('User-Agent', self.__utils__.USERAGENT)
-				request.add_header('Cookie', 'LOGIN_INFO=' + self.__login__._httpLogin(True) )
-
-				# This really should be a regex, but the regex kept failing.
-				temp = result[result.find("verify-age-actions"):(result.find("verify-age-actions") + 600)]
-				next_url = temp[( temp.find('"next_url" value="') + len('"next_url" value="')):]
-				next_url = next_url[:next_url.find('"')] 
-
-				values = { "next_url": next_url, "action_confirm": confirmed }
-				
-				con = urllib2.urlopen(request, urllib.urlencode(values))
-				
-				result = con.read()
-				if get("get_redirect"):	
-					result = con.geturl()
-				con.close()
-				
-				if self.__dbg__:
-					print self.__plugin__ + " _fetchPage. Age should now be verified, calling _fetchPage again"
-					
-				params["error"] = str(int(get("error", "0")) + 1)
+		else:
+			# We need login to verify age
+			if not get("login"):
+				params["error"] = get("error", "0")
 				params["login"] = "true"
 				return self._fetchPage(params)
-		
-		except urllib2.HTTPError, e:
-			err = str(e)
-			if self.__dbg__:
-				print self.__plugin__ + " _fetchPage HTTPError : " + err
-
-
-			if ( err.find("201") > -1):
-				if self.__dbg__:
-					print self.__plugin__ + " _fetchPage request: Done"
-				return ( "", 200)
-			
-			if int(get("error", "0")) < 2:
-				if self.__dbg__:
-					print self.__plugin__ + " _fetchPage retry: " + err
-
-				if ( self.__settings__.getSetting( "username" ) != "" and self.__settings__.getSetting( "user_password" ) != "" ):
-					params["login"] = "true"
-					self.__login__._login();
-
-				params["error"] = str(int(get("error", "0")) + 1)
-				return self._fetchPage(params)
 			else:
-				if ( err.find("401") > -1 ):
-					if self.__dbg__:
-						print self.__plugin__ + " _fetchPage 401 Not Authorized and no login credentials written in settings"
-						return ( self.__language__(30622), 303)
-				else:
-					if self.__dbg__:
-						print self.__plugin__ + " _fetchPage got empty results back"
-					return (self.__language__(30601), 303)					
-		except:
-			if self.__dbg__:
-				print self.__plugin__ + ' _fetchPage ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
-												 , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
-				
-			return ( "", 500 )
+				return self._verifyAge(result, new_url, params)
 		
+		#except urllib2.HTTPError, e:
+		#	err = str(e)
+		#	if self.__dbg__:
+		#		print self.__plugin__ + " _fetchPage HTTPError : " + err
+
+
+		#	if ( err.find("201") > -1):
+		#		if self.__dbg__:
+		#			print self.__plugin__ + " _fetchPage request: Done"
+		#		return ( "", 200)
+			
+		#	if int(get("error", "0")) < 2:
+		#		if self.__dbg__:
+		#			print self.__plugin__ + " _fetchPage retry: " + err
+#
+#				if ( self.__settings__.getSetting( "username" ) != "" and self.__settings__.getSetting( "user_password" ) != "" ):
+#					params["login"] = "true"
+#					self.__login__._login();
+#
+#				params["error"] = str(int(get("error", "0")) + 1)
+#				return self._fetchPage(params)
+#			else:
+#				if ( err.find("401") > -1 ):
+#					if self.__dbg__:
+#						print self.__plugin__ + " _fetchPage 401 Not Authorized and no login credentials written in settings"
+#						return ( self.__language__(30622), 303)
+#				else:
+#					if self.__dbg__:
+#						print self.__plugin__ + " _fetchPage got empty results back"
+#					return (self.__language__(30601), 303)					
+#		except:
+#			if self.__dbg__:
+#				print self.__plugin__ + ' _fetchPage ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
+#												 , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
+				
+#			return ( "", 500 )
+
+	def _verifyAge(self, result, new_url, params = {}):
+                get = params.get
+                if self.__dbg__ or True:
+                        print self.__plugin__ + " verifyAge: " + repr(result) + " - " + repr(params)
+		
+		if self.__dbg__ or True:
+			print self.__plugin__ + " _verifyAge Video age restricted, trying to verify for url: " + new_url + " safe_search " + self.__settings__.getSetting( "safe_search" )
+
+		if self.__settings__.getSetting( "safe_search" ) != "2" or True:
+			confirmed = 1
+		else:
+			confirmed = 0
+				
+		# Fallback for missing confirm form.
+		if result.find("confirm-age-form") == -1:
+			if self.__dbg__ or True:
+				print self.__plugin__ + " _verifyAge: Sorry - you must be 18 or over to view this video or group"
+			return ( self.__language__( 30608 ) , 303 )
+
+		request = urllib2.Request(new_url)
+		request.add_header('User-Agent', self.__utils__.USERAGENT)
+		request.add_header('Cookie', 'LOGIN_INFO=' + self.__login__._httpLogin(True) )
+
+	       	# This really should be a regex, but the regex kept failing.
+		temp = result[result.find("verify-age-actions"):(result.find("verify-age-actions") + 600)]
+		next_url = temp[( temp.find('"next_url" value="') + len('"next_url" value="')):]
+		next_url = next_url[:next_url.find('"')]
+
+		values = { "next_url": next_url, "action_confirm": confirmed }
+		values = { "next_url": next_url, "action_confirmd: "1" }
+
+		if self.__dbg__ or True:
+			print self.__plugin__ + " _verifyAge. next_url: " + next_url + " - " + urllib.urlencode(values)
+
+		con = urllib2.urlopen(request, urllib.urlencode(values))
+
+		if self.__dbg__ or True:
+			print self.__plugin__ + " _verifyAge4. next_url: " + next_url
+
+		result = con.read()
+		new_url = con.geturl()
+		con.close()
+
+		if self.__dbg__ or True:
+			print self.__plugin__ + " _verifyAge. Age should now be verified, calling _fetchPage again: " + new_url + " - " +  repr(result)
+
+		params["error"] = str(int(get("error", "0")) + 1)
+		params["login"] = "true"
+
+		return self._fetchPage(params)
+
 	def _getAuth(self):
 		if self.__dbg__:
 			print self.__plugin__ + " _getAuth"

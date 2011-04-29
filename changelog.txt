@@ -6,7 +6,7 @@
   - remove_playlist, params = { "playlist_id": "something or other" }
   - update_playlist, params = { "playlist_id": "something or other", "title" : "title", "summary": "summary" }
   - add_to_playlist, params = { "playlist_id": "something or other", "video_id": "id" }
-  - del_from_playlist, params = { "playlist_id": "something or other", "video_id": "id" }
+  - remove_from_playlist, params = { "playlist_id": "something or other", "video_id": "id" }
   - move_in_playlist, params = { "playlist_id": "something or other", "video_id": "id", "position": "integer" }
 - 18+ videos. <-- Tobias & henrik
 - Check all context menu items again some seem to be broken <-- Henrik & Tobias
