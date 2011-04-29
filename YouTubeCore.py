@@ -368,8 +368,42 @@ class YouTubeCore(object):
 		get = params.get
 		url = "http://gdata.youtube.com/feeds/api/users/default/subscriptions"
 		add_request = '<?xml version="1.0" encoding="UTF-8"?><entry xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://gdata.youtube.com/schemas/2007"> <category scheme="http://gdata.youtube.com/schemas/2007/subscriptiontypes.cat" term="user"/><yt:username>%s</yt:username></entry>' % get("channel")
-		return self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true","request": add_request})
-		
+		return self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true", "request": add_request})
+	
+	def add_playlist(self, params = {}):
+		get = params.get
+		url = "http://gdata.youtube.com/feeds/api/users/default/playlists"
+		add_request = '<?xml version="1.0" encoding="UTF-8"?><entry xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://gdata.youtube.com/schemas/2007"><title type="text">%s</title><summary>%s</summary></entry>' % ( get("title"), get("summary") )
+		return self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true", "request": add_request})
+
+	def update_playlist(self, params = {}):
+                get = params.get
+                url = "http://gdata.youtube.com/feeds/api/users/default/playlists/%s" % get("playlist_id")
+                add_request = '<?xml version="1.0" encoding="UTF-8"?><entry xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://gdata.youtube.com/schemas/2007"><title type="text">%s</title><summary>%s</summary></entry>' % ( get("title"), get("summary") )
+                return self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true", "request": add_request})
+
+	def del_playlist(self, params = {}):
+		get = params.get
+                url = "http://gdata.youtube.com/feeds/api/users/default/playlists/%s" % get("playlist_id")
+                return self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true", "method": "DELETE"})
+
+	def add_to_playlist(self, params = {}):
+		get = params.get
+                url = "http://gdata.youtube.com/feeds/api/users/default/playlists/%s" % get("playlist_id")
+                add_request = '<?xml version="1.0" encoding="UTF-8"?><entry xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://gdata.youtube.com/schemas/2007"><id>%s</id></entry>' % get("video_id")
+                return self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true", "request": add_request})
+
+	def move_in_playlist(self, params = {}):
+		get = params.get
+                url = "http://gdata.youtube.com/feeds/api/users/default/playlists/%s/%s" % ( get("playlist_id"), get("entry_id") )
+                add_request = '<?xml version="1.0" encoding="UTF-8"?><entry xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://gdata.youtube.com/schemas/2007"><yt:position>%s</yt:position></entry>' % get("position")
+                return self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true", "request": add_request})
+
+	def del_from_playlist(self, params = {}):
+		get = params.get
+                url = "http://gdata.youtube.com/feeds/api/users/default/playlists/%s/%s" % ( get("playlist_id"), get("entry_id") )
+                return self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true", "method": "DELETE"})
+
 	def getFolderInfo(self, xml, params = {}):
 		get = params.get
 		result = ""
