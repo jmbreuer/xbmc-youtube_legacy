@@ -167,13 +167,16 @@ class DialogDownloadProgressXML( xbmcgui.WindowXMLDialog ):
 
 class Window:
 	def __init__( self, parent_win=None, **kwargs ):
+		if xbmc.getInfoLabel( "Window.Property(DialogDownloadProgress.IsAlive)" ) == "true":
+			raise xbmcguiWindowError( "DialogDownloadProgress IsAlive: Not possible to overscan!" )
+
 		windowXml = DialogDownloadProgressXML( "DialogDownloadProgress.xml", __addonDir__, ADDON_SKIN )
 		self.controls = windowXml.controls
 		del windowXml
 
 		self.window   = parent_win
 		self.windowId = parent_win
-		self.active = xbmc.getInfoLabel( "Window.Property(DialogDownloadProgress.IsAlive)" ) == "true"
+
 		self.background = None
 		self.heading	= None
 		self.label	  = None
@@ -275,20 +278,9 @@ class DownloadProgress( Window ):
 		self.update( 0, heading, label)
 		
 	def isActive(self):
-		return self.active
+		return xbmc.getInfoLabel( "Window.Property(DialogDownloadProgress.IsAlive)" ) == "true"
 	
 	def iscanceled( self ):
-		""" @ module.py
-			if xbmc.getInfoLabel( "Window.Property(DialogAddonScanIsAlive)" ) == "true":
-				# ok rajoute un bouton stop dans le context menu
-				c_items += [ ( "Stop Addon Scan", "RunPlugin(%s?action=stopscan)" % sys.argv[ 0 ] ) ]
-				listitem.addContextMenuItems( c_items )
-
-			@ main.py
-			if "stopscan" in sys.argv[ 2 ]:
-				window = xbmcgui.Window( xbmcgui.getCurrentWindowId() )
-				window.setProperty( "CancelDialogAddonScan", "true" )
-		"""
 		return self.canceled
 
 	def update( self, percent=0, heading="", label="" ):

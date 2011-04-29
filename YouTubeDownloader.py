@@ -18,7 +18,8 @@
 
 import sys, urllib2, os, time, math
 from DialogDownloadProgress import DownloadProgress
-	
+import xbmc
+
 class YouTubeDownloader:	 
 	__settings__ = sys.modules[ "__main__" ].__settings__
 	__language__ = sys.modules[ "__main__" ].__language__
@@ -39,8 +40,8 @@ class YouTubeDownloader:
 			path = self.__settings__.getSetting( "downloadPath" )
 		
 		
-		scan = DownloadProgress()
-		if scan.active:
+		
+		if xbmc.getInfoLabel( "Window.Property(DialogDownloadProgress.IsAlive)" ) == "true":
 			self.__storage__.addVideoToDownloadQeueu(params)
 		else:
 			params["silent"] = "true"

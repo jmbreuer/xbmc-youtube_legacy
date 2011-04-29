@@ -556,7 +556,7 @@ class YouTubeCore(object):
 			result = con.read()
 			new_url = con.geturl()
 			con.close()
-
+			
 			# Return result if it isn't age restricted
 			if ( result.find("verify-age-actions") == -1):
 				return ( result, 200 )

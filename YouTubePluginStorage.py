@@ -246,7 +246,7 @@ class YouTubePluginStorage:
 		
 		self.__settings__.setSetting("download_queue",repr(videos))
 		
-		if not get("silent"):
+		if not get("silent",""):
 			self.__utils__.showMessage(self.__language__(30630), self.__language__(30631))
 		
 	def removeVideoFromDownloadQueue(self, videoid):
