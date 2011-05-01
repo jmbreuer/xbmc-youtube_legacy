@@ -240,4 +240,4 @@ class YouTubeLogin(object):
 			
 			return self.__settings__.getSetting( "login_info" )
 		except:
-			print self.__plugin__ + " crappy shit"
+			print self.__plugin__ + " _httplogin failed "
