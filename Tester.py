@@ -37,8 +37,8 @@ class Tester(object):
 	urls["test"] = "http://www.youtube.com/verify_age?next_url=http%3A//www.youtube.com/watch%3Fv%3DO-77ElyvRxI"
 				
 	def _httpLogin(self):
-		uname = "SmokeyTester48"
-		pword = "Farscape47"
+		uname = "Username"
+		pword = "password"
 		
 		if ( uname == "" and pword == "" ):
 			return ""
