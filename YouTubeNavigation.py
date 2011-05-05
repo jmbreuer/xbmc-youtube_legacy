@@ -87,7 +87,6 @@ class YouTubeNavigation:
 		cache = True
 		
 		path = get("path", "/root")
-		
 		if not get("feed") == "search" and not get("channel") and not get("contact") and not get("playlist") and get("page","0") == "0" and not get("scraper") == "search_disco":
 			for category in self.categories:
 				cat_get = category.get 
@@ -103,9 +102,7 @@ class YouTubeNavigation:
 								self.addListItem(params, category)
 				
 		if (get("feed") or get("user_feed") or get("options") or get("store") or get("scraper")):
-			result = self.list(params)
-			if not result:
-				return result
+			return self.list(params)
 				
 		video_view = self.__settings__.getSetting("list_view") == "1"
 		
@@ -131,10 +128,7 @@ class YouTubeNavigation:
 			self.__storage__.deleteStoredSearch(params)
 		if (get("action") == "edit_search" or get("action") == "edit_disco"):
 			self.__storage__.editStoredSearch(params)
-			if get("action") == "edit_search":
-				self.list(params)
-			else:
-				self.__scraper__.scrape(params)
+			self.listMenu(params)
 		if (get("action") == "remove_favorite"):
 			self.removeFromFavorites(params)
 		if (get("action") == "add_favorite"):
@@ -153,6 +147,7 @@ class YouTubeNavigation:
 			self.__player__.playVideo(params)
 		if (get("action") == "change_subscription_view"):
 			self.__storage__.changeSubscriptionView(params)
+			self.list(params)
 		if (get("action") == "play_all"):
 			self.__playlist__.playAll(params)
 		if (get("action") == "add_to_playlist"):
@@ -178,12 +173,12 @@ class YouTubeNavigation:
 		else:
 			(results , status) = self.__core__.list(params)
 				
-		if status == 200: 
+		if status == 200:
 			if get("folder"):
 				self.parseFolderList(params, results)
 			else:
 				self.parseVideoList(params, results)
-				return True
+			return True
 		else:
 			label = ""
 			if get("external"):
@@ -206,20 +201,18 @@ class YouTubeNavigation:
 				label = self.__language__(30627)
 			if label:
 				self.__utils__.showMessage(label, self.__language__(30601))
-		
 		return False
 		
 	#================================== Plugin Actions =========================================
-
+	
 	def addToFavorites(self, params = {}):
 		get = params.get
 		if (get("videoid")):
 			(message, status) = self.__core__.add_favorite(params)
 			if status != 200:
 				self.__utils__.showErrorMessage(self.__language__(30020), message, status)
-				return False
-
-			return True
+				return False	
+		return True
 			
 	def removeFromFavorites(self, params = {}):
 		get = params.get
@@ -229,8 +222,9 @@ class YouTubeNavigation:
 			if status != 200:
 				self.__utils__.showErrorMessage(self.__language__(30020), message, status)
 				return False
-
 			xbmc.executebuiltin( "Container.Refresh" )
+		
+		return True
 	
 	def addContact(self, params = {}):
 		get = params.get
@@ -244,7 +238,6 @@ class YouTubeNavigation:
 			if status != 200:
 				self.__utils__.showErrorMessage(self.__language__(30029), result, status)
 				return False
-
 			self.__utils__.showMessage(self.__language__(30613), contact)
 			xbmc.executebuiltin( "Container.Refresh" )
 
@@ -261,6 +254,7 @@ class YouTubeNavigation:
 			
 			self.__utils__.showMessage(self.__language__(30614), get("contact"))
 			xbmc.executebuiltin( "Container.Refresh" )
+		return True
 	
 	def addSubscription(self, params = {}):
 		get = params.get
@@ -385,11 +379,15 @@ class YouTubeNavigation:
 		listSize = len(results)
 		get = params.get
 		
+		cache = True
+		if get("store") or get("user_feed"):
+			cache = False
+		
 		for result_params in results:
 			result_params["path"] = get("path")
 			self.addFolderListItem( params, result_params, listSize + 1)
 		
-		xbmcplugin.endOfDirectory( handle=int( sys.argv[ 1 ] ), succeeded=True, cacheToDisc=False )
+		xbmcplugin.endOfDirectory( handle=int( sys.argv[ 1 ] ), succeeded=True, cacheToDisc=cache )
 	
 	#parses a video list consisting of a tuple of dictionaries 
 	def parseVideoList(self, params, results):
@@ -462,8 +460,8 @@ class YouTubeNavigation:
 			if (get("external") == "true" or (get("feed") != "subscriptions_favorites" and get("feed") != "subscriptions_uploads" and get("feed") != "subscriptions_playlists")):
 				cm.append( ( self.__language__( 30512 ) % item("Studio"), 'XBMC.RunPlugin(%s?path=%s&channel=%s&action=add_subscription)' % ( sys.argv[0], item("path"), item("Studio") ) ) )		
 			
-		if (get("feed") != "subscriptions_favorites" and get("feed") != "subscriptions_uploads" and get("feed") != "subscriptions_playlists"):
-			cm.append( ( self.__language__( 30516 ) % studio, "XBMC.Container.Update(%s?path=%s&login=true&feed=subscriptions_uploads&view_mode=subscriptions_uploads&channel=%s)" % ( sys.argv[0],  get("path"), url_studio ) ) )
+		if (get("feed") != "uploads"):
+			cm.append( ( self.__language__( 30516 ) % studio, "XBMC.Container.Update(%s?path=%s&feed=uploads&channel=%s)" % ( sys.argv[0],  get("path"), url_studio ) ) )
 			
 		if (get("scraper") == "search_disco"):
 			cm.append( ( self.__language__( 30523 ) % title, "XBMC.Container.Update(%s?path=%s&scraper=search_disco&search=%s)" % ( sys.argv[0],  get("path"), url_title ) ) )
@@ -483,18 +481,16 @@ class YouTubeNavigation:
 		if (item("next","false") == "true"):
 			return cm
 		
-		if ( item("user_feed") == "favorites"  or get("user_feed") == "playlists" or item("user_feed") == "uploads" or item("user_feed") == "newsubscriptions" or item("scraper") == "search_disco"):
-			if (item("user_feed") == "favorites" or item("user_feed") == "newsubscriptions"):
-				cm.append ( (self.__language__(30530), "XBMC.RunPlugin(%s?path=%s&action=play_all&user_feed=%s&contact=%s&)" % ( sys.argv[0], item("path"), item("user_feed"), "default" ) ) )
-				cm.append ( (self.__language__(30532), "XBMC.RunPlugin(%s?path=%s&action=play_all&shuffle=true&user_feed=%s&contact=%s&)" % ( sys.argv[0], item("path"), item("user_feed"), "default" ) ) )
-			if (get("user_feed") == "playlists" ):
-				cm.append ( (self.__language__(30536), "XBMC.RunPlugin(%s?path=%s&action=reverse_order&playlist=%s&)" % ( sys.argv[0], item("path"), item("playlist") ) ) )
-				cm.append ( (self.__language__(30530), "XBMC.RunPlugin(%s?path=%s&action=play_all&playlist=%s&)" % ( sys.argv[0], item("path"), item("playlist") ) ) )
-				cm.append ( (self.__language__(30532), "XBMC.RunPlugin(%s?path=%s&action=play_all&shuffle=true&playlist=%s&)" % ( sys.argv[0], item("path"), item("playlist") ) ) )
-			if (item("scraper") == "search_disco"):
-				cm.append( (self.__language__( 30530 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&search_disco=%s&)" % ( sys.argv[0], item("path"), item("search") ) ) )
-				cm.append( (self.__language__( 30532 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&shuffle=true&search_disco=%s&)" % ( sys.argv[0], item("path"), item("search") ) ) )
-			cm.append( ( self.__language__( 30507 ), "XBMC.Action(Queue)" ) )
+		if (not get("user_feed") == "subscriptions" and (item("user_feed") == "favorites" or item("user_feed") == "newsubscriptions")):
+			cm.append ( (self.__language__(30530), "XBMC.RunPlugin(%s?path=%s&action=play_all&user_feed=%s&contact=%s&)" % ( sys.argv[0], item("path"), item("user_feed"), "default" ) ) )
+			cm.append ( (self.__language__(30532), "XBMC.RunPlugin(%s?path=%s&action=play_all&shuffle=true&user_feed=%s&contact=%s&)" % ( sys.argv[0], item("path"), item("user_feed"), "default" ) ) )
+		if (item("playlist")):
+			cm.append ( (self.__language__(30536), "XBMC.RunPlugin(%s?path=%s&action=reverse_order&playlist=%s&)" % ( sys.argv[0], item("path"), item("playlist") ) ) )
+			cm.append ( (self.__language__(30530), "XBMC.RunPlugin(%s?path=%s&action=play_all&playlist=%s&)" % ( sys.argv[0], item("path"), item("playlist") ) ) )
+			cm.append ( (self.__language__(30532), "XBMC.RunPlugin(%s?path=%s&action=play_all&shuffle=true&playlist=%s&)" % ( sys.argv[0], item("path"), item("playlist") ) ) )
+		if (item("scraper") == "search_disco"):
+			cm.append( (self.__language__( 30530 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&search_disco=%s&)" % ( sys.argv[0], item("path"), item("search") ) ) )
+			cm.append( (self.__language__( 30532 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&shuffle=true&search_disco=%s&)" % ( sys.argv[0], item("path"), item("search") ) ) )
 		
 		if (item("feed") == "search"):
 			cm.append( ( self.__language__( 30515 ), 'XBMC.Container.Update(%s?path=%s&action=edit_search&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
@@ -513,20 +509,20 @@ class YouTubeNavigation:
 			cm.append( ( self.__language__( 30525 ), 'XBMC.RunPlugin(%s?path=%s&action=delete_disco&delete=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )								
 		
 		if (item("view_mode")):
-			cm_url = 'XBMC.RunPlugin(%s?path=%s&channel=%s&action=change_subscription_view&view_mode=%s&' % ( sys.argv[0], item("path"), item("channel"), "%s")
+			cm_url = 'XBMC.Container.Update(%s?path=%s&channel=%s&action=change_subscription_view&view_mode=%s&' % ( sys.argv[0], item("path"), item("channel"), "%s")
 			if (item("external")):
 				cm_url += "external=true&contact=" + get("contact") + "&"
 			cm_url +=")"
 			
 			if (item("user_feed") == "favorites"):
-				cm.append ( (self.__language__( 30511 ), cm_url % ("subscriptions_uploads")))
-				cm.append( (self.__language__( 30528 ), cm_url % ("subscriptions_playlists")))
+				cm.append ( (self.__language__( 30511 ), cm_url % ("uploads")))
+				cm.append( (self.__language__( 30528 ), cm_url % ("playlists&folder=true")))
 			elif(item("user_feed") == "playlists"):
-				cm.append( (self.__language__( 30511 ), cm_url % ("subscriptions_uploads"))) 
-				cm.append ( (self.__language__( 30510 ), cm_url % ("subscriptions_favorites")))
+				cm.append( (self.__language__( 30511 ), cm_url % ("uploads"))) 
+				cm.append ( (self.__language__( 30510 ), cm_url % ("favorites")))
 			elif (item("user_feed") == "uploads"):
-				cm.append ( (self.__language__( 30510 ), cm_url % ("subscriptions_favorites")))
-				cm.append( (self.__language__( 30528 ), cm_url % ("subscriptions_playlists")))
+				cm.append ( (self.__language__( 30510 ), cm_url % ("favorites")))
+				cm.append( (self.__language__( 30528 ), cm_url % ("playlists&folder=true")))
 		
 		if (item("channel") or item("contact")):
 			if ( self.__settings__.getSetting( "username" ) != "" and self.__settings__.getSetting( "auth" ) ):
