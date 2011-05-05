@@ -97,57 +97,49 @@ class YouTubeCore(object):
 		
 		if (get("feed")):
 			url = self.urls[get("feed")]
-			
-			if get("search"):
-				query = urllib.unquote_plus(get("search"))
-				safe_search = ("none", "moderate", "strict" ) [int( self.__settings__.getSetting( "safe_search" ) ) ]	
-				url = url % (query, safe_search)  
-				authors = self.__settings__.getSetting("stored_searches_author")
-				if len(authors) > 0:
-					try:
-						authors = eval(authors)
-						if query in authors:
-							url += "&" + urllib.urlencode({'author': authors[query]})
-					except:
-						print self.__plugin__ + " search - eval failed "	
-			
-			if (url.find("time") > 0 ):
-				url = url % time
-				
-			if ( url.find("?") == -1 ):
-				url += "?"
-			else:
-				url += "&"
-			
-			if not get("playlist"):
-				url += "start-index=" + repr(start_index) + "&max-results=" + repr(per_page)
-			
-			if (url.find("standardfeeds") > 0 and region):
-				url = url.replace("/standardfeeds/", "/standardfeeds/"+ region + "/")
 		
 		if (get("user_feed")):
 			url = self.urls[get("user_feed")]
+						
+		if get("search"):
+			query = urllib.unquote_plus(get("search"))
+			safe_search = ("none", "moderate", "strict" ) [int( self.__settings__.getSetting( "safe_search" ) ) ]	
+			url = url % (query, safe_search)  
+			authors = self.__settings__.getSetting("stored_searches_author")
+			if len(authors) > 0:
+				try:
+					authors = eval(authors)
+					if query in authors:
+						url += "&" + urllib.urlencode({'author': authors[query]})
+				except:
+					print self.__plugin__ + " search - eval failed "	
 			
-			if (url.find("%s") > 0):
-				if ( get("contact") and not (get("external") and get("channel"))):
-					url = url % get("contact")
-				elif ( get("channel")):
-					url = url % get("channel")
-				elif ( get("playlist")):
-					url = url % get("playlist")
-				elif ( get("feed") == "uploads" or get("feed") == "favorites" or  get("feed") == "playlists" or get("feed") == "subscriptions" or get("feed") == "newsubscriptions"):
-					url = url % "default"
-				else: 
-					url = url % "default"
+		if (url.find("%s") > 0):
+			if ( get("contact") and not (get("external") and get("channel"))):
+				url = url % get("contact")
+			elif ( get("channel") ):
+				url = url % get("channel")
+			elif ( get("playlist") ):
+				url = url % get("playlist")
+			elif ( get("videoid") ):
+				url = url % get("videoid")
+			else: 
+				url = url % "default"
+		
+		if (url.find("time") > 0 ):
+			url = url % time
 			
-			if ( url.find("?") == -1 ):
-				url += "?"
-			else:
-				url += "&"
+		if ( url.find("?") == -1 ):
+			url += "?"
+		else:
+			url += "&"
 			
-			if not get("folder") and not get("playlist"):
-				url += "start-index=" + repr(start_index) + "&max-results=" + repr(per_page)
-				
+		if not get("playlist") and not get("folder"):
+			url += "start-index=" + repr(start_index) + "&max-results=" + repr(per_page)
+		
+		if (url.find("standardfeeds") > 0 and region):
+			url = url.replace("/standardfeeds/", "/standardfeeds/"+ region + "/")
+						
 		url = url.replace(" ", "+")
 		return url
 	
@@ -253,7 +245,7 @@ class YouTubeCore(object):
 		
 		if ( page != 0 and store != ""):
 			try:
-				result = eval(store)
+				result = eval(store)						
 			except:
 				print self.__plugin__ + " folder - eval failed "	
 		
@@ -273,6 +265,26 @@ class YouTubeCore(object):
 				next = 'true'
 		
 		result = result[(per_page * page):(per_page * (page + 1))]
+		
+		if get("user_feed") == "subscriptions":
+			for item in result:					
+				viewmode = ""
+				if (get("external")):
+					viewmode += "external_" + get("contact") + "_"
+					item["external"] = "true"
+					item["contact"] = get("contact")
+				viewmode += "view_mode_" + item["Title"]
+				
+				if (self.__settings__.getSetting(viewmode) == "favorites"):
+					item["user_feed"] = "favorites"
+					item["view_mode"] = "subscriptions_uploads"
+				elif(self.__settings__.getSetting(viewmode) == "playlists"):
+					item["user_feed"] = "playlists"
+					item["folder"] = "true"
+					item["view_mode"] = "subscriptions_playlists"
+				else:
+					item["user_feed"] = "uploads"  
+					item["view_mode"] = "subscriptions_favorites"
 		
 		if next == "true":
 			self.__storage__.addNextFolder(result, params)
@@ -435,28 +447,11 @@ class YouTubeCore(object):
 				folder["contact"] = folder["Title"]
 				folder["store"] = "contact_options"
 				folder["folder"] = "true"
-
+			
 			if get("user_feed") == "subscriptions":
 				folder["channel"] = folder["Title"]
 				if (self.__settings__.getSetting(get("user_feed") + "_" + folder["channel"] + "_thumb")):
 					folder["thumbnail"] = self.__settings__.getSetting(get("user_feed") + "_" + folder["channel"] + "_thumb")
-					
-				viewmode = ""
-				if (get("external")):
-					viewmode += "external_" + get("contact") + "_"
-					folder["external"] = "true"
-					folder["contact"] = get("contact")
-				viewmode += "view_mode_" + folder["Title"]
-				
-				if (self.__settings__.getSetting(viewmode) == "subscriptions_favorites"):
-					folder["user_feed"] = "favorites"
-					folder["view_mode"] = "subscriptions_uploads"
-				elif(self.__settings__.getSetting(viewmode) == "subscriptions_playlists"):
-					folder["user_feed"] = "playlists"
-					folder["view_mode"] = "subscriptions_playlists"
-				else:
-					folder["user_feed"] = "uploads"  
-					folder["view_mode"] = "subscriptions_favorites"
 			
 			if get("user_feed") == "playlists":
 				folder["user_feed"] = "playlist"
@@ -585,29 +580,29 @@ class YouTubeCore(object):
 			else:
 				print self.__plugin__ + " _fetchPage couldn't get login token"
 		
-		#try:
-		con = urllib2.urlopen(request)
-		result = con.read()
-		new_url = con.geturl()
-		con.close()
+		try:
+			con = urllib2.urlopen(request)
+			result = con.read()
+			new_url = con.geturl()
+			con.close()
 			
-		# Return result if it isn't age restricted
-		if ( result.find("verify-age-actions") == -1):
-			return ( result, 200 )
-			
-		else:
-			# We need login to verify age
-			if not get("login"):
-				params["error"] = get("error", "0")
-				params["login"] = "true"
-				return self._fetchPage(params)
+			# Return result if it isn't age restricted
+			if ( result.find("verify-age-actions") == -1):
+				return ( result, 200 )
+				
 			else:
-				return self._verifyAge(result, new_url, params)
+				# We need login to verify age
+				if not get("login"):
+					params["error"] = get("error", "0")
+					params["login"] = "true"
+					return self._fetchPage(params)
+				else:
+					return self._verifyAge(result, new_url, params)
 		
-		#except urllib2.HTTPError, e:
-		#	err = str(e)
-		#	if self.__dbg__:
-		#		print self.__plugin__ + " _fetchPage HTTPError : " + err
+		except urllib2.HTTPError, e:
+			err = str(e)
+			if self.__dbg__:
+				print self.__plugin__ + " _fetchPage HTTPError : " + err
 
 
 		#	if ( err.find("201") > -1):
@@ -639,7 +634,7 @@ class YouTubeCore(object):
 #				print self.__plugin__ + ' _fetchPage ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
 #												 , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
 				
-#			return ( "", 500 )
+			return ( "", 500 )
 
 	def _verifyAge(self, result, new_url, params = {}):
 		get = params.get
