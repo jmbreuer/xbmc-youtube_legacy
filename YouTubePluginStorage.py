@@ -92,29 +92,30 @@ class YouTubePluginStorage:
 	def saveSearch(self, params = {}):
 		get = params.get
 		
-		if (get("store") == "searches" or get("feed") == "search"):
-			store = "stored_searches"
-		else:
-			store = "stored_disco_searches"
-		
-		new_query = urllib.unquote_plus(get("search"))
-		old_query = new_query
-		
-		if get("old_search"):
-			old_query = urllib.unquote_plus(get("old_search"))
-		try:
-			searches = eval(self.__settings__.getSetting(store))
-		except:
-			searches = []
-		
-		for count, search in enumerate(searches):
-			if (search.lower() == old_query.lower()):
-				del(searches[count])
-				break
-		
-		searchCount = ( 10, 20, 30, 40, )[ int( self.__settings__.getSetting( "saved_searches" ) ) ]
-		searches = [new_query] + searches[:searchCount]
-		self.__settings__.setSetting(store, repr(searches))
+		if get("search"):
+			if (get("store") == "searches" or get("feed") == "search"):
+				store = "stored_searches"
+			else:
+				store = "stored_disco_searches"
+			
+			new_query = urllib.unquote_plus(get("search"))
+			old_query = new_query
+			
+			if get("old_search"):
+				old_query = urllib.unquote_plus(get("old_search"))
+			try:
+				searches = eval(self.__settings__.getSetting(store))
+			except:
+				searches = []
+			
+			for count, search in enumerate(searches):
+				if (search.lower() == old_query.lower()):
+					del(searches[count])
+					break
+			
+			searchCount = ( 10, 20, 30, 40, )[ int( self.__settings__.getSetting( "saved_searches" ) ) ]
+			searches = [new_query] + searches[:searchCount]
+			self.__settings__.setSetting(store, repr(searches))
 	
 	def editStoredSearch(self, params = {}):
 		get = params.get
@@ -127,13 +128,12 @@ class YouTubePluginStorage:
 			if (get("action") == "edit_search"):
 				params["store"] = "searches"
 				self.saveSearch(params)
+				params["feed"] = "search"
 			else:
 				params["scraper"] = "search_disco"
 				self.saveSearch(params)
-		params["feed"] = "search"
 		params["old_search"] = ""
 		params["store"] = ""
-		xbmc.executebuiltin( "Container.Refresh" )
 	
 	def refineStoredSearch(self, params = {}):
 		get = params.get
@@ -196,8 +196,9 @@ class YouTubePluginStorage:
 			viewmode += "view_mode_" + get("channel")
 			
 			self.__settings__.setSetting(viewmode, get("view_mode"))
-		
-		xbmc.executebuiltin( "Container.Refresh" )
+			params['user_feed'] = get("view_mode")
+			if get("viewmode") == "playlists":
+				params["folder"] = "true"
 	
 	def reversePlaylistOrder(self, params = {}):
 		get = params.get
