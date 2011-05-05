@@ -150,8 +150,8 @@
     <string id="30507">Queue folder</string>
     <string id="30508">Delete search</string>
     <string id="30509">More results</string>
-    <string id="30510">Change subscription to favorites</string>
-    <string id="30511">Change subscription to uploads</string>
+    <string id="30510">View favorites</string>
+    <string id="30511">View uploads</string>
     <string id="30512">Subscribe to %s</string>
     <string id="30513">Unsubscribe from %s</string>
     <string id="30514">Find similar</string>
@@ -168,7 +168,7 @@
     <string id="30525">Delete disco search</string>
     <string id="30526">Play folder</string>
     <string id="30527">Now Playing...</string>
-    <string id="30528">Change subscription to playlists</string>
+    <string id="30528">View playlists</string>
     <string id="30529">Related videos</string>
     <string id="30530">Play All</string>
     <string id="30531">Play from here</string>
