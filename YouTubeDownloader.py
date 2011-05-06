@@ -128,11 +128,13 @@ class YouTubeDownloader:
 					break
 			
 			con.close()
+			file.close()
 		except:
 			try:
 				con.close()
+				file.close()
 			except:
-				print self.__player__ + " Failed to close download stream"	
+				print self.__player__ + " Failed to close download stream and file handle"	
 		
 		os.rename(filename_incomplete, filename_complete)
 		self.dialog.update(heading = self.__language__(30604), label=video["Title"])
