@@ -201,7 +201,7 @@
     <string id="30619">Couldn't scrape YouTube</string>
     <string id="30620">Stream type not supported</string>
     <string id="30621">Bad username or password</string>
-    <string id="30622">Playback failed, try logging in</string>
+    <string id="30622">Playback requires valid YouTube account</string>
     <string id="30623">Maximum login attempts tried.</string>
     <string id="30624">Downloading</string>
     <string id="30625">Download Failed</string>
@@ -212,5 +212,5 @@
     <string id="30630">Download queued</string>
     <string id="30631">Video added to download Queue</string>
     <string id="30632">Skipping download</string>
-    <string id="30633">Playback failed couldn't verify age</string> 
+    <string id="30633">Couldn't verify age</string> 
 </strings>
