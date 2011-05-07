@@ -211,5 +211,6 @@
     <string id="30629">YouTube doesn't seem to know this video id!</string>
     <string id="30630">Download queued</string>
     <string id="30631">Video added to download Queue</string>
-    <string id="30632">Skipping download</string> 
+    <string id="30632">Skipping download</string>
+    <string id="30633">Playback failed couldn't verify age</string> 
 </strings>
