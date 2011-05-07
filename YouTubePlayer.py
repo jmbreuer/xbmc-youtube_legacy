@@ -175,7 +175,7 @@ class YouTubePlayer(object):
 				print self.__plugin__ + " construct video url failed contents of video item " + repr(video)
 			self.__utils__.showErrorMessage(self.__language__(30603), video["apierror"], status)
 			return False
-						
+		
 		listitem=xbmcgui.ListItem(label=video['Title'], iconImage=video['thumbnail'], thumbnailImage=video['thumbnail'], path=video['video_url']);		
 		listitem.setInfo(type='Video', infoLabels=video)
 		
@@ -183,7 +183,7 @@ class YouTubePlayer(object):
 			print self.__plugin__ + " - Playing video: " + video['Title'] + " - " + get('videoid') + " - " + video['video_url']
 		
 		xbmcplugin.setResolvedUrl(handle=int(sys.argv[1]), succeeded=True, listitem=listitem)
-
+		
 		if self.__settings__.getSetting("lang_code") != "0":
 			self.addSubtitles(video)
 		
@@ -393,9 +393,12 @@ class YouTubePlayer(object):
 		if (status == 200 and get("action","") != "download"):
 			path = self.__settings__.getSetting( "downloadPath" )
 			path = "%s%s-[%s].mp4" % (path, ''.join(c for c in video['Title'] if c in self.__utils__.VALID_CHARS), video["videoid"])
-			if os.path.exists(path):
-				video['video_url'] = path
-				return (video, 200)
+			try:
+				if os.path.exists(path):
+					video['video_url'] = path
+					return (video, 200)
+			except:
+				print self.__plugin__ + " attempt to locate local file failed with unknown error, trying youtube instead"
 		
 		vget = video.get
 		if status == 403:
