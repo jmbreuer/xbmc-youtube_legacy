@@ -296,7 +296,7 @@ class YouTubePlayer(object):
 	
 	def getAlert(self, html, params = {}):
 		get = params.get
-		result = self.__language__(30622)	
+		result = self.__language__(30617)	
 		
 		search_string = 'class="yt-alert-content">'
 		if html.find(search_string) > 0:
@@ -385,8 +385,14 @@ class YouTubePlayer(object):
 		
 	def getVideoObject(self, params):
 		get = params.get
+		video = {}
 		
 		(html, status) = self.__core__._fetchPage({"link": self.urls["video_stream"] % get("videoid")})
+		
+		if status != 200:
+			video["apierror"] = html 
+			return (video,status)
+		
 		(video, status) = self.getVideoInfo(params)
 		
 		#Check if file has been downloaded locally and use that as a source instead

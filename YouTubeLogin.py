@@ -46,6 +46,7 @@ class YouTubeLogin(object):
 		(result, status) = self._login()
 				
 		if status == 200:
+			self._httpLogin(True)
 			self.__utils__.showErrorMessage(self.__language__(30031), result, 303)
 		else:
 			self.__utils__.showErrorMessage(self.__language__(30609), result, status)
@@ -157,25 +158,7 @@ class YouTubeLogin(object):
 			print self.__plugin__ + " _getAuth failed because login failed"
 		
 		return False
-	
-	def _getAlert(self, videoid):
-		if self.__dbg__:
-			print self.__plugin__ + " _getAlert begin"
-
-		http_result = self.__core__._fetchPage({"link": 'http://www.youtube.com/watch?v=' +videoid + "&safeSearch=none", "login": "true"})
-		
-		start = http_result.find('class="yt-alert-content">')
-		if start == -1:
-			return self.__language__(30622)
-		
-		start += len('class="yt-alert-content">')
-		result = http_result[start: http_result.find('</div>', start)].strip()
-
-		if self.__dbg__:
-			print self.__plugin__ + " _getAlert done: " + repr(start)
-
-		return result
-			
+				
 	def _httpLogin(self, new = False, error = 0):
 		if self.__dbg__:
 			print self.__plugin__ + " _httpLogin errors: " + str(error)
@@ -185,10 +168,12 @@ class YouTubeLogin(object):
 		
 		if ( uname == "" and pword == "" ):
 			return ""
-
+		
 		if ( new ):
 			self.__settings__.setSetting( "login_info", "" )
 		elif ( self.__settings__.getSetting( "login_info" ) != "" ):
+			if self.__dbg__:
+				print self.__plugin__ + " returning existing login info: " + self.__settings__.getSetting( "login_info" )
 			return self.__settings__.getSetting( "login_info" )
 								
 		cj = cookielib.LWPCookieJar()
