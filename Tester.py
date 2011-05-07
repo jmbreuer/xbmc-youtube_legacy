@@ -37,8 +37,8 @@ class Tester(object):
 	urls["test"] = "http://www.youtube.com/verify_age?next_url=http%3A//www.youtube.com/watch%3Fv%3DO-77ElyvRxI"
 				
 	def _httpLogin(self):
-		uname = "Username"
-		pword = "password"
+		uname = "SmokeyTester51"
+		pword = "Farscape47"
 		
 		if ( uname == "" and pword == "" ):
 			return ""
@@ -89,11 +89,7 @@ class Tester(object):
 	
 	def _verifyAge(self):
 		url = self.urls["test"]
-		
-		# pretty sure this isnt needed but what the hell
-		cookier_jar_opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookie_jar))
-		urllib2.install_opener(cookier_jar_opener)
-		
+				
 		request = urllib2.Request(url)
 		request.add_header('User-Agent', self.USERAGENT)
 		request.add_header('Cookie', 'LOGIN_INFO=' + self.login_info )
@@ -107,18 +103,13 @@ class Tester(object):
 		
 		print "next_url=" + next_url
 		
-		# 'XSRF_TOKEN': 'TWHcpnTLfIKMEZKBsVrpMO9MR5Z8MTMwNDM2NDA4MkAxMzA0Mjc3Njgy',
 		session_token_start = result.find("'XSRF_TOKEN': '") + len("'XSRF_TOKEN': '")
 		session_token_stop = result.find("',",session_token_start) 
 		session_token = result[result.find("'XSRF_TOKEN': '"):session_token_stop + 10]
 		print "session_token=" + session_token
 		session_token = result[session_token_start:session_token_stop]
 		print "session_token=" + session_token
-		
-		#pretty sure this isnt needed too but what the hell
-		redirect_opener = urllib2.build_opener(RedirectHandler)
-		urllib2.install_opener(redirect_opener)
-		
+				
 		request = urllib2.Request(url)
 		request.add_header('User-Agent', self.USERAGENT)
 		request.add_header('Cookie', 'LOGIN_INFO=' + self.login_info )
@@ -132,7 +123,6 @@ class Tester(object):
 		con.close()
 		
 		#If verification is success full new url must look like: 'http://www.youtube.com/index?has_verified=1'
-
 		print "New url: " + repr(new_url)
 		
 if (__name__ == "__main__" ):
