@@ -635,57 +635,107 @@ class YouTubeCore(object):
 #												 , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
 				
 			return ( "", 500 )
-
+		
 	def _verifyAge(self, result, new_url, params = {}):
 		get = params.get
-		if self.__dbg__ or True:
-			print self.__plugin__ + " verifyAge: " + repr(result) + " - " + repr(params)
-		
-		if self.__dbg__ or True:
-			print self.__plugin__ + " _verifyAge Video age restricted, trying to verify for url: " + new_url + " safe_search " + self.__settings__.getSetting( "safe_search" )
-		
+		confirmed = "0"
 		if self.__settings__.getSetting( "safe_search" ) != "2" or True:
-			confirmed = 1
-		else:
-			confirmed = 0
-				
+			confirmed = "1"
+
 		# Fallback for missing confirm form.
 		if result.find("confirm-age-form") == -1:
 			if self.__dbg__ or True:
-				print self.__plugin__ + " _verifyAge: Sorry - you must be 18 or over to view this video or group"
-			return ( self.__language__( 30608 ) , 303 )
-
-		request = urllib2.Request(new_url)
-		request.add_header('User-Agent', self.__utils__.USERAGENT)
-		request.add_header('Cookie', 'LOGIN_INFO=' + self.__login__._httpLogin(True) )
-
-		# This really should be a regex, but the regex kept failing.
-		temp = result[result.find("verify-age-actions"):(result.find("verify-age-actions") + 600)]
-		next_url = temp[( temp.find('"next_url" value="') + len('"next_url" value="')):]
-		next_url = next_url[:next_url.find('"')]
-
-		#values = { "next_url": next_url, "action_confirm": confirmed }
-		values = { "next_url": next_url, "action_confirm": "1" }
-
-		if self.__dbg__ or True:
-			print self.__plugin__ + " _verifyAge. next_url: " + next_url + " - " + urllib.urlencode(values)
+				print self.__plugin__ + " Failed trying to verify-age could find confirm age form."
+			return ( self.__language__( 30633 ) , 303 )
+						
+		# get next_url
+		next_url_start = result.find('"next_url" value="') + len('"next_url" value="')
+		next_url_stop = result.find('">',next_url_start)
+		next_url = result[next_url_start:next_url_stop]
 		
-		con = urllib2.urlopen(request, urllib.urlencode(values))
-
-		if self.__dbg__ or True:
-			print self.__plugin__ + " _verifyAge4. next_url: " + next_url
-
-		result = con.read()
+		if self.__dbg__:
+			print self.__plugin__ + " next_url=" + next_url
+		
+		# get session token to get around the cross site scripting prevetion
+		session_token_start = result.find("'XSRF_TOKEN': '") + len("'XSRF_TOKEN': '")
+		session_token_stop = result.find("',",session_token_start) 
+		session_token = result[session_token_start:session_token_stop]
+		
+		if self.__dbg__:
+			print self.__plugin__ + " session_token=" + session_token
+		
+		# post collected information to age the verifiaction page
+		request = urllib2.Request(new_url)
+		request.add_header('User-Agent', self.USERAGENT)
+		request.add_header('Cookie', 'LOGIN_INFO=' + self.login_info )
+		request.add_header("Content-Type","application/x-www-form-urlencoded")
+		values = urllib.urlencode( { "next_url": next_url, "action_confirm": "1", "session_token":session_token })
+		
+		if self.__dbg__:
+			print self.__plugin__ + " post page content: " + values
+		
+		con = urllib2.urlopen(request, values)
 		new_url = con.geturl()
+		result = con.read()
 		con.close()
+		
+		#If verification is success full new url must look like: 'http://www.youtube.com/index?has_verified=1'
+		if new_url.find("has_verified=1"):
+			params["error"] = str(int(get("error", "0")) + 1)
+			params["login"] = "true"
+			return self._fetchPage(params)
+		
+		# If verification failed we dump a shit load of info to the logs
+		if self.__dbg__:
+			print self.__plugin__ + " result url: " + repr(new_url)
+		
+		print self.__plugin__ + " age verification failed with result: " + repr(result)
+		return (self.__language__(30633), 303)
 
-		if self.__dbg__ or True:
-			print self.__plugin__ + " _verifyAge. Age should now be verified, calling _fetchPage again: " + new_url + " - " +  repr(result)
-
-		params["error"] = str(int(get("error", "0")) + 1)
-		params["login"] = "true"
-
-		return self._fetchPage(params)
+#	def _verifyAgeOld(self, result, new_url, params = {}):
+#		get = params.get
+#		if self.__dbg__ or True:
+#			print self.__plugin__ + " verifyAge: " + repr(result) + " - " + repr(params)
+#		
+#		if self.__dbg__ or True:
+#			print self.__plugin__ + " _verifyAge Video age restricted, trying to verify for url: " + new_url + " safe_search " + self.__settings__.getSetting( "safe_search" )
+#		
+#		if self.__settings__.getSetting( "safe_search" ) != "2" or True:
+#			confirmed = 1
+#		else:
+#			confirmed = 0
+#
+#		request = urllib2.Request(new_url)
+#		request.add_header('User-Agent', self.__utils__.USERAGENT)
+#		request.add_header('Cookie', 'LOGIN_INFO=' + self.__login__._httpLogin(True) )
+#
+#		# This really should be a regex, but the regex kept failing.
+#		temp = result[result.find("verify-age-actions"):(result.find("verify-age-actions") + 600)]
+#		next_url = temp[( temp.find('"next_url" value="') + len('"next_url" value="')):]
+#		next_url = next_url[:next_url.find('"')]
+#
+#		#values = { "next_url": next_url, "action_confirm": confirmed }
+#		values = { "next_url": next_url, "action_confirm": "1" }
+#
+#		if self.__dbg__ or True:
+#			print self.__plugin__ + " _verifyAge. next_url: " + next_url + " - " + urllib.urlencode(values)
+#		
+#		con = urllib2.urlopen(request, urllib.urlencode(values))
+#
+#		if self.__dbg__ or True:
+#			print self.__plugin__ + " _verifyAge4. next_url: " + next_url
+#
+#		result = con.read()
+#		new_url = con.geturl()
+#		con.close()
+#
+#		if self.__dbg__ or True:
+#			print self.__plugin__ + " _verifyAge. Age should now be verified, calling _fetchPage again: " + new_url + " - " +  repr(result)
+#
+#		params["error"] = str(int(get("error", "0")) + 1)
+#		params["login"] = "true"
+#
+#		return self._fetchPage(params)
 
 	def _getAuth(self):
 		if self.__dbg__:
