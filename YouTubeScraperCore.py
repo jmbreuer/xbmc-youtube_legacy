@@ -32,23 +32,22 @@ class YouTubeScraperCore:
 	
 	urls = {}
 	urls['categories'] = "http://www.youtube.com/videos"
-	urls['movies'] = "http://www.youtube.com/movies"
-	urls['shows'] = "http://www.youtube.com/shows"
-	urls['show_list'] = "http://www.youtube.com/show"
-	urls['disco_main'] = "http://www.youtube.com/disco" 
-	urls['disco_search'] = "http://www.youtube.com/disco?action_search=1&query=%s"
-	urls['disco_mix_list'] = "http://www.youtube.com/watch?v=%s&feature=disco&playnext=1&list=%s"
-	urls['main'] = "http://www.youtube.com"
-	urls['live'] = "http://www.youtube.com/live"
-	urls['watch_later'] = "http://www.youtube.com/my_watch_later_list"
-	urls['trailers'] = "http://www.youtube.com/trailers?s=tr"
-	urls['game_trailers'] = "http://www.youtube.com/trailers?s=gtcs"
 	urls['current_trailers'] = "http://www.youtube.com/trailers?s=trit&p=%s&hl=en"
-	urls['upcoming_trailers'] = "http://www.youtube.com/trailers?s=tros&p=%s&hl=en"
-	urls['popular_trailers'] = "http://www.youtube.com/trailers?s=trp&p=%s&hl=en"
+	urls['disco_main'] = "http://www.youtube.com/disco" 
+	urls['disco_mix_list'] = "http://www.youtube.com/watch?v=%s&feature=disco&playnext=1&list=%s"
+	urls['disco_search'] = "http://www.youtube.com/disco?action_search=1&query=%s"
+	urls['game_trailers'] = "http://www.youtube.com/trailers?s=gtcs"
+	urls['live'] = "http://www.youtube.com/live"
+	urls['main'] = "http://www.youtube.com"
+	urls['movies'] = "http://www.youtube.com/ytmovies"
 	urls['popular_game_trailers'] = "http://www.youtube.com/trailers?s=gtp&p=%s&hl=en"
-	urls['upcoming_game_trailers'] = "http://www.youtube.com/trailers?s=gtcs&p=%s&hl=en"
+	urls['popular_trailers'] = "http://www.youtube.com/trailers?s=trp&p=%s&hl=en"
 	urls['recommended'] = "http://www.youtube.com/videos?r=1&hl=en"
+	urls['show_list'] = "http://www.youtube.com/show"
+	urls['shows'] = "http://www.youtube.com/shows"
+	urls['trailers'] = "http://www.youtube.com/trailers?s=tr"
+	urls['upcoming_game_trailers'] = "http://www.youtube.com/trailers?s=gtcs&p=%s&hl=en"
+	urls['upcoming_trailers'] = "http://www.youtube.com/trailers?s=tros&p=%s&hl=en"
 	urls['watch_later'] = "http://www.youtube.com/my_watch_later_list"
 
 #=================================== Recommended ============================================
@@ -438,7 +437,7 @@ class YouTubeScraperCore:
 		
 		return (ytobjects, status)
 		
-		# If the show contains more than one season the function will returns a list of folder items,
+		# If the show contains more than one season the function will return a list of folder items,
 		# otherwise a paginated list of video items is returned
 	def scrapeShow(self, html, params = {}):
 		get = params.get
@@ -703,14 +702,24 @@ class YouTubeScraperCore:
 			else:
 				url = self.urls["categories"] + "?hl=en"
 		
-		elif (get("scraper") == "shows" or get("scraper") == "movies"):
+		elif (get("scraper") == "shows"):
 			if (get("category")):
 				category = get("category")
 				category = urllib.unquote_plus(category)
-				url = self.urls[get("scraper")] + "/" + category + "?p=" + page + "&hl=en"
+				url = self.urls["shows"] + "/" + category + "?p=" + page + "&hl=en"
 			else:
-				url = self.urls[get("scraper")] + "?hl=en"	
+				url = self.urls["shows"] + "?hl=en"
 				
+		elif (get("scraper") == "movies"):
+			if (get("category")):
+				category = get("category")
+				category = urllib.unquote_plus(category)
+				# careful not to double slashes here - e.g. http://youtube.com//ytmovies/... -
+				# YouTube doesn't like it (404s)
+				url = self.urls["main"] + category + "?p=" + page + "&hl=en"
+			else:
+				url = self.urls["movies"] + "?hl=en"
+
 		elif (get("show")):			
 			show = urllib.unquote_plus(get("show"))
 			if (show.find("p=") < 0):
