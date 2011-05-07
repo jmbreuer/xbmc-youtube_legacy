@@ -14,7 +14,10 @@
 [B]Errata[/B]
 - [XBMC] Thumbnails sometimes turns into black box or Folder (XBMC not detecting when thumbnail is set and defaulting to icon?)
 - [XBMC] When sorting items, it's impossible to get them to return to their original order.
-- [XBMC] has Excessive Memory use after running the plugin for prolonged periods of time 
+- [XBMC] Has Excessive Memory use after running the plugin for prolonged periods of time 
+- [XBMC] Playback of RTMPe streams (flash streaming) is currently broken as youtube updated to use a newer protocol than what XBMC supports
+- [XBMC] Theres an unknown issue with the version of urllib and openssl supplied by xbmc for python 2.4 on windows that causes severe login issues for windows users (ssl_ctx_new errors)
+- [YOUTUBE] Can't delete favorites (YouTube gives video id, not favorite id).
 - Download of rtmpe streams not supported.
 
 [B]Version 2.5.0 Beta[B]
@@ -32,7 +35,8 @@
 - Changed Download function now shows a progress-bar
 - Changed "Disco Top 25" to "Disco Top 50" scraper 
 - Changed plugin will now play a video from file-system if the file is still in the download folder (Partially working as this has revealed XBMC bug.)
-- Added 2 new feeds: “most shared” and “trending videos” that gives a better "pulse" of youtube videos.
+- Changed more videos by user, and related videos so you no longer have to be logged in for them to work.
+- Added 2 new feeds: "most shared" and "trending videos" that gives a better "pulse" of youtube videos.
 - Added YouTube live scraper under explore youtube
 - Added YouTube watch later Scraper (listing only)
 - Refactor: Simplify playback code
@@ -43,9 +47,16 @@
 - Fixed Disco scraper it was broken again.
 - Fixed add remove favorites
 - Fixed add remove subscription
+- Fixed broken Movies Scraper (from patch by chocol...@cpan.org)
+- Fixed problems when downloading a file to a network drives (thanks to ToCsIc...@gmail.com)
 
 [B]Version 2.0.4[/B]
-- Fixed Youtube character encoding changes broke disco scraper.
+- Fixed YouTube character encoding changes broke disco scraper.
+- Fixed YouTube character encoding changes broke show scraper
+- Fixed YouTube design changes broken categories scraper
+- Fixed broken Movies Scraper (backport of fix from new beta by chocol...@cpan.org)
+- Fixed problems when downloading a file to a network drives (thanks to ToCsIc...@gmail.com)
+- Changed more videos by user, and related videos so you no longer have to be logged in for them to work.
 
 [B]Version 2.0.3[/B]
 - Fixed Context menus were "suddenly" missing on a lot of folder items (probably since pre v.2)
