@@ -557,11 +557,56 @@ class YouTubeScraperCore:
 			return (self.__language__(30601), 303)
 		
 		yobjects[len(yobjects) -1]["next"] = next
-		
+			
 		return (yobjects, status)
 
-#=================================== Common ============================================		
+#=================================== Movies ============================================		
+
+	def scrapeMoviesGrid(self, html, params = {}):
+		get = params.get
+		yobjects = []
+		next = "false"
+		
+		pager = SoupStrainer(name="div", attrs = {'class':"yt-uix-pager"})
+		pagination = BeautifulSoup(html, parseOnlyThese=pager)
+
+		if (len(pagination) > 0):
+			tmp = str(pagination)
+			if (tmp.find("Next") > 0):
+				next = "true"
 			
+		list = SoupStrainer(name="ul", attrs = {'class':"browse-item-list"})
+		movies = BeautifulSoup(html, parseOnlyThese=list)
+		
+		if (len(movies) > 0):
+			movie = movies.li
+						
+			item = []
+			while ( movie != None ):
+				videoid = ""
+				video_info = movie.div.a.span.findNextSibling(name="span")
+				if video_info:
+					videoid = video_info['data-video-ids']
+						
+				if (videoid):					
+					item.append( (videoid, movie.div.a.span.img["data-thumb"]) )
+				
+				movie = movie.findNextSibling(name="li")
+			
+			(yobjects, result ) = self.__core__.getBatchDetailsThumbnails(item);
+			
+			if result != 200:
+				return (yobjects, result)
+
+		if (not yobjects):
+			return (yobjects, 500)
+		
+		yobjects[len(yobjects)-1]['next'] = next
+
+		return (yobjects, 200)
+
+#=================================== Common ============================================
+		
 	def scrapePageinator(self, params = {}):
 		get = params.get
 		original_page = int(get("page","0"))
@@ -607,6 +652,8 @@ class YouTubeScraperCore:
 				(result, status) = self.scrapeCategoriesGrid(html, params)
 			elif (get("scraper") == "shows"):
 				(result, status) = self.scrapeShowsGrid(html, params)	
+			elif (get("scraper") == "movies" and get("category")):
+				(result, status) = self.scrapeMoviesGrid(html, params)
 			else:
 				(result, status) = self.scrapeGridFormat(html, params)
 			
@@ -629,7 +676,9 @@ class YouTubeScraperCore:
 					if (get("scraper") == "categories"):
 						(new_result, status) = self.scrapeCategoriesGrid(html, params)
 					elif (get("scraper") == "shows"):
-						(new_result, status) = self.scrapeShowsGrid(html, params)	
+						(new_result, status) = self.scrapeShowsGrid(html, params)
+					elif (get("scraper") == "movies" and get("category")):
+						(result, status) = self.scrapeMoviesGrid(html, params)
 					else:
 						(new_result, status) = self.scrapeGridFormat(html, params)
 					
@@ -646,7 +695,7 @@ class YouTubeScraperCore:
 					i = i+1
 					if (i > 9):	
 						if (self.__dbg__):
-							print "Scraper pagination failed, requested more than 10 pages which should never happen."
+							print self.__plugin__ + " Scraper pagination failed, requested more than 10 pages which should never happen."
 						return False
 				
 				if (next == "false" and len(result) > per_page):
@@ -714,8 +763,6 @@ class YouTubeScraperCore:
 			if (get("category")):
 				category = get("category")
 				category = urllib.unquote_plus(category)
-				# careful not to double slashes here - e.g. http://youtube.com//ytmovies/... -
-				# YouTube doesn't like it (404s)
 				url = self.urls["main"] + category + "?p=" + page + "&hl=en"
 			else:
 				url = self.urls["movies"] + "?hl=en"
@@ -763,8 +810,6 @@ class YouTubeScraperCore:
 				trailer = trailers.div.div.div
 			
 			cell = "trailer-cell *vl"
-			if (get("scraper") == "movies"):
-				cell = "movie-cell *vl"
 			if (get("scraper") == "categories"):
 				cell = "video-cell"
 			
@@ -795,7 +840,7 @@ class YouTubeScraperCore:
 	def scrapeCategoryList(self, html = "", params = {}, tag = ""):
 		get = params.get
 		if self.__dbg__:
-			print self.__plugin__ + "scrapeCategories " 
+			print self.__plugin__ + " scrapeCategories " 
 		scraper = "categories"
 		thumbnail = "explore"
 		
@@ -805,6 +850,10 @@ class YouTubeScraperCore:
 		
 		list = SoupStrainer(name="div", attrs = {"class":"yt-uix-expander-body"})
 		categories = BeautifulSoup(html, parseOnlyThese=list)
+		
+		if len(categories) == 0:
+			list = SoupStrainer(name="div", id = "browse-filter-menu")
+			categories = BeautifulSoup(html, parseOnlyThese=list)
 		
 		yobjects = []
 		status = 200
@@ -836,7 +885,7 @@ class YouTubeScraperCore:
 						item['scraper'] = scraper
 						item["thumbnail"] = thumbnail
 						if self.__dbg__:
-							print self.__plugin__ + "adding item: " + item['Title'] + ", url: " + item['category']
+							print self.__plugin__ + "adding item: " + repr(item['Title']) + ", url: " + item['category']
 						yobjects.append(item)
 					
 					category = category.findNextSibling(name = "li")
