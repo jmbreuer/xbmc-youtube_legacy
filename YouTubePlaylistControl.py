@@ -113,14 +113,36 @@ class YouTubePlaylistControl:
 	def addToPlaylist(self, params = {}):
 		get = params.get
 		if (not get("playlist")):
-			dialog = xbmcgui.Dialog()
-			result = dialog.select('Smokey', ['The','Funsized','Bear'])
+			params["user_feed"] = "playlists"
+			(result, status) = self.__core__.listAll(params)
+			if status == 200:
+				list = []
+				list.append("New Playlist")
+				for item in result:
+					list.append(item["Title"])
+				dialog = xbmcgui.Dialog()
+				selected = dialog.select(self.__language__(30520), ['The','Funsized','Bear'])
+				
+				if selected == 0:
+					self.createPlayList(params)
+				elif selected > 0:
+					params["playlist"] = result[selected].get("playlist")
+					self.__core__.add_to_playlist(self, params)
+					self.__utils__.showMessage("Success", "Added to playlist")
+					return True
+		return False
 	
+	def createPlayList(self, params = {}):
+		get = params.get
+		input = self.__utils__.getUserInput("New Playlist")
+		
+		
+		
 	def removeFromPlaylist(self, params = {}):
 		get = params.get
 		
 		if get("playlist") and get("videoid"):
-			(message, status) = self.__core__.removeFromPlaylist(self, params = {})
+			(message, status) = self.__core__.remove_from_playlist(self, params = {})
 			
 			if (status != 200):
 				self.__utils__.showErrorMessage(self.__language__(30023), message, status)
