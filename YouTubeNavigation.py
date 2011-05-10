@@ -164,6 +164,8 @@ class YouTubeNavigation:
 		if (get("feed") == "search" or get("scraper") == "search_disco"):
 			if not get("search"):
 				query = self.__utils__.getUserInput(self.__language__(30006), '')
+				if not query:
+					return False
 				params["search"] = query
 			
 			self.__storage__.saveSearch(params)
