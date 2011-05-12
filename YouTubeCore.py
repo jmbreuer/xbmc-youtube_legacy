@@ -601,6 +601,11 @@ class YouTubeCore(object):
 		
 		except urllib2.HTTPError, e:
 			err = str(e)
+			if err.find("TokenExpired"):
+				self.__login__._login()
+				params["error"] = str(int(get("error", "0")) + 1)
+				return self._fetchPage(params)
+
 			if self.__dbg__:
 				print self.__plugin__ + " _fetchPage HTTPError : " + err
 		
