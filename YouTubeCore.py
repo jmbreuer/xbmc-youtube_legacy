@@ -123,11 +123,11 @@ class YouTubeCore(object):
 				url = url % get("playlist")
 			elif ( get("videoid") ):
 				url = url % get("videoid")
+			elif (url.find("time=") > 0 ): 
+				url = url % time
 			else: 
 				url = url % "default"
 		
-		if (url.find("time") > 0 ):
-			url = url % time
 			
 		if ( url.find("?") == -1 ):
 			url += "?"
