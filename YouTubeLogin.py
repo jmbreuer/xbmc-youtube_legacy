@@ -180,18 +180,18 @@ class YouTubeLogin(object):
 		
 		opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
 		urllib2.install_opener(opener)
-
+		
 		# Get GALX
 		url = urllib2.Request(urllib.unquote("https://www.google.com/accounts/ServiceLogin?service=youtube"))
 		url.add_header('User-Agent', self.USERAGENT)
-
+		
 		try:
 			if self.__dbg__:
 				print self.__plugin__ + " _httpLogin: getting new login_info"
 			con = urllib2.urlopen(url)
 			header = con.info()
 			galx = re.compile('Set-Cookie: GALX=(.*);Path=/accounts;Secure').findall(str(header))[0]
-
+			
 			cont = urllib.unquote("http%3A%2F%2Fwww.youtube.com%2Fsignin%3Faction_handle_signin%3Dtrue%26nomobiletemp%3D1%26hl%3Den_US%26next%3D%252Findex&hl=en_US&ltmpl=sso")
 			print self.__plugin__ + " cont_url = " + cont
 			params = urllib.urlencode({'GALX': galx,
@@ -206,7 +206,7 @@ class YouTubeLogin(object):
 			
 			con = urllib2.urlopen(url)
 			result = con.read()
-
+						
 			newurl = re.compile('<meta http-equiv="refresh" content="0; url=&#39;(.*)&#39;"></head>').findall(result)[0].replace("&amp;", "&")
 			url = urllib2.Request(newurl)
 			url.add_header('User-Agent', self.USERAGENT)

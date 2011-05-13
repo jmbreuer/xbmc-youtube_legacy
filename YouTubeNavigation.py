@@ -360,7 +360,7 @@ class YouTubeNavigation:
 			icon = "trailers"
 		elif(get("scraper","").find("movies") > 0):
 			icon = "movies"
-		elif(get("scraper","").find("disco")):
+		elif(get("scraper","").find("disco") > 0):
 			icon = "discoball"
 		
 		icon = self.__utils__.getThumbnail(icon)
