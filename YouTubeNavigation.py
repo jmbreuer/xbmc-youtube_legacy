@@ -361,7 +361,8 @@ class YouTubeNavigation:
 		elif(get("scraper","").find("movies") > 0):
 			icon = "movies"
 		elif(get("scraper","").find("disco")):
-			icon = "disco"
+			icon = "discoball"
+		
 		icon = self.__utils__.getThumbnail(icon)
 		
 		listitem=xbmcgui.ListItem(item("Title"), iconImage=icon, thumbnailImage=item("thumbnail") )

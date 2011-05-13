@@ -54,11 +54,11 @@ class YouTubePluginStorage:
 			
 			if (get("store") == "searches"):
 				item["feed"] = "search"
-				item["icon"] = self.__utils__.getThumbnail("search")
+				item["icon"] = "search"
 				item["thumbnail"] = self.__settings__.getSetting("search_" + search + "_thumb")
 			else:
 				item["scraper"] = "search_disco"
-				item["icon"] = self.__utils__.getThumbnail("discoball")
+				item["icon"] = "discoball"
 				item["thumbnail"] = self.__settings__.getSetting("disco_search_" + search + "_thumb")
 			
 			result.append(item)
