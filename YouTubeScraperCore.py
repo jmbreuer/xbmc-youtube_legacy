@@ -240,6 +240,7 @@ class YouTubeScraperCore:
 			print self.__plugin__ + " Disco search url " + repr(url)
 		
 		(page, status) = self.__core__._fetchPage({"link": url})
+		
 		if (page.find("list=") != -1):
 			page = page.replace("\u0026", "&")
 			mix_list_id = page[page.find("list=") + 5:]
@@ -255,7 +256,7 @@ class YouTubeScraperCore:
 										
 			(page, status) = self.__core__._fetchPage({"link": url})
 			
-			list = SoupStrainer(name="div", id ="quicklist")
+			list = SoupStrainer(name="div", id ="playlist-bar")
 			mix_list = BeautifulSoup(page, parseOnlyThese=list)
 			if (len(mix_list) > 0):
 				match = mix_list.div["data-video-ids"].split(",")
@@ -365,7 +366,7 @@ class YouTubeScraperCore:
 				videoid = video.div.a["href"]
 				videoid = videoid[videoid.rfind("/")+1:]
 				item["videoid"] = videoid
-								
+				item["icon"] = "live"
 				thumbnail = video.div.a.span.span.img["src"]
 				thumbnail = thumbnail.replace("default","0")
 				item["thumbnail"] = thumbnail
@@ -469,7 +470,7 @@ class YouTubeScraperCore:
 						item["season"] = season_url.encode("utf-8")
 						item["thumbnail"] = "shows"
 						item["scraper"] = "show"
-						item["icon"] = self.__utils__.getThumbnail("shows")
+						item["icon"] = "shows"
 						item["show"] = get("show")
 						yobjects.append(item)
 				else:
@@ -478,7 +479,7 @@ class YouTubeScraperCore:
 						item["Title"] = "Season " + season_url.encode("utf-8")
 						item["season"] = season_url.encode("utf-8")
 						item["thumbnail"] = "shows"
-						item["icon"] = self.__utils__.getThumbnail("shows")
+						item["icon"] = "shows"
 						item["scraper"] = "show"
 						item["show"] = get("show")
 						yobjects.append(item)
@@ -536,13 +537,13 @@ class YouTubeScraperCore:
 					
 					show_url = urllib.quote_plus(show_url)
 					item['show'] = show_url
-					item['icon'] = self.__utils__.getThumbnail("shows")
+					item['icon'] = "shows"
 					item['scraper'] = "show"
 					thumbnail = show.a.span.img['src']
 					if ( thumbnail.find("_thumb.") > 0):
 						thumbnail = thumbnail.replace("_thumb.",".")
 					else:
-						thumbnail = "show"
+						thumbnail = "shows"
 					
 					item["thumbnail"] = thumbnail
 					
