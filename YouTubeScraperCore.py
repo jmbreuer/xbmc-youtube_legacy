@@ -432,10 +432,10 @@ class YouTubeScraperCore:
 		subitems = videos[(per_page * page):(per_page * (page + 1))]
 		
 		( ytobjects, status ) = self.__core__.getBatchDetails(subitems)
-
-		if (len(ytobjects) > 0):
-			ytobjects[len(ytobjects)-1]['next'] = next
 		
+		if (next == "true"):
+			self.__storage__.addNextFolder(ytobjects, params)
+				
 		return (ytobjects, status)
 		
 		# If the show contains more than one season the function will return a list of folder items,
@@ -459,13 +459,16 @@ class YouTubeScraperCore:
 			
 			while (season != None):
 				item = {}
-				if (str(season).find("page not-selected") > 0):
+				if (str(season).find("page not-selected") > 0): 
 					season_url = season["href"]
 					
-					if (season_url.find("&amp;s=") > 0):
-						season_url = season_url[season_url.find("&amp;s=") + 7:]
-						if (season_url.find("&amp;") > 0):
-							season_url = season_url[:season_url.find("&amp;")]
+					if season_url:
+						season_url = season_url.replace("\u0026", "&")
+					
+					if (season_url.find("&s=") > 0):
+						season_url = season_url[season_url.find("&s=") + 3:]
+						if (season_url.find("&") > 0):
+							season_url = season_url[:season_url.find("&")]
 						item["Title"] = "Season " + season_url.encode("utf-8")
 						item["season"] = season_url.encode("utf-8")
 						item["thumbnail"] = "shows"
@@ -701,6 +704,7 @@ class YouTubeScraperCore:
 				
 				if (next == "false" and len(result) > per_page):
 					next = "true"
+					params["page"] = str(original_page)
 					
 				result = result[:per_page]
 				
