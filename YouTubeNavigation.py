@@ -441,11 +441,7 @@ class YouTubeNavigation:
 		
 		if (get("playlist")):
 			cm.append( (self.__language__(30531), "XBMC.RunPlugin(%s?path=%s&action=play_all&playlist=%s&videoid=%s&)" % ( sys.argv[0], item("path"), get("playlist"), item("videoid") ) ) )
-			cm.append( ("Remove From Playlist TEST", "XBMC.RunPlugin(%s?path=%s&action=remove_from_playlist&playlist=%s&videoid=%s&)" % ( sys.argv[0], item("path"), get("playlist"), item("videoid") ) ) )
-		
-		if (not get("playlist")):
-			cm.append( ("Add To Playlist TEST", "XBMC.RunPlugin(%s?path=%s&action=add_to_playlist&videoid=%s&)" % ( sys.argv[0], item("path"), item("videoid") ) ) )
-		
+					
 		if (get("user_feed") == "newsubscriptions" or get("user_feed") == "favorites"):
 			contact = "default"
 			if get("contact"):
@@ -465,7 +461,12 @@ class YouTubeNavigation:
 			else:
 				cm.append( ( self.__language__( 30503 ), 'XBMC.RunPlugin(%s?path=%s&action=add_favorite&videoid=%s&)' % ( sys.argv[0],  item("path"), item("videoid") ) ) )
 			if (get("external") == "true" or (get("feed") != "subscriptions_favorites" and get("feed") != "subscriptions_uploads" and get("feed") != "subscriptions_playlists")):
-				cm.append( ( self.__language__( 30512 ) % item("Studio"), 'XBMC.RunPlugin(%s?path=%s&channel=%s&action=add_subscription)' % ( sys.argv[0], item("path"), item("Studio") ) ) )		
+				cm.append( ( self.__language__( 30512 ) % item("Studio"), 'XBMC.RunPlugin(%s?path=%s&channel=%s&action=add_subscription)' % ( sys.argv[0], item("path"), item("Studio") ) ) )
+				
+			if (get("playlist")):
+				cm.append( (self.__language__(30535), "XBMC.RunPlugin(%s?path=%s&action=remove_from_playlist&playlist=%s&videoid=%s&)" % ( sys.argv[0], item("path"), get("playlist"), item("videoid") ) ) )
+			else:
+				cm.append( (self.__language__(30533), "XBMC.RunPlugin(%s?path=%s&action=add_to_playlist&videoid=%s&)" % ( sys.argv[0], item("path"), item("videoid") ) ) )
 			
 		if (get("feed") != "uploads"):
 			cm.append( ( self.__language__( 30516 ) % studio, "XBMC.Container.Update(%s?path=%s&feed=uploads&channel=%s)" % ( sys.argv[0],  get("path"), url_studio ) ) )
