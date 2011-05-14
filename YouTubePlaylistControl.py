@@ -28,13 +28,7 @@ class YouTubePlaylistControl:
 
 	__core__ = sys.modules[ "__main__" ].__core__
 	__scraper__ = sys.modules[ "__main__" ].__scraper__
-	__utils__ = sys.modules[ "__main__" ].__utils__
-	
-	urls = {};
-	urls['playlists'] = "http://gdata.youtube.com/feeds/api/playlists/%s?"
-	urls['favorites'] = "http://gdata.youtube.com/feeds/api/users/%s/favorites?"
-	urls['newsubscriptions'] = "http://gdata.youtube.com/feeds/api/users/%s/newsubscriptionvideos?";
-	
+	__utils__ = sys.modules[ "__main__" ].__utils__	
 	
 	def playAll(self, params={}):
 		get = params.get
@@ -89,8 +83,11 @@ class YouTubePlaylistControl:
 	
 	def getPlayList(self, params = {}):
 		get = params.get
-		feed = self.urls["playlists"] % get("playlist")
-		return self.__core__.listAll(feed, params)
+		
+		if not get("playlist"):
+			return False
+		params["user_feed"] = "playlist" 
+		return self.__core__.listAll(params)
 	
 	def getDiscoSearch(self, params = {}):
 		(result, status) = self.__scraper__.searchDisco(params)
@@ -98,46 +95,63 @@ class YouTubePlaylistControl:
 	
 	def getFavorites(self, params = {}):
 		get = params.get
+		
 		if not get("contact"):
-			return
-		feed = self.urls["favorites"] % get("contact")  
-		return self.__core__.listAll(feed, params)
+			return False
+		params["user_feed"] = "favorites"
+		return self.__core__.listAll(params)
 	
 	def getNewSubscriptions(self, params = {}):
 		get = params.get
+		
 		if not get("contact"):
-			return
-		feed = self.urls["newsubscriptions"] % get("contact")
-		return self.__core__.listAll(feed, params)
+			return False
+		params["user_feed"] = "newsubscriptions"
+		return self.__core__.listAll(params)
 	
 	def addToPlaylist(self, params = {}):
 		get = params.get
+		
 		if (not get("playlist")):
 			params["user_feed"] = "playlists"
+			params["login"] = "true"
 			(result, status) = self.__core__.listAll(params)
 			if status == 200:
 				list = []
-				list.append("New Playlist")
+				list.append(self.__language__(30534))
 				for item in result:
 					list.append(item["Title"])
 				dialog = xbmcgui.Dialog()
-				selected = dialog.select(self.__language__(30520), ['The','Funsized','Bear'])
+				selected = dialog.select(self.__language__(30520), list)
 				
 				if selected == 0:
 					self.createPlayList(params)
+					if get("title"):
+						(result, status) = self.__core__.listAll(params)
+						if status == 200:
+							for item in result:
+								if get("title") == item["Title"]:
+									params["playlist"] = item["playlist"]
+									break
 				elif selected > 0:
 					params["playlist"] = result[selected].get("playlist")
-					self.__core__.add_to_playlist(self, params)
-					self.__utils__.showMessage("Success", "Added to playlist")
-					return True
+		
+		if get("playlist"):
+			self.__core__.add_to_playlist(self, params)
+			return True
+		
 		return False
 	
 	def createPlayList(self, params = {}):
 		get = params.get
-		input = self.__utils__.getUserInput("New Playlist")
 		
-		
-		
+		input = self.__utils__.getUserInput(self.__language__(30534))
+		if input:
+			params["title"] = input
+			self.__core__.add_playlist(params)
+			return True
+		return False
+				
 	def removeFromPlaylist(self, params = {}):
 		get = params.get
 		
@@ -146,3 +160,6 @@ class YouTubePlaylistControl:
 			
 			if (status != 200):
 				self.__utils__.showErrorMessage(self.__language__(30023), message, status)
+				return False
+			xbmc.executebuiltin( "Container.Refresh" )
+		return True
