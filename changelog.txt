@@ -1,5 +1,6 @@
 [B]TODO:[/B]
 - Downloader should implement a queue <-- Henrik
+- Music Category Scraper and YouTube 100 playlist playback.
 - Utilise select dialog for playlist management for now (looks horrendous but its the best we can do for now) <-- Henrik
 - Implement playlist management support in core <-- Tobias
   - add_playlist, params = { "title" : "title", "summary": "summary" }
@@ -8,7 +9,6 @@
   - add_to_playlist, params = { "playlist_id": "something or other", "video_id": "id" }
   - remove_from_playlist, params = { "playlist_id": "something or other", "video_id": "id" }
   - move_in_playlist, params = { "playlist_id": "something or other", "video_id": "id", "position": "integer" }
-- 18+ videos. <-- Tobias & henrik
 - Check all context menu items again some seem to be broken <-- Henrik & Tobias
 
 [B]Errata[/B]
@@ -41,6 +41,7 @@
 - Added YouTube watch later Scraper (listing only)
 - Refactor: Simplify playback code
 - Refactor: Large scale refactor to make code more maintainable
+- Fixed Age Verification for 18+ content was broken by YouYube. 
 - Fixed notifications on empty folders
 - Fixed Playback of very low resolution videos
 - Fixed scraper pagination
