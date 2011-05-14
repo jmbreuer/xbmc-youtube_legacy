@@ -200,9 +200,7 @@ class YouTubeCore(object):
 				print self.__plugin__ + " playlist - eval failed "
 		
 		if not get("page"):
-			url = self.createUrl(params)
-			
-			result = self.listAll(url, params)
+			result = self.listAll(params)
 			
 			if len(result) == 0:
 				return (result, 303)
@@ -249,10 +247,8 @@ class YouTubeCore(object):
 			except:
 				print self.__plugin__ + " folder - eval failed "	
 		
-		if not get("page"):
-			url = self.createUrl(params)
-			
-			result = self.listAll(url, params)
+		if not get("page"):			
+			result = self.listAll(params)
 			
 			if len(result) == 0:
 				return (result, 303)
@@ -291,7 +287,7 @@ class YouTubeCore(object):
 		
 		return (result,200)
 
-	def listAll(self, feed, params ={}):
+	def listAll(self, params ={}):
 		get = params.get
 		result = ""
 		
@@ -300,6 +296,8 @@ class YouTubeCore(object):
 				if self.__dbg__:
 					print self.__plugin__ + " login required but auth wasn't set!"
 				return ( self.__language__(30609) , 303 )
+		
+		feed = self.createUrl(params)
 		
 		index = 1
 		url = feed + "start-index=" + str(index) + "&max-results=" + repr(50)
