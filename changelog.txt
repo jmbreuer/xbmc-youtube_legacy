@@ -1,14 +1,12 @@
 [B]TODO:[/B]
-- Downloader should implement a queue <-- Henrik
 - Music Category Scraper and YouTube 100 playlist playback.
+- Downloader should implement a queue <-- Henrik
 - Utilise select dialog for playlist management for now (looks horrendous but its the best we can do for now) <-- Henrik
 - Implement playlist management support in core <-- Tobias
   - add_playlist, params = { "title" : "title", "summary": "summary" }
   - remove_playlist, params = { "playlist_id": "something or other" }
-  - update_playlist, params = { "playlist_id": "something or other", "title" : "title", "summary": "summary" }
   - add_to_playlist, params = { "playlist_id": "something or other", "video_id": "id" }
   - remove_from_playlist, params = { "playlist_id": "something or other", "video_id": "id" }
-  - move_in_playlist, params = { "playlist_id": "something or other", "video_id": "id", "position": "integer" }
 - Check all context menu items again some seem to be broken <-- Henrik & Tobias
 
 [B]Errata[/B]
