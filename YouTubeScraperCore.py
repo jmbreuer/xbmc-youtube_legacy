@@ -566,6 +566,30 @@ class YouTubeScraperCore:
 
 #=================================== Movies ============================================		
 
+	def scrapeMovieSubCategory(self, html, params = {}):
+		get = params.get
+		ytobjects = []
+
+		list = SoupStrainer(name="div", attrs = {'class':"ytg-fl browse-content"})
+		categories = BeautifulSoup(html, parseOnlyThese=list)
+		if len(categories):
+			categorylist = categories.findAll(name="div", attrs = {'class':"yt-uix-slider-head"})
+			for category in categorylist:
+				item = {}
+				cat = category.div.button["href"]
+				title = category.div.findNextSibling(name="div")
+				title = title.h2.contents[0].strip()
+				item['Title'] = title
+				cat = cat.replace("/movies/", "")												
+				cat = urllib.quote_plus(cat)
+				item['category'] = cat
+				item['scraper'] = "movies"
+				item["thumbnail"] = "movies"
+				ytobjects.append(item)
+		
+		params["folder"] = "true"
+		return (ytobjects, 200)
+	
 	def scrapeMoviesGrid(self, html, params = {}):
 		get = params.get
 		yobjects = []
@@ -624,7 +648,7 @@ class YouTubeScraperCore:
 				scraper_per_page = 36
 		elif ( get("scraper") == "shows" and get("category")):
 			scraper_per_page = 44
-		elif ( get("scraper") == "movies" and get("category")):
+		elif ( get("scraper") == "movies" and get("category") and not get("subcategory")):
 			scraper_per_page = 60		
 		elif (get("scraper") != "shows" and 
 			get("scraper") != "show" and 
@@ -721,11 +745,12 @@ class YouTubeScraperCore:
 				print self.__plugin__ + " fetching url: " + url 
 				
 			(html,status) = self.__core__._fetchPage({"link": url})
-			if (get("scraper") == "categories" )	:
+			if (get("scraper") == "categories" ):
 				if (get("category")):
 					return self.scrapeCategoriesGrid(html, params)
 				else:
 					return self.scrapeCategoryList(html, params)
+				
 			elif (get("show")):
 				return self.scrapeShow(html, params)
 			elif (get("scraper") == "shows"):
@@ -735,7 +760,10 @@ class YouTubeScraperCore:
 					return self.scrapeCategoryList(html, params, "shows")
 			elif (get("scraper") == "movies"):
 				if (get("category")):
-					return self.scrapeGridFormat(html, params)
+					if get("subcategory"):
+						return self.scrapeMovieSubCategory(html, params)
+					else:
+						return self.scrapeGridFormat(html, params)
 				else: 
 					return self.scrapeCategoryList(html, params, "movies")
 			else:
@@ -768,7 +796,10 @@ class YouTubeScraperCore:
 			if (get("category")):
 				category = get("category")
 				category = urllib.unquote_plus(category)
-				url = self.urls["main"] + category + "?p=" + page + "&hl=en"
+				if get("subcategory"):
+					url = self.urls["main"] + "/movies/" + category + "?hl=en"
+				else:
+					url = self.urls["main"] + "/movies/" + category + "?p=" + page + "&hl=en"
 			else:
 				url = self.urls["movies"] + "?hl=en"
 
@@ -884,7 +915,13 @@ class YouTubeScraperCore:
 								cat = "?c=23"
 							if cat.find("gaming") > 0:
 								cat = "?c=20"
-						
+						if get("scraper") == "movies":
+							if cat.find("pt=nr") > 0:
+								category = category.findNextSibling(name = "li")
+								continue
+							elif cat == "indian-cinema":
+								item["subcategory"] = "true"
+												
 						cat = urllib.quote_plus(cat)
 						item['category'] = cat
 						item['scraper'] = scraper
