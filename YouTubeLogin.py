@@ -91,7 +91,7 @@ class YouTubeLogin(object):
 		except urllib2.HTTPError, e:
 			err = str(e)
 			if self.__dbg__:
-				print self.__plugin__ + " login failed, hit http except: " + err
+				print self.__plugin__ + " login failed, hit http error except: " + err
 			if e.code == 403:
 				return ( self.__language__(30621), 303 )
 			return ( err, 303 )
@@ -104,7 +104,7 @@ class YouTubeLogin(object):
 		
 		except IOError, e:
 			if self.__dbg__:
-				print self.__plugin__ + " login failed, hit ioerror except2: : " + repr(e)
+				print self.__plugin__ + " login failed, hit ioerror except: " + repr(e)
 				print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
 								   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
 				print self.interrogate(e)
@@ -123,7 +123,7 @@ class YouTubeLogin(object):
 		except urllib2.URLError, e:
 			err = repr(e)
 			if self.__dbg__:
-				print self.__plugin__ + " login failed, hit url except: " + err
+				print self.__plugin__ + " login failed, hit url error except: " + err
 			return ( err, 303 )										
 		except:
 			if self.__dbg__:
