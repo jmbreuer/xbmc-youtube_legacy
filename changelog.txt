@@ -52,11 +52,14 @@
 - Fixed problems when downloading a file to a network drives (thanks to ToCsIc...@gmail.com)
 
 [B]Version 2.0.4[/B]
+- Verfied Compatibility with Eden - pre and submitted to repo.
 - Fixed YouTube character encoding changes broke disco scraper.
 - Fixed YouTube character encoding changes broke show scraper
+- Fixed Site changes broke Disco top 25 scraper
 - Fixed YouTube design changes broken categories scraper
-- Fixed broken Movies Scraper (backport of fix from new beta by chocol...@cpan.org)
-- Fixed problems when downloading a file to a network drives (thanks to ToCsIc...@gmail.com)
+- Fixed Movies Scraper (backport of fix from new beta by chocol)
+- Fixed problems when downloading a file to a network drives (thanks to ToCsIc)
+- Fixed Age verification was broken, back working again.
 - Changed more videos by user, and related videos so you no longer have to be logged in for them to work.
 
 [B]Version 2.0.3[/B]
