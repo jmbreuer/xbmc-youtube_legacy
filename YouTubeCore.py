@@ -579,7 +579,7 @@ class YouTubeCore(object):
 			con.close()
 			
 			# Return result if it isn't age restricted
-			if ( result.find("verify-age-actions") == -1):
+			if ( result.find("verify-actions") == -1 and result.find("verify-age-actions") == -1):
 				return ( result, 200 )
 			else:
 				print self.__plugin__ + " found verify age request: " + repr(params) 
