@@ -174,9 +174,11 @@ class YouTubeScraperCore:
 				while (video != None):
 					id = video.div.a["href"]
 					if (id.find("/watch?v=") != -1):
-						id = id[id.find("=") + 1:id.find("&")]
-						items.append(id)
-						video = video.findNextSibling(name="div", attrs = {'class':"video-cell"})
+						id = id[id.find("=") + 1:]
+					if (id.find("&") > 0):
+						id = id[:id.find("&")]
+					items.append(id)
+					video = video.findNextSibling(name="div", attrs = {'class':"video-cell"})
 		
 		if (items):
 			(results, status) = self.__core__.getBatchDetails(items)
