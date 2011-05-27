@@ -193,31 +193,43 @@ class YouTubeCore(object):
 		if get("external"):
 			store_key += "_external_" + get("contact") 
 
-		store = self.__settings__.getSetting(store_key)
-		
-		if ( page != 0 and store != ""):
-			try:
-				result = eval(store)
-			except:
-				print self.__plugin__ + " playlist - eval failed "
-		
-		if not get("page"):
-			result = self.listAll(params)
+		if page != 0:	
+			store = self.__settings__.getSetting(store_key)
 			
+			if ( store != ""):
+				videoids = store.split("|")
+			
+			next = 'false'
+			if ( per_page * ( page + 1 ) < len(videoids) ):
+				next = 'true'
+			
+			videoids = videoids[(per_page * page):(per_page * (page + 1))]
+			
+			(result, status) = self.getBatchDetails(videoids, params)
+		
+		else:
+			result = self.listAll(params)
+				
 			if len(result) == 0:
 				return (result, 303)
 			
-			self.__settings__.setSetting(store_key, repr(result))
+			videoids = []
+			for video in result:
+				vget = video.get
+				videoids.append(vget("videoid","false"))
+			
+			self.__settings__.setSetting(store_key, self.__utils__.arrayToPipeDelimitedString(videoids))
+			
 			thumbnail = result[0].get('thumbnail', "")
 			if thumbnail:
 				self.__settings__.setSetting("playlist_" + get("playlist") + "_thumb", thumbnail)
+			
+			next = 'false'	
+			if (len(result) > 0):
+				if ( per_page * ( page + 1 ) < len(result) ):
+					next = 'true'
 		
-		next = 'false'	
-		if (len(result) > 0):
-			if ( per_page * ( page + 1 ) < len(result) ):
-				next = 'true'
-		
-		result = result[(per_page * page):(per_page * (page + 1))]
+			result = result[(per_page * page):(per_page * (page + 1))]
 		
 		if next == "true":
 			self.__storage__.addNextFolder(result, params)
