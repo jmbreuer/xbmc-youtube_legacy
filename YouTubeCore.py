@@ -102,7 +102,7 @@ class YouTubeCore(object):
 		
 		if (get("user_feed")):
 			url = self.urls[get("user_feed")]
-						
+		
 		if get("search"):
 			query = urllib.unquote_plus(get("search"))
 			safe_search = ("none", "moderate", "strict" ) [int( self.__settings__.getSetting( "safe_search" ) ) ]	
@@ -123,20 +123,19 @@ class YouTubeCore(object):
 				url = url % get("channel")
 			elif ( get("playlist") ):
 				url = url % get("playlist")
-			elif ( get("videoid") ):
+			elif ( get("videoid") and not get("action") == "add_to_playlist"):
 				url = url % get("videoid")
 			elif (url.find("time=") > 0 ): 
-				url = url % time
+				url = url % time			
 			else: 
 				url = url % "default"
-		
 			
 		if ( url.find("?") == -1 ):
 			url += "?"
 		else:
 			url += "&"
 			
-		if not get("playlist") and not get("folder"):
+		if not get("playlist") and not get("folder") and not get("action") == "add_to_playlist":
 			url += "start-index=" + repr(start_index) + "&max-results=" + repr(per_page)
 		
 		if (url.find("standardfeeds") > 0 and region):
@@ -233,7 +232,7 @@ class YouTubeCore(object):
 		
 		if next == "true":
 			self.__storage__.addNextFolder(result, params)
-				
+		
 		return (result, 200)
 	
 	def listFolder(self, params = {}):
