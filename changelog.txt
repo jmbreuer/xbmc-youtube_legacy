@@ -38,6 +38,7 @@
 - Changed more videos by user, and related videos so you no longer have to be logged in for them to work.
 - Added 2 new feeds: "most shared" and "trending videos" that gives a better "pulse" of youtube videos.
 - Added YouTube live scraper under explore youtube
+- Added YouTube Top 100 music chart scraper 
 - Added YouTube watch later Scraper (listing only)
 - Refactor: Simplify playback code
 - Refactor: Large scale refactor to make code more maintainable
