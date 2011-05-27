@@ -112,32 +112,36 @@ class YouTubePlaylistControl:
 	def addToPlaylist(self, params = {}):
 		get = params.get
 		
+		result = []
 		if (not get("playlist")):
 			params["user_feed"] = "playlists"
 			params["login"] = "true"
-			(result, status) = self.__core__.listAll(params)
-			if status == 200:
-				list = []
-				list.append(self.__language__(30534))
-				for item in result:
-					list.append(item["Title"])
-				dialog = xbmcgui.Dialog()
-				selected = dialog.select(self.__language__(30520), list)
-				
-				if selected == 0:
-					self.createPlayList(params)
-					if get("title"):
-						(result, status) = self.__core__.listAll(params)
-						if status == 200:
-							for item in result:
-								if get("title") == item["Title"]:
-									params["playlist"] = item["playlist"]
-									break
-				elif selected > 0:
-					params["playlist"] = result[selected].get("playlist")
+			params["folder"] = "true"
+			result = self.__core__.listAll(params)
+		
+		selected = -1
+		if result:
+			list = []
+			list.append(self.__language__(30534))
+			for item in result:
+				list.append(item["Title"])
+			dialog = xbmcgui.Dialog()
+			selected = dialog.select(self.__language__(30520), list)
+			
+		if selected == 0:
+			self.createPlayList(params)
+			if get("title"):
+				(result, status) = self.__core__.listAll(params)
+				if status == 200:
+					for item in result:
+						if get("title") == item["Title"]:
+							params["playlist"] = item["playlist"]
+							break
+		elif selected > 0:
+			params["playlist"] = result[selected].get("playlist")
 		
 		if get("playlist"):
-			self.__core__.add_to_playlist(self, params)
+			self.__core__.add_to_playlist(params)
 			return True
 		
 		return False
