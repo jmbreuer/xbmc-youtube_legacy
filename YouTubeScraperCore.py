@@ -49,6 +49,7 @@ class YouTubeScraperCore:
 	urls['upcoming_game_trailers'] = "http://www.youtube.com/trailers?s=gtcs&p=%s&hl=en"
 	urls['upcoming_trailers'] = "http://www.youtube.com/trailers?s=tros&p=%s&hl=en"
 	urls['watch_later'] = "http://www.youtube.com/my_watch_later_list"
+	urls['music'] = "http://www.youtube.com/music"
 
 #=================================== Recommended ============================================
 	def scrapeRecommended(self, params = {}):
@@ -336,10 +337,11 @@ class YouTubeScraperCore:
 			artists = popular.findAll(attrs={"class":"popular-artist-row"})
 			for artist in artists:
 				item = {}
-				item["search"] = artist.contents[0]
-				item["Title"] = artist.contents[0]
-				if (self.__settings__.getSetting("disco_search_" + artist.contents[0] + "_thumb")):
-					item["thumbnail"] = self.__settings__.getSetting("disco_search_" + artist.contents[0] + "_thumb")
+				title = self.__utils__.makeAscii(artist.contents[0])
+				item["search"] = title
+				item["Title"] = title
+				if (self.__settings__.getSetting("disco_search_" + title + "_thumb")):
+					item["thumbnail"] = self.__settings__.getSetting("disco_search_" + title + "_thumb")
 				else:
 					item["thumbnail"] = "discoball"
 				item["path"] = get("path")
@@ -565,6 +567,63 @@ class YouTubeScraperCore:
 		yobjects[len(yobjects) -1]["next"] = next
 			
 		return (yobjects, status)
+
+#=================================== Music ============================================		
+
+	def scrapeYouTubeTop100(self, params = {}):
+		get = params.get
+		page = int(get("page", "0"))
+		per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
+		
+		videos = []
+		existingVideos = self.__settings__.getSetting("music_top100")
+		
+		if ( page == 0 or existingVideos == ""):
+			videos = self.scrapeYouTubeTop100List(params)
+			if (videos):
+				self.__settings__.setSetting("music_top100", self.__utils__.arrayToPipeDelimitedString(videos))
+		else:
+			videos = existingVideos.split("|")
+			videos = videos[:100]
+		
+		next = 'false'
+		if ( per_page * ( page + 1 ) < len(videos) ):
+			next = 'true'
+		
+		subitems = videos[(per_page * page):(per_page * (page + 1))]
+		
+		if (get("fetch_all") == "true"):
+			subitems = videos
+		
+		if len(subitems) > 0:
+			(result , status) = self.__core__.getBatchDetails(subitems)
+			if (status == 200):
+				if (next == "true"):
+					self.__storage__.addNextFolder(result, params)
+			return (result, status) 
+		
+		return ([], 500)
+
+	def scrapeYouTubeTop100List(self, params = {}):
+		get = params.get
+		ytobjects = []
+		url = self.createUrl(params)
+		
+		(html, status) = self.__core__._fetchPage({"link": url})
+		
+		if status == 200:
+			list = SoupStrainer(name="div", id="weekly-hits")
+			videos = BeautifulSoup(html, parseOnlyThese=list)
+			if len(videos) > 0:
+				list = videos.div.div.div.button["href"]
+				if list.find("more_url=/music&video_ids="):
+					list = list[list.find("video_ids=") + len("video_ids="):]
+					list = list[:list.find("&")]
+					list = urllib.unquote_plus(list)
+					ytobjects = list.split(",")		
+		return ytobjects
+
+
 
 #=================================== Movies ============================================		
 
@@ -804,7 +863,8 @@ class YouTubeScraperCore:
 					url = self.urls["main"] + "/movies/" + category + "?p=" + page + "&hl=en"
 			else:
 				url = self.urls["movies"] + "?hl=en"
-
+		elif(get("scraper") == "music_top100"):
+			url = self.urls["music"]
 		elif (get("show")):			
 			show = urllib.unquote_plus(get("show"))
 			if (show.find("p=") < 0):
@@ -813,7 +873,6 @@ class YouTubeScraperCore:
 				url = self.urls["show_list"] + "?" + show + "&hl=en"
 			if (get("season")):
 				url = url + "&s=" + get("season")
-			
 		else:
 			if (get("scraper") in self.urls):
 				url = self.urls[get("scraper")]
@@ -823,6 +882,7 @@ class YouTubeScraperCore:
 					url = self.urls["trailers"]
 				else:
 					url = self.urls["game_trailers"]
+		
 				
 		return url
 	
@@ -955,6 +1015,8 @@ class YouTubeScraperCore:
 			return self.scrapeDiscoTopArtist(params)
 		if (get("scraper") == "recommended"):
 			return self.scrapeRecommended(params)
+		if (get("scraper") == "music_top100"):
+			return self.scrapeYouTubeTop100(params)
 		
 		return self.scrapePageinator(params)
 	
