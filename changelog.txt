@@ -1,10 +1,11 @@
 [B]TODO:[/B]
 - Utilise select dialog for playlist management for now (looks horrendous but its the best we can do for now) <-- Henrik
 - Plugin should mark as watched on watch later <-- Tobias 
-- Implement playlist management support in core <-- Tobias
+- Get subtitle downloading working in YouTubeDownloader <-- Tobias
+- Implement playlist management support in core <-- Tobias (Henrik: These seem not to work as we keep getting http 400 bad request)
   - add_playlist, params = { "title" : "title", "summary": "summary" }
   - remove_playlist, params = { "playlist_id": "something or other" }
-  - add_to_playlist, params = { "playlist_id": "something or other", "video_id": "id" }
+  - add_to_playlist, params = { "playlist_id": "something or other", "video_id": "id" } <-- tested this one
   - remove_from_playlist, params = { "playlist_id": "something or other", "video_id": "id" }
 - Add additional advanced setting to select between SD quality <-- Tobias
 - Music Category Scraper and YouTube 100 playlist playback.
@@ -17,7 +18,6 @@
 - [XBMC] Has Excessive Memory use after running the plugin for prolonged periods of time 
 - [XBMC] Playback of RTMPe streams (flash streaming) is currently broken as youtube updated to use a newer protocol than what XBMC supports
 - [XBMC] Theres an unknown issue with the version of urllib and openssl supplied by xbmc for python 2.4 on windows that causes severe login issues for windows users (ssl_ctx_new errors)
-- [YOUTUBE] Can't delete favorites (YouTube gives video id, not favorite id).
 - Download of rtmpe streams not supported.
 
 [B]Version 2.5.0 Beta[B]
