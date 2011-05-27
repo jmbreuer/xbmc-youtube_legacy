@@ -63,7 +63,7 @@ class YouTubeDownloader:
 			print self.__plugin__ + " Creating Dialog"
 			self.dialog = DownloadProgress()
 			print self.__plugin__ + " Created Dialog"
-			self.dialog.create( heading = self.__language__( 30624 ), label = "")
+			self.dialog.create( heading = self.__language__( 30634 ), label = "")
 			print self.__plugin__ + " Updated headline Dialog"
 	
 			while videoid:
