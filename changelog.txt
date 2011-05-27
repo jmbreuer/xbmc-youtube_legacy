@@ -1,5 +1,6 @@
 [B]TODO:[/B]
 - Utilise select dialog for playlist management for now (looks horrendous but its the best we can do for now) <-- Henrik
+- Plugin should mark as watched on watch later <-- Tobias 
 - Implement playlist management support in core <-- Tobias
   - add_playlist, params = { "title" : "title", "summary": "summary" }
   - remove_playlist, params = { "playlist_id": "something or other" }
