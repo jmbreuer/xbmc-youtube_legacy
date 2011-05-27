@@ -83,8 +83,10 @@ class YouTubeCore(object):
 	urls['feed_recent'] = "http://gdata.youtube.com/feeds/api/standardfeeds/most_recent" 
 	urls['feed_featured'] = "http://gdata.youtube.com/feeds/api/standardfeeds/recently_featured"
 	urls['feed_trending'] = "http://gdata.youtube.com/feeds/api/standardfeeds/on_the_web"
-	urls['feed_shared'] = "http://gdata.youtube.com/feeds/api/standardfeeds/most_shared"	
-		
+	urls['feed_shared'] = "http://gdata.youtube.com/feeds/api/standardfeeds/most_shared"
+	
+	urls['remove_watch_later'] = "http://www.youtube.com/addto_ajax?action_delete_from_playlist=1"	
+	
 	def createUrl(self, params = {}):
 		get = params.get
 		time = ( "all_time", "today", "this_week", "this_month") [ int(self.__settings__.getSetting( "feed_time" ) ) ]
@@ -361,7 +363,13 @@ class YouTubeCore(object):
 		delete_url = self.urls["subscriptions"] % "default"
 		delete_url += "/" + get("editid")
 		return self._fetchPage({"link": delete_url, "api": "true", "login": "true", "auth": "true", "method": "DELETE"})
-
+	
+	def remove_from_watch_later(self, params = {}):
+		get = params.get
+		remove_url = self.urls["remove_watch_later"]
+		return self._fetchPage({"link":remove_url, "login":"true", "watch_later_playlist":get("watch_later_playlist"), "watch_later_index":get("index")})
+		
+		
 	def add_contact(self, params = {}):
 		get = params.get
 		url = "http://gdata.youtube.com/feeds/api/users/default/contacts"
@@ -406,8 +414,8 @@ class YouTubeCore(object):
 	def remove_from_playlist(self, params = {}):
 		get = params.get
 		url = "http://gdata.youtube.com/feeds/api/users/default/playlists/%s/%s" % ( get("playlist"), get("videoid") )
-		return self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true", "method": "DELETE"})
-
+		return self._fetchPage({"link": url, "api": "true", "auth": "true", "method": "DELETE"})
+	
 	def getFolderInfo(self, xml, params = {}):
 		get = params.get
 		result = ""
@@ -593,13 +601,13 @@ class YouTubeCore(object):
 		
 		except urllib2.HTTPError, e:
 			err = str(e)
+			if self.__dbg__:
+				print self.__plugin__ + " _fetchPage HTTPError : " + err
+			
 			if err.find("TokenExpired"):
 				self.__login__._login()
 				params["error"] = str(int(get("error", "0")) + 1)
 				return self._fetchPage(params)
-
-			if self.__dbg__:
-				print self.__plugin__ + " _fetchPage HTTPError : " + err
 		
 		return ( "", 500 )
 		
@@ -856,9 +864,8 @@ class YouTubeCore(object):
 						video['editid'] = obj[obj.rfind('/')+1:]
 
 			video['thumbnail'] = "http://i.ytimg.com/vi/" + video['videoid'] + "/0.jpg"
-		
+			
 			overlay = self.__settings__.getSetting( "vidstatus-" + video['videoid'] )
-
 			if overlay:
 				video['Overlay'] = int(overlay)
 			
