@@ -234,7 +234,7 @@ class YouTubePluginStorage:
 		get = params.get
 		
 		videos = []
-		if get("video"):
+		if get("videoid"):
 			queue = self.__settings__.getSetting("download_queue")
 			if queue:
 				try:
@@ -242,13 +242,13 @@ class YouTubePluginStorage:
 				except:
 					videos = []
 		
-		if get("videoid") not in videos:
-			videos.append(get("videoid"))
-		
-		self.__settings__.setSetting("download_queue",repr(videos))
-		
-		if not get("silent",""):
-			self.__utils__.showMessage(self.__language__(30630), self.__language__(30631))
+			if get("videoid") not in videos:
+				videos.append(get("videoid"))
+			
+			self.__settings__.setSetting("download_queue",repr(videos))
+			
+			if not get("silent",""):
+				self.__utils__.showMessage(self.__language__(30630), self.__language__(30631))
 		
 	def removeVideoFromDownloadQueue(self, videoid):
 		videos = []
