@@ -187,6 +187,10 @@ class YouTubePlayer(object):
 		if self.__settings__.getSetting("lang_code") != "0":
 			self.addSubtitles(video)
 		
+		if (get("watch_later") == "true" and get("playlist")):
+			print self.__plugin__ + "trying to remove from watch later playlist"
+			self.__core__.remove_from_playlist(params)
+			
 		self.__settings__.setSetting( "vidstatus-" + video['videoid'], "7" )
 	
 	def getVideoStreamMap(self, html, video = {}):
@@ -294,6 +298,13 @@ class YouTubePlayer(object):
 		
 		return links
 	
+	def getSessionToken(self, params, html):
+		session_token =""
+		if html.find('<input type="hidden" name="session_token" value="') > 0:
+			session_token = html[html.find('<input type="hidden" name="session_token" value="') + len('<input type="hidden" name="session_token" value="'):]
+			session_token = session_token[:session_token.find('"/>')]
+		params["session_token"] = session_token
+	
 	def getAlert(self, html, params = {}):
 		get = params.get
 		result = self.__language__(30617)	
@@ -392,6 +403,9 @@ class YouTubePlayer(object):
 		if status != 200:
 			video["apierror"] = html 
 			return (video,status)
+		
+		if get("watch_later_playlist"):
+			self.getSessionToken(params, html)
 		
 		(video, status) = self.getVideoInfo(params)
 		
