@@ -52,6 +52,8 @@
     <string id="30050">Most Shared</string>
     <string id="30051">YouTube Live</string>
     <string id="30052">My Watch Later</string>
+    <string id="30053">YouTube Music</string>
+    <string id="30054">YouTube Top 100 Music Chart</string>
     
     <!-- Plugin settings strings -->
     <string id="30200">Username</string>
@@ -212,5 +214,6 @@
     <string id="30630">Download queued</string>
     <string id="30631">Video added to download Queue</string>
     <string id="30632">Skipping download</string>
-    <string id="30633">Couldn't verify age</string> 
+    <string id="30633">Couldn't verify age</string>
+    <string id="30634">Preparing download</string> 
 </strings>
