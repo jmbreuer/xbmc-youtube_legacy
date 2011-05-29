@@ -9,7 +9,6 @@
   - remove_from_playlist, params = { "playlist_id": "something or other", "video_id": "id" }
 - Add additional advanced setting to select between SD quality <-- Tobias
 - Music Category Scraper and YouTube 100 playlist playback.
-- Downloader should implement a queue <-- Henrik
 - Check all context menu items again some seem to be broken <-- Henrik & Tobias
 
 [B]Errata[/B]
@@ -19,6 +18,7 @@
 - [XBMC] Playback of RTMPe streams (flash streaming) is currently broken as youtube updated to use a newer protocol than what XBMC supports
 - [XBMC] Theres an unknown issue with the version of urllib and openssl supplied by xbmc for python 2.4 on windows that causes severe login issues for windows users (ssl_ctx_new errors)
 - Download of rtmpe streams not supported.
+- Download queue will usually crash xbmc due to Thread safety issues with xbmc's gui object.
 
 [B]Version 2.5.0 Beta[B]
 - Added Caching and alphabetically sorting of My playlists, My contacts and My subscriptions 
@@ -33,6 +33,7 @@
 - Changed Login to use new Client Login url
 - Changed Playback function now shows a more user friendly error message on failure
 - Changed Download function now shows a progress-bar
+- Changed Download function will now only download one file at a time and queues multiple files.
 - Changed "Disco Top 25" to "Disco Top 50" scraper 
 - Changed plugin will now play a video from file-system if the file is still in the download folder (Partially working as this has revealed XBMC bug.)
 - Changed more videos by user, and related videos so you no longer have to be logged in for them to work.

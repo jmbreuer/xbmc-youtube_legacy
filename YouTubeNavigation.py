@@ -206,7 +206,7 @@ class YouTubeNavigation:
 			if label:
 				self.__utils__.showMessage(label, self.__language__(30601))
 		return False
-		
+	
 	#================================== Plugin Actions =========================================
 	
 	def addToFavorites(self, params = {}):
@@ -413,7 +413,6 @@ class YouTubeNavigation:
 			if result("videoid") == "false":
 				continue
 			
-			print str(results.index(result_params))
 			if get("scraper") == "watch_later":
 				result_params["index"] = str(results.index(result_params))
 			
