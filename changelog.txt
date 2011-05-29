@@ -52,8 +52,13 @@
 - Fixed broken Movies Scraper (from patch by chocol...@cpan.org)
 - Fixed problems when downloading a file to a network drives (thanks to ToCsIc...@gmail.com)
 
-[B]Version 2.0.4[/B]
+[B]Version 2.2.4[/B]
 - Verfied Compatibility with Eden - pre and submitted to repo.
+
+[B]Version 2.0.5[/B]
+- Changed Name string from Holland to The Netherlands (thanks to Syrion for pointing it out)
+
+[B]Version 2.0.4[/B]
 - Fixed YouTube character encoding changes broke disco scraper.
 - Fixed YouTube character encoding changes broke show scraper
 - Fixed Site changes broke Disco top 25 scraper
