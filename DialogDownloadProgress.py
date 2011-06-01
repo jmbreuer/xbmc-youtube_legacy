@@ -1,7 +1,6 @@
 import os, sys, re
 import xbmc
 import xbmcgui
-from xbmcaddon import Addon
 from traceback import print_exc
 
 __settings__ = sys.modules[ "__main__" ].__settings__
@@ -112,7 +111,7 @@ class Control:
 
 	def addControl( self, window ):
 		window.addControl( self.control )
-		self.control.setVisibleCondition( "[SubString(Window.Property(DownloadProgress.Hide),false) | SubString(Window.Property(DownloadProgress.Hide),)]" )
+		self.control.setVisibleCondition( "[SubString(Window.Property(DialogDownloadProgress.Hide),false) | SubString(Window.Property(DialogDownloadProgress.Hide),)]" )
 		self.setAnimations()
 		return self.control
 
@@ -251,9 +250,9 @@ class Window:
 				try: self.window.removeControl( self.background )
 				except: pass
 		if hasattr( self.window, "clearProperty" ):
-			self.window.clearProperty( "DownloadProgress.Hide" )
-			self.window.clearProperty( "DownloadProgress.Cancel" )
-			self.window.clearProperty( "DownloadProgress.IsAlive" )
+			self.window.clearProperty( "DialogDownloadProgress.Hide" )
+			self.window.clearProperty( "DialogDownloadProgress.Cancel" )
+			self.window.clearProperty( "DialogDownloadProgress.IsAlive" )
 
 class DownloadProgress( Window ):
 	def __init__( self, parent_win=None, **kwargs ):
