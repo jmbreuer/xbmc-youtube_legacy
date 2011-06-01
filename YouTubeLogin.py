@@ -107,7 +107,7 @@ class YouTubeLogin(object):
 				print self.__plugin__ + " login failed, hit ioerror except: " + repr(e)
 				print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
 								   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
-				print self.interrogate(e)
+				print self.__utils__.interrogate(e)
 
 			if error < 9:
 				if self.__dbg__:
