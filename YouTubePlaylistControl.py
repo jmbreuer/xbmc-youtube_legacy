@@ -136,9 +136,8 @@ class YouTubePlaylistControl:
 					if get("title") == item["Title"]:
 						params["playlist"] = item["playlist"]
 						break
-			
 		elif selected > 0:
-			params["playlist"] = result[selected].get("playlist")
+			params["playlist"] = result[selected - 1].get("playlist")
 		
 		if get("playlist"):
 			self.__core__.add_to_playlist(params)

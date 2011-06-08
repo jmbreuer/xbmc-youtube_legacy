@@ -86,7 +86,7 @@ class YouTubeCore(object):
 	urls['feed_shared'] = "http://gdata.youtube.com/feeds/api/standardfeeds/most_shared"
 	
 	urls['remove_watch_later'] = "http://www.youtube.com/addto_ajax?action_delete_from_playlist=1"	
-	
+
 	def createUrl(self, params = {}):
 		get = params.get
 		time = ( "all_time", "today", "this_week", "this_month") [ int(self.__settings__.getSetting( "feed_time" ) ) ]
@@ -101,7 +101,10 @@ class YouTubeCore(object):
 			url = self.urls[get("feed")]
 		
 		if (get("user_feed")):
-			url = self.urls[get("user_feed")]
+			if get("user_feed") == "playlists":
+				url = self.urls[get("user_feed")] % get("user_id", "default")
+			else:
+				url = self.urls[get("user_feed")]
 		
 		if get("search"):
 			query = urllib.unquote_plus(get("search"))
@@ -311,9 +314,8 @@ class YouTubeCore(object):
 				return ( self.__language__(30609) , 303 )
 		
 		feed = self.createUrl(params)
-		
 		index = 1
-		url = feed + "start-index=" + str(index) + "&max-results=" + repr(50)
+		url = feed + "v=2&start-index=" + str(index) + "&max-results=" + repr(50)
 		url = url.replace(" ", "+")
 
 		ytobjects = []
@@ -354,7 +356,7 @@ class YouTubeCore(object):
 			else:
 				if (self.__storage__.getReversePlaylistOrder(params)):
 					ytobjects.reverse()
-		
+		print "YouTube : " + repr(ytobjects)
 		return ytobjects
 	
 	def delete_favorite(self, params = {}):
@@ -383,19 +385,19 @@ class YouTubeCore(object):
 		
 	def add_contact(self, params = {}):
 		get = params.get
-		url = "http://gdata.youtube.com/feeds/api/users/default/contacts"
+		url = self.urls["contacts"] % "default"
 		add_request = '<?xml version="1.0" encoding="UTF-8"?> <entry xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://gdata.youtube.com/schemas/2007"><yt:username>%s</yt:username></entry>' % get("contact")
 		return self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true", "request": add_request})
 		
 	def add_favorite(self, params = {}):
 		get = params.get 
-		url = "http://gdata.youtube.com/feeds/api/users/default/favorites"
+		url = self.urls["favorites"] % "default"
 		add_request = '<?xml version="1.0" encoding="UTF-8"?><entry xmlns="http://www.w3.org/2005/Atom"><id>%s</id></entry>' % get("videoid")
 		return self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true", "request": add_request})
 		
 	def add_subscription(self, params = {}):
 		get = params.get
-		url = "http://gdata.youtube.com/feeds/api/users/default/subscriptions"
+		url = self.urls["subscriptions"] % "default"
 		add_request = '<?xml version="1.0" encoding="UTF-8"?><entry xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://gdata.youtube.com/schemas/2007"> <category scheme="http://gdata.youtube.com/schemas/2007/subscriptiontypes.cat" term="user"/><yt:username>%s</yt:username></entry>' % get("channel")
 		return self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true", "request": add_request})
 	
@@ -405,10 +407,11 @@ class YouTubeCore(object):
 		add_request = '<?xml version="1.0" encoding="UTF-8"?><entry xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://gdata.youtube.com/schemas/2007"><title type="text">%s</title><summary>%s</summary></entry>' % ( get("title"), get("summary") )
 		return self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true", "request": add_request})
 	
+	# DOESN'T WORK
 	def update_playlist(self, params = {}):
 		get = params.get
 		url = "http://gdata.youtube.com/feeds/api/users/default/playlists/%s" % get("playlist")
-		add_request = '<?xml version="1.0" encoding="UTF-8"?><entry xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://gdata.youtube.com/schemas/2007"><title type="text">%s</title><summary>%s</summary></entry>' % ( get("title"), get("summary") )
+		add_request = '<?xml version="1.0" encoding="UTF-8"?><entry xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://gdata.youtube.com/schemas/2007"><title type="text">%s</title><summary>%s</summary></entry>' % ( "title", "summary" ) #( get("title"), get("summary") )
 		return self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true", "request": add_request})
 	
 	def del_playlist(self, params = {}):
@@ -418,13 +421,13 @@ class YouTubeCore(object):
 
 	def add_to_playlist(self, params = {}):
 		get = params.get
-		url = "http://gdata.youtube.com/feeds/api/users/default/playlists/%s" % get("playlist")
+		url = "http://gdata.youtube.com/feeds/api/playlists/%s" % get("playlist")
 		add_request = '<?xml version="1.0" encoding="UTF-8"?><entry xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://gdata.youtube.com/schemas/2007"><id>%s</id></entry>' % get("videoid")
 		return self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true", "request": add_request})
 	
 	def remove_from_playlist(self, params = {}):
 		get = params.get
-		url = "http://gdata.youtube.com/feeds/api/users/default/playlists/%s/%s" % ( get("playlist"), get("videoid") )
+		url = "http://gdata.youtube.com/feeds/api/playlists/%s/%s" % ( get("editid"), get("videoid") )
 		return self._fetchPage({"link": url, "api": "true", "auth": "true", "method": "DELETE"})
 	
 	def getFolderInfo(self, xml, params = {}):
@@ -469,14 +472,16 @@ class YouTubeCore(object):
 				thumb = self.__settings__.getSetting("playlist_" + folder["playlist"] + "_thumb")
 				if thumb:
 					folder["thumbnail"] = thumb
-							
+			
 			if node.getElementsByTagName("link"):
 				link = node.getElementsByTagName("link")
 				for i in range(len(link)):
+					#print "YouTube TEST2: " + link.item(i).getAttribute('rel')
 					if link.item(i).getAttribute('rel') == 'edit':
+						#print "YouTube TEST3"
 						obj = link.item(i).getAttribute('href')
 						folder['editid'] = obj[obj.rfind('/')+1:]
-			
+
 			folders.append(folder);
 					
 		if next:
@@ -568,16 +573,20 @@ class YouTubeCore(object):
 				print self.__plugin__ + " got request"
 			request = urllib2.Request(get("link"), get("request"))
 			request.add_header('X-GData-Client', "")
-			request.add_header('Content-Type', 'application/atom+xml')
-			request.add_header('Content-Length', str(len(get("request"))))
+			request.add_header('Content-Type', 'application/atom+xml') 
+			request.add_header('Content-Length', str(len(get("request")))) 
 
 		if get("api", "false") == "true":
-			request.add_header('GData-Version', '2')
+			if self.__dbg__:
+				print self.__plugin__ + " got api"
+			request.add_header('GData-Version', '2') #confirmed
 			request.add_header('X-GData-Key', 'key=' + self.APIKEY)
 		else:
 			request.add_header('User-Agent', self.__utils__.USERAGENT)
 		
 		if get("login", "false") == "true":
+			if self.__dbg__:
+				print self.__plugin__ + " got login"
 			if ( self.__settings__.getSetting( "username" ) == "" or self.__settings__.getSetting( "user_password" ) == "" ):
 				if self.__dbg__:
 					print self.__plugin__ + " _fetchPage, login required but no credentials provided"
@@ -586,12 +595,16 @@ class YouTubeCore(object):
 			request.add_header('Cookie', 'LOGIN_INFO=' + self.__login__._httpLogin() )
 		
 		if get("auth", "false") == "true":
+			if self.__dbg__:
+				print self.__plugin__ + " got auth"
 			if self._getAuth():
 				request.add_header('Authorization', 'GoogleLogin auth=' + self.__settings__.getSetting("auth"))
 			else:
 				print self.__plugin__ + " _fetchPage couldn't get login token"
 		
 		try:
+			if self.__dbg__:
+				print self.__plugin__ + " _fetchPage making request"
 			con = urllib2.urlopen(request)
 			result = con.read()
 			new_url = con.geturl()
@@ -615,10 +628,11 @@ class YouTubeCore(object):
 			if self.__dbg__:
 				print self.__plugin__ + " _fetchPage HTTPError : " + err
 			
-			if err.find("TokenExpired"):
+			if err.find("TokenExpired") > -1:
 				self.__login__._login()
-				params["error"] = str(int(get("error", "0")) + 1)
-				return self._fetchPage(params)
+
+			params["error"] = str(int(get("error", "0")) + 1)
+			return self._fetchPage(params)
 		
 		return ( "", 500 )
 		

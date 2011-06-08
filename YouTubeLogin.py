@@ -168,7 +168,7 @@ class YouTubeLogin(object):
 		
 		if ( uname == "" and pword == "" ):
 			return ""
-		
+
 		if ( new ):
 			self.__settings__.setSetting( "login_info", "" )
 		elif ( self.__settings__.getSetting( "login_info" ) != "" ):
