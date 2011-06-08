@@ -131,12 +131,12 @@ class YouTubePlaylistControl:
 		if selected == 0:
 			self.createPlayList(params)
 			if get("title"):
-				(result, status) = self.__core__.listAll(params)
-				if status == 200:
-					for item in result:
-						if get("title") == item["Title"]:
-							params["playlist"] = item["playlist"]
-							break
+				result = self.__core__.listAll(params)
+				for item in result:
+					if get("title") == item["Title"]:
+						params["playlist"] = item["playlist"]
+						break
+			
 		elif selected > 0:
 			params["playlist"] = result[selected].get("playlist")
 		
