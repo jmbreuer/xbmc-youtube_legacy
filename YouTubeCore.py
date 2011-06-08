@@ -207,8 +207,7 @@ class YouTubeCore(object):
 			
 			videoids = videoids[(per_page * page):(per_page * (page + 1))]
 			
-			(result, status) = self.getBatchDetails(videoids, params)
-		
+			(result, status) = self.getBatchDetails(videoids, params)		
 		else:
 			result = self.listAll(params)
 				
@@ -356,7 +355,6 @@ class YouTubeCore(object):
 			else:
 				if (self.__storage__.getReversePlaylistOrder(params)):
 					ytobjects.reverse()
-		print "YouTube : " + repr(ytobjects)
 		return ytobjects
 	
 	def delete_favorite(self, params = {}):
