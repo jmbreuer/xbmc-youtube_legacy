@@ -159,7 +159,7 @@ class YouTubePlaylistControl:
 		get = params.get
 		
 		if get("playlist") and get("videoid"):
-			(message, status) = self.__core__.remove_from_playlist(self, params = {})
+			(message, status) = self.__core__.remove_from_playlist(params)
 			
 			if (status != 200):
 				self.__utils__.showErrorMessage(self.__language__(30023), message, status)
