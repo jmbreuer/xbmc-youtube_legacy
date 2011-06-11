@@ -54,7 +54,7 @@ class YouTubePlayer(object):
 			if status == 200:
 				srt = self.transformSubtitleXMLtoSRT(xml)
 			if len(srt) > 0:
-				self.saveSubtitle(srt, video)	
+				self.saveSubtitle(srt, video)
 				return True
 		
 		return False
@@ -62,7 +62,10 @@ class YouTubePlayer(object):
 	def saveSubtitle(self, srt, video = {}):
 		get = video.get
 		filename = ''.join(c for c in video['Title'] if c in self.__utils__.VALID_CHARS) + " [" + get('videoid') + "]" + ".srt"
-		path = os.path.join( xbmc.translatePath( "special://temp" ), filename )
+		if video.has_key("downloadPath"):
+			path = os.path.join( video["downloadPath"], filename )
+		else:
+			path = os.path.join( xbmc.translatePath( "special://temp" ), filename )
 		w = open(path, "w")
 		w.write(srt.encode('utf-8'))
 		w.close()

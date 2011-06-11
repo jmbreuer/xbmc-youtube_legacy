@@ -1,18 +1,17 @@
 [B]TODO:[/B]
 - Utilise select dialog for playlist management for now (looks horrendous but its the best we can do for now) <-- Henrik
 - Plugin should mark as watched on watch later <-- Tobias 
-- Get subtitle downloading working in YouTubeDownloader <-- Tobias
 - Fix playlist management support in core <-- Tobias (Henrik: These seem not to work as we keep getting http 400 bad request)
-  - add_playlist, params = { "title" : "title", "summary": "summary" }
-  - remove_playlist, params = { "playlist_id": "something or other" }
-  - add_to_playlist, params = { "playlist_id": "something or other", "video_id": "id" } <-- tested this one
-  - remove_from_playlist, params = { "playlist_id": "something or other", "video_id": "id" }
+  - add_playlist, params = { "title" : "title", "summary": "summary" } <- works
+  - remove_playlist, params = { "playlist_id": "something or other" } <- don't know
+  - add_to_playlist, params = { "playlist_id": "something or other", "video_id": "id" } <- works
+  - remove_from_playlist, params = { "playlist_id": "something or other", "video_id": "id" } <- Missing edit url from google, and created one fails
 - Add additional advanced setting to select between SD quality <-- Tobias
 - Music Category Scraper and YouTube 100 playlist playback.
 - Change Download code to support xbmcvfs (ie download to temp folder, move to final location).
-- Look into download dialog problems
 - look into oauth 2 for login, including 2 factor authentication and refresh token
 - Check all context menu items again some seem to be broken <-- Henrik & Tobias
+- Look into download dialog problems. [ Mayhaps ]
 
 [B]Errata[/B]
 - [XBMC] Thumbnails sometimes turns into black box or Folder (XBMC not detecting when thumbnail is set and defaulting to icon?)
@@ -56,6 +55,7 @@
 - Fixed add remove subscription
 - Fixed broken Movies Scraper (from patch by chocol...@cpan.org)
 - Fixed problems when downloading a file to a network drives (thanks to ToCsIc...@gmail.com)
+- Fixed download subtitles when download a video
 
 [B]Version 2.2.4[/B]
 - Verfied Compatibility with Eden - pre and submitted to repo.

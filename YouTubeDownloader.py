@@ -19,6 +19,7 @@
 import sys, urllib2, os, time, math
 from DialogDownloadProgress import DownloadProgress
 import xbmc
+from filelock import FileLock
 
 class YouTubeDownloader:	 
 	__settings__ = sys.modules[ "__main__" ].__settings__
@@ -29,7 +30,8 @@ class YouTubeDownloader:
 	__player__ = sys.modules["__main__" ].__player__
 	__utils__ = sys.modules[ "__main__" ].__utils__
 	__storage__ = sys.modules[ "__main__" ].__storage__
-	
+	__lock__ = FileLock(os.path.join( xbmc.translatePath( "special://temp" ), "YouTubeDownloadProgress.lock"), 0)
+
 	dialog = ""
 						
 	def downloadVideo(self, params = {}):
@@ -40,29 +42,49 @@ class YouTubeDownloader:
 			self.__utils__.showMessage(self.__language__(30600), self.__language__(30611))
 			self.__settings__.openSettings()
 			path = self.__settings__.getSetting( "downloadPath" )
-		
+
+		'''
 		if xbmc.getInfoLabel( "Window.Property(DialogDownloadProgress.IsAlive)" ) == "true":
-			if self.__dbg__:
-				print self.__plugin__ + " Downloader is active Queueing video "
+                       if self.__dbg__: 
+			       print self.__plugin__ + " Downloader is active Queueing video "    
+			       print self.__plugin__ + " XBMC info label " + xbmc.getInfoLabel( "Window.Property(DialogDownloadProgress.IsAlive)" )         
+                        self.__storage__.addVideoToDownloadQeueu(params)                           
+                else:                    
+                        params["silent"] = "true"                     
+                        if self.__plugin__:                           
+				print self.__plugin__ + " Downloader not active, intialising downloader"
 				print self.__plugin__ + " XBMC info label " + xbmc.getInfoLabel( "Window.Property(DialogDownloadProgress.IsAlive)" )
+                        self.__storage__.addVideoToDownloadQeueu(params)                           
+                        self.processQueue(params)
+		'''
+
+		#print self.__plugin__ + " XBMC info label " + xbmc.getInfoLabel( "Window.Property(DialogDownloadProgress.IsAlive)" )
+		try:
+			print self.__plugin__ + " trying to acquire"
+			self.__lock__.acquire()
+		except:
+			if self.__dbg__:
+				print self.__plugin__ + " Exception "
+				print self.__plugin__ + " Downloader is active Queueing video "
+				#print self.__plugin__ + " XBMC info label " + xbmc.getInfoLabel( "Window.Property(DialogDownloadProgress.IsAlive)" )
 			self.__storage__.addVideoToDownloadQeueu(params)
 		else:
 			params["silent"] = "true"
 			if self.__plugin__:
 				print self.__plugin__ + " Downloader not active, intialising downloader"
-				print self.__plugin__ + " XBMC info label " + xbmc.getInfoLabel( "Window.Property(DialogDownloadProgress.IsAlive)" )
+				#print self.__plugin__ + " XBMC info label " + xbmc.getInfoLabel( "Window.Property(DialogDownloadProgress.IsAlive)" )
 			
 			self.__storage__.addVideoToDownloadQeueu(params)
 			self.processQueue(params)
-		
-	def processQueue(self, params):
-		
+
+	def processQueue(self, params = {}):
 		videoid = self.__storage__.getNextVideoFromDownloadQueue()
 		
 		if videoid:
-			print self.__plugin__ + " Creating Dialog"
-			self.dialog = DownloadProgress()
-			print self.__plugin__ + " Created Dialog"
+			if not self.dialog:
+				print self.__plugin__ + " Creating Dialog"
+				self.dialog = DownloadProgress()
+				print self.__plugin__ + " Created Dialog"
 			self.dialog.create( heading = self.__language__( 30634 ), label = "")
 			print self.__plugin__ + " Updated headline Dialog"
 	
@@ -84,9 +106,14 @@ class YouTubeDownloader:
 				( video, status ) = self.downloadVideoURL(video)
 				self.__storage__.removeVideoFromDownloadQueue(videoid)
 				videoid = self.__storage__.getNextVideoFromDownloadQueue()
-				
+
+			print self.__plugin__  +  " Finished download queue."
 			self.dialog.close()
 			self.dialog = ""
+
+			# Remove lock
+			self.__lock__.release()
+
 			
 	def downloadVideoURL(self, video, params = {}):
 		if self.__dbg__:
@@ -97,13 +124,14 @@ class YouTubeDownloader:
 			return ([], 303)
 		
 		path = self.__settings__.getSetting( "downloadPath" )
-		self.__player__.downloadSubtitle(video) 
+		video["downloadPath"] = self.__settings__.getSetting( "downloadPath" )
+		subtitle_path = self.__player__.downloadSubtitle(video) 
 		url = urllib2.Request(video['video_url'])
 		url.add_header('User-Agent', self.__utils__.USERAGENT);
 		
 		filename_incomplete = "%s/%s-[%s]-incomplete.mp4" % ( path, ''.join(c for c in video['Title'] if c in self.__utils__.VALID_CHARS), video["videoid"] )
 		filename_complete = "%s/%s-[%s].mp4" % ( path, ''.join(c for c in video['Title'] if c in self.__utils__.VALID_CHARS), video["videoid"] )
-			
+
 		file = open(filename_incomplete, "wb")
 		con = urllib2.urlopen(url);
 		total_size = 8192 * 25

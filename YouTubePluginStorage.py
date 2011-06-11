@@ -16,8 +16,9 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, urllib
+import sys, urllib, os
 import xbmc
+from filelock import FileLock
 	
 class YouTubePluginStorage:
 	__settings__ = sys.modules[ "__main__"].__settings__ 
@@ -25,6 +26,7 @@ class YouTubePluginStorage:
 	__language__ = sys.modules[ "__main__" ].__language__
 	
 	__utils__ = sys.modules[ "__main__" ].__utils__
+        __lock__ = FileLock(os.path.join( xbmc.translatePath( "special://temp" ), "YouTubeDownloadQueue.lock"), 10)
 	
 	# This list contains the list options a user sees when indexing a contact 
 	#				label					  , external		 , login		 ,	thumbnail					, feed
@@ -231,53 +233,107 @@ class YouTubePluginStorage:
 		return result
 	
 	def addVideoToDownloadQeueu(self, params = {}):
-		get = params.get
+                try:
+                        print self.__plugin__ + " addVideoToDownloadQeueu trying to acquire"
+                        self.__lock__.acquire()
+                except:
+			print self.__plugin__ + " addVideoToDownloadQeueu Exception "
+                else:
+			get = params.get
+
+			videos = []
+			if get("videoid"):			
+				#queue = self.__settings__.getSetting("download_queue")
+				fd = os.open(os.path.join( xbmc.translatePath( "special://temp" ), "YouTubeDownloadQueue"), os.O_RDWR | os.O_CREAT)
+				queue = os.read(fd, 65535)	
+				os.close(fd)
+				print self.__plugin__ + " qeueu loaded : " + repr(queue)
+
+				if queue:
+					try:
+						videos = eval(queue)
+					except:
+						videos = []
 		
-		videos = []
-		if get("videoid"):
-			queue = self.__settings__.getSetting("download_queue")
+				if get("videoid") not in videos:
+					videos.append(get("videoid"))
+			
+				        #self.__settings__.setSetting("download_queue",repr(videos))
+
+					os.unlink(os.path.join( xbmc.translatePath( "special://temp" ), "YouTubeDownloadQueue"))
+					fd = os.open(os.path.join( xbmc.translatePath( "special://temp" ), "YouTubeDownloadQueue"), os.O_RDWR | os.O_CREAT)
+					os.write(fd, repr(videos))
+					os.close(fd)
+					print self.__plugin__ + " Added: " + get("videoid") + " to: " + repr(videos)
+			
+					if not get("silent",""):
+						self.__utils__.showMessage(self.__language__(30630), self.__language__(30631))
+
+			self.__lock__.release()
+                        print self.__plugin__ + " addVideoToDownloadQeueu released"
+		
+	def removeVideoFromDownloadQueue(self, videoid):
+                try:
+                        print self.__plugin__ + " removeVideoFromDownloadQueue trying to acquire"
+                        self.__lock__.acquire()
+                except:
+			print self.__plugin__ + " removeVideoFromDownloadQueue Exception "
+                else:
+			videos = []
+			#queue = self.__settings__.getSetting("download_queue")
+			fd = os.open(os.path.join( xbmc.translatePath( "special://temp" ), "YouTubeDownloadQueue"), os.O_RDWR | os.O_CREAT)
+			queue = os.read(fd, 65535)
+			os.close(fd)
+			print self.__plugin__ + " qeueu loaded : " + repr(queue)
 			if queue:
 				try:
 					videos = eval(queue)
 				except:
 					videos = []
 		
-			if get("videoid") not in videos:
-				videos.append(get("videoid"))
-			
-			self.__settings__.setSetting("download_queue",repr(videos))
-			
-			if not get("silent",""):
-				self.__utils__.showMessage(self.__language__(30630), self.__language__(30631))
-		
-	def removeVideoFromDownloadQueue(self, videoid):
-		videos = []
-		queue = self.__settings__.getSetting("download_queue")
-		if queue:
-			try:
-				videos = eval(queue)
-			except:
-				videos = []
-		
-		if videoid in videos:
-			videos.remove(videoid)
-			self.__settings__.setSetting("download_queue",repr(videos))
+			if videoid in videos:
+				videos.remove(videoid)
+				#self.__settings__.setSetting("download_queue",repr(videos))
+				os.unlink(os.path.join( xbmc.translatePath( "special://temp" ), "YouTubeDownloadQueue"))
+				fd = os.open(os.path.join( xbmc.translatePath( "special://temp" ), "YouTubeDownloadQueue"), os.O_RDWR | os.O_CREAT)
+				os.write(fd, repr(videos))
+				os.close(fd)
+				print self.__plugin__ + " Removed: " + videoid + " from: " + repr(videos)
+			else:
+				print self.__plugin__ + " Didn't remove: " + videoid + " from: " + repr(videos)
+
+			self.__lock__.release()
+                        print self.__plugin__ + " removeVideoFromDownloadQueue released"
 		
 	def getNextVideoFromDownloadQueue(self):
-		videos = []
-		queue = self.__settings__.getSetting("download_queue")
-		if queue:
-			try:
-				videos = eval(queue)
-			except: 
-				videos = []
+                try:
+                        print self.__plugin__ + " getNextVideoFromDownloadQueue trying to acquire"
+                        self.__lock__.acquire()
+                except:
+			print self.__plugin__ + " getNextVideoFromDownloadQueue Exception "
+                else:
+			videos = []
+			#queue = self.__settings__.getSetting("download_queue")
+
+			fd = os.open(os.path.join( xbmc.translatePath( "special://temp" ), "YouTubeDownloadQueue"), os.O_RDWR | os.O_CREAT)
+			queue = os.read(fd, 65535)
+			print self.__plugin__ + " qeueu loaded : " + repr(queue)
+
+			if queue:
+				try:
+					videos = eval(queue)
+				except: 
+					videos = []
 		
-		videoid = ""
-		if videos:
-			videoid = videos[0]
-		
-		return videoid
-			
+			videoid = ""
+			if videos:
+				videoid = videos[0]
+
+			os.close(fd)
+			self.__lock__.release()
+                        print self.__plugin__ + " getNextVideoFromDownloadQueue released. returning : " + videoid
+			return videoid
+
 	def addNextFolder(self, items = [], params = {}):
 		get = params.get
 		item = {"Title":self.__language__( 30509 ), "thumbnail":"next", "next":"true", "page":str(int(get("page", "0")) + 1)} 
