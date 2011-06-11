@@ -49,67 +49,9 @@ class YouTubeScraperCore:
 	urls['upcoming_game_trailers'] = "http://www.youtube.com/trailers?s=gtcs&p=%s&hl=en"
 	urls['upcoming_trailers'] = "http://www.youtube.com/trailers?s=tros&p=%s&hl=en"
 	urls['watch_later'] = "http://www.youtube.com/my_watch_later_list"
+	urls['liked_videos'] = "http://www.youtube.com/my_liked_videos"
 	urls['music'] = "http://www.youtube.com/music"
 
-#=================================== Recommended ============================================
-	def scrapeRecommended(self, params = {}):
-		get = params.get
-				
-		page = int(get("page", "0"))
-		per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
-		
-		oldVideos = self.__settings__.getSetting("recommendedVideos")
-		
-		if ( page == 0 or oldVideos == ""):
-			( videos, result)  = self.scrapeYouTubeData(params)
-			if (result == 200):
-				self.__settings__.setSetting("recommendedVideos", self.__utils__.arrayToPipeDelimitedString(videos))
-			else:
-				return ( videos, result )
-		else:
-			videos = oldVideos.split("|")
-		
-		if ( per_page * ( page + 1 ) < len(videos) ):
-			next = 'true'
-		else:
-			next = 'false'
-		
-		subitems = videos[(per_page * page):(per_page * (page + 1))]
-		
-		if self.__dbg__:
-			print self.__plugin__ + " calling get batch"
-		if len(subitems) > 0:
-			( ytobjects, status ) = self.__core__.getBatchDetails(subitems)
-		else:
-			return (subitems, 303)
-		
-		if (len(ytobjects) > 0):
-			if (next == "true"):
-				self.__storage__.addNextFolder(ytobjects, params)
-						
-		return (ytobjects, status)
-	
-	def scrapeYouTubeData(self, params ={}):
-		get = params.get
-		retry = 0
-		
-		login_info = self.__settings__.getSetting( "login_info" )
-		
-		while not login_info and retry < 10:
-			if ( self.__core__._httpLogin() ):
-				login_info = self.__settings__.getSetting( "login_info" )
-			retry += 1
-		
-		url = self.urls[get("scraper")]
-		(result, status) = self.__core__._fetchPage({"link": url, "login": "true"})
-		
-		videos = re.compile('<a href="/watch\?v=(.*)&amp;feature=grec_browse" class=').findall(result);
-		
-		if len(videos) == 0:
-			videos = re.compile('<div id="reco-(.*)" class=').findall(result);
-		
-		return ( videos, 200 )
-		
 #=================================== Trailers ============================================
 	def scrapeTrailersListFormat (self, page, params = {}):
 		get = params.get		 
@@ -354,7 +296,7 @@ class YouTubeScraperCore:
 	def scrapeLiveNow(self, params = {}):
 		get = params.get
 		if self.__dbg__:
-			print self.__plugin__ + " scrapeWatchLater"
+			print self.__plugin__ + " scrapeLiveNow"
 
 		url = self.urls[get("scraper")]
 		
@@ -389,7 +331,57 @@ class YouTubeScraperCore:
 		
 		return ([],303)	
 				
-#=================================== Watch Later ============================================
+#=================================== User Scraper ============================================
+	def scrapeRecommended(self, params = {}):
+		get = params.get
+				
+		page = int(get("page", "0"))
+		per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
+		
+		oldVideos = self.__settings__.getSetting("recommendedVideos")
+		
+		if ( page == 0 or oldVideos == ""):
+			( videos, result)  = self.scrapeYouTubeData(params)
+			if (result == 200):
+				self.__settings__.setSetting("recommendedVideos", self.__utils__.arrayToPipeDelimitedString(videos))
+			else:
+				return ( videos, result )
+		else:
+			videos = oldVideos.split("|")
+		
+		if ( per_page * ( page + 1 ) < len(videos) ):
+			next = 'true'
+		else:
+			next = 'false'
+		
+		subitems = videos[(per_page * page):(per_page * (page + 1))]
+		
+		if self.__dbg__:
+			print self.__plugin__ + " calling get batch"
+		if len(subitems) > 0:
+			( ytobjects, status ) = self.__core__.getBatchDetails(subitems)
+		else:
+			return (subitems, 303)
+		
+		if (len(ytobjects) > 0):
+			if (next == "true"):
+				self.__storage__.addNextFolder(ytobjects, params)
+						
+		return (ytobjects, status)
+	
+	def scrapeYouTubeData(self, params ={}):
+		get = params.get
+				
+		url = self.urls[get("scraper")]
+		(result, status) = self.__core__._fetchPage({"link": url, "login": "true"})
+		
+		videos = re.compile('<a href="/watch\?v=(.*)&amp;feature=grec_browse" class=').findall(result);
+		
+		if len(videos) == 0:
+			videos = re.compile('<div id="reco-(.*)" class=').findall(result);
+		
+		return ( videos, 200 )
+
 	def scrapeWatchLater(self, params):	
 		get = params.get
 		if self.__dbg__:
@@ -408,6 +400,33 @@ class YouTubeScraperCore:
 				return self.__core__.list(params)
 		
 		return ([], 303)
+	
+	def scrapeLikedVideos(self, params):
+		get = params.get
+		if self.__dbg__:
+			print self.__plugin__ + " scrapeLikedVideos"
+		
+		url = self.urls[get("scraper")]
+		
+		(response, status) = self.__core__._fetchPage({"link": url, "login": "true"})
+		
+		list = SoupStrainer(name="div", id="vm-video-list-container")
+		liked = BeautifulSoup(response, parseOnlyThese=list)
+		items = []
+		
+		if (len(liked) > 0):
+			video = liked.ol.li
+			while video:
+				videoid = video["id"]
+				videoid = videoid[videoid.rfind("video-") + 6:]
+				items.append(videoid)
+				video = video.findNextSibling()
+		
+		if len(items) > 0:
+			return self.__core__.getBatchDetails(items)
+		
+		return ([], 303 )
+			
 #=================================== Shows ============================================
 	def scrapeShowEpisodes(self, html, params = {}):
 		get = params.get
@@ -1007,6 +1026,8 @@ class YouTubeScraperCore:
 			return self.searchDisco(params)
 		if (get("scraper") == "watch_later"):
 			return self.scrapeWatchLater(params)
+		if (get("scraper") == "liked_videos"):
+			return self.scrapeLikedVideos(params)
 		if (get("scraper") == "live"):
 			return self.scrapeLiveNow(params)
 		if (get("scraper") == "disco_top_50"):
