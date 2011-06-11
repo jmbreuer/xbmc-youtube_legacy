@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, urllib, urllib2, re, cookielib
+import sys, urllib, urllib2, re, cookielib, socket
 import xbmc
 
 # ERRORCODES:
