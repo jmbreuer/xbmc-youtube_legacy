@@ -69,6 +69,7 @@ class YouTubeNavigation:
 				  {'Title':__language__( 30051 )  ,'path':"/root/explore/live"  					, 'thumbnail':"live"				, 'login':"false" , 'scraper':"live" },
 				  {'Title':__language__( 30019 )  ,'path':"/root/recommended"						, 'thumbnail':"recommended"			, 'login':"true"  , 'scraper':"recommended" },
 				  {'Title':__language__( 30052 )  ,'path':"/root/watch_later"						, 'thumbnail':"watch_later"			, 'login':"true"  , 'scraper':"watch_later" },
+				  {'Title':__language__( 30055 )  ,'path':"/root/liked"								, 'thumbnail':"liked"				, 'login':"true"  , 'scraper':"liked_videos" },
 				  {'Title':__language__( 30018 )  ,'path':"/root/contacts"			  				, 'thumbnail':"contacts"			, 'login':"true"  , 'user_feed':"contacts", 'folder':'true' },
 				  {'Title':__language__( 30024 )  ,'path':"/root/contacts/new"						, 'thumbnail':"contacts"			, 'login':"true"  , 'action':"add_contact"},
 				  {'Title':__language__( 30002 )  ,'path':"/root/favorites"		 					, 'thumbnail':"favorites"			, 'login':"true"  , 'user_feed':"favorites" },
@@ -372,7 +373,7 @@ class YouTubeNavigation:
 		url = '%s?path=%s&action=play_video&videoid=%s' % ( sys.argv[0], item("path"), item("videoid"));
 		
 		if get("scraper") == "watch_later":
-			url+= "&watch_later=true&playlist=%s&" % get("playlist") 
+			url+= "&watch_later=true&playlist=%s&index=%s&" % (get("playlist"), item("index")) 
 			
 		cm = self.addVideoContextMenuItems(params, item_params)
 				
@@ -473,8 +474,7 @@ class YouTubeNavigation:
 				
 			if (get("playlist")):
 				cm.append( (self.__language__(30535), "XBMC.RunPlugin(%s?path=%s&action=remove_from_playlist&playlist=%s&videoid=%s&)" % ( sys.argv[0], item("path"), get("playlist"), item("videoid") ) ) )
-			else:
-				cm.append( (self.__language__(30533), "XBMC.RunPlugin(%s?path=%s&action=add_to_playlist&videoid=%s&)" % ( sys.argv[0], item("path"), item("videoid") ) ) )
+			cm.append( (self.__language__(30533), "XBMC.RunPlugin(%s?path=%s&action=add_to_playlist&videoid=%s&)" % ( sys.argv[0], item("path"), item("videoid") ) ) )
 			
 		if (get("feed") != "uploads"):
 			cm.append( ( self.__language__( 30516 ) % studio, "XBMC.Container.Update(%s?path=%s&feed=uploads&channel=%s)" % ( sys.argv[0],  get("path"), url_studio ) ) )
