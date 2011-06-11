@@ -79,12 +79,13 @@ class YouTubePlayer(object):
 			code = lang_code
 			break
 			
-		if node.getAttribute("lang_code") == "en":
-			subtitle = node.getAttribute("name").replace(" ", "%20")
-			code = "en"
+			if node.getAttribute("lang_code") == "en":
+				subtitle = node.getAttribute("name").replace(" ", "%20")
+				code = "en"
 
-		if subtitle and code:
-			url = self.urls["close_caption_url"] % ( get("videoid"), subtitle, code)
+			if subtitle and code:
+				url = self.urls["close_caption_url"] % ( get("videoid"), subtitle, code)
+		
 		return url
 
 	def saveSubtitle(self, srt, video = {}):
