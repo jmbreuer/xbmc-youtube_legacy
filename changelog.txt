@@ -6,7 +6,7 @@
 - Music Category Scraper and YouTube 100 playlist playback
 - Maybe update playback code to use this: http://www.youtube.com/get_video_info?video_id=O-77ElyvRxI
 - Check all context menu items again some seem to be broken <-- Henrik & Tobias
-- Handle stale lock file
+- Handle stale lock file for windows.
 
 [B]Errata[/B]
 - [XBMC] Thumbnails sometimes turns into black box or Folder (XBMC not detecting when thumbnail is set and defaulting to icon?)

@@ -2,8 +2,7 @@
 Copyright: Evan Fosmark.
 http://www.evanfosmark.com/2009/01/cross-platform-file-locking-support-in-python/
 '''
-import os, ctypes, sys, time 
-import errno
+import os, sys, time, errno
  
 class FileLockException(Exception):
     pass
