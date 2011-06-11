@@ -4,7 +4,7 @@
   - remove_from_playlist, params = { "playlist_id": "something or other", "video_id": "id" } <- Missing edit url from google, and created one fails
 - Plugin should mark as watched on watch later <-- Tobias
 - Music Category Scraper and YouTube 100 playlist playback
-- Maybe update playback code to use this: http://www.youtube.com/get_video_info?video_id=O-77ElyvRxI
+- Update playback code to use: http://www.youtube.com/get_video_info?video_id=O-77ElyvRxI
 - Check all context menu items again some seem to be broken <-- Henrik & Tobias
 - Handle stale lock file for windows.
 
@@ -18,7 +18,7 @@
 - Download queue will usually crash xbmc due to Thread safety issues with xbmc's gui object.
 - Playback of youtube video from local downloads folder fails until xbmc has had a chance to refresh the folder listing. 
 
-[B]Version 2.5.0 Beta[B]
+[B]Version 2.5.0 (Beta)[B]
 - Added new option to select playback and download quality with dialogs
 - Added Caching and alphabetically sorting of My playlists, My contacts and My subscriptions 
 - Added "Play all" context menu on certain folders 
