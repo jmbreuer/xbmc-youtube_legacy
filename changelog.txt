@@ -1,8 +1,6 @@
 [B]TODO:[/B]
 - Fix playlist management support in core <-- Tobias (Henrik: These seem not to work as we keep getting http 400 bad request)
-  - add_playlist, params = { "title" : "title", "summary": "summary" } <- works
   - remove_playlist, params = { "playlist_id": "something or other" } <- don't know
-  - add_to_playlist, params = { "playlist_id": "something or other", "video_id": "id" } <- works
   - remove_from_playlist, params = { "playlist_id": "something or other", "video_id": "id" } <- Missing edit url from google, and created one fails
 - Plugin should mark as watched on watch later <-- Tobias 
 - Music Category Scraper and YouTube 100 playlist playback.
