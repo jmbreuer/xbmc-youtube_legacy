@@ -90,7 +90,7 @@ class YouTubePlayer(object):
 	def saveSubtitle(self, srt, video = {}):
 		get = video.get
 
-		filename = ''.join(c for c in video['Title'] if c in self.__utils__.VALID_CHARS) + " [" + get('videoid') + "]" + ".srt"
+		filename = ''.join(c for c in video['Title'] if c in self.__utils__.VALID_CHARS) + "-[" + get('videoid') + "]" + ".srt"
 		path = os.path.join( xbmc.translatePath( "special://temp" ), filename )
 
 		w = open(path, "w")
