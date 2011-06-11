@@ -26,6 +26,20 @@ class FileLock(object):
         self.file_name = file_name
         self.timeout = timeout
         self.delay = delay 
+
+        if os.path.isfile(self.file_name):
+            fd = os.open(self.file_name, os.O_CREAT|os.O_RDWR)
+            oldpid = os.read(fd, 65535)
+            os.close(fd);
+            if oldpid:
+                try:
+                    os.kill(int(oldpid), 0)
+                except OSError:
+                    print "YouTube filelock OSError unlinking stale pid file"
+                    os.unlink(self.file_name)
+            else:
+                print "YouTube filelock removing lock file with no PID in it"
+                os.unlink(self.file_name)
         
     def acquire(self):
         """ Acquire the lock, if possible. If the lock is in use, it check again
@@ -37,11 +51,8 @@ class FileLock(object):
         start_time = time.time()
         while True:
             try:
-                #print "YouTube filelock debug : " + self.lockfile
                 self.fd = os.open(self.lockfile, os.O_CREAT|os.O_EXCL|os.O_RDWR)
-                #print "YouTube filelock write : " + str(self.pid)
-                #os.write(self.fd, "%d" % self.pid)
-                #print "YouTube filelock break"
+                os.write(self.fd, "%d" % self.pid)
                 break;
             except OSError as e:
                 #print "YouTube filelock exception : " + repr(e)
