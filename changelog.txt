@@ -1,5 +1,4 @@
 [B]TODO:[/B]
-- Re-enable timeout on login connection attempts <-- Tobias
 - New option to select playback and download quality with dialogs <-- Henrik
 - Plugin should mark as watched on watch later <-- Tobias 
 - Fix playlist management support in core <-- Tobias (Henrik: These seem not to work as we keep getting http 400 bad request)
@@ -10,7 +9,6 @@
 - Music Category Scraper and YouTube 100 playlist playback.
 - Change Download code to support xbmcvfs (ie download to temp folder, move to final location).
 - Check all context menu items again some seem to be broken <-- Henrik & Tobias
-- Look into download dialog problems. [ Mayhaps ]
 
 [B]Errata[/B]
 - [XBMC] Thumbnails sometimes turns into black box or Folder (XBMC not detecting when thumbnail is set and defaulting to icon?)
@@ -45,6 +43,7 @@
 - Added YouTube My Watch Later Scraper
 - Added YouTube My liked Video Scraper
 - Added socket timeout since that makes now appears to work on windows
+- Added new download dialog
 - Refactor: Simplify playback code
 - Refactor: Large scale refactor to make code more maintainable
 - Fixed Age Verification for 18+ content was broken by YouYube. 
