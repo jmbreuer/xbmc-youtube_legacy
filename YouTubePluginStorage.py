@@ -26,7 +26,7 @@ class YouTubePluginStorage:
 	__language__ = sys.modules[ "__main__" ].__language__
 	
 	__utils__ = sys.modules[ "__main__" ].__utils__
-        __lock__ = FileLock(os.path.join( xbmc.translatePath( "special://temp" ), "YouTubeDownloadQueue.lock"), 10)
+	__lock__ = FileLock(os.path.join( xbmc.translatePath( "special://temp" ), "YouTubeDownloadQueue.lock"), 10)
 	
 	# This list contains the list options a user sees when indexing a contact 
 	#				label					  , external		 , login		 ,	thumbnail					, feed
@@ -258,7 +258,7 @@ class YouTubePluginStorage:
 				if get("videoid") not in videos:
 					videos.append(get("videoid"))
 			
-				        #self.__settings__.setSetting("download_queue",repr(videos))
+					#self.__settings__.setSetting("download_queue",repr(videos))
 
 					os.unlink(os.path.join( xbmc.translatePath( "special://temp" ), "YouTubeDownloadQueue"))
 					fd = os.open(os.path.join( xbmc.translatePath( "special://temp" ), "YouTubeDownloadQueue"), os.O_RDWR | os.O_CREAT)
@@ -267,7 +267,7 @@ class YouTubePluginStorage:
 					print self.__plugin__ + " Added: " + get("videoid") + " to: " + repr(videos)
 
 			self.__lock__.release()
-                        print self.__plugin__ + " addVideoToDownloadQeueu released"
+			print self.__plugin__ + " addVideoToDownloadQeueu released"
 		
 	def removeVideoFromDownloadQueue(self, videoid):
 		try:
@@ -300,7 +300,7 @@ class YouTubePluginStorage:
 				print self.__plugin__ + " Didn't remove: " + videoid + " from: " + repr(videos)
 
 			self.__lock__.release()
-                        print self.__plugin__ + " removeVideoFromDownloadQueue released"
+			print self.__plugin__ + " removeVideoFromDownloadQueue released"
 		
 	def getNextVideoFromDownloadQueue(self):
 		try:
@@ -328,7 +328,7 @@ class YouTubePluginStorage:
 				videoid = videos[0]
 
 			self.__lock__.release()
-                        print self.__plugin__ + " getNextVideoFromDownloadQueue released. returning : " + videoid
+			print self.__plugin__ + " getNextVideoFromDownloadQueue released. returning : " + videoid
 			return videoid
 
 	def addNextFolder(self, items = [], params = {}):
