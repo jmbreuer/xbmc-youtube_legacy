@@ -16,8 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, urllib, re, os.path, datetime, time
-import xbmc, xbmcgui, xbmcplugin
+import sys, urllib, re, os.path, datetime, time, urllib2
+import xbmc, xbmcgui, xbmcplugin, xbmcvfs
 from xml.dom.minidom import parseString
 
 class YouTubePlayer(object):
@@ -37,6 +37,7 @@ class YouTubePlayer(object):
 	urls['video_info'] = "http://gdata.youtube.com/feeds/api/videos/%s"
 	urls['close_caption_url'] = "http://www.youtube.com/api/timedtext?type=track&v=%s&name=%s&lang=%s"
 	urls['transcription_url'] = "http://www.youtube.com/api/timedtext?caps=asr&kind=asr&type=track&key=yttt1&expire=%s&sparams=caps,expire,v&v=%s&signature=%s&lang=en"
+	urls['remove_watch_later'] = "http://www.youtube.com/addto_ajax?action_delete_from_playlist=1"
 	
 	# ================================ Subtitle Downloader ====================================
 	def downloadSubtitle(self, video = {}):
@@ -166,6 +167,26 @@ class YouTubePlayer(object):
 			time.sleep(5)		
 			xbmc.Player().setSubtitles(path)
 
+	# ================================= Watch Later =====================================
+	
+	def removeWatchLater(self, params = {}):
+		get = params.get
+		data = urllib.urlencode({'video_ids': get("videoid"), 'session_token': get("session_token"), 'playlist_id': get("playlist"), 'index': get("index")})
+		
+		print self.__plugin__  + " calling remove from playlist with data " + repr(data)
+		request = urllib2.Request(self.urls["remove_watch_later"])		
+		request.add_header('Content-Type', 'application/x-www-form-urlencoded')
+		request.add_header('User-Agent', self.__utils__.USERAGENT)
+		request.add_header('Content-Length', str(len(data)))
+		request.add_header('Cookie', 'LOGIN_INFO=' + self.__settings__.getSetting( "login_info" ))
+		
+		try:
+			con = urllib2.urlopen(request, data);
+			value = con.read()
+			con.close()
+		except:
+			print self.__plugin__ + " remove from watch later failed with contents " + repr(value)
+	
 	# ================================ Video Playback ====================================
 	
 	def playVideo(self, params = {}):
@@ -190,9 +211,9 @@ class YouTubePlayer(object):
 		if self.__settings__.getSetting("lang_code") != "0":
 			self.addSubtitles(video)
 		
-		if (get("watch_later") == "true" and get("playlist")):
-			print self.__plugin__ + "trying to remove from watch later playlist"
-			self.__core__.remove_from_playlist(params)
+		if (get("watch_later") == "true" and get("playlist") and get("index")):
+			self.removeWatchLater(params)
+			#print self.__plugin__ + "trying to remove from watch later playlist"
 			
 		self.__settings__.setSetting( "vidstatus-" + video['videoid'], "7" )
 	
@@ -359,11 +380,11 @@ class YouTubePlayer(object):
 				hd_quality = int(self.__settings__.getSetting( "hd_videos" ))
 			else:
 				if (get("quality") == "1080p"):
-					hd_quality = 2
+					hd_quality = 3
 				elif (get("quality") == "720p"):
-					hd_quality = 1
+					hd_quality = 2
 				else: 
-					hd_quality = 0
+					hd_quality = 1
 		
 		# SD videos are default, but we go for the highest res
 		if (link(35)):
@@ -379,15 +400,18 @@ class YouTubePlayer(object):
 		elif (link(5)):
 			video_url = link(5)
 		
-		if hd_quality > 0: #<-- 720p
+		if hd_quality > 1: #<-- 720p
 			if (link(22)):
 				video_url = link(22)
 			if (link(45)):
 				video_url = link(45)
-		if hd_quality > 1: #<-- 1080p
+		if hd_quality > 2: #<-- 1080p
 			if (link(37)):
 				video_url = link(37)
-			
+		
+		if hd_quality == 0 and not get("quality"):
+			return self.userSelectsVideoQuality(params, links)
+		
 		if not len(video_url) > 0:
 			print self.__plugin__ + " construct_video_url failed, video_url not set"
 			return video_url
@@ -396,7 +420,51 @@ class YouTubePlayer(object):
 			video_url += " | " + self.__utils__.USERAGENT
 			
 		return video_url
+	
+	def userSelectsVideoQuality(self,params, links):
+		get = params.get
+		link = links.get
+		list = []
+		choices = []
 		
+		print "select video quality"
+		if link(37):
+			list.append((37,"1080p"))
+		if link(22):
+			list.append((22,"720p"))
+		elif link(45):
+			list.append((45,"720p"))	
+		
+		if link(35):
+			list.append((18,"480p"))
+		elif link(44):
+			list.append((44,"480p"))
+		
+		if link(18):
+			list.append((18,"380p"))
+		
+		if link(34):
+			list.append((34,"360p"))
+		elif link(43):
+			list.append((43,"360p"))
+		
+		if link(5):
+			list.append((5,"240p"))
+		if link(17):
+			list.append((17,"144p"))
+		
+		for (quality, message) in list:
+			choices.append(message)
+		
+		dialog = xbmcgui.Dialog()
+		selected = dialog.select(self.__language__(30537), choices)
+		
+		if selected > -1:
+			(quality, message) = list[selected]
+			return link(quality)
+		
+		return ""
+	
 	def getVideoObject(self, params):
 		get = params.get
 		video = {}
@@ -407,7 +475,7 @@ class YouTubePlayer(object):
 			video["apierror"] = html 
 			return (video,status)
 		
-		if get("watch_later_playlist"):
+		if get("watch_later","false") == "true":
 			self.getSessionToken(params, html)
 		
 		(video, status) = self.getVideoInfo(params)
