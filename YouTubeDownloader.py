@@ -57,7 +57,7 @@ class YouTubeDownloader:
                         self.__storage__.addVideoToDownloadQeueu(params)                           
                         self.processQueue(params)
 		'''
-
+		
 		#print self.__plugin__ + " XBMC info label " + xbmc.getInfoLabel( "Window.Property(DialogDownloadProgress.IsAlive)" )
 		try:
 			print self.__plugin__ + " trying to acquire"
@@ -150,8 +150,23 @@ class YouTubeDownloader:
 				bytes_so_far += len(chunk)
 				percent = int(float(bytes_so_far) / float(total_size) * 100)
 				file.write(chunk)
-				heading = self.__language__(30624) + " - " + str(percent) + "%"
+
+				fd = os.open(os.path.join( xbmc.translatePath( "special://temp" ), "YouTubeDownloadQueue"), os.O_RDONLY | os.O_NONBLOCK | os.O_CREAT)
+				queue = os.read(fd, 65535)
+				os.close(fd)
+
+				if queue:
+					try:
+						videos = eval(queue)
+					except:
+						videos = []
+				else:
+					videos = []
+
+				heading = "[" + str(len(videos)) + "] " +  self.__language__(30624) + " - " + str(percent) + "%"
+
 				self.dialog.update(percent=percent, heading = heading, label=video["Title"])
+
 				if not chunk:
 					break
 			

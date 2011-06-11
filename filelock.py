@@ -65,11 +65,9 @@ class FileLock(object):
  
     def clean(self):
         """ Get rid of the lock by deleting the lockfile. 
-             CHECK PID ID RUNNING
         """
-        if self.is_locked:
-            os.unlink(self.lockfile)
-            self.is_locked = False
+        os.unlink(self.lockfile)
+        self.is_locked = False
  
  
     def __enter__(self):

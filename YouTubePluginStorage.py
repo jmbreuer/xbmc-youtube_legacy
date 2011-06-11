@@ -265,9 +265,6 @@ class YouTubePluginStorage:
 					os.write(fd, repr(videos))
 					os.close(fd)
 					print self.__plugin__ + " Added: " + get("videoid") + " to: " + repr(videos)
-			
-					if not get("silent",""):
-						self.__utils__.showMessage(self.__language__(30630), self.__language__(30631))
 
 			self.__lock__.release()
                         print self.__plugin__ + " addVideoToDownloadQeueu released"
@@ -317,6 +314,7 @@ class YouTubePluginStorage:
 
 			fd = os.open(os.path.join( xbmc.translatePath( "special://temp" ), "YouTubeDownloadQueue"), os.O_RDWR | os.O_CREAT)
 			queue = os.read(fd, 65535)
+			os.close(fd)
 			print self.__plugin__ + " qeueu loaded : " + repr(queue)
 
 			if queue:
@@ -329,7 +327,6 @@ class YouTubePluginStorage:
 			if videos:
 				videoid = videos[0]
 
-			os.close(fd)
 			self.__lock__.release()
                         print self.__plugin__ + " getNextVideoFromDownloadQueue released. returning : " + videoid
 			return videoid
