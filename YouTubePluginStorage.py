@@ -233,15 +233,15 @@ class YouTubePluginStorage:
 		return result
 	
 	def addVideoToDownloadQeueu(self, params = {}):
-                try:
-                        print self.__plugin__ + " addVideoToDownloadQeueu trying to acquire"
-                        self.__lock__.acquire()
-                except:
-			print self.__plugin__ + " addVideoToDownloadQeueu Exception "
-                else:
+        try:
+            print self.__plugin__ + " addVideoToDownloadQeueu trying to acquire"
+            self.__lock__.acquire()
+        except:
+            print self.__plugin__ + " addVideoToDownloadQeueu Exception "
+        else:
 			get = params.get
 
-			videos = []
+            videos = []
 			if get("videoid"):			
 				#queue = self.__settings__.getSetting("download_queue")
 				fd = os.open(os.path.join( xbmc.translatePath( "special://temp" ), "YouTubeDownloadQueue"), os.O_RDWR | os.O_CREAT)
@@ -270,12 +270,12 @@ class YouTubePluginStorage:
                         print self.__plugin__ + " addVideoToDownloadQeueu released"
 		
 	def removeVideoFromDownloadQueue(self, videoid):
-                try:
-                        print self.__plugin__ + " removeVideoFromDownloadQueue trying to acquire"
-                        self.__lock__.acquire()
-                except:
+        try:
+            print self.__plugin__ + " removeVideoFromDownloadQueue trying to acquire"
+            self.__lock__.acquire()
+        except:
 			print self.__plugin__ + " removeVideoFromDownloadQueue Exception "
-                else:
+        else:
 			videos = []
 			#queue = self.__settings__.getSetting("download_queue")
 			fd = os.open(os.path.join( xbmc.translatePath( "special://temp" ), "YouTubeDownloadQueue"), os.O_RDWR | os.O_CREAT)
@@ -303,12 +303,12 @@ class YouTubePluginStorage:
                         print self.__plugin__ + " removeVideoFromDownloadQueue released"
 		
 	def getNextVideoFromDownloadQueue(self):
-                try:
-                        print self.__plugin__ + " getNextVideoFromDownloadQueue trying to acquire"
-                        self.__lock__.acquire()
-                except:
+        try:
+            print self.__plugin__ + " getNextVideoFromDownloadQueue trying to acquire"
+            self.__lock__.acquire()
+        except:
 			print self.__plugin__ + " getNextVideoFromDownloadQueue Exception "
-                else:
+        else:
 			videos = []
 			#queue = self.__settings__.getSetting("download_queue")
 
