@@ -54,6 +54,7 @@
     <string id="30052">My Watch Later</string>
     <string id="30053">YouTube Music</string>
     <string id="30054">YouTube Top 100 Music Chart</string>
+    <string id="30055">My Liked Videos</string>
     
     <!-- Plugin settings strings -->
     <string id="30200">Username</string>
@@ -64,12 +65,12 @@
     <string id="30205">This week</string>
     <string id="30206">This month</string>
     <string id="30207">Download Location</string>
-    <string id="30208">Max video quality (if available)</string>
+    <string id="30208">Max video quality</string>
     <string id="30209">Enable YouTube SafeSearch</string>
-    <string id="30210">Number of videos per page</string>
-    <string id="30211">Number of searches to save</string>
-    <string id="30212">Default folder view</string>
-    <string id="30213">Default video view</string>
+    <string id="30210">Videos per page</string>
+    <string id="30211">Searches to save</string>
+    <string id="30212">Ask</string>
+    <string id="30213"></string>
     <string id="30214">Notification length in seconds</string>
     <string id="30215">1080p</string>
     <string id="30216">720p</string>
@@ -113,11 +114,12 @@
     <string id="30254">Show Subscriptions</string>
     <string id="30255">Show Uploads</string>
     <string id="30256">Show Search</string>
+    <string id="30257"></string>
     <string id="30258">View mode in Confluence</string>
     <string id="30259">Advanced</string>
-    <string id="30260">Download quality (if available)</string>
+    <string id="30260">Max video quality (Downloading)</string>
     <string id="30261">Same as playback</string>
-    <string id="30262">Playback quality selection on video items</string> 
+    <string id="30262"></string> 
     <string id="30263">Show Youtube Disco!</string>
     <string id="30264">Show Youtube Trailers</string>
     <string id="30265">Timeout (in seconds)</string>
@@ -179,6 +181,7 @@
     <string id="30534">New Playlist..</string>
     <string id="30535">Remove from Playlist</string>
     <string id="30536">Reverse Playlist</string>
+    <string id="30537">Select video quality</string>
 	
     <!-- messages -->
     <string id="30600">Error</string>
