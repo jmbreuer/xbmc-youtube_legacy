@@ -55,7 +55,7 @@ class FileLock(object):
                 self.fd = os.open(self.lockfile, os.O_CREAT|os.O_EXCL|os.O_RDWR)
                 os.write(self.fd, "%d" % self.pid)
                 break
-            except OSError as e:
+            except OSError, e:
                 #print "YouTube filelock exception : " + repr(e)
                 if e.errno != errno.EEXIST:
                     raise 
