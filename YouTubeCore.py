@@ -87,6 +87,13 @@ class YouTubeCore(object):
 	
 	urls['remove_watch_later'] = "http://www.youtube.com/addto_ajax?action_delete_from_playlist=1"	
 
+        def __init__(self):
+                timeout = self.__settings__.getSetting( "timeout" )
+                if not timeout:
+                        timeout = "5"
+                socket.setdefaulttimeout(float(timeout))
+                return None
+
 	def createUrl(self, params = {}):
 		get = params.get
 		time = ( "all_time", "today", "this_week", "this_month") [ int(self.__settings__.getSetting( "feed_time" ) ) ]

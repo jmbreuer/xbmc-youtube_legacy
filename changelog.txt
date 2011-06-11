@@ -44,6 +44,7 @@
 - Added YouTube Top 100 music chart scraper 
 - Added YouTube My Watch Later Scraper
 - Added YouTube My liked Video Scraper
+- Added socket timeout since that makes now appears to work on windows
 - Refactor: Simplify playback code
 - Refactor: Large scale refactor to make code more maintainable
 - Fixed Age Verification for 18+ content was broken by YouYube. 
@@ -133,7 +134,7 @@
 - Hardened handling of age restricted videos
 - No longer try login when no credentials have been provided.
 
-[B]Version 1.9.2[/B]
+[B]Version 1.9.2[/B
 - Disable socket timeout since that makes login fail on windows.
 
 [B]Version 1.9.1[/B]

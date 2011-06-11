@@ -26,14 +26,14 @@ class FileLock(object):
         self.file_name = file_name
         self.timeout = timeout
         self.delay = delay 
- 
+        
     def acquire(self):
         """ Acquire the lock, if possible. If the lock is in use, it check again
             every `wait` seconds. It does this until it either gets the lock or
             exceeds `timeout` number of seconds, in which case it throws 
             an exception.
         """
-        print "YouTube filelock pre"
+        print "YouTube filelock pre: " + self.file_name
         start_time = time.time()
         while True:
             try:

@@ -132,6 +132,8 @@ class YouTubeDownloader:
 		filename_incomplete = "%s/%s-[%s]-incomplete.mp4" % ( path, ''.join(c for c in video['Title'] if c in self.__utils__.VALID_CHARS), video["videoid"] )
 		filename_complete = "%s/%s-[%s].mp4" % ( path, ''.join(c for c in video['Title'] if c in self.__utils__.VALID_CHARS), video["videoid"] )
 
+		if os.path.isfile(filename_complete):
+			os.unlink(filename_complete)
 		file = open(filename_incomplete, "wb")
 		con = urllib2.urlopen(url);
 		total_size = 8192 * 25
@@ -151,10 +153,10 @@ class YouTubeDownloader:
 				percent = int(float(bytes_so_far) / float(total_size) * 100)
 				file.write(chunk)
 
-				fd = os.open(os.path.join( xbmc.translatePath( "special://temp" ), "YouTubeDownloadQueue"), os.O_RDONLY | os.O_NONBLOCK | os.O_CREAT)
+				fd = os.open(os.path.join( xbmc.translatePath( "special://temp" ), "YouTubeDownloadQueue"), os.O_CREAT|os.O_RDWR)
 				queue = os.read(fd, 65535)
 				os.close(fd)
-
+				
 				if queue:
 					try:
 						videos = eval(queue)
@@ -164,7 +166,6 @@ class YouTubeDownloader:
 					videos = []
 
 				heading = "[" + str(len(videos)) + "] " +  self.__language__(30624) + " - " + str(percent) + "%"
-
 				self.dialog.update(percent=percent, heading = heading, label=video["Title"])
 
 				if not chunk:
