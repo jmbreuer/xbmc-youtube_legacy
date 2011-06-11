@@ -1,13 +1,13 @@
 [B]TODO:[/B]
-- New option to select playback and download quality with dialogs <-- Henrik
-- Plugin should mark as watched on watch later <-- Tobias 
 - Fix playlist management support in core <-- Tobias (Henrik: These seem not to work as we keep getting http 400 bad request)
   - add_playlist, params = { "title" : "title", "summary": "summary" } <- works
   - remove_playlist, params = { "playlist_id": "something or other" } <- don't know
   - add_to_playlist, params = { "playlist_id": "something or other", "video_id": "id" } <- works
   - remove_from_playlist, params = { "playlist_id": "something or other", "video_id": "id" } <- Missing edit url from google, and created one fails
+- Plugin should mark as watched on watch later <-- Tobias 
 - Music Category Scraper and YouTube 100 playlist playback.
 - Change Download code to support xbmcvfs (ie download to temp folder, move to final location).
+- Maybe update playback code to use this: http://www.youtube.com/get_video_info?video_id=O-77ElyvRxI
 - Check all context menu items again some seem to be broken <-- Henrik & Tobias
 
 [B]Errata[/B]
@@ -21,6 +21,7 @@
 - Playback of youtube video from local downloads folder fails until xbmc has had a chance to refresh the folder listing. 
 
 [B]Version 2.5.0 Beta[B]
+- Added new option to select playback and download quality with dialogs
 - Added Caching and alphabetically sorting of My playlists, My contacts and My subscriptions 
 - Added "Play all" context menu on certain folders 
 - Added "Shuffle and Play All" Context menu on certain folders
