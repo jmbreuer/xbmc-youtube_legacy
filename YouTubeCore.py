@@ -207,7 +207,7 @@ class YouTubeCore(object):
 			
 			videoids = videoids[(per_page * page):(per_page * (page + 1))]
 			
-			(result, status) = self.getBatchDetails(videoids, params)		
+			(result, status) = self.getBatchDetails(videoids, params)
 		else:
 			result = self.listAll(params)
 				
@@ -355,6 +355,7 @@ class YouTubeCore(object):
 			else:
 				if (self.__storage__.getReversePlaylistOrder(params)):
 					ytobjects.reverse()
+		
 		return ytobjects
 	
 	def delete_favorite(self, params = {}):
@@ -474,9 +475,7 @@ class YouTubeCore(object):
 			if node.getElementsByTagName("link"):
 				link = node.getElementsByTagName("link")
 				for i in range(len(link)):
-					#print "YouTube TEST2: " + link.item(i).getAttribute('rel')
 					if link.item(i).getAttribute('rel') == 'edit':
-						#print "YouTube TEST3"
 						obj = link.item(i).getAttribute('href')
 						folder['editid'] = obj[obj.rfind('/')+1:]
 
@@ -729,7 +728,7 @@ class YouTubeCore(object):
 
 	def getVideoInfoBatch(self, xml, params = {}):
 		get = params.get
-		dom = parseString(xml);
+		dom = parseString(xml)
 		entries = dom.getElementsByTagName("atom:entry");
 		
 		ytobjects = [];
@@ -747,10 +746,14 @@ class YouTubeCore(object):
 			if (videoid):
 				if (videoid.rfind("/") != -1):
 					video['videoid'] = videoid[videoid.rfind("/") + 1:]
+				
+				if node.getElementsByTagName("batch:status").item(0).hasAttribute('code'):
+					code = self._getNodeAttribute(node, "batch:status", 'code', 'unknown')
+					if code == "404":
+						video["videoid"] = "false"
 					
 				if node.getElementsByTagName("yt:state").item(0):
 					state = self._getNodeAttribute(node, "yt:state", 'name', 'Unknown Name')
-	
 					if ( state == 'deleted' or state == 'rejected'):
 						video['videoid'] = "false"
 						
