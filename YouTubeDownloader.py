@@ -18,7 +18,7 @@
 
 import sys, urllib2, os, time, math
 from DialogDownloadProgress import DownloadProgress
-import xbmc
+import xbmc, xbmcvfs
 from filelock import FileLock
 
 class YouTubeDownloader:	 
@@ -123,17 +123,17 @@ class YouTubeDownloader:
 			self.__utils__.showMessage(self.__language__( 30625 ), self.__language__(30626))
 			return ([], 303)
 		
-		path = self.__settings__.getSetting( "downloadPath" )
 		video["downloadPath"] = self.__settings__.getSetting( "downloadPath" )
 		subtitle_path = self.__player__.downloadSubtitle(video) 
 		url = urllib2.Request(video['video_url'])
 		url.add_header('User-Agent', self.__utils__.USERAGENT);
-		
-		filename_incomplete = "%s/%s-[%s]-incomplete.mp4" % ( path, ''.join(c for c in video['Title'] if c in self.__utils__.VALID_CHARS), video["videoid"] )
-		filename_complete = "%s/%s-[%s].mp4" % ( path, ''.join(c for c in video['Title'] if c in self.__utils__.VALID_CHARS), video["videoid"] )
+		filename = "%s-[%s].mp4" % ( ''.join(c for c in video['Title'] if c in self.__utils__.VALID_CHARS), video["videoid"] )
+		filename_incomplete = os.path.join(xbmc.translatePath( "special://temp" ), filename )
+		filename_complete = os.path.join(self.__settings__.getSetting( "downloadPath" ), filename )
 
-		if os.path.isfile(filename_complete):
-			os.unlink(filename_complete)
+		if xbmcvfs.exists(filename_complete):
+			xbmcvfs.delete(filename_complete)
+
 		file = open(filename_incomplete, "wb")
 		con = urllib2.urlopen(url);
 		total_size = 8192 * 25
@@ -180,7 +180,7 @@ class YouTubeDownloader:
 			except:
 				print self.__player__ + " Failed to close download stream and file handle"	
 		
-		os.rename(filename_incomplete, filename_complete)
+		xbmcvfs.rename(filename_incomplete, filename_complete)
 		self.dialog.update(heading = self.__language__(30604), label=video["Title"])
 		self.__settings__.setSetting( "vidstatus-" + video['videoid'], "1" )
 		return ( video, 200 )

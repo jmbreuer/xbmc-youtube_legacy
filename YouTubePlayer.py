@@ -42,8 +42,9 @@ class YouTubePlayer(object):
 	# ================================ Subtitle Downloader ====================================
 	def downloadSubtitle(self, video = {}):
 		get = video.get
+
 		subtitle_url = self.getSubtitleUrl(video)
-		
+
 		if not subtitle_url and self.__settings__.getSetting("transcode") == "true":
 			(html, status) = self.__core__._fetchPage({"link": self.urls["video_stream"] % get("videoid")})
 			if status == 200:
@@ -52,7 +53,8 @@ class YouTubePlayer(object):
 		if subtitle_url:
 			srt = ""
 			(xml, status) = self.__core__._fetchPage({"link": subtitle_url})
-			if status == 200:
+
+			if status == 200 and xml:
 				srt = self.transformSubtitleXMLtoSRT(xml)
 			if len(srt) > 0:
 				self.saveSubtitle(srt, video)
@@ -60,42 +62,44 @@ class YouTubePlayer(object):
 		
 		return False
 	
+        def getSubtitleUrl(self, video = {}):
+                get = video.get
+                url = ""
+
+                (xml, status) = self.__core__._fetchPage({"link": self.urls["timed_text_index"] % get('videoid')})
+        	dom = parseString(xml)
+                entries = dom.getElementsByTagName("track")
+
+                subtitle = ""
+                lang_code = [ self.__language__( 30277 ), self.__language__( 30278  ), self.__language__( 30279 ), self.__language__( 30280 ), self.__language__( 30281 ), self.__language__( 30282 ), self.__language__( 30283 )][int(self.__settings__.getSetting("lang_code"))]
+                code = ""
+                for node in entries:
+                        if node.getAttribute("lang_code") == lang_code:
+                                subtitle = node.getAttribute("name").replace(" ", "%20")
+				code = lang_code
+                                break
+                        if node.getAttribute("lang_code") == "en":
+                                subtitle = node.getAttribute("name").replace(" ", "%20")
+				code = "en"
+
+                if subtitle and code:
+                        url = self.urls["close_caption_url"] % ( get("videoid"), subtitle, code)
+
+                return url
+
 	def saveSubtitle(self, srt, video = {}):
 		get = video.get
+
 		filename = ''.join(c for c in video['Title'] if c in self.__utils__.VALID_CHARS) + " [" + get('videoid') + "]" + ".srt"
-		if video.has_key("downloadPath"):
-			path = os.path.join( video["downloadPath"], filename )
-		else:
-			path = os.path.join( xbmc.translatePath( "special://temp" ), filename )
+		path = os.path.join( xbmc.translatePath( "special://temp" ), filename )
+
 		w = open(path, "w")
 		w.write(srt.encode('utf-8'))
 		w.close()
-		
-	def getSubtitleUrl(self, video = {}):
-		get = video.get
-		url = ""
-		
-		(xml, status) = self.__core__._fetchPage({"link": self.urls["timed_text_index"] % get('videoid')})
-		dom = parseString(xml)
-		entries = dom.getElementsByTagName("track")
-		
-		subtitle = ""
-		lang_code = [ self.__language__( 30277 ), self.__language__( 30278  ), self.__language__( 30279 ), self.__language__( 30280 ), self.__language__( 30281 ), self.__language__( 30282 ), self.__language__( 30283 )][int(self.__settings__.getSetting("lang_code"))]
-		code = ""
-		for node in entries:
-			if node.getAttribute("lang_code") == lang_code:
-				subtitle = node.getAttribute("name").replace(" ", "%20")
-				code = lang_code
-				break
-			if node.getAttribute("lang_code") == "en":
-				subtitle = node.getAttribute("name").replace(" ", "%20")
-				code = "en"
-		
-		if subtitle and code:
-			url = self.urls["close_caption_url"] % ( get("videoid"), subtitle, code)
-		
-		return url
-	
+
+		if video.has_key("downloadPath"):
+			xbmcvfs.rename(path, os.path.join( video["downloadPath"], filename ))
+
 	def getTranscriptionUrl(self, html, video = {}):
 		get = video.get
 		trans_url = ""	

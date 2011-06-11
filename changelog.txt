@@ -2,11 +2,11 @@
 - Fix playlist management support in core <-- Tobias (Henrik: These seem not to work as we keep getting http 400 bad request)
   - remove_playlist, params = { "playlist_id": "something or other" } <- don't know
   - remove_from_playlist, params = { "playlist_id": "something or other", "video_id": "id" } <- Missing edit url from google, and created one fails
-- Plugin should mark as watched on watch later <-- Tobias 
-- Music Category Scraper and YouTube 100 playlist playback.
-- Change Download code to support xbmcvfs (ie download to temp folder, move to final location).
+- Plugin should mark as watched on watch later <-- Tobias
+- Music Category Scraper and YouTube 100 playlist playback
 - Maybe update playback code to use this: http://www.youtube.com/get_video_info?video_id=O-77ElyvRxI
 - Check all context menu items again some seem to be broken <-- Henrik & Tobias
+- Handle stale lock file
 
 [B]Errata[/B]
 - [XBMC] Thumbnails sometimes turns into black box or Folder (XBMC not detecting when thumbnail is set and defaulting to icon?)
@@ -29,13 +29,6 @@
 - Added playback of WebM streams if user enables it on his/her profile
 - Added Date for sorting
 - Added Auto-magic re-login on token verfication failure
-- Changed Login to use new Client Login url
-- Changed Playback function now shows a more user friendly error message on failure
-- Changed Download function now shows a progress-bar
-- Changed Download function will now only download one file at a time and queues multiple files.
-- Changed "Disco Top 25" to "Disco Top 50" scraper 
-- Changed plugin will now play a video from file-system if the file is still in the download folder (Partially working as this has revealed XBMC bug.)
-- Changed more videos by user, and related videos so you no longer have to be logged in for them to work.
 - Added 2 new feeds: "most shared" and "trending videos" that gives a better "pulse" of youtube videos.
 - Added YouTube live scraper under explore youtube
 - Added YouTube Top 100 music chart scraper 
@@ -43,6 +36,14 @@
 - Added YouTube My liked Video Scraper
 - Added socket timeout since that makes now appears to work on windows
 - Added new download dialog
+- Added support for xbmcvfs in downloads. (ie download to temp folder, move to final location)
+- Changed Login to use new Client Login url
+- Changed Playback function now shows a more user friendly error message on failure
+- Changed Download function now shows a progress-bar
+- Changed Download function will now only download one file at a time and queues multiple files.
+- Changed "Disco Top 25" to "Disco Top 50" scraper 
+- Changed plugin will now play a video from file-system if the file is still in the download folder (Partially working as this has revealed XBMC bug.)
+- Changed more videos by user, and related videos so you no longer have to be logged in for them to work.
 - Refactor: Simplify playback code
 - Refactor: Large scale refactor to make code more maintainable
 - Fixed Age Verification for 18+ content was broken by YouYube. 

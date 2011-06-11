@@ -563,7 +563,7 @@ class YouTubeCore(object):
 	def _fetchPage(self, params = {}):
 		get = params.get
 		if self.__dbg__:
-			print self.__plugin__ + " fetching page : " + repr(params)
+			print self.__plugin__ + " _fetchPage called for : " + repr(params)
 		
 		if not get("link") or int(get("error", "0")) > 3 :
 			if self.__dbg__:
