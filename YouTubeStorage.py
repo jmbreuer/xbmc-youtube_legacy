@@ -306,7 +306,7 @@ class YouTubeStorage:
 		
 	def store(self, params = {}, results = []):
 		key = self.getStorageKey(params)				
-		self.self.storeResultSet(key, results)
+		self.storeResultSet(key, results)
 		
 	def retrieve(self, params = {}):
 		key = self.getStorageKey(params)
