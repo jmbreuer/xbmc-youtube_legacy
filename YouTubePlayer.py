@@ -490,7 +490,7 @@ class YouTubePlayer(object):
 			path = self.__settings__.getSetting( "downloadPath" )
 			path = "%s%s-[%s].mp4" % (path, ''.join(c for c in video['Title'] if c in self.__utils__.VALID_CHARS), video["videoid"])
 			try:
-				if os.path.exists(path):
+				if xbmcvfs.exists(path):
 					video['video_url'] = path
 					return (video, 200)
 			except:
