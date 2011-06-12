@@ -558,10 +558,10 @@ class YouTubeScraperCore:
 		page = int(get("page", "0"))
 		per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
 		
-		items = self.__storage__.retrieve(params)
-		
 		videos = []
-		if page == 0 or not items:
+		videos = self.__storage__.retrieve(params)
+		
+		if page == 0 or not videos:
 			
 			if (get("scraper") == "search_disco"):
 				(videos, result ) = self.searchDisco(params)
