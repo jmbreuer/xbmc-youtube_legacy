@@ -470,24 +470,16 @@ class YouTubeScraperCore:
 
 	def scrapeYouTubeTop100(self, params = {}):
 		get = params.get
-		ytobjects = []
+		items = []
 		
 		url = self.createUrl(params)
 		
 		(html, status) = self.__core__._fetchPage({"link": url})
 		
 		if status == 200:
-			list = SoupStrainer(name="div", id="weekly-hits")
-			videos = BeautifulSoup(html, parseOnlyThese=list)
-			if len(videos) > 0:
-				list = videos.div.div.div.button["href"]
-				if list.find("more_url=/music&video_ids="):
-					list = list[list.find("video_ids=") + len("video_ids="):]
-					list = list[:list.find("&")]
-					list = urllib.unquote_plus(list)
-					ytobjects = list.split(",")		
+			items = re.compile('<a href="/watch\?v=(.*)&amp;feature=musicchart" class=').findall(html);
 		
-		return (ytobjects, status)
+		return (items, status)
 		
 #=================================== Movies ============================================		
 
