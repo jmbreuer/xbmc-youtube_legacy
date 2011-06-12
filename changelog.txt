@@ -28,15 +28,15 @@
 - Added Caching of playlist and option to reverse playlist order
 - Added playback of WebM streams if user enables it on his/her profile
 - Added Date for sorting
-- Added Auto-magic re-login on token verfication failure
+- Added "Auto-magic" re-login on token verfication failure
 - Added 2 new feeds: "most shared" and "trending videos" that gives a better "pulse" of youtube videos.
 - Added YouTube live scraper under explore youtube
 - Added YouTube Top 100 music chart scraper 
 - Added YouTube My Watch Later Scraper
 - Added YouTube My liked Video Scraper
 - Added socket timeout since that makes now appears to work on windows
-- Added new download dialog
-- Added support for xbmcvfs in downloads. (ie download to temp folder, move to final location)
+- Added New download dialog showing queue and progress completion.
+- Added support for xbmcvfs in downloads. (ie. download to temp folder then let xbmc move to final location)
 - Changed Login to use new Client Login url
 - Changed Playback function now shows a more user friendly error message on failure
 - Changed Download function now shows a progress-bar

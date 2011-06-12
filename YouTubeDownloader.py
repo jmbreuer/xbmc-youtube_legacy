@@ -42,23 +42,7 @@ class YouTubeDownloader:
 			self.__utils__.showMessage(self.__language__(30600), self.__language__(30611))
 			self.__settings__.openSettings()
 			path = self.__settings__.getSetting( "downloadPath" )
-
-		'''
-		if xbmc.getInfoLabel( "Window.Property(DialogDownloadProgress.IsAlive)" ) == "true":
-                       if self.__dbg__: 
-			       print self.__plugin__ + " Downloader is active Queueing video "    
-			       print self.__plugin__ + " XBMC info label " + xbmc.getInfoLabel( "Window.Property(DialogDownloadProgress.IsAlive)" )         
-                        self.__storage__.addVideoToDownloadQeueu(params)                           
-                else:                    
-                        params["silent"] = "true"                     
-                        if self.__plugin__:                           
-				print self.__plugin__ + " Downloader not active, intialising downloader"
-				print self.__plugin__ + " XBMC info label " + xbmc.getInfoLabel( "Window.Property(DialogDownloadProgress.IsAlive)" )
-                        self.__storage__.addVideoToDownloadQeueu(params)                           
-                        self.processQueue(params)
-		'''
 		
-		#print self.__plugin__ + " XBMC info label " + xbmc.getInfoLabel( "Window.Property(DialogDownloadProgress.IsAlive)" )
 		try:
 			print self.__plugin__ + " trying to acquire"
 			self.__lock__.acquire()
@@ -66,13 +50,11 @@ class YouTubeDownloader:
 			if self.__dbg__:
 				print self.__plugin__ + " Exception "
 				print self.__plugin__ + " Downloader is active Queueing video "
-				#print self.__plugin__ + " XBMC info label " + xbmc.getInfoLabel( "Window.Property(DialogDownloadProgress.IsAlive)" )
 			self.__storage__.addVideoToDownloadQeueu(params)
 		else:
 			params["silent"] = "true"
 			if self.__plugin__:
 				print self.__plugin__ + " Downloader not active, intialising downloader"
-				#print self.__plugin__ + " XBMC info label " + xbmc.getInfoLabel( "Window.Property(DialogDownloadProgress.IsAlive)" )
 			
 			self.__storage__.addVideoToDownloadQeueu(params)
 			self.processQueue(params)
@@ -111,7 +93,6 @@ class YouTubeDownloader:
 			self.dialog.close()
 			self.dialog = ""
 
-			# Remove lock
 			self.__lock__.release()
 
 			
