@@ -20,7 +20,7 @@ import sys, urllib, os
 import xbmc
 from filelock import FileLock
 	
-class YouTubePluginStorage:
+class YouTubeStorage:
 	__settings__ = sys.modules[ "__main__"].__settings__ 
 	__plugin__ = sys.modules[ "__main__"].__plugin__
 	__language__ = sys.modules[ "__main__" ].__language__
@@ -192,12 +192,13 @@ class YouTubePluginStorage:
 		get = params.get
 		
 		if (get("view_mode")):  
-			viewmode = ""
+			key = ""
 			if (get("external")):
-				viewmode += "external_" + get("contact") + "_"
-			viewmode += "view_mode_" + get("channel")
+				key += "external_" + get("contact") + "_"
+			key += "view_mode_" + get("channel")
 			
-			self.__settings__.setSetting(viewmode, get("view_mode"))
+			self.storeValue(key, get("view_mode"))
+
 			params['user_feed'] = get("view_mode")
 			if get("viewmode") == "playlists":
 				params["folder"] = "true"
@@ -206,15 +207,16 @@ class YouTubePluginStorage:
 		get = params.get
 		
 		if (get("playlist")):
-			sort = "reverse_playlist_" + get("playlist")
+			key = "reverse_playlist_" + get("playlist")
 			if (get("external")):
-				sort += "_external_" + get("contact") 
+				key += "_external_" + get("contact") 
 			
-			existing = self.__settings__.getSetting(sort)
-			if existing != "true":
-				self.__settings__.setSetting(sort, "true")
-			else:
-				self.__settings__.setSetting(sort, "false")
+			value = "true"
+			existing = self.retrieveValue(key)
+			if existing == "true":
+				value = "false"
+						
+			self.storeValue(key, value)
 		
 		xbmc.executebuiltin( "Container.Refresh" )
 		
@@ -222,11 +224,11 @@ class YouTubePluginStorage:
 		get = params.get 
 		result = False
 		if (get("playlist")):
-			sort = "reverse_playlist_" + get("playlist")
+			key = "reverse_playlist_" + get("playlist")
 			if (get("external")):
-				sort += "_external_" + get("contact") 
+				key += "_external_" + get("contact") 
 			
-			existing = self.__settings__.getSetting(sort)
+			existing = self.retrieveValue(key)
 			if existing == "true":
 				result = True
 		
@@ -302,6 +304,70 @@ class YouTubePluginStorage:
 			self.__lock__.release()
 			print self.__plugin__ + " removeVideoFromDownloadQueue released"
 		
+	def store(self, params = {}, results = []):
+		key = self.getStorageKey(params)				
+		self.self.storeResultSet(key, results)
+		
+	def retrieve(self, params = {}):
+		key = self.getStorageKey(params)
+		return self.retrieveResultSet(key)
+	
+	def getStorageKey(self, params):
+		get = params.get
+		key = ""
+		
+		if get("scraper"):
+			key = get("scraper")
+		if get("scraper") == "search_disco":
+			if get("query"):
+				key = "disco_search_%s" % urllib.unquote_plus(get("search"))
+				
+		if get("user_feed"):
+			key = "result_" + get("user_feed")
+			
+			if get("playlist"):
+				key += "_" + get("playlist")
+			
+			if get("channel"):
+				key += "_" + get("channel")
+			
+			if get("external") and not get("thumb"):
+				key += "_external_" + get("contact")
+		
+		if get("thumb"):
+			key += "_thumb"
+			params["thumb"] = ""
+		
+		return key
+	
+	def storeResultSet(self, key, results = []):
+		if results:
+			value = repr(results)
+			self.__settings__.setSetting(key,value)
+	
+	def retrieveResultSet(self, key):
+		results = []
+		
+		value = self.__settings__.getSetting(key)		
+		if value: 
+			try:
+				results = eval(value)
+			except:
+				results = []
+		
+		return results
+		
+	def storeValue(self, key, value):
+		if value:
+			self.__settings__.setSetting(key, value)
+		
+	def retrieveValue(self, key):
+		value = ""
+		if key:
+			value = self.__settings__.getSetting(key)
+		
+		return value
+		
 	def getNextVideoFromDownloadQueue(self):
 		try:
 			print self.__plugin__ + " getNextVideoFromDownloadQueue trying to acquire"
@@ -310,8 +376,7 @@ class YouTubePluginStorage:
 			print self.__plugin__ + " getNextVideoFromDownloadQueue Exception "
 		else:
 			videos = []
-			#queue = self.__settings__.getSetting("download_queue")
-
+			
 			fd = os.open(os.path.join( xbmc.translatePath( "special://temp" ), "YouTubeDownloadQueue"), os.O_RDWR | os.O_CREAT)
 			queue = os.read(fd, 65535)
 			os.close(fd)

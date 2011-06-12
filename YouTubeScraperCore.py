@@ -30,6 +30,8 @@ class YouTubeScraperCore:
 	__core__ = sys.modules[ "__main__" ].__core__
 	__storage__ = sys.modules [ "__main__" ].__storage__
 	
+	simple_scrapers = ["search_disco","liked_videos","live","disco_top_50","recommended","music_top100"]
+	
 	urls = {}
 	urls['categories'] = "http://www.youtube.com/videos"
 	urls['current_trailers'] = "http://www.youtube.com/trailers?s=trit&p=%s&hl=en"
@@ -132,125 +134,40 @@ class YouTubeScraperCore:
 		return ([], 303)
 		
 #=================================== Disco  ============================================
-
 	def searchDisco(self, params = {}):
 		get = params.get
-		
-		query = get("search")
-		query = urllib.unquote_plus(query)
-		
-		page = int(get("page", "0"))
-		per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
-		
-		existingVideos = self.__settings__.getSetting("disco_%s" % query)
-		
-		if ( page == 0 or existingVideos == ""):
-			( videos, status)  = self._get_disco_list(query)
-			if (status == 200):
-				self.__settings__.setSetting("disco_%s" % query, self.__utils__.arrayToPipeDelimitedString(videos))
-		else:
-			status = 200
-			videos = existingVideos.split("|")
-		
-		if ( per_page * ( page + 1 ) < len(videos) ):
-			next = 'true'
-		else:
-			next = 'false'
-		
-		subitems = videos[(per_page * page):(per_page * (page + 1))]
-		
-		if (get("fetch_all") == "true"):
-			subitems = videos
-		
-		if (status == 200):
-			( ytobjects, status ) = self.__core__.getBatchDetails(subitems)
-		
-			if (len(ytobjects) > 0):
-				if page == 0:
-					self.__settings__.setSetting("disco_search_" + query + "_thumb", ytobjects[0]["thumbnail"])
-				
-				if (next == "true"):
-					self.__storage__.addNextFolder(ytobjects, params)
-								
-			return (ytobjects, status)
-		
-		return ([], 500)
-		
-	def _get_disco_list(self, query):
 		if self.__dbg__:
-			print self.__plugin__ + " _get_disco_list"
-			
-		url = self.urls["disco_search"] % urllib.quote_plus(query)
-		if (self.__dbg__):
-			print self.__plugin__ + " Disco search url " + repr(url)
+			print self.__plugin__ + " searchDisco"
 		
-		(page, status) = self.__core__._fetchPage({"link": url})
-		
-		if (page.find("list=") != -1):
-			page = page.replace("\u0026", "&")
-			mix_list_id = page[page.find("list=") + 5:]
-			if (mix_list_id.find("&") != -1):
-				mix_list_id = mix_list_id[:mix_list_id.find("&")]
-			elif (mix_list_id.find('"') != -1):
-				mix_list_id = mix_list_id[:mix_list_id.find('"')]
-			
-			video_id = page[page.find("v=") + 2:]
-			video_id = video_id[:video_id.find("&")]
-			
-			url = self.urls["disco_mix_list"] % (video_id, mix_list_id)
-										
+		items = []
+		if get("search"):
+			url = self.urls["disco_search"] % urllib.quote_plus(get("search"))
+						
 			(page, status) = self.__core__._fetchPage({"link": url})
 			
-			list = SoupStrainer(name="div", id ="playlist-bar")
-			mix_list = BeautifulSoup(page, parseOnlyThese=list)
-			if (len(mix_list) > 0):
-				match = mix_list.div["data-video-ids"].split(",")
+			if (page.find("list=") != -1):
+				page = page.replace("\u0026", "&")
+				mix_list_id = page[page.find("list=") + 5:]
+				if (mix_list_id.find("&") != -1):
+					mix_list_id = mix_list_id[:mix_list_id.find("&")]
+				elif (mix_list_id.find('"') != -1):
+					mix_list_id = mix_list_id[:mix_list_id.find('"')]
 				
-				if match:
-					return (match, 200)
-				else:
-					return ( self.__language__(30601), 303)
+				video_id = page[page.find("v=") + 2:]
+				video_id = video_id[:video_id.find("&")]
+				
+				url = self.urls["disco_mix_list"] % (video_id, mix_list_id)
+											
+				(page, status) = self.__core__._fetchPage({"link": url})
+				
+				list = SoupStrainer(name="div", id ="playlist-bar")
+				mix_list = BeautifulSoup(page, parseOnlyThese=list)
+				if (len(mix_list) > 0):
+					items = mix_list.div["data-video-ids"].split(",")
 		
-		if (self.__dbg__):
-			print self.__plugin__ + " _get_disco_list no match"
-			
-		return ( self.__language__(30601), 303)
+		return ( items, 200)
 	
-	def scrapeDiscoTop50(self, params = {}):
-		get = params.get
-		page = int(get("page", "0"))
-		per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
-		
-		videos = []
-		existingVideos = self.__settings__.getSetting("disco_top_50")
-		
-		if ( page == 0 or existingVideos == ""):
-			videos = self.scrapeDiscoTop50List(params)
-			if (videos):
-				self.__settings__.setSetting("disco_top_50", self.__utils__.arrayToPipeDelimitedString(videos))
-		else:
-			videos = existingVideos.split("|")
-			videos = videos[:50]
-		
-		next = 'false'
-		if ( per_page * ( page + 1 ) < len(videos) ):
-			next = 'true'
-		
-		subitems = videos[(per_page * page):(per_page * (page + 1))]
-		
-		if (get("fetch_all") == "true"):
-			subitems = videos
-		
-		if len(subitems) > 0:
-			(result , status) = self.__core__.getBatchDetails(subitems)
-			if (status == 200):
-				if (next == "true"):
-					self.__storage__.addNextFolder(result, params)
-			return (result, status) 
-
-		return ([], 500)
-	
-	def scrapeDiscoTop50List(self, params = {}):
+	def scrapeDiscoTop50(self, params = {}):		
 		url = self.urls["disco_main"]
 		(page, status) = self.__core__._fetchPage({"link": url})
 		list = SoupStrainer(name="div", attrs = {"class":"popular-message"})
@@ -266,8 +183,8 @@ class YouTubeScraperCore:
 				videos = videos.replace(" ","")
 				items = videos.split(",")
 		
-		return items[:50]
-		
+		return ( items, status)
+	
 	def scrapeDiscoTopArtist(self, params = {}):
 		get = params.get
 		url = self.urls["disco_main"]
@@ -282,10 +199,14 @@ class YouTubeScraperCore:
 				title = self.__utils__.makeAscii(artist.contents[0])
 				item["search"] = title
 				item["Title"] = title
-				if (self.__settings__.getSetting("disco_search_" + title + "_thumb")):
-					item["thumbnail"] = self.__settings__.getSetting("disco_search_" + title + "_thumb")
-				else:
+				
+				params["thumb"] = "true"
+				thumb = self.__storage__.retrieve(params)
+				if not thumb:
 					item["thumbnail"] = "discoball"
+				else:
+					item["thumbnail"] = thumb
+				
 				item["path"] = get("path")
 				item["scraper"] = "search_disco"
 				yobjects.append(item)
@@ -326,50 +247,11 @@ class YouTubeScraperCore:
 				videos.append(item)
 				video = video.findNextSibling(name="div", attrs= {"class":"video-cell"})
 		
-		if videos:
-			return (videos,200)
-		
-		return ([],303)	
+		return (videos, status)	
 				
 #=================================== User Scraper ============================================
-	def scrapeRecommended(self, params = {}):
-		get = params.get
-				
-		page = int(get("page", "0"))
-		per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
-		
-		oldVideos = self.__settings__.getSetting("recommendedVideos")
-		
-		if ( page == 0 or oldVideos == ""):
-			( videos, result)  = self.scrapeYouTubeData(params)
-			if (result == 200):
-				self.__settings__.setSetting("recommendedVideos", self.__utils__.arrayToPipeDelimitedString(videos))
-			else:
-				return ( videos, result )
-		else:
-			videos = oldVideos.split("|")
-		
-		if ( per_page * ( page + 1 ) < len(videos) ):
-			next = 'true'
-		else:
-			next = 'false'
-		
-		subitems = videos[(per_page * page):(per_page * (page + 1))]
-		
-		if self.__dbg__:
-			print self.__plugin__ + " calling get batch"
-		if len(subitems) > 0:
-			( ytobjects, status ) = self.__core__.getBatchDetails(subitems)
-		else:
-			return (subitems, 303)
-		
-		if (len(ytobjects) > 0):
-			if (next == "true"):
-				self.__storage__.addNextFolder(ytobjects, params)
-						
-		return (ytobjects, status)
 	
-	def scrapeYouTubeData(self, params ={}):
+	def scrapeRecommended(self, params = {}):
 		get = params.get
 				
 		url = self.urls[get("scraper")]
@@ -422,10 +304,7 @@ class YouTubeScraperCore:
 				items.append(videoid)
 				video = video.findNextSibling()
 		
-		if len(items) > 0:
-			return self.__core__.getBatchDetails(items)
-		
-		return ([], 303 )
+		return (items, status)
 			
 #=================================== Shows ============================================
 	def scrapeShowEpisodes(self, html, params = {}):
@@ -587,45 +466,12 @@ class YouTubeScraperCore:
 			
 		return (yobjects, status)
 
-#=================================== Music ============================================		
+#=================================== Music ============================================
 
 	def scrapeYouTubeTop100(self, params = {}):
 		get = params.get
-		page = int(get("page", "0"))
-		per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
-		
-		videos = []
-		existingVideos = self.__settings__.getSetting("music_top100")
-		
-		if ( page == 0 or existingVideos == ""):
-			videos = self.scrapeYouTubeTop100List(params)
-			if (videos):
-				self.__settings__.setSetting("music_top100", self.__utils__.arrayToPipeDelimitedString(videos))
-		else:
-			videos = existingVideos.split("|")
-			videos = videos[:100]
-		
-		next = 'false'
-		if ( per_page * ( page + 1 ) < len(videos) ):
-			next = 'true'
-		
-		subitems = videos[(per_page * page):(per_page * (page + 1))]
-		
-		if (get("fetch_all") == "true"):
-			subitems = videos
-		
-		if len(subitems) > 0:
-			(result , status) = self.__core__.getBatchDetails(subitems)
-			if (status == 200):
-				if (next == "true"):
-					self.__storage__.addNextFolder(result, params)
-			return (result, status) 
-		
-		return ([], 500)
-
-	def scrapeYouTubeTop100List(self, params = {}):
-		get = params.get
 		ytobjects = []
+		
 		url = self.createUrl(params)
 		
 		(html, status) = self.__core__._fetchPage({"link": url})
@@ -640,16 +486,15 @@ class YouTubeScraperCore:
 					list = list[:list.find("&")]
 					list = urllib.unquote_plus(list)
 					ytobjects = list.split(",")		
-		return ytobjects
-
-
-
+		
+		return (ytobjects, status)
+		
 #=================================== Movies ============================================		
 
 	def scrapeMovieSubCategory(self, html, params = {}):
 		get = params.get
 		ytobjects = []
-
+		
 		list = SoupStrainer(name="div", attrs = {'class':"ytg-fl browse-content"})
 		categories = BeautifulSoup(html, parseOnlyThese=list)
 		if len(categories):
@@ -714,8 +559,56 @@ class YouTubeScraperCore:
 		return (yobjects, 200)
 
 #=================================== Common ============================================
+	
+	def simplePaginator(self, params = {}):
+		get = params.get
+
+		page = int(get("page", "0"))
+		per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
 		
-	def scrapePageinator(self, params = {}):
+		items = self.__storage__.retrieve(params)
+		
+		videos = []
+		if page == 0 or not items:
+			
+			if (get("scraper") == "search_disco"):
+				(videos, result ) = self.searchDisco(params)
+			if (get("scraper") == "liked_videos"):
+				(videos, result ) = self.scrapeLikedVideos(params)
+			if (get("scraper") == "live"):
+				(videos, result ) = self.scrapeLiveNow(params)
+			if (get("scraper") == "disco_top_50"):
+				(videos, result ) = self.scrapeDiscoTop50(params)
+			if (get("scraper") == "recommended"):
+				(videos, result ) = self.scrapeRecommended(params)
+			if (get("scraper") == "music_top100"):
+				(videos, result ) = self.scrapeYouTubeTop100(params)
+			
+			if result == 200:
+				self.__storage__.store(params, videos)
+		
+		if ( per_page * ( page + 1 ) < len(videos) ):
+			next = 'true'
+		else:
+			next = 'false'
+		
+		subitems = videos[(per_page * page):(per_page * (page + 1))]
+		
+		if (get("fetch_all") == "true"):
+			subitems = videos
+		
+		if len(subitems) > 0:
+			( ytobjects, status ) = self.__core__.getBatchDetails(subitems)
+		else:
+			return (subitems, 303)
+		
+		if (len(ytobjects) > 0):
+			if (next == "true"):
+				self.__storage__.addNextFolder(ytobjects, params)
+		
+		return (ytobjects, status)
+	
+	def advancedPageinator(self, params = {}):
 		get = params.get
 		original_page = int(get("page","0"))
 		scraper_per_page = 0
@@ -1022,24 +915,14 @@ class YouTubeScraperCore:
 	def scrape(self, params = {}):
 		get = params.get
 		
-		if (get("scraper") == "search_disco"):
-			return self.searchDisco(params)
+		if get("scraper") in self.simple_scrapers:
+			return self.simplePaginator(params)
 		if (get("scraper") == "watch_later"):
 			return self.scrapeWatchLater(params)
-		if (get("scraper") == "liked_videos"):
-			return self.scrapeLikedVideos(params)
-		if (get("scraper") == "live"):
-			return self.scrapeLiveNow(params)
-		if (get("scraper") == "disco_top_50"):
-			return self.scrapeDiscoTop50(params)
 		if (get("scraper") == "disco_top_artist"):
 			return self.scrapeDiscoTopArtist(params)
-		if (get("scraper") == "recommended"):
-			return self.scrapeRecommended(params)
-		if (get("scraper") == "music_top100"):
-			return self.scrapeYouTubeTop100(params)
 		
-		return self.scrapePageinator(params)
+		return self.advancedPageinator(params)
 	
 if __name__ == '__main__':
 	sys.exit(0);

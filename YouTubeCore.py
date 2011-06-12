@@ -189,7 +189,9 @@ class YouTubeCore(object):
 			thumbnail = result[0].get('thumbnail', "")
 			
 			if (thumbnail):
-				self.__settings__.setSetting("search_" + urllib.unquote_plus(get("search")) + "_thumb", thumbnail)
+				params["thumb"] = "true"
+				self.__storage__.store(thumbnail)
+				#self.__settings__.setSetting("search_" + urllib.unquote_plus(get("search")) + "_thumb", )
 			
 		return (result, 200)
 	
@@ -197,17 +199,10 @@ class YouTubeCore(object):
 		get = params.get
 		page = int(get("page", "0"))
 		per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
-		
-		store_key = "playlist_result_" + get("playlist")
-		if get("external"):
-			store_key += "_external_" + get("contact") 
-
-		if page != 0:	
-			store = self.__settings__.getSetting(store_key)
 			
-			if ( store != ""):
-				videoids = store.split("|")
+		videoids = self.__storage__.retrieve(params)
 			
+		if page != 0 and videoids:
 			next = 'false'
 			if ( per_page * ( page + 1 ) < len(videoids) ):
 				next = 'true'
@@ -226,11 +221,12 @@ class YouTubeCore(object):
 				vget = video.get
 				videoids.append(vget("videoid","false"))
 			
-			self.__settings__.setSetting(store_key, self.__utils__.arrayToPipeDelimitedString(videoids))
+			self.__storage__.store(params, videoids)
 			
 			thumbnail = result[0].get('thumbnail', "")
-			if thumbnail:
-				self.__settings__.setSetting("playlist_" + get("playlist") + "_thumb", thumbnail)
+			
+			params["thumb"] = "true"
+			self.__storage__.store(params, thumbnail)
 			
 			next = 'false'	
 			if (len(result) > 0):
@@ -257,11 +253,7 @@ class YouTubeCore(object):
 		page = int(get("page", "0"))
 		per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
 		
-		user_feed = "result_" + get("user_feed")
-		if get("external"):
-			user_feed += "_external_" + get("contact") 
-
-		store = self.__settings__.getSetting(user_feed)
+		store = self.__storage__.retrieve(params)
 		
 		if ( page != 0 and store != ""):
 			try:
@@ -275,9 +267,9 @@ class YouTubeCore(object):
 			if len(result) == 0:
 				return (result, 303)
 			
-			self.__settings__.setSetting(user_feed, repr(result))
+			self.__storage__.store(params, result)
 		
-		next = 'false'	
+		next = 'false'
 		if (len(result) > 0):
 			if ( per_page * ( page + 1 ) < len(result) ):
 				next = 'true'
@@ -470,14 +462,12 @@ class YouTubeCore(object):
 			
 			if get("user_feed") == "subscriptions":
 				folder["channel"] = folder["Title"]
-				if (self.__settings__.getSetting(get("user_feed") + "_" + folder["channel"] + "_thumb")):
-					folder["thumbnail"] = self.__settings__.getSetting(get("user_feed") + "_" + folder["channel"] + "_thumb")
 			
 			if get("user_feed") == "playlists":
 				folder["user_feed"] = "playlist"
-				thumb = self.__settings__.getSetting("playlist_" + folder["playlist"] + "_thumb")
-				if thumb:
-					folder["thumbnail"] = thumb
+
+			params["thumb"] = "true"
+			folder["thumbnail"] = self.__storage__.retrieve(params)
 			
 			if node.getElementsByTagName("link"):
 				link = node.getElementsByTagName("link")
@@ -804,7 +794,7 @@ class YouTubeCore(object):
 				
 				video['thumbnail'] = "http://i.ytimg.com/vi/" + video['videoid'] + "/0.jpg"
 				
-				overlay = self.__settings__.getSetting( "vidstatus-" + video['videoid'] )
+				overlay = self.__storage__.retrieveValue("vidstatus-" + video['videoid'] )
 				if overlay:
 					video['Overlay'] = int(overlay)
 				
@@ -898,7 +888,7 @@ class YouTubeCore(object):
 
 			video['thumbnail'] = "http://i.ytimg.com/vi/" + video['videoid'] + "/0.jpg"
 			
-			overlay = self.__settings__.getSetting( "vidstatus-" + video['videoid'] )
+			overlay = self.__storage__.retrieveValue("vidstatus-" + video['videoid'] )
 			if overlay:
 				video['Overlay'] = int(overlay)
 			
