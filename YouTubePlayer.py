@@ -506,7 +506,7 @@ class YouTubePlayer(object):
 		if status == 200:			
 			links = self.getVideoUrlMap(html, video)
 			
-			if len(links) == 0:
+			if len(links) == 0 and get("action") != "download":
 				links= self.getVideoStreamMap(html, video)
 		
 		if not links:
@@ -520,5 +520,8 @@ class YouTubePlayer(object):
 				video['apierror'] = self.__language__(30618)
 		else:
 			video["video_url"] = self.selectVideoQuality(links, params)
+			if video["video_url"] == "":
+				video['apierror'] = self.__language__(30618)
+				status = 303
 		
 		return (video, status)

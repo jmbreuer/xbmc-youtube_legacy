@@ -16,7 +16,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, urllib2, os, time, math
+import sys, urllib2, os
 from DialogDownloadProgress import DownloadProgress
 import xbmc, xbmcvfs
 from filelock import FileLock
@@ -64,11 +64,8 @@ class YouTubeDownloader:
 		
 		if videoid:
 			if not self.dialog:
-				print self.__plugin__ + " Creating Dialog"
 				self.dialog = DownloadProgress()
-				print self.__plugin__ + " Created Dialog"
 			self.dialog.create( heading = self.__language__( 30634 ), label = "")
-			print self.__plugin__ + " Updated headline Dialog"
 	
 			while videoid:
 				params["videoid"] = videoid
