@@ -67,24 +67,26 @@ class YouTubePlayer(object):
 		url = ""
 		
 		(xml, status) = self.__core__._fetchPage({"link": self.urls["timed_text_index"] % get('videoid')})
-		dom = parseString(xml)
-		entries = dom.getElementsByTagName("track")
 		
-		subtitle = ""
-		lang_code = [ self.__language__( 30277 ), self.__language__( 30278  ), self.__language__( 30279 ), self.__language__( 30280 ), self.__language__( 30281 ), self.__language__( 30282 ), self.__language__( 30283 )][int(self.__settings__.getSetting("lang_code"))]
-		code = ""
-		for node in entries:
-			if node.getAttribute("lang_code") == lang_code:
-				subtitle = node.getAttribute("name").replace(" ", "%20")
-			code = lang_code
-			break
+		if status == 200:
+			dom = parseString(xml)
+			entries = dom.getElementsByTagName("track")
 			
-			if node.getAttribute("lang_code") == "en":
-				subtitle = node.getAttribute("name").replace(" ", "%20")
-				code = "en"
-
-			if subtitle and code:
-				url = self.urls["close_caption_url"] % ( get("videoid"), subtitle, code)
+			subtitle = ""
+			lang_code = [ self.__language__( 30277 ), self.__language__( 30278  ), self.__language__( 30279 ), self.__language__( 30280 ), self.__language__( 30281 ), self.__language__( 30282 ), self.__language__( 30283 )][int(self.__settings__.getSetting("lang_code"))]
+			code = ""
+			for node in entries:
+				if node.getAttribute("lang_code") == lang_code:
+					subtitle = node.getAttribute("name").replace(" ", "%20")
+				code = lang_code
+				break
+				
+				if node.getAttribute("lang_code") == "en":
+					subtitle = node.getAttribute("name").replace(" ", "%20")
+					code = "en"
+	
+				if subtitle and code:
+					url = self.urls["close_caption_url"] % ( get("videoid"), subtitle, code)
 		
 		return url
 
@@ -327,11 +329,17 @@ class YouTubePlayer(object):
 		
 		return links
 	
-	def getSessionToken(self, params, html):
-		session_token =""
-		if html.find('<input type="hidden" name="session_token" value="') > 0:
-			session_token = html[html.find('<input type="hidden" name="session_token" value="') + len('<input type="hidden" name="session_token" value="'):]
-			session_token = session_token[:session_token.find('"/>')]
+	def getSessionToken(self, params):
+		get = params.get
+		
+		( html, status ) = self.__core__._fetchPage({"link": self.urls["session_token"] % get("videoid"), "login": "true"})
+		
+		if status == 200:
+			session_token =""
+			if html.find('<input type="hidden" name="session_token" value="') > 0:
+				session_token = html[html.find('<input type="hidden" name="session_token" value="') + len('<input type="hidden" name="session_token" value="'):]
+				session_token = session_token[:session_token.find('"/>')]
+		
 		params["session_token"] = session_token
 	
 	def getAlert(self, html, params = {}):
@@ -432,7 +440,6 @@ class YouTubePlayer(object):
 		list = []
 		choices = []
 		
-		print "select video quality"
 		if link(37):
 			list.append((37,"1080p"))
 		if link(22):
@@ -473,15 +480,9 @@ class YouTubePlayer(object):
 	def getVideoObject(self, params):
 		get = params.get
 		video = {}
-		
-		(html, status) = self.__core__._fetchPage({"link": self.urls["video_stream"] % get("videoid")})
-		
-		if status != 200:
-			video["apierror"] = html 
-			return (video,status)
-		
+				
 		if get("watch_later","false") == "true":
-			self.getSessionToken(params, html)
+			self.getSessionToken(params)
 		
 		(video, status) = self.getVideoInfo(params)
 		
@@ -495,6 +496,14 @@ class YouTubePlayer(object):
 					return (video, 200)
 			except:
 				print self.__plugin__ + " attempt to locate local file failed with unknown error, trying youtube instead"
+		
+		(html, status) = self.__core__._fetchPage({"link": self.urls["video_stream"] % get("videoid")})
+		
+		if status != 200:
+			video["apierror"] = html 
+			return (video,status)
+		
+		html = urllib.unquote_plus(html)
 		
 		vget = video.get
 		if status == 403:
