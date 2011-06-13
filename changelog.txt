@@ -4,7 +4,6 @@
   - remove_from_playlist, params = { "playlist_id": "something or other", "video_id": "id" } <- Missing edit url from google, and created one fails
 - Plugin should mark as watched on watch later <-- Tobias
 - Music Category and artists Scraper <-- Henrik
-- Update playback code to use: http://www.youtube.com/get_video_info?video_id=O-77ElyvRxI <-- Henrik & Tobias
 - Check all context menu items again some seem to be broken <-- Henrik & Tobias
 - Handle stale lock file for windows. <-- Tobias
 
