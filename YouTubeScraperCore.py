@@ -30,7 +30,7 @@ class YouTubeScraperCore:
 	__core__ = sys.modules[ "__main__" ].__core__
 	__storage__ = sys.modules [ "__main__" ].__storage__
 	
-	simple_scrapers = ["search_disco","liked_videos","live","disco_top_50","recommended","music_top100", "disco_top_artist"]
+	simple_scrapers = ["search_disco","liked_videos","live","disco_top_50","recommended","music_top100", "disco_top_artist", "music_hits", "music_artists","music_artist"]
 	
 	urls = {}
 	urls['categories'] = "http://www.youtube.com/videos"
@@ -153,18 +153,44 @@ class YouTubeScraperCore:
 					category = cat_list.li
 					if (category.a == None):
 						category = category.findNextSibling()
-						while category != None:
-							item = {}
-							title = self.__utils__.makeAscii(category.a.contents[0])
-							id = category.a["href"].replace("/music/","/")
-							item["Title"] = title
-							item["category"] = urllib.quote_plus(id)
-							item["icon"] = "music"
-							items.append(item)
-							category = category.findNextSibling()
-					cat_list.findNextSibling()
+					while category != None:
+						item = {}
+						title = self.__utils__.makeAscii(category.a.contents[0])
+						title = self.__utils__.replaceHtmlCodes(title)
+						id = category.a["href"].replace("/music/","/")
+						item["Title"] = title
+						item["category"] = urllib.quote_plus(id)
+						item["icon"] = "music"
+						item["scraper"] = get("scraper")
+						if get("scraper") == "music_artists":
+							item["folder"] = "true"
+						
+						items.append(item)
+						category = category.findNextSibling()
+					cat_list = cat_list.findNextSibling()
+		return (items, status) 
 
+	
+	def scrapeArtist(self, params = {}):
+		get = params.get
+		items = []
+		videos = []
+		if self.__dbg__:
+			print self.__plugin__ + " scrapeArtist"
 		
+		if get("artist"):
+			url = self.urls["artist"] % get("artist")
+			(html, status) = self.__core__._fetchPage({"link": url})
+			
+			if status == 200:
+				#<a href="/watch?v=ivWoqv4lJ2M&amp;feature=artist" title="Play video">
+				videos = re.compile('<a href="/watch\?v=(.*)&amp;feature=artist" title="').findall(html);
+				
+		for v in videos:
+			if v not in items:
+				items.append(v)
+		
+		return ( items, status )
 	
 	def scrapeSimilarArtists(self, params = {}):
 		get = params.get
@@ -175,12 +201,56 @@ class YouTubeScraperCore:
 	
 	def scrapeMusicCategoryArtists(self, params={}):
 		get = params.get
-		
+		status = 200
 		items = []
+		
+		if get("category"):
+			category = urllib.unquote_plus(get("category"))
+			url = self.urls["music"] + category
+			(html, status) = self.__core__._fetchPage({"link":url})
+			
+			list = SoupStrainer(name="div", attrs = {"class":"ytg-fl browse-content"})
+			content = BeautifulSoup(html, parseOnlyThese=list)
+			
+			if (len(content) > 0):
+				artists = content.findAll(name="div", attrs = {"class":"browse-item artist-item"}, recursive=True)
+				for artist in artists:
+					item = {}
+					title = self.__utils__.makeAscii(artist.div.h3.a.contents[0])
+					title = self.__utils__.replaceHtmlCodes(title)
+					item["Title"] = title
+					item["scraper"] = "music_artist"
+					
+					id = artist.a["href"]
+					id = id[id.find("?a=") + 3:id.find("&")]
+					item["artist"] = id
+					item["icon"] = "music"
+					item["thumbnail"] = artist.a.span.span.span.img["data-thumb"]
+					items.append(item)
+		
+		return (items, status)
 	
 	def scrapeMusicCategoryHits(self, params = {}):
 		get = params.get
+		status = 200
 		items = []
+		
+		if get("category"):
+			category = urllib.unquote_plus(get("category"))
+			url = self.urls["music"] + category
+			(html, status) = self.__core__._fetchPage({"link":url})
+			
+			list = SoupStrainer(name="div", attrs = {"class":"ytg-fl browse-content"})
+			content = BeautifulSoup(html, parseOnlyThese=list)
+			
+			if (len(content) > 0):
+				videos = content.findAll(name="div", attrs = {"class":"browse-item music-item"}, recursive=True)
+				for video in videos: 
+					id = video.a["href"]
+					id = id[id.find("?v=") + 3:id.find("&")]
+					items.append(id)
+		
+		return (items, status)
 	
 
 	def searchDisco(self, params = {}):
@@ -609,7 +679,7 @@ class YouTubeScraperCore:
 		
 		videos = []
 		status = 200
-		videos = self.__storage__.retrieve(params)
+		stored = self.__storage__.retrieve(params)
 		
 		if page == 0 or not videos:
 			
@@ -627,10 +697,23 @@ class YouTubeScraperCore:
 				(videos, result ) = self.scrapeYouTubeTop100(params)
 			if (get("scraper") == "disco_top_artist"):
 				(videos, result ) = self.scrapeDiscoTopArtist(params)
-
+			if (get("scraper") == "music_artist"):
+				(videos, result ) = self.scrapeArtist(params)
+			if (get("scraper") == "similar_artist"):
+				(videos, result ) = self.scrapeSimilarArtist(params)
+			if (get("scraper") == "music_hits" or get("scraper") == "music_artists"):
+				if get("category") and get("scraper") == "music_hits":
+					(videos, result ) = self.scrapeMusicCategoryHits(params)
+				elif get("category") and get("scraper") == "music_artists":
+					(videos, result ) = self.scrapeMusicCategoryArtists(params)
+				else:
+					(videos, result ) = self.scrapeMusicCategories(params)
 			
 			if result == 200:
 				self.__storage__.store(params, videos)
+		
+		if not videos and get("scraper") == "music_top100":
+			videos = stored
 		
 		if not get("folder"): 
 			if ( per_page * ( page + 1 ) < len(videos) ):

@@ -61,6 +61,17 @@ class YouTubeUtils:
 		
 		return commands
 	
+	def replaceHtmlCodes(self, str):
+		
+		str = str.strip()
+		str = str.replace("&amp;", "&")
+		str = str.replace("&quot;", '"')
+		str = str.replace("&hellip;", "...")
+		str = str.replace("&gt;",">")
+		str = str.replace("&lt;","<")
+
+		return str
+	
 	# This function implements a horrible hack related to python 2.4's terrible unicode handling
 	def makeAscii(self, str):
 		try:

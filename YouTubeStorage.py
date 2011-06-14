@@ -318,6 +318,13 @@ class YouTubeStorage:
 		
 		if get("scraper"):
 			key = get("scraper")
+		
+		if get("scraper") == "music_hits" and get("category"):
+			key += "_" + get("category")
+		
+		if get("scraper") == "music_artist" and get("artist"):
+			key += "_" + get("artist")
+		
 		if get("scraper") == "search_disco":
 			if get("query"):
 				key = "disco_search_%s" % urllib.unquote_plus(get("search"))
