@@ -134,8 +134,11 @@ class YouTubeStorage:
 			else:
 				params["scraper"] = "search_disco"
 				self.saveSearch(params)
-		params["old_search"] = ""
-		params["store"] = ""
+			params["search"] = urllib.quote_plus(new_query)
+		
+		del params["old_search"]
+		del params["store"]
+		del params["action"]
 	
 	def refineStoredSearch(self, params = {}):
 		get = params.get

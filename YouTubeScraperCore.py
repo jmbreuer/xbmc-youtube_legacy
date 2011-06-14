@@ -183,7 +183,6 @@ class YouTubeScraperCore:
 			(html, status) = self.__core__._fetchPage({"link": url})
 			
 			if status == 200:
-				#<a href="/watch?v=ivWoqv4lJ2M&amp;feature=artist" title="Play video">
 				videos = re.compile('<a href="/watch\?v=(.*)&amp;feature=artist" title="').findall(html);
 				
 		for v in videos:
