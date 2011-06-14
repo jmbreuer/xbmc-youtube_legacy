@@ -56,6 +56,8 @@ class YouTubeNavigation:
 				  {'Title':__language__( 30016 )  ,'path':"/root/explore/feeds/rated"				, 'thumbnail':"top"					, 'login':"false" , 'feed':"feed_rated" },
 				  {'Title':__language__( 30043 )  ,'path':"/root/explore/movies"					, 'thumbnail':"movies"				, 'login':"false" , 'scraper':'movies', 'folder':'true'},
 				  {'Title':__language__( 30053 )  ,'path':"/root/explore/music"						, 'thumbnail':"music"				, 'login':"false" },
+				  {'Title':__language__( 30056 )  ,'path':"/root/explore/music/hits"				, 'thumbnail':"music"				, 'login':"false" , 'scraper':'music_hits', "folder":"true"},
+				  {'Title':__language__( 30057 )  ,'path':"/root/explore/music/artists"				, 'thumbnail':"music"				, 'login':"false" , 'scraper':'music_artists', "folder":"true" },
 				  {'Title':__language__( 30054 )  ,'path':"/root/explore/music/top100"				, 'thumbnail':"music"				, 'login':"false" , 'scraper':'music_top100'},
 				  {'Title':__language__( 30042 )  ,'path':"/root/explore/shows"						, 'thumbnail':"shows"				, 'login':"false" , 'scraper':'shows', 'folder':'true'},
 				  {'Title':__language__( 30032 )  ,'path':"/root/explore/trailers"					, 'thumbnail':"trailers"			, 'login':"false" },
