@@ -55,6 +55,8 @@
     <string id="30053">YouTube Music</string>
     <string id="30054">YouTube Top 100 Music Chart</string>
     <string id="30055">My Liked Videos</string>
+    <string id="30056">Todays Hit's</string>
+    <string id="30057">Popular Artists</string>
     
     <!-- Plugin settings strings -->
     <string id="30200">Username</string>
@@ -182,6 +184,7 @@
     <string id="30535">Remove from Playlist</string>
     <string id="30536">Reverse Playlist</string>
     <string id="30537">Select video quality</string>
+    <string id="30538">Similar artists</string>
 	
     <!-- messages -->
     <string id="30600">Error</string>

@@ -69,6 +69,7 @@ class YouTubeUtils:
 		str = str.replace("&hellip;", "...")
 		str = str.replace("&gt;",">")
 		str = str.replace("&lt;","<")
+		str = str.replace("&#39;","'")
 
 		return str
 	

@@ -30,7 +30,7 @@ class YouTubeScraperCore:
 	__core__ = sys.modules[ "__main__" ].__core__
 	__storage__ = sys.modules [ "__main__" ].__storage__
 	
-	simple_scrapers = ["search_disco","liked_videos","live","disco_top_50","recommended","music_top100", "disco_top_artist", "music_hits", "music_artists","music_artist"]
+	simple_scrapers = ["search_disco","liked_videos","live","disco_top_50","recommended","music_top100", "disco_top_artist", "music_hits", "music_artists","music_artist", "similar_artist"]
 	
 	urls = {}
 	urls['categories'] = "http://www.youtube.com/videos"
@@ -195,9 +195,33 @@ class YouTubeScraperCore:
 		get = params.get
 		items = []
 		
+		if self.__dbg__:
+			print self.__plugin__ + " scrapeSimilarArtist"
+		
 		if get("artist"):
-			print " skoksok"
-	
+			url = self.urls["artist"] % get("artist")
+			(html, status) = self.__core__._fetchPage({"link": url})
+			
+			if status == 200:
+				list = SoupStrainer(name="div", id ="similar-artists")
+				content = BeautifulSoup(html, parseOnlyThese=list)
+				artists = content.findAll(name = "div", attrs = {"class":"similar-artist"})
+				for artist in artists:
+					item = {}
+					title = self.__utils__.makeAscii(artist.a.contents[0])
+					title = self.__utils__.replaceHtmlCodes(title)
+					item["Title"] = title
+					
+					id = artist.a["href"]
+					id = id[id.find("?a=") + 3:id.find("&")]
+					item["artist"] = id
+					item["icon"] = "music"
+					item["scraper"] = "music_artist"
+					item["thumbnail"] = "music"
+					items.append(item)
+		
+		return ( items, status )
+		
 	def scrapeMusicCategoryArtists(self, params={}):
 		get = params.get
 		status = 200
@@ -699,7 +723,7 @@ class YouTubeScraperCore:
 			if (get("scraper") == "music_artist"):
 				(videos, result ) = self.scrapeArtist(params)
 			if (get("scraper") == "similar_artist"):
-				(videos, result ) = self.scrapeSimilarArtist(params)
+				(videos, result ) = self.scrapeSimilarArtists(params)
 			if (get("scraper") == "music_hits" or get("scraper") == "music_artists"):
 				if get("category") and get("scraper") == "music_hits":
 					(videos, result ) = self.scrapeMusicCategoryHits(params)

@@ -494,6 +494,9 @@ class YouTubeNavigation:
 		if (item("next","false") == "true"):
 			return cm
 		
+		if item("artist"):
+			cm.append ( (self.__language__(30538), "XBMC.Container.Update(%s?path=%s&scraper=similar_artist&artist=%s&folder=true&)" % ( sys.argv[0], item("path"), item("artist") ) ) )			
+			
 		if (not get("user_feed") == "subscriptions" and (item("user_feed") == "favorites" or item("user_feed") == "newsubscriptions")):
 			cm.append ( (self.__language__(30530), "XBMC.RunPlugin(%s?path=%s&action=play_all&user_feed=%s&contact=%s&)" % ( sys.argv[0], item("path"), item("user_feed"), "default" ) ) )
 			cm.append ( (self.__language__(30532), "XBMC.RunPlugin(%s?path=%s&action=play_all&shuffle=true&user_feed=%s&contact=%s&)" % ( sys.argv[0], item("path"), item("user_feed"), "default" ) ) )
