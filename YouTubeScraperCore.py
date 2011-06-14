@@ -30,7 +30,7 @@ class YouTubeScraperCore:
 	__core__ = sys.modules[ "__main__" ].__core__
 	__storage__ = sys.modules [ "__main__" ].__storage__
 	
-	simple_scrapers = ["search_disco","liked_videos","live","disco_top_50","recommended","music_top100"]
+	simple_scrapers = ["search_disco","liked_videos","live","disco_top_50","recommended","music_top100", "disco_top_artist"]
 	
 	urls = {}
 	urls['categories'] = "http://www.youtube.com/videos"
@@ -53,6 +53,7 @@ class YouTubeScraperCore:
 	urls['watch_later'] = "http://www.youtube.com/my_watch_later_list"
 	urls['liked_videos'] = "http://www.youtube.com/my_liked_videos"
 	urls['music'] = "http://www.youtube.com/music"
+	urls['artist'] = "http://www.youtube.com/artist?a=%s&feature=artist"
 
 #=================================== Trailers ============================================
 	def scrapeTrailersListFormat (self, page, params = {}):
@@ -133,7 +134,55 @@ class YouTubeScraperCore:
 		
 		return ([], 303)
 		
-#=================================== Disco  ============================================
+#=================================== Music  ============================================
+	def scrapeMusicCategories(self, params = {}):
+		get = params.get
+		if self.__dbg__:
+			print self.__plugin__ + " scrapeMusicCategories"
+		
+		items = []
+		url = self.urls["music"]
+		(html, status) = self.__core__._fetchPage({"link": url})
+		
+		if status == 200:
+			list = SoupStrainer(name="div", id="browse-filter-menu")
+			content = BeautifulSoup(html, parseOnlyThese=list)
+			if (len(content) > 0):
+				cat_list = content.ul
+				while cat_list != None:
+					category = cat_list.li
+					if (category.a == None):
+						category = category.findNextSibling()
+						while category != None:
+							item = {}
+							title = self.__utils__.makeAscii(category.a.contents[0])
+							id = category.a["href"].replace("/music/","/")
+							item["Title"] = title
+							item["category"] = urllib.quote_plus(id)
+							item["icon"] = "music"
+							items.append(item)
+							category = category.findNextSibling()
+					cat_list.findNextSibling()
+
+		
+	
+	def scrapeSimilarArtists(self, params = {}):
+		get = params.get
+		items = []
+		
+		if get("artist"):
+			print " skoksok"
+	
+	def scrapeMusicCategoryArtists(self, params={}):
+		get = params.get
+		
+		items = []
+	
+	def scrapeMusicCategoryHits(self, params = {}):
+		get = params.get
+		items = []
+	
+
 	def searchDisco(self, params = {}):
 		get = params.get
 		if self.__dbg__:
@@ -559,6 +608,7 @@ class YouTubeScraperCore:
 		per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
 		
 		videos = []
+		status = 200
 		videos = self.__storage__.retrieve(params)
 		
 		if page == 0 or not videos:
@@ -575,29 +625,35 @@ class YouTubeScraperCore:
 				(videos, result ) = self.scrapeRecommended(params)
 			if (get("scraper") == "music_top100"):
 				(videos, result ) = self.scrapeYouTubeTop100(params)
+			if (get("scraper") == "disco_top_artist"):
+				(videos, result ) = self.scrapeDiscoTopArtist(params)
+
 			
 			if result == 200:
 				self.__storage__.store(params, videos)
 		
-		if ( per_page * ( page + 1 ) < len(videos) ):
-			next = 'true'
-		else:
-			next = 'false'
-		
-		subitems = videos[(per_page * page):(per_page * (page + 1))]
-		
-		if (get("fetch_all") == "true"):
-			subitems = videos
-		
-		if len(subitems) > 0:
+		if not get("folder"): 
+			if ( per_page * ( page + 1 ) < len(videos) ):
+				next = 'true'
+			else:
+				next = 'false'
+			
+			subitems = videos[(per_page * page):(per_page * (page + 1))]
+			
+			if (get("fetch_all") == "true"):
+				subitems = videos
+			
+			if len(subitems) == 0:
+				return (subitems, 303)
+			
 			( ytobjects, status ) = self.__core__.getBatchDetails(subitems)
+			
+			if (len(ytobjects) > 0):
+				if (next == "true"):
+					self.__storage__.addNextFolder(ytobjects, params)
 		else:
-			return (subitems, 303)
-		
-		if (len(ytobjects) > 0):
-			if (next == "true"):
-				self.__storage__.addNextFolder(ytobjects, params)
-		
+			ytobjects = videos
+			
 		return (ytobjects, status)
 	
 	def advancedPageinator(self, params = {}):
@@ -911,8 +967,6 @@ class YouTubeScraperCore:
 			return self.simplePaginator(params)
 		if (get("scraper") == "watch_later"):
 			return self.scrapeWatchLater(params)
-		if (get("scraper") == "disco_top_artist"):
-			return self.scrapeDiscoTopArtist(params)
 		
 		return self.advancedPageinator(params)
 	
