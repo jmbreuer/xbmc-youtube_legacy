@@ -190,7 +190,7 @@ class YouTubeCore(object):
 			
 			if (thumbnail):
 				params["thumb"] = "true"
-				self.__storage__.store(thumbnail)
+				self.__storage__.store(params, thumbnail)
 				#self.__settings__.setSetting("search_" + urllib.unquote_plus(get("search")) + "_thumb", )
 			
 		return (result, 200)
