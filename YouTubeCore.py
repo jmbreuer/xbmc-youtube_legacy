@@ -467,7 +467,9 @@ class YouTubeCore(object):
 				folder["user_feed"] = "playlist"
 
 			params["thumb"] = "true"
-			folder["thumbnail"] = self.__storage__.retrieve(params)
+			thumb = self.__storage__.retrieve(params)
+			if thumb:
+				folder["thumbnail"] = thumb 
 			
 			if node.getElementsByTagName("link"):
 				link = node.getElementsByTagName("link")
