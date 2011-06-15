@@ -410,6 +410,8 @@ class YouTubePlayer(object):
 			video_url = link(26)
 		elif (link(18)):
 			video_url = link(18)
+		elif (link(33)):
+			video_url = link(33)
 		elif (link(5)):
 			video_url = link(5)
 		
