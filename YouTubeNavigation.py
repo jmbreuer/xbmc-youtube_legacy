@@ -417,7 +417,7 @@ class YouTubeNavigation:
 				continue
 			
 			if get("scraper") == "watch_later":
-				result_params["index"] = str(results.index(result_params))
+				result_params["index"] = str(results.index(result_params) + 1)
 			
 			if result("next") == "true":
 				self.addFolderListItem(params, result_params, listSize)
