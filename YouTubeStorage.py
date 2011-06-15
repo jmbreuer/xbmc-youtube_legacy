@@ -320,7 +320,7 @@ class YouTubeStorage:
 		key = ""
 		
 		if get("scraper"):
-			key = get("scraper")
+			key = "s_" + get("scraper")
 		
 		if get("scraper") == "music_hits" and get("category"):
 			key += "_" + get("category")

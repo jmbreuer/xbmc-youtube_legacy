@@ -712,6 +712,7 @@ class YouTubeScraperCore:
 				(videos, result ) = self.scrapeLikedVideos(params)
 			if (get("scraper") == "live"):
 				(videos, result ) = self.scrapeLiveNow(params)
+				params["no_batch"] = "true"
 			if (get("scraper") == "disco_top_50"):
 				(videos, result ) = self.scrapeDiscoTop50(params)
 			if (get("scraper") == "recommended"):
@@ -752,7 +753,12 @@ class YouTubeScraperCore:
 			if len(subitems) == 0:
 				return (subitems, 303)
 			
-			( ytobjects, status ) = self.__core__.getBatchDetails(subitems)
+			if get("batch_thumbnails"):
+				( ytobjects, status ) = self.__core__.getBatchDetailsThumbnails(subitems)
+			elif not get("no_batch"):
+				( ytobjects, status ) = self.__core__.getBatchDetails(subitems)
+			else:
+				ytobjects = videos
 			
 			if (len(ytobjects) > 0):
 				if (next == "true"):
