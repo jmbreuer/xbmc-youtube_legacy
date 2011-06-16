@@ -68,6 +68,9 @@ class YouTubePlayer(object):
 		
 		(xml, status) = self.__core__._fetchPage({"link": self.urls["timed_text_index"] % get('videoid')})
 		
+		if self.__dbg__:
+			print self.__plugin__ + " subtitle index: " + repr(xml)
+		
 		if status == 200:
 			dom = parseString(xml)
 			entries = dom.getElementsByTagName("track")
@@ -78,28 +81,31 @@ class YouTubePlayer(object):
 			for node in entries:
 				if node.getAttribute("lang_code") == lang_code:
 					subtitle = node.getAttribute("name").replace(" ", "%20")
-				code = lang_code
-				break
-				
+					code = lang_code
+					break
+			
 				if node.getAttribute("lang_code") == "en":
 					subtitle = node.getAttribute("name").replace(" ", "%20")
 					code = "en"
-	
-				if subtitle and code:
-					url = self.urls["close_caption_url"] % ( get("videoid"), subtitle, code)
+			
+			if subtitle and code:
+				url = self.urls["close_caption_url"] % ( get("videoid"), subtitle, code)
+		
+		if self.__dbg__:
+			print self.__plugin__ + " found subtitle url: " + repr(url)
 		
 		return url
 
 	def saveSubtitle(self, srt, video = {}):
 		get = video.get
-
+		
 		filename = ''.join(c for c in video['Title'] if c in self.__utils__.VALID_CHARS) + "-[" + get('videoid') + "]" + ".srt"
 		path = os.path.join( xbmc.translatePath( "special://temp" ), filename )
-
+		
 		w = open(path, "w")
 		w.write(srt.encode('utf-8'))
 		w.close()
-
+		
 		if video.has_key("downloadPath"):
 			xbmcvfs.rename(path, os.path.join( video["downloadPath"], filename ))
 
@@ -137,29 +143,35 @@ class YouTubePlayer(object):
 			if node:
 				if node.firstChild:
 					if node.firstChild.nodeValue:
-						text = node.firstChild.nodeValue
-						text = text.replace("&amp;", "&")
-						text = text.replace("&quot;", '"')
-						text = text.replace("&hellip;", "...")
-						start = str(datetime.timedelta(seconds=float(node.getAttribute("start")))).replace("000", "")
-						if ( start.find(".") == -1 ):
-							start += ".000"
-						dur = str(datetime.timedelta(seconds=float(node.getAttribute("start")) + float(node.getAttribute("dur")))).replace("000", "")
-						if ( dur.find(".") == -1 ):
-							dur += ".000"
-						result += start + " --> " + ( dur ) + "\n" + text + "\n\n"
-		result = result.replace("&#39;", "'")
+						text = self.__utils__.replaceHtmlCodes(node.firstChild.nodeValue)
+						start = ""
+						
+						if node.getAttribute("start"):
+							start = str(datetime.timedelta(seconds=float(node.getAttribute("start")))).replace("000", "")
+							if ( start.find(".") == -1 ):
+								start += ".000"
+						
+						dur = ""
+						if node.getAttribute("dur"):
+							dur = str(datetime.timedelta(seconds=float(node.getAttribute("start")) + float(node.getAttribute("dur")))).replace("000", "")
+							if ( dur.find(".") == -1 ):
+								dur += ".000"
+						
+						if start and dur:
+							result += start + " --> " + ( dur ) + "\n" + text + "\n\n"
 		
 		return result
 		
 	def addSubtitles(self, video = {}):
 		get = video.get
+		if self.__dbg__:
+			print self.__plugin__ + " fetching subtitle if available"
 		
 		filename = ''.join(c for c in video['Title'] if c in self.__utils__.VALID_CHARS) + " [" + get('videoid') + "]" + ".srt"
 		
 		download_path = os.path.join( self.__settings__.getSetting( "downloadPath" ), filename )
 		path = os.path.join( xbmc.translatePath( "special://temp" ), filename )
-
+		
 		set_subtitle = False
 		if (os.path.exists(download_path)):
 			path = download_path
@@ -170,6 +182,8 @@ class YouTubePlayer(object):
 			set_subtitle = True
 		
 		if set_subtitle:
+			if self.__dbg__:
+				print self.__plugin__ + " adding subtitle to playback"		
 			xbmc.Player().setSubtitles(path)
 			time.sleep(5)		
 			xbmc.Player().setSubtitles(path)
