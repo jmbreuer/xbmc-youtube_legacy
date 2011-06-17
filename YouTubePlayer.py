@@ -33,6 +33,7 @@ class YouTubePlayer(object):
 	
 	# YouTube Playback Feeds
 	urls['video_stream'] = "http://www.youtube.com/watch?v=%s&safeSearch=none&hl=en_us"
+	urls['embed_stream'] = "http://www.youtube.com/get_video_info?video_id=%s"
 	urls['timed_text_index'] = "http://www.youtube.com/api/timedtext?type=list&v=%s"
 	urls['video_info'] = "http://gdata.youtube.com/feeds/api/videos/%s"
 	urls['close_caption_url'] = "http://www.youtube.com/api/timedtext?type=track&v=%s&name=%s&lang=%s"
@@ -318,10 +319,13 @@ class YouTubePlayer(object):
 					links[int(quality)] = final_url.replace('\/','/')
 				
 		return links
-	
+
 	def getVideoUrlMap(self, html, video = {}):
 		links = {}
-		fmtSource = re.findall('"fmt_url_map": "([^"]+)"', html);
+		# For /get_video_info
+		fmtSource = re.findall('&fmt_url_map=(.*)&', html);
+		if not fmtSource:
+			fmtSource = re.findall('"fmt_url_map": "([^"]+)"', html);
 		
 		fmt_url_map = []
 		if fmtSource:
@@ -403,8 +407,6 @@ class YouTubePlayer(object):
 	def selectVideoQuality(self, links, params):
 		get = params.get
 		link = links.get
-		if self.__dbg__:
-			print self.__plugin__ + " url map: " + repr(links)
 		video_url = ""
 		
 		if get("action") == "download":
@@ -523,25 +525,39 @@ class YouTubePlayer(object):
 					return (video, 200)
 			except:
 				print self.__plugin__ + " attempt to locate local file failed with unknown error, trying youtube instead"
-		
-		(html, status) = self.__core__._fetchPage({"link": self.urls["video_stream"] % get("videoid")})
 
-		html = urllib.unquote_plus(html)
-		
-		vget = video.get
-		if status == 403:
-			video['apierror'] = self.getAlert(html, params)
-		elif status != 200:
-			if not vget('apierror'):
-				video['apierror'] = self.__language__(30617)
-		
-		if status == 200:			
+		# Get data from /get_video_info
+		print self.__plugin__ + " getVideoObject trying embedded"
+		(html, status) = self.__core__._fetchPage({"link": self.urls["embed_stream"] % get("videoid")})
+
+		if status == 200:
 			links = self.getVideoUrlMap(html, video)
 
-			if len(links) == 0 and get("action") != "download":
-				links= self.getVideoStreamMap(html, video)
+		if len(links) == 0: # Fallback to scraping the website.
+			print self.__plugin__ + " getVideoObject trying website"
+			(html, status) = self.__core__._fetchPage({"link": self.urls["video_stream"] % get("videoid")})
+
+			html = urllib.unquote_plus(html)
+
+			vget = video.get
+			if status == 403:
+				video['apierror'] = self.getAlert(html, params)
+			elif status != 200:
+				if not vget('apierror'):
+					video['apierror'] = self.__language__(30617)
 		
-		if not links:
+			if status == 200:			
+				links = self.getVideoUrlMap(html, video)
+
+			if len(links) == 0 and get("action") != "download":
+				links = self.getVideoStreamMap(html, video)
+
+		if links:
+			video["video_url"] = self.selectVideoQuality(links, params)
+			if video["video_url"] == "":
+				video['apierror'] = self.__language__(30618)
+				status = 303
+		else:
 			status = 303
 			vget = video.get
 			if vget("live_play"):
@@ -550,10 +566,5 @@ class YouTubePlayer(object):
 				video['apierror'] = self.__language__(30620)
 			else:
 				video['apierror'] = self.__language__(30618)
-		else:
-			video["video_url"] = self.selectVideoQuality(links, params)
-			if video["video_url"] == "":
-				video['apierror'] = self.__language__(30618)
-				status = 303
 		
 		return (video, status)
