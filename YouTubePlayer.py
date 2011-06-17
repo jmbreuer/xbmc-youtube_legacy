@@ -322,20 +322,19 @@ class YouTubePlayer(object):
 
 	def getVideoUrlMap(self, html, video = {}):
 		links = {}
+			
 		# For /get_video_info
 		fmtSource = re.findall('&fmt_url_map=(.*)&', html);
 		if not fmtSource:
 			fmtSource = re.findall('"fmt_url_map": "([^"]+)"', html);
-		
+				
 		fmt_url_map = []
 		if fmtSource:
-			if self.__dbg__:
-				print self.__plugin__ + " fmt_url_map found"
 			fmtSource = fmtSource[0].replace('\u0026','&')
 			fmt_url_map = urllib.unquote_plus(fmtSource).split('|')
 			
 		for fmt_url in fmt_url_map:
-			if (len(fmt_url) > 7):
+			if (len(fmt_url) > 7 and fmt_url.find("&") > 7):
 				if (fmt_url.rfind(',') > fmt_url.rfind('&id=')): 
 					final_url = fmt_url[:fmt_url.rfind(',')]
 					if (final_url.rfind('itag=') > 0):
