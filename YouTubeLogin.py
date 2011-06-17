@@ -68,6 +68,7 @@ class YouTubeLogin(object):
 		passwd = self.__settings__.getSetting( "user_password" )
 		
 		self.__settings__.setSetting('auth', "")
+		self.__settings__.setSetting('nick', "")
 		
 		if ( uname == "" or passwd == "" ):
 			if self.__dbg__:
@@ -220,6 +221,17 @@ class YouTubeLogin(object):
 			
 			# Login to youtube
 			con = urllib2.urlopen(newurl)
+			result = con.read()
+			con.close()
+			
+			if result.find("USERNAME', ") > 0:
+				nick = result[result.find("USERNAME', ") + 12:]
+				nick = nick[:nick.find('")')]
+			
+			if nick:
+				self.__settings__.setSetting("nick", nick)
+			else:
+				print self.__plugin__ + " _httplogin failed to get usename from youtube"
 			
 			# Save cookiefile in settings
 			cookies = repr(cj)
