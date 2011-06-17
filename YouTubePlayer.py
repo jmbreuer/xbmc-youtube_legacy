@@ -56,6 +56,7 @@ class YouTubePlayer(object):
 
 			if status == 200 and xml:
 				srt = self.transformSubtitleXMLtoSRT(xml)
+
 			if len(srt) > 0:
 				self.saveSubtitle(srt, video)
 				return True
@@ -74,10 +75,15 @@ class YouTubePlayer(object):
 		if status == 200:
 			dom = parseString(xml)
 			entries = dom.getElementsByTagName("track")
-			
+
 			subtitle = ""
-			lang_code = [ self.__language__( 30277 ), self.__language__( 30278  ), self.__language__( 30279 ), self.__language__( 30280 ), self.__language__( 30281 ), self.__language__( 30282 ), self.__language__( 30283 )][int(self.__settings__.getSetting("lang_code"))]
 			code = ""
+			if len(entries) > 0:
+				# Fallback to first in list.
+				subtitle = entries[0].getAttribute("name").replace(" ", "%20")
+				code = entries[0].getAttribute("lang_code")
+
+			lang_code = [ self.__language__( 30277 ), self.__language__( 30278  ), self.__language__( 30279 ), self.__language__( 30280 ), self.__language__( 30281 ), self.__language__( 30282 ), self.__language__( 30283 )][int(self.__settings__.getSetting("lang_code"))]
 			for node in entries:
 				if node.getAttribute("lang_code") == lang_code:
 					subtitle = node.getAttribute("name").replace(" ", "%20")
