@@ -145,6 +145,7 @@ class YouTubePlayer(object):
 		entries = dom.getElementsByTagName("text")
 		
 		result = ""
+		i = 0
 		for node in entries:
 			if node:
 				if node.firstChild:
@@ -164,7 +165,8 @@ class YouTubePlayer(object):
 								dur += ".000"
 						
 						if start and dur:
-							result += start + " --> " + ( dur ) + "\n" + text + "\n\n"
+							result += str(i) + "\r\n" + start + " --> " + ( dur ) + "\n" + text + "\n\n"
+							i = i + 1
 		
 		return result
 		
@@ -173,25 +175,27 @@ class YouTubePlayer(object):
 		if self.__dbg__:
 			print self.__plugin__ + " fetching subtitle if available"
 		
-		filename = ''.join(c for c in video['Title'] if c in self.__utils__.VALID_CHARS) + " [" + get('videoid') + "]" + ".srt"
-		
+		filename = ''.join(c for c in video['Title'] if c in self.__utils__.VALID_CHARS) + "-[" + get('videoid') + "]" + ".srt"
+
 		download_path = os.path.join( self.__settings__.getSetting( "downloadPath" ), filename )
 		path = os.path.join( xbmc.translatePath( "special://temp" ), filename )
 		
 		set_subtitle = False
-		if (os.path.exists(download_path)):
+		if xbmcvfs.exists(download_path):
 			path = download_path
 			set_subtitle = True
-		elif (os.path.exists(path)):
+		elif xbmcvfs.exists(path):
 			set_subtitle = True
-		elif (self.downloadSubtitle(video)): 
+		elif self.downloadSubtitle(video):
 			set_subtitle = True
-		
-		if set_subtitle:
+
+		if xbmcvfs.exists(path) and not video.has_key("downloadPath"):
 			if self.__dbg__:
-				print self.__plugin__ + " adding subtitle to playback"		
+				print self.__plugin__ + " adding subtitle %s to playback" % path
 			xbmc.Player().setSubtitles(path)
-			time.sleep(5)		
+			time.sleep(5)
+			if self.__dbg__:
+				print self.__plugin__ + " adding subtitle %s to playback" % path
 			xbmc.Player().setSubtitles(path)
 
 	# ================================= Watch Later =====================================
@@ -232,7 +236,7 @@ class YouTubePlayer(object):
 		listitem.setInfo(type='Video', infoLabels=video)
 		
 		if self.__dbg__:
-			print self.__plugin__ + " - Playing video: " + video['Title'] + " - " + get('videoid') + " - " + video['video_url']
+			print self.__plugin__ + " - Playing video: " + self.__utils__.makeAscii(video['Title']) + " - " + get('videoid') + " - " + video['video_url']
 		
 		xbmcplugin.setResolvedUrl(handle=int(sys.argv[1]), succeeded=True, listitem=listitem)
 		
@@ -521,11 +525,7 @@ class YouTubePlayer(object):
 				print self.__plugin__ + " attempt to locate local file failed with unknown error, trying youtube instead"
 		
 		(html, status) = self.__core__._fetchPage({"link": self.urls["video_stream"] % get("videoid")})
-		
-		if status != 200:
-			video["apierror"] = html 
-			return (video,status)
-		
+
 		html = urllib.unquote_plus(html)
 		
 		vget = video.get
@@ -537,7 +537,7 @@ class YouTubePlayer(object):
 		
 		if status == 200:			
 			links = self.getVideoUrlMap(html, video)
-			
+
 			if len(links) == 0 and get("action") != "download":
 				links= self.getVideoStreamMap(html, video)
 		
