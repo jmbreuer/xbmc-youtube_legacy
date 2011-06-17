@@ -420,6 +420,7 @@ class YouTubeScraperCore:
 				response = response[response.find("p=") + 2:]
 				playlist_id = response[:response.find("&")]
 				params["user_feed"] = "playlist"
+				params["login"] = "true"
 				params["playlist"] = playlist_id
 				return self.__core__.list(params)
 		
