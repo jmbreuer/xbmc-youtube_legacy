@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, urllib, re, os.path, datetime, time, urllib2
+import sys, urllib, re, os.path, datetime, time, urllib2, cookielib
 import xbmc, xbmcgui, xbmcplugin, xbmcvfs
 from xml.dom.minidom import parseString
 
@@ -190,7 +190,7 @@ class YouTubePlayer(object):
 		elif self.downloadSubtitle(video):
 			set_subtitle = True
 
-		if xbmcvfs.exists(path) and not video.has_key("downloadPath"):
+		if xbmcvfs.exists(path) and not video.has_key("downloadPath") and set_subtitle:
 			if self.__dbg__:
 				print self.__plugin__ + " adding subtitle %s to playback" % path
 			xbmc.Player().setSubtitles(path)
@@ -198,27 +198,6 @@ class YouTubePlayer(object):
 			if self.__dbg__:
 				print self.__plugin__ + " adding subtitle %s to playback" % path
 			xbmc.Player().setSubtitles(path)
-
-	# ================================= Watch Later =====================================
-	
-	def removeWatchLater(self, params = {}):
-		get = params.get
-		data = urllib.urlencode([('video_ids', get("videoid")), ('session_token', get("session_token")), ('playlist_id', get("playlist")), ('index', get("index"))])		
-		print self.__plugin__  + " calling remove from playlist with data " + repr(data)
-		request = urllib2.Request(self.urls["remove_watch_later"])		
-		request.add_header('Content-Type', 'application/x-www-form-urlencoded')
-		request.add_header('Referer', 'http://www.youtube.com/')
-		request.add_header('User-Agent', self.__utils__.USERAGENT)
-		request.add_header('Cookie', 'LOGIN_INFO=' + self.__settings__.getSetting( "login_info" ))
-		
-		try:
-			con = urllib2.urlopen(request, data)
-			value = con.read()
-			con.close()
-			
-			print "recieved message " + repr(value)
-		except:
-			print self.__plugin__ + " remove from watch later failed with contents " + repr(value)
 	
 	# ================================ Video Playback ====================================
 	
@@ -244,9 +223,10 @@ class YouTubePlayer(object):
 		if self.__settings__.getSetting("lang_code") != "0":
 			self.addSubtitles(video)
 		
-		if (get("watch_later") == "true" and get("playlist") and get("index")):
-			self.removeWatchLater(params)
-			#print self.__plugin__ + "trying to remove from watch later playlist"
+		if (get("watch_later") == "true" and get("playlist") and get("playlist_entry_id")):
+			if self.__dbg__:
+				print self.__plugin__ + " removing video from watch later playlist"
+			self.__core__.remove_from_playlist(params)
 			
 		self.__settings__.setSetting( "vidstatus-" + video['videoid'], "7" )
 	
@@ -337,20 +317,7 @@ class YouTubePlayer(object):
 			video["url_map"] = "true"
 		
 		return links
-	
-	def getSessionToken(self, params):
-		get = params.get
 		
-		( html, status ) = self.__core__._fetchPage({"link": self.urls["video_stream"] % get("videoid"), "login": "true"})
-		
-		if status == 200:
-			session_token =""
-			if html.find('<input type="hidden" name="session_token" value="') > 0:
-				session_token = html[html.find('<input type="hidden" name="session_token" value="') + len('<input type="hidden" name="session_token" value="'):]
-				session_token = session_token[:session_token.find('"/>')]
-		
-		params["session_token"] = session_token
-	
 	def getAlert(self, html, params = {}):
 		get = params.get
 		result = self.__language__(30617)	
@@ -490,9 +457,6 @@ class YouTubePlayer(object):
 		get = params.get
 		video = {}
 				
-		if get("watch_later","false") == "true":
-			self.getSessionToken(params)
-		
 		(video, status) = self.getVideoInfo(params)
 		
 		#Check if file has been downloaded locally and use that as a source instead
