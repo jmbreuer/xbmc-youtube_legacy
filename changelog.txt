@@ -8,13 +8,12 @@
 
 [B]Errata[/B]
 - [XBMC] Thumbnails sometimes turns into black box or Folder (XBMC not detecting when thumbnail is set and defaulting to icon?)
-- [XBMC] When sorting items, it's impossible to get them to return to their original order.
-- [XBMC] Has Excessive Memory use after running the plugin for prolonged periods of time 
+- [XBMC] When sorting items, it's impossible to get them to return to their original order
+- [XBMC] Has Excessive Memory use after running the plugin for prolonged periods of time
 - [XBMC] Playback of RTMPe streams (flash streaming) is currently broken as youtube updated to use a newer protocol than what XBMC supports
 - [XBMC] Theres an unknown issue with the version of urllib and openssl supplied by xbmc for python 2.4 on windows that causes severe login issues for windows users (ssl_ctx_new errors)
 - Download of rtmpe streams not supported.
 - Download queue will usually crash xbmc due to Thread safety issues with xbmc's gui object.
-- Playback of youtube video from local downloads folder fails until xbmc has had a chance to refresh the folder listing. 
 
 [B]Version 2.5.0 (Beta)[B]
 - Added new option to select playback and download quality with dialogs
@@ -36,6 +35,7 @@
 - Added socket timeout since that makes now appears to work on windows
 - Added New download dialog showing queue and progress completion.
 - Added support for xbmcvfs in downloads. (ie. download to temp folder then let xbmc move to final location)
+- Added support for using embedded link to get video information. Better playback stability
 - Changed Login to use new Client Login url
 - Changed Playback function now shows a more user friendly error message on failure
 - Changed Download function now shows a progress-bar
@@ -55,6 +55,7 @@
 - Fixed broken Movies Scraper (from patch by chocol...@cpan.org)
 - Fixed problems when downloading a file to a network drives (thanks to ToCsIc...@gmail.com)
 - Fixed download subtitles when download a video
+- Fixed XBMC not refreshing folder after download completes.
 
 [B]Version 2.2.4[/B]
 - Verfied Compatibility with Eden - pre and submitted to repo.
