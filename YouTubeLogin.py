@@ -40,12 +40,12 @@ class YouTubeLogin(object):
 	urls['http_login_confirmation'] = "http://www.youtube.com/signin?action_handle_signin=true&nomobiletemp=1&hl=en_US&next=/index&hl=en_US&ltmpl=sso"
 	urls['gdata_login'] = "https://www.google.com/accounts/ClientLogin"
 	
-        def __init__(self):
-                timeout = self.__settings__.getSetting( "timeout" )
-                if not timeout:
-                        timeout = "5"
-                socket.setdefaulttimeout(float(timeout))
-                return None
+	def __init__(self):
+		timeout = self.__settings__.getSetting( "timeout" )
+		if not timeout:
+			timeout = "5"
+		socket.setdefaulttimeout(float(timeout))
+		return None
 
 	def login(self, params = {}):
 		self.__settings__.openSettings()
