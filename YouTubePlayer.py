@@ -203,16 +203,16 @@ class YouTubePlayer(object):
 	
 	def removeWatchLater(self, params = {}):
 		get = params.get
-		data = "videoids=%s&session_token=%s&playlist_id=%s&index=%s" % (get("videoid"), get("session_token"), get("playlist"), "" + get("index"))
-		
+		data = urllib.urlencode([('video_ids', get("videoid")), ('session_token', get("session_token")), ('playlist_id', get("playlist")), ('index', get("index"))])		
 		print self.__plugin__  + " calling remove from playlist with data " + repr(data)
 		request = urllib2.Request(self.urls["remove_watch_later"])		
 		request.add_header('Content-Type', 'application/x-www-form-urlencoded')
+		request.add_header('Referer', 'http://www.youtube.com/')
 		request.add_header('User-Agent', self.__utils__.USERAGENT)
 		request.add_header('Cookie', 'LOGIN_INFO=' + self.__settings__.getSetting( "login_info" ))
 		
 		try:
-			con = urllib2.urlopen(request, data);
+			con = urllib2.urlopen(request, data)
 			value = con.read()
 			con.close()
 			
