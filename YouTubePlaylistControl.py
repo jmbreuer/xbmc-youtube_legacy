@@ -158,11 +158,22 @@ class YouTubePlaylistControl:
 	def removeFromPlaylist(self, params = {}):
 		get = params.get
 		
-		if get("playlist") and get("videoid"):
+		if get("playlist") and get("playlist_entry_id"):
 			(message, status) = self.__core__.remove_from_playlist(params)
 			
 			if (status != 200):
-				self.__utils__.showErrorMessage(self.__language__(30023), message, status)
+				self.__utils__.showErrorMessage(self.__language__(30600), message, status)
+				return False
+			xbmc.executebuiltin( "Container.Refresh" )
+		return True
+	
+	def deletePlaylist(self, params):
+		get = params.get
+		if get("playlist"):
+			(message, status) = self.__core__.del_playlist(params)
+			
+			if status != 200:
+				self.__utils__.showErrorMessage(self.__language__(30600), message, status)
 				return False
 			xbmc.executebuiltin( "Container.Refresh" )
 		return True
