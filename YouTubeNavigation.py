@@ -159,6 +159,8 @@ class YouTubeNavigation:
 			self.__playlist__.addToPlaylist(params)
 		if (get("action") == "remove_from_playlist"):
 			self.__playlist__.removeFromPlaylist(params)
+		if (get("action") == "delete_playlist"):
+			self.__playlist__.deletePlaylist(params)
 		if (get("action") == "reverse_order"):
 			self.__storage__.reversePlaylistOrder(params)
 			
@@ -469,8 +471,8 @@ class YouTubeNavigation:
 			if (get("external") == "true" or (get("feed") != "subscriptions_favorites" and get("feed") != "subscriptions_uploads" and get("feed") != "subscriptions_playlists")):
 				cm.append( ( self.__language__( 30512 ) % item("Studio"), 'XBMC.RunPlugin(%s?path=%s&channel=%s&action=add_subscription)' % ( sys.argv[0], item("path"), item("Studio") ) ) )
 				
-			if (get("playlist")):
-				cm.append( (self.__language__(30535), "XBMC.RunPlugin(%s?path=%s&action=remove_from_playlist&playlist=%s&videoid=%s&)" % ( sys.argv[0], item("path"), get("playlist"), item("videoid") ) ) )
+			if (get("playlist") and item("playlist_entry_id")):
+				cm.append( (self.__language__(30535), "XBMC.RunPlugin(%s?path=%s&action=remove_from_playlist&playlist=%s&playlist_entry_id=%s&)" % ( sys.argv[0], item("path"), get("playlist"), item("playlist_entry_id") ) ) )
 			cm.append( (self.__language__(30533), "XBMC.RunPlugin(%s?path=%s&action=add_to_playlist&videoid=%s&)" % ( sys.argv[0], item("path"), item("videoid") ) ) )
 			
 		if (get("feed") != "uploads"):
@@ -504,6 +506,7 @@ class YouTubeNavigation:
 			cm.append ( (self.__language__(30536), "XBMC.RunPlugin(%s?path=%s&action=reverse_order&playlist=%s&)" % ( sys.argv[0], item("path"), item("playlist") ) ) )
 			cm.append ( (self.__language__(30530), "XBMC.RunPlugin(%s?path=%s&action=play_all&playlist=%s&)" % ( sys.argv[0], item("path"), item("playlist") ) ) )
 			cm.append ( (self.__language__(30532), "XBMC.RunPlugin(%s?path=%s&action=play_all&shuffle=true&playlist=%s&)" % ( sys.argv[0], item("path"), item("playlist") ) ) )
+			cm.append ( (self.__language__(30539), "XBMC.RunPlugin(%s?path=%s&action=delete_playlist&playlist=%s&)" % ( sys.argv[0], item("path"), item("playlist") ) ) )
 		if (item("scraper") == "search_disco"):
 			cm.append( (self.__language__( 30530 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&search_disco=%s&)" % ( sys.argv[0], item("path"), item("search") ) ) )
 			cm.append( (self.__language__( 30532 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&shuffle=true&search_disco=%s&)" % ( sys.argv[0], item("path"), item("search") ) ) )
