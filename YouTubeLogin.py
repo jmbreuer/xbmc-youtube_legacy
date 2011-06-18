@@ -49,9 +49,8 @@ class YouTubeLogin(object):
 
 	def login(self, params = {}):
 		self.__settings__.openSettings()
-						
 		(result, status) = self._login()
-				
+		
 		if status == 200:
 			self._httpLogin(True)
 			self.__utils__.showErrorMessage(self.__language__(30031), result, 303)
@@ -125,7 +124,7 @@ class YouTubeLogin(object):
 				time.sleep(3)
 				if self.__dbg__:
 					print self.__plugin__ + " login post sleep"
-				return self.login( error + 1 )
+				return self._login( error + 1 )
 			return ( self.__language__(30623), 303 )
 		
 		except urllib2.URLError, e:
