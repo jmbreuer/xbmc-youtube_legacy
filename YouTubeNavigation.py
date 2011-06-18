@@ -55,7 +55,7 @@ class YouTubeNavigation:
 				  {'Title':__language__( 30015 )  ,'path':"/root/explore/feeds/favorites"			, 'thumbnail':"top"					, 'login':"false" , 'feed':"feed_favorites" },
 				  {'Title':__language__( 30016 )  ,'path':"/root/explore/feeds/rated"				, 'thumbnail':"top"					, 'login':"false" , 'feed':"feed_rated" },
 				  {'Title':__language__( 30043 )  ,'path':"/root/explore/movies"					, 'thumbnail':"movies"				, 'login':"false" , 'scraper':'movies', 'folder':'true'},
-				  {'Title':__language__( 30053 )  ,'path':"/root/explore/music"						, 'thumbnail':"music"				, 'login':"false" },
+				  {'Title':__language__( 30053 )  ,'path':"/root/explore/music"						, 'thumbnail':"music"				, 'login':"false" , 'store': 'artists', 'folder':'true'},
 				  {'Title':__language__( 30056 )  ,'path':"/root/explore/music/hits"				, 'thumbnail':"music"				, 'login':"false" , 'scraper':'music_hits', "folder":"true"},
 				  {'Title':__language__( 30057 )  ,'path':"/root/explore/music/artists"				, 'thumbnail':"music"				, 'login':"false" , 'scraper':'music_artists', "folder":"true" },
 				  {'Title':__language__( 30054 )  ,'path':"/root/explore/music/top100"				, 'thumbnail':"music"				, 'login':"false" , 'scraper':'music_top100'},
@@ -179,9 +179,11 @@ class YouTubeNavigation:
 		
 		if get("scraper"):
 			(results , status) = self.__scraper__.scrape(params)
+		elif get("store"): 
+			(results , status) = self.__storage__.list(params)
 		else:
 			(results , status) = self.__core__.list(params)
-				
+	
 		if status == 200:
 			if get("folder"):
 				self.parseFolderList(params, results)
