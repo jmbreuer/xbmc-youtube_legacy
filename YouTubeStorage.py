@@ -36,19 +36,38 @@ class YouTubeStorage:
 				{'Title':__language__( 30021 ), 'external':"true", 'login':"true", 'thumbnail':"subscriptions", 'user_feed':"subscriptions", 'folder':"true"},
 				{'Title':__language__( 30022 ), 'external':"true", 'login':"true", 'thumbnail':"uploads", 		'user_feed':"uploads"},
 				)
-
+	
+	def list(self, params = {}):
+		get = params.get
+		if get("store") == "contact_options":
+			return self.getUserOptionFolder(params)
+		elif get("store") == "artists":
+			return self.getStoredArtists(params)
+		elif get("store") == "searches" or get("store") == "disco_searches":
+			return self.getStoredSearches(params)
+	
+	def getStoredArtists(self, params = {}):
+		get = params.get
+		result = []
+		
+		key = self.getStorageKey(params)
+		
+		return (result, 200)
+	
 	def getStoredSearches(self, params = {}):
 		get = params.get
+		key = self.getStorageKey(params)
+		searches = []
+		
 		try:
-			if (get("store") == "searches"):
-				searches = eval(self.__settings__.getSetting("stored_searches"))
-			else:
-				searches = eval(self.__settings__.getSetting("stored_disco_searches"))
+			searches = eval(self.retrieveValue(key))
 		except:
-			searches = []
+			print self.__plugin__ + "failed to retrieve stored searches"
 		
 		result = []
 		for search in searches:
+			params["search"] = search
+			thumb_key = self.getStorageKey(params)
 			item = {}
 			item["path"] = get("path")
 			item["Title"] = search
@@ -56,13 +75,14 @@ class YouTubeStorage:
 			
 			if (get("store") == "searches"):
 				item["feed"] = "search"
-				item["icon"] = "search"
-				item["thumbnail"] = self.__settings__.getSetting("search_" + search + "_thumb")
+				item["icon"] = "search" 
 			else:
 				item["scraper"] = "search_disco"
 				item["icon"] = "discoball"
-				item["thumbnail"] = self.__settings__.getSetting("disco_search_" + search + "_thumb")
 			
+			params["thumb"] = "true"
+			
+			item["thumbnail"] = self.retrieveValue(thumb_key)
 			result.append(item)
 				
 		return (result, 200)
@@ -71,34 +91,31 @@ class YouTubeStorage:
 		get = params.get
 		query = get("delete")
 		query = urllib.unquote_plus(query)
+		key = self.getStorageKey(params)
+		searches = []
 		try:
-			if (get("action") == "delete_search"):
-				searches = eval(self.__settings__.getSetting("stored_searches"))
-			else:
-				searches = eval(self.__settings__.getSetting("stored_disco_searches"))
+			searches = eval(self.retrieveValue(key))
 		except:
-			searches = []
+			print self.__plugin__ + "failed to retrieve stored searches"
 			
 		for count, search in enumerate(searches):
 			if (search.lower() == query.lower()):
 				del(searches[count])
 				break
 		
-		if (get("action") == "delete_search"):
-			self.__settings__.setSetting("stored_searches", repr(searches))
-		else:
-			self.__settings__.setSetting("stored_disco_searches", repr(searches))
+		self.storeValue(key, repr(searches))
 		
 		xbmc.executebuiltin( "Container.Refresh" )
 		
 	def saveSearch(self, params = {}):
 		get = params.get
 		
+		searches = []
+		
 		if get("search"):
-			if (get("store") == "searches" or get("feed") == "search"):
-				store = "stored_searches"
-			else:
-				store = "stored_disco_searches"
+			params["store"] = "searches"
+			
+			key = self.getStorageKey(params)
 			
 			new_query = urllib.unquote_plus(get("search"))
 			old_query = new_query
@@ -106,9 +123,9 @@ class YouTubeStorage:
 			if get("old_search"):
 				old_query = urllib.unquote_plus(get("old_search"))
 			try:
-				searches = eval(self.__settings__.getSetting(store))
+				searches = eval(self.retrieveValue(key))
 			except:
-				searches = []
+				print self.__plugin__ + "failed to retrieve stored searches"
 			
 			for count, search in enumerate(searches):
 				if (search.lower() == old_query.lower()):
@@ -117,7 +134,7 @@ class YouTubeStorage:
 			
 			searchCount = ( 10, 20, 30, 40, )[ int( self.__settings__.getSetting( "saved_searches" ) ) ]
 			searches = [new_query] + searches[:searchCount]
-			self.__settings__.setSetting(store, repr(searches))
+			self.storeValue(key, repr(searches))
 	
 	def editStoredSearch(self, params = {}):
 		get = params.get
@@ -142,14 +159,14 @@ class YouTubeStorage:
 	
 	def refineStoredSearch(self, params = {}):
 		get = params.get
-		query = get("search")
-		query = urllib.unquote_plus(query)
+		key = self.getStorageKey(params) 
+		query = urllib.unquote_plus(get("search"))
 		
 		try:
-			searches = eval(self.__settings__.getSetting("stored_searches_author"))
+			searches = eval(self.retrieveValue(key))
 		except :
 			searches = {}
-			
+		
 		if query in searches:
 			author = self.__utils__.getUserInput(self.__language__(30517), searches[query])
 		else:
@@ -162,22 +179,23 @@ class YouTubeStorage:
 		elif author:
 			searches[query] = author
 			
-			self.__settings__.setSetting("stored_searches_author", repr(searches))
+			self.storeValue(key, repr(searches))
 			self.__utils__.showMessage(self.__language__(30006), self.__language__(30616))
 			xbmc.executebuiltin( "Container.Refresh" )
 		
 	def deleteStoredSearchRefinement(self, params = {}):
 		get = params.get
-		query = get("search")
-		query = urllib.unquote_plus(query)
+		key = self.getStorageKey(params)
+		searches = {}
+		query = urllib.unquote_plus(get("search",""))
 		try:
-			searches = eval(self.__settings__.getSetting("stored_searches_author"))
-		except :
+			searches = eval(self.retrieveValue(key))
+		except:
 			searches = {}
-			
+		
 		if query in searches:
 			del searches[query]
-			self.__settings__.setSetting("stored_searches_author", repr(searches))
+			self.storeValue(key, repr(searches))
 			self.__utils__.showMessage(self.__language__(30006), self.__language__(30610))
 			xbmc.executebuiltin( "Container.Refresh" )
 		
@@ -195,13 +213,10 @@ class YouTubeStorage:
 		get = params.get
 		
 		if (get("view_mode")):  
-			key = ""
-			if (get("external")):
-				key += "external_" + get("contact") + "_"
-			key += "view_mode_" + get("channel")
+			key = self.getStorageKey(params)
 			
 			self.storeValue(key, get("view_mode"))
-
+			
 			params['user_feed'] = get("view_mode")
 			if get("viewmode") == "playlists":
 				params["folder"] = "true"
@@ -210,15 +225,13 @@ class YouTubeStorage:
 		get = params.get
 		
 		if (get("playlist")):
-			key = "reverse_playlist_" + get("playlist")
-			if (get("external")):
-				key += "_external_" + get("contact") 
+			key = self.getStorageKey(params)
 			
 			value = "true"
 			existing = self.retrieveValue(key)
 			if existing == "true":
 				value = "false"
-						
+					
 			self.storeValue(key, value)
 		
 		xbmc.executebuiltin( "Container.Refresh" )
@@ -226,11 +239,10 @@ class YouTubeStorage:
 	def getReversePlaylistOrder(self, params = {}):
 		get = params.get 
 		result = False
+		
 		if (get("playlist")):
-			key = "reverse_playlist_" + get("playlist")
-			if (get("external")):
-				key += "_external_" + get("contact") 
-			
+			key = self.getStorageKey(params) 
+						
 			existing = self.retrieveValue(key)
 			if existing == "true":
 				result = True
@@ -247,8 +259,7 @@ class YouTubeStorage:
 			get = params.get
 
 			videos = []
-			if get("videoid"):			
-				#queue = self.__settings__.getSetting("download_queue")
+			if get("videoid"):
 				fd = os.open(os.path.join( xbmc.translatePath( "special://temp" ), "YouTubeDownloadQueue"), os.O_RDWR | os.O_CREAT)
 				queue = os.read(fd, 65535)	
 				os.close(fd)
@@ -262,9 +273,7 @@ class YouTubeStorage:
 		
 				if get("videoid") not in videos:
 					videos.append(get("videoid"))
-			
-					#self.__settings__.setSetting("download_queue",repr(videos))
-
+					
 					os.unlink(os.path.join( xbmc.translatePath( "special://temp" ), "YouTubeDownloadQueue"))
 					fd = os.open(os.path.join( xbmc.translatePath( "special://temp" ), "YouTubeDownloadQueue"), os.O_RDWR | os.O_CREAT)
 					os.write(fd, repr(videos))
@@ -282,7 +291,7 @@ class YouTubeStorage:
 			print self.__plugin__ + " removeVideoFromDownloadQueue Exception "
 		else:
 			videos = []
-			#queue = self.__settings__.getSetting("download_queue")
+			
 			fd = os.open(os.path.join( xbmc.translatePath( "special://temp" ), "YouTubeDownloadQueue"), os.O_RDWR | os.O_CREAT)
 			queue = os.read(fd, 65535)
 			os.close(fd)
@@ -295,7 +304,7 @@ class YouTubeStorage:
 		
 			if videoid in videos:
 				videos.remove(videoid)
-				#self.__settings__.setSetting("download_queue",repr(videos))
+				
 				os.unlink(os.path.join( xbmc.translatePath( "special://temp" ), "YouTubeDownloadQueue"))
 				fd = os.open(os.path.join( xbmc.translatePath( "special://temp" ), "YouTubeDownloadQueue"), os.O_RDWR | os.O_CREAT)
 				os.write(fd, repr(videos))
@@ -343,17 +352,64 @@ class YouTubeStorage:
 			
 			if get("external") and not get("thumb"):
 				key += "_external_" + get("contact")
+			
+		if get("search"):
+			key = "disco_search_"
+			if get("user_feed"):
+				key = "search_" 
+			query = urllib.unquote_plus(get("search"))
+			key += query
 		
+		if get("store"):
+			key = "store_"+ get("store")
+		
+		if (get("action") == "delete_search" or get("action") == "edit_search" or get("feed") == "search" and not get("thumb")):
+			key = "store_searches"
+		
+		if (get("action") == "delete_disco" or get("action") == "edit_disco" or get("scraper") == "search_disco" and not get("thumb")):
+			key = "store_disco_searches"
+		
+		if (get("action") == "refine_user" or get("action") == "delete_refinements"):
+			key = "store_searches_author"
+		
+		if (get("view_mode")):  
+			key = "view_mode_" + get("channel")
+			if (get("external")):
+				key += "_external_" + get("contact")  
+		
+		if (get("action") == "reverse_order" and get("playlist")):
+			key = "reverse_playlist_" + get("playlist")
+			if (get("external")):
+				key += "_external_" + get("contact") 
+		
+		if get("action") == "change_subscription_view" and get("view_mode"):
+			key = "view_mode_" + get("channel")
+			if (get("external")):
+				key += "_external_" + get("contact")
+
 		if get("thumb"):
 			key += "_thumb"
-			params["thumb"] = ""
+			del params["thumb"]
 		
+		print "storage key: " + repr(key)
 		return key
 	
-	def storeResultSet(self, key, results = []):
+	def storeResultSet(self, key, results = [], params = {}):
+		get = params.get
 		if results:
-			value = repr(results)
-			self.__settings__.setSetting(key,value)
+			
+			if get("prepend"):
+				searchCount = ( 10, 20, 30, 40, )[ int( self.__settings__.getSetting( "saved_searches" ) ) ]
+				existing = self.retrieveResultSet(key)  
+				existing = [results] + existing[:searchCount]
+				self.__settings__.setSetting(key, repr(existing))
+			elif get("append"):
+				existing = self.retrieveResultSet(key)  
+				existing = existing.append(results)
+				self.__settings__.setSetting(key, repr(existing))
+			else:
+				value = repr(results)
+				self.__settings__.setSetting(key,value)
 	
 	def retrieveResultSet(self, key):
 		results = []
