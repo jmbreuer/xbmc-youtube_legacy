@@ -29,23 +29,22 @@ class FileLock(object):
             oldpid = os.read(fd, 65535)
             os.close(fd);
             if oldpid:
-                if sys.platform == "win32":
-                    print "YouTube filelock. win32 pid check not implemented"
-                    #maybe http://code.google.com/p/psutil/
-                    kernel32 = ctypes.windll.kernel32
-                    handle = kernel32.OpenProcess(1, 0, oldpid)
-                    #return (0 != kernel32.TerminateProcess(handle, 0))
-                    if not handle:
-                        os.unlink(self.file_name)
-                else:
-                    try:
-                        os.kill(int(oldpid), 0)
-                    except OSError:
-                        print "YouTube filelock OSError unlinking stale pid file"
-                        os.unlink(self.file_name)
+				if sys.platform == "win32":
+					try:
+						kernel32 = ctypes.windll.kernel32
+						if not kernel32.OpenProcess(1, 0, oldpid):
+							os.unlink(self.file_name)
+					except:
+						print "YouTube filelock. lockfile locked."
+				else:
+					try:
+						os.kill(int(oldpid), 0)
+					except OSError:
+						print "YouTube filelock Couldn't find pid. Unlinking file"
+						os.unlink(self.file_name)
             else:
-                print "YouTube filelock removing lock file with no PID in it"
-                os.unlink(self.file_name)
+				print "YouTube filelock removing lock file with no PID in it"
+				os.unlink(self.file_name)
         
     def acquire(self):
         """ Acquire the lock, if possible. If the lock is in use, it check again
