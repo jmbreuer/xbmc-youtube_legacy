@@ -244,12 +244,6 @@ class YouTubeCore(object):
 		get = params.get
 		result = []
 		
-		if get("store"): 
-			if get("store") == "contact_options":
-				return self.__storage__.getUserOptionFolder(params)
-			else:
-				return self.__storage__.getStoredSearches(params)
-
 		page = int(get("page", "0"))
 		per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
 		
