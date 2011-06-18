@@ -374,13 +374,7 @@ class YouTubeCore(object):
 		delete_url = self.urls["subscriptions"] % "default"
 		delete_url += "/" + get("editid")
 		return self._fetchPage({"link": delete_url, "api": "true", "login": "true", "auth": "true", "method": "DELETE"})
-	
-	def remove_from_watch_later(self, params = {}):
-		get = params.get
-		remove_url = self.urls["remove_watch_later"]
-		return self._fetchPage({"link":remove_url, "login":"true", "watch_later_playlist":get("watch_later_playlist"), "watch_later_index":get("index")})
-		
-		
+			
 	def add_contact(self, params = {}):
 		get = params.get
 		url = self.urls["contacts"] % "default"
@@ -404,17 +398,10 @@ class YouTubeCore(object):
 		url = "http://gdata.youtube.com/feeds/api/users/default/playlists"
 		add_request = '<?xml version="1.0" encoding="UTF-8"?><entry xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://gdata.youtube.com/schemas/2007"><title type="text">%s</title><summary>%s</summary></entry>' % ( get("title"), get("summary") )
 		return self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true", "request": add_request})
-	
-	# DOESN'T WORK
-	def update_playlist(self, params = {}):
-		get = params.get
-		url = "http://gdata.youtube.com/feeds/api/users/default/playlists/%s" % get("playlist")
-		add_request = '<?xml version="1.0" encoding="UTF-8"?><entry xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://gdata.youtube.com/schemas/2007"><title type="text">%s</title><summary>%s</summary></entry>' % ( "title", "summary" ) #( get("title"), get("summary") )
-		return self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true", "request": add_request})
-	
+		
 	def del_playlist(self, params = {}):
 		get = params.get
-		url = "http://gdata.youtube.com/feeds/api/users/default/playlists/%s" % get("playlist")
+		url = "http://gdata.youtube.com/feeds/api/users/%s/playlists/%s" % (self.__settings__.getSetting("nick"), get("playlist"))
 		return self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true", "method": "DELETE"})
 
 	def add_to_playlist(self, params = {}):
@@ -425,7 +412,7 @@ class YouTubeCore(object):
 	
 	def remove_from_playlist(self, params = {}):
 		get = params.get
-		url = "http://gdata.youtube.com/feeds/api/playlists/%s/%s" % ( get("playlist"), get("videoid") )
+		url = "http://gdata.youtube.com/feeds/api/playlists/%s/%s" % ( get("playlist"), get("playlist_entry_id") )
 		return self._fetchPage({"link": url, "api": "true", "auth": "true", "method": "DELETE"})
 	
 	def getFolderInfo(self, xml, params = {}):
@@ -830,13 +817,18 @@ class YouTubeCore(object):
 
 			video['videoid'] = self._getNodeValue(node, "yt:videoid", "missing")
 			
+			if node.getElementsByTagName("id"):
+				entryid = self._getNodeValue(node, "id","")
+				entryid = entryid[entryid.rfind(":")+1:]
+				video["playlist_entry_id"] = entryid
+
 			if node.getElementsByTagName("yt:state").item(0):			
 				state = self._getNodeAttribute(node, "yt:state", 'name', 'Unknown Name')
 
 				# Ignore unplayable items.
 				if ( state == 'deleted' or state == 'rejected'):
 					video['videoid'] = "false"
-				
+								
 				# Get reason for why we can't playback the file.		
 				if node.getElementsByTagName("yt:state").item(0).hasAttribute('reasonCode'):
 					reason = self._getNodeAttribute(node, "yt:state", 'reasonCode', 'Unknown reasonCode')
