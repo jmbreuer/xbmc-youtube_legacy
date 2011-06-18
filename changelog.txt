@@ -1,9 +1,12 @@
 [B]TODO:[/B]
 - Fix playlist management support in core <-- Tobias (Henrik: These seem not to work as we keep getting http 400 bad request)
   - remove_playlist, params = { "playlist_id": "something or other" } <- don't know (Henrik: don't really care, but nice if it could get working)
-  - remove_from_playlist, params = { "playlist_id": "something or other", "video_id": "id" } <- Missing edit url from google, and created one fails
-- Plugin should mark as watched on watch later <-- Tobias
 - Check all context menu items again some seem to be broken <-- Henrik & Tobias
+- Music scraper should remember previously watched playlist
+- Music scraper should support PlayAll for artists
+- Rework caching of playlists, it need to support playlist entry id accross all pages
+- Implemnet new storage api where possible 
+- Go through every menu to check if things are still working
 - Handle stale lock file for windows. <-- Tobias
 
 [B]Errata[/B]
