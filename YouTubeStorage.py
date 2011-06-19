@@ -58,10 +58,17 @@ class YouTubeStorage:
 	def getStoredSearches(self, params = {}):
 		get = params.get
 		key = self.getStorageKey(params)
+		author_key = self.getStorageKey({"store":"searches_author"})
 		searches = []
+		authors = {}
 		
 		try:
 			searches = eval(self.retrieveValue(key))
+		except:
+			print self.__plugin__ + " failed to retrieve stored searches"
+		
+		try:
+			authors = eval(self.retrieveValue(author_key))
 		except:
 			print self.__plugin__ + " failed to retrieve stored searches"
 		
@@ -77,6 +84,8 @@ class YouTubeStorage:
 			if (get("store") == "searches"):
 				item["feed"] = "search"
 				item["icon"] = "search" 
+				if search in authors:
+					item["refined"] = "true"
 			else:
 				item["scraper"] = "search_disco"
 				item["icon"] = "discoball"
@@ -335,8 +344,58 @@ class YouTubeStorage:
 		key = self.getStorageKey(params)
 		return self.retrieveResultSet(key)
 	
-	def getStorageKey(self, params):
+	def getStorageKey(self, params = {}, type = ""):
 		get = params.get
+		
+		if type == "value":
+			return self.getStorageKeyValue(params)
+		elif type == "viewmode":
+			return self.getStorageKeyViewMode(params)
+		elif type == "thumbnail":
+			return self.getStorageKeyThumbnail(params)
+		
+		return self.getStorageKeyResult(params)
+		
+	def getStorageKeyThumbnail(self, params = {}):
+		get = params.get
+		key = ""
+		
+		if get("search"):
+			key = "disco_search_"
+			if get("user_feed"):
+				key = "search_"
+			key += urllib.unquote_plus(get("search"))
+		
+		if key:
+			key += "_thumb"
+		
+		return key
+	
+	def getStorageKeyValue(self, params = {}):
+		get = params.get
+		key = ""
+		
+		if (get("action") == "reverse_order" and get("playlist")):
+			key = "reverse_playlist_" + get("playlist")
+			if (get("external")):
+				key += "_external_" + get("contact")
+				
+		return key 
+	
+	def getStorageKeyViewMode(self, params = {}):
+		get = params.get
+		key = ""
+		
+		if (get("view_mode")):  
+			key = "view_mode_" + get("channel")
+			if (get("external")):
+				key += "_external_" + get("contact")  
+		
+		return key
+		
+	def getStorageKeyResult(self, params = {}):
+		get = params.get
+		
 		key = ""
 		
 		if get("scraper"):
@@ -358,7 +417,7 @@ class YouTubeStorage:
 			
 			if get("external") and not get("thumb"):
 				key += "_external_" + get("contact")
-				
+		
 		if get("search"):
 			key = "disco_search_"
 			if get("user_feed"):
@@ -367,18 +426,7 @@ class YouTubeStorage:
 		
 		if get("store"):
 			key = "store_"+ get("store")
-						
-		if (get("view_mode")):  
-			key = "view_mode_" + get("channel")
-			if (get("external")):
-				key += "_external_" + get("contact")  
 		
-		if (get("action") == "reverse_order" and get("playlist")):
-			key = "reverse_playlist_" + get("playlist")
-			if (get("external")):
-				key += "_external_" + get("contact") 
-		
-		print self.__plugin__ + " found storage key " + repr(key) 
 		return key
 	
 	def storeResultSet(self, key, results = [], params = {}):
@@ -448,7 +496,7 @@ class YouTubeStorage:
 			self.__lock__.release()
 			print self.__plugin__ + " getNextVideoFromDownloadQueue released. returning : " + videoid
 			return videoid
-
+	
 	def addNextFolder(self, items = [], params = {}):
 		get = params.get
 		item = {"Title":self.__language__( 30509 ), "thumbnail":"next", "next":"true", "page":str(int(get("page", "0")) + 1)} 
