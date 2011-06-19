@@ -177,9 +177,10 @@ class YouTubeNavigation:
 			
 			self.__storage__.saveSearch(params)
 		
+		print "params " + repr(params)
 		if get("scraper"):
 			(results , status) = self.__scraper__.scrape(params)
-		elif get("store"): 
+		elif get("store"):
 			(results , status) = self.__storage__.list(params)
 			print self.__plugin__ + " store returned " + repr(results)
 		else:

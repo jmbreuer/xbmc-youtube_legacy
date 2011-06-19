@@ -479,7 +479,7 @@ class YouTubeScraperCore:
 		( ytobjects, status ) = self.__core__.getBatchDetails(subitems)
 		
 		if (next == "true"):
-			self.__storage__.addNextFolder(ytobjects, params)
+			self.__utils__.addNextFolder(ytobjects, params)
 				
 		return (ytobjects, status)
 		
@@ -763,7 +763,7 @@ class YouTubeScraperCore:
 			
 			if (len(ytobjects) > 0):
 				if (next == "true"):
-					self.__storage__.addNextFolder(ytobjects, params)
+					self.__utils__.addNextFolder(ytobjects, params)
 		else:
 			ytobjects = videos
 			
@@ -867,7 +867,7 @@ class YouTubeScraperCore:
 				result = result[:per_page]
 				
 				if (next == "true"):
-					self.__storage__.addNextFolder(result, params)
+					self.__utils__.addNextFolder(result, params)
 				
 				return (result, status)
 			else:

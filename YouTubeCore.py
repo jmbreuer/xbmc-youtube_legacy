@@ -141,7 +141,7 @@ class YouTubeCore(object):
 				url = url % time			
 			else: 
 				url = url % "default"
-			
+		
 		if ( url.find("?") == -1 ):
 			url += "?"
 		else:
@@ -166,7 +166,7 @@ class YouTubeCore(object):
 		
 		if get("playlist"):
 			return self.listPlaylist(params)
-
+		
 		if get("login") == "true":
 			if ( not self._getAuth() ):
 				if self.__dbg__:
@@ -191,9 +191,7 @@ class YouTubeCore(object):
 			thumbnail = result[0].get('thumbnail', "")
 			
 			if (thumbnail):
-				params["thumb"] = "true"
-				self.__storage__.store(params, thumbnail)
-				#self.__settings__.setSetting("search_" + urllib.unquote_plus(get("search")) + "_thumb", )
+				self.__storage__.store(params, thumbnail, "thumbnail")
 			
 		return (result, 200)
 	
@@ -238,7 +236,7 @@ class YouTubeCore(object):
 			result = result[(per_page * page):(per_page * (page + 1))]
 		
 		if next == "true":
-			self.__storage__.addNextFolder(result, params)
+			self.__utils__.addNextFolder(result, params)
 		
 		return (result, 200)
 	
@@ -253,11 +251,11 @@ class YouTubeCore(object):
 		
 		if ( page != 0 and store != ""):
 			try:
-				result = eval(store)						
+				result = eval(store)
 			except:
 				print self.__plugin__ + " folder - eval failed "	
 		
-		if not get("page"):			
+		if not get("page"):
 			result = self.listAll(params)
 			
 			if len(result) == 0:
@@ -273,18 +271,13 @@ class YouTubeCore(object):
 		result = result[(per_page * page):(per_page * (page + 1))]
 		
 		if get("user_feed") == "subscriptions":
-			for item in result:					
-				viewmode = ""
-				if (get("external")):
-					viewmode += "external_" + get("contact") + "_"
-					item["external"] = "true"
-					item["contact"] = get("contact")
-				viewmode += "view_mode_" + item["Title"]
+			for item in result:
+				key = self.__storage__.getStorageKeyViewMode(params)
 				
-				if (self.__settings__.getSetting(viewmode) == "favorites"):
+				if (self.__settings__.getSetting(key) == "favorites"):
 					item["user_feed"] = "favorites"
 					item["view_mode"] = "subscriptions_uploads"
-				elif(self.__settings__.getSetting(viewmode) == "playlists"):
+				elif(self.__settings__.getSetting(key) == "playlists"):
 					item["user_feed"] = "playlists"
 					item["folder"] = "true"
 					item["view_mode"] = "subscriptions_playlists"
@@ -293,10 +286,10 @@ class YouTubeCore(object):
 					item["view_mode"] = "subscriptions_favorites"
 		
 		if next == "true":
-			self.__storage__.addNextFolder(result, params)
+			self.__utils__.addNextFolder(result, params)
 		
 		return (result,200)
-
+	
 	def listAll(self, params ={}):
 		get = params.get
 		result = ""
@@ -464,7 +457,7 @@ class YouTubeCore(object):
 			folders.append(folder);
 					
 		if next:
-			self.__storage__.addNextFolder(folders, params)
+			self.__utils__.addNextFolder(folders, params)
 		
 		return folders;
 
@@ -889,6 +882,6 @@ class YouTubeCore(object):
 			ytobjects.append(video);
 		
 		if next:
-			self.__storage__.addNextFolder(ytobjects,params)
+			self.__utils__.addNextFolder(ytobjects,params)
 				
 		return ytobjects;

@@ -74,8 +74,6 @@ class YouTubeStorage:
 		
 		result = []
 		for search in searches:
-			params["search"] = search
-			thumb_key = self.getStorageKey(params)
 			item = {}
 			item["path"] = get("path")
 			item["Title"] = search
@@ -92,6 +90,7 @@ class YouTubeStorage:
 			
 			params["thumb"] = "true"
 			
+			thumb_key = self.getStorageKey(params, "thumbnail", item)
 			item["thumbnail"] = self.retrieveValue(thumb_key)
 			result.append(item)
 				
@@ -146,6 +145,7 @@ class YouTubeStorage:
 					del(searches[count])
 					break
 			
+			del params["store"]
 			searchCount = ( 10, 20, 30, 40, )[ int( self.__settings__.getSetting( "saved_searches" ) ) ]
 			searches = [new_query] + searches[:searchCount]
 			self.storeValue(key, repr(searches))
@@ -233,7 +233,7 @@ class YouTubeStorage:
 		get = params.get
 		
 		if (get("view_mode")):  
-			key = self.getStorageKey(params)
+			key = self.getStorageKey(params, "viewmode")
 			
 			self.storeValue(key, get("view_mode"))
 			
@@ -269,6 +269,201 @@ class YouTubeStorage:
 		
 		return result
 	
+	#=================================== Storage Key ========================================
+	def getStorageKey(self, params = {}, type = "", item = {}):
+		get = params.get
+		
+		if type == "value":
+			return self._getValueStorageKey(params, item)
+		elif type == "viewmode":
+			return self._getViewModeStorageKey(params, item)
+		elif type == "thumbnail":
+			return self._getThumbnailStorageKey(params, item)
+		
+		return self._getResultSetStorageKey(params)
+		
+	def _getThumbnailStorageKey(self, params = {}, item = {}):
+		get = params.get
+		iget = item.get
+		key = ""
+		
+		if get("search") or iget("search"):
+			key = "disco_search_"
+			if get("user_feed"):
+				key = "search_"
+			
+			if get("search"):
+				key += urllib.unquote_plus(get("search",""))
+			
+			if iget("search"):
+				key += urllib.unquote_plus(iget("search",""))
+		
+		if get("user_feed"):
+			key = get("user_feed")
+			
+			if get("playlist"):
+				key += "_" + get("playlist")
+			
+			if iget("playlist"):
+				key += "_" + iget("playlist")
+			
+			if get("channel"):
+				key += "_" + get("channel")
+				
+			if iget("channel"):
+				key += "_" + iget("channel")
+		
+		if key:
+			key += "_thumb"
+		
+		return key
+	
+	def _getValueStorageKey(self, params = {}, item = {}):
+		get = params.get
+		iget = item.get
+		key = ""
+		
+		if (get("action") == "reverse_order" and iget("playlist")):
+			key = "reverse_playlist_" + iget("playlist")
+			if (get("external")):
+				key += "_external_" + get("contact")
+		
+		return key 
+	
+	def _getViewModeStorageKey(self, params = {}, item = {}):
+		get = params.get
+		iget = item.get
+		key = ""
+		
+		if get("channel"):
+			key = "view_mode_" + get("channel")
+		elif (iget("channel")):  
+			key = "view_mode_" + iget("channel")
+		
+		if (get("external")):
+			key += "_external_" + get("contact")
+		elif (iget("external")):
+			key += "_external_" + iget("contact")
+		
+		return key
+		
+	def _getResultSetStorageKey(self, params = {}):
+		get = params.get
+		
+		key = ""
+		
+		if get("scraper"):
+			key = "s_" + get("scraper")		
+			if get("scraper") == "music_hits" and get("category"):
+				key += "_" + get("category")
+			
+			if get("scraper") == "music_artist" and get("artist"):
+				key += "_" + get("artist")
+						
+		if get("user_feed"):
+			key = "result_" + get("user_feed")
+			
+			if get("playlist"):
+				key += "_" + get("playlist")
+			
+			if get("channel"):
+				key += "_" + get("channel")
+			
+			if get("external") and not get("thumb"):
+				key += "_external_" + get("contact")
+				
+		if get("store"):
+			key = "store_"+ get("store")
+		
+		return key
+	
+	#============================= Storage Functions =================================
+	def store(self, params = {}, results = [], type = "", item = {}):
+		key = self.getStorageKey(params, type. item)
+		
+		if type == "thumbnail" or type == "viewmode" or type == "value":
+			self.storeValue(key, results)
+		else:
+			self.storeResultSet(key, results)
+
+	def storeValue(self, key, value):
+		if value:
+			self.__settings__.setSetting(key, value)
+
+	def storeResultSet(self, key, results = [], params = {}):
+		get = params.get
+		
+		if results:
+			if get("prepend"):
+				searchCount = ( 10, 20, 30, 40, )[ int( self.__settings__.getSetting( "saved_searches" ) ) ]
+				existing = self.retrieveResultSet(key)  
+				existing = [results] + existing[:searchCount]
+				self.__settings__.setSetting(key, repr(existing))
+			elif get("append"):
+				existing = self.retrieveResultSet(key)  
+				existing = existing.append(results)
+				self.__settings__.setSetting(key, repr(existing))
+			else:
+				value = repr(results)
+				self.__settings__.setSetting(key,value)
+	
+	#============================= Retrieval Functions =================================
+	def retrieve(self, params = {}, type = "", item = {}):
+		key = self.getStorageKey(params, type, item)
+		
+		if type == "thumbnail" or type == "viewmode" or type == "value":
+			return self.retrieveValue(key)
+		else:
+			return self.retrieveResultSet(key)
+
+	def retrieveValue(self, key):
+		value = ""
+		if key:
+			value = self.__settings__.getSetting(key)
+		
+		return value
+	
+	def retrieveResultSet(self, key):
+		results = []
+		
+		value = self.__settings__.getSetting(key)		
+		if value: 
+			try:
+				results = eval(value)
+			except:
+				results = []
+		
+		return results
+		
+	#============================= Download Queue =================================
+	def getNextVideoFromDownloadQueue(self):
+		try:
+			print self.__plugin__ + " getNextVideoFromDownloadQueue trying to acquire"
+			self.__lock__.acquire()
+		except:
+			print self.__plugin__ + " getNextVideoFromDownloadQueue Exception "
+		else:
+			videos = []
+			
+			fd = os.open(os.path.join( xbmc.translatePath( "special://temp" ), "YouTubeDownloadQueue"), os.O_RDWR | os.O_CREAT)
+			queue = os.read(fd, 65535)
+			os.close(fd)
+			print self.__plugin__ + " qeueu loaded : " + repr(queue)
+
+			if queue:
+				try:
+					videos = eval(queue)
+				except: 
+					videos = []
+		
+			videoid = ""
+			if videos:
+				videoid = videos[0]
+
+			self.__lock__.release()
+			print self.__plugin__ + " getNextVideoFromDownloadQueue released. returning : " + videoid
+			return videoid
+
 	def addVideoToDownloadQeueu(self, params = {}):
 		try:
 			print self.__plugin__ + " addVideoToDownloadQeueu trying to acquire"
@@ -335,172 +530,3 @@ class YouTubeStorage:
 
 			self.__lock__.release()
 			print self.__plugin__ + " removeVideoFromDownloadQueue released"
-		
-	def store(self, params = {}, results = []):
-		key = self.getStorageKey(params)				
-		self.storeResultSet(key, results)
-		
-	def retrieve(self, params = {}):
-		key = self.getStorageKey(params)
-		return self.retrieveResultSet(key)
-	
-	def getStorageKey(self, params = {}, type = ""):
-		get = params.get
-		
-		if type == "value":
-			return self.getStorageKeyValue(params)
-		elif type == "viewmode":
-			return self.getStorageKeyViewMode(params)
-		elif type == "thumbnail":
-			return self.getStorageKeyThumbnail(params)
-		
-		return self.getStorageKeyResult(params)
-		
-	def getStorageKeyThumbnail(self, params = {}):
-		get = params.get
-		key = ""
-		
-		if get("search"):
-			key = "disco_search_"
-			if get("user_feed"):
-				key = "search_"
-			key += urllib.unquote_plus(get("search"))
-		
-		if key:
-			key += "_thumb"
-		
-		return key
-	
-	def getStorageKeyValue(self, params = {}):
-		get = params.get
-		key = ""
-		
-		if (get("action") == "reverse_order" and get("playlist")):
-			key = "reverse_playlist_" + get("playlist")
-			if (get("external")):
-				key += "_external_" + get("contact")
-				
-		return key 
-	
-	def getStorageKeyViewMode(self, params = {}):
-		get = params.get
-		key = ""
-		
-		if (get("view_mode")):  
-			key = "view_mode_" + get("channel")
-			if (get("external")):
-				key += "_external_" + get("contact")  
-		
-		return key
-		
-	def getStorageKeyResult(self, params = {}):
-		get = params.get
-		
-		key = ""
-		
-		if get("scraper"):
-			key = "s_" + get("scraper")		
-			if get("scraper") == "music_hits" and get("category"):
-				key += "_" + get("category")
-			
-			if get("scraper") == "music_artist" and get("artist"):
-				key += "_" + get("artist")
-						
-		if get("user_feed"):
-			key = "result_" + get("user_feed")
-			
-			if get("playlist"):
-				key += "_" + get("playlist")
-			
-			if get("channel"):
-				key += "_" + get("channel")
-			
-			if get("external") and not get("thumb"):
-				key += "_external_" + get("contact")
-		
-		if get("search"):
-			key = "disco_search_"
-			if get("user_feed"):
-				key = "search_"
-			key += urllib.unquote_plus(get("search"))
-		
-		if get("store"):
-			key = "store_"+ get("store")
-		
-		return key
-	
-	def storeResultSet(self, key, results = [], params = {}):
-		get = params.get
-		if results:
-			
-			if get("prepend"):
-				searchCount = ( 10, 20, 30, 40, )[ int( self.__settings__.getSetting( "saved_searches" ) ) ]
-				existing = self.retrieveResultSet(key)  
-				existing = [results] + existing[:searchCount]
-				self.__settings__.setSetting(key, repr(existing))
-			elif get("append"):
-				existing = self.retrieveResultSet(key)  
-				existing = existing.append(results)
-				self.__settings__.setSetting(key, repr(existing))
-			else:
-				value = repr(results)
-				self.__settings__.setSetting(key,value)
-	
-	def retrieveResultSet(self, key):
-		results = []
-		
-		value = self.__settings__.getSetting(key)		
-		if value: 
-			try:
-				results = eval(value)
-			except:
-				results = []
-		
-		return results
-		
-	def storeValue(self, key, value):
-		if value:
-			self.__settings__.setSetting(key, value)
-		
-	def retrieveValue(self, key):
-		value = ""
-		if key:
-			value = self.__settings__.getSetting(key)
-		
-		return value
-		
-	def getNextVideoFromDownloadQueue(self):
-		try:
-			print self.__plugin__ + " getNextVideoFromDownloadQueue trying to acquire"
-			self.__lock__.acquire()
-		except:
-			print self.__plugin__ + " getNextVideoFromDownloadQueue Exception "
-		else:
-			videos = []
-			
-			fd = os.open(os.path.join( xbmc.translatePath( "special://temp" ), "YouTubeDownloadQueue"), os.O_RDWR | os.O_CREAT)
-			queue = os.read(fd, 65535)
-			os.close(fd)
-			print self.__plugin__ + " qeueu loaded : " + repr(queue)
-
-			if queue:
-				try:
-					videos = eval(queue)
-				except: 
-					videos = []
-		
-			videoid = ""
-			if videos:
-				videoid = videos[0]
-
-			self.__lock__.release()
-			print self.__plugin__ + " getNextVideoFromDownloadQueue released. returning : " + videoid
-			return videoid
-	
-	def addNextFolder(self, items = [], params = {}):
-		get = params.get
-		item = {"Title":self.__language__( 30509 ), "thumbnail":"next", "next":"true", "page":str(int(get("page", "0")) + 1)} 
-		for k, v in params.items():
-			if (k != "thumbnail" and k != "Title" and k != "page"):
-				item[k] = v
-		items.append(item)
