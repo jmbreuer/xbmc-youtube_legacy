@@ -51,6 +51,7 @@ class YouTubeStorage:
 		result = []
 		
 		key = self.getStorageKey(params)
+		result = self.retrieveResultSet(key)
 		
 		return (result, 200)
 	
@@ -62,7 +63,7 @@ class YouTubeStorage:
 		try:
 			searches = eval(self.retrieveValue(key))
 		except:
-			print self.__plugin__ + "failed to retrieve stored searches"
+			print self.__plugin__ + " failed to retrieve stored searches"
 		
 		result = []
 		for search in searches:
@@ -89,9 +90,13 @@ class YouTubeStorage:
 						
 	def deleteStoredSearch(self, params = {}):
 		get = params.get
-		query = get("delete")
-		query = urllib.unquote_plus(query)
-		key = self.getStorageKey(params)
+		params["store"] = "searches"
+		if get("action") == "delete_disco":
+			params["store"] = "disco_searches"
+		
+		key = self.getStorageKey(params) 
+		query = urllib.unquote_plus(get("delete"))
+		
 		searches = []
 		try:
 			searches = eval(self.retrieveValue(key))
@@ -138,6 +143,10 @@ class YouTubeStorage:
 	
 	def editStoredSearch(self, params = {}):
 		get = params.get
+		params["store"] = "searches"
+		if get("action") == "edit_disco":
+			params["store"] = "disco_searches"
+
 		if (get("search")):
 			old_query = urllib.unquote_plus(get("search"))
 			new_query = self.__utils__.getUserInput(self.__language__(30515), old_query)
@@ -159,6 +168,7 @@ class YouTubeStorage:
 	
 	def refineStoredSearch(self, params = {}):
 		get = params.get
+		params["store"] = "searches_author"
 		key = self.getStorageKey(params) 
 		query = urllib.unquote_plus(get("search"))
 		
@@ -185,6 +195,7 @@ class YouTubeStorage:
 		
 	def deleteStoredSearchRefinement(self, params = {}):
 		get = params.get
+		params["store"] = "searches_author"
 		key = self.getStorageKey(params)
 		searches = {}
 		query = urllib.unquote_plus(get("search",""))
@@ -329,18 +340,13 @@ class YouTubeStorage:
 		key = ""
 		
 		if get("scraper"):
-			key = "s_" + get("scraper")
-		
-		if get("scraper") == "music_hits" and get("category"):
-			key += "_" + get("category")
-		
-		if get("scraper") == "music_artist" and get("artist"):
-			key += "_" + get("artist")
-		
-		if get("scraper") == "search_disco":
-			if get("query"):
-				key = "disco_search_%s" % urllib.unquote_plus(get("search"))
-				
+			key = "s_" + get("scraper")		
+			if get("scraper") == "music_hits" and get("category"):
+				key += "_" + get("category")
+			
+			if get("scraper") == "music_artist" and get("artist"):
+				key += "_" + get("artist")
+						
 		if get("user_feed"):
 			key = "result_" + get("user_feed")
 			
@@ -352,26 +358,16 @@ class YouTubeStorage:
 			
 			if get("external") and not get("thumb"):
 				key += "_external_" + get("contact")
-			
+				
 		if get("search"):
 			key = "disco_search_"
 			if get("user_feed"):
-				key = "search_" 
-			query = urllib.unquote_plus(get("search"))
-			key += query
+				key = "search_"
+			key += urllib.unquote_plus(get("search"))
 		
 		if get("store"):
 			key = "store_"+ get("store")
-		
-		if (get("action") == "delete_search" or get("action") == "edit_search" or get("feed") == "search" and not get("thumb")):
-			key = "store_searches"
-		
-		if (get("action") == "delete_disco" or get("action") == "edit_disco" or get("scraper") == "search_disco" and not get("thumb")):
-			key = "store_disco_searches"
-		
-		if (get("action") == "refine_user" or get("action") == "delete_refinements"):
-			key = "store_searches_author"
-		
+						
 		if (get("view_mode")):  
 			key = "view_mode_" + get("channel")
 			if (get("external")):
@@ -382,16 +378,7 @@ class YouTubeStorage:
 			if (get("external")):
 				key += "_external_" + get("contact") 
 		
-		if get("action") == "change_subscription_view" and get("view_mode"):
-			key = "view_mode_" + get("channel")
-			if (get("external")):
-				key += "_external_" + get("contact")
-
-		if get("thumb"):
-			key += "_thumb"
-			del params["thumb"]
-		
-		print "storage key: " + repr(key)
+		print self.__plugin__ + " found storage key " + repr(key) 
 		return key
 	
 	def storeResultSet(self, key, results = [], params = {}):
