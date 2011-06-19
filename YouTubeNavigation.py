@@ -181,6 +181,7 @@ class YouTubeNavigation:
 			(results , status) = self.__scraper__.scrape(params)
 		elif get("store"): 
 			(results , status) = self.__storage__.list(params)
+			print self.__plugin__ + " store returned " + repr(results)
 		else:
 			(results , status) = self.__core__.list(params)
 	
@@ -517,14 +518,10 @@ class YouTubeNavigation:
 		
 		if (item("feed") == "search"):
 			cm.append( ( self.__language__( 30515 ), 'XBMC.Container.Update(%s?path=%s&action=edit_search&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
-			cm.append( ( self.__language__( 30505 ), 'XBMC.RunPlugin(%s?path=%s&action=refine_user&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
 			cm.append( ( self.__language__( 30508 ), 'XBMC.RunPlugin(%s?path=%s&action=delete_search&delete=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
-			try:
-				searches = eval(self.__settings__.getSetting("stored_searches_author"))
-			except :
-				searches = {}
+			cm.append( ( self.__language__( 30505 ), 'XBMC.RunPlugin(%s?path=%s&action=refine_user&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
 			
-			if item("Title") in searches:
+			if item("refined"):
 				cm.append( ( self.__language__( 30500 ), 'XBMC.RunPlugin(%s?path=%s&action=delete_refinements&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
 		
 		if item("scraper") == "search_disco":			
