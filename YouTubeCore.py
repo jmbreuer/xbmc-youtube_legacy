@@ -62,6 +62,8 @@ class YouTubeCore(object):
 	urls['playlist'] = "http://gdata.youtube.com/feeds/api/playlists/%s"
 	urls['related'] = "http://gdata.youtube.com/feeds/api/videos/%s/related"
 	urls['search'] = "http://gdata.youtube.com/feeds/api/videos?q=%s&safeSearch=%s"
+	urls['batch'] = "http://gdata.youtube.com/feeds/api/videos/batch"
+	urls['thumbnail'] = "http://i.ytimg.com/vi/%s/0.jpg"
 	
 	# YouTube User specific Feeds
 	urls['uploads'] = "http://gdata.youtube.com/feeds/api/users/%s/uploads"
@@ -775,7 +777,7 @@ class YouTubeCore(object):
 							obj = link.item(i).getAttribute('href')
 							video['editid'] = obj[obj.rfind('/')+1:]
 				
-				video['thumbnail'] = "http://i.ytimg.com/vi/" + video['videoid'] + "/0.jpg"
+				video['thumbnail'] = self.urls["thumbnail"] % video['videoid']
 				
 				overlay = self.__storage__.retrieveValue("vidstatus-" + video['videoid'] )
 				if overlay:
@@ -874,7 +876,7 @@ class YouTubeCore(object):
 						obj = link.item(i).getAttribute('href')
 						video['editid'] = obj[obj.rfind('/')+1:]
 
-			video['thumbnail'] = "http://i.ytimg.com/vi/" + video['videoid'] + "/0.jpg"
+			video['thumbnail'] = self.urls["thumbnail"] % video['videoid']
 			
 			overlay = self.__storage__.retrieveValue("vidstatus-" + video['videoid'] )
 			if overlay:
