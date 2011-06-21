@@ -65,7 +65,7 @@ class YouTubeDownloader:
 		if videoid:
 			if not self.dialog:
 				self.dialog = DownloadProgress()
-			self.dialog.create( heading = self.__language__( 30634 ), label = "")
+			self.dialog.create( heading = self.__language__( 30605 ), label = "")
 	
 			while videoid:
 				params["videoid"] = videoid
@@ -77,7 +77,7 @@ class YouTubeDownloader:
 					continue
 				item = video.get
 				if item("stream_map"):
-					self.__utils__.showMessage(self.__language__(30632), self.__language__("30626"))
+					self.__utils__.showMessage(self.__language__(30607), self.__language__("30619"))
 					self.__storage__.removeVideoFromDownloadQueue(videoid)
 					videoid = self.__storage__.getNextVideoFromDownloadQueue()
 					continue
@@ -98,7 +98,7 @@ class YouTubeDownloader:
 			print self.__plugin__ + " downloadVideo : " + video['Title']
 		
 		if video["video_url"].find("swfurl") > 0:
-			self.__utils__.showMessage(self.__language__( 30625 ), self.__language__(30626))
+			self.__utils__.showMessage(self.__language__( 30625 ), self.__language__(30619))
 			return ([], 303)
 		
 		video["downloadPath"] = self.__settings__.getSetting( "downloadPath" )

@@ -340,7 +340,7 @@ class YouTubePlayer(object):
 			if len(result) == 0:
 				if self.__dbg__:
 					print self.__plugin__ + " Couldn't parse API output, YouTube doesn't seem to know this video id?"
-				video["apierror"] = self.__language__(30629)
+				video["apierror"] = self.__language__(30608)
 				return (video, 303)
 		else:
 			if self.__dbg__:
@@ -445,7 +445,7 @@ class YouTubePlayer(object):
 			choices.append(message)
 		
 		dialog = xbmcgui.Dialog()
-		selected = dialog.select(self.__language__(30537), choices)
+		selected = dialog.select(self.__language__(30518), choices)
 		
 		if selected > -1:
 			(quality, message) = list[selected]
@@ -505,7 +505,7 @@ class YouTubePlayer(object):
 			status = 303
 			vget = video.get
 			if vget("live_play"):
-				video['apierror'] = self.__language__(30628)
+				video['apierror'] = self.__language__(30612)
 			elif vget("stream_map"):
 				video['apierror'] = self.__language__(30620)
 			else:

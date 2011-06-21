@@ -626,7 +626,7 @@ class YouTubeCore(object):
 			if self.__dbg__ or True:
 				print self.__plugin__ + " Failed trying to verify-age could find confirm age form."
 				print self.__plugin__ + " html page given: " + repr(result)
-			return ( self.__language__( 30633 ) , 303 )
+			return ( self.__language__( 30606 ) , 303 )
 						
 		# get next_url
 		next_url_start = result.find('"next_url" value="') + len('"next_url" value="')
@@ -670,7 +670,7 @@ class YouTubeCore(object):
 			print self.__plugin__ + " result url: " + repr(new_url)
 		
 		print self.__plugin__ + " age verification failed with result: " + repr(result)
-		return (self.__language__(30633), 303)
+		return (self.__language__(30606), 303)
 	
 	def _getAuth(self):
 		if self.__dbg__:

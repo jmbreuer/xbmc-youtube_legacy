@@ -55,10 +55,10 @@ class YouTubeNavigation:
 				  {'Title':__language__( 30015 )  ,'path':"/root/explore/feeds/favorites"			, 'thumbnail':"top"					, 'login':"false" , 'feed':"feed_favorites" },
 				  {'Title':__language__( 30016 )  ,'path':"/root/explore/feeds/rated"				, 'thumbnail':"top"					, 'login':"false" , 'feed':"feed_rated" },
 				  {'Title':__language__( 30043 )  ,'path':"/root/explore/movies"					, 'thumbnail':"movies"				, 'login':"false" , 'scraper':'movies', 'folder':'true'},
-				  {'Title':__language__( 30053 )  ,'path':"/root/explore/music"						, 'thumbnail':"music"				, 'login':"false" , 'store': 'artists', 'folder':'true'},
-				  {'Title':__language__( 30056 )  ,'path':"/root/explore/music/hits"				, 'thumbnail':"music"				, 'login':"false" , 'scraper':'music_hits', "folder":"true"},
-				  {'Title':__language__( 30057 )  ,'path':"/root/explore/music/artists"				, 'thumbnail':"music"				, 'login':"false" , 'scraper':'music_artists', "folder":"true" },
-				  {'Title':__language__( 30054 )  ,'path':"/root/explore/music/top100"				, 'thumbnail':"music"				, 'login':"false" , 'scraper':'music_top100'},
+				  {'Title':__language__( 30052 )  ,'path':"/root/explore/music"						, 'thumbnail':"music"				, 'login':"false" },
+				  {'Title':__language__( 30053 )  ,'path':"/root/explore/music/hits"				, 'thumbnail':"music"				, 'login':"false" , 'scraper':'music_hits', "folder":"true"},
+				  {'Title':__language__( 30054 )  ,'path':"/root/explore/music/artists"				, 'thumbnail':"music"				, 'login':"false" , 'scraper':'music_artists', "folder":"true" },
+				  {'Title':__language__( 30055 )  ,'path':"/root/explore/music/top100"				, 'thumbnail':"music"				, 'login':"false" , 'scraper':'music_top100'},
 				  {'Title':__language__( 30042 )  ,'path':"/root/explore/shows"						, 'thumbnail':"shows"				, 'login':"false" , 'scraper':'shows', 'folder':'true'},
 				  {'Title':__language__( 30032 )  ,'path':"/root/explore/trailers"					, 'thumbnail':"trailers"			, 'login':"false" },
 				  {'Title':__language__( 30035 )  ,'path':"/root/explore/trailers/latest"   		, 'thumbnail':"trailers"			, 'login':"false" , 'scraper':"latest_trailers" },
@@ -70,8 +70,8 @@ class YouTubeNavigation:
 				  {'Title':__language__( 30046 )  ,'path':"/root/explore/trailers/popular_game"  	, 'thumbnail':"trailers"			, 'login':"false" , 'scraper':"popular_game_trailers" },
 				  {'Title':__language__( 30051 )  ,'path':"/root/explore/live"  					, 'thumbnail':"live"				, 'login':"false" , 'scraper':"live" },
 				  {'Title':__language__( 30019 )  ,'path':"/root/recommended"						, 'thumbnail':"recommended"			, 'login':"true"  , 'scraper':"recommended" },
-				  {'Title':__language__( 30052 )  ,'path':"/root/watch_later"						, 'thumbnail':"watch_later"			, 'login':"true"  , 'scraper':"watch_later" },
-				  {'Title':__language__( 30055 )  ,'path':"/root/liked"								, 'thumbnail':"liked"				, 'login':"true"  , 'scraper':"liked_videos" },
+				  {'Title':__language__( 30008 )  ,'path':"/root/watch_later"						, 'thumbnail':"watch_later"			, 'login':"true"  , 'scraper':"watch_later" },
+				  {'Title':__language__( 30056 )  ,'path':"/root/liked"								, 'thumbnail':"liked"				, 'login':"true"  , 'scraper':"liked_videos" },
 				  {'Title':__language__( 30018 )  ,'path':"/root/contacts"			  				, 'thumbnail':"contacts"			, 'login':"true"  , 'user_feed':"contacts", 'folder':'true' },
 				  {'Title':__language__( 30024 )  ,'path':"/root/contacts/new"						, 'thumbnail':"contacts"			, 'login':"true"  , 'action':"add_contact"},
 				  {'Title':__language__( 30002 )  ,'path':"/root/favorites"		 					, 'thumbnail':"favorites"			, 'login':"true"  , 'user_feed':"favorites" },
@@ -457,13 +457,13 @@ class YouTubeNavigation:
 		cm.append( ( self.__language__( 30504 ), "XBMC.Action(Queue)", ) )
 		
 		if (get("playlist")):
-			cm.append( (self.__language__(30531), "XBMC.RunPlugin(%s?path=%s&action=play_all&playlist=%s&videoid=%s&)" % ( sys.argv[0], item("path"), get("playlist"), item("videoid") ) ) )
+			cm.append( (self.__language__(30521), "XBMC.RunPlugin(%s?path=%s&action=play_all&playlist=%s&videoid=%s&)" % ( sys.argv[0], item("path"), get("playlist"), item("videoid") ) ) )
 					
 		if (get("user_feed") == "newsubscriptions" or get("user_feed") == "favorites"):
 			contact = "default"
 			if get("contact"):
 				contact = get("contact") 
-			cm.append( (self.__language__(30531), "XBMC.RunPlugin(%s?path=%s&action=play_all&user_feed=%s&contact=%s&videoid=%s&)" % ( sys.argv[0], item("path"), get("user_feed"), contact, item("videoid") ) ) )
+			cm.append( (self.__language__(30521), "XBMC.RunPlugin(%s?path=%s&action=play_all&user_feed=%s&contact=%s&videoid=%s&)" % ( sys.argv[0], item("path"), get("user_feed"), contact, item("videoid") ) ) )
 				
 		cm.append( ( self.__language__(30501), "XBMC.RunPlugin(%s?path=%s&action=download&videoid=%s)" % ( sys.argv[0],  item("path"), item("videoid") ) ) )
 
@@ -476,18 +476,15 @@ class YouTubeNavigation:
 				cm.append( ( self.__language__( 30512 ) % item("Studio"), 'XBMC.RunPlugin(%s?path=%s&channel=%s&action=add_subscription)' % ( sys.argv[0], item("path"), item("Studio") ) ) )
 				
 			if (get("playlist") and item("playlist_entry_id")):
-				cm.append( (self.__language__(30535), "XBMC.RunPlugin(%s?path=%s&action=remove_from_playlist&playlist=%s&playlist_entry_id=%s&)" % ( sys.argv[0], item("path"), get("playlist"), item("playlist_entry_id") ) ) )
-			cm.append( (self.__language__(30533), "XBMC.RunPlugin(%s?path=%s&action=add_to_playlist&videoid=%s&)" % ( sys.argv[0], item("path"), item("videoid") ) ) )
+				cm.append( (self.__language__(30530), "XBMC.RunPlugin(%s?path=%s&action=remove_from_playlist&playlist=%s&playlist_entry_id=%s&)" % ( sys.argv[0], item("path"), get("playlist"), item("playlist_entry_id") ) ) )
+			cm.append( (self.__language__(30528), "XBMC.RunPlugin(%s?path=%s&action=add_to_playlist&videoid=%s&)" % ( sys.argv[0], item("path"), item("videoid") ) ) )
 			
 		if (get("feed") != "uploads"):
 			cm.append( ( self.__language__( 30516 ) % studio, "XBMC.Container.Update(%s?path=%s&feed=uploads&channel=%s)" % ( sys.argv[0],  get("path"), url_studio ) ) )
-			
-		if (get("scraper") == "search_disco"):
-			cm.append( ( self.__language__( 30523 ) % title, "XBMC.Container.Update(%s?path=%s&scraper=search_disco&search=%s)" % ( sys.argv[0],  get("path"), url_title ) ) )
-			
+					
 		cm.append( ( self.__language__( 30514 ), "XBMC.Container.Update(%s?path=%s&feed=search&search=%s)" % ( sys.argv[0],  get("path"), url_title ) ) )
-		cm.append( ( self.__language__( 30529 ), "XBMC.Container.Update(%s?path=%s&feed=related&videoid=%s)" % ( sys.argv[0],  get("path"), item("videoid") ) ) )
-		cm.append( ( self.__language__( 30527 ), "XBMC.ActivateWindow(VideoPlaylist)"))
+		cm.append( ( self.__language__( 30527 ), "XBMC.Container.Update(%s?path=%s&feed=related&videoid=%s)" % ( sys.argv[0],  get("path"), item("videoid") ) ) )
+		cm.append( ( self.__language__( 30523 ), "XBMC.ActivateWindow(VideoPlaylist)"))
 		cm.append( ( self.__language__( 30502 ), "XBMC.Action(Info)", ) )
 		
 		return cm
@@ -501,21 +498,21 @@ class YouTubeNavigation:
 			return cm
 		
 		if item("artist"):
-			cm.append ( (self.__language__(30538), "XBMC.Container.Update(%s?path=%s&scraper=similar_artist&artist=%s&folder=true&)" % ( sys.argv[0], item("path"), item("artist") ) ) )			
+			cm.append ( (self.__language__(30507), "XBMC.Container.Update(%s?path=%s&scraper=similar_artist&artist=%s&folder=true&)" % ( sys.argv[0], item("path"), item("artist") ) ) )			
 			
 		if (not get("user_feed") == "subscriptions" and (item("user_feed") == "favorites" or item("user_feed") == "newsubscriptions")):
-			cm.append ( (self.__language__(30530), "XBMC.RunPlugin(%s?path=%s&action=play_all&user_feed=%s&contact=%s&)" % ( sys.argv[0], item("path"), item("user_feed"), "default" ) ) )
-			cm.append ( (self.__language__(30532), "XBMC.RunPlugin(%s?path=%s&action=play_all&shuffle=true&user_feed=%s&contact=%s&)" % ( sys.argv[0], item("path"), item("user_feed"), "default" ) ) )
+			cm.append ( (self.__language__(30520), "XBMC.RunPlugin(%s?path=%s&action=play_all&user_feed=%s&contact=%s&)" % ( sys.argv[0], item("path"), item("user_feed"), "default" ) ) )
+			cm.append ( (self.__language__(30522), "XBMC.RunPlugin(%s?path=%s&action=play_all&shuffle=true&user_feed=%s&contact=%s&)" % ( sys.argv[0], item("path"), item("user_feed"), "default" ) ) )
 		if (item("playlist")):
-			cm.append ( (self.__language__(30536), "XBMC.RunPlugin(%s?path=%s&action=reverse_order&playlist=%s&)" % ( sys.argv[0], item("path"), item("playlist") ) ) )
-			cm.append ( (self.__language__(30530), "XBMC.RunPlugin(%s?path=%s&action=play_all&playlist=%s&)" % ( sys.argv[0], item("path"), item("playlist") ) ) )
-			cm.append ( (self.__language__(30532), "XBMC.RunPlugin(%s?path=%s&action=play_all&shuffle=true&playlist=%s&)" % ( sys.argv[0], item("path"), item("playlist") ) ) )
+			cm.append ( (self.__language__(30531), "XBMC.RunPlugin(%s?path=%s&action=reverse_order&playlist=%s&)" % ( sys.argv[0], item("path"), item("playlist") ) ) )
+			cm.append ( (self.__language__(30520), "XBMC.RunPlugin(%s?path=%s&action=play_all&playlist=%s&)" % ( sys.argv[0], item("path"), item("playlist") ) ) )
+			cm.append ( (self.__language__(30522), "XBMC.RunPlugin(%s?path=%s&action=play_all&shuffle=true&playlist=%s&)" % ( sys.argv[0], item("path"), item("playlist") ) ) )
 			if not get("external"):
 				cm.append ( (self.__language__(30539), "XBMC.RunPlugin(%s?path=%s&action=delete_playlist&playlist=%s&)" % ( sys.argv[0], item("path"), item("playlist") ) ) )
 			
 		if (item("scraper") == "search_disco"):
 			cm.append( (self.__language__( 30530 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&search_disco=%s&)" % ( sys.argv[0], item("path"), item("search") ) ) )
-			cm.append( (self.__language__( 30532 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&shuffle=true&search_disco=%s&)" % ( sys.argv[0], item("path"), item("search") ) ) )
+			cm.append( (self.__language__( 30522 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&shuffle=true&search_disco=%s&)" % ( sys.argv[0], item("path"), item("search") ) ) )
 		
 		if (item("feed") == "search"):
 			cm.append( ( self.__language__( 30515 ), 'XBMC.Container.Update(%s?path=%s&action=edit_search&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
@@ -537,13 +534,13 @@ class YouTubeNavigation:
 			
 			if (item("user_feed") == "favorites"):
 				cm.append ( (self.__language__( 30511 ), cm_url % ("uploads")))
-				cm.append( (self.__language__( 30528 ), cm_url % ("playlists&folder=true")))
+				cm.append( (self.__language__( 30526 ), cm_url % ("playlists&folder=true")))
 			elif(item("user_feed") == "playlists"):
 				cm.append( (self.__language__( 30511 ), cm_url % ("uploads"))) 
 				cm.append ( (self.__language__( 30510 ), cm_url % ("favorites")))
 			elif (item("user_feed") == "uploads"):
 				cm.append ( (self.__language__( 30510 ), cm_url % ("favorites")))
-				cm.append( (self.__language__( 30528 ), cm_url % ("playlists&folder=true")))
+				cm.append( (self.__language__( 30526 ), cm_url % ("playlists&folder=true")))
 		
 		if (item("channel") or item("contact")):
 			if ( self.__settings__.getSetting( "username" ) != "" and self.__settings__.getSetting( "auth" ) ):
@@ -562,5 +559,5 @@ class YouTubeNavigation:
 				else:
 					cm.append( (self.__language__(30025), 'XBMC.RunPlugin(%s?path=%s&action=remove_contact&contact=%s&)' % ( sys.argv[0], item("path"), item("Title") ) ) )
 				
-		cm.append( ( self.__language__( 30527 ), "XBMC.ActivateWindow(VideoPlaylist)"))
+		cm.append( ( self.__language__( 30523 ), "XBMC.ActivateWindow(VideoPlaylist)"))
 		return cm

@@ -122,11 +122,11 @@ class YouTubePlaylistControl:
 		selected = -1
 		if result:
 			list = []
-			list.append(self.__language__(30534))
+			list.append(self.__language__(30529))
 			for item in result:
 				list.append(item["Title"])
 			dialog = xbmcgui.Dialog()
-			selected = dialog.select(self.__language__(30520), list)
+			selected = dialog.select(self.__language__(30528), list)
 			
 		if selected == 0:
 			self.createPlayList(params)
@@ -148,7 +148,7 @@ class YouTubePlaylistControl:
 	def createPlayList(self, params = {}):
 		get = params.get
 		
-		input = self.__utils__.getUserInput(self.__language__(30534))
+		input = self.__utils__.getUserInput(self.__language__(30529))
 		if input:
 			params["title"] = input
 			self.__core__.add_playlist(params)
