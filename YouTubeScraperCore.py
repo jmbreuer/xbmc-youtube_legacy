@@ -461,9 +461,7 @@ class YouTubeScraperCore:
 		oldVideos = self.__settings__.getSetting("show_" + get("show") + "_season_" + get("season","0") )
 		
 		if ( page == 0 or not oldVideos):
-			videos = re.compile('<a href="/watch\?v=(.*)&amp;list=SL">').findall(html)
-			if (not videos):
-				videos = re.compile('<a class="yt-uix-hovercard-target" href="/watch\?v=(.*)&amp;list=SL"').findall(html)
+			videos = re.compile('<a href="/watch\?v=(.*)&amp;feature=sh_e_sl&amp;list=SL"').findall(html)
 			
 			self.__settings__.setSetting("show_" + get("show") + "_season_" + get("season","0"), self.__utils__.arrayToPipeDelimitedString(videos))
 		else:
@@ -487,15 +485,24 @@ class YouTubeScraperCore:
 		# otherwise a paginated list of video items is returned
 	def scrapeShow(self, html, params = {}):
 		get = params.get
-		yobjects = []
+		if self.__dbg__:
+			print self.__plugin__ + " scrapeShow"
+
 		
-		if ((html.find("page not-selected") == -1) or get("season")):
+		if ((html.find('class="seasons"') == -1) or get("season")):
 			if self.__dbg__:
 				print self.__plugin__ + " parsing videolist for single season"
-			(yobjects, status) = self.scrapeShowEpisodes(html, params)
-						
-			return (yobjects, status)
-				
+			return self.scrapeShowEpisodes(html, params)
+		
+		return self.scrapeShowSeasons(html, params)
+	
+	def scrapeShowSeasons(self, html, params = {}):
+		get = params.get
+		yobjects = []
+		
+		if self.__dbg__:
+			print self.__plugin__ + " scrapeShowSeasons"
+		
 		list = SoupStrainer(name="div", attrs = {'class':"shows-episodes-sort browse-pager"})
 		seasons = BeautifulSoup(html, parseOnlyThese=list)
 		if (len(seasons) > 0):
@@ -534,9 +541,10 @@ class YouTubeScraperCore:
 				
 				season = season.findNextSibling()			
 		
-		if (yobjects):
+		if (len(yobjects) > 0):
+			print "kokokokoko"
 			return ( yobjects, 200 )
-				
+		
 		return ([], 303)
 	
 	def scrapeShowsGrid(self, html, params = {}):
@@ -922,7 +930,11 @@ class YouTubeScraperCore:
 			if (get("category")):
 				category = get("category")
 				category = urllib.unquote_plus(category)
-				url = self.urls["shows"] + "/" + category + "?p=" + page + "&hl=en"
+				url = self.urls["shows"] + "/" + category
+				if url.find("?") < 0:
+					url += "?p=" + page + "&hl=en"
+				else:
+					url += "&p=" + page + "&hl=en"
 			else:
 				url = self.urls["shows"] + "?hl=en"
 				
@@ -938,7 +950,7 @@ class YouTubeScraperCore:
 				url = self.urls["movies"] + "?hl=en"
 		elif(get("scraper") == "music_top100"):
 			url = self.urls["music"]
-		elif (get("show")):			
+		elif (get("show")):
 			show = urllib.unquote_plus(get("show"))
 			if (show.find("p=") < 0):
 				url = self.urls["show_list"] + "/" + show + "?hl=en"
