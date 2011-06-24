@@ -503,42 +503,25 @@ class YouTubeScraperCore:
 		if self.__dbg__:
 			print self.__plugin__ + " scrapeShowSeasons"
 		
-		list = SoupStrainer(name="div", attrs = {'class':"shows-episodes-sort browse-pager"})
+		list = SoupStrainer(name="div", attrs = {'class':"seasons"})
 		seasons = BeautifulSoup(html, parseOnlyThese=list)
 		if (len(seasons) > 0):
 			params["folder"] = "true"
-			season = seasons.div.span.findNextSibling()
+			season = seasons.div.div.span.button
 			
 			while (season != None):
 				item = {}
-				if (str(season).find("page not-selected") > 0): 
-					season_url = season["href"]
-					
-					if season_url:
-						season_url = season_url.replace("\u0026", "&")
-					
-					if (season_url.find("&s=") > 0):
-						season_url = season_url[season_url.find("&s=") + 3:]
-						if (season_url.find("&") > 0):
-							season_url = season_url[:season_url.find("&")]
-						item["Title"] = "Season " + season_url.encode("utf-8")
-						item["season"] = season_url.encode("utf-8")
-						item["thumbnail"] = "shows"
-						item["scraper"] = "show"
-						item["icon"] = "shows"
-						item["show"] = get("show")
-						yobjects.append(item)
-				else:
-					if (len(season.contents[0]) > 0):
-						season_url = season.contents[0]
-						item["Title"] = "Season " + season_url.encode("utf-8")
-						item["season"] = season_url.encode("utf-8")
-						item["thumbnail"] = "shows"
-						item["icon"] = "shows"
-						item["scraper"] = "show"
-						item["show"] = get("show")
-						yobjects.append(item)
 				
+				season_id = season.span.contents[0]
+				title = self.__language__(30058) % season_id.encode("utf-8")
+				title += " - " + season["title"].encode("utf-8")
+				item["Title"] = title
+				item["season"] = season_id.encode("utf-8")
+				item["thumbnail"] = "shows"
+				item["scraper"] = "show"
+				item["icon"] = "shows"
+				item["show"] = get("show")
+				yobjects.append(item)
 				season = season.findNextSibling()			
 		
 		if (len(yobjects) > 0):
