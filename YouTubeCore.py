@@ -110,10 +110,7 @@ class YouTubeCore(object):
 			url = self.urls[get("feed")]
 		
 		if (get("user_feed")):
-			if get("user_feed") == "playlists":
-				url = self.urls[get("user_feed")] % get("user_id", "default")
-			else:
-				url = self.urls[get("user_feed")]
+			url = self.urls[get("user_feed")]
 		
 		if get("search"):
 			query = urllib.unquote_plus(get("search"))
