@@ -184,7 +184,7 @@ class YouTubeCore(object):
 		if len(result) == 0:
 			return (result, 303)
 		
-		if (get("search")):
+		if (get("search") or get("channel")):
 			thumbnail = result[0].get('thumbnail', "")
 			
 			if (thumbnail):
@@ -427,7 +427,6 @@ class YouTubeCore(object):
 			folder["login"] = "true"
 			folder['Title'] = node.getElementsByTagName("title").item(0).firstChild.nodeValue.replace('Activity of : ', '').replace('Videos published by : ', '').encode( "utf-8" );
 			folder['published'] = self._getNodeValue(node, "published", "2008-07-05T19:56:35.000-07:00")
-			folder['playlist'] = self._getNodeValue(node, 'yt:playlistId', '')
 			
 			if get("user_feed") == "contacts":
 				folder["thumbnail"] = "user"
@@ -439,6 +438,7 @@ class YouTubeCore(object):
 				folder["channel"] = folder["Title"]
 			
 			if get("user_feed") == "playlists":
+				folder['playlist'] = self._getNodeValue(node, 'yt:playlistId', '')
 				folder["user_feed"] = "playlist"
 
 			params["thumb"] = "true"
@@ -452,9 +452,9 @@ class YouTubeCore(object):
 					if link.item(i).getAttribute('rel') == 'edit':
 						obj = link.item(i).getAttribute('href')
 						folder['editid'] = obj[obj.rfind('/')+1:]
-
+			
 			folders.append(folder);
-					
+		
 		if next:
 			self.__utils__.addNextFolder(folders, params)
 		
