@@ -379,7 +379,7 @@ class YouTubeStorage:
 	
 	#============================= Storage Functions =================================
 	def store(self, params = {}, results = [], type = "", item = {}):
-		key = self.getStorageKey(params, type. item)
+		key = self.getStorageKey(params, type, item)
 		
 		if type == "thumbnail" or type == "viewmode" or type == "value":
 			self.storeValue(key, results)
