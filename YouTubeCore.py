@@ -305,10 +305,12 @@ class YouTubeCore(object):
 		ytobjects = []
 		
 		( result, status ) = self._fetchPage({"link":url, "auth":"true"})
-		if get("folder") == "true":
-			ytobjects = self.getFolderInfo(result, params)
-		else:
-			ytobjects = self.getVideoInfo(result, params)
+		
+		if status == 200:
+			if get("folder") == "true":
+				ytobjects = self.getFolderInfo(result, params)
+			else:
+				ytobjects = self.getVideoInfo(result, params)
 		
 		if len(ytobjects) == 0:
 			return ytobjects
@@ -441,7 +443,6 @@ class YouTubeCore(object):
 
 			params["thumb"] = "true"
 			thumb = self.__storage__.retrieve(params, "thumbnail", folder)
-			
 			if thumb:
 				folder["thumbnail"] = thumb 
 			
