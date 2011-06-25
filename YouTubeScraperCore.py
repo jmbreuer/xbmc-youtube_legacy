@@ -463,6 +463,39 @@ class YouTubeScraperCore:
 		if ( page == 0 or not oldVideos):
 			videos = re.compile('<a href="/watch\?v=(.*)&amp;feature=sh_e_sl&amp;list=SL"').findall(html)
 			
+			list = SoupStrainer(name="div", attrs = {'class':"show-more-ctrl"})
+			nexturl = BeautifulSoup(html, parseOnlyThese=list)
+			if (len(nexturl) > 0):
+				nexturl = nexturl.find(name="div", attrs = {'class':"button-container"})
+				if (nexturl.button):
+					nexturl = nexturl.button["data-next-url"]
+				else:
+					nexturl = ""
+			
+			if nexturl.find("start=") > 0:
+				fetch = True
+				start = 20
+				nexturl = nexturl.replace("start=20", "start=%s")
+				while fetch:
+					url = self.urls["main"] + nexturl % start
+					(html, status) = self.__core__._fetchPage({"link":url})
+					
+					if status == 200:
+						html = html.replace("\\u0026","&")
+						html = html.replace("\\/","/")
+						html = html.replace('\\"','"')
+						html = html.replace("\\u003c","<")
+						html = html.replace("\\u003e",">")
+						more_videos = re.compile('data-video-ids="([^"]*)"').findall(html)
+						
+						if not more_videos:
+							fetch = False
+						else:
+							videos += more_videos
+							start += 20
+			if self.__dbg__:
+				print self.__plugin__ + "found " + str(len(videos)) + " videos: " + repr(videos)
+			
 			self.__settings__.setSetting("show_" + get("show") + "_season_" + get("season","0"), self.__utils__.arrayToPipeDelimitedString(videos))
 		else:
 			videos = oldVideos.split("|")
