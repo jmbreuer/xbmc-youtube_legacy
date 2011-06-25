@@ -440,7 +440,8 @@ class YouTubeCore(object):
 				folder["user_feed"] = "playlist"
 
 			params["thumb"] = "true"
-			thumb = self.__storage__.retrieve(params)
+			thumb = self.__storage__.retrieve(params, "thumbnail", folder)
+			
 			if thumb:
 				folder["thumbnail"] = thumb 
 			
