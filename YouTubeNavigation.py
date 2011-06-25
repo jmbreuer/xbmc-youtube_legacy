@@ -177,7 +177,6 @@ class YouTubeNavigation:
 			
 			self.__storage__.saveSearch(params)
 		
-		print "params " + repr(params)
 		if get("scraper"):
 			(results , status) = self.__scraper__.scrape(params)
 		elif get("store"):
@@ -185,7 +184,7 @@ class YouTubeNavigation:
 			print self.__plugin__ + " store returned " + repr(results)
 		else:
 			(results , status) = self.__core__.list(params)
-	
+		
 		if status == 200:
 			if get("folder"):
 				self.parseFolderList(params, results)
@@ -211,7 +210,7 @@ class YouTubeNavigation:
 			if get("channel"):
 				label = get("channel")
 			if get("playlist"):
-				label = self.__language__(30627)
+				label = self.__language__(30615)
 			if label:
 				self.__utils__.showMessage(label, self.__language__(30601))
 		return False
