@@ -558,7 +558,6 @@ class YouTubeScraperCore:
 				season = season.findNextSibling()			
 		
 		if (len(yobjects) > 0):
-			print "kokokokoko"
 			return ( yobjects, 200 )
 		
 		return ([], 303)
@@ -1084,7 +1083,7 @@ class YouTubeScraperCore:
 								continue
 							elif cat == "indian-cinema":
 								item["subcategory"] = "true"
-												
+						
 						cat = urllib.quote_plus(cat)
 						item['category'] = cat
 						item['scraper'] = scraper
