@@ -799,7 +799,7 @@ class YouTubeScraperCore:
 		result = []
 
 		if ( get("scraper") == "categories" and get("category")):
-			if urllib.unquote_plus(get("category")).find("/") != -1:
+			if urllib.unquote_plus(get("category")).find("/") > 0:
 				scraper_per_page = 23
 			else:
 				scraper_per_page = 36
