@@ -269,7 +269,7 @@ class YouTubeCore(object):
 		
 		if get("user_feed") == "subscriptions":
 			for item in result:
-				key = self.__storage__.getStorageKeyViewMode(params)
+				key = self.__storage__.getStorageKey(params, "viewmode", item)
 				
 				if (self.__settings__.getSetting(key) == "favorites"):
 					item["user_feed"] = "favorites"
@@ -285,7 +285,7 @@ class YouTubeCore(object):
 		if next == "true":
 			self.__utils__.addNextFolder(result, params)
 		
-		return (result,200)
+		return (result, 200)
 	
 	def listAll(self, params ={}):
 		get = params.get
