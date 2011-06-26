@@ -89,12 +89,12 @@ class YouTubeUtils:
 				else:
 					s += i
 			return s
-
+	
 	# Shows a more user-friendly notification
 	def showMessage(self, heading, message):
-		duration = ([5, 10, 15, 20, 25, 30][int(self.__settings__.getSetting( 'notification_length' ))]) * 1000
+		duration = ([1, 2, 3, 4, 5, 6, 7, 8, 9, 10][int(self.__settings__.getSetting( 'notification_length' ))]) * 1000
 		xbmc.executebuiltin('XBMC.Notification("%s", "%s", %s)' % ( heading, message, duration) )
-
+	
 	# Resolves the full thumbnail path for the plugins skins directory
 	def getThumbnail( self, title ):
 		if (not title):
