@@ -196,7 +196,7 @@ class YouTubeCore(object):
 		get = params.get
 		page = int(get("page", "0"))
 		per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
-			
+		
 		videoids = self.__storage__.retrieve(params)
 			
 		if page != 0 and videoids:
