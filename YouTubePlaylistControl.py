@@ -49,7 +49,10 @@ class YouTubePlaylistControl:
 
 		if len(result) == 0:
 			return
-
+		
+		if self.__dbg__:
+			print self.__plugin__ + " video results " + repr(result)
+		
 		if get("videoid"):
 			video_index = -1
 			for index, video in enumerate(result):
@@ -91,6 +94,10 @@ class YouTubePlaylistControl:
 	
 	def getDiscoSearch(self, params = {}):
 		(result, status) = self.__scraper__.searchDisco(params)
+		
+		if status == 200:
+			(result, status) = self.__core__.getBatchDetails(result, params)
+		
 		return result
 	
 	def getFavorites(self, params = {}):
@@ -98,6 +105,7 @@ class YouTubePlaylistControl:
 		
 		if not get("contact"):
 			return False
+		
 		params["user_feed"] = "favorites"
 		return self.__core__.listAll(params)
 	
