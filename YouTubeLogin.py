@@ -181,7 +181,7 @@ class YouTubeLogin(object):
 		
 		if ( uname == "" and pword == "" ):
 			return ""
-		
+
 		if ( new ):
 			self.__settings__.setSetting( "login_info", "" )
 		elif ( self.__settings__.getSetting( "login_info" ) != "" ):
@@ -224,6 +224,7 @@ class YouTubeLogin(object):
 		con = urllib2.urlopen(url)
 		result = con.read()
 			
+		# Login to youtube
 		newurl = re.compile('<meta http-equiv="refresh" content="0; url=&#39;(.*)&#39;"></head>').findall(result)[0].replace("&amp;", "&")
 		if self.__dbg__:
 			print self.__plugin__ + " new_url: " + repr(newurl)
@@ -231,13 +232,24 @@ class YouTubeLogin(object):
 		url = urllib2.Request(newurl)
 		url.add_header('User-Agent', self.USERAGENT)
 		
-		# Login to youtube
+		con = urllib2.urlopen(newurl)
+		result = con.read()
+		con.close()
+
+		# We need to do this twice now.
+		newurl = re.compile('<meta http-equiv="refresh" content="0; url=&#39;(.*)&#39;"></head>').findall(result)[0].replace("&amp;", "&")
+		if self.__dbg__:
+			print self.__plugin__ + " new_url: " + repr(newurl)
+		
+		url = urllib2.Request(newurl)
+		url.add_header('User-Agent', self.USERAGENT)
+		
 		con = urllib2.urlopen(newurl)
 		result = con.read()
 		con.close()
 		
 		if self.__dbg__:
-			print self.__plugin__ + " searching for nick " + repr(result)
+			print self.__plugin__ + " searching for nick "
 		
 		nick = ""
 		if result.find("USERNAME', ") > 0:
@@ -248,11 +260,11 @@ class YouTubeLogin(object):
 			self.__settings__.setSetting("nick", nick)
 		else:
 			status = 303
-			print self.__plugin__ + " _httplogin failed to get usename from youtube"
+			print self.__plugin__ + " _httpLogin failed to get usename from youtube"
 		
 		# Save cookiefile in settings
 		if self.__dbg__:
-			print self.__plugin__ + "scanning cookies for login info: " + repr(cj)
+			print self.__plugin__ + " _httpLogin scanning cookies for login info: "
 		
 		login_info = ""
 		cookies = repr(cj)
@@ -267,7 +279,7 @@ class YouTubeLogin(object):
 			status = 303
 		
 		if self.__dbg__:
-			print self.__plugin__ + " _httpLogin done"
+			print self.__plugin__ + " _httpLogin done : " + str(status) + " - " + login_info
 		
 		result = self.__settings__.getSetting( "login_info" )
 		

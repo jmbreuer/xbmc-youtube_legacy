@@ -99,7 +99,7 @@ class YouTubeCore(object):
 	def createUrl(self, params = {}):
 		get = params.get
 		time = ( "all_time", "today", "this_week", "this_month") [ int(self.__settings__.getSetting( "feed_time" ) ) ]
-		per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
+		per_page = ( 10, 15, 20, 25, 30, 40, 50 )[ int( self.__settings__.getSetting( "perpage" ) ) ]
 		region = ('', 'AU', 'BR', 'CA', 'CZ', 'FR', 'DE', 'GB', 'NL', 'HK', 'IN', 'IE', 'IL', 'IT', 'JP', 'MX', 'NZ', 'PL', 'RU', 'KR', 'ES','SE', 'TW', 'US', 'ZA' )[ int( self.__settings__.getSetting( "region_id" ) ) ]
 		
 		page = get("page","0")
@@ -195,7 +195,7 @@ class YouTubeCore(object):
 	def listPlaylist(self, params = {}):
 		get = params.get
 		page = int(get("page", "0"))
-		per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
+		per_page = ( 10, 15, 20, 25, 30, 40, 50 )[ int( self.__settings__.getSetting( "perpage" ) ) ]
 		
 		videoids = self.__storage__.retrieve(params)
 			
@@ -242,7 +242,7 @@ class YouTubeCore(object):
 		result = []
 		
 		page = int(get("page", "0"))
-		per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
+		per_page = ( 10, 15, 20, 25, 30, 40, 50 )[ int( self.__settings__.getSetting( "perpage" ) ) ]
 		
 		store = self.__storage__.retrieve(params)
 		
