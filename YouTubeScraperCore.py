@@ -885,8 +885,8 @@ class YouTubeScraperCore:
 				
 				if (next == "false" and len(result) > per_page):
 					next = "true"
-					params["page"] = str(original_page)
-					
+				
+				params["page"] = str(original_page)
 				result = result[:per_page]
 				
 				if (next == "true"):
