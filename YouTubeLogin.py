@@ -52,9 +52,13 @@ class YouTubeLogin(object):
 		(result, status) = self._login()
 		
 		if status == 200:
-			self._httpLogin(True)
+			(http_login, status) = self._httpLogin(True)
+			
+		if status == 200:
 			self.__utils__.showErrorMessage(self.__language__(30031), result, 303)
 		else:
+			self.__settings__.setSetting("auth","")
+			self.__settings__.setSetting("nick","")
 			self.__utils__.showErrorMessage(self.__language__(30609), result, status)
 		
 		xbmc.executebuiltin( "Container.Refresh" )
@@ -169,20 +173,22 @@ class YouTubeLogin(object):
 	def _httpLogin(self, new = False, error = 0):
 		if self.__dbg__:
 			print self.__plugin__ + " _httpLogin errors: " + str(error)
-
+		result = ""
+		status = 200
+		
 		uname = self.__settings__.getSetting( "username" )
 		pword = self.__settings__.getSetting( "user_password" )
 		
 		if ( uname == "" and pword == "" ):
 			return ""
-
+		
 		if ( new ):
 			self.__settings__.setSetting( "login_info", "" )
 		elif ( self.__settings__.getSetting( "login_info" ) != "" ):
 			if self.__dbg__:
 				print self.__plugin__ + " returning existing login info: " + self.__settings__.getSetting( "login_info" )
 			return self.__settings__.getSetting( "login_info" )
-								
+		
 		cj = cookielib.LWPCookieJar()
 		
 		opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
@@ -192,55 +198,77 @@ class YouTubeLogin(object):
 		url = urllib2.Request(urllib.unquote("https://www.google.com/accounts/ServiceLogin?service=youtube"))
 		url.add_header('User-Agent', self.USERAGENT)
 		
-		try:
-			if self.__dbg__:
-				print self.__plugin__ + " _httpLogin: getting new login_info"
-			con = urllib2.urlopen(url)
-			header = con.info()
-			galx = re.compile('Set-Cookie: GALX=(.*);Path=/accounts;Secure').findall(str(header))[0]
-			
-			cont = urllib.unquote("http%3A%2F%2Fwww.youtube.com%2Fsignin%3Faction_handle_signin%3Dtrue%26nomobiletemp%3D1%26hl%3Den_US%26next%3D%252Findex&hl=en_US&ltmpl=sso")
+		if self.__dbg__:
+			print self.__plugin__ + " _httpLogin: getting new login_info"
+		con = urllib2.urlopen(url)
+		header = con.info()
+		galx = re.compile('Set-Cookie: GALX=(.*);Path=/accounts;Secure').findall(str(header))[0]
+		
+		if self.__dbg__:
+			print self.__plugin__ + " galx: " + repr(galx)
+		
+		cont = urllib.unquote("http%3A%2F%2Fwww.youtube.com%2Fsignin%3Faction_handle_signin%3Dtrue%26nomobiletemp%3D1%26hl%3Den_US%26next%3D%252Findex&hl=en_US&ltmpl=sso")
+		if self.__dbg__:
 			print self.__plugin__ + " cont_url = " + cont
-			params = urllib.urlencode({'GALX': galx,
-						   'Email': uname,
-						   'Passwd': pword,
-						   'PersistentCookie': 'yes',
-						   'continue': cont})
-
-			# Login to Google
-			url = urllib2.Request('https://www.google.com/accounts/ServiceLoginAuth?service=youtube', params)
-			url.add_header('User-Agent', self.USERAGENT)
+		
+		params = urllib.urlencode({'GALX': galx,
+					   'Email': uname,
+					   'Passwd': pword,
+					   'PersistentCookie': 'yes',
+					   'continue': cont})
+		
+		# Login to Google
+		url = urllib2.Request('https://www.google.com/accounts/ServiceLoginAuth?service=youtube', params)
+		url.add_header('User-Agent', self.USERAGENT)
+		
+		con = urllib2.urlopen(url)
+		result = con.read()
 			
-			con = urllib2.urlopen(url)
-			result = con.read()
-						
-			newurl = re.compile('<meta http-equiv="refresh" content="0; url=&#39;(.*)&#39;"></head>').findall(result)[0].replace("&amp;", "&")
-			url = urllib2.Request(newurl)
-			url.add_header('User-Agent', self.USERAGENT)
+		newurl = re.compile('<meta http-equiv="refresh" content="0; url=&#39;(.*)&#39;"></head>').findall(result)[0].replace("&amp;", "&")
+		if self.__dbg__:
+			print self.__plugin__ + " new_url: " + repr(newurl)
+		
+		url = urllib2.Request(newurl)
+		url.add_header('User-Agent', self.USERAGENT)
+		
+		# Login to youtube
+		con = urllib2.urlopen(newurl)
+		result = con.read()
+		con.close()
+		
+		if self.__dbg__:
+			print self.__plugin__ + " searching for nick " + repr(result)
+		
+		nick = ""
+		if result.find("USERNAME', ") > 0:
+			nick = result[result.find("USERNAME', ") + 12:]
+			nick = nick[:nick.find('")')]
+		
+		if nick:
+			self.__settings__.setSetting("nick", nick)
+		else:
+			status = 303
+			print self.__plugin__ + " _httplogin failed to get usename from youtube"
+		
+		# Save cookiefile in settings
+		if self.__dbg__:
+			print self.__plugin__ + "scanning cookies for login info: " + repr(cj)
+		
+		login_info = ""
+		cookies = repr(cj)
 			
-			# Login to youtube
-			con = urllib2.urlopen(newurl)
-			result = con.read()
-			con.close()
-			
-			if result.find("USERNAME', ") > 0:
-				nick = result[result.find("USERNAME', ") + 12:]
-				nick = nick[:nick.find('")')]
-			
-			if nick:
-				self.__settings__.setSetting("nick", nick)
-			else:
-				print self.__plugin__ + " _httplogin failed to get usename from youtube"
-			
-			# Save cookiefile in settings
-			cookies = repr(cj)
+		if cookies.find("name='LOGIN_INFO', value='") > 0:
 			start = cookies.find("name='LOGIN_INFO', value='") + len("name='LOGIN_INFO', value='")
 			login_info = cookies[start:cookies.find("', port=None", start)]
+		
+		if login_info:
 			self.__settings__.setSetting( "login_info", login_info )
-			
-			if self.__dbg__:
-				print self.__plugin__ + " _httpLogin done"
-			
-			return self.__settings__.getSetting( "login_info" )
-		except:
-			print self.__plugin__ + " _httplogin failed "
+		else:
+			status = 303
+		
+		if self.__dbg__:
+			print self.__plugin__ + " _httpLogin done"
+		
+		result = self.__settings__.getSetting( "login_info" )
+		
+		return (result, status)
