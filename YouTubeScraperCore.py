@@ -785,6 +785,10 @@ class YouTubeScraperCore:
 				ytobjects = videos
 			
 			if (len(ytobjects) > 0):
+				if get("scraper") == "search_disco":
+					thumbnail = ytobjects[0].get("thumbnail","")
+					if thumbnail:
+						self.__settings__.setSetting("disco_search_" + urllib.unquote_plus(get("search")) + "_thumb", thumbnail)
 				if (next == "true"):
 					self.__utils__.addNextFolder(ytobjects, params)
 		else:
