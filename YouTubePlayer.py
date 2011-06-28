@@ -200,7 +200,29 @@ class YouTubePlayer(object):
 			xbmc.Player().setSubtitles(path)
 	
 	# ================================ Video Playback ====================================
-	
+        def queueVideo(self, params = {}):
+		get = params.get
+		if self.__dbg__:
+			print self.__plugin__ + " - Queuing video: " + get("videoid")
+
+		(video, status) = self.getVideoObject(params);
+		
+		if status != 200:
+			if self.__dbg__ : 
+				print self.__plugin__ + " construct video url failed contents of video item " + repr(video)
+			self.__utils__.showErrorMessage(self.__language__(30603), video["apierror"], status)
+			return False
+		
+		listitem=xbmcgui.ListItem(label=video['Title'], iconImage=video['thumbnail'], thumbnailImage=video['thumbnail'], path=video['video_url']);		
+		listitem.setInfo(type='Video', infoLabels=video)
+		
+		if self.__dbg__:
+			print self.__plugin__ + " - Queuing video: " + self.__utils__.makeAscii(video['Title']) + " - " + get('videoid') + " - " + video['video_url']
+		
+                playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
+		playlist.add("%s?path=/root&action=play_video&videoid=%s" % (sys.argv[0], video["videoid"] ), listitem)
+		//xbmcplugin.setResolvedUrl(handle=int(sys.argv[1]), succeeded=True, listitem=listitem)		
+
 	def playVideo(self, params = {}):
 		get = params.get
 		

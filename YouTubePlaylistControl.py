@@ -84,6 +84,7 @@ class YouTubePlaylistControl:
 
 		xbmc.executebuiltin('playlist.playoffset(video , 0)')
 	
+
 	def getPlayList(self, params = {}):
 		get = params.get
 		
