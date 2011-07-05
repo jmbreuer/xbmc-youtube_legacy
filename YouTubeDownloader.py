@@ -43,22 +43,24 @@ class YouTubeDownloader:
 			self.__settings__.openSettings()
 			path = self.__settings__.getSetting( "downloadPath" )
 		
+		if sys.platform == "win32":
+			return self.downloadVideoURLNoQueue(video, param)
+		
 		try:
 			print self.__plugin__ + " trying to acquire"
 			self.__lock__.acquire()
 		except:
 			if self.__dbg__:
-				print self.__plugin__ + " Exception "
-				print self.__plugin__ + " Downloader is active Queueing video "
+				print self.__plugin__ + " Downloader is active, Queueing video "
 			self.__storage__.addVideoToDownloadQeueu(params)
 		else:
 			params["silent"] = "true"
 			if self.__plugin__:
-				print self.__plugin__ + " Downloader not active, intialising downloader"
+				print self.__plugin__ + " Downloader not active, initializing downloader"
 			
 			self.__storage__.addVideoToDownloadQeueu(params)
 			self.processQueue(params)
-
+	
 	def processQueue(self, params = {}):
 		videoid = self.__storage__.getNextVideoFromDownloadQueue()
 		
@@ -95,7 +97,7 @@ class YouTubeDownloader:
 			
 	def downloadVideoURL(self, video, params = {}):
 		if self.__dbg__:
-			print self.__plugin__ + " downloadVideo : " + video['Title']
+			print self.__plugin__ + " downloadVideo: " + video['Title']
 		
 		if video["video_url"].find("swfurl") > 0:
 			self.__utils__.showMessage(self.__language__( 30625 ), self.__language__(30619))
