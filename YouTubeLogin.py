@@ -49,17 +49,19 @@ class YouTubeLogin(object):
 
 	def login(self, params = {}):
 		self.__settings__.openSettings()
-		(result, status) = self._login()
 		
-		if status == 200:
-			(http_login, status) = self._httpLogin(True)
-			
-		if status == 200:
-			self.__utils__.showErrorMessage(self.__language__(30031), result, 303)
-		else:
-			self.__settings__.setSetting("auth","")
-			self.__settings__.setSetting("nick","")
-			self.__utils__.showErrorMessage(self.__language__(30609), result, status)
+		if self.__settings__.getSetting("username") and self.__settings__.getSetting( "user_password" ):
+			(result, status) = self._login()
+		
+			if status == 200:
+				(http_login, status) = self._httpLogin(True)
+				
+			if status == 200:
+				self.__utils__.showErrorMessage(self.__language__(30031), result, 303)
+			else:
+				self.__settings__.setSetting("auth","")
+				self.__settings__.setSetting("nick","")
+				self.__utils__.showErrorMessage(self.__language__(30609), result, status)
 		
 		xbmc.executebuiltin( "Container.Refresh" )
 	
