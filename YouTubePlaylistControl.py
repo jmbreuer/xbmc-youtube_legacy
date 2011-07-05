@@ -46,12 +46,12 @@ class YouTubePlaylistControl:
 			result = self.getNewSubscriptions(params)
 		else:
 			return
-
+		
 		if len(result) == 0:
 			return
 		
 		if self.__dbg__:
-			print self.__plugin__ + " video results " + repr(result)
+			print self.__plugin__ + " " + repr(len(result)) + " video results "
 		
 		if get("videoid"):
 			video_index = -1
@@ -78,13 +78,12 @@ class YouTubePlaylistControl:
 			listitem.setProperty( "Video", "true" )
 			listitem.setInfo(type='Video', infoLabels=entry)
 			playlist.add(video_url % (sys.argv[0], video("videoid") ), listitem)
-			
+		
 		if (get("shuffle")):
 			playlist.shuffle()
-
+		
 		xbmc.executebuiltin('playlist.playoffset(video , 0)')
 	
-
 	def getPlayList(self, params = {}):
 		get = params.get
 		
