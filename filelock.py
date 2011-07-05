@@ -1,5 +1,5 @@
 '''
-Copyright: Evan Fosmark.
+Copyright: Evan Fosmark. - Released under BSD License
 http://www.evanfosmark.com/2009/01/cross-platform-file-locking-support-in-python/
 '''
 import os, sys, time, errno
