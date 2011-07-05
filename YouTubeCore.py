@@ -144,7 +144,7 @@ class YouTubeCore(object):
 		else:
 			url += "&"
 			
-		if not get("playlist") and not get("folder") and not get("action") == "add_to_playlist":
+		if not get("playlist") and not get("folder") and not get("action") == "play_all" and not get("action") == "add_to_playlist":
 			url += "start-index=" + repr(start_index) + "&max-results=" + repr(per_page)
 		
 		if (url.find("standardfeeds") > 0 and region):
@@ -323,7 +323,8 @@ class YouTubeCore(object):
 			index += 50
 			url = feed + "start-index=" + str(index) + "&max-results=" + repr(50)
 			url = url.replace(" ", "+")
-			(result, status) = self._fetchPage({"link": url})
+			(result, status) = self._fetchPage({"link": url, "auth":"true"})
+			
 			if status != 200:
 				break
 			temp_objects = []
@@ -331,13 +332,14 @@ class YouTubeCore(object):
 				temp_objects = self.getFolderInfo(result, params)
 			else:
 				temp_objects = self.getVideoInfo(result, params)
+		
 			next = temp_objects[len(temp_objects)-1].get("next","false")
 			if next == "true":
-				temp_objects += temp_objects[:len(temp_objects)-1]
+				temp_objects = temp_objects[:len(temp_objects)-1]
 			ytobjects += temp_objects
 		
-		if (get("user_feed")):
-			if get("user_feed") != "playlist":
+		if get("user_feed"):
+			if get("user_feed") != "playlist" and get("action") != "play_all":
 				ytobjects.sort(key=lambda item:item["Title"].lower(), reverse=False)
 			else:
 				if (self.__storage__.getReversePlaylistOrder(params)):
@@ -365,7 +367,7 @@ class YouTubeCore(object):
 			
 	def add_contact(self, params = {}):
 		get = params.get
-		url = self.urls["contacts"] % "default"
+		url = self.urls["contacts"]
 		add_request = '<?xml version="1.0" encoding="UTF-8"?> <entry xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://gdata.youtube.com/schemas/2007"><yt:username>%s</yt:username></entry>' % get("contact")
 		return self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true", "request": add_request})
 		
@@ -428,6 +430,12 @@ class YouTubeCore(object):
 			folder['Title'] = node.getElementsByTagName("title").item(0).firstChild.nodeValue.replace('Activity of : ', '').replace('Videos published by : ', '').encode( "utf-8" );
 			folder['published'] = self._getNodeValue(node, "published", "2008-07-05T19:56:35.000-07:00")
 			
+			if node.getElementsByTagName("id"):
+				entryid = self._getNodeValue(node, "id","")
+				entryid = entryid[entryid.rfind(":")+1:]
+				folder["editid"] = entryid
+			
+			thumb = ""
 			if get("user_feed") == "contacts":
 				folder["thumbnail"] = "user"
 				folder["contact"] = folder["Title"]
@@ -601,7 +609,7 @@ class YouTubeCore(object):
 			
 			if err.find("TokenExpired") > -1:
 				self.__login__._login()
-
+			
 			params["error"] = str(int(get("error", "0")) + 1)
 			return self._fetchPage(params)
 		
