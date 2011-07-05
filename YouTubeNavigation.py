@@ -501,7 +501,7 @@ class YouTubeNavigation:
 		if item("artist"):
 			cm.append ( (self.__language__(30507), "XBMC.Container.Update(%s?path=%s&scraper=similar_artist&artist=%s&folder=true&)" % ( sys.argv[0], item("path"), item("artist") ) ) )			
 			
-		if (not get("user_feed") == "subscriptions" and (item("user_feed") == "favorites" or item("user_feed") == "newsubscriptions")):
+		if (item("user_feed") == "favorites" or item("user_feed") == "newsubscriptions"):
 			cm.append ( (self.__language__(30520), "XBMC.RunPlugin(%s?path=%s&action=play_all&user_feed=%s&contact=%s&)" % ( sys.argv[0], item("path"), item("user_feed"), "default" ) ) )
 			cm.append ( (self.__language__(30522), "XBMC.RunPlugin(%s?path=%s&action=play_all&shuffle=true&user_feed=%s&contact=%s&)" % ( sys.argv[0], item("path"), item("user_feed"), "default" ) ) )
 		if (item("playlist")):
@@ -517,8 +517,8 @@ class YouTubeNavigation:
 		
 		if (item("feed") == "search"):
 			cm.append( ( self.__language__( 30515 ), 'XBMC.Container.Update(%s?path=%s&action=edit_search&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
-			cm.append( ( self.__language__( 30508 ), 'XBMC.RunPlugin(%s?path=%s&action=delete_search&delete=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
 			cm.append( ( self.__language__( 30505 ), 'XBMC.RunPlugin(%s?path=%s&action=refine_user&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
+			cm.append( ( self.__language__( 30508 ), 'XBMC.RunPlugin(%s?path=%s&action=delete_search&delete=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
 			
 			if item("refined"):
 				cm.append( ( self.__language__( 30500 ), 'XBMC.RunPlugin(%s?path=%s&action=delete_refinements&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
