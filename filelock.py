@@ -2,7 +2,7 @@
 Copyright: Evan Fosmark.
 http://www.evanfosmark.com/2009/01/cross-platform-file-locking-support-in-python/
 '''
-import os, sys, time, errno, ctypes
+import os, sys, time, errno
  
 class FileLockException(Exception):
     pass
@@ -28,23 +28,19 @@ class FileLock(object):
             fd = os.open(self.file_name, os.O_CREAT|os.O_RDWR)
             oldpid = os.read(fd, 65535)
             os.close(fd);
-            if oldpid:
-				if sys.platform == "win32":
-					try:
-						kernel32 = ctypes.windll.kernel32
-						if not kernel32.OpenProcess(1, 0, oldpid):
-							os.unlink(self.file_name)
-					except:
-						print "YouTube filelock. lockfile locked."
-				else:
-					try:
-						os.kill(int(oldpid), 0)
-					except OSError:
-						print "YouTube filelock Couldn't find pid. Unlinking file"
-						os.unlink(self.file_name)
+            if sys.platform == "win32":
+                print "YouTube filelock. win32 pid check not implemented"
+                #maybe http://code.google.com/p/psutil/
             else:
-				print "YouTube filelock removing lock file with no PID in it"
-				os.unlink(self.file_name)
+                if oldpid:
+                    try:
+                        os.kill(int(oldpid), 0)
+                    except OSError:
+                        print "YouTube filelock OSError unlinking stale pid file"
+                        os.unlink(self.file_name)
+                else:
+                    print "YouTube filelock removing lock file with no PID in it"
+                    os.unlink(self.file_name)
         
     def acquire(self):
         """ Acquire the lock, if possible. If the lock is in use, it check again
