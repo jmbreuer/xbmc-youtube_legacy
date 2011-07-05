@@ -267,7 +267,7 @@ class YouTubeScraperCore:
 			content = BeautifulSoup(html, parseOnlyThese=list)
 			
 			if (len(content) > 0):
-				videos = content.findAll(name="div", attrs = {"class":"browse-item music-item"}, recursive=True)
+				videos = content.findAll(name="div", attrs = {"class":"browse-item music-item "}, recursive=True)
 				for video in videos: 
 					id = video.a["href"]
 					id = id[id.find("?v=") + 3:id.find("&")]
