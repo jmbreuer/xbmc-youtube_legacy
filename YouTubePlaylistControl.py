@@ -83,7 +83,39 @@ class YouTubePlaylistControl:
 			playlist.shuffle()
 		
 		xbmc.executebuiltin('playlist.playoffset(video , 0)')
-	
+
+        def queueVideo(self, params = {}):
+		get = params.get
+                if self.__dbg__:
+                        print self.__plugin__ + " - Queuing videos: " + get("videoid")
+
+                items =[]
+                videoids = get("videoid")
+
+		if videoids.find(','):
+                        items = videoids.split(',')
+		else:
+			items.append(videoids)
+
+		(video, status) = self.__core__.getBatchDetails(items, params);
+
+                if status != 200:
+			        if self.__dbg__ :
+                                print self.__plugin__ + " construct video url failed contents of video item " + repr(video)
+
+                        self.__utils__.showErrorMessage(self.__language__(30603), video["apierror"], status)
+                        return False
+
+                listitem=xbmcgui.ListItem(label=video['Title'], iconImage=video['thumbnail'], thumbnailImage=video['thumbnail'], path=video['video_url']);
+                listitem.setProperty('IsPlayable', 'true')
+                listitem.setInfo(type='Video', infoLabels=video)
+
+                if self.__dbg__:
+                        print self.__plugin__ + " - Queuing video: " + self.__utils__.makeAscii(video['Title']) + " - " + get('videoid') + " - " + video['video_url']
+
+                playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
+                playlist.add("%s?path=/root&action=play_video&videoid=%s" % (sys.argv[0], video["videoid"] ), listitem)
+
 	def getPlayList(self, params = {}):
 		get = params.get
 		

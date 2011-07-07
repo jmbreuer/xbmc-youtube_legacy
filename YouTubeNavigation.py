@@ -153,7 +153,7 @@ class YouTubeNavigation:
 		if (get("action") == "play_video_list"):
 			self.__player__.playVideoList(params)
 		if (get("action") == "queue_video"):
-			self.__player__.queueVideo(params)
+			self.__playlist__.queueVideo(params)
 		if (get("action") == "change_subscription_view"):
 			self.__storage__.changeSubscriptionView(params)
 			self.list(params)

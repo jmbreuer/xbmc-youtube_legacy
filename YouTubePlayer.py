@@ -236,7 +236,7 @@ class YouTubePlayer(object):
 		video_list = get("videoid", "").split(",")
 		play = video_list.pop()
 		for video in video_list:
-			self.queueVideo({ "videoid": video});
+			self.__playlist__.queueVideo({ "videoid": video});
 		else:
 			return self.playVideo({ "videoid": play});
 		
