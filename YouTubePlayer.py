@@ -229,7 +229,18 @@ class YouTubePlayer(object):
 			self.__core__.remove_from_playlist(params)
 			
 		self.__settings__.setSetting( "vidstatus-" + video['videoid'], "7" )
-	
+
+	def playVideoList(self, params = {}):
+		print self.__plugin__ + " playVideoList"
+		get = params.get
+		video_list = get("videoid", "").split(",")
+		play = video_list.pop()
+		for video in video_list:
+			self.queueVideo({ "videoid": video});
+		else:
+			return self.playVideo({ "videoid": play});
+		
+
 	def getVideoStreamMap(self, html, video = {}):
 		links = {}
 		fmt_url_map = []
@@ -494,6 +505,9 @@ class YouTubePlayer(object):
 
 			if len(links) == 0 and get("action") != "download":
 				links = self.getVideoStreamMap(html, video)
+				if len(links) != 0:
+					video['apierror'] = self.__language__(30626)
+					return ( video, 303)
 
 		if links:
 			video["video_url"] = self.selectVideoQuality(links, params)

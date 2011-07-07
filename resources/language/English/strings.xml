@@ -207,5 +207,6 @@
     <string id="30623">Maximum login attempts tried.</string>
     <string id="30624">Downloading</string>
     <string id="30625">Download Failed</string>
+    <string id="30626">RTMPe playback currently not supported</string> 
 
 </strings>
