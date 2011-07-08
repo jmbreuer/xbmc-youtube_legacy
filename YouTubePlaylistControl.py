@@ -29,6 +29,7 @@ class YouTubePlaylistControl:
 	__core__ = sys.modules[ "__main__" ].__core__
 	__scraper__ = sys.modules[ "__main__" ].__scraper__
 	__utils__ = sys.modules[ "__main__" ].__utils__	
+	__player__ = sys.modules[ "__main__" ].__player__
 	
 	def playAll(self, params={}):
 		get = params.get
@@ -44,6 +45,13 @@ class YouTubePlaylistControl:
 			result = self.getFavorites(params)
 		elif get("user_feed") == "newsubscriptions":
 			result = self.getNewSubscriptions(params)
+		elif get("video_list", False) :
+			result = []
+			video_list = get("video_list", "").split(",")
+			for videoid in video_list:
+				(video, stat) = self.__player__.getVideoObject({ "videoid": videoid})
+				result.append(video);
+			
 		else:
 			return
 		
@@ -83,8 +91,8 @@ class YouTubePlaylistControl:
 			playlist.shuffle()
 		
 		xbmc.executebuiltin('playlist.playoffset(video , 0)')
-
-        def queueVideo(self, params = {}):
+		
+	def queueVideo(self, params = {}):
 		get = params.get
                 if self.__dbg__:
                         print self.__plugin__ + " - Queuing videos: " + get("videoid")
@@ -100,7 +108,7 @@ class YouTubePlaylistControl:
 		(video, status) = self.__core__.getBatchDetails(items, params);
 
                 if status != 200:
-			        if self.__dbg__ :
+			if self.__dbg__ :
                                 print self.__plugin__ + " construct video url failed contents of video item " + repr(video)
 
                         self.__utils__.showErrorMessage(self.__language__(30603), video["apierror"], status)

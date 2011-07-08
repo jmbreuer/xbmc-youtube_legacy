@@ -26,6 +26,7 @@ class YouTubePlayer(object):
 	__plugin__ = sys.modules[ "__main__" ].__plugin__ 
 	__dbg__ = sys.modules[ "__main__" ].__dbg__
 	
+        __playlist__ = sys.modules[ "__main__" ].__playlist__
 	__core__ = sys.modules[ "__main__" ].__core__
 	__utils__ = sys.modules[ "__main__" ].__utils__
 
@@ -229,17 +230,6 @@ class YouTubePlayer(object):
 			self.__core__.remove_from_playlist(params)
 			
 		self.__settings__.setSetting( "vidstatus-" + video['videoid'], "7" )
-
-	def playVideoList(self, params = {}):
-		print self.__plugin__ + " playVideoList"
-		get = params.get
-		video_list = get("videoid", "").split(",")
-		play = video_list.pop()
-		for video in video_list:
-			self.__playlist__.queueVideo({ "videoid": video});
-		else:
-			return self.playVideo({ "videoid": play});
-		
 
 	def getVideoStreamMap(self, html, video = {}):
 		links = {}
