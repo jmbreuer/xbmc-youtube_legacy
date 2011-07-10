@@ -90,13 +90,17 @@ class YouTubePlayer(object):
 				if node.getAttribute("lang_code") == lang_code:
 					subtitle = node.getAttribute("name").replace(" ", "%20")
 					code = lang_code
+					if self.__dbg__:
+						print self.__plugin__ + " found subtitle specified: " + subtitle + " - " + code
 					break
 			
 				if node.getAttribute("lang_code") == "en":
 					subtitle = node.getAttribute("name").replace(" ", "%20")
 					code = "en"
-			
-			if subtitle and code:
+					if self.__dbg__:
+						print self.__plugin__ + " found subtitle default: " + subtitle + " - " + code
+
+			if code:
 				url = self.urls["close_caption_url"] % ( get("videoid"), subtitle, code)
 		
 		if self.__dbg__:
