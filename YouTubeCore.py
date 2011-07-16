@@ -18,7 +18,7 @@
 
 import sys, urllib, urllib2, re, time, socket
 from xml.dom.minidom import parseString
-
+import YouTubeUtils
 # ERRORCODES:
 # 200 = OK
 # 303 = See other (returned an error message)
@@ -36,14 +36,13 @@ class url2request(urllib2.Request):
 		else:
 			return urllib2.Request.get_method(self) 
 
-class YouTubeCore(object):
+class YouTubeCore(YouTubeUtils.YouTubeUtils):
 	__settings__ = sys.modules[ "__main__" ].__settings__
 	__language__ = sys.modules[ "__main__" ].__language__
 	__plugin__ = sys.modules[ "__main__" ].__plugin__
 	__dbg__ = sys.modules[ "__main__" ].__dbg__
 	
 	__storage__ = sys.modules[ "__main__" ].__storage__
-	__utils__ = sys.modules[ "__main__" ].__utils__
 	__login__ = sys.modules[ "__main__" ].__login__
 
 	APIKEY = "AI39si6hWF7uOkKh4B9OEAX-gK337xbwR9Vax-cdeF9CF9iNAcQftT8NVhEXaORRLHAmHxj6GjM-Prw04odK4FxACFfKkiH9lg";
@@ -186,7 +185,7 @@ class YouTubeCore(object):
 			folders.append(folder);
 		
 		if next:
-			self.__utils__.addNextFolder(folders, params)
+			self.addNextFolder(folders, params)
 		
 		return folders;
 	
@@ -283,7 +282,7 @@ class YouTubeCore(object):
 			request.add_header('GData-Version', '2') #confirmed
 			request.add_header('X-GData-Key', 'key=' + self.APIKEY)
 		else:
-			request.add_header('User-Agent', self.__utils__.USERAGENT)
+			request.add_header('User-Agent', self.USERAGENT)
 		
 		if get("login", "false") == "true":
 			if self.__dbg__:
@@ -345,7 +344,7 @@ class YouTubeCore(object):
 			confirmed = "1"
 		
 		request = urllib2.Request(new_url)
-		request.add_header('User-Agent', self.__utils__.USERAGENT)
+		request.add_header('User-Agent', self.USERAGENT)
 		request.add_header('Cookie', 'LOGIN_INFO=' + login_info)
 		con = urllib2.urlopen(request)
 		result = con.read()
@@ -375,7 +374,7 @@ class YouTubeCore(object):
 		
 		# post collected information to age the verifiaction page
 		request = urllib2.Request(new_url)
-		request.add_header('User-Agent', self.__utils__.USERAGENT)
+		request.add_header('User-Agent', self.USERAGENT)
 		request.add_header('Cookie', 'LOGIN_INFO=' + login_info )
 		request.add_header("Content-Type","application/x-www-form-urlencoded")
 		values = urllib.urlencode( { "next_url": next_url, "action_confirm": confirmed, "session_token":session_token })
@@ -611,6 +610,6 @@ class YouTubeCore(object):
 			ytobjects.append(video);
 		
 		if next:
-			self.__utils__.addNextFolder(ytobjects,params)
+			self.addNextFolder(ytobjects,params)
 				
 		return ytobjects;

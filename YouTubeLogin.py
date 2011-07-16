@@ -18,6 +18,7 @@
 
 import sys, urllib, urllib2, re, cookielib, socket
 import xbmc
+import YouTubeUtils
 
 # ERRORCODES:
 # 0 = Ignore
@@ -25,11 +26,10 @@ import xbmc
 # 303 = See other (returned an error message)
 # 500 = uncaught error
 
-class YouTubeLogin(object):
+class YouTubeLogin(YouTubeUtils.YouTubeUtils):
 	__settings__ = sys.modules[ "__main__" ].__settings__
 	__language__ = sys.modules[ "__main__" ].__language__
 	__plugin__ = sys.modules[ "__main__" ].__plugin__
-	__utils__ = sys.modules[ "__main__" ].__utils__
 	__dbg__ = sys.modules[ "__main__" ].__dbg__
 	
 	APIKEY = "AI39si6hWF7uOkKh4B9OEAX-gK337xbwR9Vax-cdeF9CF9iNAcQftT8NVhEXaORRLHAmHxj6GjM-Prw04odK4FxACFfKkiH9lg";
@@ -57,11 +57,11 @@ class YouTubeLogin(object):
 				(http_login, status) = self._httpLogin(True)
 				
 			if status == 200:
-				self.__utils__.showErrorMessage(self.__language__(30031), result, 303)
+				self.showErrorMessage(self.__language__(30031), result, 303)
 			else:
 				self.__settings__.setSetting("auth","")
 				self.__settings__.setSetting("nick","")
-				self.__utils__.showErrorMessage(self.__language__(30609), result, status)
+				self.showErrorMessage(self.__language__(30609), result, status)
 		
 		xbmc.executebuiltin( "Container.Refresh" )
 	
@@ -120,7 +120,7 @@ class YouTubeLogin(object):
 				print self.__plugin__ + " login failed, hit ioerror except: " + repr(e)
 				print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
 								   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
-				print self.__utils__.interrogate(e)
+				print self.interrogate(e)
 
 			if error < 9:
 				if self.__dbg__:

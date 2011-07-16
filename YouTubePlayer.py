@@ -18,16 +18,14 @@
 
 import sys, urllib, re, os.path, datetime, time
 import xbmc, xbmcgui, xbmcplugin, xbmcvfs
-import YouTubeCore
+import YouTubeCore, YouTubeUtils
 from xml.dom.minidom import parseString
 
-class YouTubePlayer(YouTubeCore.YouTubeCore):
+class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 	__settings__ = sys.modules[ "__main__" ].__settings__
 	__language__ = sys.modules[ "__main__" ].__language__
 	__plugin__ = sys.modules[ "__main__" ].__plugin__ 
 	__dbg__ = sys.modules[ "__main__" ].__dbg__
-	
-	__utils__ = sys.modules[ "__main__" ].__utils__
 	
 	def __init__(self):
 		# YouTube Playback Feeds
@@ -109,7 +107,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore):
 	def saveSubtitle(self, srt, video = {}):
 		get = video.get
 		
-		filename = ''.join(c for c in video['Title'] if c in self.__utils__.VALID_CHARS) + "-[" + get('videoid') + "]" + ".srt"
+		filename = ''.join(c for c in video['Title'] if c in self.VALID_CHARS) + "-[" + get('videoid') + "]" + ".srt"
 		path = os.path.join( xbmc.translatePath( "special://temp" ), filename )
 		
 		w = open(path, "w")
@@ -154,7 +152,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore):
 			if node:
 				if node.firstChild:
 					if node.firstChild.nodeValue:
-						text = self.__utils__.replaceHtmlCodes(node.firstChild.nodeValue)
+						text = self.replaceHtmlCodes(node.firstChild.nodeValue)
 						start = ""
 						
 						if node.getAttribute("start"):
@@ -179,7 +177,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore):
 		if self.__dbg__:
 			print self.__plugin__ + " fetching subtitle if available"
 		
-		filename = ''.join(c for c in video['Title'] if c in self.__utils__.VALID_CHARS) + "-[" + get('videoid') + "]" + ".srt"
+		filename = ''.join(c for c in video['Title'] if c in self.VALID_CHARS) + "-[" + get('videoid') + "]" + ".srt"
 
 		download_path = os.path.join( self.__settings__.getSetting( "downloadPath" ), filename )
 		path = os.path.join( xbmc.translatePath( "special://temp" ), filename )
@@ -212,14 +210,14 @@ class YouTubePlayer(YouTubeCore.YouTubeCore):
 		if status != 200:
 			if self.__dbg__ : 
 				print self.__plugin__ + " construct video url failed contents of video item " + repr(video)
-			self.__utils__.showErrorMessage(self.__language__(30603), video["apierror"], status)
+			self.showErrorMessage(self.__language__(30603), video["apierror"], status)
 			return False
 		
 		listitem=xbmcgui.ListItem(label=video['Title'], iconImage=video['thumbnail'], thumbnailImage=video['thumbnail'], path=video['video_url']);		
 		listitem.setInfo(type='Video', infoLabels=video)
 		
 		if self.__dbg__:
-			print self.__plugin__ + " - Playing video: " + self.__utils__.makeAscii(video['Title']) + " - " + get('videoid') + " - " + video['video_url']
+			print self.__plugin__ + " - Playing video: " + self.makeAscii(video['Title']) + " - " + get('videoid') + " - " + video['video_url']
 		
 		xbmcplugin.setResolvedUrl(handle=int(sys.argv[1]), succeeded=True, listitem=listitem)
 		
@@ -440,7 +438,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore):
 			return video_url
 		
 		if get("action") != "download":
-			video_url += " | " + self.__utils__.USERAGENT
+			video_url += " | " + self.USERAGENT
 			
 		return video_url
 	
@@ -496,7 +494,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore):
 		#Check if file has been downloaded locally and use that as a source instead
 		if (status == 200 and get("action","") != "download"):
 			path = self.__settings__.getSetting( "downloadPath" )
-			path = "%s%s-[%s].mp4" % (path, ''.join(c for c in video['Title'] if c in self.__utils__.VALID_CHARS), video["videoid"])
+			path = "%s%s-[%s].mp4" % (path, ''.join(c for c in video['Title'] if c in self.VALID_CHARS), video["videoid"])
 			try:
 				if xbmcvfs.exists(path):
 					video['video_url'] = path

@@ -18,14 +18,14 @@
 
 import sys, urllib
 import xbmc, xbmcgui, xbmcplugin
+import YouTubeUtils
 	
-class YouTubeNavigation:	 
+class YouTubeNavigation(YouTubeUtils.YouTubeUtils): 
 	__settings__ = sys.modules[ "__main__" ].__settings__
 	__plugin__ = sys.modules[ "__main__"].__plugin__	
 	__language__ = sys.modules[ "__main__" ].__language__
 	__dbg__ = sys.modules[ "__main__" ].__dbg__
 	
-	__utils__ = sys.modules[ "__main__" ].__utils__
 	__playlist__ = sys.modules[ "__main__" ].__playlist__
 	__login__ = sys.modules[ "__main__" ].__login__
 	__feeds__ = sys.modules[ "__main__" ].__feeds__
@@ -172,7 +172,7 @@ class YouTubeNavigation:
 		results = []
 		if (get("feed") == "search" or get("scraper") == "search_disco"):
 			if not get("search"):
-				query = self.__utils__.getUserInput(self.__language__(30006), '')
+				query = self.getUserInput(self.__language__(30006), '')
 				if not query:
 					return False
 				params["search"] = query
@@ -214,7 +214,7 @@ class YouTubeNavigation:
 			if get("playlist"):
 				label = self.__language__(30615)
 			if label:
-				self.__utils__.showMessage(label, self.__language__(30601))
+				self.showMessage(label, self.__language__(30601))
 		return False
 	
 	#================================== Plugin Actions =========================================
@@ -224,7 +224,7 @@ class YouTubeNavigation:
 		if (get("videoid")):
 			(message, status) = self.__feeds__.add_favorite(params)
 			if status != 200:
-				self.__utils__.showErrorMessage(self.__language__(30020), message, status)
+				self.showErrorMessage(self.__language__(30020), message, status)
 				return False	
 		return True
 			
@@ -234,7 +234,7 @@ class YouTubeNavigation:
 		if (get("editid")):
 			(message, status ) = self.__feeds__.delete_favorite(params)
 			if status != 200:
-				self.__utils__.showErrorMessage(self.__language__(30020), message, status)
+				self.showErrorMessage(self.__language__(30020), message, status)
 				return False
 			xbmc.executebuiltin( "Container.Refresh" )
 		
@@ -244,15 +244,15 @@ class YouTubeNavigation:
 		get = params.get
 
 		if not get("contact"):
-			contact = self.__utils__.getUserInput(self.__language__(30519), '')
+			contact = self.getUserInput(self.__language__(30519), '')
 			params["contact"] = contact
 			
 		if (get("contact")):
 			(result, status) = self.__feeds__.add_contact(params)
 			if status != 200:
-				self.__utils__.showErrorMessage(self.__language__(30029), result, status)
+				self.showErrorMessage(self.__language__(30029), result, status)
 				return False
-			self.__utils__.showMessage(self.__language__(30613), contact)
+			self.showMessage(self.__language__(30613), contact)
 			xbmc.executebuiltin( "Container.Refresh" )
 
 		return True
@@ -263,10 +263,10 @@ class YouTubeNavigation:
 		if (get("contact")):
 			(result, status) = self.__feeds__.remove_contact(params)
 			if status != 200:
-				self.__utils__.showErrorMessage(self.__language__(30029), result, status)
+				self.showErrorMessage(self.__language__(30029), result, status)
 				return False
 			
-			self.__utils__.showMessage(self.__language__(30614), get("contact"))
+			self.showMessage(self.__language__(30614), get("contact"))
 			xbmc.executebuiltin( "Container.Refresh" )
 		return True
 	
@@ -275,7 +275,7 @@ class YouTubeNavigation:
 		if (get("channel")):
 			(message, status) = self.__feeds__.add_subscription(params)
 			if status != 200:
-				self.__utils__.showErrorMessage(self.__language__(30021), message, status)
+				self.showErrorMessage(self.__language__(30021), message, status)
 				return False
 		
 		return True
@@ -285,7 +285,7 @@ class YouTubeNavigation:
 		if (get("editid")):
 			(message, status) = self.__feeds__.remove_subscription(params)
 			if status != 200:
-				self.__utils__.showErrorMessage(self.__language__(30021), message, status)
+				self.showErrorMessage(self.__language__(30021), message, status)
 				return False
 												
 			xbmc.executebuiltin( "Container.Refresh" )
@@ -330,11 +330,11 @@ class YouTubeNavigation:
 		cm = self.addFolderContextMenuItems(params, item_params)
 		
 		if (item("thumbnail", "DefaultFolder.png").find("http://") == -1):	
-			thumbnail = self.__utils__.getThumbnail(item("thumbnail"))
+			thumbnail = self.getThumbnail(item("thumbnail"))
 			
 		listitem=xbmcgui.ListItem( item("Title"), iconImage=icon, thumbnailImage=thumbnail )
 		url = '%s?path=%s&' % ( sys.argv[0], item("path") )
-		url = self.__utils__.buildItemUrl(item_params, url)
+		url = self.buildItemUrl(item_params, url)
 		
 		if len(cm) > 0:
 			listitem.addContextMenuItems( cm, replaceItems=False )
@@ -350,7 +350,7 @@ class YouTubeNavigation:
 		item = item_params.get
 		folder = True
 		icon = "DefaultFolder.png"
-		thumbnail = self.__utils__.getThumbnail(item("thumbnail"))
+		thumbnail = self.getThumbnail(item("thumbnail"))
 		listitem=xbmcgui.ListItem( item("Title"), iconImage=icon, thumbnailImage=thumbnail )
 		
 		if (item("action") == "playbyid"):
@@ -375,7 +375,7 @@ class YouTubeNavigation:
 		elif(get("scraper","").find("disco") > 0):
 			icon = "discoball"
 		
-		icon = self.__utils__.getThumbnail(icon)
+		icon = self.getThumbnail(icon)
 		
 		listitem=xbmcgui.ListItem(item("Title"), iconImage=icon, thumbnailImage=item("thumbnail") )
 
@@ -450,9 +450,9 @@ class YouTubeNavigation:
 		get = params.get
 		item = item_params.get
 
-		title = self.__utils__.makeAscii(item("Title"))
+		title = self.makeAscii(item("Title"))
 		url_title = urllib.quote_plus(title)
-		studio = self.__utils__.makeAscii(item("Studio","Unknown Author"))
+		studio = self.makeAscii(item("Studio","Unknown Author"))
 		url_studio = urllib.quote_plus(studio)
 		
 		cm.append( ( self.__language__( 30504 ), "XBMC.Action(Queue)", ) )

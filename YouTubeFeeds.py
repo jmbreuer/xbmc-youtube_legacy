@@ -26,9 +26,7 @@ class YouTubeFeeds(YouTubeCore.YouTubeCore):
 	__dbg__ = sys.modules[ "__main__" ].__dbg__
 	
 	__storage__ = sys.modules[ "__main__" ].__storage__
-	__utils__ = sys.modules[ "__main__" ].__utils__
-	__login__ = sys.modules[ "__main__" ].__login__
-	
+		
 	def __init__(self):
 		# YouTube General Feeds
 		self.urls['playlist'] = "http://gdata.youtube.com/feeds/api/playlists/%s"

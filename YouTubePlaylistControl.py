@@ -18,9 +18,9 @@
 
 import sys
 import xbmc, xbmcgui
-import YouTubeCore
+import YouTubeCore, YouTubeUtils
 
-class YouTubePlaylistControl(YouTubeCore.YouTubeCore):
+class YouTubePlaylistControl(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 	__settings__ = sys.modules[ "__main__" ].__settings__
 	__language__ = sys.modules[ "__main__" ].__language__
 	__plugin__ = sys.modules[ "__main__"].__plugin__	
@@ -28,7 +28,6 @@ class YouTubePlaylistControl(YouTubeCore.YouTubeCore):
 
 	__feeds__ = sys.modules[ "__main__" ].__feeds__
 	__scraper__ = sys.modules[ "__main__" ].__scraper__
-	__utils__ = sys.modules[ "__main__" ].__utils__	
 	__player__ = sys.modules[ "__main__" ].__player__
 	
 	def playAll(self, params={}):
@@ -94,35 +93,35 @@ class YouTubePlaylistControl(YouTubeCore.YouTubeCore):
 		
 	def queueVideo(self, params = {}):
 		get = params.get
-                if self.__dbg__:
-                        print self.__plugin__ + " - Queuing videos: " + get("videoid")
-
-                items =[]
-                videoids = get("videoid")
-
+		if self.__dbg__:
+			print self.__plugin__ + " - Queuing videos: " + get("videoid")
+		
+		items =[]
+		videoids = get("videoid")
+		
 		if videoids.find(','):
-                        items = videoids.split(',')
+			items = videoids.split(',')
 		else:
 			items.append(videoids)
-
+		
 		(video, status) = self.__core__.getBatchDetails(items, params);
 
-                if status != 200:
+		if status != 200:
 			if self.__dbg__ :
-                                print self.__plugin__ + " construct video url failed contents of video item " + repr(video)
+				print self.__plugin__ + " construct video url failed contents of video item " + repr(video)
+				
+			self.showErrorMessage(self.__language__(30603), video["apierror"], status)
+			return False
 
-                        self.__utils__.showErrorMessage(self.__language__(30603), video["apierror"], status)
-                        return False
+		listitem=xbmcgui.ListItem(label=video['Title'], iconImage=video['thumbnail'], thumbnailImage=video['thumbnail'], path=video['video_url']);
+		listitem.setProperty('IsPlayable', 'true')
+		listitem.setInfo(type='Video', infoLabels=video)
 
-                listitem=xbmcgui.ListItem(label=video['Title'], iconImage=video['thumbnail'], thumbnailImage=video['thumbnail'], path=video['video_url']);
-                listitem.setProperty('IsPlayable', 'true')
-                listitem.setInfo(type='Video', infoLabels=video)
+		if self.__dbg__:
+			print self.__plugin__ + " - Queuing video: " + self.makeAscii(video['Title']) + " - " + get('videoid') + " - " + video['video_url']
 
-                if self.__dbg__:
-                        print self.__plugin__ + " - Queuing video: " + self.__utils__.makeAscii(video['Title']) + " - " + get('videoid') + " - " + video['video_url']
-
-                playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
-                playlist.add("%s?path=/root&action=play_video&videoid=%s" % (sys.argv[0], video["videoid"] ), listitem)
+		playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
+		playlist.add("%s?path=/root&action=play_video&videoid=%s" % (sys.argv[0], video["videoid"] ), listitem)
 
 	def getPlayList(self, params = {}):
 		get = params.get
@@ -196,7 +195,7 @@ class YouTubePlaylistControl(YouTubeCore.YouTubeCore):
 	def createPlayList(self, params = {}):
 		get = params.get
 		
-		input = self.__utils__.getUserInput(self.__language__(30529))
+		input = self.getUserInput(self.__language__(30529))
 		if input:
 			params["title"] = input
 			self.add_playlist(params)
@@ -210,7 +209,7 @@ class YouTubePlaylistControl(YouTubeCore.YouTubeCore):
 			(message, status) = self.remove_from_playlist(params)
 			
 			if (status != 200):
-				self.__utils__.showErrorMessage(self.__language__(30600), message, status)
+				self.showErrorMessage(self.__language__(30600), message, status)
 				return False
 			xbmc.executebuiltin( "Container.Refresh" )
 		return True
@@ -221,7 +220,7 @@ class YouTubePlaylistControl(YouTubeCore.YouTubeCore):
 			(message, status) = self.del_playlist(params)
 			
 			if status != 200:
-				self.__utils__.showErrorMessage(self.__language__(30600), message, status)
+				self.showErrorMessage(self.__language__(30600), message, status)
 				return False
 			xbmc.executebuiltin( "Container.Refresh" )
 		return True

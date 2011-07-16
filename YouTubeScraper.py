@@ -17,10 +17,10 @@
 '''
 
 import sys, urllib, re
-import YouTubeCore
+import YouTubeCore, YouTubeUtils
 from BeautifulSoup import BeautifulSoup, SoupStrainer
 
-class YouTubeScraper(YouTubeCore.YouTubeCore):	 
+class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):	 
 
 	__settings__ = sys.modules[ "__main__" ].__settings__
 	__language__ = sys.modules[ "__main__" ].__language__
@@ -28,7 +28,6 @@ class YouTubeScraper(YouTubeCore.YouTubeCore):
 	__dbg__ = sys.modules[ "__main__" ].__dbg__
 	
 	__feeds__ = sys.modules[ "__main__" ].__feeds__
-	__utils__ = sys.modules[ "__main__" ].__utils__
 	__storage__ = sys.modules [ "__main__" ].__storage__
 	
 	simple_scrapers = ["search_disco","liked_videos","live","disco_top_50","recommended","music_top100", "disco_top_artist", "music_hits", "music_artists","music_artist", "similar_artist"]
@@ -156,8 +155,8 @@ class YouTubeScraper(YouTubeCore.YouTubeCore):
 						category = category.findNextSibling()
 					while category != None:
 						item = {}
-						title = self.__utils__.makeAscii(category.a.contents[0])
-						title = self.__utils__.replaceHtmlCodes(title)
+						title = self.makeAscii(category.a.contents[0])
+						title = self.replaceHtmlCodes(title)
 						id = category.a["href"].replace("/music/","/")
 						item["Title"] = title
 						item["category"] = urllib.quote_plus(id)
@@ -209,8 +208,8 @@ class YouTubeScraper(YouTubeCore.YouTubeCore):
 				artists = content.findAll(name = "div", attrs = {"class":"similar-artist"})
 				for artist in artists:
 					item = {}
-					title = self.__utils__.makeAscii(artist.a.contents[0])
-					title = self.__utils__.replaceHtmlCodes(title)
+					title = self.makeAscii(artist.a.contents[0])
+					title = self.replaceHtmlCodes(title)
 					item["Title"] = title
 					
 					id = artist.a["href"]
@@ -240,8 +239,8 @@ class YouTubeScraper(YouTubeCore.YouTubeCore):
 				artists = content.findAll(name="div", attrs = {"class":"browse-item artist-item"}, recursive=True)
 				for artist in artists:
 					item = {}
-					title = self.__utils__.makeAscii(artist.div.h3.a.contents[0])
-					title = self.__utils__.replaceHtmlCodes(title)
+					title = self.makeAscii(artist.div.h3.a.contents[0])
+					title = self.replaceHtmlCodes(title)
 					item["Title"] = title
 					item["scraper"] = "music_artist"
 					
@@ -339,7 +338,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore):
 			artists = popular.findAll(attrs={"class":"popular-artist-row"})
 			for artist in artists:
 				item = {}
-				title = self.__utils__.makeAscii(artist.contents[0])
+				title = self.makeAscii(artist.contents[0])
 				item["search"] = title
 				item["Title"] = title
 				
@@ -497,7 +496,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore):
 			if self.__dbg__:
 				print self.__plugin__ + "found " + str(len(videos)) + " videos: " + repr(videos)
 			
-			self.__settings__.setSetting("show_" + get("show") + "_season_" + get("season","0"), self.__utils__.arrayToPipeDelimitedString(videos))
+			self.__settings__.setSetting("show_" + get("show") + "_season_" + get("season","0"), self.arrayToPipeDelimitedString(videos))
 		else:
 			videos = oldVideos.split("|")
 		
@@ -511,7 +510,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore):
 		( ytobjects, status ) = self.getBatchDetails(subitems)
 		
 		if (next == "true"):
-			self.__utils__.addNextFolder(ytobjects, params)
+			self.addNextFolder(ytobjects, params)
 				
 		return (ytobjects, status)
 		
@@ -791,7 +790,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore):
 					if thumbnail:
 						self.__settings__.setSetting("disco_search_" + urllib.unquote_plus(get("search")) + "_thumb", thumbnail)
 				if (next == "true"):
-					self.__utils__.addNextFolder(ytobjects, params)
+					self.addNextFolder(ytobjects, params)
 		else:
 			ytobjects = videos
 			
@@ -895,7 +894,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore):
 				result = result[:per_page]
 				
 				if (next == "true"):
-					self.__utils__.addNextFolder(result, params)
+					self.addNextFolder(result, params)
 				
 				return (result, status)
 			else:

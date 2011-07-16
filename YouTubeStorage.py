@@ -18,14 +18,14 @@
 
 import sys, urllib, os
 import xbmc
+import YouTubeUtils
 from filelock import FileLock
 	
-class YouTubeStorage:
+class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 	__settings__ = sys.modules[ "__main__"].__settings__ 
 	__plugin__ = sys.modules[ "__main__"].__plugin__
 	__language__ = sys.modules[ "__main__" ].__language__
 	
-	__utils__ = sys.modules[ "__main__" ].__utils__
 	__lock__ = FileLock(os.path.join( xbmc.translatePath( "special://temp" ), "YouTubeDownloadQueue.lock"), 10)
 	
 	# This list contains the list options a user sees when indexing a contact 
@@ -158,7 +158,7 @@ class YouTubeStorage:
 
 		if (get("search")):
 			old_query = urllib.unquote_plus(get("search"))
-			new_query = self.__utils__.getUserInput(self.__language__(30515), old_query)
+			new_query = self.getUserInput(self.__language__(30515), old_query)
 			params["search"] = new_query
 			params["old_search"] = old_query
 			
@@ -187,9 +187,9 @@ class YouTubeStorage:
 			searches = {}
 		
 		if query in searches:
-			author = self.__utils__.getUserInput(self.__language__(30517), searches[query])
+			author = self.getUserInput(self.__language__(30517), searches[query])
 		else:
-			author = self.__utils__.getUserInput(self.__language__(30517), '')
+			author = self.getUserInput(self.__language__(30517), '')
 
 		if author == "":
 			if author in searches:
@@ -199,7 +199,7 @@ class YouTubeStorage:
 			searches[query] = author
 			
 			self.storeValue(key, repr(searches))
-			self.__utils__.showMessage(self.__language__(30006), self.__language__(30616))
+			self.showMessage(self.__language__(30006), self.__language__(30616))
 			xbmc.executebuiltin( "Container.Refresh" )
 		
 	def deleteStoredSearchRefinement(self, params = {}):
@@ -216,7 +216,7 @@ class YouTubeStorage:
 		if query in searches:
 			del searches[query]
 			self.storeValue(key, repr(searches))
-			self.__utils__.showMessage(self.__language__(30006), self.__language__(30610))
+			self.showMessage(self.__language__(30006), self.__language__(30610))
 			xbmc.executebuiltin( "Container.Refresh" )
 		
 	def getUserOptionFolder(self, params = {}):
