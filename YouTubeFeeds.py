@@ -146,11 +146,8 @@ class YouTubeFeeds(YouTubeCore.YouTubeCore):
 		thumbnail = result[0].get('thumbnail', "")
 		
 		if thumbnail:
-			if get("channel"):
-				self.__settings__.setSetting("subscriptions_" + get("channel") + "_thumb", thumbnail)
-			if get("search"):
-				self.__settings__.setSetting("search_" + urllib.unquote_plus(get("search")) + "_thumb", thumbnail)
-			
+			self.__storage__.store(params, thumbnail, "thumbnail")
+						
 		return (result, 200)
 	
 	def listPlaylist(self, params = {}):
@@ -182,9 +179,8 @@ class YouTubeFeeds(YouTubeCore.YouTubeCore):
 			self.__storage__.store(params, videoids)
 			
 			thumbnail = result[0].get('thumbnail', "")
-			
-			if (thumbnail):					
-				self.__settings__.setSetting("playlists_" + get("playlist") + "_thumb", thumbnail)
+			if (thumbnail):
+				self.__storage__.store(params, thumbnail, "thumbnail")
 			
 			next = 'false'	
 			if (len(result) > 0):
@@ -194,7 +190,7 @@ class YouTubeFeeds(YouTubeCore.YouTubeCore):
 			result = result[(per_page * page):(per_page * (page + 1))]
 		
 		if next == "true":
-			self.__storage__.addNextFolder(result, params)
+			self.addNextFolder(result, params)
 		
 		return (result, 200)
 	
@@ -236,17 +232,16 @@ class YouTubeFeeds(YouTubeCore.YouTubeCore):
 		
 		if get("user_feed") == "subscriptions":
 			for item in result:
-				viewmode = ""
-				if (get("external")):
-					viewmode += "external_" + get("contact") + "_"
-					item["external"] = "true"
-					item["contact"] = get("contact")
-				viewmode += "view_mode_" + item["Title"]
+				viewmode = self.__storage__.retrieve(params, "viewmode", item)
 				
-				if (self.__settings__.getSetting(viewmode) == "favorites"):
+				if (get("external")):
+					item["external"] = "true"
+					item["contact"] = get("contact")	
+				
+				if (viewmode == "favorites"):
 					item["user_feed"] = "favorites"
 					item["view_mode"] = "subscriptions_uploads"
-				elif(self.__settings__.getSetting(viewmode) == "playlists"):
+				elif(viewmode == "playlists"):
 					item["user_feed"] = "playlists"
 					item["folder"] = "true"
 					item["view_mode"] = "subscriptions_playlists"
@@ -255,7 +250,7 @@ class YouTubeFeeds(YouTubeCore.YouTubeCore):
 					item["view_mode"] = "subscriptions_favorites"
 		
 		if next == "true":
-			self.__storage__.addNextFolder(result, params)
+			self.addNextFolder(result, params)
 		
 		return (result,200)
 	

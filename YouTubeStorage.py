@@ -334,16 +334,18 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 		get = params.get
 		iget = item.get
 		key = ""
-		
-		if get("channel"):
-			key = "view_mode_" + get("channel")
-		elif (iget("channel")):  
-			key = "view_mode_" + iget("channel")
-		
+				
 		if (get("external")):
-			key += "_external_" + get("contact")
+			key = "external_" + get("contact") + "_"
 		elif (iget("external")):
-			key += "_external_" + iget("contact")
+			key = "external_" + iget("contact") + "_"
+					
+		if get("channel"):
+			key += "view_mode_" + get("channel")
+		elif (iget("channel")):  
+			key += "view_mode_" + iget("channel")
+		
+		
 		
 		return key
 		
@@ -353,12 +355,16 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 		key = ""
 		
 		if get("scraper"):
-			key = "s_" + get("scraper")		
+			key = "s_" + get("scraper")
+			
 			if get("scraper") == "music_hits" and get("category"):
 				key += "_" + get("category")
 			
 			if get("scraper") == "music_artist" and get("artist"):
 				key += "_" + get("artist")
+			
+			if get("show"):
+				key += "_season_" + get("season","0")
 						
 		if get("user_feed"):
 			key = "result_" + get("user_feed")

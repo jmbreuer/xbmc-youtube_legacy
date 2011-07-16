@@ -458,7 +458,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		page = int(get("page", "0"))
 		per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
 		
-		oldVideos = self.__settings__.getSetting("show_" + get("show") + "_season_" + get("season","0") )
+		oldVideos = self.__storage__.retrieve(params)
 		
 		if ( page == 0 or not oldVideos):
 			videos = re.compile('<a href="/watch\?v=(.*)&amp;feature=sh_e_sl&amp;list=SL"').findall(html)
@@ -496,9 +496,9 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			if self.__dbg__:
 				print self.__plugin__ + "found " + str(len(videos)) + " videos: " + repr(videos)
 			
-			self.__settings__.setSetting("show_" + get("show") + "_season_" + get("season","0"), self.arrayToPipeDelimitedString(videos))
+			self.__storage__.store(params, videos)
 		else:
-			videos = oldVideos.split("|")
+			videos = self.__storage__.retrieve(params)
 		
 		if ( per_page * ( page + 1 ) < len(videos) ):
 			next = 'true'
@@ -788,147 +788,13 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 				if get("scraper") == "search_disco":
 					thumbnail = ytobjects[0].get("thumbnail","")
 					if thumbnail:
-						self.__settings__.setSetting("disco_search_" + urllib.unquote_plus(get("search")) + "_thumb", thumbnail)
+						self.__storage__.store(params, thumbnail, "thumbnail", ytobjects[0])
 				if (next == "true"):
 					self.addNextFolder(ytobjects, params)
 		else:
 			ytobjects = videos
-			
+		
 		return (ytobjects, status)
-	
-	def advancedPageinator(self, params = {}):
-		get = params.get
-		original_page = int(get("page","0"))
-		scraper_per_page = 0
-		result = []
-
-		if ( get("scraper") == "categories" and get("category")):
-			if urllib.unquote_plus(get("category")).find("/") > 0:
-				scraper_per_page = 23
-			else:
-				scraper_per_page = 36
-		elif ( get("scraper") == "shows" and get("category")):
-			scraper_per_page = 44
-		elif ( get("scraper") == "movies" and get("category") and not get("subcategory")):
-			scraper_per_page = 60		
-		elif (get("scraper") != "shows" and 
-			get("scraper") != "show" and 
-			get("scraper") != "categories" and 
-			get("scraper") != "movies" and 
-			get("scraper") in self.urls):
-			scraper_per_page = 40
-		
-		if (self.__dbg__):
-			print self.__plugin__ + " scraper per page " + str(scraper_per_page) 
-		
-		if (scraper_per_page > 0):
-			# begin dark magic
-			request_page = int(get("page", "0"))
-			page_count = request_page
-			per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
-			xbmc_index = page_count * per_page 
-			
-			begin_page = (xbmc_index / scraper_per_page) + 1
-			begin_index = (xbmc_index % scraper_per_page)
-			
-			params["page"] = str(begin_page)
-			url = self.createUrl(params)
-			if (self.__dbg__):
-				print "fetching url " + url
-			(html, status) = self._fetchPage({"link": url})
-
-			if (get("scraper") == "categories"):
-				(result, status) = self.scrapeCategoriesGrid(html, params)
-			elif (get("scraper") == "shows"):
-				(result, status) = self.scrapeShowsGrid(html, params)	
-			elif (get("scraper") == "movies" and get("category")):
-				(result, status) = self.scrapeMoviesGrid(html, params)
-			else:
-				(result, status) = self.scrapeGridFormat(html, params)
-			
-			next = "false"
-			if (result):
-				next = result[len(result) -1]["next"]
-				result[len(result) -1]["next"] = ""
-				result = result[begin_index:]
-			
-				page_count = begin_page + 1
-				params["page"] = str(page_count)
-				
-				i = 1
-				while (len(result) <  per_page and next == "true"):
-					url = self.createUrl(params)
-					if (self.__dbg__):
-						print "fetching url: " + url
-					(html, status) = self._fetchPage({"link": url})
-	
-					if (get("scraper") == "categories"):
-						(new_result, status) = self.scrapeCategoriesGrid(html, params)
-					elif (get("scraper") == "shows"):
-						(new_result, status) = self.scrapeShowsGrid(html, params)
-					elif (get("scraper") == "movies" and get("category")):
-						(result, status) = self.scrapeMoviesGrid(html, params)
-					else:
-						(new_result, status) = self.scrapeGridFormat(html, params)
-					
-					if (new_result):
-						next = new_result[len(new_result) - 1]["next"]
-						result[len(result) -1]["next"] = ""
-					else: 
-						next = "false"
-					
-					result = result + new_result 
-					page_count = page_count + 1
-					params["page"] = str(page_count)
-					
-					i = i+1
-					if (i > 9):	
-						if (self.__dbg__):
-							print self.__plugin__ + " Scraper pagination failed, requested more than 10 pages which should never happen."
-						return False
-				
-				if (next == "false" and len(result) > per_page):
-					next = "true"
-				
-				params["page"] = str(original_page)
-				result = result[:per_page]
-				
-				if (next == "true"):
-					self.addNextFolder(result, params)
-				
-				return (result, status)
-			else:
-				return ([], 303)
-		else:
-			url = self.createUrl(params)
-			
-			if self.__dbg__:
-				print self.__plugin__ + " fetching url: " + url 
-				
-			(html,status) = self._fetchPage({"link": url})
-			if (get("scraper") == "categories" ):
-				if (get("category")):
-					return self.scrapeCategoriesGrid(html, params)
-				else:
-					return self.scrapeCategoryList(html, params)
-				
-			elif (get("show")):
-				return self.scrapeShow(html, params)
-			elif (get("scraper") == "shows"):
-				if (get("category")):
-					return self.scrapeShowsGrid(html, params)
-				else:
-					return self.scrapeCategoryList(html, params, "shows")
-			elif (get("scraper") == "movies"):
-				if (get("category")):
-					if get("subcategory"):
-						return self.scrapeMovieSubCategory(html, params)
-					else:
-						return self.scrapeGridFormat(html, params)
-				else: 
-					return self.scrapeCategoryList(html, params, "movies")
-			else:
-				return self.scrapeTrailersListFormat(html, params)
 	
 	def createUrl(self, params = {}):
 		get = params.get
@@ -987,7 +853,6 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 				else:
 					url = self.urls["game_trailers"]
 		
-				
 		return url
 	
 	def scrapeGridFormat(self, html, params = {}):
@@ -1107,12 +972,10 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 	def scrape(self, params = {}):
 		get = params.get
 		
-		if get("scraper") in self.simple_scrapers:
-			return self.simplePaginator(params)
 		if (get("scraper") == "watch_later"):
 			return self.scrapeWatchLater(params)
 		
-		return self.advancedPageinator(params)
+		return self.simplePaginator(params)
 	
 if __name__ == '__main__':
 	sys.exit(0);
