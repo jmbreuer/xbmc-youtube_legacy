@@ -58,35 +58,8 @@ class YouTubeCore(object):
 	#===============================================================================
 
 	urls = {};
-	# YouTube General Feeds
-	urls['playlist'] = "http://gdata.youtube.com/feeds/api/playlists/%s"
-	urls['related'] = "http://gdata.youtube.com/feeds/api/videos/%s/related"
-	urls['search'] = "http://gdata.youtube.com/feeds/api/videos?q=%s&safeSearch=%s"
 	urls['batch'] = "http://gdata.youtube.com/feeds/api/videos/batch"
 	urls['thumbnail'] = "http://i.ytimg.com/vi/%s/0.jpg"
-	
-	# YouTube User specific Feeds
-	urls['uploads'] = "http://gdata.youtube.com/feeds/api/users/%s/uploads"
-	urls['favorites'] = "http://gdata.youtube.com/feeds/api/users/%s/favorites"
-	urls['playlists'] = "http://gdata.youtube.com/feeds/api/users/%s/playlists"
-	urls['contacts'] = "http://gdata.youtube.com/feeds/api/users/default/contacts"
-	urls['subscriptions'] = "http://gdata.youtube.com/feeds/api/users/%s/subscriptions"
-	urls['newsubscriptions'] = "http://gdata.youtube.com/feeds/api/users/%s/newsubscriptionvideos"
-	
-	# YouTube Standard feeds
-	urls['feed_rated'] = "http://gdata.youtube.com/feeds/api/standardfeeds/top_rated?time=%s"
-	urls['feed_favorites'] = "http://gdata.youtube.com/feeds/api/standardfeeds/top_favorites?time=%s"
-	urls['feed_viewed'] = "http://gdata.youtube.com/feeds/api/standardfeeds/most_viewed?time=%s"
-	urls['feed_linked'] = "http://gdata.youtube.com/feeds/api/standardfeeds/most_popular?time=%s" 
-	urls['feed_discussed'] = "http://gdata.youtube.com/feeds/api/standardfeeds/most_discussed?time=%s"
-	urls['feed_responded'] = "http://gdata.youtube.com/feeds/api/standardfeeds/most_responded?time=%s"
-	
-	# Wont work with time parameter
-	urls['feed_recent'] = "http://gdata.youtube.com/feeds/api/standardfeeds/most_recent" 
-	urls['feed_featured'] = "http://gdata.youtube.com/feeds/api/standardfeeds/recently_featured"
-	urls['feed_trending'] = "http://gdata.youtube.com/feeds/api/standardfeeds/on_the_web"
-	urls['feed_shared'] = "http://gdata.youtube.com/feeds/api/standardfeeds/most_shared"
-	
 	urls['remove_watch_later'] = "http://www.youtube.com/addto_ajax?action_delete_from_playlist=1"	
 
 	def __init__(self):
@@ -95,257 +68,6 @@ class YouTubeCore(object):
 			timeout = "5"
 			socket.setdefaulttimeout(float(timeout))
 		return None
-
-	def createUrl(self, params = {}):
-		get = params.get
-		time = ( "all_time", "today", "this_week", "this_month") [ int(self.__settings__.getSetting( "feed_time" ) ) ]
-		per_page = ( 10, 15, 20, 25, 30, 40, 50 )[ int( self.__settings__.getSetting( "perpage" ) ) ]
-		region = ('', 'AU', 'BR', 'CA', 'CZ', 'FR', 'DE', 'GB', 'NL', 'HK', 'IN', 'IE', 'IL', 'IT', 'JP', 'MX', 'NZ', 'PL', 'RU', 'KR', 'ES','SE', 'TW', 'US', 'ZA' )[ int( self.__settings__.getSetting( "region_id" ) ) ]
-		
-		page = get("page","0")
-		start_index = per_page * int(page) + 1
-		url = ""
-		
-		if (get("feed")):
-			url = self.urls[get("feed")]
-		
-		if (get("user_feed")):
-			url = self.urls[get("user_feed")]
-		
-		if get("search"):
-			query = urllib.unquote_plus(get("search"))
-			safe_search = ("none", "moderate", "strict" ) [int( self.__settings__.getSetting( "safe_search" ) ) ]	
-			url = url % (query, safe_search)  
-			authors = self.__settings__.getSetting("stored_searches_author")
-			if len(authors) > 0:
-				try:
-					authors = eval(authors)
-					if query in authors:
-						url += "&" + urllib.urlencode({'author': authors[query]})
-				except:
-					print self.__plugin__ + " search - eval failed "	
-			
-		if (url.find("%s") > 0):
-			if ( get("contact") and not (get("external") and get("channel"))):
-				url = url % get("contact")
-			elif ( get("channel") ):
-				url = url % get("channel")
-			elif ( get("playlist") ):
-				url = url % get("playlist")
-			elif ( get("videoid") and not get("action") == "add_to_playlist"):
-				url = url % get("videoid")
-			elif (url.find("time=") > 0 ): 
-				url = url % time			
-			else: 
-				url = url % "default"
-		
-		if ( url.find("?") == -1 ):
-			url += "?"
-		else:
-			url += "&"
-			
-		if not get("playlist") and not get("folder") and not get("action") == "play_all" and not get("action") == "add_to_playlist":
-			url += "start-index=" + repr(start_index) + "&max-results=" + repr(per_page)
-		
-		if (url.find("standardfeeds") > 0 and region):
-			url = url.replace("/standardfeeds/", "/standardfeeds/"+ region + "/")
-						
-		url = url.replace(" ", "+")
-		return url
-	
-	def list(self, params = {}):
-		get = params.get
-		result = []
-		status = 303
-		
-		if get("folder"):
-			return self.listFolder(params)
-		
-		if get("playlist"):
-			return self.listPlaylist(params)
-		
-		if get("login") == "true":
-			if ( not self._getAuth() ):
-				if self.__dbg__:
-					print self.__plugin__ + " login required but auth wasn't set!"
-				return ( self.__language__(30609) , 303 )
-
-		url = self.createUrl(params)
-		
-		if url:
-			( response, status ) = self._fetchPage({"link": url, "auth": get("login"), "api": "true"})
-		
-		if status != 200:
-			return ( result, status )
-		
-		if not get("folder"):
-			result = self.getVideoInfo(response, params)
-		
-		if len(result) == 0:
-			return (result, 303)
-		
-		if (get("search") or get("channel")):
-			thumbnail = result[0].get('thumbnail', "")
-			
-			if (thumbnail):
-				self.__storage__.store(params, thumbnail, "thumbnail")
-			
-		return (result, 200)
-	
-	def listPlaylist(self, params = {}):
-		get = params.get
-		page = int(get("page", "0"))
-		per_page = ( 10, 15, 20, 25, 30, 40, 50 )[ int( self.__settings__.getSetting( "perpage" ) ) ]
-		
-		videoids = self.__storage__.retrieve(params)
-			
-		if page != 0 and videoids:
-			next = 'false'
-			if ( per_page * ( page + 1 ) < len(videoids) ):
-				next = 'true'
-			
-			videoids = videoids[(per_page * page):(per_page * (page + 1))]
-			
-			(result, status) = self.getBatchDetails(videoids, params)
-		else:
-			result = self.listAll(params)
-				
-			if len(result) == 0:
-				return (result, 303)
-			
-			videoids = []
-			for video in result:
-				vget = video.get
-				videoids.append(vget("videoid","false"))
-			
-			self.__storage__.store(params, videoids)
-			
-			thumbnail = result[0].get('thumbnail', "")
-			
-			params["thumb"] = "true"
-			self.__storage__.store(params, thumbnail)
-			
-			next = 'false'	
-			if (len(result) > 0):
-				if ( per_page * ( page + 1 ) < len(result) ):
-					next = 'true'
-		
-			result = result[(per_page * page):(per_page * (page + 1))]
-		
-		if next == "true":
-			self.__utils__.addNextFolder(result, params)
-		
-		return (result, 200)
-	
-	def listFolder(self, params = {}):
-		get = params.get
-		result = []
-		
-		page = int(get("page", "0"))
-		per_page = ( 10, 15, 20, 25, 30, 40, 50 )[ int( self.__settings__.getSetting( "perpage" ) ) ]
-		
-		store = self.__storage__.retrieve(params)
-		
-		if ( page != 0 and store != ""):
-			try:
-				result = eval(store)
-			except:
-				print self.__plugin__ + " folder - eval failed "	
-		
-		if not get("page"):
-			result = self.listAll(params)
-			
-			if len(result) == 0:
-				return (result, 303)
-			
-			self.__storage__.store(params, result)
-		
-		next = 'false'
-		if (len(result) > 0):
-			if ( per_page * ( page + 1 ) < len(result) ):
-				next = 'true'
-		
-		result = result[(per_page * page):(per_page * (page + 1))]
-		
-		if get("user_feed") == "subscriptions":
-			for item in result:
-				key = self.__storage__.getStorageKey(params, "viewmode", item)
-				
-				if (self.__settings__.getSetting(key) == "favorites"):
-					item["user_feed"] = "favorites"
-					item["view_mode"] = "subscriptions_uploads"
-				elif(self.__settings__.getSetting(key) == "playlists"):
-					item["user_feed"] = "playlists"
-					item["folder"] = "true"
-					item["view_mode"] = "subscriptions_playlists"
-				else:
-					item["user_feed"] = "uploads"  
-					item["view_mode"] = "subscriptions_favorites"
-		
-		if next == "true":
-			self.__utils__.addNextFolder(result, params)
-		
-		return (result, 200)
-	
-	def listAll(self, params ={}):
-		get = params.get
-		result = ""
-		
-		if get("login") == "true":
-			if ( not self._getAuth() ):
-				if self.__dbg__:
-					print self.__plugin__ + " login required but auth wasn't set!"
-				return ( self.__language__(30609) , 303 )
-		
-		feed = self.createUrl(params)
-		index = 1
-		url = feed + "v=2&start-index=" + str(index) + "&max-results=" + repr(50)
-		url = url.replace(" ", "+")
-
-		ytobjects = []
-		
-		( result, status ) = self._fetchPage({"link":url, "auth":"true"})
-		
-		if status == 200:
-			if get("folder") == "true":
-				ytobjects = self.getFolderInfo(result, params)
-			else:
-				ytobjects = self.getVideoInfo(result, params)
-		
-		if len(ytobjects) == 0:
-			return ytobjects
-		
-		next = ytobjects[len(ytobjects)-1].get("next","false")
-		if next == "true": 
-			ytobjects = ytobjects[:len(ytobjects)-1]
-		
-		while next == "true":
-			index += 50
-			url = feed + "start-index=" + str(index) + "&max-results=" + repr(50)
-			url = url.replace(" ", "+")
-			(result, status) = self._fetchPage({"link": url, "auth":"true"})
-			
-			if status != 200:
-				break
-			temp_objects = []
-			if get("folder") == "true":
-				temp_objects = self.getFolderInfo(result, params)
-			else:
-				temp_objects = self.getVideoInfo(result, params)
-		
-			next = temp_objects[len(temp_objects)-1].get("next","false")
-			if next == "true":
-				temp_objects = temp_objects[:len(temp_objects)-1]
-			ytobjects += temp_objects
-		
-		if get("user_feed"):
-			if get("user_feed") != "playlist" and get("action") != "play_all":
-				ytobjects.sort(key=lambda item:item["Title"].lower(), reverse=False)
-			else:
-				if (self.__storage__.getReversePlaylistOrder(params)):
-					ytobjects.reverse()
-		
-		return ytobjects
 	
 	def delete_favorite(self, params = {}):
 		get = params.get
@@ -467,7 +189,7 @@ class YouTubeCore(object):
 			self.__utils__.addNextFolder(folders, params)
 		
 		return folders;
-
+	
 	def getBatchDetailsThumbnails(self, items, params = {}):
 		ytobjects = []
 		videoids = []
@@ -790,7 +512,7 @@ class YouTubeCore(object):
 		
 		return ( "", 500 )
 	
-	def getVideoInfo(self, xml, params):
+	def getVideoInfo(self, xml, params = {}):
 		get = params.get
 		dom = parseString(xml);
 		links = dom.getElementsByTagName("link");

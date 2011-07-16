@@ -16,31 +16,29 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, urllib, re, os.path, datetime, time, urllib2, cookielib
+import sys, urllib, re, os.path, datetime, time
 import xbmc, xbmcgui, xbmcplugin, xbmcvfs
+import YouTubeCore
 from xml.dom.minidom import parseString
 
-class YouTubePlayer(object):
+class YouTubePlayer(YouTubeCore.YouTubeCore):
 	__settings__ = sys.modules[ "__main__" ].__settings__
 	__language__ = sys.modules[ "__main__" ].__language__
 	__plugin__ = sys.modules[ "__main__" ].__plugin__ 
 	__dbg__ = sys.modules[ "__main__" ].__dbg__
 	
-        __playlist__ = sys.modules[ "__main__" ].__playlist__
-	__core__ = sys.modules[ "__main__" ].__core__
 	__utils__ = sys.modules[ "__main__" ].__utils__
-
-	urls = {};
 	
-	# YouTube Playback Feeds
-	urls['video_stream'] = "http://www.youtube.com/watch?v=%s&safeSearch=none&hl=en_us"
-	urls['embed_stream'] = "http://www.youtube.com/get_video_info?video_id=%s"
-	urls['timed_text_index'] = "http://www.youtube.com/api/timedtext?type=list&v=%s"
-	urls['video_info'] = "http://gdata.youtube.com/feeds/api/videos/%s"
-	urls['close_caption_url'] = "http://www.youtube.com/api/timedtext?type=track&v=%s&name=%s&lang=%s"
-	urls['transcription_url'] = "http://www.youtube.com/api/timedtext?caps=asr&kind=asr&type=track&key=yttt1&expire=%s&sparams=caps,expire,v&v=%s&signature=%s&lang=en"
-	urls['remove_watch_later'] = "http://www.youtube.com/addto_ajax?action_delete_from_playlist=1"
-	
+	def __init__(self):
+		# YouTube Playback Feeds
+		self.urls['video_stream'] = "http://www.youtube.com/watch?v=%s&safeSearch=none&hl=en_us"
+		self.urls['embed_stream'] = "http://www.youtube.com/get_video_info?video_id=%s"
+		self.urls['timed_text_index'] = "http://www.youtube.com/api/timedtext?type=list&v=%s"
+		self.urls['video_info'] = "http://gdata.youtube.com/feeds/api/videos/%s"
+		self.urls['close_caption_url'] = "http://www.youtube.com/api/timedtext?type=track&v=%s&name=%s&lang=%s"
+		self.urls['transcription_url'] = "http://www.youtube.com/api/timedtext?caps=asr&kind=asr&type=track&key=yttt1&expire=%s&sparams=caps,expire,v&v=%s&signature=%s&lang=en"
+		self.urls['remove_watch_later'] = "http://www.youtube.com/addto_ajax?action_delete_from_playlist=1"
+		
 	# ================================ Subtitle Downloader ====================================
 	def downloadSubtitle(self, video = {}):
 		get = video.get
@@ -48,13 +46,13 @@ class YouTubePlayer(object):
 		subtitle_url = self.getSubtitleUrl(video)
 
 		if not subtitle_url and self.__settings__.getSetting("transcode") == "true":
-			(html, status) = self.__core__._fetchPage({"link": self.urls["video_stream"] % get("videoid")})
+			(html, status) = self._fetchPage({"link": self.urls["video_stream"] % get("videoid")})
 			if status == 200:
 				subtitle_url = self.getTranscriptionUrl(html, video) 
 		
 		if subtitle_url:
 			srt = ""
-			(xml, status) = self.__core__._fetchPage({"link": subtitle_url})
+			(xml, status) = self._fetchPage({"link": subtitle_url})
 
 			if status == 200 and xml:
 				srt = self.transformSubtitleXMLtoSRT(xml)
@@ -69,7 +67,7 @@ class YouTubePlayer(object):
 		get = video.get
 		url = ""
 		
-		(xml, status) = self.__core__._fetchPage({"link": self.urls["timed_text_index"] % get('videoid')})
+		(xml, status) = self._fetchPage({"link": self.urls["timed_text_index"] % get('videoid')})
 		
 		if self.__dbg__:
 			print self.__plugin__ + " subtitle index: " + repr(xml)
@@ -231,7 +229,7 @@ class YouTubePlayer(object):
 		if (get("watch_later") == "true" and get("playlist") and get("playlist_entry_id")):
 			if self.__dbg__:
 				print self.__plugin__ + " removing video from watch later playlist"
-			self.__core__.remove_from_playlist(params)
+			self.remove_from_playlist(params)
 			
 		self.__settings__.setSetting( "vidstatus-" + video['videoid'], "7" )
 
@@ -259,7 +257,9 @@ class YouTubePlayer(object):
 		else:
 			print self.__plugin__ + " couldn't locate fmt_url_map or fmt_stream_map, no videos on page?"
 			return links
-			
+		
+		print self.__plugin__ + " smokey " + repr(fmt_url_map)
+		
 		for fmt_url in fmt_url_map:				
 			quality = "5"
 			final_url = ""
@@ -287,7 +287,33 @@ class YouTubePlayer(object):
 		for quality, url in links.items():
 			url = url.replace('\/','/')
 			if (url.find('rtmp') >= 0 and swf_url):
-				links[quality] = url + " swfurl=%s swfvfy=1" % swf_url
+				playpath = ""
+				for fmt_url in fmt_url_map:
+					if fmt_url.find('/' + str(quality)) > 0:
+						playpath = fmt_url
+						break
+				
+				pchn = ""
+				if html.find("ptchn=") > 0:
+					pchn = html[html.find("ptchn=") + len("ptchn="):]
+					pchn = pchn[:pchn.find('&')]
+				
+				ptk = ""
+				if html.find("ptk=") > 0:
+					ptk = html[html.find("ptk=") + len("ptk="):]
+					ptk = ptk[:ptk.find("&")]
+				
+				if playpath:
+					if pchn:
+						playpath += '?pchn='+ pchn
+					if ptk:
+						playpath += '&ptk=' + ptk
+					
+					playpath = playpath.replace('\/','/')
+					
+					links[quality] = url + " swfurl=%s playpath=%s swfvfy=1" % (swf_url, playpath)
+				else:
+					links[quality] = url + " swfurl=%s swfvfy=1" % swf_url
 		
 		return links
 
@@ -333,14 +359,14 @@ class YouTubePlayer(object):
 		
 		return result
 	
-	def getVideoInfo(self, params):
+	def getInfo(self, params):
 		get = params.get
 		video = {}
 		
-		( result, status ) = self.__core__._fetchPage({"link": self.urls["video_info"] % get("videoid"), "api": "true"})
+		( result, status ) = self._fetchPage({"link": self.urls["video_info"] % get("videoid"), "api": "true"})
 
 		if status == 200:				
-			result = self.__core__.getVideoInfo(result, params)
+			result = self.getVideoInfo(result, params)
 		
 			if len(result) == 0:
 				if self.__dbg__:
@@ -365,7 +391,7 @@ class YouTubePlayer(object):
 			hd_quality = int(self.__settings__.getSetting( "hd_videos_download" ))
 			if ( hd_quality == 0 ):
 				hd_quality = int(self.__settings__.getSetting( "hd_videos" ))
-			 
+		
 		else:
 			if (not get("quality")):
 				hd_quality = int(self.__settings__.getSetting( "hd_videos" ))
@@ -382,11 +408,15 @@ class YouTubePlayer(object):
 			video_url = link(35)
 		elif (link(34)):
 			video_url = link(34)
+		elif (link(59)): #<-- 480 for rtmpe
+			video_url = link(59)
+		elif (link(78)): #<-- seems to be around 400 for rtmpe
+			video_url = link(78)
 		elif (link(43)):
 			video_url = link(43)
 		elif (link(26)):
 			video_url = link(26)
-		elif (link(18)):
+		elif (link(18)): #<-- 270 for rtmpe but 360 for http?
 			video_url = link(18)
 		elif (link(33)):
 			video_url = link(33)
@@ -414,7 +444,7 @@ class YouTubePlayer(object):
 			
 		return video_url
 	
-	def userSelectsVideoQuality(self,params, links):
+	def userSelectsVideoQuality(self, params, links):
 		get = params.get
 		link = links.get
 		list = []
@@ -461,7 +491,7 @@ class YouTubePlayer(object):
 		get = params.get
 		video = {}
 				
-		(video, status) = self.getVideoInfo(params)
+		(video, status) = self.getInfo(params)
 		
 		#Check if file has been downloaded locally and use that as a source instead
 		if (status == 200 and get("action","") != "download"):
@@ -476,14 +506,14 @@ class YouTubePlayer(object):
 
 		# Get data from /get_video_info
 		print self.__plugin__ + " getVideoObject trying embedded"
-		(html, status) = self.__core__._fetchPage({"link": self.urls["embed_stream"] % get("videoid")})
+		(html, status) = self._fetchPage({"link": self.urls["embed_stream"] % get("videoid")})
 
 		if status == 200:
 			links = self.getVideoUrlMap(html, video)
 
 		if len(links) == 0: # Fallback to scraping the website.
 			print self.__plugin__ + " getVideoObject trying website"
-			(html, status) = self.__core__._fetchPage({"link": self.urls["video_stream"] % get("videoid")})
+			(html, status) = self._fetchPage({"link": self.urls["video_stream"] % get("videoid")})
 
 			html = urllib.unquote_plus(html)
 
@@ -499,10 +529,7 @@ class YouTubePlayer(object):
 
 			if len(links) == 0 and get("action") != "download":
 				links = self.getVideoStreamMap(html, video)
-				if len(links) != 0:
-					video['apierror'] = self.__language__(30626)
-					return ( video, 303)
-
+		
 		if links:
 			video["video_url"] = self.selectVideoQuality(links, params)
 			if video["video_url"] == "":

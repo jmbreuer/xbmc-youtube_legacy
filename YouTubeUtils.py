@@ -198,8 +198,6 @@ class YouTubeUtils:
 		
 		if next == "true":
 			self.__storage__.addNextFolder(result, params)
-		
-		
 	
 	# Adds a default next folder to a result set
 	def addNextFolder(self, items = [], params = {}):
@@ -211,4 +209,4 @@ class YouTubeUtils:
 		items.append(item)
 	
 if __name__ == '__main__':	
-	sys.exit(0);
+	sys.exit(0)

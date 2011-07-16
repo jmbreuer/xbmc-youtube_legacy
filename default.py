@@ -32,7 +32,7 @@ __dbg__ = __settings__.getSetting("debug") == "true"
 
 # plugin structure
 __utils__ = "" 
-__core__ = ""
+__feeds__ = ""
 __scraper__ = ""
 __playlist__ = ""
 __navigation__ = ""
@@ -48,14 +48,14 @@ if (__name__ == "__main__" ):
 	__login__ = login.YouTubeLogin()
 	import YouTubeStorage as storage
 	__storage__ = storage.YouTubeStorage()
-	import YouTubeCore as core
-	__core__ = core.YouTubeCore()
+	import YouTubeFeeds as feeds
+	__feeds__ = feeds.YouTubeFeeds()
 	import YouTubePlayer as player
 	__player__ = player.YouTubePlayer()
 	import YouTubeDownloader as downloader
 	__downloader__ = downloader.YouTubeDownloader()
-	import YouTubeScraperCore as scraper
-	__scraper__ = scraper.YouTubeScraperCore()
+	import YouTubeScraper as scraper
+	__scraper__ = scraper.YouTubeScraper()
 	import YouTubePlaylistControl as playlist
 	__playlist__ = playlist.YouTubePlaylistControl()
 	import YouTubeNavigation as navigation

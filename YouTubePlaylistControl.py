@@ -17,16 +17,16 @@
 '''
 
 import sys
-import xbmc
-import xbmcgui
+import xbmc, xbmcgui
+import YouTubeCore
 
-class YouTubePlaylistControl:
+class YouTubePlaylistControl(YouTubeCore.YouTubeCore):
 	__settings__ = sys.modules[ "__main__" ].__settings__
 	__language__ = sys.modules[ "__main__" ].__language__
 	__plugin__ = sys.modules[ "__main__"].__plugin__	
 	__dbg__ = sys.modules[ "__main__" ].__dbg__
 
-	__core__ = sys.modules[ "__main__" ].__core__
+	__feeds__ = sys.modules[ "__main__" ].__feeds__
 	__scraper__ = sys.modules[ "__main__" ].__scraper__
 	__utils__ = sys.modules[ "__main__" ].__utils__	
 	__player__ = sys.modules[ "__main__" ].__player__
@@ -130,13 +130,13 @@ class YouTubePlaylistControl:
 		if not get("playlist"):
 			return False
 		params["user_feed"] = "playlist" 
-		return self.__core__.listAll(params)
+		return self.__feeds__.listAll(params)
 	
 	def getDiscoSearch(self, params = {}):
 		(result, status) = self.__scraper__.searchDisco(params)
 		
 		if status == 200:
-			(result, status) = self.__core__.getBatchDetails(result, params)
+			(result, status) = self.__feeds__.getBatchDetails(result, params)
 		
 		return result
 	
@@ -147,7 +147,7 @@ class YouTubePlaylistControl:
 			return False
 		
 		params["user_feed"] = "favorites"
-		return self.__core__.listAll(params)
+		return self.__feeds__.listAll(params)
 	
 	def getNewSubscriptions(self, params = {}):
 		get = params.get
@@ -155,7 +155,7 @@ class YouTubePlaylistControl:
 		if not get("contact"):
 			return False
 		params["user_feed"] = "newsubscriptions"
-		return self.__core__.listAll(params)
+		return self.__feeds__.listAll(params)
 	
 	def addToPlaylist(self, params = {}):
 		get = params.get
@@ -165,7 +165,7 @@ class YouTubePlaylistControl:
 			params["user_feed"] = "playlists"
 			params["login"] = "true"
 			params["folder"] = "true"
-			result = self.__core__.listAll(params)
+			result = self.__feeds__.listAll(params)
 		
 		selected = -1
 		if result:
@@ -179,7 +179,7 @@ class YouTubePlaylistControl:
 		if selected == 0:
 			self.createPlayList(params)
 			if get("title"):
-				result = self.__core__.listAll(params)
+				result = self.__feeds__.listAll(params)
 				for item in result:
 					if get("title") == item["Title"]:
 						params["playlist"] = item["playlist"]
@@ -188,7 +188,7 @@ class YouTubePlaylistControl:
 			params["playlist"] = result[selected - 1].get("playlist")
 		
 		if get("playlist"):
-			self.__core__.add_to_playlist(params)
+			self.add_to_playlist(params)
 			return True
 		
 		return False
@@ -199,7 +199,7 @@ class YouTubePlaylistControl:
 		input = self.__utils__.getUserInput(self.__language__(30529))
 		if input:
 			params["title"] = input
-			self.__core__.add_playlist(params)
+			self.add_playlist(params)
 			return True
 		return False
 				
@@ -207,7 +207,7 @@ class YouTubePlaylistControl:
 		get = params.get
 		
 		if get("playlist") and get("playlist_entry_id"):
-			(message, status) = self.__core__.remove_from_playlist(params)
+			(message, status) = self.remove_from_playlist(params)
 			
 			if (status != 200):
 				self.__utils__.showErrorMessage(self.__language__(30600), message, status)
@@ -218,7 +218,7 @@ class YouTubePlaylistControl:
 	def deletePlaylist(self, params):
 		get = params.get
 		if get("playlist"):
-			(message, status) = self.__core__.del_playlist(params)
+			(message, status) = self.del_playlist(params)
 			
 			if status != 200:
 				self.__utils__.showErrorMessage(self.__language__(30600), message, status)
