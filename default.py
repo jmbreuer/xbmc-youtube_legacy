@@ -19,11 +19,10 @@
 import sys, xbmcaddon
 
 # plugin constants
-__version__ = "2.1.0"
+__version__ = "2.5.5"
 __plugin__ = "YouTube Beta-" + __version__
 __author__ = "TheCollective"
 __url__ = "www.xbmc.com"
-__XBMC_Revision__ = "34731"
 
 # xbmc hooks
 __settings__ = xbmcaddon.Addon(id='plugin.video.youtube.beta')
