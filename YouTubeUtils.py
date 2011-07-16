@@ -130,7 +130,7 @@ class YouTubeUtils:
 	
 	# generic function for building the item url filters out many item params to reduce unicode problems
 	def buildItemUrl(self, item_params = {}, url = ""):
-		blacklist = ("path","thumbnail", "Overlay", "icon", "next", "content" , "editid", "summary", "published","count","Rating","Plot","Title")
+		blacklist = ("path","thumbnail", "Overlay", "icon", "next", "content" , "editid", "summary", "published","count","Rating","Plot","Title","new_results_function")
 		for key, value in item_params.items():
 			if key not in blacklist:
 				url += key + "=" + value + "&"
@@ -158,53 +158,12 @@ class YouTubeUtils:
 				firstline = doc.split('\n')[0]
 				print "DOC:     ", firstline
 	
-	def simplePaginator(self, params = {}):
-		get = params.get
-		
-		result = []
-		
-		page = int(get("page", "0"))
-		per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
-		
-		if not get("page"):
-			result = params["new_results_function"](params)
-			
-			if len(result) == 0:
-				return (result, 303)
-			
-			self.__storage__.store(params, result)
-		
-		next = 'false'
-		if (len(result) > 0):
-			if ( per_page * ( page + 1 ) < len(result) ):
-				next = 'true'
-		
-		result = result[(per_page * page):(per_page * (page + 1))]
-		
-		if get("user_feed") == "subscriptions":
-			for item in result:
-				key = self.__storage__.getStorageKeyViewMode(params)
-				
-				if (self.__settings__.getSetting(key) == "favorites"):
-					item["user_feed"] = "favorites"
-					item["view_mode"] = "subscriptions_uploads"
-				elif(self.__settings__.getSetting(key) == "playlists"):
-					item["user_feed"] = "playlists"
-					item["folder"] = "true"
-					item["view_mode"] = "subscriptions_playlists"
-				else:
-					item["user_feed"] = "uploads"  
-					item["view_mode"] = "subscriptions_favorites"
-		
-		if next == "true":
-			self.__storage__.addNextFolder(result, params)
-	
 	# Adds a default next folder to a result set
 	def addNextFolder(self, items = [], params = {}):
 		get = params.get
 		item = {"Title":self.__language__( 30509 ), "thumbnail":"next", "next":"true", "page":str(int(get("page", "0")) + 1)} 
 		for k, v in params.items():
-			if (k != "thumbnail" and k != "Title" and k != "page"):
+			if (k != "thumbnail" and k != "Title" and k != "page" and k != "new_results_function"):
 				item[k] = v
 		items.append(item)
 	

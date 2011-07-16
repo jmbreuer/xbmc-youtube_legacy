@@ -30,8 +30,6 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 	__feeds__ = sys.modules[ "__main__" ].__feeds__
 	__storage__ = sys.modules [ "__main__" ].__storage__
 	
-	simple_scrapers = ["search_disco","liked_videos","live","disco_top_50","recommended","music_top100", "disco_top_artist", "music_hits", "music_artists","music_artist", "similar_artist"]
-	
 	def __init__(self):
 		self.urls['categories'] = "http://www.youtube.com/videos"
 		self.urls['current_trailers'] = "http://www.youtube.com/trailers?s=trit&p=%s&hl=en"
@@ -718,83 +716,50 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 
 #=================================== Common ============================================
 	
-	def simplePaginator(self, params = {}):
+	def getNewResultsFunction(self, params = {}):
 		get = params.get
-
-		page = int(get("page", "0"))
-		per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
 		
-		videos = []
-		status = 200
-		stored = self.__storage__.retrieve(params)
-		
-		if page == 0 or not videos:
-			
-			if (get("scraper") == "search_disco"):
-				(videos, result ) = self.searchDisco(params)
-			if (get("scraper") == "liked_videos"):
-				(videos, result ) = self.scrapeLikedVideos(params)
-			if (get("scraper") == "live"):
-				(videos, result ) = self.scrapeLiveNow(params)
-				params["no_batch"] = "true"
-			if (get("scraper") == "disco_top_50"):
-				(videos, result ) = self.scrapeDiscoTop50(params)
-			if (get("scraper") == "recommended"):
-				(videos, result ) = self.scrapeRecommended(params)
-			if (get("scraper") == "music_top100"):
-				(videos, result ) = self.scrapeYouTubeTop100(params)
-			if (get("scraper") == "disco_top_artist"):
-				(videos, result ) = self.scrapeDiscoTopArtist(params)
-			if (get("scraper") == "music_artist"):
-				(videos, result ) = self.scrapeArtist(params)
-			if (get("scraper") == "similar_artist"):
-				(videos, result ) = self.scrapeSimilarArtists(params)
-			if (get("scraper") == "music_hits" or get("scraper") == "music_artists"):
-				if get("category") and get("scraper") == "music_hits":
-					(videos, result ) = self.scrapeMusicCategoryHits(params)
-				elif get("category") and get("scraper") == "music_artists":
-					(videos, result ) = self.scrapeMusicCategoryArtists(params)
-				else:
-					(videos, result ) = self.scrapeMusicCategories(params)
-			
-			if result == 200:
-				self.__storage__.store(params, videos)
-		
-		if not videos and get("scraper") == "music_top100":
-			videos = stored
-		
-		if not get("folder"): 
-			if ( per_page * ( page + 1 ) < len(videos) ):
-				next = 'true'
+		function = ""	
+		if (get("scraper") == "search_disco"):
+			function = self.searchDisco
+		if (get("scraper") == "liked_videos"):
+			function = self.scrapeLikedVideos
+		if (get("scraper") == "live"):
+			function = self.scrapeLiveNow
+			params["no_batch"] = "true"
+		if (get("scraper") == "disco_top_50"):
+			function = self.scrapeDiscoTop50
+		if (get("scraper") == "recommended"):
+			function = self.scrapeRecommended
+		if (get("scraper") == "music_top100"):
+			function = self.scrapeYouTubeTop100
+		if (get("scraper") == "disco_top_artist"):
+			function = self.scrapeDiscoTopArtist
+		if (get("scraper") == "music_artist"):
+			function = self.scrapeArtist
+		if (get("scraper") == "similar_artist"):
+			function = self.scrapeSimilarArtists
+		if (get("scraper") == "music_hits" or get("scraper") == "music_artists"):
+			if get("category") and get("scraper") == "music_hits":
+				function = self.scrapeMusicCategoryHits
+			elif get("category") and get("scraper") == "music_artists":
+				function = self.scrapeMusicCategoryArtists
 			else:
-				next = 'false'
-			
-			subitems = videos[(per_page * page):(per_page * (page + 1))]
-			
-			if (get("fetch_all") == "true"):
-				subitems = videos
-			
-			if len(subitems) == 0:
-				return (subitems, 303)
-			
-			if get("batch_thumbnails"):
-				( ytobjects, status ) = self.getBatchDetailsThumbnails(subitems)
-			elif not get("no_batch"):
-				( ytobjects, status ) = self.getBatchDetails(subitems)
-			else:
-				ytobjects = videos
-			
-			if (len(ytobjects) > 0):
-				if get("scraper") == "search_disco":
-					thumbnail = ytobjects[0].get("thumbnail","")
-					if thumbnail:
-						self.__storage__.store(params, thumbnail, "thumbnail", ytobjects[0])
-				if (next == "true"):
-					self.addNextFolder(ytobjects, params)
-		else:
-			ytobjects = videos
+				function = self.scrapeMusicCategories
 		
-		return (ytobjects, status)
+		if (get("scraper") == "categories"):
+			function = self.scrapeCategoriesGrid
+		elif (get("scraper") == "shows"):
+			function = self.scrapeShowsGrid	
+		elif (get("scraper") == "movies" and get("category")):
+			function = self.scrapeMoviesGrid
+		elif (get("scraper") in ['current_trailers','game_trailers','popular_game_trailers','popular_trailers','trailers','upcoming_game_trailers','upcoming_trailers']):
+			function = self.scrapeGridFormat
+		
+		if function:
+			params["new_results_function"] = function
+		
+		return True
 	
 	def createUrl(self, params = {}):
 		get = params.get
