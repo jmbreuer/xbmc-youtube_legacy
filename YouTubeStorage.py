@@ -127,6 +127,8 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 		
 		if get("search"):
 			params["store"] = "searches"
+			if get("scraper"):
+				params["store"] = "disco_searches"
 			
 			key = self.getStorageKey(params)
 			

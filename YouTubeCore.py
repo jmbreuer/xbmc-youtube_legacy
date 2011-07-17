@@ -68,64 +68,6 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 			socket.setdefaulttimeout(float(timeout))
 		return None
 	
-	def paginator(self, params = {}):
-		get = params.get
-		
-		result = []
-		
-		page = int(get("page", "0"))
-		per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
-		
-		if not get("page"):
-			result = params["new_results_function"](params)
-			
-			if len(result) == 0:
-				return (result, 303)
-			
-			self.__storage__.store(params, result)
-		else:
-			result = self.__storage__.retrieve(params)
-		
-		if not get("folder"):
-			next = 'false'
-			if ( per_page * ( page + 1 ) < len(result) ):
-				next = 'true'
-			
-			subitems = result[(per_page * page):(per_page * (page + 1))]
-			
-			if (get("fetch_all") == "true"):
-				subitems = result
-			
-			if len(subitems) == 0:
-				return (subitems, 303)
-		
-		if get("batch" == "thumbnails"):
-			(result, status) = self.getBatchDetailsThumbnails(subitems, params)
-		elif get("batch"):
-			(result, status) = self.getBatchDetails(subitems, params)
-		
-		if get("user_feed") == "subscriptions":
-			for item in result:
-				viewmode = self.__storage__.retrieve(params, "viewmode", item)
-				
-				if (get("external")):
-					item["external"] = "true"
-					item["contact"] = get("contact")	
-				
-				if (viewmode == "favorites"):
-					item["user_feed"] = "favorites"
-					item["view_mode"] = "subscriptions_uploads"
-				elif(viewmode == "playlists"):
-					item["user_feed"] = "playlists"
-					item["folder"] = "true"
-					item["view_mode"] = "subscriptions_playlists"
-				else:
-					item["user_feed"] = "uploads"  
-					item["view_mode"] = "subscriptions_favorites"
-		
-		if next == "true":
-			self.addNextFolder(result, params)
-	
 	def delete_favorite(self, params = {}):
 		get = params.get
 		delete_url = self.urls["favorites"] % "default"
