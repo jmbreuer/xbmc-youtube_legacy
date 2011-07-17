@@ -831,54 +831,48 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		
 		return url
 	
-	def scrapeGridFormat(self, html, params = {}):
+	def scrapeGridFormat(self, params = {}):
 		get = params.get
 		yobjects = []
 		next = "false"
 		
-		pager = SoupStrainer(name="div", attrs = {'class':"yt-uix-pager"})
-		pagination = BeautifulSoup(html, parseOnlyThese=pager)
-
-		if (len(pagination) > 0):
-			tmp = str(pagination)
-			if (tmp.find("Next") > 0):
-				next = "true"
-			
-		list = SoupStrainer(id="popular-column", name="div")
-		trailers = BeautifulSoup(html, parseOnlyThese=list)
+		url = self.createUrl(params)
+		(html, status) = self._fetchPage({"link":url})
 		
-		if (len(trailers) > 0):
-			trailer = trailers.div.div
-			if (get("scraper") == "movies"):
-				trailer = trailers.div.div.div
+		if status == 200:
+			pager = SoupStrainer(name="div", attrs = {'class':"yt-uix-pager"})
+			pagination = BeautifulSoup(html, parseOnlyThese=pager)
+	
+			if (len(pagination) > 0):
+				tmp = str(pagination)
+				if (tmp.find("Next") > 0):
+					next = "true"
 			
-			cell = "trailer-cell *vl"
-			if (get("scraper") == "categories"):
-				cell = "video-cell"
+			items = []
+			list = SoupStrainer(id="popular-column", name="div")
+			trailers = BeautifulSoup(html, parseOnlyThese=list)
 			
-			item = []
-			while ( trailer != None ):
-				videoid = trailer.div.a['href']
-						
-				if (videoid):
-					if (videoid.find("=") > -1):
-						videoid = videoid[videoid.find("=")+1:]
-					
-					item.append( (videoid, trailer.div.a.span.img['src']) )
+			if (len(trailers) > 0):
+				trailer = trailers.div.div
+				if (get("scraper") == "movies"):
+					trailer = trailers.div.div.div
 				
-				trailer = trailer.findNextSibling(name="div", attrs = { 'class':cell })
-			
-			(yobjects, result ) = self.getBatchDetailsThumbnails(item);
-			
-			if result != 200:
-				return (yobjects, result)
-
-		if (not yobjects):
-			return (yobjects, 500)
+				cell = "trailer-cell *vl"
+				if (get("scraper") == "categories"):
+					cell = "video-cell"
+				
+				while ( trailer != None ):
+					videoid = trailer.div.a['href']
+							
+					if (videoid):
+						if (videoid.find("=") > -1):
+							videoid = videoid[videoid.find("=")+1:]
+						
+						items.append( (videoid, trailer.div.a.span.img['src']) )
+					
+					trailer = trailer.findNextSibling(name="div", attrs = { 'class':cell })
 		
-		yobjects[len(yobjects)-1]['next'] = next
-
-		return (yobjects, 200)
+		return (items, status)
 	
 	def scrapeCategoryList(self, params = {}):
 		get = params.get
