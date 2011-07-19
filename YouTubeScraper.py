@@ -47,6 +47,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		self.urls['shows'] = "http://www.youtube.com/shows"
 		self.urls['trailers'] = "http://www.youtube.com/trailers?s=tr"
 		self.urls['latest_trailers'] = "http://www.youtube.com/trailers?s=tr"
+		self.urls['latest_game_trailers'] = "http://www.youtube.com/trailers?s=gtcs"
 		self.urls['upcoming_game_trailers'] = "http://www.youtube.com/trailers?s=gtcs&p=%s&hl=en"
 		self.urls['upcoming_trailers'] = "http://www.youtube.com/trailers?s=tros&p=%s&hl=en"
 		self.urls['watch_later'] = "http://www.youtube.com/my_watch_later_list"
@@ -796,12 +797,12 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		
 		if (get("scraper") in self.urls):
 			url = self.urls[get("scraper")]
-			url = url % page
-		else :
-			if (get("scraper") == "latest_trailers"):					
-				url = self.urls["trailers"]
+			if url.find('%s') > 0:
+				url = url % page
+			elif url.find('?') > 0:
+				url += "&p=" + page
 			else:
-				url = self.urls["game_trailers"]
+				url += "?p=" + page
 		
 		if (get("scraper") == "categories"):
 			if (get("category")):
