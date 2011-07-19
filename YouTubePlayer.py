@@ -507,8 +507,9 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		(html, status) = self._fetchPage({"link": self.urls["embed_stream"] % get("videoid")})
 
 		if status == 200:
-			links = self.getVideoUrlMap(html, video)
+			links2 = self.getVideoUrlMap(html, video)
 
+		links = []
 		if len(links) == 0: # Fallback to scraping the website.
 			print self.__plugin__ + " getVideoObject trying website"
 			(html, status) = self._fetchPage({"link": self.urls["video_stream"] % get("videoid")})
