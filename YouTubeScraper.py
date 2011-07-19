@@ -815,7 +815,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			else:
 				url = self.urls["categories"] + "?hl=en"
 		
-		if (get("scraper") == "shows" and not get("show")):
+		if (get("scraper") == "shows"):
 			url = self.urls["shows"] + "?hl=en"
 			if (get("category")):
 				category = get("category")
@@ -973,10 +973,13 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			(result, status) = params["new_results_function"](params)
 			
 			print "new result " + repr(result)
-			if len(result) == 0:
-				return (result, 303)
 			
-			self.__storage__.store(params, result)
+			if len(result) == 0:
+				if get("scraper") not in ["music_top100"]:
+					return (result, 303)
+				result = self.__storage__.retrieve(params)
+			else:
+				self.__storage__.store(params, result)
 		else:
 			result = self.__storage__.retrieve(params)
 			print "retrieved result " + repr(result)
@@ -990,7 +993,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			
 			if len(result) == 0:
 				return (result, status)
-		
+				
 		if get("batch") == "thumbnails":
 			(result, status) = self.getBatchDetailsThumbnails(result, params)
 		elif get("batch"):
@@ -999,6 +1002,10 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		if get("batch"):
 			del params["batch"]
 		
+		if get("scraper") == "search_disco":
+			thumbnail = result[0].get("thumbnail")
+			self.__storage__.store(params, thumbnail, "thumbnail")
+
 		if next == "true":
 			self.addNextFolder(result, params)
 		
@@ -1009,7 +1016,9 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		
 		if (get("scraper") == "watch_later"):
 			return self.scrapeWatchLater(params)
+		
 		self.getNewResultsFunction(params)
+		
 		return self.paginator(params)
 	
 if __name__ == '__main__':
