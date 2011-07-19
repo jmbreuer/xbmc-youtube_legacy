@@ -29,7 +29,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 	
 	def __init__(self):
 		# YouTube Playback Feeds
-		self.urls['video_stream'] = "http://www.youtube.com/watch?v=%s&safeSearch=none&hl=en_us"
+		self.urls['video_stream'] = "http://www.youtube.com/watch?v=%s&safeSearch=none"
 		self.urls['embed_stream'] = "http://www.youtube.com/get_video_info?video_id=%s"
 		self.urls['timed_text_index'] = "http://www.youtube.com/api/timedtext?type=list&v=%s"
 		self.urls['video_info'] = "http://gdata.youtube.com/feeds/api/videos/%s"

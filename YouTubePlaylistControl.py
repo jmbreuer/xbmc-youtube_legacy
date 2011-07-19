@@ -88,7 +88,7 @@ class YouTubePlaylistControl(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils)
 		
 		if (get("shuffle")):
 			playlist.shuffle()
-		
+
 		xbmc.executebuiltin('playlist.playoffset(video , 0)')
 		
 	def queueVideo(self, params = {}):
