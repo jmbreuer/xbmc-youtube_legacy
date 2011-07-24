@@ -6,8 +6,6 @@
 - Go through every menu to check if things are still working
 - Context menu "more videos by user" shouldnt be visible when viewing a users upload
 - OAuth Login
-- Annotation to SSA/ASS subtitle file. http://www.matroska.org/technical/specs/subtitles/ssa.html.
-- Merge subtitles and annotations to one file
 - Check all context menu items again some seem to be broken <-- Henrik & Tobias
 
 [B]Errata[/B]
@@ -40,6 +38,8 @@
 - Added New download dialog showing queue and progress completion.
 - Added support for xbmcvfs in downloads. (ie. download to temp folder then let xbmc move to final location)
 - Added support for using embedded link to get video information. Better playback stability
+- Added support for Annotations to subtitles.
+- Changed subtitles format to SSA.
 - Changed Login to use new Client Login url
 - Changed Playback function now shows a more user friendly error message on failure
 - Changed Download function now shows a progress-bar

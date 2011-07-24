@@ -1,5 +1,5 @@
-'''
-    YouTube plugin for XBMC
+''' 
+   YouTube plugin for XBMC
     Copyright (C) 2010-2011 Tobias Ussing And Henrik Mosgaard Jensen
 
     This program is free software: you can redistribute it and/or modify
@@ -35,29 +35,41 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		self.urls['video_info'] = "http://gdata.youtube.com/feeds/api/videos/%s"
 		self.urls['close_caption_url'] = "http://www.youtube.com/api/timedtext?type=track&v=%s&name=%s&lang=%s"
 		self.urls['transcription_url'] = "http://www.youtube.com/api/timedtext?caps=asr&kind=asr&type=track&key=yttt1&expire=%s&sparams=caps,expire,v&v=%s&signature=%s&lang=en"
+		self.urls['annotation_url'] = "http://www.youtube.com/api/reviews/y/read2?video_id=%s"
 		self.urls['remove_watch_later'] = "http://www.youtube.com/addto_ajax?action_delete_from_playlist=1"
 		
 	# ================================ Subtitle Downloader ====================================
 	def downloadSubtitle(self, video = {}):
 		get = video.get
-
-		subtitle_url = self.getSubtitleUrl(video)
-
-		if not subtitle_url and self.__settings__.getSetting("transcode") == "true":
-			(html, status) = self._fetchPage({"link": self.urls["video_stream"] % get("videoid")})
-			if status == 200:
-				subtitle_url = self.getTranscriptionUrl(html, video) 
 		
-		if subtitle_url:
-			srt = ""
-			(xml, status) = self._fetchPage({"link": subtitle_url})
+		result = ""
+		
+		if self.__settings__.getSetting("annotations") == "true" and not video.has_key("downloadPath"):
+
+			(xml, status) = self._fetchPage({"link": self.urls["annotation_url"] % get('videoid')})
+			if status == 200 and xml:
+				result += self.transformAnnotationToSSA(xml)
+
+                if self.__settings__.getSetting("lang_code") != "0":
+			subtitle_url = self.getSubtitleUrl(video)
+
+			if not subtitle_url and self.__settings__.getSetting("transcode") == "true":
+				(html, status) = self._fetchPage({"link": self.urls["video_stream"] % get("videoid")})
+				if status == 200:
+					subtitle_url = self.getTranscriptionUrl(html, video) 
+		
+			if subtitle_url:
+				(xml, status) = self._fetchPage({"link": subtitle_url})
 
 			if status == 200 and xml:
-				srt = self.transformSubtitleXMLtoSRT(xml)
+				result += self.transformSubtitleXMLtoSRT(xml)
 
-			if len(srt) > 0:
-				self.saveSubtitle(srt, video)
-				return True
+		if len(result) > 0:
+			result = "[Script Info]\r\n; This is a Sub Station Alpha v4 script.\r\n; For Sub Station Alpha info and downloads,\r\n; go to http://www.eswat.demon.co.uk/\r\n; or email kotus@eswat.demon.co.uk\r\nTitle: Auto Generated\r\nScriptType: v4.00\r\nCollisions: Normal\r\nPlayResY: 1024\r\nPlayResX: 768\r\n\r\n[V4 Styles]\r\nFormat: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, TertiaryColour, BackColour, Bold, Italic, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, AlphaLevel, Encoding\r\nStyle: Default,Arial,40,0,65535,65535,999999,0,0,3,3,0,2,30,30,30,0,0\r\nStyle: speech,Arial,40,0,65535,65535,11861244,0,0,3,1,0,1,30,30,30,0,0\r\nStyle: popup,Arial,40,0,65535,65535,11861244,0,0,3,3,0,1,30,30,30,0,0\r\nStyle: highlightText,Wolf_Rain,56,15724527,15724527,15724527,4144959,0,0,1,1,2,2,5,5,30,0,0\r\n\r\n[Events]\r\nFormat: Marked, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\r\n" + result
+
+			result += "Dialogue: Marked=0,0:00:0.00,0:00:0.00,Default,Name,0000,0000,0000,,\r\n" # This solves a bug.
+			self.saveSubtitle(result, video)
+			return True
 		
 		return False
 	
@@ -104,14 +116,14 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		
 		return url
 
-	def saveSubtitle(self, srt, video = {}):
+	def saveSubtitle(self, result, video = {}):
 		get = video.get
 		
-		filename = ''.join(c for c in video['Title'] if c in self.VALID_CHARS) + "-[" + get('videoid') + "]" + ".srt"
+		filename = ''.join(c for c in video['Title'] if c in self.VALID_CHARS) + "-[" + get('videoid') + "]" + ".ssa"
 		path = os.path.join( xbmc.translatePath( "special://temp" ), filename )
 		
 		w = open(path, "w")
-		w.write(srt.encode('utf-8'))
+		w.write(result.encode('utf-8'))
 		w.close()
 		
 		if video.has_key("downloadPath"):
@@ -167,17 +179,73 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 								dur += ".000"
 						
 						if start and dur:
-							result += str(i) + "\r\n" + start + " --> " + ( dur ) + "\n" + text + "\n\n"
-							i = i + 1
+							result += "Dialogue: Marked=%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\r\n" % ( "0", start, dur, "Default", "Name", "0000", "0000", "0000", "", text )
 		
+		return result
+
+	def transformAnnotationToSSA(self, xml):
+		dom = parseString(xml)
+		entries = dom.getElementsByTagName("annotation")
+		result = ""
+		i = 0
+		for node in entries:
+			if node:
+				stype = node.getAttribute("type")
+				style = node.getAttribute("style")
+
+				if stype == "highlight":
+					linkt = self._getNodeAttribute(node, "url", "type", "")
+					linkv = self._getNodeAttribute(node, "url", "value", "")
+					if linkt == "video":
+						if self.__dbg__:
+							print self.__plugin__ + " transformAnnotationToSSA Reference to video : " + linkv
+				elif node.firstChild:
+					if node.firstChild.nodeValue:
+						text = self._getNodeValue(node, "TEXT", "")
+						start = ""
+
+						if node.getAttribute("start"):
+							start = str(datetime.timedelta(seconds=float(node.getAttribute("start")))).replace("000", "")
+							if ( start.find(".") == -1 ):
+								start += ".000"
+						
+						dur = ""
+						if node.getAttribute("dur"):
+							dur = str(datetime.timedelta(seconds=float(node.getAttribute("start")) + float(node.getAttribute("dur")))).replace("000", "")
+							if ( dur.find(".") == -1 ):
+								dur += ".000"
+
+						if style == "popup":
+							cnode = node.getElementsByTagName("rectRegion")
+						elif style == "speech":
+							cnode = node.getElementsByTagName("anchoredRegion");
+
+						if cnode:
+							if cnode.item(0):
+								start = cnode.item(0).getAttribute("t")
+							if cnode.item(1):
+								dur = cnode.item(1).getAttribute("t")
+						
+						if start and dur and style != "highlightText":
+							marginL = "0000"
+							marginV = 1024 * float(cnode.item(0).getAttribute("y")) / 100
+							marginV += 1024 * float(cnode.item(0).getAttribute("h")) / 100
+							marginV = 1024 - int(marginV)
+							old_x = int((768 * float(cnode.item(0).getAttribute("x")) / 100) )
+							marginL = old_x
+							result += "Dialogue: Marked=%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\r\n" % ( "0", start, dur, style, "Name", marginL, "0000", marginV, "", text )
+				else:
+					if self.__dbg__:
+						print self.__plugin__ + " transformAnnotationToSSA wrong type"
+
 		return result
 		
 	def addSubtitles(self, video = {}):
 		get = video.get
 		if self.__dbg__:
-			print self.__plugin__ + " fetching subtitle if available"
+			print self.__plugin__ + " addSubtitles fetching subtitle if available"
 		
-		filename = ''.join(c for c in video['Title'] if c in self.VALID_CHARS) + "-[" + get('videoid') + "]" + ".srt"
+		filename = ''.join(c for c in video['Title'] if c in self.VALID_CHARS) + "-[" + get('videoid') + "]" + ".ssa"
 
 		download_path = os.path.join( self.__settings__.getSetting( "downloadPath" ), filename )
 		path = os.path.join( xbmc.translatePath( "special://temp" ), filename )
@@ -192,13 +260,14 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			set_subtitle = True
 
 		if xbmcvfs.exists(path) and not video.has_key("downloadPath") and set_subtitle:
+			player = xbmc.Player()
+			while not player.isPlaying():
+				print self.__plugin__ + " addSubtitles Waiting for playback to start "
+				time.sleep(1)
+			xbmc.Player().setSubtitles(path);
+
 			if self.__dbg__:
-				print self.__plugin__ + " adding subtitle %s to playback" % path
-			xbmc.Player().setSubtitles(path)
-			time.sleep(5)
-			if self.__dbg__:
-				print self.__plugin__ + " adding subtitle %s to playback" % path
-			xbmc.Player().setSubtitles(path)
+				print self.__plugin__ + " addSubtitles added subtitle %s to playback" % path
 	
 	# ================================ Video Playback ====================================
 	
@@ -221,7 +290,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		
 		xbmcplugin.setResolvedUrl(handle=int(sys.argv[1]), succeeded=True, listitem=listitem)
 		
-		if self.__settings__.getSetting("lang_code") != "0":
+		if self.__settings__.getSetting("lang_code") != "0" or self.__settings__.getSetting("annotations") == "true":
 			self.addSubtitles(video)
 		
 		if (get("watch_later") == "true" and get("playlist") and get("playlist_entry_id")):
@@ -524,8 +593,8 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 
 	def _getVideoLinks(self, video, params):
 		get = params.get
-		preferred = False; # Setting.
 
+		preferred = True; # Setting.
 		if preferred:
 			if self.__dbg__:
 				print self.__plugin__ + " _getVideoLinks trying website"
