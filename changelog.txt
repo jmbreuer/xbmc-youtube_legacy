@@ -7,6 +7,7 @@
 - Context menu "more videos by user" shouldnt be visible when viewing a users upload
 - OAuth Login
 - Check all context menu items again some seem to be broken <-- Henrik & Tobias
+- http://lxml.de/tutorial.html <- investigate if this can speed up the soup.
 
 [B]Errata[/B]
 - [XBMC] Thumbnails sometimes turns into black box or Folder (XBMC not detecting when thumbnail is set and defaulting to icon?)
