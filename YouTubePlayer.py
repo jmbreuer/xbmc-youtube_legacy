@@ -256,12 +256,9 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			print self.__plugin__ + " couldn't locate fmt_url_map or fmt_stream_map, no videos on page?"
 			return links
 		
-		print self.__plugin__ + " smokey " + repr(fmt_url_map)
-		
 		for fmt_url in fmt_url_map:				
 			quality = "5"
 			final_url = ""
-			print " url: " + repr(fmt_url)
 			if (len(fmt_url) > 7 and fmt_url.find(":\\/\\/") > 0 and fmt_url.find('liveplay?') < 0):
 				final_url = fmt_url
 				if (fmt_url.rfind(',') > fmt_url.rfind('\/id\/')):
@@ -384,6 +381,9 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		get = params.get
 		link = links.get
 		video_url = ""
+
+		if self.__dbg__:
+			print self.__plugin__ + " selectVideoQuality : " + repr(links)
 		
 		if get("action") == "download":
 			hd_quality = int(self.__settings__.getSetting( "hd_videos_download" ))
@@ -488,6 +488,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 	def getVideoObject(self, params):
 		get = params.get
 		video = {}
+		links = []
 				
 		(video, status) = self.getInfo(params)
 		
@@ -502,33 +503,8 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			except:
 				print self.__plugin__ + " attempt to locate local file failed with unknown error, trying youtube instead"
 
-		# Get data from /get_video_info
-		print self.__plugin__ + " getVideoObject trying embedded"
-		(html, status) = self._fetchPage({"link": self.urls["embed_stream"] % get("videoid")})
+		(links, video) = self._getVideoLinks(video, params);
 
-		if status == 200:
-			links2 = self.getVideoUrlMap(html, video)
-
-		links = []
-		if len(links) == 0: # Fallback to scraping the website.
-			print self.__plugin__ + " getVideoObject trying website"
-			(html, status) = self._fetchPage({"link": self.urls["video_stream"] % get("videoid")})
-
-			html = urllib.unquote_plus(html)
-
-			vget = video.get
-			if status == 403:
-				video['apierror'] = self.getAlert(html, params)
-			elif status != 200:
-				if not vget('apierror'):
-					video['apierror'] = self.__language__(30617)
-		
-			if status == 200:			
-				links = self.getVideoUrlMap(html, video)
-
-			if len(links) == 0 and get("action") != "download":
-				links = self.getVideoStreamMap(html, video)
-		
 		if links:
 			video["video_url"] = self.selectVideoQuality(links, params)
 			if video["video_url"] == "":
@@ -545,3 +521,38 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 				video['apierror'] = self.__language__(30618)
 		
 		return (video, status)
+
+	def _getVideoLinks(self, video, params):
+		get = params.get
+		preferred = False; # Setting.
+
+		if preferred:
+			if self.__dbg__:
+				print self.__plugin__ + " _getVideoLinks trying website"
+			(html, status) = self._fetchPage({"link": self.urls["video_stream"] % get("videoid")})
+
+			html = urllib.unquote_plus(html)
+
+			vget = video.get
+			if status == 403:
+				video['apierror'] = self.getAlert(html, params)
+			elif status != 200:
+				if not vget('apierror'):
+					video['apierror'] = self.__language__(30617)
+		
+			if status == 200:			
+				return (self.getVideoUrlMap(html, video), video)
+
+			if len(links) == 0 and get("action") != "download":
+				return (self.getVideoStreamMap(html, video), video)
+		
+		# Get data from /get_video_info
+		if self.__dbg__:
+			print self.__plugin__ + " _getVideoLinks trying embedded"
+			
+		(html, status) = self._fetchPage({"link": self.urls["embed_stream"] % get("videoid") })
+			
+		if status == 200:
+			return (self.getVideoUrlMap(html, video), video)
+
+		return (False, video)
