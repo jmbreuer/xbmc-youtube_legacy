@@ -19,6 +19,7 @@
 import sys, urllib, urllib2, re, cookielib, socket
 import xbmc
 import YouTubeUtils
+import YouTubeCore
 
 # ERRORCODES:
 # 0 = Ignore
@@ -26,7 +27,7 @@ import YouTubeUtils
 # 303 = See other (returned an error message)
 # 500 = uncaught error
 
-class YouTubeLogin(YouTubeUtils.YouTubeUtils):
+class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 	__settings__ = sys.modules[ "__main__" ].__settings__
 	__language__ = sys.modules[ "__main__" ].__language__
 	__plugin__ = sys.modules[ "__main__" ].__plugin__
@@ -46,7 +47,7 @@ class YouTubeLogin(YouTubeUtils.YouTubeUtils):
 			timeout = "5"
 		socket.setdefaulttimeout(float(timeout))
 		return None
-
+	
 	def login(self, params = {}):
 		self.__settings__.openSettings()
 		

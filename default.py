@@ -40,10 +40,10 @@ __login__ = ""
 __player__ = ""
 
 if (__name__ == "__main__" ):
-	import YouTubeLogin as login
-	__login__ = login.YouTubeLogin()
 	import YouTubeStorage as storage
 	__storage__ = storage.YouTubeStorage()
+	import YouTubeLogin as login
+	__login__ = login.YouTubeLogin()
 	import YouTubeFeeds as feeds
 	__feeds__ = feeds.YouTubeFeeds()
 	import YouTubePlayer as player
