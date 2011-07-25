@@ -314,6 +314,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
                         request.add_header('X-GData-Key', 'key=' + self.APIKEY)
                 else:
                         request.add_header('User-Agent', self.USERAGENT)
+			request.add_header('Cookie', 'PREF=f1=50000000&hl=en')
                 
                 if get("login", "false") == "true":
                         if self.__dbg__:
@@ -331,7 +332,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 					print self.__plugin__ + " returning existing login info: " + self.__settings__.getSetting( "login_info" )
 				info = self.__settings__.getSetting( "login_info" )
 				request.add_header('Cookie', 'LOGIN_INFO=' + info )
-                
+
                 if get("auth", "false") == "true":
                         if self.__dbg__:
                                 print self.__plugin__ + " got auth"
