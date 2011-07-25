@@ -322,7 +322,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
                                 if self.__dbg__:
                                         print self.__plugin__ + " _fetchPage, login required but no credentials provided"
                                 ret_obj["status"] = 303
-                                ret_obj["body"] = self.__language__( 30622 )
+                                ret_obj["content"] = self.__language__( 30622 )
                                 return ret_obj
                         
 			# This should be a call to self.__login__._httpLogin()
@@ -346,16 +346,16 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 
                         con = urllib2.urlopen(request)
 
-                        ret_obj["body"] = con.read()
+                        ret_obj["content"] = con.read()
                         ret_obj["new_url"] = con.geturl()
                         ret_obj["header"] = str(con.info())
                         con.close()
 
                         # Return result if it isn't age restricted
-                        if ( ret_obj["body"].find("verify-actions") == -1 and ret_obj["body"].find("verify-age-actions") == -1):
+                        if ( ret_obj["content"].find("verify-actions") == -1 and ret_obj["content"].find("verify-age-actions") == -1):
                                 if self.__dbg__:
                                         print self.__plugin__ + " _fetchPage done"
-                                        #print repr(ret_obj["body"])
+                                        #print repr(ret_obj["content"])
                                         #print self.__plugin__ + " _bla: cj2 : " + repr(self.__cj__)
 				ret_obj["status"] = 200
                                 return ret_obj
@@ -367,7 +367,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
                                         params["login"] = "true"
                                         return self._fetchPage(params)
                                 #else:
-                                        return self._verifyAge(ret_obj["body"], new_url, params)
+                                        return self._verifyAge(ret_obj["content"], new_url, params)
                 
                 except urllib2.HTTPError, e:
                         err = str(e)
@@ -379,12 +379,12 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 					print self.__plugin__ + " _fetchPage refreshing token"
 				self._oRefreshToken()
 			else:
-                                print self.__plugin__ + " _fetchPage HTTPError - Headers: " + str(e.headers) + " - Body: " + e.fp.read()
+                                print self.__plugin__ + " _fetchPage HTTPError - Headers: " + str(e.headers) + " - Content: " + e.fp.read()
                         
                         params["error"] = str(int(get("error", "0")) + 1)
 			ret = self._fetchPage(params)
-			if not ret.has_key("body") and e.fp:
-				ret["body"] = e.fp.read()
+			if not ret.has_key("content") and e.fp:
+				ret["content"] = e.fp.read()
                         return ret
                 ret_obj["status"] = 505
                 return ret_obj
@@ -463,7 +463,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
                                      "refresh_token": self.__settings__.getSetting( "oauth2_refresh_token" ),
                                      "grant_type": "refresh_token"}
                         ret = self._fetchPage({ "link": url, "url_data": url_data})
-                        oauth = json.loads(ret["body"])
+                        oauth = json.loads(ret["content"])
                         #self.__settings__.setSetting("oauth2_expires at", oauth["expires_in"] + current time. )
 			if self.__dbg__:
 				print self.__plugin__ + " _oRefreshToken: " + repr(oauth)
