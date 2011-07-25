@@ -468,6 +468,11 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 			if self.__dbg__:
 				print self.__plugin__ + " _oRefreshToken: " + repr(oauth)
                         self.__settings__.setSetting("oauth2_access_token", oauth["access_token"])
+			return True
+		if self.__dbg__:
+			print self.__plugin__ + " _oRefreshToken didn't even try"
+
+		return False
 
         def _getAuth(self):
                 if self.__dbg__:

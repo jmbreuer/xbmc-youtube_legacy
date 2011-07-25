@@ -49,27 +49,39 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		return None
 	
 	def login(self, params = {}):
-		self.__settings__.setSetting("oauth2_access_token","")
-		self.__settings__.setSetting("oauth2_refresh_token","")
-		self.__settings__.setSetting("oauth2_expires at", "")
-		self.__settings__.setSetting("nick","")
 		self.__settings__.openSettings()
 		
 		if self.__settings__.getSetting("username") and self.__settings__.getSetting( "user_password" ):
-			(http_login, status) = self._httpLogin(True)
-			result = "_httpLogin"
+			refreshed = False
+			if self.__settings__.getSetting( "oauth2_refresh_token" ):
+				if self.__dbg__:
+					print self.__plugin__ + " login refreshing token: " + str(refreshed)
+				refreshed = self._oRefreshToken()
+				if self.__dbg__:
+					print self.__plugin__ + " login refreshing token: " + str(refreshed)
 
-			if status == 200:
-				(result, status) = self._login()
+			if not refreshed:
+				if self.__dbg__:
+					print self.__plugin__ + " login token not refresh, or new uname or password"
+
+				self.__settings__.setSetting("oauth2_access_token","")
+				self.__settings__.setSetting("oauth2_refresh_token","")
+				self.__settings__.setSetting("oauth2_expires at", "")
+				self.__settings__.setSetting("nick","")
+				(http_login, status) = self._httpLogin(True)
+				result = "_httpLogin"
+
+				if status == 200:
+					(result, status) = self._apiLogin()
 				
-			if status == 200:
-				self.showErrorMessage(self.__language__(30031), result, 303)
-			else:
-				self.showErrorMessage(self.__language__(30609), result, status)
+				if status == 200:
+					self.showErrorMessage(self.__language__(30031), result, 303)
+				else:
+					self.showErrorMessage(self.__language__(30609), result, status)
 		
 		xbmc.executebuiltin( "Container.Refresh" )
 
-	def _login(self, error = 0):
+	def _apiLogin(self, error = 0):
                 if self.__dbg__:
                         print self.__plugin__ + " _login - errors: " + str(error)
                         
