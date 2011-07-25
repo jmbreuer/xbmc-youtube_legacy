@@ -64,7 +64,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 					result += self.transformSubtitleXMLtoSRT(xml["content"])
 
 		if len(result) > 0:
-			result = "[Script Info]\r\n; This is a Sub Station Alpha v4 script.\r\n; For Sub Station Alpha info and downloads,\r\n; go to http://www.eswat.demon.co.uk/\r\n; or email kotus@eswat.demon.co.uk\r\nTitle: Auto Generated\r\nScriptType: v4.00\r\nCollisions: Normal\r\nPlayResY: 1024\r\nPlayResX: 768\r\n\r\n[V4 Styles]\r\nFormat: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, TertiaryColour, BackColour, Bold, Italic, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, AlphaLevel, Encoding\r\nStyle: Default,Arial,40,0,65535,65535,999999,0,0,3,3,0,2,30,30,30,0,0\r\nStyle: speech,Arial,40,0,65535,65535,11861244,0,0,3,1,0,1,30,30,30,0,0\r\nStyle: popup,Arial,40,0,65535,65535,11861244,0,0,3,3,0,1,30,30,30,0,0\r\nStyle: highlightText,Wolf_Rain,56,15724527,15724527,15724527,4144959,0,0,1,1,2,2,5,5,30,0,0\r\n\r\n[Events]\r\nFormat: Marked, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\r\n" + result
+			result = "[Script Info]\r\n; This is a Sub Station Alpha v4 script.\r\n; For Sub Station Alpha info and downloads,\r\n; go to http://www.eswat.demon.co.uk/\r\n; or email kotus@eswat.demon.co.uk\r\nTitle: Auto Generated\r\nScriptType: v4.00\r\nCollisions: Normal\r\nPlayResY: 1280\r\nPlayResX: 800\r\n\r\n[V4 Styles]\r\nFormat: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, TertiaryColour, BackColour, Bold, Italic, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, AlphaLevel, Encoding\r\nStyle: Default,Arial,60,0,65535,65535,&H4BFFFFFF&,0,0,3,3,0,2,30,30,30,0,0\r\nStyle: speech,Arial,60,0,65535,65535,&H4BFFFFFF&,0,0,3,1,0,1,30,30,30,0,0\r\nStyle: popup,Arial,60,0,65535,65535,&H4BFFFFFF&,0,0,3,3,0,1,30,30,30,0,0\r\nStyle: highlightText,Wolf_Rain,60,15724527,15724527,15724527,&H4BFFFFFF&,0,0,1,1,2,2,5,5,30,0,0\r\n\r\n[Events]\r\nFormat: Marked, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\r\n" + result
 
 			result += "Dialogue: Marked=0,0:00:0.00,0:00:0.00,Default,Name,0000,0000,0000,,\r\n" # This solves a bug.
 			self.saveSubtitle(result, video)
@@ -231,10 +231,10 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 						
 						if start and dur and style != "highlightText":
 							marginL = "0000"
-							marginV = 1024 * float(cnode.item(0).getAttribute("y")) / 100
-							marginV += 1024 * float(cnode.item(0).getAttribute("h")) / 100
-							marginV = 1024 - int(marginV)
-							old_x = int((768 * float(cnode.item(0).getAttribute("x")) / 100) )
+							marginV = 1280 * float(cnode.item(0).getAttribute("y")) / 100
+							marginV += 1280 * float(cnode.item(0).getAttribute("h")) / 100
+							marginV = 1280 - int(marginV)
+							old_x = int((800 * float(cnode.item(0).getAttribute("x")) / 100) )
 							marginL = old_x
 							result += "Dialogue: Marked=%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\r\n" % ( "0", start, dur, style, "Name", marginL, "0000", marginV, "", text )
 				else:
