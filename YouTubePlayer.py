@@ -601,31 +601,31 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		get = params.get
 		links = []
 
-		if self.__settings__.getSetting("preferred") == "true":
-			if self.__dbg__:
-				print self.__plugin__ + " _getVideoLinks trying website"
+		if self.__dbg__:
+			print self.__plugin__ + " _getVideoLinks trying website"
 
-			result = self._fetchPage({"link": self.urls["video_stream"] % get("videoid")})
+		result = self._fetchPage({"link": self.urls["video_stream"] % get("videoid")})
 
-			html = urllib.unquote_plus(result["content"])
+		html = urllib.unquote_plus(result["content"])
 
-			vget = video.get
-			if result["status"] == 403:
-				video['apierror'] = self.getAlert(html, params)
-			elif result["status"] != 200:
-				if not vget('apierror'):
-					video['apierror'] = self.__language__(30617)
+		vget = video.get
+		if result["status"] == 403:
+			video['apierror'] = self.getAlert(html, params)
+		elif result["status"] != 200:
+			if not vget('apierror'):
+				video['apierror'] = self.__language__(30617)
 		
-			if result["status"] == 200:	
-				links = self.getVideoUrlMap(html, video)
+		if result["status"] == 200:	
+			links = self.getVideoUrlMap(html, video)
 
-			if len(links) == 0 and get("action") != "download":
-				links = self.getVideoStreamMap(html, video)
+		if len(links) == 0 and get("action") != "download":
+			links = self.getVideoStreamMap(html, video)
 
-			if len(links) > 0:
-				return (links, video)
+		if len(links) > 0:
+			return (links, video)
 
-			# If nothing is found, try the embeded link
+
+		# If nothing is found, try the embeded link
 		
 		# Get data from /get_video_info
 		if self.__dbg__:

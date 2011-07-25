@@ -313,7 +313,10 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
                         request.add_header('GData-Version', '2') #confirmed
                         request.add_header('X-GData-Key', 'key=' + self.APIKEY)
                 else:
-                        request.add_header('User-Agent', self.USERAGENT)
+			if self.__settings__.getSetting("preferred") == "true":
+				request.add_header('User-Agent', self.USERAGENT)
+			else:
+				request.add_header('User-Agent', self.USERAGENTIE)
 			request.add_header('Cookie', 'PREF=f1=50000000&hl=en')
                 
                 if get("login", "false") == "true":

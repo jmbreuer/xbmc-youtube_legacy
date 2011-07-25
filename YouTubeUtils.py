@@ -28,6 +28,7 @@ class YouTubeUtils:
 	PR_VIDEO_QUALITY = __settings__.getSetting("pr_video_quality") == "true"
 	VALID_CHARS = "-_.() %s%s" % (string.ascii_letters, string.digits)
 	USERAGENT = "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-GB; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8"
+	USERAGENTIE = "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)"
 	THUMBNAIL_PATH = os.path.join( __settings__.getAddonInfo('path'), "thumbnails" )
 	
 	# This function raises a keyboard for user input
