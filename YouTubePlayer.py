@@ -60,9 +60,8 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		
 			if subtitle_url:
 				xml = self._fetchPage({"link": subtitle_url})
-
-			if xml["status"] == 200 and xml["body"]:
-				result += self.transformSubtitleXMLtoSRT(xml["body"])
+				if xml["status"] == 200 and xml["body"]:
+					result += self.transformSubtitleXMLtoSRT(xml["body"])
 
 		if len(result) > 0:
 			result = "[Script Info]\r\n; This is a Sub Station Alpha v4 script.\r\n; For Sub Station Alpha info and downloads,\r\n; go to http://www.eswat.demon.co.uk/\r\n; or email kotus@eswat.demon.co.uk\r\nTitle: Auto Generated\r\nScriptType: v4.00\r\nCollisions: Normal\r\nPlayResY: 1024\r\nPlayResX: 768\r\n\r\n[V4 Styles]\r\nFormat: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, TertiaryColour, BackColour, Bold, Italic, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, AlphaLevel, Encoding\r\nStyle: Default,Arial,40,0,65535,65535,999999,0,0,3,3,0,2,30,30,30,0,0\r\nStyle: speech,Arial,40,0,65535,65535,11861244,0,0,3,1,0,1,30,30,30,0,0\r\nStyle: popup,Arial,40,0,65535,65535,11861244,0,0,3,3,0,1,30,30,30,0,0\r\nStyle: highlightText,Wolf_Rain,56,15724527,15724527,15724527,4144959,0,0,1,1,2,2,5,5,30,0,0\r\n\r\n[Events]\r\nFormat: Marked, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\r\n" + result
