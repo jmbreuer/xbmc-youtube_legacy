@@ -290,7 +290,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 
                 if not link or int(get("error", "0")) > 2 :
                         if self.__dbg__:
-                                print self.__plugin__ + " fetching page giving up "
+                                print self.__plugin__ + " _fetchPage giving up "
                         ret_obj["status"] = 500
                         return ret_obj
 
@@ -301,7 +301,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 			request = url2request(link, get("method", "GET"));
                 else:
                         if self.__dbg__:
-                                print self.__plugin__ + " got request"
+                                print self.__plugin__ + " _fetchPage got request"
                         request = urllib2.Request(link, get("request"))
                         request.add_header('X-GData-Client', "")
                         request.add_header('Content-Type', 'application/atom+xml') 
@@ -699,3 +699,37 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 			self.addNextFolder(ytobjects,params)
 				
 		return ytobjects;
+
+	def getDOMObject(self, html, params):
+		get = params.get
+                #if self.__dbg__:
+                #        print self.__plugin__ + " getDOMObject : " + repr(params)
+		m = re.search('(' + get("name") +' .*' + get("class") + '.*>)', html)
+		if m:
+                        #print self.__plugin__ + " getDOMObject : " + m.group(1)
+			start = html.find(m.group(1))
+			end = html.find("</" + get("name") + ">", start)
+			#print self.__plugin__ + " getDOMObject1 : " + str(start) + " < " + str(end)
+
+			pos = start
+			while html.find("<" + get("name"), pos) < end:
+				pos = html.find("<" + get("name"), pos)
+				end = html.find("</" + get("name") + ">", end)
+				print self.__plugin__ + " getDOMObject loop: " + str(start) + " < " + str(end)
+			html = html[start -1 :end]
+
+		#print self.__plugin__ + " getDOMObject done"
+		return html
+
+	def parseDOM(self, html, params):
+		get = params.get
+                #if self.__dbg__:
+                #        print self.__plugin__ + " parseDOM : " + repr(params)
+		if get("class"):
+			lst = re.compile('<'+ get("name") +'.*' + get("class")+'.*' + get("return") + '="(.*?)".*>').findall(html)
+			if len(lst) == 0:
+				lst = re.compile('<'+ get("name") +'.*' + get("return") + '="(.*?)".*' + get("class")+'.*>').findall(html)
+		else:
+			lst = re.compile('<'+ get("name") +'.*' + get("return") + '="(.*?)".*>').findall(html)
+		#print self.__plugin__ + " parseDOM done: " + str(len(lst))
+		return lst
