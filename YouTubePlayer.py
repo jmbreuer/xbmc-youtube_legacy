@@ -596,7 +596,8 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		links = []
 
 		preferred = True; # Setting.
-		if preferred:
+
+		if self.__settings__.getSetting("preferred") == "true":
 			if self.__dbg__:
 				print self.__plugin__ + " _getVideoLinks trying website"
 

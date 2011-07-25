@@ -47,6 +47,7 @@
   <!-- Advanced -->
   <category label="30260">
     <setting id="list_view" type="enum" label="30259" lvalues="30271|30272|30273" default="0" />
+    <setting id="preferred" type="bool" label="30285" default="true" />
     <setting id="hd_videos_download" type="enum" label="30261" lvalues="30262|30215|30216|30217" default="0" />
     <setting id="timeout" type="enum" label="30265" values="1|2|3|4|5" default="4" />
     <setting id="debug" type="bool" label="30246" default="false" />
