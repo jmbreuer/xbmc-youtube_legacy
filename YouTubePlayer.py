@@ -163,7 +163,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			if node:
 				if node.firstChild:
 					if node.firstChild.nodeValue:
-						text = self.replaceHtmlCodes(node.firstChild.nodeValue)
+						text = self.replaceHtmlCodes(node.firstChild.nodeValue).replace("\n", "\\n")
 						start = ""
 						
 						if node.getAttribute("start"):
@@ -200,7 +200,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 							print self.__plugin__ + " transformAnnotationToSSA Reference to video : " + linkv
 				elif node.firstChild:
 					if node.firstChild.nodeValue:
-						text = self._getNodeValue(node, "TEXT", "")
+						text = self._getNodeValue(node, "TEXT", "").replace("\n", "\\n")
 						start = ""
 
 						if node.getAttribute("start"):
