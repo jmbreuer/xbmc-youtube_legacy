@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, urllib, urllib2, re, socket, json
+import sys, urllib, re, socket, json
 import xbmc
 import YouTubeUtils
 import YouTubeCore
@@ -56,8 +56,7 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			result = "_httpLogin"
 
 			if status == 200:
-				#(result, status) = self._login()
-				(result, status) = self._oLogin()
+				(result, status) = self._login()
 				
 			if status == 200:
 				self.showErrorMessage(self.__language__(30031), result, 303)
@@ -70,9 +69,9 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		
 		xbmc.executebuiltin( "Container.Refresh" )
 
-	def _oLogin(self, error = 0):
+	def _login(self, error = 0):
                 if self.__dbg__:
-                        print self.__plugin__ + " _oLogin - errors: " + str(error)
+                        print self.__plugin__ + " _login - errors: " + str(error)
                         
                 uname = self.__settings__.getSetting( "username" )
                 passwd = self.__settings__.getSetting( "user_password" )
@@ -82,12 +81,12 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
                 
                 if ( uname == "" or passwd == "" ):
                         if self.__dbg__:
-                                print self.__plugin__ + " _oLogin no username or password set "
+                                print self.__plugin__ + " _login no username or password set "
                         return ( "", 0 )
 
                 url = "https://accounts.google.com/o/oauth2/auth?client_id=208795275779.apps.googleusercontent.com&redirect_uri=urn:ietf:wg:oauth:2.0:oob&scope=http%3A%2F%2Fgdata.youtube.com&response_type=code"
                 ret = self._fetchPage({ "link": url})
-		#print self.__plugin__ + " _oLogin : " + repr(ret)
+		#print self.__plugin__ + " _login : " + repr(ret)
 
 		newurl = re.compile('<form action="(.*?)" method="POST">').findall(ret["body"])[0]
 		url_data = { "state_wrapper": re.compile('<input type="hidden" id="state_wrapper" name="state_wrapper" value="(.*?)">').findall(ret["body"])[0],
@@ -95,7 +94,7 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		#"submit_deny_access": '<input id="submit_deny_access" name="submit_deny_access" type="submit" tabindex="1" value="Nej tak" class="approval_button grey" onClick="_gaq.push([\'_trackEvent\', \'ApprovalPage\', \'AccessGrant\', \'Denied\']);">' }
 		#state_wrapper=CrUBZnJvbV9sb2dpbj0xJnJlc3BvbnNlX3R5cGU9Y29kZSZyZWRpcmVjdF91cmk9dXJuOmlldGY6d2c6b2F1dGg6Mi4wOm9vYiZwbGk9MSZhdXRodXNlcj0wJmhsPWVuJmNsaWVudF9pZD03MzQ2NDQ3OTkyNTcuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20mc2NvcGU9aHR0cHM6Ly93d3cuZ29vZ2xlLmNvbS9tOC9mZWVkcxIVMTA1NjM1MDk1NjY2MDc1NzkzMjg5&submit_approve_access=Allow+Access
 		ret = self._fetchPage({ "link": newurl, "url_data": url_data})
-		#print self.__plugin__ + " _oLogin2 : " + repr(ret)
+		#print self.__plugin__ + " _login2 : " + repr(ret)
 
                 result = re.compile('code=(.*)</title>').findall(ret['body'])[0]
 
@@ -108,7 +107,7 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
                 ret = self._fetchPage({ "link": url, "url_data": url_data})
 
 		oauth = json.loads(ret["body"])
-		#print self.__plugin__ + " _oLogin3 : " + repr(oauth)
+		#print self.__plugin__ + " _login3 : " + repr(oauth)
 		self.__settings__.setSetting("oauth2_access_token", oauth["access_token"])
 		self.__settings__.setSetting("oauth2_refresh_token", oauth["refresh_token"])
 
@@ -124,91 +123,11 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			self.__settings__.setSetting("oauth2_refresh_token", oauth["refresh_token"])
 
                         if self.__dbg__:
-                                print self.__plugin__ + " _oLogin done: " + uname
+                                print self.__plugin__ + " _login done: " + uname
                         return ( self.__language__(30030), 200 )
                                         
                 return ( self.__language__(30609), 303 )
 
-	def _login(self, error = 0):
-		if self.__dbg__:
-			print self.__plugin__ + " _login - errors: " + str(error)
-			
-		uname = self.__settings__.getSetting( "username" )
-		passwd = self.__settings__.getSetting( "user_password" )
-		
-		self.__settings__.setSetting('auth', "")
-		self.__settings__.setSetting('nick', "")
-		
-		if ( uname == "" or passwd == "" ):
-			if self.__dbg__:
-				print self.__plugin__ + " _login no username or password set "
-			return ( "", 0 )
-
-		url = urllib2.Request(self.urls['gdata_login'])
-		url.add_header('Content-Type', 'application/x-www-form-urlencoded')
-		data = urllib.urlencode({'Email': uname, 'Passwd': passwd, 'service': 'youtube', 'source': 'YouTube plugin'})
-		
-		try:
-			con = urllib2.urlopen(url, data);
-			
-			value = con.read()
-			con.close()
-			
-			result = re.compile('Auth=(.*)').findall(value)
-					
-			if len(result) > 0:
-				self.__settings__.setSetting('auth', result[0])
-
-				if self.__dbg__:
-					print self.__plugin__ + " _login done: " + uname
-				return ( self.__language__(30030), 200 )
-					
-			return ( self.__language__(30609), 303 )
-			
-		except urllib2.HTTPError, e:
-			err = str(e)
-			if self.__dbg__:
-				print self.__plugin__ + " _login failed, hit http error except: " + err
-			if e.code == 403:
-				return ( self.__language__(30621), 303 )
-			return ( err, 303 )
-		
-		except ValueError, e:
-			err = repr(e)
-			if self.__dbg__:
-				print self.__plugin__ + " _login failed, hit valueerror except: " + err
-			return ( err, 303 )
-		
-		except IOError, e:
-			if self.__dbg__:
-				print self.__plugin__ + " _login failed, hit ioerror except: " + repr(e)
-				print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
-								   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
-				print self.interrogate(e)
-
-			if error < 9:
-				if self.__dbg__:
-					print self.__plugin__ + " login pre sleep"
-				# Check if there is a timeout here.
-				import time
-				time.sleep(3)
-				if self.__dbg__:
-					print self.__plugin__ + " login post sleep"
-				return self._login( error + 1 )
-			return ( self.__language__(30623), 303 )
-		
-		except urllib2.URLError, e:
-			err = repr(e)
-			if self.__dbg__:
-				print self.__plugin__ + " login failed, hit url error except: " + err
-			return ( err, 303 )										
-		except:
-			if self.__dbg__:
-				print self.__plugin__ + " login failed uncaught exception"
-				print 'ERROR: %s::%s (%d) - %s' % (self.__class__.__name__
-								   , sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
-			return ( self.__language__(30609), 500 )
-	
 	def createUrl(self, params):
 		url = ""
 		return url

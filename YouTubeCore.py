@@ -237,11 +237,8 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 				video_request +=	"<entry> \n <id>http://gdata.youtube.com/feeds/api/videos/" + videoid+ "</id>\n</entry> \n"
 				if i == 50:
 					final_request = request_start + video_request + request_end
-					request = urllib2.Request("http://gdata.youtube.com/feeds/api/videos/batch")
-					request.add_data(final_request)
-					con = urllib2.urlopen(request)
-					result = con.read()
-					(temp, status) = self.getVideoInfoBatch(result, params)
+					result = self._fetchPage({"link": "http://gdata.youtube.com/feeds/api/videos/batch", "request": final_request})
+					(temp, status) = self.getVideoInfoBatch(result["body"], params)
 					ytobjects += temp
 					if status != 200:
 						return (ytobjects, status)
@@ -250,12 +247,9 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 				i+=1
 		
 		final_request = request_start + video_request + request_end
-		request = urllib2.Request("http://gdata.youtube.com/feeds/api/videos/batch")
-		request.add_data(final_request)
-		con = urllib2.urlopen(request)
-		result = con.read()
+                result = self._fetchPage({"link": "http://gdata.youtube.com/feeds/api/videos/batch", "request": final_request})
 				
-		(temp, status) = self.getVideoInfoBatch(result, params)
+		(temp, status) = self.getVideoInfoBatch(result["body"], params)
 		ytobjects += temp
 				
 		return ( ytobjects, 200)
@@ -402,6 +396,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 		if self.__settings__.getSetting( "safe_search" ) != "2":
 			confirmed = "1"
 		
+		# Convert to fetchpage
 		request = urllib2.Request(new_url)
 		request.add_header('User-Agent', self.USERAGENT)
 		request.add_header('Cookie', 'LOGIN_INFO=' + login_info)
