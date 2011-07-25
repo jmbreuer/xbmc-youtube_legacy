@@ -67,7 +67,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		result = self._fetchPage({"link":url})
 		
 		list = SoupStrainer(id="recent-trailers-container", name="div")
-		trailers = BeautifulSoup(result["body"], parseOnlyThese=list)
+		trailers = BeautifulSoup(result["content"], parseOnlyThese=list)
 		
 		if (len(trailers) > 0):
 			trailer = trailers.div.div
@@ -102,7 +102,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 
 		next = "false"
 		pager = SoupStrainer(name="div", attrs = {'class':"yt-uix-pager"})
-		pagination = BeautifulSoup(result["body"], parseOnlyThese=pager)
+		pagination = BeautifulSoup(result["content"], parseOnlyThese=pager)
 
 		if (len(pagination) > 0):
 			tmp = str(pagination)
@@ -110,7 +110,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 				next = "true"
 		
 		list = SoupStrainer(name="div", id="browse-video-data")
-		videos = BeautifulSoup(result["body"], parseOnlyThese=list)
+		videos = BeautifulSoup(result["content"], parseOnlyThese=list)
 		
 		items = []
 		if (len(videos) > 0):
@@ -123,7 +123,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 				video = video.findNextSibling(name="div", attrs = {'class':"video-cell *vl"})
 		else:
 			list = SoupStrainer(name="div", attrs = {'class':"most-viewed-list paginated"})
-			videos = BeautifulSoup(result["body"], parseOnlyThese=list)
+			videos = BeautifulSoup(result["content"], parseOnlyThese=list)
 			if (len(videos) > 0):
 				video = videos.div.div.findNextSibling(name="div", attrs={'class':"video-cell"})
 				while (video != None):
@@ -149,7 +149,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		
 		if result["status"] == 200:
 			list = SoupStrainer(name="div", id="browse-filter-menu")
-			content = BeautifulSoup(result["body"], parseOnlyThese=list)
+			content = BeautifulSoup(result["content"], parseOnlyThese=list)
 			if (len(content) > 0):
 				cat_list = content.ul
 				while cat_list != None:
@@ -190,7 +190,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			result = self._fetchPage({"link": url})
 			
 			if result["status"] == 200:
-				videos = re.compile('<a href="/watch\?v=(.*)&amp;feature=artist" title="').findall(result["body"]);
+				videos = re.compile('<a href="/watch\?v=(.*)&amp;feature=artist" title="').findall(result["content"]);
 				
 		for v in videos:
 			if v not in items:
@@ -210,7 +210,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			
 			if result["status"] == 200:
 				list = SoupStrainer(name="div", id ="similar-artists")
-				content = BeautifulSoup(result["body"], parseOnlyThese=list)
+				content = BeautifulSoup(result["content"], parseOnlyThese=list)
 				artists = content.findAll(name = "div", attrs = {"class":"similar-artist"})
 				for artist in artists:
 					item = {}
@@ -242,7 +242,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			result = self._fetchPage({"link":url})
 			
 			list = SoupStrainer(name="div", attrs = {"class":"ytg-fl browse-content"})
-			content = BeautifulSoup(result["body"], parseOnlyThese=list)
+			content = BeautifulSoup(result["content"], parseOnlyThese=list)
 			
 			if (len(content) > 0):
 				artists = content.findAll(name="div", attrs = {"class":"browse-item artist-item"}, recursive=True)
@@ -277,7 +277,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			result = self._fetchPage({"link":url})
 			
 			list = SoupStrainer(name="div", attrs = {"class":"ytg-fl browse-content"})
-			content = BeautifulSoup(result["body"], parseOnlyThese=list)
+			content = BeautifulSoup(result["content"], parseOnlyThese=list)
 			
 			if (len(content) > 0):
 				videos = content.findAll(name="div", attrs = {"class":"browse-item music-item "}, recursive=True)
@@ -299,15 +299,15 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		url = self.urls["disco_search"] % urllib.quote_plus(get("search"))
 		result = self._fetchPage({"link": url})
 		
-		if (result["body"].find("list=") != -1):
-			result["body"] = result["body"].replace("\u0026", "&")
-			mix_list_id = result["body"][result["body"].find("list=") + 5:]
+		if (result["content"].find("list=") != -1):
+			result["content"] = result["content"].replace("\u0026", "&")
+			mix_list_id = result["content"][result["content"].find("list=") + 5:]
 			if (mix_list_id.find("&") != -1):
 				mix_list_id = mix_list_id[:mix_list_id.find("&")]
 			elif (mix_list_id.find('"') != -1):
 				mix_list_id = mix_list_id[:mix_list_id.find('"')]
 			
-			video_id = result["body"][result["body"].find("v=") + 2:]
+			video_id = result["content"][result["content"].find("v=") + 2:]
 			video_id = video_id[:video_id.find("&")]
 			
 			url = self.urls["disco_mix_list"] % (video_id, mix_list_id)
@@ -315,7 +315,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			result = self._fetchPage({"link": url})
 			
 			list = SoupStrainer(name="div", id ="playlist-bar")
-			mix_list = BeautifulSoup(result["body"], parseOnlyThese=list)
+			mix_list = BeautifulSoup(result["content"], parseOnlyThese=list)
 			if (len(mix_list) > 0):
 				items = mix_list.div["data-video-ids"].split(",")
 		
@@ -330,7 +330,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		result = self._fetchPage({"link": url})
 		
 		list = SoupStrainer(name="div", attrs = {"class":"popular-message"})
-		popular = BeautifulSoup(result["body"], parseOnlyThese=list)
+		popular = BeautifulSoup(result["content"], parseOnlyThese=list)
 		items = []
 		
 		if (len(popular) > 0):
@@ -387,7 +387,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		result = self._fetchPage({"link": url})
 		
 		list = SoupStrainer(name="div", id='live-now-list-container')
-		live = BeautifulSoup(result["body"], parseOnlyThese=list)
+		live = BeautifulSoup(result["content"], parseOnlyThese=list)
 		videos = []
 		if (len(live) > 0):
 			video = live.div.div
@@ -422,10 +422,10 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		url = self.urls[get("scraper")]
 		result = self._fetchPage({"link": url, "login": "true"})
 		
-		videos = re.compile('<a href="/watch\?v=(.*)&amp;feature=grec_browse" class=').findall(result["body"]);
+		videos = re.compile('<a href="/watch\?v=(.*)&amp;feature=grec_browse" class=').findall(result["content"]);
 		
 		if len(videos) == 0:
-			videos = re.compile('<div id="reco-(.*)" class=').findall(result["body"]);
+			videos = re.compile('<div id="reco-(.*)" class=').findall(result["content"]);
 		
 		return ( videos, result["status"] )
 
@@ -439,9 +439,9 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		result = self._fetchPage({"link": url, "get_redirect":"true", "login": "true"})
 		
 		if result["status"] == 200:
-			if result["body"].find("p=") > 0:
-				result["body"] = result["body"][result["body"].find("p=") + 2:]
-				playlist_id = result["body"][:result["body"].find("&")]
+			if result["content"].find("p=") > 0:
+				result["content"] = result["content"][result["content"].find("p=") + 2:]
+				playlist_id = result["content"][:result["content"].find("&")]
 				params["user_feed"] = "playlist"
 				params["login"] = "true"
 				params["playlist"] = playlist_id
@@ -458,7 +458,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		
 		result = self._fetchPage({"link": url, "login": "true"})
 		list = SoupStrainer(name="div", id="vm-video-list-container")
-		liked = BeautifulSoup(result["body"], parseOnlyThese=list)
+		liked = BeautifulSoup(result["content"], parseOnlyThese=list)
 		items = []
 		
 		if (len(liked) > 0):
@@ -480,10 +480,10 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		url = self.createUrl(params)
 		result = self._fetchPage({"link":url})
 			
-		videos = re.compile('<a href="/watch\?v=(.*)&amp;feature=sh_e_sl&amp;list=SL"').findall(result["body"])
+		videos = re.compile('<a href="/watch\?v=(.*)&amp;feature=sh_e_sl&amp;list=SL"').findall(result["content"])
 			
 		list = SoupStrainer(name="div", attrs = {'class':"show-more-ctrl"})
-		nexturl = BeautifulSoup(result["body"], parseOnlyThese=list)
+		nexturl = BeautifulSoup(result["content"], parseOnlyThese=list)
 		if (len(nexturl) > 0):
 			nexturl = nexturl.find(name="div", attrs = {'class':"button-container"})
 			if (nexturl.button):
@@ -500,12 +500,12 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 				result = self._fetchPage({"link":url})
 				
 				if result["status"] == 200:
-					result["body"] = result["body"].replace("\\u0026","&")
-					result["body"] = result["body"].replace("\\/","/")
-					result["body"] = result["body"].replace('\\"','"')
-					result["body"] = result["body"].replace("\\u003c","<")
-					result["body"] = result["body"].replace("\\u003e",">")
-					more_videos = re.compile('data-video-ids="([^"]*)"').findall(result["body"])
+					result["content"] = result["content"].replace("\\u0026","&")
+					result["content"] = result["content"].replace("\\/","/")
+					result["content"] = result["content"].replace('\\"','"')
+					result["content"] = result["content"].replace("\\u003c","<")
+					result["content"] = result["content"].replace("\\u003e",">")
+					more_videos = re.compile('data-video-ids="([^"]*)"').findall(result["content"])
 					
 					if not more_videos:
 						fetch = False
@@ -525,14 +525,14 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		url = self.createUrl(params)
 		result = self._fetchPage({"link":url})
 		
-		if ((result["body"].find('class="seasons"') == -1) or get("season")):
+		if ((result["content"].find('class="seasons"') == -1) or get("season")):
 			if self.__dbg__:
 				print self.__plugin__ + " parsing videolist for single season"
 			return self.scrapeShowEpisodes(params)
 		
 		params["folder"] = "true"
 		del params["batch"]
-		return self.scrapeShowSeasons(result["body"], params)
+		return self.scrapeShowSeasons(result["content"], params)
 	
 	def scrapeShowSeasons(self, html, params = {}):
 		get = params.get
@@ -585,7 +585,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			result = self._fetchPage({"link":url})
 			
 			list = SoupStrainer(name="div", attrs = {"class":"popular-show-list"})
-			shows = BeautifulSoup(result["body"], parseOnlyThese=list)
+			shows = BeautifulSoup(result["content"], parseOnlyThese=list)
 		
 			if (len(shows) > 0):
 				show = shows.div.div
@@ -636,7 +636,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		
 		items = []
 		if result["status"] == 200:
-			items = re.compile('<a href="/watch\?v=(.*)&amp;feature=musicchart" class=').findall(result["body"]);
+			items = re.compile('<a href="/watch\?v=(.*)&amp;feature=musicchart" class=').findall(result["content"]);
 		
 		return (items, result["status"])
 		
@@ -653,7 +653,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		params["folder"] = "true"
 		ytobjects = []
 		list = SoupStrainer(name="div", attrs = {'class':"ytg-fl browse-content"})
-		categories = BeautifulSoup(result["body"], parseOnlyThese=list)		
+		categories = BeautifulSoup(result["content"], parseOnlyThese=list)		
 		
 		if len(categories):
 			categorylist = categories.findAll(name="div", attrs = {'class':"yt-uix-slider-head"})
@@ -690,7 +690,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			result = self._fetchPage({"link":url})
 			
 			list = SoupStrainer(name="div", attrs = {'class':"yt-uix-pager"})
-			paginator = BeautifulSoup(result["body"], parseOnlyThese=list)
+			paginator = BeautifulSoup(result["content"], parseOnlyThese=list)
 			if (len(paginator) > 0):
 				links = paginator.findAll(name="a", attrs = {'class':"yt-uix-pager-link"})
 				for link in links:
@@ -699,7 +699,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 						next = "true"
 			
 			list = SoupStrainer(name="ul", attrs = {'class':"browse-item-list"})
-			movies = BeautifulSoup(result["body"], parseOnlyThese=list)
+			movies = BeautifulSoup(result["content"], parseOnlyThese=list)
 			
 			if (len(movies) > 0):
 				page += 1
@@ -860,7 +860,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		
 		if result["status"] == 200:
 			pager = SoupStrainer(name="div", attrs = {'class':"yt-uix-pager"})
-			pagination = BeautifulSoup(result["body"], parseOnlyThese=pager)
+			pagination = BeautifulSoup(result["content"], parseOnlyThese=pager)
 	
 			if (len(pagination) > 0):
 				tmp = str(pagination)
@@ -869,7 +869,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			
 			
 			list = SoupStrainer(id="popular-column", name="div")
-			trailers = BeautifulSoup(result["body"], parseOnlyThese=list)
+			trailers = BeautifulSoup(result["content"], parseOnlyThese=list)
 			
 			if (len(trailers) > 0):
 				trailer = trailers.div.div
@@ -911,11 +911,11 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		
 		if result["status"] == 200:
 			list = SoupStrainer(name="div", attrs = {"class":"yt-uix-expander-body"})
-			categories = BeautifulSoup(result["body"], parseOnlyThese=list)
+			categories = BeautifulSoup(result["content"], parseOnlyThese=list)
 			
 			if len(categories) == 0:
 				list = SoupStrainer(name="div", id = "browse-filter-menu")
-				categories = BeautifulSoup(result["body"], parseOnlyThese=list)
+				categories = BeautifulSoup(result["content"], parseOnlyThese=list)
 			
 			if (len(categories) > 0):
 				ul = categories.ul

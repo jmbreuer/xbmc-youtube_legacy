@@ -114,7 +114,7 @@ class YouTubeFeeds(YouTubeCore.YouTubeCore):
 	
 	def list(self, params = {}):
 		get = params.get
-		result = { "body": "", "status": 303 }
+		result = { "content": "", "status": 303 }
 		
 		if get("folder"):
 			return self.listFolder(params)
@@ -134,10 +134,10 @@ class YouTubeFeeds(YouTubeCore.YouTubeCore):
 			result = self._fetchPage({"link": url, "auth": get("login"), "api": "true"})
 		
 		if result["status"] != 200:
-			return ( result["body"], result["status"] )
+			return ( result["content"], result["status"] )
 		
 		if not get("folder"):
-			videos = self.getVideoInfo(result["body"], params)
+			videos = self.getVideoInfo(result["content"], params)
 		
 		if len(videos) == 0:
 			return (videos, 303)
@@ -255,7 +255,7 @@ class YouTubeFeeds(YouTubeCore.YouTubeCore):
 	
 	def listAll(self, params ={}):
 		get = params.get
-		result = { "body": "", "status": 303 }
+		result = { "content": "", "status": 303 }
 		
 		if get("login") == "true":
 			if ( not self._getAuth() ):
@@ -274,9 +274,9 @@ class YouTubeFeeds(YouTubeCore.YouTubeCore):
 		
 		if result["status"] == 200:
 			if get("folder") == "true":
-				ytobjects = self.getFolderInfo(result["body"], params)
+				ytobjects = self.getFolderInfo(result["content"], params)
 			else:
-				ytobjects = self.getVideoInfo(result["body"], params)
+				ytobjects = self.getVideoInfo(result["content"], params)
 		
 		if len(ytobjects) == 0:
 			return ytobjects
@@ -295,9 +295,9 @@ class YouTubeFeeds(YouTubeCore.YouTubeCore):
 				break
 			temp_objects = []
 			if get("folder") == "true":
-				temp_objects = self.getFolderInfo(result["body"], params)
+				temp_objects = self.getFolderInfo(result["content"], params)
 			else:
-				temp_objects = self.getVideoInfo(result["body"], params)
+				temp_objects = self.getVideoInfo(result["content"], params)
 		
 			next = temp_objects[len(temp_objects)-1].get("next","false")
 			if next == "true":

@@ -47,8 +47,8 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		if self.__settings__.getSetting("annotations") == "true" and not video.has_key("downloadPath"):
 
 			xml = self._fetchPage({"link": self.urls["annotation_url"] % get('videoid')})
-			if xml["status"] == 200 and xml["body"]:
-				result += self.transformAnnotationToSSA(xml["body"])
+			if xml["status"] == 200 and xml["content"]:
+				result += self.transformAnnotationToSSA(xml["content"])
 
                 if self.__settings__.getSetting("lang_code") != "0":
 			subtitle_url = self.getSubtitleUrl(video)
@@ -56,12 +56,12 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			if not subtitle_url and self.__settings__.getSetting("transcode") == "true":
 				html = self._fetchPage({"link": self.urls["video_stream"] % get("videoid")})
 				if html["status"] == 200:
-					subtitle_url = self.getTranscriptionUrl(html["body"], video) 
+					subtitle_url = self.getTranscriptionUrl(html["content"], video) 
 		
 			if subtitle_url:
 				xml = self._fetchPage({"link": subtitle_url})
-				if xml["status"] == 200 and xml["body"]:
-					result += self.transformSubtitleXMLtoSRT(xml["body"])
+				if xml["status"] == 200 and xml["content"]:
+					result += self.transformSubtitleXMLtoSRT(xml["content"])
 
 		if len(result) > 0:
 			result = "[Script Info]\r\n; This is a Sub Station Alpha v4 script.\r\n; For Sub Station Alpha info and downloads,\r\n; go to http://www.eswat.demon.co.uk/\r\n; or email kotus@eswat.demon.co.uk\r\nTitle: Auto Generated\r\nScriptType: v4.00\r\nCollisions: Normal\r\nPlayResY: 1024\r\nPlayResX: 768\r\n\r\n[V4 Styles]\r\nFormat: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, TertiaryColour, BackColour, Bold, Italic, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, AlphaLevel, Encoding\r\nStyle: Default,Arial,40,0,65535,65535,999999,0,0,3,3,0,2,30,30,30,0,0\r\nStyle: speech,Arial,40,0,65535,65535,11861244,0,0,3,1,0,1,30,30,30,0,0\r\nStyle: popup,Arial,40,0,65535,65535,11861244,0,0,3,3,0,1,30,30,30,0,0\r\nStyle: highlightText,Wolf_Rain,56,15724527,15724527,15724527,4144959,0,0,1,1,2,2,5,5,30,0,0\r\n\r\n[Events]\r\nFormat: Marked, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\r\n" + result
@@ -79,10 +79,10 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		xml = self._fetchPage({"link": self.urls["timed_text_index"] % get('videoid')})
 		
 		if self.__dbg__:
-			print self.__plugin__ + " subtitle index: " + repr(xml["body"])
+			print self.__plugin__ + " subtitle index: " + repr(xml["content"])
 		
 		if xml["status"] == 200:
-			dom = parseString(xml["body"])
+			dom = parseString(xml["content"])
 			entries = dom.getElementsByTagName("track")
 
 			subtitle = ""
@@ -436,7 +436,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		result = self._fetchPage({"link": self.urls["video_info"] % get("videoid"), "api": "true"})
 
 		if result["status"] == 200:
-			video = self.getVideoInfo(result["body"], params)
+			video = self.getVideoInfo(result["content"], params)
 		
 			if len(result) == 0:
 				if self.__dbg__:
@@ -446,7 +446,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		else:
 			if self.__dbg__:
 				print self.__plugin__ + " Got API Error from YouTube!"
-			video["apierror"] = result["body"]
+			video["apierror"] = result["content"]
 			
 			return (video,303)
 		video = video[0]
@@ -607,7 +607,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 
 			result = self._fetchPage({"link": self.urls["video_stream"] % get("videoid")})
 
-			html = urllib.unquote_plus(result["body"])
+			html = urllib.unquote_plus(result["content"])
 
 			vget = video.get
 			if result["status"] == 403:
@@ -633,13 +633,13 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			
 		result = self._fetchPage({"link": self.urls["embed_stream"] % get("videoid") })
 		
-		if result["body"].find("status=fail") > -1: # this is
+		if result["content"].find("status=fail") > -1: # this is
 			result["status"] = 303
-			#result["body"] = re.compile('reason=(.*)%3Cbr').findall(result["body"])[0]
+			#result["content"] = re.compile('reason=(.*)%3Cbr').findall(result["content"])[0]
 
 		if result["status"] == 200:
-			links = self.getVideoUrlMap(result["body"], video)
+			links = self.getVideoUrlMap(result["content"], video)
 			if len(links) == 0 and get("action") != "download":
-				links = self.getVideoStreamMap(result["body"], video)
+				links = self.getVideoStreamMap(result["content"], video)
 
 		return (links, video)

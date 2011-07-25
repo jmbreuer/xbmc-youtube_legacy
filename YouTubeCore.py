@@ -77,68 +77,68 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 		delete_url = self.urls["favorites"] % "default"
 		delete_url += "/" + get('editid') 
 		result = self._fetchPage({"link": delete_url, "api": "true", "login": "true", "auth": "true", "method": "DELETE"})
-		return (result["body"], result["status"])
+		return (result["content"], result["status"])
 	
 	def remove_contact(self, params = {}):
 		get = params.get
 		delete_url = self.urls["contacts"] 
 		delete_url += "/" + get("contact")
 		result = self._fetchPage({"link": delete_url, "api": "true", "login": "true", "auth": "true", "method": "DELETE"})
-		return (result["body"], result["status"])
+		return (result["content"], result["status"])
 
 	def remove_subscription(self, params = {}):
 		get = params.get
 		delete_url = self.urls["subscriptions"] % "default"
 		delete_url += "/" + get("editid")
 		result = self._fetchPage({"link": delete_url, "api": "true", "login": "true", "auth": "true", "method": "DELETE"})
-		return (result["body"], result["status"])
+		return (result["content"], result["status"])
 			
 	def add_contact(self, params = {}):
 		get = params.get
 		url = self.urls["contacts"]
 		add_request = '<?xml version="1.0" encoding="UTF-8"?> <entry xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://gdata.youtube.com/schemas/2007"><yt:username>%s</yt:username></entry>' % get("contact")
 		result = self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true", "request": add_request})
-		return (result["body"], result["status"])
+		return (result["content"], result["status"])
 		
 	def add_favorite(self, params = {}):
 		get = params.get 
 		url = self.urls["favorites"] % "default"
 		add_request = '<?xml version="1.0" encoding="UTF-8"?><entry xmlns="http://www.w3.org/2005/Atom"><id>%s</id></entry>' % get("videoid")
 		result = self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true", "request": add_request})
-		return (result["body"], result["status"])
+		return (result["content"], result["status"])
 		
 	def add_subscription(self, params = {}):
 		get = params.get
 		url = self.urls["subscriptions"] % "default"
 		add_request = '<?xml version="1.0" encoding="UTF-8"?><entry xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://gdata.youtube.com/schemas/2007"> <category scheme="http://gdata.youtube.com/schemas/2007/subscriptiontypes.cat" term="user"/><yt:username>%s</yt:username></entry>' % get("channel")
 		result = self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true", "request": add_request})
-		return (result["body"], result["status"])
+		return (result["content"], result["status"])
 	
 	def add_playlist(self, params = {}):
 		get = params.get
 		url = "http://gdata.youtube.com/feeds/api/users/default/playlists"
 		add_request = '<?xml version="1.0" encoding="UTF-8"?><entry xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://gdata.youtube.com/schemas/2007"><title type="text">%s</title><summary>%s</summary></entry>' % ( get("title"), get("summary") )
 		result = self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true", "request": add_request})
-		return (result["body"], result["status"])
+		return (result["content"], result["status"])
 		
 	def del_playlist(self, params = {}):
 		get = params.get
 		url = "http://gdata.youtube.com/feeds/api/users/%s/playlists/%s" % (self.__settings__.getSetting("nick"), get("playlist"))
 		result = self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true", "method": "DELETE"})
-		return (result["body"], result["status"])
+		return (result["content"], result["status"])
 
 	def add_to_playlist(self, params = {}):
 		get = params.get
 		url = "http://gdata.youtube.com/feeds/api/playlists/%s" % get("playlist")
 		add_request = '<?xml version="1.0" encoding="UTF-8"?><entry xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://gdata.youtube.com/schemas/2007"><id>%s</id></entry>' % get("videoid")
 		result = self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true", "request": add_request})
-		return (result["body"], result["status"])
+		return (result["content"], result["status"])
 	
 	def remove_from_playlist(self, params = {}):
 		get = params.get
 		url = "http://gdata.youtube.com/feeds/api/playlists/%s/%s" % ( get("playlist"), get("playlist_entry_id") )
 		result = self._fetchPage({"link": url, "api": "true", "auth": "true", "method": "DELETE"})
-		return (result["body"], result["status"])
+		return (result["content"], result["status"])
 	
 	def getFolderInfo(self, xml, params = {}):
 		get = params.get
@@ -238,7 +238,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 				if i == 50:
 					final_request = request_start + video_request + request_end
 					result = self._fetchPage({"link": "http://gdata.youtube.com/feeds/api/videos/batch", "request": final_request})
-					(temp, status) = self.getVideoInfoBatch(result["body"], params)
+					(temp, status) = self.getVideoInfoBatch(result["content"], params)
 					ytobjects += temp
 					if status != 200:
 						return (ytobjects, status)
@@ -249,7 +249,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 		final_request = request_start + video_request + request_end
                 result = self._fetchPage({"link": "http://gdata.youtube.com/feeds/api/videos/batch", "request": final_request})
 				
-		(temp, status) = self.getVideoInfoBatch(result["body"], params)
+		(temp, status) = self.getVideoInfoBatch(result["content"], params)
 		ytobjects += temp
 				
 		return ( ytobjects, 200)
