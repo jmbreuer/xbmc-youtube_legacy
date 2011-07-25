@@ -218,6 +218,10 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 							cnode = node.getElementsByTagName("rectRegion")
 						elif style == "speech":
 							cnode = node.getElementsByTagName("anchoredRegion");
+						elif style == "higlightText":
+							cnode = False
+						else:
+							cnode = False
 
 						if cnode:
 							if cnode.item(0):
@@ -310,7 +314,10 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		if (html.find("live_playback") > 0):
 			video["live_play"] = "true"
 		
-		fmtSource = re.findall('"fmt_stream_map": "([^"]+)"', html);			
+		# For /get_video_info
+		fmtSource = re.findall('&fmt_stream_map=(.*)&', html);
+		if not fmtSource:
+			fmtSource = re.findall('"fmt_stream_map": "([^"]+)"', html);			
 		if fmtSource:
 			if self.__dbg__:
 				print self.__plugin__ + " fmt_stream_map found"
@@ -451,7 +458,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		video_url = ""
 
 		if self.__dbg__:
-			print self.__plugin__ + " selectVideoQuality : " + repr(links)
+			print self.__plugin__ + " selectVideoQuality : " #+ repr(links)
 		
 		if get("action") == "download":
 			hd_quality = int(self.__settings__.getSetting( "hd_videos_download" ))
@@ -594,8 +601,6 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		get = params.get
 		links = []
 
-		preferred = True; # Setting.
-
 		if self.__settings__.getSetting("preferred") == "true":
 			if self.__dbg__:
 				print self.__plugin__ + " _getVideoLinks trying website"
@@ -619,6 +624,8 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 
 			if len(links) > 0:
 				return (links, video)
+
+			# If nothing is found, try the embeded link
 		
 		# Get data from /get_video_info
 		if self.__dbg__:
@@ -626,10 +633,13 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			
 		result = self._fetchPage({"link": self.urls["embed_stream"] % get("videoid") })
 		
+		if result["body"].find("status=fail") > -1: # this is
+			result["status"] = 303
+			#result["body"] = re.compile('reason=(.*)%3Cbr').findall(result["body"])[0]
+
 		if result["status"] == 200:
-			html = urllib.unquote_plus(result["body"])
-			links = self.getVideoUrlMap(html, video)
+			links = self.getVideoUrlMap(result["body"], video)
 			if len(links) == 0 and get("action") != "download":
-				links = self.getVideoStreamMap(html, video)
+				links = self.getVideoStreamMap(result["body"], video)
 
 		return (links, video)
