@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, urllib, urllib2, re, time, socket
+import sys, urllib, urllib2, re, time, socket, cookielib
 from xml.dom.minidom import parseString
 import YouTubeUtils
 # ERRORCODES:
@@ -44,6 +44,10 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 	
 	__storage__ = sys.modules[ "__main__" ].__storage__
 	__login__ = sys.modules[ "__main__" ].__login__
+
+        __cj__ = cookielib.LWPCookieJar()
+        __opener__ = urllib2.build_opener(urllib2.HTTPCookieProcessor(__cj__))
+        urllib2.install_opener(__opener__)
 
 	APIKEY = "AI39si6hWF7uOkKh4B9OEAX-gK337xbwR9Vax-cdeF9CF9iNAcQftT8NVhEXaORRLHAmHxj6GjM-Prw04odK4FxACFfKkiH9lg";
 	
@@ -337,6 +341,111 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 			return self._fetchPage(params)
 		
 		return ( "", 500 )
+
+        def _fetchPageDict(self, params = {}):
+                get = params.get
+                ret_obj = {}
+                if self.__dbg__:
+			if get("url_data") and False:
+				print self.__plugin__ + " _fetchPage called for : " + repr(params['link'])
+			else:
+				print self.__plugin__ + " _fetchPage called for : " + repr(params)
+
+                if not get("link") or int(get("error", "0")) > 0 :
+                        if self.__dbg__:
+                                print self.__plugin__ + " fetching page giving up "
+                        ret_obj["error"] = 500
+                        return ret_obj
+
+		if get("url_data"):
+			request = urllib2.Request(get("link"), urllib.urlencode(get("url_data")) )
+			request.add_header('Content-Type', 'application/x-www-form-urlencoded')
+		elif get("request", "false") == "false":
+			request = url2request(get("link"), get("method", "GET"));
+                else:
+                        if self.__dbg__:
+                                print self.__plugin__ + " got request"
+                        request = urllib2.Request(get("link"), get("request"))
+                        request.add_header('X-GData-Client', "")
+                        request.add_header('Content-Type', 'application/atom+xml') 
+                        request.add_header('Content-Length', str(len(get("request")))) 
+
+                if get("api", "false") == "true":
+                        if self.__dbg__:
+                                print self.__plugin__ + " got api"
+                        request.add_header('GData-Version', '2') #confirmed
+                        request.add_header('X-GData-Key', 'key=' + self.APIKEY)
+                else:
+                        request.add_header('User-Agent', self.USERAGENT)
+                
+                if get("login", "false") == "true":
+                        if self.__dbg__:
+                                print self.__plugin__ + " got login"
+                        if ( self.__settings__.getSetting( "username" ) == "" or self.__settings__.getSetting( "user_password" ) == "" ):
+                                if self.__dbg__:
+                                        print self.__plugin__ + " _fetchPage, login required but no credentials provided"
+                                ret_obj["error"] = 303
+                                ret_obj["body"] = self.__language__( 30622 )
+                                return ret_obj
+                        
+                        request.add_header('Cookie', 'LOGIN_INFO=' + self.__login__._httpLogin() )
+                
+                if get("auth", "false") == "true":
+                        if self.__dbg__:
+                                print self.__plugin__ + " got auth"
+                        if self._getAuth():
+                                request.add_header('Authorization', 'GoogleLogin auth=' + self.__settings__.getSetting("auth"))
+                        else:
+                                print self.__plugin__ + " _fetchPage couldn't get login token"
+                
+                try:
+                        if self.__dbg__:
+                                print self.__plugin__ + " _fetchPage making request"
+
+                        con = urllib2.urlopen(request)
+
+                        ret_obj["body"] = con.read()
+                        ret_obj["new_url"] = con.geturl()
+                        ret_obj["header"] = str(con.info())
+                        con.close()
+
+                        # Return result if it isn't age restricted
+                        if ( ret_obj["body"].find("verify-actions") == -1 and ret_obj["body"].find("verify-age-actions") == -1):
+                                if self.__dbg__:
+                                        print self.__plugin__ + " done"
+                                        #print repr(ret_obj["body"])
+                                        #print self.__plugin__ + " _bla: cj2 : " + repr(self.__cj__)
+                                return ret_obj
+                        else:
+                                print self.__plugin__ + " found verify age request: " + repr(params) 
+                                # We need login to verify age
+                                if not get("login"):
+                                        params["error"] = get("error", "0")
+                                        params["login"] = "true"
+                                        return self._fetchPageDict(params)
+                                #else:
+                                        # TODO: THIS NEEDS UPDATING!!!!!
+                                        #return self._verifyAge(result, new_url, params)
+                
+                except urllib2.HTTPError, e:
+                        err = str(e)
+                        if self.__dbg__:
+                                print self.__plugin__ + " _fetchPage HTTPError : " + err
+                        
+                        if err.find("TokenExpired") > -1:
+                                self.__login__._login()
+                        
+			# e.fp.read() <- read error message from 500 pages for instance.
+		        # e.headers
+		        # e.code
+			# e.msg
+                        params["error"] = str(int(get("error", "0")) + 1)
+			ret = self._fetchPageDict(params)
+			if not ret.has_key("body") and e.fp:
+				ret["body"] = e.fp.read()
+                        return ret
+                ret_obj["error"] = 505
+                return ret_obj
 		
 	def _verifyAge(self, result, new_url, params = {}):
 		get = params.get

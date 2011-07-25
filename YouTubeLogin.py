@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, urllib, urllib2, re, cookielib, socket
+import sys, urllib, urllib2, re, socket
 import xbmc
 import YouTubeUtils
 import YouTubeCore
@@ -32,7 +32,7 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 	__language__ = sys.modules[ "__main__" ].__language__
 	__plugin__ = sys.modules[ "__main__" ].__plugin__
 	__dbg__ = sys.modules[ "__main__" ].__dbg__
-	
+
 	APIKEY = "AI39si6hWF7uOkKh4B9OEAX-gK337xbwR9Vax-cdeF9CF9iNAcQftT8NVhEXaORRLHAmHxj6GjM-Prw04odK4FxACFfKkiH9lg";
 	USERAGENT = "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-GB; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8"
 		
@@ -52,10 +52,11 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		self.__settings__.openSettings()
 		
 		if self.__settings__.getSetting("username") and self.__settings__.getSetting( "user_password" ):
-			(result, status) = self._login()
-		
+			(http_login, status) = self._httpLogin(True)
+			result = "_httpLogin"
+
 			if status == 200:
-				(http_login, status) = self._httpLogin(True)
+				(result, status) = self._login()
 				
 			if status == 200:
 				self.showErrorMessage(self.__language__(30031), result, 303)
@@ -182,81 +183,82 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		uname = self.__settings__.getSetting( "username" )
 		pword = self.__settings__.getSetting( "user_password" )
 		
-		if ( uname == "" and pword == "" ):
-			return ""
+		if uname == "" and pword == "":
+			return ( "", 303)
 
-		if ( new ):
+		if new:
 			self.__settings__.setSetting( "login_info", "" )
-		elif ( self.__settings__.getSetting( "login_info" ) != "" ):
+		elif self.__settings__.getSetting( "login_info" ) != "":
 			if self.__dbg__:
 				print self.__plugin__ + " returning existing login info: " + self.__settings__.getSetting( "login_info" )
-			return self.__settings__.getSetting( "login_info" )
+			return ( self.__settings__.getSetting( "login_info" ), 200)
 		
-		cj = cookielib.LWPCookieJar()
-		
-		opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
-		urllib2.install_opener(opener)
-		
-		# Get GALX
-		url = urllib2.Request(urllib.unquote("https://www.google.com/accounts/ServiceLogin?service=youtube"))
-		url.add_header('User-Agent', self.USERAGENT)
-		
-		if self.__dbg__:
-			print self.__plugin__ + " _httpLogin: getting new login_info"
-		con = urllib2.urlopen(url)
-		header = con.info()
-		galx = re.compile('Set-Cookie: GALX=(.*);Path=/accounts;Secure').findall(str(header))[0]
-		
+		ret = self._fetchPageDict({ "link": "https://www.google.com/accounts/ServiceLogin?uilel=3&service=youtube&passive=true&continue=http%3A%2F%2Fwww.youtube.com%2Fsignin%3Faction_handle_signin%3Dtrue%26nomobiletemp%3D1%26hl%3Den_US%26next%3D%252F&hl=en_US&ltmpl=sso"})
+		galx = re.compile('Set-Cookie: GALX=(.*);Path=/accounts;Secure').findall(str(ret["header"]))[0]
 		if self.__dbg__:
 			print self.__plugin__ + " galx: " + repr(galx)
-		
+
+		# Get GALX
+		if self.__dbg__:
+			print self.__plugin__ + " _httpLogin: getting new login_info"
+
+		# Login to Google
 		cont = urllib.unquote("http%3A%2F%2Fwww.youtube.com%2Fsignin%3Faction_handle_signin%3Dtrue%26nomobiletemp%3D1%26hl%3Den_US%26next%3D%252Findex&hl=en_US&ltmpl=sso")
 		if self.__dbg__:
 			print self.__plugin__ + " cont_url = " + cont
-		
-		params = urllib.urlencode({'GALX': galx,
-					   'Email': uname,
-					   'Passwd': pword,
-					   'PersistentCookie': 'yes',
-					   'continue': cont})
-		
-		# Login to Google
-		url = urllib2.Request('https://www.google.com/accounts/ServiceLoginAuth?service=youtube', params)
-		url.add_header('User-Agent', self.USERAGENT)
-		
-		con = urllib2.urlopen(url)
-		result = con.read()
-			
-		# Login to youtube
-		newurl = re.compile('<meta http-equiv="refresh" content="0; url=&#39;(.*)&#39;"></head>').findall(result)[0].replace("&amp;", "&")
-		if self.__dbg__:
-			print self.__plugin__ + " new_url: " + repr(newurl)
-		
-		url = urllib2.Request(newurl)
-		url.add_header('User-Agent', self.USERAGENT)
-		
-		con = urllib2.urlopen(newurl)
-		result = con.read()
-		con.close()
 
-		# We need to do this twice now.
-		newurl = re.compile('<meta http-equiv="refresh" content="0; url=&#39;(.*)&#39;"></head>').findall(result)[0].replace("&amp;", "&")
-		if self.__dbg__:
-			print self.__plugin__ + " new_url: " + repr(newurl)
-		
-		url = urllib2.Request(newurl)
-		url.add_header('User-Agent', self.USERAGENT)
-		
-		con = urllib2.urlopen(newurl)
-		result = con.read()
-		con.close()
-		
-		if self.__dbg__:
-			print self.__plugin__ + " searching for nick "
-		
+                ret = self._fetchPageDict({ "link": "https://www.google.com/accounts/ServiceLoginAuth?service=youtube", "url_data": {'GALX': galx, 'Email': uname, 'Passwd': pword, 'PersistentCookie': 'yes', 'continue': cont} });
+
+		# Login to youtube
+		newurl = re.compile('<meta http-equiv="refresh" content="0; url=&#39;(.*)&#39;"></head>').findall(ret["body"])
+		if len(newurl) >  0: # Normal login
+			newurl = newurl[0].replace("&amp;", "&")
+			if self.__dbg__:
+				print self.__plugin__ + " new_url: " + newurl
+
+		        # We need to do this twice now.
+			ret = self._fetchPageDict({ "link": newurl});
+			# Login to youtube
+			newurl = re.compile('<meta http-equiv="refresh" content="0; url=&#39;(.*)&#39;"></head>').findall(ret["body"])[0].replace("&amp;", "&")
+			
+			if self.__dbg__:
+				print self.__plugin__ + " new_url2: " + newurl
+			ret = self._fetchPageDict({ "link": newurl });		
+		else: # 2-factor authentication
+			url_data = { "smsToken": re.compile('<input type="hidden" name="smsToken"\n        value="(.*?)">').findall(str(ret["body"]))[0],
+				     "PersistentCookie": "yes",
+				     "service": "youtube",
+				     "smsUserPin" : self.getUserInput(self.__language__(30627)),
+				     "smsVerifyPin" : "Verify",
+				     "timeStmp" : "",
+				     "secTok" : "",
+				     "email" : re.compile('<input type="hidden" name="email"\n          value="(.*?)">').findall(str(ret["body"]))[0]}
+			ret = self._fetchPageDict({ "link": "https://www.google.com/accounts/SmsAuth?persistent=yes", "url_data": url_data })
+
+			url_data = { "smsToken": re.compile('<input type="hidden" name="smsToken" value="(.*?)">').findall(str(ret["body"]))[0],
+				     "continue": urllib.quote(re.compile('<input type="hidden" name="continue" value="(.*?)">').findall(str(ret["body"]))[0]),
+				     "PersistentCookie": "yes",
+				     "service": "youtube",
+				     "GALX": galx}
+			ret = self._fetchPageDict({ "link": "https://www.google.com/accounts/ServiceLoginAuth?service=youtube", "url_data": url_data })
+
+			newurl = re.compile('<meta http-equiv="refresh" content="0; url=&#39;(.*)&#39;"></head>').findall(ret["body"])
+                        newurl = newurl[0].replace("&amp;", "&").replace("http%25253A%252F", "http%253A%252F") # Google has an extra 25 in their code.
+                        if self.__dbg__:
+                                print self.__plugin__ + " new_url3: " + newurl
+                        ret = self._fetchPageDict({ "link": newurl});
+
+                        if self.__dbg__:
+                                print self.__plugin__ + " new_url4: " + repr(ret)
+			newurl = re.compile('<meta http-equiv="refresh" content="0; url=&#39;(.*)&#39;"></head>').findall(ret["body"])
+                        newurl = urllib.unquote(newurl[0])
+                        if self.__dbg__:
+                                print self.__plugin__ + " new_url4: " + newurl
+                        ret = self._fetchPageDict({ "link": newurl});
+
 		nick = ""
-		if result.find("USERNAME', ") > 0:
-			nick = result[result.find("USERNAME', ") + 12:]
+		if ret["body"].find("USERNAME', ") > 0:
+			nick = ret["body"][ret["body"].find("USERNAME', ") + 12:]
 			nick = nick[:nick.find('")')]
 		
 		if nick:
@@ -270,7 +272,7 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			print self.__plugin__ + " _httpLogin scanning cookies for login info: "
 		
 		login_info = ""
-		cookies = repr(cj)
+		cookies = repr(self.__cj__)
 			
 		if cookies.find("name='LOGIN_INFO', value='") > 0:
 			start = cookies.find("name='LOGIN_INFO', value='") + len("name='LOGIN_INFO', value='")
@@ -287,3 +289,4 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		result = self.__settings__.getSetting( "login_info" )
 		
 		return (result, status)
+

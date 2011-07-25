@@ -5,7 +5,8 @@
 - Implement new storage api where possible 
 - Go through every menu to check if things are still working
 - Context menu "more videos by user" shouldnt be visible when viewing a users upload
-- OAuth Login
+- OAuth Login. [ WIP ]
+- 2-Factor [ 50% done ]
 - Check all context menu items again some seem to be broken <-- Henrik & Tobias
 - http://lxml.de/tutorial.html <- investigate if this can speed up the soup.
 
