@@ -294,7 +294,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 				print self.__plugin__ + " _fetchPage couldn't get login token"
 
 
-                if not link or int(get("error", "0")) > 0 :
+                if not link or int(get("error", "0")) > 2 :
                         if self.__dbg__:
                                 print self.__plugin__ + " fetching page giving up "
                         ret_obj["status"] = 500
@@ -379,15 +379,13 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
                         err = str(e)
                         if self.__dbg__:
                                 print self.__plugin__ + " _fetchPage HTTPError : " + err
-                                print self.__plugin__ + " _fetchPage HTTPError - Headers: " + str(e.headers) + " - Body: " + e.fp.read()
-                        
-                        if err.find("TokenExpired") > -1 and False:
-				self.__login__._login()
 
 			if err.find("Token invalid") > -1:
 				if self.__dbg__:
-					print self.__plugin__ + " _fetchPage refreshing token : " + err
-				#self._oRefreshToken()
+					print self.__plugin__ + " _fetchPage refreshing token"
+				self._oRefreshToken()
+			else:
+                                print self.__plugin__ + " _fetchPage HTTPError - Headers: " + str(e.headers) + " - Body: " + e.fp.read()
                         
                         params["error"] = str(int(get("error", "0")) + 1)
 			ret = self._fetchPage(params)
