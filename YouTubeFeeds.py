@@ -114,8 +114,7 @@ class YouTubeFeeds(YouTubeCore.YouTubeCore):
 	
 	def list(self, params = {}):
 		get = params.get
-		result = []
-		status = 303
+		result = { "body": "", "status": 303 }
 		
 		if get("folder"):
 			return self.listFolder(params)
@@ -132,23 +131,23 @@ class YouTubeFeeds(YouTubeCore.YouTubeCore):
 		url = self.createUrl(params)
 		
 		if url:
-			( response, status ) = self._fetchPage({"link": url, "auth": get("login"), "api": "true"})
+			result = self._fetchPage({"link": url, "auth": get("login"), "api": "true"})
 		
-		if status != 200:
-			return ( result, status )
+		if result["status"] != 200:
+			return ( result["body"], result["status"] )
 		
 		if not get("folder"):
-			result = self.getVideoInfo(response, params)
+			videos = self.getVideoInfo(result["body"], params)
 		
-		if len(result) == 0:
-			return (result, 303)
+		if len(videos) == 0:
+			return (videos, 303)
 		
-		thumbnail = result[0].get('thumbnail', "")
+		thumbnail = videos[0].get('thumbnail', "")
 		
 		if thumbnail:
 			self.__storage__.store(params, thumbnail, "thumbnail")
 						
-		return (result, 200)
+		return (videos, 200)
 	
 	def listPlaylist(self, params = {}):
 		get = params.get
@@ -256,7 +255,7 @@ class YouTubeFeeds(YouTubeCore.YouTubeCore):
 	
 	def listAll(self, params ={}):
 		get = params.get
-		result = ""
+		result = { "body": "", "status": 303 }
 		
 		if get("login") == "true":
 			if ( not self._getAuth() ):
@@ -271,13 +270,13 @@ class YouTubeFeeds(YouTubeCore.YouTubeCore):
 
 		ytobjects = []
 		
-		( result, status ) = self._fetchPage({"link":url, "auth":"true"})
+		result = self._fetchPage({"link":url, "auth":"true"})
 		
-		if status == 200:
+		if result["status"] == 200:
 			if get("folder") == "true":
-				ytobjects = self.getFolderInfo(result, params)
+				ytobjects = self.getFolderInfo(result["body"], params)
 			else:
-				ytobjects = self.getVideoInfo(result, params)
+				ytobjects = self.getVideoInfo(result["body"], params)
 		
 		if len(ytobjects) == 0:
 			return ytobjects
@@ -290,15 +289,15 @@ class YouTubeFeeds(YouTubeCore.YouTubeCore):
 			index += 50
 			url = feed + "start-index=" + str(index) + "&max-results=" + repr(50)
 			url = url.replace(" ", "+")
-			(result, status) = self._fetchPage({"link": url, "auth":"true"})
+			result = self._fetchPage({"link": url, "auth":"true"})
 			
-			if status != 200:
+			if result["status"] != 200:
 				break
 			temp_objects = []
 			if get("folder") == "true":
-				temp_objects = self.getFolderInfo(result, params)
+				temp_objects = self.getFolderInfo(result["body"], params)
 			else:
-				temp_objects = self.getVideoInfo(result, params)
+				temp_objects = self.getVideoInfo(result["body"], params)
 		
 			next = temp_objects[len(temp_objects)-1].get("next","false")
 			if next == "true":

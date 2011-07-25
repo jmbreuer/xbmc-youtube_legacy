@@ -46,23 +46,23 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		
 		if self.__settings__.getSetting("annotations") == "true" and not video.has_key("downloadPath"):
 
-			(xml, status) = self._fetchPage({"link": self.urls["annotation_url"] % get('videoid')})
-			if status == 200 and xml:
-				result += self.transformAnnotationToSSA(xml)
+			xml = self._fetchPage({"link": self.urls["annotation_url"] % get('videoid')})
+			if xml["status"] == 200 and xml["body"]:
+				result += self.transformAnnotationToSSA(xml["body"])
 
                 if self.__settings__.getSetting("lang_code") != "0":
 			subtitle_url = self.getSubtitleUrl(video)
 
 			if not subtitle_url and self.__settings__.getSetting("transcode") == "true":
-				(html, status) = self._fetchPage({"link": self.urls["video_stream"] % get("videoid")})
-				if status == 200:
-					subtitle_url = self.getTranscriptionUrl(html, video) 
+				html = self._fetchPage({"link": self.urls["video_stream"] % get("videoid")})
+				if html["status"] == 200:
+					subtitle_url = self.getTranscriptionUrl(html["body"], video) 
 		
 			if subtitle_url:
-				(xml, status) = self._fetchPage({"link": subtitle_url})
+				xml = self._fetchPage({"link": subtitle_url})
 
-			if status == 200 and xml:
-				result += self.transformSubtitleXMLtoSRT(xml)
+			if xml["status"] == 200 and xml["body"]:
+				result += self.transformSubtitleXMLtoSRT(xml["body"])
 
 		if len(result) > 0:
 			result = "[Script Info]\r\n; This is a Sub Station Alpha v4 script.\r\n; For Sub Station Alpha info and downloads,\r\n; go to http://www.eswat.demon.co.uk/\r\n; or email kotus@eswat.demon.co.uk\r\nTitle: Auto Generated\r\nScriptType: v4.00\r\nCollisions: Normal\r\nPlayResY: 1024\r\nPlayResX: 768\r\n\r\n[V4 Styles]\r\nFormat: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, TertiaryColour, BackColour, Bold, Italic, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, AlphaLevel, Encoding\r\nStyle: Default,Arial,40,0,65535,65535,999999,0,0,3,3,0,2,30,30,30,0,0\r\nStyle: speech,Arial,40,0,65535,65535,11861244,0,0,3,1,0,1,30,30,30,0,0\r\nStyle: popup,Arial,40,0,65535,65535,11861244,0,0,3,3,0,1,30,30,30,0,0\r\nStyle: highlightText,Wolf_Rain,56,15724527,15724527,15724527,4144959,0,0,1,1,2,2,5,5,30,0,0\r\n\r\n[Events]\r\nFormat: Marked, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\r\n" + result
@@ -77,13 +77,13 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		get = video.get
 		url = ""
 		
-		(xml, status) = self._fetchPage({"link": self.urls["timed_text_index"] % get('videoid')})
+		xml = self._fetchPage({"link": self.urls["timed_text_index"] % get('videoid')})
 		
 		if self.__dbg__:
-			print self.__plugin__ + " subtitle index: " + repr(xml)
+			print self.__plugin__ + " subtitle index: " + repr(xml["body"])
 		
-		if status == 200:
-			dom = parseString(xml)
+		if xml["status"] == 200:
+			dom = parseString(xml["body"])
 			entries = dom.getElementsByTagName("track")
 
 			subtitle = ""
@@ -427,10 +427,10 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		get = params.get
 		video = {}
 		
-		( result, status ) = self._fetchPage({"link": self.urls["video_info"] % get("videoid"), "api": "true"})
+		result = self._fetchPage({"link": self.urls["video_info"] % get("videoid"), "api": "true"})
 
-		if status == 200:				
-			result = self.getVideoInfo(result, params)
+		if result["status"] == 200:
+			video = self.getVideoInfo(result["body"], params)
 		
 			if len(result) == 0:
 				if self.__dbg__:
@@ -440,11 +440,11 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		else:
 			if self.__dbg__:
 				print self.__plugin__ + " Got API Error from YouTube!"
-			video["apierror"] = result
+			video["apierror"] = result["body"]
 			
 			return (video,303)
-		video = result[0]
-		return (video, status)
+		video = video[0]
+		return (video, result["status"])
 	
 	def selectVideoQuality(self, links, params):
 		get = params.get
@@ -572,7 +572,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			except:
 				print self.__plugin__ + " attempt to locate local file failed with unknown error, trying youtube instead"
 
-		(links, video) = self._getVideoLinks(video, params);
+		(links, video) = self._getVideoLinks(video, params)
 
 		if links:
 			video["video_url"] = self.selectVideoQuality(links, params)
@@ -593,35 +593,43 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 
 	def _getVideoLinks(self, video, params):
 		get = params.get
+		links = []
 
 		preferred = True; # Setting.
 		if preferred:
 			if self.__dbg__:
 				print self.__plugin__ + " _getVideoLinks trying website"
-			(html, status) = self._fetchPage({"link": self.urls["video_stream"] % get("videoid")})
 
-			html = urllib.unquote_plus(html)
+			result = self._fetchPage({"link": self.urls["video_stream"] % get("videoid")})
+
+			html = urllib.unquote_plus(result["body"])
 
 			vget = video.get
-			if status == 403:
+			if result["status"] == 403:
 				video['apierror'] = self.getAlert(html, params)
-			elif status != 200:
+			elif result["status"] != 200:
 				if not vget('apierror'):
 					video['apierror'] = self.__language__(30617)
 		
-			if status == 200:			
-				return (self.getVideoUrlMap(html, video), video)
+			if result["status"] == 200:	
+				links = self.getVideoUrlMap(html, video)
 
 			if len(links) == 0 and get("action") != "download":
-				return (self.getVideoStreamMap(html, video), video)
+				links = self.getVideoStreamMap(html, video)
+
+			if len(links) > 0:
+				return (links, video)
 		
 		# Get data from /get_video_info
 		if self.__dbg__:
 			print self.__plugin__ + " _getVideoLinks trying embedded"
 			
-		(html, status) = self._fetchPage({"link": self.urls["embed_stream"] % get("videoid") })
-			
-		if status == 200:
-			return (self.getVideoUrlMap(html, video), video)
+		result = self._fetchPage({"link": self.urls["embed_stream"] % get("videoid") })
+		
+		if result["status"] == 200:
+			html = urllib.unquote_plus(result["body"])
+			links = self.getVideoUrlMap(html, video)
+			if len(links) == 0 and get("action") != "download":
+				links = self.getVideoStreamMap(html, video)
 
-		return (False, video)
+		return (links, video)
