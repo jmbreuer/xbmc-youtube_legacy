@@ -262,20 +262,34 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 
 	def _fetchPage(self, params = {}):
 		get = params.get
+		link = get("link")
 		if self.__dbg__:
 			print self.__plugin__ + " _fetchPage called for : " + repr(params)
 		
-		if not get("link") or int(get("error", "0")) > 3 :
+		if not link or int(get("error", "0")) > 3 :
 			if self.__dbg__:
-				print self.__plugin__ + " fetching page giving up "
+				print self.__plugin__ + " fetching page giving up : " 
 			return ( "", 500 )
 
+		if get("auth", "false") == "true":
+			if self.__dbg__:
+				print self.__plugin__ + " got auth"
+			if self._getAuth():
+				if link.find("?") > -1:
+					link += "&oauth_token=" + self.__settings__.getSetting("oauth2_access_token")
+				else:
+					link += "?oauth_token=" + self.__settings__.getSetting("oauth2_access_token")
+
+				print self.__plugin__ + " _fetchPage updated link: " + link
+			else:
+				print self.__plugin__ + " _fetchPage couldn't get login token"
+
 		if get("request", "false") == "false":
-			request = url2request(get("link"), get("method", "GET"));
+			request = url2request(link, get("method", "GET"));
 		else:
 			if self.__dbg__:
 				print self.__plugin__ + " got request"
-			request = urllib2.Request(get("link"), get("request"))
+			request = urllib2.Request(link, get("request"))
 			request.add_header('X-GData-Client', "")
 			request.add_header('Content-Type', 'application/atom+xml') 
 			request.add_header('Content-Length', str(len(get("request")))) 
@@ -297,15 +311,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 				return ( self.__language__( 30622 ) , 303 )
 			
 			request.add_header('Cookie', 'LOGIN_INFO=' + self.__login__._httpLogin() )
-		
-		if get("auth", "false") == "true":
-			if self.__dbg__:
-				print self.__plugin__ + " got auth"
-			if self._getAuth():
-				request.add_header('Authorization', 'GoogleLogin auth=' + self.__settings__.getSetting("auth"))
-			else:
-				print self.__plugin__ + " _fetchPage couldn't get login token"
-		
+				
 		try:
 			if self.__dbg__:
 				print self.__plugin__ + " _fetchPage making request"
@@ -335,10 +341,17 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 				print self.__plugin__ + " _fetchPage HTTPError : " + err
 			
 			if err.find("TokenExpired") > -1:
-				self.__login__._login()
-			
-			params["error"] = str(int(get("error", "0")) + 1)
-			return self._fetchPage(params)
+				#self.__login__._login()
+				self.__login__._oRefreshToken()
+			# e.fp.read() <- read error message from 500 pages for instance.
+		        # e.headers
+		        # e.code
+			# e.msg
+                        params["error"] = str(int(get("error", "0")) + 1)
+			ret = self._fetchPageDict(params)
+			if not ret.has_key("body") and e.fp:
+				ret["body"] = e.fp.read()
+                        return ret
 		
 		return ( "", 500 )
 
@@ -347,9 +360,9 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
                 ret_obj = {}
                 if self.__dbg__:
 			if get("url_data") and False:
-				print self.__plugin__ + " _fetchPage called for : " + repr(params['link'])
+				print self.__plugin__ + " _fetchPageDict called for : " + repr(params['link'])
 			else:
-				print self.__plugin__ + " _fetchPage called for : " + repr(params)
+				print self.__plugin__ + " _fetchPageDict called for : " + repr(params)
 
                 if not get("link") or int(get("error", "0")) > 0 :
                         if self.__dbg__:
@@ -383,12 +396,15 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
                                 print self.__plugin__ + " got login"
                         if ( self.__settings__.getSetting( "username" ) == "" or self.__settings__.getSetting( "user_password" ) == "" ):
                                 if self.__dbg__:
-                                        print self.__plugin__ + " _fetchPage, login required but no credentials provided"
+                                        print self.__plugin__ + " _fetchPageDict, login required but no credentials provided"
                                 ret_obj["error"] = 303
                                 ret_obj["body"] = self.__language__( 30622 )
                                 return ret_obj
                         
-                        request.add_header('Cookie', 'LOGIN_INFO=' + self.__login__._httpLogin() )
+			#(info, result ) = self._httpLogin()
+
+			#if result = 200:
+			#request.add_header('Cookie', 'LOGIN_INFO=' + info )
                 
                 if get("auth", "false") == "true":
                         if self.__dbg__:
@@ -396,11 +412,11 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
                         if self._getAuth():
                                 request.add_header('Authorization', 'GoogleLogin auth=' + self.__settings__.getSetting("auth"))
                         else:
-                                print self.__plugin__ + " _fetchPage couldn't get login token"
+                                print self.__plugin__ + " _fetchPageDict couldn't get login token"
                 
                 try:
                         if self.__dbg__:
-                                print self.__plugin__ + " _fetchPage making request"
+                                print self.__plugin__ + " _fetchPageDict making request"
 
                         con = urllib2.urlopen(request)
 
@@ -430,10 +446,11 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
                 except urllib2.HTTPError, e:
                         err = str(e)
                         if self.__dbg__:
-                                print self.__plugin__ + " _fetchPage HTTPError : " + err
+                                print self.__plugin__ + " _fetchPageDict HTTPError : " + err
                         
                         if err.find("TokenExpired") > -1:
-                                self.__login__._login()
+                                #self.__login__._login()
+				self.__login__._oRefreshToken()
                         
 			# e.fp.read() <- read error message from 500 pages for instance.
 		        # e.headers

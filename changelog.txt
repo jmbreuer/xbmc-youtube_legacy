@@ -5,8 +5,6 @@
 - Implement new storage api where possible 
 - Go through every menu to check if things are still working
 - Context menu "more videos by user" shouldnt be visible when viewing a users upload
-- OAuth Login. [ WIP ]
-- 2-Factor [ 50% done ]
 - Check all context menu items again some seem to be broken <-- Henrik & Tobias
 - http://lxml.de/tutorial.html <- investigate if this can speed up the soup.
 
@@ -20,6 +18,8 @@
 - Download queue will usually crash xbmc due to Thread safety issues with xbmc's gui object.
 
 [B]Version 2.5.0 (Beta)[B]
+- Added 2-factor login
+- Added OAuth2 for API
 - Added new option to select playback and download quality with dialogs
 - Added Caching and alphabetically sorting of My playlists, My contacts and My subscriptions 
 - Added "Play all" context menu on certain folders 
