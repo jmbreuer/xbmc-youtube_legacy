@@ -301,11 +301,11 @@ class YouTubeNavigation(YouTubeUtils.YouTubeUtils):
 			if (item("login") == "false"):
 				self.addFolderListItem(params, item_params)				
 			else:
-				if (len(self.__settings__.getSetting( "auth" )) > 0):
+				if (len(self.__settings__.getSetting( "oauth2_access_token" )) > 0):
 					self.addFolderListItem(params, item_params)
 		else :
 			if (item("action") == "settings"):
-				if (len(self.__settings__.getSetting( "auth" )) > 0):
+				if (len(self.__settings__.getSetting( "oauth2_access_token" )) > 0):
 					if (item("login") == "true"):
 						self.addActionListItem(params, item_params)
 				else:
@@ -468,7 +468,7 @@ class YouTubeNavigation(YouTubeUtils.YouTubeUtils):
 				
 		cm.append( ( self.__language__(30501), "XBMC.RunPlugin(%s?path=%s&action=download&videoid=%s)" % ( sys.argv[0],  item("path"), item("videoid") ) ) )
 
-		if ( self.__settings__.getSetting( "username" ) != "" and self.__settings__.getSetting( "auth" ) ):
+		if ( self.__settings__.getSetting( "username" ) != "" and self.__settings__.getSetting( "oauth2_access_token" ) ):
 			if ( get("user_feed") == "favorites" and not get("contact") ):
 				cm.append( ( self.__language__( 30506 ), 'XBMC.RunPlugin(%s?path=%s&action=remove_favorite&editid=%s&)' % ( sys.argv[0], item("path"), item("editid") ) ) )
 			else:
@@ -544,7 +544,7 @@ class YouTubeNavigation(YouTubeUtils.YouTubeUtils):
 				cm.append( (self.__language__( 30526 ), cm_url % ("playlists&folder=true")))
 		
 		if (item("channel") or item("contact")):
-			if ( self.__settings__.getSetting( "username" ) != "" and self.__settings__.getSetting( "auth" ) ):
+			if ( self.__settings__.getSetting( "username" ) != "" and self.__settings__.getSetting( "oauth2_access_token" ) ):
 				if (get("external")):
 					channel = get("channel","")
 					if not channel:
@@ -555,7 +555,7 @@ class YouTubeNavigation(YouTubeUtils.YouTubeUtils):
 						cm.append( ( self.__language__( 30513 ) % item("channel"), 'XBMC.RunPlugin(%s?path=%s&editid=%s&action=remove_subscription)' % ( sys.argv[0], item("path"), item("editid") ) ) )
 		
 		if (item("contact")):
-			if ( self.__settings__.getSetting( "username" ) != "" and self.__settings__.getSetting( "auth" ) ):
+			if ( self.__settings__.getSetting( "username" ) != "" and self.__settings__.getSetting( "oauth2_access_token" ) ):
 				if (item("external")):
 					cm.append( (self.__language__(30026), 'XBMC.RunPlugin(%s?path=%s&action=add_contact&)' % ( sys.argv[0], item("path") ) ) )
 				else:
