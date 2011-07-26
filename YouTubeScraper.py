@@ -731,12 +731,8 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			url = self.createUrl(params)
 			result = self._fetchPage({"link":url})
 			
-			dom_pages = self.getDOMObject(result["content"], {"name": "div", "class": "yt-uix-pager"})
-
-			list = SoupStrainer(name="div", attrs = {'class':"yt-uix-pager"})
-			paginator = BeautifulSoup(dom_pages, parseOnlyThese=list)
-
-
+			dom_pages = self.parseDOM(result["content"], {"name": "div", "class": "yt-uix-pager"})
+			
 			links = self.parseDOM(dom_pages, {"name": "a", "class": "yt-uix-pager-link", "return": "data-page"})
 			if len(links) > 0:
 				for link in links:
@@ -745,13 +741,18 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 							print self.__plugin__ + " scrapeMoviesGrid - next page ? link: " + str(link) + " > page: " + str(page)
 						next = "true"
 
-			dom_list = self.getDOMObject(result["content"], {"name": "ul", "class": "browse-item-list"})
+			dom_list = self.parseDOM(result["content"], {"name": "ul", "class": "browse-item-list"})
 			vidids = self.parseDOM(dom_list, {"name": "span", "return": "data-video-ids"})
 			thumbs = self.parseDOM(dom_list, {"name": "img", "return": "data-thumb"})
+
+			page += 1
 			if len(vidids) == len(thumbs) and len(vidids) > 0:
-				page += 1
 				for i in range(0 , len(vidids)):
 					items.append( (vidids[i], thumbs[i]) )
+			else:
+				if self.__dbg__:
+					print self.__plugin__ + " scrapeMoviesGrid problems with vivids and thumbs : " + str(len(vidids)) + " != " + str(len(thumbs)) + " != 0"
+				
 		
 		del params["page"]
 		if self.__dbg__:

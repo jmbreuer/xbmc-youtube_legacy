@@ -700,36 +700,74 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 				
 		return ytobjects;
 
-	def getDOMObject(self, html, params):
+	def getDOMContent(self, html, params, match):
 		get = params.get
-                #if self.__dbg__:
-                #        print self.__plugin__ + " getDOMObject : " + repr(params)
-		m = re.search('(' + get("name") +' .*' + get("class") + '.*>)', html)
-		if m:
-                        #print self.__plugin__ + " getDOMObject : " + m.group(1)
-			start = html.find(m.group(1))
-			end = html.find("</" + get("name") + ">", start)
-			#print self.__plugin__ + " getDOMObject1 : " + str(start) + " < " + str(end)
+		#print self.__plugin__ + " getDOMContent match: " + match
+		start = html.find(match)
+		end = html.find("</" + get("name") + ">", start)
+		#print self.__plugin__ + " getDOMContent " + str(start) + " < " + str(end)
 
-			pos = start
-			while html.find("<" + get("name"), pos) < end:
-				pos = html.find("<" + get("name"), pos)
-				end = html.find("</" + get("name") + ">", end)
-				print self.__plugin__ + " getDOMObject loop: " + str(start) + " < " + str(end)
-			html = html[start -1 :end]
-
-		#print self.__plugin__ + " getDOMObject done"
+		pos = start
+		while html.find("<" + get("name"), pos) < end:
+			pos = html.find("<" + get("name"), pos) + 1
+			end = html.find("</" + get("name") + ">", end)
+			#print self.__plugin__ + " getDOMContent2 loop: " + str(start) + " < " + str(end) + " pos = " + str(pos)
+		html = html[start -1 :end]
+		#print self.__plugin__ + " getDOMContent2 html length: " + str(len(html))
 		return html
 
 	def parseDOM(self, html, params):
 		get = params.get
-                #if self.__dbg__:
-                #        print self.__plugin__ + " parseDOM : " + repr(params)
-		if get("class"):
-			lst = re.compile('<'+ get("name") +'.*' + get("class")+'.*' + get("return") + '="(.*?)".*>').findall(html)
-			if len(lst) == 0:
-				lst = re.compile('<'+ get("name") +'.*' + get("return") + '="(.*?)".*' + get("class")+'.*>').findall(html)
+		if self.__dbg__:
+                        print self.__plugin__ + " parseDOMUni : " + repr(params)
+		if get("attribute"):
+			lst = re.compile('(<' + get("name")+'.*' + get("attribute") + '.*?>)').findall(html)
+		elif get("return"):
+			lst = re.compile('(<' + get("name")+'.*' + get("return") + '.*?>)').findall(html)
+		elif get("class"):
+			lst = re.compile('(<' + get("name")+'.*class=[\'"]' + get("class") + '[\'"].*?>)').findall(html)
+		
+		#print self.__plugin__ + " parseDOMUni name: " + str(len(lst))
+		if get("return"):
+			html2 = "\n".join(lst)
 		else:
-			lst = re.compile('<'+ get("name") +'.*' + get("return") + '="(.*?)".*>').findall(html)
-		#print self.__plugin__ + " parseDOM done: " + str(len(lst))
-		return lst
+			html2 = ""
+			for match in lst:
+				html2 += self.getDOMContent(html, params, match)
+
+		if len(lst) > 0 and get("class"):
+			lst = re.compile('(<.*class=[\'"]' + get("class") + '[\'"].*>)').findall(html2)
+			if get("return"):
+				html2 = "\n".join(lst)
+			else:
+				html2 = ""
+				for match in lst:
+					html2 += self.getDOMContent(html, params, match)
+			#print self.__plugin__ + " parseDOMUni class: " + str(len(lst))
+
+		if len(lst) > 0 and get("attribute"):
+			lst = re.compile('(<.*' + get("attribute") + '=.*>)').findall(html2)
+			if get("return"):
+				html2 = "\n".join(lst)
+			else:
+				html2 = ""
+				for match in lst:
+					html2 += self.getDOMContent(html, params, match)
+			#print self.__plugin__ + " parseDOMUni attribute: " + str(len(lst))
+			if len(lst) > 0 and get("attribute-match"):
+				lst = re.compile('(<.*' + get("attribute") + '=[\'"]' + get("attribute-match") + '[\'"].*>)').findall(html2)
+				if get("return"):
+					html2 = "\n".join(lst)
+				else:
+					html2 = ""
+					for match in lst:
+						html2 += self.getDOMContent(html, params, match)
+				#print self.__plugin__ + " parseDOMUni attribute-match: " + str(len(lst))
+
+		if len(lst) > 0 and get("return"):
+			lst = re.compile('<' + get("name") + '.*' + get("return") + '=[\'"](.*?)[\'"].*>').findall(html2)
+			print self.__plugin__ + " parseDOMUni return lst: " + str(len(lst))
+			return lst
+
+		print self.__plugin__ + " parseDOMUni done return html: " + str(len(html2))
+		return html2
