@@ -738,7 +738,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 				for link in links:
 					if int(link) > page:
 						if self.__dbg__:
-							print self.__plugin__ + " scrapeMoviesGrid - next page ? link: " + str(link) + " > page: " + str(page)
+							print self.__plugin__ + " scrapeMoviesGrid - next page ? link: " + str(link) + " > page: " + str(page + 1)
 						next = "true"
 
 			dom_list = self.parseDOM(result["content"], {"name": "ul", "class": "browse-item-list"})
@@ -784,7 +784,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 				links = paginator.findAll(name="a", attrs = {'class':"yt-uix-pager-link"})
 				for link in links:
 					if self.__dbg__:
-						print self.__plugin__ + " scrapeMoviesGridSoup - next page ? link: " + repr(int(link["data-page"])) + " > page: " + str(page)
+						print self.__plugin__ + " scrapeMoviesGridSoup - next page ? link: " + repr(int(link["data-page"])) + " > page: " + str(page + 1)
 					if int(link["data-page"]) > page:
 						next = "true"
 
