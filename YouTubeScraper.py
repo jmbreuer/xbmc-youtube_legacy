@@ -609,7 +609,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		
 		next = "true"
 		items = []
-		page = 1
+		page = 0
 		
 		while next == "true":
 			next = "false"
@@ -722,7 +722,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		params["batch"] = "thumbnails"
 		next = "true"
 		items = []
-		page = 1
+		page = 0
 		
 		while next == "true":
 			next = "false"
@@ -767,7 +767,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		params["batch"] = "thumbnails"
 		next = "true"
 		items = []
-		page = 1
+		page = 0
 		
 		while next == "true":
 			next = "false"
@@ -1042,6 +1042,8 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 								elif cat == "indian-cinema":
 									item["subcategory"] = "true"
 							
+							if cat.find("?") > 0:
+								cat = cat[0:cat.find("?")]
 							cat = urllib.quote_plus(cat)
 							item['category'] = cat
 							item['scraper'] = scraper
