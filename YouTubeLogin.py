@@ -283,7 +283,7 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
                         error = self.parseDOM(ret['content'], { "name": "div", "class": "error smaller", "content": "true"})
                         if len(error) > 0:
 				error = error[0]
-				error = urllib.unquote(error[:error.find("<")]).replace("&#39;", "'")
+				error = urllib.unquote(error[0:error.find("<")]).replace("&#39;", "'")
                                 return ( error.strip(), 303)
 			smsToken = re.compile('<input type="hidden" name="smsToken" value="(.*?)">').findall(ret["content"])
 			if len(smsToken) == 0:
@@ -327,7 +327,9 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		else:
 			error = self.parseDOM(ret['content'], { "name": "div", "class": "errormsg", "content": "true"})
 			if len(error) > 0:
-				return ( error[0].strip(), 303)
+				error = error[0]
+				error = urllib.unquote(error[0:error.find("[")]).replace("&#39;", "'")
+				return ( error.strip(), 303)
                         if self.__dbg__:
                                 print self.__plugin__ + " _login couldn't find method to authenticate: " + repr(ret)
 
