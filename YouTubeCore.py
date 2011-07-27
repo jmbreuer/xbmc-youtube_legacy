@@ -329,14 +329,13 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 				ret_obj["status"] = 303
 				ret_obj["content"] = self.__language__( 30622 )
 				return ret_obj
-                        
-                        # This should be a call to self.__login__._httpLogin()
-                        if self.__settings__.getSetting( "login_info" ) != "":
-                                if self.__dbg__:
-                                        print self.__plugin__ + " returning existing login info: " + self.__settings__.getSetting( "login_info" )
-                                info = self.__settings__.getSetting( "login_info" )
-                                request.add_header('Cookie', 'LOGIN_INFO=' + info )
-
+			# This should be a call to self.__login__._httpLogin()
+			if self.__settings__.getSetting( "login_info" ) != "":
+				if self.__dbg__:
+					print self.__plugin__ + " returning existing login info: " + self.__settings__.getSetting( "login_info" )
+					info = self.__settings__.getSetting( "login_info" )
+					request.add_header('Cookie', 'LOGIN_INFO=' + info )
+		
 		if get("auth", "false") == "true":
 			if self.__dbg__:
 				print self.__plugin__ + " got auth"
