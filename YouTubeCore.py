@@ -497,8 +497,8 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 					print self.__plugin__ + " _getAuth returning new auth"
 				return self.__settings__.getSetting( "oauth2_access_token" )
 			
-			if self.__dbg__:
-				print self.__plugin__ + " _getAuth failed because login failed"
+		if self.__dbg__:
+			print self.__plugin__ + " _getAuth failed because login failed"
 		
 		return False
 	
