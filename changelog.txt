@@ -5,7 +5,6 @@
 - Go through every menu to check if things are still working
 - Context menu "more videos by user" shouldnt be visible when viewing a users upload
 - Check all context menu items again some seem to be broken <-- Henrik & Tobias
-- http://lxml.de/tutorial.html <- investigate if this can speed up the soup.
 
 [B]Errata[/B]
 - [XBMC] Thumbnails sometimes turns into black box or Folder (XBMC not detecting when thumbnail is set and defaulting to icon?)
@@ -28,8 +27,6 @@
 - Fixed RTMPe support (we now provide playpath correctly) - NOTE: this requires and updated version of librtmp
 
 [B]Version 2.5.0 (Beta)[B]
-- Added 2-factor login
-- Added OAuth2 for API
 - Added new option to select playback and download quality with dialogs
 - Added Caching and alphabetically sorting of My playlists, My contacts and My subscriptions 
 - Added "Play all" context menu on certain folders 
@@ -50,8 +47,6 @@
 - Added New download dialog showing queue and progress completion.
 - Added support for xbmcvfs in downloads. (ie. download to temp folder then let xbmc move to final location)
 - Added support for using embedded link to get video information. Better playback stability
-- Added support for Annotations to subtitles.
-- Changed subtitles format to SSA.
 - Changed Login to use new Client Login url
 - Changed Playback function now shows a more user friendly error message on failure
 - Changed Download function now shows a progress-bar
