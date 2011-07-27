@@ -333,8 +333,8 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 			if self.__settings__.getSetting( "login_info" ) != "":
 				if self.__dbg__:
 					print self.__plugin__ + " returning existing login info: " + self.__settings__.getSetting( "login_info" )
-					info = self.__settings__.getSetting( "login_info" )
-					request.add_header('Cookie', 'LOGIN_INFO=' + info )
+				info = self.__settings__.getSetting( "login_info" )
+			       	request.add_header('Cookie', 'LOGIN_INFO=' + info )
 		
 		if get("auth", "false") == "true":
 			if self.__dbg__:
