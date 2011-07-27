@@ -266,8 +266,6 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 
         def _fetchPage(self, params = {}):
 		get = params.get
-		urllib2.install_opener(self.__opener__)
-		get = params.get
 		link = get("link")
 		ret_obj = {}
 		if self.__dbg__:
@@ -285,7 +283,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 				else:
 					link += "?oauth_token=" + self.__settings__.getSetting("oauth2_access_token")
 
-					print self.__plugin__ + " _fetchPage updated link: " + link
+				print self.__plugin__ + " _fetchPage updated link: " + link
 			else:
 				print self.__plugin__ + " _fetchPage couldn't get login token"
 
@@ -297,7 +295,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 
 		if get("url_data"):
 			request = urllib2.Request(link, urllib.urlencode(get("url_data")) )
-			#request.add_header('Content-Type', 'application/x-www-form-urlencoded')
+			request.add_header('Content-Type', 'application/x-www-form-urlencoded')
 		elif get("request", "false") == "false":
 			request = url2request(link, get("method", "GET"));
 		else:
@@ -319,7 +317,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 			else:
 				request.add_header('User-Agent', self.USERAGENTIE)
 
-			request.add_header('Cookie', 'PREF=f1=50000000&hl=en')
+			#request.add_header('Cookie', 'PREF=f1=50000000&hl=en')
                 
 		if get("login", "false") == "true":
 			if self.__dbg__:
@@ -387,12 +385,11 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 			else:
 				print self.__plugin__ + " _fetchPage HTTPError - Headers: " + str(e.headers) + " - Content: " + e.fp.read()
                         
-				params["error"] = str(int(get("error", "0")) + 1)
-				ret = self._fetchPage(params)
-
+			params["error"] = str(int(get("error", "0")) + 1)
+			ret = self._fetchPage(params)
 			if not ret.has_key("content") and e.fp:
 				ret["content"] = e.fp.read()
-				return ret
+			return ret
 
 			ret_obj["status"] = 505
 			return ret_obj
