@@ -269,7 +269,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 		link = get("link")
                 ret_obj = {}
                 if self.__dbg__:
-			if get("url_data") and False:
+			if get("url_data") or get("request"):
 				print self.__plugin__ + " _fetchPage called for : " + repr(params['link'])
 			else:
 				print self.__plugin__ + " _fetchPage called for : " + repr(params)

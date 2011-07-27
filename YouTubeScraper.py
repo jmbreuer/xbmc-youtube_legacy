@@ -276,15 +276,12 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			url = self.urls["music"] + category
 			result = self._fetchPage({"link":url})
 			
-			list = SoupStrainer(name="div", attrs = {"class":"ytg-fl browse-content"})
-			content = BeautifulSoup(result["content"], parseOnlyThese=list)
+			content = self.parseDOM(result["content"], { "name": "div", "class": "browse-item music-item ", "content": "true"})
 			
-			if (len(content) > 0):
-				videos = content.findAll(name="div", attrs = {"class":"browse-item music-item "}, recursive=True)
-				for video in videos: 
-					id = video.a["href"]
-					id = id[id.find("?v=") + 3:id.find("&")]
-					items.append(id)
+			for video in content: 
+				videoid = self.parseDOM(video, { "name": "a", "class": "ux-thumb-wrap " })
+				videoid = videoid[videoid.find("?v=") + 3:videoid.find("&")]
+				items.append(videoid)
 		if self.__dbg__:
 			print self.__plugin__ + " scrapeMusicCategoryHits done"		
 		return (items, status)
@@ -1002,7 +999,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		if not get("page"):
 			(result, status) = params["new_results_function"](params)
 			
-			print self.__plugin__ + " new result " + repr(result)
+			print self.__plugin__ + " paginator new result " + repr(result)
 			
 			if len(result) == 0:
 				if get("scraper") not in ["music_top100"]:
