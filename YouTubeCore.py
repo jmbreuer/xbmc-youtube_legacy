@@ -702,30 +702,44 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 
 	def getDOMContent(self, html, params, match):
 		get = params.get
-		print self.__plugin__ + " getDOMContent match: " + match
+		#print self.__plugin__ + " getDOMContent match: " + match
 		start = html.find(match)
-		end = html.find("</" + get("name") + ">", start)
-		print self.__plugin__ + " getDOMContent " + str(start) + " < " + str(end)
+		if get("name") == "img":
+			endstr = ">"
+		else:
+			endstr = "</" + get("name") + ">"
+		end = html.find(endstr, start)
 
-		pos = start
-		while html.find("<" + get("name"), pos) < end:
-			pos = html.find("<" + get("name"), pos +1)
+		#print self.__plugin__ + " getDOMContent " + str(start) + " < " + str(end)
+
+		pos = html.find("<" + get("name"), start + 1)
+		while pos < end:
+			pos = html.find("<" + get("name"), pos + 1)
 			if pos == -1:
 				break;
-			end = html.find("</" + get("name") + ">", start)
-			print self.__plugin__ + " getDOMContent2 loop: " + str(start) + " < " + str(end) + " pos = " + str(pos)
-		html = html[start:end + len("</" + get("name") + ">")]
-		print self.__plugin__ + " getDOMContent done html length: " + str(len(html))
+			tend = html.find(endstr, end + 1)
+			if tend != -1:
+				end = tend
+			#print self.__plugin__ + " getDOMContent2 loop: " + str(start) + " < " + str(end) + " pos = " + str(pos)
+
+		html = html[start:end + len(endstr)]
+		#print self.__plugin__ + " getDOMContent done html length: " + str(len(html))
 		return html
 
 	def parseDOM(self, html, params):
 		get = params.get
 		if self.__dbg__:
-                        print self.__plugin__ + " parseDOMUni : " + repr(params)
+                        print self.__plugin__ + " parseDOM : " + repr(params)
 		if get("id"):
-			lst = re.compile('(<' + get("name") + ' ' + get("id") + '=[\'"]+' + get("id-match") + '[\'"]+.*?>)').findall(html)
-			if len(lst) == 0:
-				lst = re.compile('(<' + get("name") + '.*' + get("id") + '=[\'"]+' + get("id-match") + '[\'"]+.*?>)').findall(html)
+			if get("id-match"):
+				lst = re.compile('(<' + get("name") + ' ' + get("id") + '=[\'"]+' + get("id-match") + '[\'"]+.*?>)').findall(html)
+				if len(lst) == 0:
+					lst = re.compile('(<' + get("name") + '.*' + get("id") + '=[\'"]+' + get("id-match") + '[\'"]+.*?>)').findall(html)
+			else:
+				lst = re.compile('(<' + get("name") + ' ' + get("id") + '=[\'"].*?[\'"]+.*?>)').findall(html)
+				if len(lst) == 0:
+					lst = re.compile('(<' + get("name") + '.*' + get("id") + '=[\'"]+.*?[\'"]+.*?>)').findall(html)
+				
 		elif get("return"):
 			lst = re.compile('(<' + get("name") + ' ' + get("return") + '=[\'"]+.*?[\'"]+.*?>)').findall(html)
 			if len(lst) == 0:
@@ -737,9 +751,8 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 		else:
 			lst = re.compile('(<' + get("name") + '.*?>)').findall(html)
 		
-		print self.__plugin__ + " parseDOMUni len(lst): " + str(len(lst))
 		if len(lst) == 0:
-			print self.__plugin__ + " parseDOMUni id - no result : " + repr(params)
+			print self.__plugin__ + " parseDOM Couldn't find any matches. Returning empty handed : " + html
 			return ""
 
 		if get("return"):
@@ -747,7 +760,8 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 		else:
 			html2 = ""
 			for match in lst:
-				html2 += self.getDOMContent(html, params, match)
+				html2 += "\n" + self.getDOMContent(html, params, match)
+
 		if len(lst) > 0 and get("class"):
 			lst = re.compile('(<.*class=[\'"]' + get("class") + '[\'"].*>)').findall(html2)
 			if get("return"):
@@ -755,8 +769,8 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 			else:
 				html2 = ""
 				for match in lst:
-					html2 += self.getDOMContent(html, params, match)
-			print self.__plugin__ + " parseDOMUni class: " + str(len(lst))
+					html2 += "\n" + self.getDOMContent(html, params, match)
+			#print self.__plugin__ + " parseDOM class: " + str(len(lst))
 
 		if len(lst) > 0 and get("id"):
 			lst = re.compile('(<.*' + get("id") + '=.*>)').findall(html2)
@@ -765,8 +779,8 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 			else:
 				html2 = ""
 				for match in lst:
-					html2 += self.getDOMContent(html, params, match)
-			print self.__plugin__ + " parseDOMUni id: " + str(len(lst))
+					html2 += "\n" + self.getDOMContent(html, params, match)
+			#print self.__plugin__ + " parseDOM id: " + str(len(lst))
 			if len(lst) > 0 and get("id-match"):
 				lst = re.compile('(<.*' + get("id") + '=[\'"]' + get("id-match") + '[\'"].*>)').findall(html2)
 				if get("return"):
@@ -774,22 +788,23 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 				else:
 					html2 = ""
 					for match in lst:
-						html2 += self.getDOMContent(html, params, match)
-				print self.__plugin__ + " parseDOMUni id-match: " + str(len(lst))
-		print self.__plugin__ + " parseDOMUni id - html2 length: " + str(len(html2)) +  " - " + str(len(lst))
+						html2 += "\n" + self.getDOMContent(html, params, match)
+				#print self.__plugin__ + " parseDOM id-match: " + str(len(lst))
+		#print self.__plugin__ + " parseDOM id - html2 length: " + str(len(html2)) +  " - " + str(len(lst))
 
 		if len(lst) > 0 and get("return"):
-			print self.__plugin__ + " parseDOMUni return1 lst for " + repr(params) + " : " + str(len(lst))
 			lst = re.compile('<' + get("name") + '.*' + get("return") + '=[\'"](.*?)[\'"].*>').findall(html2)
-			print self.__plugin__ + " parseDOMUni return2 lst for " + repr(params) + " : " + str(len(lst))
+			print self.__plugin__ + " parseDOM return lst for " + repr(params) + " : " + str(len(lst))
 			return lst
 
 		if len(lst) > 0 and get("content"):
 			contlst = []
 			for match in lst:
 				temp = self.getDOMContent(html, params, match)
+				html = html.replace(temp, "")
 				contlst.append(temp[temp.find(">")+1:temp.find("</" + get("name") + ">")])
+			print self.__plugin__ + " parseDOM return lst for " + repr(params) + " : " + str(len(lst)) + " - " + repr(lst)
 			return contlst
 
-		print self.__plugin__ + " parseDOMUni done return html for " + repr(params) + " : " + str(len(html2))
+		print self.__plugin__ + " parseDOM done return html for " + repr(params) + " : " + str(len(html2))
 		return html2

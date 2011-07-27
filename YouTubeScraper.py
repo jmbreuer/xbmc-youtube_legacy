@@ -97,45 +97,37 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 	def scrapeCategoriesGrid(self, params = {}):
 		get = params.get
 		if self.__dbg__:
-			print self.__plugin__ + " scrapeCategoriesGrid"
+			print self.__plugin__ + " scrapeCategoriesGrid: "
 		
 		url = self.createUrl(params)
 		result = self._fetchPage({"link":url})
 
 		next = "false"
-		pager = SoupStrainer(name="div", attrs = {'class':"yt-uix-pager"})
-		pagination = BeautifulSoup(result["content"], parseOnlyThese=pager)
+		pagination = self.parseDOM(result["content"], { "name": "div", "class": " yt-uix-pager"})
 
 		if (len(pagination) > 0):
 			tmp = str(pagination)
 			if (tmp.find("Next") > 0):
 				next = "true"
 		
-		list = SoupStrainer(name="div", id="browse-video-data")
-		videos = BeautifulSoup(result["content"], parseOnlyThese=list)
+		videos = self.parseDOM(result["content"], { "name": "div", "id": "id", "id-match": "browse-video-data"})
 		
 		items = []
 		if (len(videos) > 0):
-			video = videos.div.div
-			while (video != None):
-				id = video.div.a["href"]
-				if (id.find("/watch?v=") != -1):
-					id = id[id.find("=") + 1:id.find("&")]
-					items.append(id)
-				video = video.findNextSibling(name="div", attrs = {'class':"video-cell *vl"})
+			links = self.parseDOM(videos, { "name": "a", "return": "href"})
+			for link in links:
+				if (link.find("/watch?v=") != -1):
+					link = link[link.find("=") + 1:link.find("&")]
+					items.append(link)
 		else:
-			list = SoupStrainer(name="div", attrs = {'class':"most-viewed-list paginated"})
-			videos = BeautifulSoup(result["content"], parseOnlyThese=list)
-			if (len(videos) > 0):
-				video = videos.div.div.findNextSibling(name="div", attrs={'class':"video-cell"})
-				while (video != None):
-					id = video.div.a["href"]
-					if (id.find("/watch?v=") != -1):
-						id = id[id.find("=") + 1:]
-					if (id.find("&") > 0):
-						id = id[:id.find("&")]
-					items.append(id)
-					video = video.findNextSibling(name="div", attrs = {'class':"video-cell"})
+			videos = self.parseDOM(result["content"], { "name": "div", "class": "most-viewed-list paginated"})
+			links = self.parseDOM(videos, { "name": "a", "return": "href"})
+			for link in links:
+				if (link.find("/watch?v=") != -1):
+					link = link[link.find("=") + 1:]
+				if (link.find("&") > 0):
+					link = link[:link.find("&")]
+				items.append(link)
 				
 		if self.__dbg__:
 			print self.__plugin__ + " scrapeCategoriesGrid done"
@@ -149,33 +141,30 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		
 		items = []
 		url = self.urls["music"]
+
 		result = self._fetchPage({"link": url})
 		
 		if result["status"] == 200:
-			list = SoupStrainer(name="div", id="browse-filter-menu")
-			content = BeautifulSoup(result["content"], parseOnlyThese=list)
-			if (len(content) > 0):
-				cat_list = content.ul
-				while cat_list != None:
-					category = cat_list.li
-					if (category.a == None):
-						category = category.findNextSibling()
-					while category != None:
-						item = {}
-						title = self.makeAscii(category.a.contents[0])
-						title = self.replaceHtmlCodes(title)
-						id = category.a["href"].replace("/music/","/")
-						item["Title"] = title
-						item["category"] = urllib.quote_plus(id)
-						item["icon"] = "music"
-						item["thumbnail"] = "music"
-						item["scraper"] = get("scraper")
-						if get("scraper") == "music_artists":
-							item["folder"] = "true"
+			categories = self.parseDOM(result["content"], {"name": "div", "id": "id", "id-match": "browse-filter-menu"})
+			ahref = self.parseDOM(categories, {"name": "a", "return": "href"})
+			acontent = self.parseDOM(categories, {"name": "a", "content": "true"})
+
+			if len(acontent) == len(ahref) and len(ahref) > 0:
+				for i in range(0 , len(ahref)):
+					item = {}
+					title = self.makeAscii(acontent[i])
+					title = self.replaceHtmlCodes(title)
+					link = ahref[i].replace("/music/","/")
+					item["Title"] = title
+					item["category"] = urllib.quote_plus(link)
+					item["icon"] = "music"
+					item["thumbnail"] = "music"
+					item["scraper"] = get("scraper")
+					if get("scraper") == "music_artists":
+						item["folder"] = "true"
 						
-						items.append(item)
-						category = category.findNextSibling()
-					cat_list = cat_list.findNextSibling()
+					items.append(item)
+
 		if self.__dbg__:
 			print self.__plugin__ + " scrapeMusicCategories done"
 		return (items, result["status"]) 
@@ -248,25 +237,26 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			category = urllib.unquote_plus(get("category"))
 			url = self.urls["music"] + category
 			result = self._fetchPage({"link":url})
-			
-			list = SoupStrainer(name="div", attrs = {"class":"ytg-fl browse-content"})
-			content = BeautifulSoup(result["content"], parseOnlyThese=list)
-			
-			if (len(content) > 0):
-				artists = content.findAll(name="div", attrs = {"class":"browse-item artist-item"}, recursive=True)
-				for artist in artists:
-					item = {}
-					title = self.makeAscii(artist.div.h3.a.contents[0])
-					title = self.replaceHtmlCodes(title)
-					item["Title"] = title
-					item["scraper"] = "music_artist"
-					
-					id = artist.a["href"]
-					id = id[id.find("?a=") + 3:id.find("&")]
-					item["artist"] = id
-					item["icon"] = "music"
-					item["thumbnail"] = artist.a.span.span.span.img["data-thumb"]
-					items.append(item)
+
+			artists = self.parseDOM(result["content"], {"name": "div", "class": "browse-item artist-item", "content": "true"})
+			for artist in artists:
+				ahref = self.parseDOM(artist, {"name": "a", "return": "href", "id": "title"})
+				atitle = self.parseDOM(artist, {"name": "a", "return": "title"})
+				athumb = self.parseDOM(artist, {"name": "img", "return": "data-thumb"})
+				if len(atitle) == len(ahref) == len(athumb) and len(ahref) > 0:
+					for i in range(0 , len(ahref)):
+						item = {}
+						title = self.makeAscii(atitle[i])
+						title = self.replaceHtmlCodes(title)
+						item["Title"] = title
+						item["scraper"] = "music_artist"
+
+						link = ahref[i]
+						link = link[link.find("?a=") + 3:link.find("&")]
+						item["artist"] = link
+						item["icon"] = "music"
+						item["thumbnail"] = athumb[i]
+						items.append(item)
 		
 		if self.__dbg__:
 			print self.__plugin__ + " scrapeMusicCategoryArtists done"
@@ -368,7 +358,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		result = self._fetchPage({"link":url})
 		
 		list = SoupStrainer(name="div", attrs = {"class":"popular-artists"})
-		popular = BeautifulSoup(page, parseOnlyThese=list)
+		popular = BeautifulSoup(result["content"], parseOnlyThese=list)
 		yobjects = []
 		if (len(popular)):
 			artists = popular.findAll(attrs={"class":"popular-artist-row"})
@@ -403,30 +393,31 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		
 		result = self._fetchPage({"link": url})
 		
-		list = SoupStrainer(name="div", id='live-now-list-container')
-		live = BeautifulSoup(result["content"], parseOnlyThese=list)
+		live = self.parseDOM(result["content"], { "name": "div", "id": "id", "id-match": "live-now-list-container"})
 		videos = []
-		if (len(live) > 0):
-			video = live.div.div
-			while (video != None):
-				item = {}
-				videoid = video.div.a["href"]
-				videoid = videoid[videoid.rfind("/")+1:]
-				item["videoid"] = videoid
-				item["icon"] = "live"
-				thumbnail = video.div.a.span.span.img["src"]
-				thumbnail = thumbnail.replace("default","0")
-				item["thumbnail"] = thumbnail
-				title = "Unknown Title"
-				
-				info = video.div.findNextSibling(name="div", attrs = {'class':"live-browse-info"})
-				if len(info) > 0: 
-					title = info.a.contents[0]
-				item["Studio"] = info.span.a["title"]
-				item ["Title"] = title
-				videos.append(item)
-				video = video.findNextSibling(name="div", attrs= {"class":"video-cell"})
-		
+
+		if len(live) > 0:
+			ahref = self.parseDOM(live, {"name": "a", "return": "href", "class": "live-video-title"})
+			atitle = self.parseDOM(live, {"name": "a", "class": "live-video-title", "content": "true"})
+			astudio = self.parseDOM(live, {"name": "a", "id": "title", "return": "title"})
+
+			if len(ahref) == len(atitle) and len(ahref) == len(astudio) and len(ahref) > 0:
+                                for i in range(0 , len(ahref)):
+					item = {}
+					videoid = ahref[i]
+					videoid = videoid[videoid.rfind("/")+1:]
+					item["videoid"] = videoid
+					item["icon"] = "live"
+					thumbnail = self.urls["thumbnail"] % videoid
+					thumbnail = thumbnail.replace("default","0")
+					item["thumbnail"] = thumbnail
+					title = "Unknown Title"
+
+					title = atitle[i]
+					item["Studio"] = astudio[i]
+					item ["Title"] = title
+					videos.append(item)
+
 		if self.__dbg__:
 			print self.__plugin__ + " scrapeLiveNow Done"
 		return (videos, result["status"])
@@ -605,7 +596,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 	def scrapeShowsGrid(self, html, params = {}):
 		get = params.get
 		if self.__dbg__:
-			print self.__plugin__ + " scrapeShowsGrid : " + repr(params)
+			print self.__plugin__ + " scrapeShowsGrid : "
 		
 		next = "true"
 		items = []
@@ -616,7 +607,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			params["page"] = str(page)
 			
 			url = self.createUrl(params)
-			print "some url " + repr(url)
+			print self.__plugin__ + "some url " + repr(url)
 			result = self._fetchPage({"link":url})
 			
 			list = SoupStrainer(name="div", attrs = {"class":"popular-show-list"})
@@ -714,7 +705,6 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		return (ytobjects, result["status"])
 	
 	def scrapeMoviesGrid(self, params = {}):
-		#self.scrapeMoviesGridSoup(params) # Quick compare with old.
 		get = params.get
 		if self.__dbg__:
 			print self.__plugin__ + " scrapeMoviesGrid"
@@ -732,9 +722,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			result = self._fetchPage({"link":url})
 			
 			dom_pages = self.parseDOM(result["content"], {"name": "div", "class": "yt-uix-pager"})
-			print self.__plugin__ + " scrapeMoviesGrid - dom_pages : " + str(len(dom_pages))
 			links = self.parseDOM(dom_pages, {"name": "a", "class": "yt-uix-pager-link", "return": "data-page"})
-			print self.__plugin__ + " scrapeMoviesGrid - links : " + repr(links)
 			if len(links) > 0:
 				for link in links:
 					if int(link) > page:
@@ -750,10 +738,6 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			if len(vidids) == len(thumbs) and len(vidids) > 0:
 				for i in range(0 , len(vidids)):
 					items.append( (vidids[i], thumbs[i]) )
-			else:
-				if self.__dbg__:
-					print self.__plugin__ + " scrapeMoviesGrid problems with vivids and thumbs : " + str(len(vidids)) + " != " + str(len(thumbs)) + " != 0"
-				
 		
 		del params["page"]
 		if self.__dbg__:
@@ -943,7 +927,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 	def scrapeCategoryList(self, params = {}):
 		get = params.get
 		if self.__dbg__:
-			print self.__plugin__ + " scrapeCategoryList : " + repr(params)
+			print self.__plugin__ + " scrapeCategoryList : "
 		
 		scraper = "categories"
 		thumbnail = "explore"
@@ -954,7 +938,6 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			thumbnail = get("scraper")
 		
 		url = self.createUrl(params)
-		print self.__plugin__ + " scrapeCategoryList : " + url
 		result = self._fetchPage({"link":url})
 		
 		if result["status"] == 200:
@@ -1019,7 +1002,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		if not get("page"):
 			(result, status) = params["new_results_function"](params)
 			
-			print "new result " + repr(result)
+			print self.__plugin__ + " new result " + repr(result)
 			
 			if len(result) == 0:
 				if get("scraper") not in ["music_top100"]:
@@ -1029,7 +1012,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 				self.__storage__.store(params, result)
 		else:
 			result = self.__storage__.retrieve(params)
-			print "retrieved result " + repr(result)
+			print self.__plugin__ + " retrieved result " + repr(result)
 		
 		if not get("folder"):
 			if ( per_page * ( page + 1 ) < len(result) ):
