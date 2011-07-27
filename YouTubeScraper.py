@@ -946,7 +946,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			if (len(categories) > 0):
 				ahref = self.parseDOM(categories, {"name": "a", "return": "href"})
 				acontent = self.parseDOM(categories, {"name": "a", "content": "true"})
-				
+				print self.__plugin__ + " TEST BLA : " + repr(ahref) + "\n\n\n" + repr(acontent)
 				if len(acontent) == len(ahref) and len(ahref) > 0:
 					for i in range(0 , len(ahref)):
 						item = {}

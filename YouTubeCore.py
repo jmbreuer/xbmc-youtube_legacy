@@ -317,7 +317,8 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 			else:
 				request.add_header('User-Agent', self.USERAGENTIE)
 
-			#request.add_header('Cookie', 'PREF=f1=50000000&hl=en')
+			if get("no-language-cookie", "false") != "true":
+				request.add_header('Cookie', 'PREF=f1=50000000&hl=en')
                 
 		if get("login", "false") == "true":
 			if self.__dbg__:
@@ -467,7 +468,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
                                      "client_secret": "sZn1pllhAfyonULAWfoGKCfp",
                                      "refresh_token": self.__settings__.getSetting( "oauth2_refresh_token" ),
                                      "grant_type": "refresh_token"}
-                        ret = self._fetchPage({ "link": url, "url_data": url_data})
+                        ret = self._fetchPage({ "link": url, "url_data": url_data}) # "no-language-cookie": "true" <- might be needed here..
                         oauth = json.loads(ret["content"])
                         #self.__settings__.setSetting("oauth2_expires at", oauth["expires_in"] + current time. )
 			if self.__dbg__:
@@ -759,6 +760,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 			return ""
 
 		if get("return"):
+			#these must be \n, at least for login and live.
 			html2 = "\n".join(lst)
 		else:
 			html2 = ""
