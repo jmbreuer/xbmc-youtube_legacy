@@ -183,34 +183,71 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 				print self.__plugin__ + " returning existing login info: " + self.__settings__.getSetting( "login_info" )
 			return ( self.__settings__.getSetting( "login_info" ), 200)
 		
-		ret = self._fetchPage({ "link": "https://www.google.com/accounts/ServiceLogin?uilel=3&service=youtube&passive=true&continue=http%3A%2F%2Fwww.youtube.com%2Fsignin%3Faction_handle_signin%3Dtrue%26nomobiletemp%3D1%26hl%3Den_US%26next%3D%252F&hl=en_US&ltmpl=sso"})
 
-		galx = re.compile('Set-Cookie: GALX=(.*);Path=/accounts;Secure').findall(str(ret["header"]))
-		if len(galx) == 0:
+		if self.__dbg__:
+			print self.__plugin__ + " _httpLogin step 1"
+		ret = self._fetchPage({ "link": "http://www.youtube.com/"})
+		newurl = self.parseDOM(ret["content"], { "name": "a", "class": "end", "return": "href"})
+		
+		if len(newurl) == 0:
 			return ( "", 0)
+
+		if self.__dbg__:
+			print self.__plugin__ + " _httpLogin step 2"
+		ret = self._fetchPage({ "link": newurl[0] })
+
+		newurl = self.parseDOM(ret["content"], { "name": "form", "id": "id", "id-match": "gaia_loginform", "return": "action"})
+		rmShown = re.compile('<input type="hidden" name=\'rmShown\' value="(.*?)" />').findall(ret["content"])
+		cont = re.compile('<input type="hidden" name="continue" id="continue"\n           value="(.*)" />').findall(ret["content"])
+		#cont = self.parseDOM(ret["content"], { "name": "input", "id": "id", "id-match": "continue", "return": "value"})
+		cont = ["http://www.youtube.com/signin?action_handle_signin=true&amp;nomobiletemp=1&amp;hl=en_US&amp;next=%2F"]
+		uilel = re.compile('<input type="hidden" name="uilel" id="uilel"\n           value="(.*?)" />').findall(ret["content"])
+		dsh = re.compile('<input type="hidden" name="dsh" id="dsh"\n           value="(.*?)" />').findall(ret["content"])
+		galx = re.compile('Set-Cookie: GALX=(.*);Path=/accounts;Secure').findall(str(ret["header"]))
+
+		if len(galx) == 0 or len(cont) == 0 or len(uilel) == 0 or len(dsh) == 0 or len(rmShown) == 0:
+			if self.__dbg__:
+				print self.__plugin__ + " _httpLogin missing values for login form " + repr(galx) + repr(cont) + repr(uilel) + repr(dsh) + repr(rmShown)
+			return ( "", 0)
+
 		galx = galx[0]
+		url_data = { "pstMsg": "0",
+			     "ltmpl": "sso",
+			     "dnConn": "",
+			     "continue": cont[0],
+			     "service": "youtube",
+			     "uilel": uilel[0],
+			     "dsh": dsh[0],
+			     "hl": "en_US",
+			     "timeStmp": "",
+			     "secTok": "",
+			     "GALX": galx,
+			     "Email": uname,
+			     "Passwd": pword,
+			     "PersistentCookie": "yes",
+			     "rmShown": rmShown[0],
+			     "signin": "Sign in",
+			     "asts": ""
+			}
 
 		if self.__dbg__:
-			print self.__plugin__ + " _httpLogin: getting new login_info"
-
-		# Login to Google
-		cont = urllib.unquote("http%3A%2F%2Fwww.youtube.com%2Fsignin%3Faction_handle_signin%3Dtrue%26nomobiletemp%3D1%26hl%3Den_US%26next%3D%252Findex&hl=en_US&ltmpl=sso")
-		if self.__dbg__:
-			print self.__plugin__ + " _httpLogin: cont_url = " + cont
-
-                ret = self._fetchPage({ "link": "https://www.google.com/accounts/ServiceLoginAuth?service=youtube", "url_data": {'GALX': galx, 'Email': uname, 'Passwd': pword, 'PersistentCookie': 'yes', 'continue': cont} });
+			print self.__plugin__ + " _httpLogin step 3 : " + repr(url_data)
+                ret = self._fetchPage({ "link": newurl[0], "url_data": url_data });
 
 		# Login to youtube
 		newurl = re.compile('<meta http-equiv="refresh" content="0; url=&#39;(.*)&#39;"></head>').findall(ret["content"])
-		if self.__dbg__:
-			print self.__plugin__ + " _httpLogin: newurl " + str(len(newurl)) + " - " + ret["content"]
-		if len(newurl) > 0: # Normal login
+
+		if len(newurl): # Normal login
 			if self.__dbg__:
 				print self.__plugin__ + " _httpLogin: Normal login"
 			newurl = newurl[0].replace("&amp;", "&")
 
 		        # We need to do this twice now.
+
+			if self.__dbg__:
+				print self.__plugin__ + " _httpLogin step 4 - normal login"
 			ret = self._fetchPage({ "link": newurl});
+
 			# Login to youtube
 			newurl = re.compile('<meta http-equiv="refresh" content="0; url=&#39;(.*)&#39;"></head>').findall(ret["content"])
 			if len(newurl) == 0:
@@ -220,10 +257,10 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 
 			newurl = newurl[0].replace("&amp;", "&")
 			
+			if self.__dbg__:
+				print self.__plugin__ + " _httpLogin step 5 - normal login"
 			ret = self._fetchPage({ "link": newurl });		
 		elif ret["content"].find("smsToken") > -1:
-			if self.__dbg__:
-				print self.__plugin__ + " _httpLogin: 2-factor login"
 			smsToken = re.compile('<input type="hidden" name="smsToken"\n        value="(.*?)">').findall(ret["content"])
 			if len(smsToken) == 0:
 				return ( "", 0)
@@ -241,6 +278,8 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 				     "secTok" : "",
 				     "email" : email[0]}
 
+			if self.__dbg__:
+				print self.__plugin__ + " _httpLogin step 4 - 2-factor login"
 			ret = self._fetchPage({ "link": "https://www.google.com/accounts/SmsAuth?persistent=yes", "url_data": url_data })
 
 			smsToken = re.compile('<input type="hidden" name="smsToken" value="(.*?)">').findall(ret["content"])
@@ -255,6 +294,9 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 				     "PersistentCookie": "yes",
 				     "service": "youtube",
 				     "GALX": galx}
+
+			if self.__dbg__:
+				print self.__plugin__ + " _httpLogin step 5 - 2-factor login"
 			ret = self._fetchPage({ "link": "https://www.google.com/accounts/ServiceLoginAuth?service=youtube", "url_data": url_data })
 
 			newurl = re.compile('<meta http-equiv="refresh" content="0; url=&#39;(.*)&#39;"></head>').findall(ret["content"])
@@ -264,6 +306,9 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 
                         if self.__dbg__:
                                 print self.__plugin__ + " new_url3: " + newurl
+
+			if self.__dbg__:
+				print self.__plugin__ + " _httpLogin step 6 - 2-factor login"
                         ret = self._fetchPage({ "link": newurl});
 
                         if self.__dbg__:
@@ -273,10 +318,13 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 				return ("", 0)
                         newurl = urllib.unquote(newurl[0])
 
+			if self.__dbg__:
+				print self.__plugin__ + " _httpLogin step 7 - 2-factor login"
                         ret = self._fetchPage({ "link": newurl});
 		else:
                         if self.__dbg__:
-                                print self.__plugin__ + " _login couldn't find method to authenticate: " + str(ret["content"].find("smsToken"))
+                                print self.__plugin__ + " _login couldn't find method to authenticate: " + repr(ret)
+			return ( "", 0)
 
 		if self.__dbg__:
 			print self.__plugin__ + " _httpLogin: Logged in. Parsing data."
