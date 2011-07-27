@@ -44,6 +44,8 @@ class YouTubePlaylistControl(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils)
 			result = self.getFavorites(params)
 		elif get("user_feed") == "newsubscriptions":
 			result = self.getNewSubscriptions(params)
+		elif get("scraper") == "artist":
+			result = self.getArtist(params)
 		elif get("video_list", False) :
 			result = []
 			video_list = get("video_list", "").split(",")
@@ -122,7 +124,18 @@ class YouTubePlaylistControl(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils)
 
 		playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
 		playlist.add("%s?path=/root&action=play_video&videoid=%s" % (sys.argv[0], video["videoid"] ), listitem)
-
+	
+	def getArtist(self, params = {}):
+		get = params.get
+		if not get("artist"):
+			return False
+		
+		(result, status) = self.__scraper__.scrapeArtist(params)
+		if status == 200:
+			(result, status) = self.getBatchDetails(result, params)
+		
+		return result
+	
 	def getPlayList(self, params = {}):
 		get = params.get
 		
@@ -132,10 +145,11 @@ class YouTubePlaylistControl(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils)
 		return self.__feeds__.listAll(params)
 	
 	def getDiscoSearch(self, params = {}):
+		get = params.get
 		(result, status) = self.__scraper__.searchDisco(params)
 		
 		if status == 200:
-			(result, status) = self.__feeds__.getBatchDetails(result, params)
+			(result, status) = self.getBatchDetails(result, params)
 		
 		return result
 	
