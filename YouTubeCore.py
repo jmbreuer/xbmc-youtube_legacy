@@ -371,7 +371,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 					params["login"] = "true"
 					return self._fetchPage(params)
 				else:
-					return self._verifyAge(ret_obj["content"], new_url, params)
+					return self._verifyAge(ret_obj["content"], ret_obj["new_url"], params)
 		
 		except urllib2.HTTPError, e:
 			err = str(e)
