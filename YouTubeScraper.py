@@ -886,8 +886,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		result = self._fetchPage({"link":url})
 		
 		if result["status"] == 200:
-			pager = SoupStrainer(name="div", attrs = {'class':"yt-uix-pager"})
-			pagination = BeautifulSoup(result["content"], parseOnlyThese=pager)
+			pagination = self.parseDOM(result["content"], { "name": "div", "class": "yt-uix-pager"})
 	
 			if (len(pagination) > 0):
 				tmp = str(pagination)
@@ -895,29 +894,29 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 					next = "true"
 			
 			
-			list = SoupStrainer(id="popular-column", name="div")
-			trailers = BeautifulSoup(result["content"], parseOnlyThese=list)
+			trailers = self.parseDOM(result["content"], { "name": "div", "id": "id", "id-match": "popular-column" })
 			
 			if (len(trailers) > 0):
-				trailer = trailers.div.div
-				if (get("scraper") == "movies"):
-					trailer = trailers.div.div.div
-				
-				cell = "trailer-cell *vl"
-				if (get("scraper") == "categories"):
-					cell = "video-cell"
-				
-				while ( trailer != None ):
-					videoid = trailer.div.a['href']
-							
-					if (videoid):
-						if (videoid.find("=") > -1):
-							videoid = videoid[videoid.find("=")+1:]
-						
-						items.append( (videoid, trailer.div.a.span.img['src']) )
-					
-					trailer = trailer.findNextSibling(name="div", attrs = { 'class':cell })
-		
+				ahref = self.parseDOM(trailers, { "name": "a", "class": "ux-thumb-wrap ", "return": "href"})
+				if len(ahref) == 0:
+					ahref = self.parseDOM(trailers, { "name": "a", "class": "ux-thumb-wrap contains-addto", "return": "href"})
+
+				athumbs = self.parseDOM(trailers, { "name": "a", "class": "ux-thumb-wrap ", "content": "true"})
+				if len(athumbs) == 0:
+					athumbs = self.parseDOM(trailers, { "name": "a", "class": "ux-thumb-wrap contains-addto", "content": "true"})
+
+                                if len(athumbs) == len(ahref) and len(ahref) > 0:
+                                        for i in range(0 , len(ahref)):
+						videoid = ahref[i]
+
+						if (videoid):
+							if (videoid.find("=") > -1):
+								videoid = videoid[videoid.find("=")+1:]
+						thumb = self.parseDOM(athumbs[i], { "name": "img", "return": "src"});
+						if len(thumb) > 0:
+							thumb = thumb[0]
+						items.append((videoid, thumb))
+									    
 		if self.__dbg__:
 			print self.__plugin__ + " scrapeGridFormat done"
 		return (items, result["status"])
