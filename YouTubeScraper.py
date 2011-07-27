@@ -939,9 +939,9 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		result = self._fetchPage({"link":url})
 		
 		if result["status"] == 200:
-                        categories = self.parseDOM(result["content"], {"name": "div", "class": "yt-uix-expander-body hid"})
+                        categories = self.parseDOM(result["content"], {"name": "div", "class": "yt-uix-expander-body.*"})
 			if len(categories) == 0:
-				categories = self.parseDOM(result["content"], {"name": "div", "class": "browse-filter-menu hid"})
+				categories = self.parseDOM(result["content"], {"name": "div", "class": "browse-filter-menu.*"})
 			
 			if (len(categories) > 0):
 				ahref = self.parseDOM(categories, {"name": "a", "return": "href"})
