@@ -334,7 +334,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 				if self.__dbg__:
 					print self.__plugin__ + " returning existing login info: " + self.__settings__.getSetting( "login_info" )
 				info = self.__settings__.getSetting( "login_info" )
-			       	request.add_header('Cookie', 'LOGIN_INFO=' + info )
+				request.add_header('Cookie', 'LOGIN_INFO=' + info )
 		
 		if get("auth", "false") == "true":
 			if self.__dbg__:
@@ -730,7 +730,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 	def parseDOM(self, html, params):
 		get = params.get
 		if self.__dbg__:
-                        print self.__plugin__ + " parseDOM : " + repr(params)
+			print self.__plugin__ + " parseDOM : " + repr(params)
 		if get("id"):
 			if get("id-match"):
 				lst = re.compile('(<' + get("name") + ' ' + get("id") + '=[\'"]+' + get("id-match") + '[\'"]>)').findall(html)
