@@ -317,7 +317,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 			else:
 				request.add_header('User-Agent', self.USERAGENTIE)
 
-			if get("no-language-cookie", "false") != "true":
+			if get("no-language-cookie", "false") == "false":
 				request.add_header('Cookie', 'PREF=f1=50000000&hl=en')
                 
 		if get("login", "false") == "true":
@@ -704,7 +704,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 
 	def getDOMContent(self, html, params, match):
 		get = params.get
-		print self.__plugin__ + " getDOMContent match: " + match
+		#print self.__plugin__ + " getDOMContent match: " + match
 		start = html.find(match)
 		if get("name") == "img":
 			endstr = ">"
@@ -712,7 +712,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 			endstr = "</" + get("name") + ">"
 		end = html.find(endstr, start)
 
-		print self.__plugin__ + " getDOMContent " + str(start) + " < " + str(end)
+		#print self.__plugin__ + " getDOMContent " + str(start) + " < " + str(end)
 
 		pos = html.find("<" + get("name"), start + 1)
 		while pos < end:
@@ -722,10 +722,10 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 			tend = html.find(endstr, end + 1)
 			if tend != -1:
 				end = tend
-			print self.__plugin__ + " getDOMContent2 loop: " + str(start) + " < " + str(end) + " pos = " + str(pos)
+			#print self.__plugin__ + " getDOMContent2 loop: " + str(start) + " < " + str(end) + " pos = " + str(pos)
 
 		html = html[start:end + len(endstr)]
-		print self.__plugin__ + " getDOMContent done html length: " + str(len(html)) + repr(html)
+		#print self.__plugin__ + " getDOMContent done html length: " + str(len(html)) + repr(html)
 		return html
 
 	def parseDOM(self, html, params):
@@ -746,7 +746,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 				
 		elif get("return"):
 			lst = re.compile('(<' + get("name") + ' ' + get("return") + '=[\'"]+.*?[\'"]+.*?>)').findall(html)
-			if len(lst) == 0 or True:
+			if len(lst) == 0:
 				lst = re.compile('(<' + get("name") + '.*' + get("return") + '=[\'"]+.*?[\'"]+.*?>)').findall(html) 
 		elif get("class"):
 			lst = re.compile('(<' + get("name") + ' class=[\'"]+' + get("class") + '[\'"]+.*?>)').findall(html)
