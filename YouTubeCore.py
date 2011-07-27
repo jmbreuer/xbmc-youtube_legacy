@@ -45,9 +45,9 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 	__storage__ = sys.modules[ "__main__" ].__storage__
 	__login__ = sys.modules[ "__main__" ].__login__
 
-        __cj__ = cookielib.LWPCookieJar()
-        __opener__ = urllib2.build_opener(urllib2.HTTPCookieProcessor(__cj__))
-        urllib2.install_opener(__opener__)
+	__cj__ = cookielib.LWPCookieJar()
+	__opener__ = urllib2.build_opener(urllib2.HTTPCookieProcessor(__cj__))
+	urllib2.install_opener(__opener__)
 
 	APIKEY = "AI39si6hWF7uOkKh4B9OEAX-gK337xbwR9Vax-cdeF9CF9iNAcQftT8NVhEXaORRLHAmHxj6GjM-Prw04odK4FxACFfKkiH9lg";
 	
@@ -247,7 +247,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 				i+=1
 		
 		final_request = request_start + video_request + request_end
-                result = self._fetchPage({"link": "http://gdata.youtube.com/feeds/api/videos/batch", "request": final_request})
+		result = self._fetchPage({"link": "http://gdata.youtube.com/feeds/api/videos/batch", "request": final_request})
 				
 		(temp, status) = self.getVideoInfoBatch(result["content"], params)
 		ytobjects += temp
@@ -264,7 +264,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 	#
 	#===============================================================================
 
-        def _fetchPage(self, params = {}):
+	def _fetchPage(self, params = {}):
 		get = params.get
 		link = get("link")
 		ret_obj = {}
