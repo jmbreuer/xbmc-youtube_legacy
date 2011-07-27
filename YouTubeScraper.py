@@ -944,6 +944,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 				categories = self.parseDOM(result["content"], {"name": "div", "class": "browse-filter-menu hid"})
 			
 			if (len(categories) > 0):
+				ahref = self.parseDOM(categories, {"name": "a", "return": "href"})
 				acontent = self.parseDOM(categories, {"name": "a", "content": "true"})
 				
 				if len(acontent) == len(ahref) and len(ahref) > 0:

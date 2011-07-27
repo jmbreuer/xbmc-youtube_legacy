@@ -716,7 +716,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 		pos = html.find("<" + get("name"), start + 1)
 		while pos < end:
 			pos = html.find("<" + get("name"), pos + 1)
-			if pos == -1 or pos > end:
+			if pos == -1:
 				break;
 			tend = html.find(endstr, end + 1)
 			if tend != -1:
@@ -728,7 +728,6 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 		return html
 
 	def parseDOM(self, html, params):
-		html = html.replace("\n", " ")
 		get = params.get
 		if self.__dbg__:
                         print self.__plugin__ + " parseDOM : " + repr(params)
@@ -744,14 +743,14 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 				if len(lst) == 0:
 					lst = re.compile('(<' + get("name") + '.*' + get("id") + '=[\'"]+.*?[\'"]+.*?>)').findall(html)
 				
-		elif get("class"):
-			lst = re.compile('(<' + get("name") + ' class=[\'"]+' + get("class") + '[\'"]+.*?>)').findall(html)
-			if len(lst) == 0:
-				lst = re.compile('(<' + get("name") + '.*class=[\'"]+' + get("class") + '[\'"]+.*?>)').findall(html)
 		elif get("return"):
 			lst = re.compile('(<' + get("name") + ' ' + get("return") + '=[\'"]+.*?[\'"]+.*?>)').findall(html)
 			if len(lst) == 0 or True:
 				lst = re.compile('(<' + get("name") + '.*' + get("return") + '=[\'"]+.*?[\'"]+.*?>)').findall(html) 
+		elif get("class"):
+			lst = re.compile('(<' + get("name") + ' class=[\'"]+' + get("class") + '[\'"]+.*?>)').findall(html)
+			if len(lst) == 0:
+				lst = re.compile('(<' + get("name") + '.*class=[\'"]+' + get("class") + '[\'"]+.*?>)').findall(html)
 		else:
 			lst = re.compile('(<' + get("name") + '.*?>)').findall(html)
 		
@@ -760,39 +759,39 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 			return ""
 
 		if get("return"):
-			html2 = " ".join(lst)
+			html2 = "\n".join(lst)
 		else:
 			html2 = ""
 			for match in lst:
-				html2 += " " + self.getDOMContent(html, params, match)
+				html2 += "\n" + self.getDOMContent(html, params, match)
 
 		if len(lst) > 0 and get("class"):
 			lst = re.compile('(<.*class=[\'"]' + get("class") + '[\'"].*>)').findall(html2)
 			if get("return"):
-				html2 = " ".join(lst)
+				html2 = "\n".join(lst)
 			else:
 				html2 = ""
 				for match in lst:
-					html2 += " " + self.getDOMContent(html, params, match)
+					html2 += "\n" + self.getDOMContent(html, params, match)
 			#print self.__plugin__ + " parseDOM class: " + str(len(lst))
 
 		if len(lst) > 0 and get("id"):
 			lst = re.compile('(<.*' + get("id") + '=.*>)').findall(html2)
 			if get("return"):
-				html2 = " ".join(lst)
+				html2 = "\n".join(lst)
 			else:
 				html2 = ""
 				for match in lst:
-					html2 += " " + self.getDOMContent(html, params, match)
+					html2 += "\n" + self.getDOMContent(html, params, match)
 			#print self.__plugin__ + " parseDOM id: " + str(len(lst))
 			if len(lst) > 0 and get("id-match"):
 				lst = re.compile('(<.*' + get("id") + '=[\'"]' + get("id-match") + '[\'"].*>)').findall(html2)
 				if get("return"):
-					html2 = " ".join(lst)
+					html2 = "\n".join(lst)
 				else:
 					html2 = ""
 					for match in lst:
-						html2 += " " + self.getDOMContent(html, params, match)
+						html2 += "\n" + self.getDOMContent(html, params, match)
 				#print self.__plugin__ + " parseDOM id-match: " + str(len(lst))
 		#print self.__plugin__ + " parseDOM id - html2 length: " + str(len(html2)) +  " - " + str(len(lst))
 
@@ -812,3 +811,6 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 
 		print self.__plugin__ + " parseDOM done return html for " + repr(params) + " : " + str(len(html2))
 		return html2
+
+
+
