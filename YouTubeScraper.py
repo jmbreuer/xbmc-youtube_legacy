@@ -398,6 +398,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			atitle = self.parseDOM(live, {"name": "a", "class": "live-video-title", "content": "true"})
 			astudio = self.parseDOM(live, {"name": "a", "id": "title", "return": "title"})
 
+			print self.__plugin__ + " BLA BLA BTEST2 " + str(len(ahref)) +  " - " + str(len(atitle))  + " -" + str(len(astudio)) + " - " + str(len(result["content"])) + " - " + str(len(live))
 			if len(ahref) == len(atitle) and len(ahref) == len(astudio) and len(ahref) > 0:
                                 for i in range(0 , len(ahref)):
 					item = {}
@@ -938,12 +939,11 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		result = self._fetchPage({"link":url})
 		
 		if result["status"] == 200:
-                        categories = self.parseDOM(result["content"], {"name": "div", "class": "yt-uix-expander-body"})
+                        categories = self.parseDOM(result["content"], {"name": "div", "class": "yt-uix-expander-body hid"})
 			if len(categories) == 0:
-				categories = self.parseDOM(result["content"], {"name": "div", "id": "id", "id-match": "browse-filter-menu"})
+				categories = self.parseDOM(result["content"], {"name": "div", "class": "browse-filter-menu hid"})
 			
 			if (len(categories) > 0):
-				ahref = self.parseDOM(categories, {"name": "a", "return": "href"})
 				acontent = self.parseDOM(categories, {"name": "a", "content": "true"})
 				
 				if len(acontent) == len(ahref) and len(ahref) > 0:

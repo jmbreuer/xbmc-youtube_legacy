@@ -265,11 +265,13 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 	#===============================================================================
 
         def _fetchPage(self, params = {}):
-                get = params.get
+		get = params.get
+		urllib2.install_opener(self.__opener__)
+		get = params.get
 		link = get("link")
-                ret_obj = {}
-                if self.__dbg__:
-			if ( get("url_data") or get("request")):
+		ret_obj = {}
+		if self.__dbg__:
+			if (get("url_data") or get("request")):
 				print self.__plugin__ + " _fetchPage called for : " + repr(params['link'])
 			else:
 				print self.__plugin__ + " _fetchPage called for : " + repr(params)
@@ -283,115 +285,117 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 				else:
 					link += "?oauth_token=" + self.__settings__.getSetting("oauth2_access_token")
 
-				print self.__plugin__ + " _fetchPage updated link: " + link
+					print self.__plugin__ + " _fetchPage updated link: " + link
 			else:
 				print self.__plugin__ + " _fetchPage couldn't get login token"
 
-
-                if not link or int(get("error", "0")) > 2 :
-                        if self.__dbg__:
-                                print self.__plugin__ + " _fetchPage giving up "
-                        ret_obj["status"] = 500
-                        return ret_obj
+		if not link or int(get("error", "0")) > 2 :
+			if self.__dbg__:
+				print self.__plugin__ + " _fetchPage giving up "
+			ret_obj["status"] = 500
+			return ret_obj
 
 		if get("url_data"):
 			request = urllib2.Request(link, urllib.urlencode(get("url_data")) )
-			request.add_header('Content-Type', 'application/x-www-form-urlencoded')
+			#request.add_header('Content-Type', 'application/x-www-form-urlencoded')
 		elif get("request", "false") == "false":
 			request = url2request(link, get("method", "GET"));
-                else:
-                        if self.__dbg__:
-                                print self.__plugin__ + " _fetchPage got request"
-                        request = urllib2.Request(link, get("request"))
-                        request.add_header('X-GData-Client', "")
-                        request.add_header('Content-Type', 'application/atom+xml') 
-                        request.add_header('Content-Length', str(len(get("request")))) 
+		else:
+			if self.__dbg__:
+				print self.__plugin__ + " _fetchPage got request"
+			request = urllib2.Request(link, get("request"))
+			request.add_header('X-GData-Client', "")
+			request.add_header('Content-Type', 'application/atom+xml') 
+			request.add_header('Content-Length', str(len(get("request")))) 
 
-                if get("api", "false") == "true":
-                        if self.__dbg__:
-                                print self.__plugin__ + " got api"
-                        request.add_header('GData-Version', '2') #confirmed
-                        request.add_header('X-GData-Key', 'key=' + self.APIKEY)
-                else:
+		if get("api", "false") == "true":
+			if self.__dbg__:
+				print self.__plugin__ + " got api"
+			request.add_header('GData-Version', '2') #confirmed
+			request.add_header('X-GData-Key', 'key=' + self.APIKEY)
+		else:
 			if self.__settings__.getSetting("preferred") == "true":
 				request.add_header('User-Agent', self.USERAGENT)
 			else:
 				request.add_header('User-Agent', self.USERAGENTIE)
+
 			request.add_header('Cookie', 'PREF=f1=50000000&hl=en')
                 
-                if get("login", "false") == "true":
-                        if self.__dbg__:
-                                print self.__plugin__ + " got login"
-                        if ( self.__settings__.getSetting( "username" ) == "" or self.__settings__.getSetting( "user_password" ) == "" ):
-                                if self.__dbg__:
-                                        print self.__plugin__ + " _fetchPage, login required but no credentials provided"
-                                ret_obj["status"] = 303
-                                ret_obj["content"] = self.__language__( 30622 )
-                                return ret_obj
-                        
-			# This should be a call to self.__login__._httpLogin()
-			if self.__settings__.getSetting( "login_info" ) != "":
+		if get("login", "false") == "true":
+			if self.__dbg__:
+				print self.__plugin__ + " got login"
+			if ( self.__settings__.getSetting( "username" ) == "" or self.__settings__.getSetting( "user_password" ) == "" ):
 				if self.__dbg__:
-					print self.__plugin__ + " returning existing login info: " + self.__settings__.getSetting( "login_info" )
-				info = self.__settings__.getSetting( "login_info" )
-				request.add_header('Cookie', 'LOGIN_INFO=' + info )
-
-                if get("auth", "false") == "true":
-                        if self.__dbg__:
-                                print self.__plugin__ + " got auth"
-                        if self._getAuth():
-                                request.add_header('Authorization', 'GoogleLogin auth=' + self.__settings__.getSetting("auth"))
-                        else:
-                                print self.__plugin__ + " _fetchPage couldn't get login token"
-                
-                try:
-                        if self.__dbg__:
-                                print self.__plugin__ + " _fetchPage making request"
-
-                        con = urllib2.urlopen(request)
-
-                        ret_obj["content"] = con.read()
-                        ret_obj["new_url"] = con.geturl()
-                        ret_obj["header"] = str(con.info())
-                        con.close()
-
-                        # Return result if it isn't age restricted
-                        if ( ret_obj["content"].find("verify-actions") == -1 and ret_obj["content"].find("verify-age-actions") == -1):
+					print self.__plugin__ + " _fetchPage, login required but no credentials provided"
+				ret_obj["status"] = 303
+				ret_obj["content"] = self.__language__( 30622 )
+				return ret_obj
+                        
+                        # This should be a call to self.__login__._httpLogin()
+                        if self.__settings__.getSetting( "login_info" ) != "":
                                 if self.__dbg__:
-                                        print self.__plugin__ + " _fetchPage done"
-                                        #print repr(ret_obj["content"])
-                                        #print self.__plugin__ + " _bla: cj2 : " + repr(self.__cj__)
-				ret_obj["status"] = 200
-                                return ret_obj
-                        else:
-                                print self.__plugin__ + " _fetchPage found verify age request: " + repr(params) 
-                                # We need login to verify age
-                                if not get("login"):
-                                        params["error"] = get("error", "0")
-                                        params["login"] = "true"
-                                        return self._fetchPage(params)
-                                #else:
-                                        return self._verifyAge(ret_obj["content"], new_url, params)
+                                        print self.__plugin__ + " returning existing login info: " + self.__settings__.getSetting( "login_info" )
+                                info = self.__settings__.getSetting( "login_info" )
+                                request.add_header('Cookie', 'LOGIN_INFO=' + info )
+
+		if get("auth", "false") == "true":
+			if self.__dbg__:
+				print self.__plugin__ + " got auth"
+			if self._getAuth():
+				request.add_header('Authorization', 'GoogleLogin auth=' + self.__settings__.getSetting("auth"))
+			else:
+				print self.__plugin__ + " _fetchPage couldn't get login token"
                 
-                except urllib2.HTTPError, e:
-                        err = str(e)
-                        if self.__dbg__:
-                                print self.__plugin__ + " _fetchPage HTTPError : " + err
+		try:
+			if self.__dbg__:
+				print self.__plugin__ + " _fetchPage connecting to server... "
+
+			con = urllib2.urlopen(request)
+			
+			ret_obj["content"] = con.read()
+			ret_obj["new_url"] = con.geturl()
+			ret_obj["header"] = str(con.info())
+			con.close()
+
+		       	# Return result if it isn't age restricted
+			if ( ret_obj["content"].find("verify-actions") == -1 and ret_obj["content"].find("verify-age-actions") == -1):
+				if self.__dbg__:
+					print self.__plugin__ + " _fetchPage done"
+				#print repr(ret_obj["content"])
+				#print self.__plugin__ + " _bla: cj2 : " + repr(self.__cj__)
+				ret_obj["status"] = 200
+				return ret_obj
+			else:
+				print self.__plugin__ + " _fetchPage found verify age request: " + repr(params) 
+			       	# We need login to verify age
+				if not get("login"):
+					params["error"] = get("error", "0")
+					params["login"] = "true"
+					return self._fetchPage(params)
+				else:
+					return self._verifyAge(ret_obj["content"], new_url, params)
+                
+		except urllib2.HTTPError, e:
+			err = str(e)
+			if self.__dbg__:
+				print self.__plugin__ + " _fetchPage HTTPError : " + err
 
 			if err.find("Token invalid") > -1:
 				if self.__dbg__:
 					print self.__plugin__ + " _fetchPage refreshing token"
 				self._oRefreshToken()
 			else:
-                                print self.__plugin__ + " _fetchPage HTTPError - Headers: " + str(e.headers) + " - Content: " + e.fp.read()
+				print self.__plugin__ + " _fetchPage HTTPError - Headers: " + str(e.headers) + " - Content: " + e.fp.read()
                         
-                        params["error"] = str(int(get("error", "0")) + 1)
-			ret = self._fetchPage(params)
+				params["error"] = str(int(get("error", "0")) + 1)
+				ret = self._fetchPage(params)
+
 			if not ret.has_key("content") and e.fp:
 				ret["content"] = e.fp.read()
-                        return ret
-                ret_obj["status"] = 505
-                return ret_obj
+				return ret
+
+			ret_obj["status"] = 505
+			return ret_obj
 		
 	def _verifyAge(self, result, new_url, params = {}):
 		get = params.get
@@ -702,7 +706,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 
 	def getDOMContent(self, html, params, match):
 		get = params.get
-		#print self.__plugin__ + " getDOMContent match: " + match
+		print self.__plugin__ + " getDOMContent match: " + match
 		start = html.find(match)
 		if get("name") == "img":
 			endstr = ">"
@@ -710,20 +714,20 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 			endstr = "</" + get("name") + ">"
 		end = html.find(endstr, start)
 
-		#print self.__plugin__ + " getDOMContent " + str(start) + " < " + str(end)
+		print self.__plugin__ + " getDOMContent " + str(start) + " < " + str(end)
 
 		pos = html.find("<" + get("name"), start + 1)
 		while pos < end:
 			pos = html.find("<" + get("name"), pos + 1)
-			if pos == -1:
+			if pos == -1 or pos > end:
 				break;
 			tend = html.find(endstr, end + 1)
 			if tend != -1:
 				end = tend
-			#print self.__plugin__ + " getDOMContent2 loop: " + str(start) + " < " + str(end) + " pos = " + str(pos)
+			print self.__plugin__ + " getDOMContent2 loop: " + str(start) + " < " + str(end) + " pos = " + str(pos)
 
 		html = html[start:end + len(endstr)]
-		#print self.__plugin__ + " getDOMContent done html length: " + str(len(html))
+		print self.__plugin__ + " getDOMContent done html length: " + str(len(html)) + repr(html)
 		return html
 
 	def parseDOM(self, html, params):
@@ -733,9 +737,11 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
                         print self.__plugin__ + " parseDOM : " + repr(params)
 		if get("id"):
 			if get("id-match"):
-				lst = re.compile('(<' + get("name") + ' ' + get("id") + '=[\'"]+' + get("id-match") + '[\'"]+.*?>)').findall(html)
+				lst = re.compile('(<' + get("name") + ' ' + get("id") + '=[\'"]+' + get("id-match") + '[\'"]>)').findall(html)
 				if len(lst) == 0:
-					lst = re.compile('(<' + get("name") + '.*' + get("id") + '=[\'"]+' + get("id-match") + '[\'"]+.*?>)').findall(html)
+					lst = re.compile('(<' + get("name") + ' ' + get("id") + '=[\'"]+' + get("id-match") + '[\'"]+.*?>)').findall(html)
+					if len(lst) == 0:
+						lst = re.compile('(<' + get("name") + '.*' + get("id") + '=[\'"]+' + get("id-match") + '[\'"]+.*?>)').findall(html)
 			else:
 				lst = re.compile('(<' + get("name") + ' ' + get("id") + '=[\'"].*?[\'"]+.*?>)').findall(html)
 				if len(lst) == 0:
@@ -747,13 +753,13 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 				lst = re.compile('(<' + get("name") + '.*class=[\'"]+' + get("class") + '[\'"]+.*?>)').findall(html)
 		elif get("return"):
 			lst = re.compile('(<' + get("name") + ' ' + get("return") + '=[\'"]+.*?[\'"]+.*?>)').findall(html)
-			if len(lst) == 0:
+			if len(lst) == 0 or True:
 				lst = re.compile('(<' + get("name") + '.*' + get("return") + '=[\'"]+.*?[\'"]+.*?>)').findall(html) 
 		else:
 			lst = re.compile('(<' + get("name") + '.*?>)').findall(html)
 		
 		if len(lst) == 0:
-			print self.__plugin__ + " parseDOM Couldn't find any matches. Returning empty handed : " + html
+			#print self.__plugin__ + " parseDOM Couldn't find any matches. Returning empty handed : " + html
 			return ""
 
 		if get("return"):
