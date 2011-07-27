@@ -319,7 +319,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 
 			if get("no-language-cookie", "false") == "false":
 				request.add_header('Cookie', 'PREF=f1=50000000&hl=en')
-                
+		
 		if get("login", "false") == "true":
 			if self.__dbg__:
 				print self.__plugin__ + " got login"
@@ -344,7 +344,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 				request.add_header('Authorization', 'GoogleLogin auth=' + self.__settings__.getSetting("auth"))
 			else:
 				print self.__plugin__ + " _fetchPage couldn't get login token"
-                
+		
 		try:
 			if self.__dbg__:
 				print self.__plugin__ + " _fetchPage connecting to server... "
@@ -356,7 +356,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 			ret_obj["header"] = str(con.info())
 			con.close()
 
-		       	# Return result if it isn't age restricted
+			# Return result if it isn't age restricted
 			if ( ret_obj["content"].find("verify-actions") == -1 and ret_obj["content"].find("verify-age-actions") == -1):
 				if self.__dbg__:
 					print self.__plugin__ + " _fetchPage done"
@@ -366,14 +366,14 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 				return ret_obj
 			else:
 				print self.__plugin__ + " _fetchPage found verify age request: " + repr(params) 
-			       	# We need login to verify age
+				# We need login to verify age
 				if not get("login"):
 					params["error"] = get("error", "0")
 					params["login"] = "true"
 					return self._fetchPage(params)
 				else:
 					return self._verifyAge(ret_obj["content"], new_url, params)
-                
+		
 		except urllib2.HTTPError, e:
 			err = str(e)
 			if self.__dbg__:
@@ -385,7 +385,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 				self._oRefreshToken()
 			else:
 				print self.__plugin__ + " _fetchPage HTTPError - Headers: " + str(e.headers) + " - Content: " + e.fp.read()
-                        
+			
 			params["error"] = str(int(get("error", "0")) + 1)
 			ret = self._fetchPage(params)
 			if not ret.has_key("content") and e.fp:
@@ -461,19 +461,20 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 		return (self.__language__(30606), 303)
 
 	def _oRefreshToken(self):
-                # Refresh token
-                if self.__settings__.getSetting( "oauth2_refresh_token" ):
-                        url = "https://accounts.google.com/o/oauth2/token"
-                        url_data = { "client_id": "208795275779.apps.googleusercontent.com",
-                                     "client_secret": "sZn1pllhAfyonULAWfoGKCfp",
-                                     "refresh_token": self.__settings__.getSetting( "oauth2_refresh_token" ),
-                                     "grant_type": "refresh_token"}
-                        ret = self._fetchPage({ "link": url, "url_data": url_data}) # "no-language-cookie": "true" <- might be needed here..
-                        oauth = json.loads(ret["content"])
-                        #self.__settings__.setSetting("oauth2_expires at", oauth["expires_in"] + current time. )
+		# Refresh token
+		if self.__settings__.getSetting( "oauth2_refresh_token" ):
+			url = "https://accounts.google.com/o/oauth2/token"
+			data = { "client_id": "208795275779.apps.googleusercontent.com",
+				"client_secret": "sZn1pllhAfyonULAWfoGKCfp",
+				"refresh_token": self.__settings__.getSetting( "oauth2_refresh_token" ),
+				"grant_type": "refresh_token"}
+			ret = self._fetchPage({ "link": url, "url_data": data}) # "no-language-cookie": "true" <- might be needed here..
+			oauth = json.loads(ret["content"])
+			
 			if self.__dbg__:
 				print self.__plugin__ + " _oRefreshToken: " + repr(oauth)
-                        self.__settings__.setSetting("oauth2_access_token", oauth["access_token"])
+			
+			self.__settings__.setSetting("oauth2_access_token", oauth["access_token"])
 			return True
 		if self.__dbg__:
 			print self.__plugin__ + " _oRefreshToken didn't even try"
