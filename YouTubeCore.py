@@ -460,7 +460,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 		print self.__plugin__ + " age verification failed with result: " + repr(result)
 		return (self.__language__(30606), 303)
 
-        def _oRefreshToken(self):
+	def _oRefreshToken(self):
                 # Refresh token
                 if self.__settings__.getSetting( "oauth2_refresh_token" ):
                         url = "https://accounts.google.com/o/oauth2/token"
@@ -480,28 +480,27 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 
 		return False
 
-        def _getAuth(self):
-                if self.__dbg__:
-                        print self.__plugin__ + " _getAuth"
+	def _getAuth(self):
+		if self.__dbg__:
+			print self.__plugin__ + " _getAuth"
+		
+		auth = self.__settings__.getSetting( "oauth2_access_token" )
 
-                auth = self.__settings__.getSetting( "oauth2_access_token" )
-
-                if ( auth ):
-                        if self.__dbg__:
-                                print self.__plugin__ + " _getAuth returning stored auth"
-                        return auth
-                else:   
-                        (result, status ) =  self.login()
-                        if status == 200:
-                                if self.__dbg__:
-                                        print self.__plugin__ + " _getAuth returning new auth"
-
-                                return self.__settings__.getSetting( "oauth2_access_token" )
-
-                if self.__dbg__:
-                        print self.__plugin__ + " _getAuth failed because login failed"
-
-                return False
+		if ( auth ):
+			if self.__dbg__:
+				print self.__plugin__ + " _getAuth returning stored auth"
+			return auth
+		else:   
+			(result, status ) =  self.login()
+			if status == 200:
+				if self.__dbg__:
+					print self.__plugin__ + " _getAuth returning new auth"
+				return self.__settings__.getSetting( "oauth2_access_token" )
+			
+			if self.__dbg__:
+				print self.__plugin__ + " _getAuth failed because login failed"
+		
+		return False
 	
 	def _getNodeAttribute(self, node, tag, attribute, default = ""):
 		if node.getElementsByTagName(tag).item(0):
