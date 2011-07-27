@@ -1,8 +1,7 @@
 [B]TODO:[/B]
-- Music scraper should remember previously listed artists
-- Music scraper should support PlayAll for artists
-- Rework caching of playlists, it need to support playlist entry id accross all pages
-- Implement new storage api where possible 
+- Add support for play all on Watch Later
+- Age verification is broken again
+- Music scraper should remember previously listed artists 
 - Go through every menu to check if things are still working
 - Context menu "more videos by user" shouldnt be visible when viewing a users upload
 - Check all context menu items again some seem to be broken <-- Henrik & Tobias
@@ -16,6 +15,13 @@
 - [XBMC] Theres an unknown issue with the version of urllib and openssl supplied by xbmc for python 2.4 on windows that causes severe login issues for windows users (ssl_ctx_new errors)
 - Download of rtmpe streams not supported.
 - Download queue will usually crash xbmc due to Thread safety issues with xbmc's gui object.
+
+[B]Version 2.6.0 (Beta)[B]
+- Changed caching of playlists, to support playlist editid accross all pages
+- Fixed RTMPe support (we now provide playpath correctly) - NOTE: this requires and updated version of librtmp
+- Added PlayAll support for artist listings
+- Changed scraper 
+- Changed caching to a common storage system
 
 [B]Version 2.5.0 (Beta)[B]
 - Added 2-factor login
