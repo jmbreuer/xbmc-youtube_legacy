@@ -73,8 +73,7 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 				self.__settings__.setSetting("oauth2_refresh_token","")
 				self.__settings__.setSetting("oauth2_expires at", "")
 				self.__settings__.setSetting("nick","")
-				(http_login, status) = self._httpLogin(True)
-				result = "_httpLogin"
+				(result, status) = self._httpLogin(True)
 
 				if status == 200:
 					(result, status) = self._apiLogin()
@@ -193,7 +192,7 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			return ( "", 0)
 
 		if self.__dbg__:
-			print self.__plugin__ + " _httpLogin step 2"
+			print self.__plugin__ + " _httpLogin step 2 : "+ repr(newurl)
 		ret = self._fetchPage({ "link": newurl[0]})
 
 		newurl = self.parseDOM(ret["content"].replace("\n", " "), { "name": "form", "id": "id", "id-match": "gaia_loginform", "return": "action"})
@@ -280,8 +279,12 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 
 			if self.__dbg__:
 				print self.__plugin__ + " _httpLogin step 4 - 2-factor login"
-			ret = self._fetchPage({ "link": "https://www.google.com/accounts/SmsAuth?persistent=yes", "url_data": url_data })
-
+			ret = self._fetchPage({ "link": "https://www.google.com/accounts/SmsAuth?persistent=yes", "url_data": url_data, "no-language-cookie": "true" })
+                        error = self.parseDOM(ret['content'], { "name": "div", "class": "error smaller", "content": "true"})
+                        if len(error) > 0:
+				error = error[0]
+				error = urllib.unquote(error[:error.find("<")]).replace("&#39;", "'")
+                                return ( error.strip(), 303)
 			smsToken = re.compile('<input type="hidden" name="smsToken" value="(.*?)">').findall(ret["content"])
 			if len(smsToken) == 0:
 				return ( "", 0)
@@ -297,7 +300,7 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 
 			if self.__dbg__:
 				print self.__plugin__ + " _httpLogin step 5 - 2-factor login"
-			ret = self._fetchPage({ "link": "https://www.google.com/accounts/ServiceLoginAuth?service=youtube", "url_data": url_data })
+			ret = self._fetchPage({ "link": "https://www.google.com/accounts/ServiceLoginAuth?service=youtube", "url_data": url_data, "no-language-cookie": "true"})
 
 			newurl = re.compile('<meta http-equiv="refresh" content="0; url=&#39;(.*)&#39;"></head>').findall(ret["content"])
 			if len(newurl) == 0:
@@ -320,10 +323,14 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 
 			if self.__dbg__:
 				print self.__plugin__ + " _httpLogin step 7 - 2-factor login"
-                        ret = self._fetchPage({ "link": newurl});
+                        ret = self._fetchPage({ "link": newurl, "no-language-cookie": "true"});
 		else:
+			error = self.parseDOM(ret['content'], { "name": "div", "class": "errormsg", "content": "true"})
+			if len(error) > 0:
+				return ( error[0].strip(), 303)
                         if self.__dbg__:
                                 print self.__plugin__ + " _login couldn't find method to authenticate: " + repr(ret)
+
 			return ( "", 0)
 
 		if self.__dbg__:
