@@ -11,17 +11,21 @@
 - [XBMC] Thumbnails sometimes turns into black box or Folder (XBMC not detecting when thumbnail is set and defaulting to icon?)
 - [XBMC] When sorting items, it's impossible to get them to return to their original order
 - [XBMC] Has Excessive Memory use after running the plugin for prolonged periods of time
-- [XBMC] Playback of RTMPe streams (flash streaming) is currently broken as youtube updated to use a newer protocol than what XBMC supports
 - [XBMC] Theres an unknown issue with the version of urllib and openssl supplied by xbmc for python 2.4 on windows that causes severe login issues for windows users (ssl_ctx_new errors)
 - Download of rtmpe streams not supported.
-- Download queue will usually crash xbmc due to Thread safety issues with xbmc's gui object.
 
 [B]Version 2.6.0 (Beta)[B]
-- Changed caching of playlists, to support playlist editid accross all pages
-- Fixed RTMPe support (we now provide playpath correctly) - NOTE: this requires and updated version of librtmp
+- Added Support for Oauth2 authentication
+- Added Suppert for 2 factor authentication
+- Added Support OAuth2 token refresh when login token expires (reducing the need to re-login all the time) 
+- Added YouTube Annotations to subtitles
 - Added PlayAll support for artist listings
-- Changed scraper 
+- Added Support for enabling and disabling youtube caching servers (aka o-preffered-yourisp urls)
+- Changed Subtitle format to SSA to support merging of annotations and subtitles
+- Changed caching of playlists, to support playlist editid accross all pages
+- Changed scraper to use custom dom parsing with regexe's as it greatly improves speed 
 - Changed caching to a common storage system
+- Fixed RTMPe support (we now provide playpath correctly) - NOTE: this requires and updated version of librtmp
 
 [B]Version 2.5.0 (Beta)[B]
 - Added 2-factor login
