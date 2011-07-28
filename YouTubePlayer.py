@@ -98,7 +98,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 					if self.__dbg__:
 						print self.__plugin__ + " found subtitle specified: " + subtitle + " - " + code
 					break
-			
+
 				if node.getAttribute("lang_code") == "en":
 					subtitle = node.getAttribute("name").replace(" ", "%20")
 					code = "en"
@@ -361,7 +361,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 
 	def getVideoUrlMap(self, html, video = {}):
 		if self.__dbg__:
-			print self.__plugin__ + " getVideoUrlMap Searching for fmt_url_map : " 
+			print self.__plugin__ + " getVideoUrlMap Searching for fmt_url_map " 
 		links = {}
 			
 		fmt_url_map = urllib.unquote_plus(html).split('|')
@@ -384,7 +384,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			video["url_map"] = "true"
 
 		if self.__dbg__:
-			print self.__plugin__ + " getVideoUrlMap done : "
+			print self.__plugin__ + " getVideoUrlMap done "
 		return links
 		
 	def getAlert(self, html, params = {}):
@@ -592,11 +592,11 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 						links = self.getVideoUrlMap(links2["PLAYER_CONFIG"]["args"]["fmt_url_map"], video)
 					elif links2["PLAYER_CONFIG"]["args"]["fmt_stream_map"] != "":
 						links = self.getVideoStreamMap(links2["PLAYER_CONFIG"]["args"]["fmt_stream_map"], video)
-					if links2["PLAYER_CONFIG"]["args"].has_key("ttsurl"):
-						video["ttsurl"] = links2["PLAYER_CONFIG"]["args"]["ttsurl"]
 					else:
 						if self.__dbg__:
 							print self.__plugin__ + " _getVideoLinks XXXXXXXXXXXXXXXXX IMPLEMENT FALLBACK WITH FLASHVARS"
+					if links2["PLAYER_CONFIG"]["args"].has_key("ttsurl"):
+						video["ttsurl"] = links2["PLAYER_CONFIG"]["args"]["ttsurl"]
 		else:
 			if self.__dbg__:
 				print self.__plugin__ + " _getVideoLinks Falling back to embed"
