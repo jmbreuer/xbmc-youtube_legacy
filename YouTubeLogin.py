@@ -64,7 +64,6 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 				if self.__dbg__:
 					print self.__plugin__ + " login refreshing token: " + str(refreshed)
 
-			refreshed = False
 			if not refreshed:
 				if self.__dbg__:
 					print self.__plugin__ + " login token not refresh, or new uname or password"

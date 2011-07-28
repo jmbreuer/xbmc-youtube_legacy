@@ -467,14 +467,26 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 				"client_secret": "sZn1pllhAfyonULAWfoGKCfp",
 				"refresh_token": self.__settings__.getSetting( "oauth2_refresh_token" ),
 				"grant_type": "refresh_token"}
-			ret = self._fetchPage({ "link": url, "url_data": data}) # "no-language-cookie": "true" <- might be needed here..
-			oauth = json.loads(ret["content"])
+			ret = self._fetchPage({ "link": url, "no-language-cookie": "true", "url_data": data}) # "no-language-cookie": "true" <- might be needed here..
+			if ret["status"] == 200:
+				try:
+					oauth = json.loads(ret["content"])
+				except:
+					if self.__dbg__:
+						print self.__plugin__ + " _oRefreshToken: " + repr(ret)
+					return False
 			
+				if self.__dbg__:
+					print self.__plugin__ + " _oRefreshToken: " + repr(oauth)
+			
+				self.__settings__.setSetting("oauth2_access_token", oauth["access_token"])
+				return True
+
 			if self.__dbg__:
-				print self.__plugin__ + " _oRefreshToken: " + repr(oauth)
-			
-			self.__settings__.setSetting("oauth2_access_token", oauth["access_token"])
-			return True
+				print self.__plugin__ + " _oRefreshToken - returning, got result a: " + repr(oauth)
+
+			return False
+
 		if self.__dbg__:
 			print self.__plugin__ + " _oRefreshToken didn't even try"
 

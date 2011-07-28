@@ -388,13 +388,15 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		return links
 
 	def getVideoUrlMap(self, html, video = {}):
+		if self.__dbg__:
+			print self.__plugin__ + " getVideoUrlMap Searching for fmt_url_map"
 		links = {}
 			
 		# For /get_video_info
-		fmtSource = re.findall('&fmt_url_map=(.*)&', html);
+		fmtSource = re.findall('&fmt_url_map=(.*)&', html.replace("&amp;", "&"));
 		if not fmtSource:
-			fmtSource = re.findall('"fmt_url_map": "([^"]+)"', html);
-				
+			fmtSource = re.findall('"fmt_url_map": "(.*?)"', html);
+
 		fmt_url_map = []
 		if fmtSource:
 			fmtSource = fmtSource[0].replace('\u0026','&')
@@ -416,7 +418,9 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		
 		if len(links) > 0:
 			video["url_map"] = "true"
-		
+
+		if self.__dbg__:
+			print self.__plugin__ + " getVideoUrlMap done : " + repr(links)
 		return links
 		
 	def getAlert(self, html, params = {}):
