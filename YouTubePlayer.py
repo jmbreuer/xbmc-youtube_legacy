@@ -265,7 +265,8 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		if xbmcvfs.exists(path) and not video.has_key("downloadPath") and set_subtitle:
 			player = xbmc.Player()
 			while not player.isPlaying():
-				print self.__plugin__ + " addSubtitles Waiting for playback to start "
+				if self.__dbg__:
+					print self.__plugin__ + " addSubtitles Waiting for playback to start "
 				time.sleep(1)
 			xbmc.Player().setSubtitles(path);
 
@@ -336,7 +337,8 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 					quality = final_url[final_url.rfind('itag=') + 5:]
 					quality = quality[:quality.find('&')]
 			
-			print self.__plugin__ + " getVideoStreamMap " + final_url + " - " + quality + " - " + fmt_url
+			if self.__dbg__:
+				print self.__plugin__ + " getVideoStreamMap " + final_url + " - " + quality + " - " + fmt_url
 			if final_url and quality:
 				links[int(quality)] = final_url
 		
@@ -489,12 +491,15 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			return self.userSelectsVideoQuality(params, links)
 		
 		if not len(video_url) > 0:
-			print self.__plugin__ + " construct_video_url failed, video_url not set"
+			if self.__dbg__:
+				print self.__plugin__ + " selectVideoQuality - construct_video_url failed, video_url not set"
 			return video_url
 		
 		if get("action") != "download":
 			video_url += " | " + self.USERAGENT
-			
+
+		if self.__dbg__:
+			print self.__plugin__ + " selectVideoQuality done"			
 		return video_url
 	
 	def userSelectsVideoQuality(self, params, links):
@@ -556,7 +561,8 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 					video['video_url'] = path
 					return (video, 200)
 			except:
-				print self.__plugin__ + " attempt to locate local file failed with unknown error, trying youtube instead"
+				if self.__dbg__:
+					print self.__plugin__ + " getVideoObject attempt to locate local file failed with unknown error, trying youtube instead"
 
 		(links, video) = self._getVideoLinks(video, params)
 
@@ -603,7 +609,8 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 					if links2["PLAYER_CONFIG"]["args"].has_key("ttsurl"):
 						video["ttsurl"] = links2["PLAYER_CONFIG"]["args"]["ttsurl"]
 					else:
-						print self.__plugin__ + " _getVideoLinks XXXXXXXXXXXXXXXXX IMPLEMENT FALLBACK WITH FLASHVARS"
+						if self.__dbg__:
+							print self.__plugin__ + " _getVideoLinks XXXXXXXXXXXXXXXXX IMPLEMENT FALLBACK WITH FLASHVARS"
 		else:
 			if self.__dbg__:
 				print self.__plugin__ + " _getVideoLinks Falling back to embed"

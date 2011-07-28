@@ -158,7 +158,7 @@ class YouTubeDownloader(YouTubeUtils.YouTubeUtils):
 				con.close()
 				file.close()
 			except:
-				print self.__player__ + " Failed to close download stream and file handle"	
+				print self.__plugin__ + " downloadVideoURL - Failed to close download stream and file handle"	
 		
 		xbmcvfs.rename(filename_incomplete, filename_complete)
 		self.dialog.update(heading = self.__language__(30604), label=video["Title"])
