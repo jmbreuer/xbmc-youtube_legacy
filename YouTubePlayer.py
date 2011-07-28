@@ -307,40 +307,25 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		links = {}
 		fmt_url_map = []
 		if self.__dbg__:
-			print self.__plugin__ + " fmt_url_map not found, searching for stream map"
+			print self.__plugin__ + " getVideoStreamMap "
 		
-		swf_url = ""		
 		video["stream_map"] = "true"
 		if (html.find("live_playback") > 0):
 			video["live_play"] = "true"
-		
-		# For /get_video_info
-		fmtSource = re.findall('&fmt_stream_map=(.*)&', html);
-		if not fmtSource:
-			fmtSource = re.findall('"fmt_stream_map": "([^"]+)"', html);			
-		if fmtSource:
-			if self.__dbg__:
-				print self.__plugin__ + " fmt_stream_map found"
-			
-			fmtSource = fmtSource[0].replace('\u0026','&')
-			fmt_url_map = urllib.unquote_plus(fmtSource).split('|')
-			swfConfig = re.findall('var swfConfig = {"url": "(.*)", "min.*};', html)
-			if len(swfConfig) > 0:
-				swf_url = swfConfig[0].replace("\\", "")
-		else:
-			print self.__plugin__ + " couldn't locate fmt_url_map or fmt_stream_map, no videos on page?"
-			return links
-		
+
+		fmtSource = html.replace('\u0026','&')
+		fmt_url_map = urllib.unquote_plus(fmtSource).split('|')
+
 		for fmt_url in fmt_url_map:				
 			quality = "5"
 			final_url = ""
-			if (len(fmt_url) > 7 and fmt_url.find(":\\/\\/") > 0 and fmt_url.find('liveplay?') < 0):
+			if (len(fmt_url) > 7 and fmt_url.find("://") > 0 and fmt_url.find('liveplay?') < 0):
 				final_url = fmt_url
-				if (fmt_url.rfind(',') > fmt_url.rfind('\/id\/')):
+				if (fmt_url.rfind(',') > fmt_url.rfind('/id/')):
 					final_url = fmt_url[:fmt_url.rfind(',')]
 				
-				if (final_url.rfind('\/itag\/') > 0):
-					quality = final_url[final_url.rfind('\/itag\/') + 8:]
+				if (final_url.rfind('/itag/') > 0):
+					quality = final_url[final_url.rfind('/itag/') + 6:]
 
 			elif len(fmt_url) > 7 and fmt_url.find('liveplay?') > 0:
 				final_url = fmt_url
@@ -351,12 +336,12 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 					quality = final_url[final_url.rfind('itag=') + 5:]
 					quality = quality[:quality.find('&')]
 			
+			print self.__plugin__ + " getVideoStreamMap " + final_url + " - " + quality + " - " + fmt_url
 			if final_url and quality:
 				links[int(quality)] = final_url
 		
 		for quality, url in links.items():
-			url = url.replace('\/','/')
-			if (url.find('rtmp') >= 0 and swf_url):
+			if (url.find('rtmp') >= 0):
 				playpath = ""
 				for fmt_url in fmt_url_map:
 					if fmt_url.find('/' + str(quality)) > 0:
@@ -373,34 +358,25 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 					ptk = html[html.find("ptk=") + len("ptk="):]
 					ptk = ptk[:ptk.find("&")]
 				
+
 				if playpath:
 					if pchn:
 						playpath += '?pchn='+ pchn
 					if ptk:
 						playpath += '&ptk=' + ptk
-					
-					playpath = playpath.replace('\/','/')
-					
-					links[quality] = url + " swfurl=%s playpath=%s swfvfy=1" % (swf_url, playpath)
-				else:
-					links[quality] = url + " swfurl=%s swfvfy=1" % swf_url
+
+					links[quality] = url + " playpath=%s " % (playpath)
 		
+		if self.__dbg__:
+			print self.__plugin__ + " getVideoStreamMap done : " + repr(links)
 		return links
 
 	def getVideoUrlMap(self, html, video = {}):
 		if self.__dbg__:
-			print self.__plugin__ + " getVideoUrlMap Searching for fmt_url_map"
+			print self.__plugin__ + " getVideoUrlMap Searching for fmt_url_map : "  + repr(html)
 		links = {}
 			
-		# For /get_video_info
-		fmtSource = re.findall('&fmt_url_map=(.*)&', html.replace("&amp;", "&"));
-		if not fmtSource:
-			fmtSource = re.findall('"fmt_url_map": "(.*?)"', html);
-
-		fmt_url_map = []
-		if fmtSource:
-			fmtSource = fmtSource[0].replace('\u0026','&')
-			fmt_url_map = urllib.unquote_plus(fmtSource).split('|')
+		fmt_url_map = urllib.unquote_plus(html).split('|')
 		
 		for fmt_url in fmt_url_map:
 			if (len(fmt_url) > 7 and fmt_url.find("&") > 7):
@@ -613,37 +589,50 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		html = urllib.unquote_plus(result["content"])
 
 		vget = video.get
-		if result["status"] == 403:
-			video['apierror'] = self.getAlert(html, params)
-		elif result["status"] != 200:
-			if not vget('apierror'):
-				video['apierror'] = self.__language__(30617)
-		
-		if result["status"] == 200:	
-			links = self.getVideoUrlMap(html, video)
 
-		if len(links) == 0 and get("action") != "download":
-			links = self.getVideoStreamMap(html, video)
+		if result["status"] == 200 and False:
+			temp = re.compile('yt.setConfig\((.*?)\)').findall(result["content"].replace("\n", ""))
+			for link in temp:
+				if link.find("PLAYER_CONFIG") > 0:
+					import json
+					links2 = json.loads(link.replace('\'PLAYER_CONFIG\'', '"PLAYER_CONFIG"'))
+					if links2["PLAYER_CONFIG"]["args"]["fmt_url_map"] != "":
+						links = self.getVideoUrlMap(links2["PLAYER_CONFIG"]["args"]["fmt_url_map"], video)
+					elif links2["PLAYER_CONFIG"]["args"]["fmt_stream_map"] != "":
+						links = self.getVideoStreamMap(links2["PLAYER_CONFIG"]["args"]["fmt_stream_map"], video)
+					if links2["PLAYER_CONFIG"]["args"].has_key("ttsurl"):
+						video["ttsurl"] = links2["PLAYER_CONFIG"]["args"]["ttsurl"]
+					else:
+						print self.__plugin__ + " _getVideoLinks XXXXXXXXXXXXXXXXX IMPLEMENT FALLBACK WITH FLASHVARS"
+		else:
+			if self.__dbg__:
+				print self.__plugin__ + " _getVideoLinks Falling back to embed"
 
-		if len(links) > 0:
-			return (links, video)
+			# Default error reporting.
+			if result["status"] == 403:
+				video['apierror'] = self.getAlert(html, params)
+			elif result["status"] != 200:
+				if not vget('apierror'):
+					video['apierror'] = self.__language__(30617)
 
-
-		# If nothing is found, try the embeded link
-		
-		# Get data from /get_video_info
-		if self.__dbg__:
-			print self.__plugin__ + " _getVideoLinks trying embedded"
+			if self.__dbg__:
+				print self.__plugin__ + " _getVideoLinks trying embedded"
 			
-		result = self._fetchPage({"link": self.urls["embed_stream"] % get("videoid") })
+			result = self._fetchPage({"link": self.urls["embed_stream"] % get("videoid") })
 		
-		if result["content"].find("status=fail") > -1: # this is
-			result["status"] = 303
-			#result["content"] = re.compile('reason=(.*)%3Cbr').findall(result["content"])[0]
+			# Fallback error reporting
+			if result["content"].find("status=fail") > -1:
+				result["status"] = 303
+				video["apierror"] = re.compile('reason=(.*)%3Cbr').findall(result["content"])[0]
 
-		if result["status"] == 200:
-			links = self.getVideoUrlMap(result["content"], video)
-			if len(links) == 0 and get("action") != "download":
-				links = self.getVideoStreamMap(result["content"], video)
+			if result["status"] == 200:
+				# For /get_video_info
+				html = re.findall('&fmt_url_map=(.*)&', result["content"].replace("&amp;", "&"));
+				if len(html) > 0:
+					links = self.getVideoUrlMap(html[0], video)
+				elif get("action") != "download":
+					html = re.findall('&fmt_stream_map=(.*)&', result["content"].replace("&amp;", "&"));
+					if len(html) > 0:
+						links = self.getVideoStreamMap(html[0], video)
 
 		return (links, video)
