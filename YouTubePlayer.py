@@ -590,7 +590,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 
 		vget = video.get
 
-		if result["status"] == 200 and False:
+		if result["status"] == 200:
 			temp = re.compile('yt.setConfig\((.*?)\)').findall(result["content"].replace("\n", ""))
 			for link in temp:
 				if link.find("PLAYER_CONFIG") > 0:
