@@ -54,9 +54,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			subtitle_url = self.getSubtitleUrl(video)
 
 			if not subtitle_url and self.__settings__.getSetting("transcode") == "true":
-				html = self._fetchPage({"link": self.urls["video_stream"] % get("videoid")})
-				if html["status"] == 200:
-					subtitle_url = self.getTranscriptionUrl(html["content"], video) 
+					subtitle_url = self.getTranscriptionUrl(video) 
 		
 			if subtitle_url:
 				xml = self._fetchPage({"link": subtitle_url})
@@ -128,29 +126,17 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		if video.has_key("downloadPath"):
 			xbmcvfs.rename(path, os.path.join( video["downloadPath"], filename ))
 
-	def getTranscriptionUrl(self, html, video = {}):
+	def getTranscriptionUrl(self, video = {}):
 		get = video.get
-		trans_url = ""	
-		if (html.find("ttsurl=") > 0):	
-			html = html[html.find("ttsurl="):len(html)]
-			html = html[0:html.find("&amp;")+5]
+		trans_url = ""
+		if video.has_key("ttsurl"):
+			if len(video["ttsurl"]) > 0:
+				trans_url = urllib.unquote(video["ttsurl"]).replace("\\", "") + "&type=trackformat=1&lang=en&kind=asr&name=&v=" + video["videoid"]
+				if self.__settings__.getSetting("lang_code") > 1: # 1 == en
+					lang_code = [ self.__language__( 30277 ), self.__language__( 30278  ), self.__language__( 30279 ), self.__language__( 30280 ), self.__language__( 30281 ), self.__language__( 30282 ), self.__language__( 30283 )][int(self.__settings__.getSetting("lang_code"))]
+					trans_url += "&tlang=" + lang_code
 
-			urls = re.findall('.*ttsurl=(.*)&amp;.*', html)
-		
-			if len(urls) > 0:
-				urls = urllib.unquote(urls[0]).replace("\\", "")
-				urls = urls.split("&")
-				expire = ""
-				signature = ""
 
-				for item in urls: 
-					if ( item.find("expire") == 0 ):
-						expire = item[item.find("expire")+7:len(item)]
-					if ( item.find("signature") == 0 ):
-						signature = item[item.find("signature")+10:len(item)]
-				
-				if expire != "" and signature != "":
-					trans_url = self.urls["transcription_url"] % (expire, get("videoid"), signature)
 		return trans_url
 		
 	def transformSubtitleXMLtoSRT(self, xml):
@@ -375,7 +361,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 
 	def getVideoUrlMap(self, html, video = {}):
 		if self.__dbg__:
-			print self.__plugin__ + " getVideoUrlMap Searching for fmt_url_map : "  + repr(html)
+			print self.__plugin__ + " getVideoUrlMap Searching for fmt_url_map : " 
 		links = {}
 			
 		fmt_url_map = urllib.unquote_plus(html).split('|')
@@ -398,7 +384,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			video["url_map"] = "true"
 
 		if self.__dbg__:
-			print self.__plugin__ + " getVideoUrlMap done : " + repr(links)
+			print self.__plugin__ + " getVideoUrlMap done : "
 		return links
 		
 	def getAlert(self, html, params = {}):

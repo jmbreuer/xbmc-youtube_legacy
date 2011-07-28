@@ -264,7 +264,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 	#
 	#===============================================================================
 
-	def _fetchPage(self, params = {}):
+	def _fetchPage(self, params = {}): # This does not handle cookie timeout for _httpLogin
 		get = params.get
 		link = get("link")
 		ret_obj = {}
