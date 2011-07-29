@@ -288,75 +288,6 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			
 		self.__settings__.setSetting( "vidstatus-" + video['videoid'], "7" )
 
-	def getVideoStreamMap(self, html, video = {}):
-		links = {}
-		fmt_url_map = []
-		if self.__dbg__:
-			print self.__plugin__ + " getVideoStreamMap "
-		
-		video["stream_map"] = "true"
-		if (html.find("live_playback") > 0):
-			video["live_play"] = "true"
-
-		fmtSource = html.replace('\u0026','&')
-		fmt_url_map = urllib.unquote_plus(fmtSource).split('|')
-
-		for fmt_url in fmt_url_map:				
-			quality = "5"
-			final_url = ""
-			if (len(fmt_url) > 7 and fmt_url.find("://") > 0 and fmt_url.find('liveplay?') < 0):
-				final_url = fmt_url
-				if (fmt_url.rfind(',') > fmt_url.rfind('/id/')):
-					final_url = fmt_url[:fmt_url.rfind(',')]
-				
-				if (final_url.rfind('/itag/') > 0):
-					quality = final_url[final_url.rfind('/itag/') + 6:]
-
-			elif len(fmt_url) > 7 and fmt_url.find('liveplay?') > 0:
-				final_url = fmt_url
-				if (fmt_url.rfind(',') > fmt_url.rfind('&id=')): 
-					final_url = fmt_url[:fmt_url.rfind(',')]
-				
-				if (final_url.rfind('itag=') > 0):
-					quality = final_url[final_url.rfind('itag=') + 5:]
-					quality = quality[:quality.find('&')]
-			
-			if self.__dbg__:
-				print self.__plugin__ + " getVideoStreamMap " + final_url + " - " + quality + " - " + fmt_url
-			if final_url and quality:
-				links[int(quality)] = final_url
-		
-		for quality, url in links.items():
-			if (url.find('rtmp') >= 0):
-				playpath = ""
-				for fmt_url in fmt_url_map:
-					if fmt_url.find('/' + str(quality)) > 0:
-						playpath = fmt_url
-						break
-				
-				pchn = ""
-				if html.find("ptchn=") > 0:
-					pchn = html[html.find("ptchn=") + len("ptchn="):]
-					pchn = pchn[:pchn.find('&')]
-				
-				ptk = ""
-				if html.find("ptk=") > 0:
-					ptk = html[html.find("ptk=") + len("ptk="):]
-					ptk = ptk[:ptk.find("&")]
-				
-
-				if playpath:
-					if pchn:
-						playpath += '?pchn='+ pchn
-					if ptk:
-						playpath += '&ptk=' + ptk
-
-					links[quality] = url + " playpath=%s " % (playpath)
-		
-		if self.__dbg__:
-			print self.__plugin__ + " getVideoStreamMap done : " + repr(links)
-		return links
-
 	def getVideoUrlMap(self, html, video = {}):
 		if self.__dbg__:
 			print self.__plugin__ + " getVideoUrlMap Searching for fmt_url_map " 
@@ -390,9 +321,11 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 						fmt_fallback = fmt_url_map[i + 2]
 						final_url = final_url.replace(host, fmt_fallback[:fmt_fallback.rfind(",")])
 					links[int(quality)] = final_url.replace('\/','/')
-
-		if len(links) > 0:
-			video["url_map"] = "true"
+					if not video.has_key("url_map") and not video.has_key("stream_map"):
+						if final_url.find("rtmp") > -1:
+							video["stream_map"] = "true"
+						else:
+							video["url_map"] = "true"
 
 		for quality, url in links.items():
 			if (url.find('rtmp') >= 0):
