@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, urllib, re, os.path, datetime, time
+import sys, urllib, re, os.path, datetime, time, json
 import xbmc, xbmcgui, xbmcplugin, xbmcvfs
 import YouTubeCore, YouTubeUtils
 from xml.dom.minidom import parseString
@@ -34,7 +34,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		self.urls['timed_text_index'] = "http://www.youtube.com/api/timedtext?type=list&v=%s"
 		self.urls['video_info'] = "http://gdata.youtube.com/feeds/api/videos/%s"
 		self.urls['close_caption_url'] = "http://www.youtube.com/api/timedtext?type=track&v=%s&name=%s&lang=%s"
-		self.urls['transcription_url'] = "http://www.youtube.com/api/timedtext?caps=asr&kind=asr&type=track&key=yttt1&expire=%s&sparams=caps,expire,v&v=%s&signature=%s&lang=en"
+		self.urls['transcription_url'] = "http://www.youtube.com/api/timedtext?sparams=asr_langs,caps,expire,v&asr_langs=en,ja&caps=asr&expire=%s&key=yttt1&signature=%s&hl=en&type=trackformat=1&lang=en&kind=asr&name=&v=%s&tlang=en"
 		self.urls['annotation_url'] = "http://www.youtube.com/api/reviews/y/read2?video_id=%s"
 		self.urls['remove_watch_later'] = "http://www.youtube.com/addto_ajax?action_delete_from_playlist=1"
 		
@@ -131,12 +131,10 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		trans_url = ""
 		if video.has_key("ttsurl"):
 			if len(video["ttsurl"]) > 0:
-				trans_url = urllib.unquote(video["ttsurl"]).replace("\\", "") + "&type=trackformat=1&lang=en&kind=asr&name=&v=" + video["videoid"]
+				trans_url = urllib.unquote(video["ttsurl"]).replace("\\", "") + "&type=trackformat=1&lang=en&kind=asr&name=&v=" + get("videoid")
 				if self.__settings__.getSetting("lang_code") > 1: # 1 == en
 					lang_code = [ self.__language__( 30277 ), self.__language__( 30278  ), self.__language__( 30279 ), self.__language__( 30280 ), self.__language__( 30281 ), self.__language__( 30282 ), self.__language__( 30283 )][int(self.__settings__.getSetting("lang_code"))]
 					trans_url += "&tlang=" + lang_code
-
-
 		return trans_url
 		
 	def transformSubtitleXMLtoSRT(self, xml):
@@ -569,62 +567,73 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		
 		return (video, status)
 
+	def _convertFlashVars(self, html):
+		#print self.__plugin__ + " _convertFlashVars : " + repr(html)
+		obj = { "PLAYER_CONFIG": { "args": {} } }
+		temp = html.split("&")
+		print self.__plugin__ + " _convertFlashVars : " + str(len(temp))
+		for item in temp:
+			it = item.split("=")
+			obj["PLAYER_CONFIG"]["args"][it[0]] = urllib.unquote_plus(it[1])
+		#print self.__plugin__ + " _convertFlashVars done : " + repr(obj)
+		return obj
+
 	def _getVideoLinks(self, video, params):
 		get = params.get
+		vget = video.get
+		player_object = False
 		links = []
 
 		if self.__dbg__:
 			print self.__plugin__ + " _getVideoLinks trying website"
 
 		result = self._fetchPage({"link": self.urls["video_stream"] % get("videoid")})
-
-		html = urllib.unquote_plus(result["content"])
-
-		vget = video.get
-
 		if result["status"] == 200:
-			temp = re.compile('yt.setConfig\((.*?)\)').findall(result["content"].replace("\n", ""))
-			print self.__plugin__ + " _getVideoLinks XXXXXXXXXXXXXXXXX IMPLEMENT FALLBACK WITH FLASHVARS: " + repr(result)
-			for link in temp:
-				if link.find("PLAYER_CONFIG") > 0:
-					import json
-					links2 = json.loads(link.replace('\'PLAYER_CONFIG\'', '"PLAYER_CONFIG"'))
-					if links2["PLAYER_CONFIG"]["args"]["fmt_url_map"] != "":
-						links = self.getVideoUrlMap(links2["PLAYER_CONFIG"]["args"]["fmt_url_map"], video)
-					elif links2["PLAYER_CONFIG"]["args"]["fmt_stream_map"] != "":
-						links = self.getVideoStreamMap(links2["PLAYER_CONFIG"]["args"]["fmt_stream_map"], video)
-					else:
-						if self.__dbg__:
-							print self.__plugin__ + " _getVideoLinks XXXXXXXXXXXXXXXXX IMPLEMENT FALLBACK WITH FLASHVARS"
-					if links2["PLAYER_CONFIG"]["args"].has_key("ttsurl"):
-						video["ttsurl"] = links2["PLAYER_CONFIG"]["args"]["ttsurl"]
-					return (links, video)
+			data = result["content"].find("PLAYER_CONFIG")
+			if data > -1:
+				data = result["content"].rfind("yt.setConfig", 0, data)
+				data = re.compile('yt.setConfig\((.*?PLAYER_CONFIG.*?)\)').findall(result["content"][data:].replace("\n", ""))
+				if len(data) > 0:
+					player_object = json.loads(data[0].replace('\'PLAYER_CONFIG\'', '"PLAYER_CONFIG"'))
+			else:
+				data = result["content"]
+				data = data[data.find('flashvars'):].replace("\n", "").replace("&amp;", "&")
+				data = re.findall('="(ttsurl=.*?)"', data)
+				if len(data) > 0:
+					player_object = self._convertFlashVars(data[0])
 
-		if self.__dbg__:
-			print self.__plugin__ + " _getVideoLinks Falling back to embed"
+		else:
+			# Default error reporting.
+			if result["status"] == 403:
+				video['apierror'] = self.getAlert(result["content"], params)
+			elif result["status"] != 200:
+				if not vget('apierror'):
+					video['apierror'] = self.__language__(30617)
 
-		# Default error reporting.
-		if result["status"] == 403:
-			video['apierror'] = self.getAlert(html, params)
-		elif result["status"] != 200:
-			if not vget('apierror'):
-				video['apierror'] = self.__language__(30617)
+			if self.__dbg__:
+				print self.__plugin__ + " _getVideoLinks Falling back to embed"
 
-		result = self._fetchPage({"link": self.urls["embed_stream"] % get("videoid") })
+			result = self._fetchPage({"link": self.urls["embed_stream"] % get("videoid") })
 		
-	       	# Fallback error reporting
-		if result["content"].find("status=fail") > -1:
-			result["status"] = 303
-			video["apierror"] = re.compile('reason=(.*)%3Cbr').findall(result["content"])[0]
+			# Fallback error reporting
+			if result["content"].find("status=fail") > -1:
+				result["status"] = 303
+				video["apierror"] = re.compile('reason=(.*)%3Cbr').findall(result["content"])[0]
 
-		if result["status"] == 200:
-			# For /get_video_info
-			html = re.findall('&fmt_url_map=(.*)&', result["content"].replace("&amp;", "&"));
-			if len(html) > 0:
-				links = self.getVideoUrlMap(html[0], video)
-			elif get("action") != "download":
-				html = re.findall('&fmt_stream_map=(.*)&', result["content"].replace("&amp;", "&"));
-				if len(html) > 0:
-					links = self.getVideoStreamMap(html[0], video)
+			if result["status"] == 200:
+				player_object = self._convertFlashVars(result["content"])
+
+		# Find playback URI
+		if player_object.has_key("PLAYER_CONFIG"):
+			if player_object["PLAYER_CONFIG"]["args"].has_key("ttsurl"):
+				video["ttsurl"] = player_object["PLAYER_CONFIG"]["args"]["ttsurl"]
+
+			if player_object["PLAYER_CONFIG"]["args"]["fmt_url_map"] != "":
+				links = self.getVideoUrlMap(player_object["PLAYER_CONFIG"]["args"]["fmt_url_map"], video)
+			elif player_object["PLAYER_CONFIG"]["args"]["fmt_stream_map"] != "":
+				links = self.getVideoStreamMap(player_object["PLAYER_CONFIG"]["args"]["fmt_stream_map"], video)
+			else:
+				if self.__dbg__:
+					print self.__plugin__ + " _getVideoLinks Couldn't find url map or stream map."
 
 		return (links, video)
