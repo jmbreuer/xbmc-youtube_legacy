@@ -104,7 +104,7 @@ class YouTubeDownloader(YouTubeUtils.YouTubeUtils):
 			return ([], 303)
 		
 		video["downloadPath"] = self.__settings__.getSetting( "downloadPath" )
-		subtitle_path = self.__player__.downloadSubtitle(video) 
+		self.__player__.downloadSubtitle(video) 
 		url = urllib2.Request(video['video_url'])
 		url.add_header('User-Agent', self.USERAGENT);
 		filename = "%s-[%s].mp4" % ( ''.join(c for c in video['Title'] if c in self.VALID_CHARS), video["videoid"] )
@@ -178,7 +178,7 @@ class YouTubeDownloader(YouTubeUtils.YouTubeUtils):
 		video["downloadPath"] = self.__settings__.getSetting( "downloadPath" )
 		self.showMessage(self.__language__(30626), self.makeAscii(video['Title']))
 		
-		subtitle_path = self.__player__.downloadSubtitle(video)
+		self.__player__.downloadSubtitle(video)
 		url = urllib2.Request(video['video_url'])
 		url.add_header('User-Agent', self.USERAGENT);
 		filename = "%s-[%s].mp4" % ( ''.join(c for c in video['Title'] if c in self.VALID_CHARS), video["videoid"] )
