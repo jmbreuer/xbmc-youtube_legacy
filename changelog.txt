@@ -14,6 +14,7 @@
 - Download of rtmpe streams not supported.
 
 [B]Version 2.6.0 (Beta)[B]
+- Added new playback function. Now uses unified code accross all pages(html scraping, embeded, flash fallback). Supports fallback server.
 - Added Support for Oauth2 authentication
 - Added Suppert for 2 factor authentication
 - Added Support OAuth2 token refresh when login token expires (reducing the need to re-login all the time) 
