@@ -331,7 +331,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		url = self.urls["disco_main"]
 		result = self._fetchPage({"link": url})
 		
-                popular = self.parseDOM(result["content"], { "name": "a", "id": "id", "id-match": "popular-tracks"})
+		popular = self.parseDOM(result["content"], { "name": "a", "id": "id", "id-match": "popular-tracks"})
 
 		items = []		
 		if (len(popular) > 0):
@@ -402,7 +402,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 
 			print self.__plugin__ + " BLA BLA BTEST2 " + str(len(ahref)) +  " - " + str(len(atitle))  + " -" + str(len(astudio)) + " - " + str(len(result["content"])) + " - " + str(len(live))
 			if len(ahref) == len(atitle) and len(ahref) == len(astudio) and len(ahref) > 0:
-                                for i in range(0 , len(ahref)):
+				for i in range(0 , len(ahref)):
 					item = {}
 					videoid = ahref[i]
 					videoid = videoid[videoid.rfind("/")+1:]
@@ -417,7 +417,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 					item["Studio"] = astudio[i]
 					item ["Title"] = title
 					videos.append(item)
-
+		
 		if self.__dbg__:
 			print self.__plugin__ + " scrapeLiveNow Done"
 		return (videos, result["status"])
@@ -473,8 +473,6 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		url = self.urls[get("scraper")]
 		
 		result = self._fetchPage({"link": url, "login": "true"})
-		#list = SoupStrainer(name="div", id="vm-video-list-container")
-		#liked = BeautifulSoup(result["content"], parseOnlyThese=list)
 		liked = self.parseDOM(result["content"], { "name": "div", "id": "id", "id-match": "vm-video-list-container"})
 
 		items = []
@@ -533,7 +531,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		
 		if self.__dbg__:
 			print self.__plugin__ + " scrapeShowEpisodes done"
-		return (videos, status)
+		return (videos, result["status"])
 		
 		# If the show contains more than one season the function will return a list of folder items,
 		# otherwise a paginated list of video items is returned
@@ -650,7 +648,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 
 		if self.__dbg__:
 			print self.__plugin__ + " scrapeShowsGrid done"
-		return (items, status)
+		return (items, result["status"])
 
 #=================================== Music ============================================
 
@@ -902,15 +900,15 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 				ahref = self.parseDOM(trailers, { "name": "a", "class": "ux-thumb-wrap ", "return": "href"})
 				if len(ahref) == 0:
 					ahref = self.parseDOM(trailers, { "name": "a", "class": "ux-thumb-wrap contains-addto", "return": "href"})
-
+				
 				athumbs = self.parseDOM(trailers, { "name": "a", "class": "ux-thumb-wrap ", "content": "true"})
 				if len(athumbs) == 0:
 					athumbs = self.parseDOM(trailers, { "name": "a", "class": "ux-thumb-wrap contains-addto", "content": "true"})
-
-                                if len(athumbs) == len(ahref) and len(ahref) > 0:
-                                        for i in range(0 , len(ahref)):
+				
+				if len(athumbs) == len(ahref) and len(ahref) > 0:
+					for i in range(0 , len(ahref)):
 						videoid = ahref[i]
-
+						
 						if (videoid):
 							if (videoid.find("=") > -1):
 								videoid = videoid[videoid.find("=")+1:]
@@ -918,7 +916,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 						if len(thumb) > 0:
 							thumb = thumb[0]
 						items.append((videoid, thumb))
-									    
+		
 		if self.__dbg__:
 			print self.__plugin__ + " scrapeGridFormat done"
 		return (items, result["status"])
@@ -940,7 +938,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		result = self._fetchPage({"link":url})
 		
 		if result["status"] == 200:
-                        categories = self.parseDOM(result["content"], {"name": "div", "class": "yt-uix-expander-body.*"})
+			categories = self.parseDOM(result["content"], {"name": "div", "class": "yt-uix-expander-body.*"})
 			if len(categories) == 0:
 				categories = self.parseDOM(result["content"], {"name": "div", "class": "browse-filter-menu.*"})
 			
