@@ -49,8 +49,8 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			xml = self._fetchPage({"link": self.urls["annotation_url"] % get('videoid')})
 			if xml["status"] == 200 and xml["content"]:
 				result += self.transformAnnotationToSSA(xml["content"])
-
-                if self.__settings__.getSetting("lang_code") != "0":
+		
+		if self.__settings__.getSetting("lang_code") != "0":
 			subtitle_url = self.getSubtitleUrl(video)
 
 			if not subtitle_url and self.__settings__.getSetting("transcode") == "true":
@@ -142,7 +142,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		entries = dom.getElementsByTagName("text")
 		
 		result = ""
-		i = 0
+		
 		for node in entries:
 			if node:
 				if node.firstChild:
@@ -170,7 +170,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		dom = parseString(xml)
 		entries = dom.getElementsByTagName("annotation")
 		result = ""
-		i = 0
+		
 		for node in entries:
 			if node:
 				stype = node.getAttribute("type")
