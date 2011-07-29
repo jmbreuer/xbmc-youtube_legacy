@@ -584,6 +584,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 
 		if result["status"] == 200:
 			temp = re.compile('yt.setConfig\((.*?)\)').findall(result["content"].replace("\n", ""))
+			print self.__plugin__ + " _getVideoLinks XXXXXXXXXXXXXXXXX IMPLEMENT FALLBACK WITH FLASHVARS: " + repr(result)
 			for link in temp:
 				if link.find("PLAYER_CONFIG") > 0:
 					import json
@@ -597,35 +598,33 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 							print self.__plugin__ + " _getVideoLinks XXXXXXXXXXXXXXXXX IMPLEMENT FALLBACK WITH FLASHVARS"
 					if links2["PLAYER_CONFIG"]["args"].has_key("ttsurl"):
 						video["ttsurl"] = links2["PLAYER_CONFIG"]["args"]["ttsurl"]
-		else:
-			if self.__dbg__:
-				print self.__plugin__ + " _getVideoLinks Falling back to embed"
+					return (links, video)
 
-			# Default error reporting.
-			if result["status"] == 403:
-				video['apierror'] = self.getAlert(html, params)
-			elif result["status"] != 200:
-				if not vget('apierror'):
-					video['apierror'] = self.__language__(30617)
+		if self.__dbg__:
+			print self.__plugin__ + " _getVideoLinks Falling back to embed"
 
-			if self.__dbg__:
-				print self.__plugin__ + " _getVideoLinks trying embedded"
-			
-			result = self._fetchPage({"link": self.urls["embed_stream"] % get("videoid") })
+		# Default error reporting.
+		if result["status"] == 403:
+			video['apierror'] = self.getAlert(html, params)
+		elif result["status"] != 200:
+			if not vget('apierror'):
+				video['apierror'] = self.__language__(30617)
+
+		result = self._fetchPage({"link": self.urls["embed_stream"] % get("videoid") })
 		
-			# Fallback error reporting
-			if result["content"].find("status=fail") > -1:
-				result["status"] = 303
-				video["apierror"] = re.compile('reason=(.*)%3Cbr').findall(result["content"])[0]
+	       	# Fallback error reporting
+		if result["content"].find("status=fail") > -1:
+			result["status"] = 303
+			video["apierror"] = re.compile('reason=(.*)%3Cbr').findall(result["content"])[0]
 
-			if result["status"] == 200:
-				# For /get_video_info
-				html = re.findall('&fmt_url_map=(.*)&', result["content"].replace("&amp;", "&"));
+		if result["status"] == 200:
+			# For /get_video_info
+			html = re.findall('&fmt_url_map=(.*)&', result["content"].replace("&amp;", "&"));
+			if len(html) > 0:
+				links = self.getVideoUrlMap(html[0], video)
+			elif get("action") != "download":
+				html = re.findall('&fmt_stream_map=(.*)&', result["content"].replace("&amp;", "&"));
 				if len(html) > 0:
-					links = self.getVideoUrlMap(html[0], video)
-				elif get("action") != "download":
-					html = re.findall('&fmt_stream_map=(.*)&', result["content"].replace("&amp;", "&"));
-					if len(html) > 0:
-						links = self.getVideoStreamMap(html[0], video)
+					links = self.getVideoStreamMap(html[0], video)
 
 		return (links, video)
