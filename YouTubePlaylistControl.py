@@ -48,7 +48,7 @@ class YouTubePlaylistControl(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils)
 			result = []
 			video_list = get("video_list", "").split(",")
 			for videoid in video_list:
-				(video, stat) = self.__player__.getVideoObject({ "videoid": videoid})
+				(video, status) = self.__player__.getVideoObject({ "videoid": videoid})
 				result.append(video);
 			
 		else:
