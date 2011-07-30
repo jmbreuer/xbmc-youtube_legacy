@@ -298,7 +298,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		if (html.find("live_playback") > 0):
 			video["live_play"] = "true"
 		
-		fmt_url_map = []
+		fmt_url_map = [html]
 		if html.find("|") > -1:
 			fmt_url_map = html.split('|')
 		elif html.find(",url=") > -1:
@@ -306,6 +306,8 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		elif html.find("&conn=") > -1:
 			video["stream_map"] = "true"
 			fmt_url_map = html.split('&conn=')
+		
+		print self.__plugin__ + " getVideoUrlMap Searching for fmt_url_map 2: "  + repr(fmt_url_map)
 		
 		if len(fmt_url_map) > 0:
 			for index, fmt_url in enumerate(fmt_url_map):
