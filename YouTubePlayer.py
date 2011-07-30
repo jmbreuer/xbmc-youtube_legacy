@@ -89,8 +89,8 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 				# Fallback to first in list.
 				subtitle = entries[0].getAttribute("name").replace(" ", "%20")
 				code = entries[0].getAttribute("lang_code")
-
-			lang_code = [ self.__language__( 30277 ), self.__language__( 30278  ), self.__language__( 30279 ), self.__language__( 30280 ), self.__language__( 30281 ), self.__language__( 30282 ), self.__language__( 30283 )][int(self.__settings__.getSetting("lang_code"))]
+			
+			lang_code = [ "off", "en", "es", "de", "fr", "it", "ja"][int(self.__settings__.getSetting("lang_code"))]
 			for node in entries:
 				if node.getAttribute("lang_code") == lang_code:
 					subtitle = node.getAttribute("name").replace(" ", "%20")
@@ -133,7 +133,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			if len(video["ttsurl"]) > 0:
 				trans_url = urllib.unquote(video["ttsurl"]).replace("\\", "") + "&type=trackformat=1&lang=en&kind=asr&name=&v=" + get("videoid")
 				if self.__settings__.getSetting("lang_code") > 1: # 1 == en
-					lang_code = [ self.__language__( 30277 ), self.__language__( 30278  ), self.__language__( 30279 ), self.__language__( 30280 ), self.__language__( 30281 ), self.__language__( 30282 ), self.__language__( 30283 )][int(self.__settings__.getSetting("lang_code"))]
+					lang_code = [ "off", "en", "es", "de", "fr", "it", "ja"][int(self.__settings__.getSetting("lang_code"))]
 					trans_url += "&tlang=" + lang_code
 		return trans_url
 		
