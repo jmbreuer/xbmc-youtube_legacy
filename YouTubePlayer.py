@@ -288,16 +288,27 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			
 		self.__settings__.setSetting( "vidstatus-" + video['videoid'], "7" )
 
-	def getVideoUrlMap(self, html, video = {}):
+	def getVideoUrlMap(self, pl_obj, video = {}):
 		if self.__dbg__:
 			print self.__plugin__ + " getVideoUrlMap " 
 		links = {}
-		html = urllib.unquote_plus(html)
 		video["url_map"] = "true"
-			
-		if (html.find("live_playback") > 0):
+					
+		html = ""
+		if pl_obj.has_key("fmt_stream_map"):
+			html = pl_obj["fmt_stream_map"]
+
+		if len(html) == 0 and pl_obj.has_key("url_encoded_fmt_stream_map"):
+			html = urllib.unquote(pl_obj["url_encoded_fmt_stream_map"])
+
+		if len(html) == 0 and pl_obj.has_key("fmt_url_map"):
+			html = pl_obj["fmt_url_map"]
+
+		html = urllib.unquote_plus(html)
+
+		if pl_obj.has_key("liveplayback_module"):
 			video["live_play"] = "true"
-		
+
 		fmt_url_map = [html]
 		if html.find("|") > -1:
 			fmt_url_map = html.split('|')
@@ -342,8 +353,8 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 						final_url = final_url.replace(host, fmt_fallback[:fmt_fallback.rfind(",")])
 						print self.__plugin__ + " final_url" + repr(final_url)
 
-					if final_url.find("rtmp") > -1 and index > 0:	
-						final_url = final_url + " playpath=" +  fmt_url_map[index - 1]
+					if final_url.find("rtmp") > -1 and index > 0 and pl_obj.has_key("ptk") and pl_obj.has_key("ptchn"):	
+						final_url = final_url + " playpath=" +  fmt_url_map[index - 1] + "?ptchn=" + pl_obj["ptchn"] + "&ptk=" + pl_obj["ptk"] 
 					links[int(quality)] = final_url.replace('\/','/')
 		
 		if self.__dbg__:
@@ -594,14 +605,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 				if player_object["PLAYER_CONFIG"]["args"].has_key("ttsurl"):
 					video["ttsurl"] = player_object["PLAYER_CONFIG"]["args"]["ttsurl"]
 
-				if player_object["PLAYER_CONFIG"]["args"].has_key("fmt_stream_map"):
-					links = self.getVideoUrlMap(player_object["PLAYER_CONFIG"]["args"]["fmt_stream_map"], video)
-
-				if len(links) == 0 and player_object["PLAYER_CONFIG"]["args"].has_key("url_encoded_fmt_stream_map"):
-					links = self.getVideoUrlMap(urllib.unquote(player_object["PLAYER_CONFIG"]["args"]["url_encoded_fmt_stream_map"]), video)
-
-				if len(links) == 0 and player_object["PLAYER_CONFIG"]["args"].has_key("fmt_url_map"):
-						links = self.getVideoUrlMap(player_object["PLAYER_CONFIG"]["args"]["fmt_url_map"], video)
+				links = self.getVideoUrlMap(player_object["PLAYER_CONFIG"]["args"], video)
 
 				if len(links) == 0:
 					if self.__dbg__:
