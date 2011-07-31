@@ -295,18 +295,18 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		video["url_map"] = "true"
 					
 		html = ""
-		if pl_obj.has_key("fmt_stream_map"):
-			html = pl_obj["fmt_stream_map"]
+		if pl_obj["args"].has_key("fmt_stream_map"):
+			html = pl_obj["args"]["fmt_stream_map"]
 
-		if len(html) == 0 and pl_obj.has_key("url_encoded_fmt_stream_map"):
-			html = urllib.unquote(pl_obj["url_encoded_fmt_stream_map"])
+		if len(html) == 0 and pl_obj["args"].has_key("url_encoded_fmt_stream_map"):
+			html = urllib.unquote(pl_obj["args"]["url_encoded_fmt_stream_map"])
 
-		if len(html) == 0 and pl_obj.has_key("fmt_url_map"):
-			html = pl_obj["fmt_url_map"]
+		if len(html) == 0 and pl_obj["args"].has_key("fmt_url_map"):
+			html = pl_obj["args"]["fmt_url_map"]
 
 		html = urllib.unquote_plus(html)
 
-		if pl_obj.has_key("liveplayback_module"):
+		if pl_obj["args"].has_key("liveplayback_module"):
 			video["live_play"] = "true"
 
 		fmt_url_map = [html]
@@ -353,8 +353,15 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 						final_url = final_url.replace(host, fmt_fallback[:fmt_fallback.rfind(",")])
 						print self.__plugin__ + " final_url" + repr(final_url)
 
-					if final_url.find("rtmp") > -1 and index > 0 and pl_obj.has_key("ptk") and pl_obj.has_key("ptchn"):	
-						final_url = final_url + " playpath=" +  fmt_url_map[index - 1] + "?ptchn=" + pl_obj["ptchn"] + "&ptk=" + pl_obj["ptk"] 
+					if final_url.find("rtmp") > -1 and index > 0:
+						if pl_obj.has_key("url") or True:
+							final_url += " swfurl=" + pl_obj["url"] + " swfvfy=1"
+
+						final_url += " playpath=" +  fmt_url_map[index - 1]
+
+						if pl_obj["args"].has_key("ptk") and pl_obj["args"].has_key("ptchn"):
+							final_url += "?ptchn=" + pl_obj["args"]["ptchn"] + "&ptk=" + pl_obj["args"]["ptk"] 
+
 					links[int(quality)] = final_url.replace('\/','/')
 		
 		if self.__dbg__:
@@ -605,7 +612,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 				if player_object["PLAYER_CONFIG"]["args"].has_key("ttsurl"):
 					video["ttsurl"] = player_object["PLAYER_CONFIG"]["args"]["ttsurl"]
 
-				links = self.getVideoUrlMap(player_object["PLAYER_CONFIG"]["args"], video)
+				links = self.getVideoUrlMap(player_object["PLAYER_CONFIG"], video)
 
 				if len(links) == 0:
 					if self.__dbg__:
