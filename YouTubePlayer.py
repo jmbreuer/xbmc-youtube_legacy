@@ -335,15 +335,15 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 					if final_url.find("&type") > 0:
 						final_url = final_url[:final_url.find("&type")]
 					
-#					if self.__settings__.getSetting("preferred") == "true" and index + 3 < len(fmt_url_map):
-#						print self.__plugin__ + " removing preferred servers" 
-#						host = final_url[final_url.find("://") + 3:final_url.find("/", final_url.find("://") +3)]
-#						fmt_fallback = fmt_url_map[index + 2]
-#						final_url = final_url.replace(host, fmt_fallback[:fmt_fallback.rfind(",")])
-#						print self.__plugin__ + " final_url" + repr(final_url)
+					if self.__settings__.getSetting("preferred") == "true" and index + 3 < len(fmt_url_map) and False:
+						print self.__plugin__ + " removing preferred servers" 
+						host = final_url[final_url.find("://") + 3:final_url.find("/", final_url.find("://") +3)]
+						fmt_fallback = fmt_url_map[index + 2]
+						final_url = final_url.replace(host, fmt_fallback[:fmt_fallback.rfind(",")])
+						print self.__plugin__ + " final_url" + repr(final_url)
 
-					if final_url.find("rtmp") > -1:	
-						final_url = final_url + " playpath=" +  final_url[final_url.find("stream=")+7:final_url.find("&", final_url.find("stream=")+7)]
+					if final_url.find("rtmp") > -1 and index > 0:	
+						final_url = final_url + " playpath=" +  fmt_url_map[index - 1]
 					links[int(quality)] = final_url.replace('\/','/')
 		
 		if self.__dbg__:
