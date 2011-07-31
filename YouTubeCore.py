@@ -738,8 +738,8 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 
 	def parseDOM(self, html, params):
 		get = params.get
-		if self.__dbg__:
-			print self.__plugin__ + " parseDOM : " + repr(params)
+		#if self.__dbg__:
+		#	print self.__plugin__ + " parseDOM : " + repr(params)
 		if get("id"):
 			if get("id-match"):
 				lst = re.compile('(<' + get("name") + ' ' + get("id") + '=[\'"]+' + get("id-match") + '[\'"]>)').findall(html)
@@ -806,7 +806,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 
 		if len(lst) > 0 and get("return"):
 			lst = re.compile('<' + get("name") + '.*' + get("return") + '=[\'"](.*?)[\'"].*>').findall(html2)
-			print self.__plugin__ + " parseDOM return lst for " + repr(params) + " : " + str(len(lst)) + repr(lst)
+			#print self.__plugin__ + " parseDOM return lst for " + repr(params) + " : " + str(len(lst)) + repr(lst)
 			return lst
 
 		if len(lst) > 0 and get("content"):
@@ -815,10 +815,10 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 				temp = self.getDOMContent(html, params, match)
 				html = html.replace(temp, "")
 				contlst.append(temp[temp.find(">")+1:temp.find("</" + get("name") + ">")])
-			print self.__plugin__ + " parseDOM return lst for " + repr(params) + " : " + str(len(lst)) + " - " + repr(lst)
+			#print self.__plugin__ + " parseDOM return lst for " + repr(params) + " : " + str(len(lst)) + " - " + repr(lst)
 			return contlst
 
-		print self.__plugin__ + " parseDOM done return html for " + repr(params) + " : " + str(len(html2))
+		#print self.__plugin__ + " parseDOM done return html for " + repr(params) + " : " + str(len(html2))
 		return html2
 
 
