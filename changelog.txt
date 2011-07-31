@@ -4,7 +4,6 @@
 - Music scraper should remember previously listed artists 
 - Go through every menu to check if things are still working
 - Annotations need colors specified in xml
-- Subtitles and Annotations dont work the first time 90% of the time
 - Context menu "more videos by user" shouldnt be visible when viewing a users upload
 - Check all context menu items again some seem to be broken
 
@@ -13,6 +12,7 @@
 - [XBMC] When sorting items, it's impossible to get them to return to their original order
 - [XBMC] Has Excessive Memory use after running the plugin for prolonged periods of time
 - [XBMC] Theres an unknown issue with the version of urllib and openssl supplied by xbmc for python 2.4 on windows that causes severe login issues for windows users (ssl_ctx_new errors)
+- [XBMC] Subtitles and Annotations dont work the first time 90% of the time
 - Download of rtmpe streams not supported.
 
 [B]Version 2.6.0 (Beta)[B]
