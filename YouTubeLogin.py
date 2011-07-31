@@ -45,13 +45,6 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 	__opener__ = urllib2.build_opener(urllib2.HTTPCookieProcessor(__cj__))
 	urllib2.install_opener(__opener__)
 	
-	def __init__(self):
-		timeout = self.__settings__.getSetting( "timeout" )
-		if not timeout:
-			timeout = "5"
-		socket.setdefaulttimeout(float(timeout))
-		return None
-	
 	def login(self, params = {}):
 		self.__settings__.openSettings()
 		
