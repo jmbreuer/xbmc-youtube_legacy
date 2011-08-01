@@ -203,6 +203,29 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 		
 		return folders;
 	
+	def getBatchDetailsOverride(self, items, params = {}):
+		ytobjects = []
+		videoids = []
+		
+		for video in items:
+			for k, v in video.items():
+				if k == "videoid":
+					videoids.append(v)
+		
+		(ytobjects, status) = self.getBatchDetails(videoids, params = {})
+		
+		for video in items:
+			videoid = video["videoid"]
+			for item in ytobjects:
+				if item['videoid'] == videoid:
+					for k, v in video.items():
+						item[k] = v
+		
+		while len(items) > len(ytobjects):
+			ytobjects.append({'videoid': 'false'});
+		
+		return ( ytobjects, 200)
+	
 	def getBatchDetailsThumbnails(self, items, params = {}):
 		ytobjects = []
 		videoids = []
