@@ -154,9 +154,6 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 	
 	def editStoredSearch(self, params = {}):
 		get = params.get
-		params["store"] = "searches"
-		if get("action") == "edit_disco":
-			params["store"] = "disco_searches"
 
 		if (get("search")):
 			old_query = urllib.unquote_plus(get("search"))
@@ -164,17 +161,19 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 			params["search"] = new_query
 			params["old_search"] = old_query
 			
-			if (get("action") == "edit_search"):
-				params["store"] = "searches"
-				self.saveSearch(params)
-				params["feed"] = "search"
-			else:
+			if get("action") == "edit_disco":
 				params["scraper"] = "search_disco"
-				self.saveSearch(params)
+				params["store"] = "disco_searches"
+			else:
+				params["store"] = "searches"
+				params["feed"] = "search"
+			
+			self.saveSearch(params)
+
 			params["search"] = urllib.quote_plus(new_query)
-		
-		del params["old_search"]
-		del params["store"]
+			del params["old_search"]
+			del params["store"]
+
 		del params["action"]
 	
 	def refineStoredSearch(self, params = {}):
