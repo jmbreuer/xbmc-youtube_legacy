@@ -153,39 +153,41 @@ class YouTubeFeeds(YouTubeCore.YouTubeCore):
 		get = params.get
 		page = int(get("page", "0"))
 		per_page = ( 10, 15, 20, 25, 30, 40, 50 )[ int( self.__settings__.getSetting( "perpage" ) ) ]
+		next = 'false'
 		
-		videoids = self.__storage__.retrieve(params)
-			
-		if page != 0 and videoids:
-			next = 'false'
-			if ( per_page * ( page + 1 ) < len(videoids) ):
+		videos = self.__storage__.retrieve(params)
+		
+		if page != 0 and videos:
+			if ( per_page * ( page + 1 ) < len(videos) ):
 				next = 'true'
 			
-			videoids = videoids[(per_page * page):(per_page * (page + 1))]
+			videos = videos[(per_page * page):(per_page * (page + 1))]
 			
-			(result, status) = self.getBatchDetails(videoids, params)
+			(result, status) = self.getBatchDetailsOverride(videos, params)
 		else:
 			result = self.listAll(params)
 				
 			if len(result) == 0:
 				return (result, 303)
 			
-			videoids = []
+			videos = []
 			for video in result:
 				vget = video.get
-				videoids.append(vget("videoid","false"))
+				item = {}
+				item["playlist_entry_id"] = vget("playlist_entry_id")
+				item["videoid"] = vget("videoid")
+				videos.append(item)
 			
-			self.__storage__.store(params, videoids)
+			self.__storage__.store(params, videos)
 			
 			thumbnail = result[0].get('thumbnail', "")
 			if (thumbnail):
 				self.__storage__.store(params, thumbnail, "thumbnail")
 			
-			next = 'false'	
 			if (len(result) > 0):
 				if ( per_page * ( page + 1 ) < len(result) ):
 					next = 'true'
-		
+			
 			result = result[(per_page * page):(per_page * (page + 1))]
 		
 		if next == "true":
@@ -206,15 +208,10 @@ class YouTubeFeeds(YouTubeCore.YouTubeCore):
 		page = int(get("page", "0"))
 		per_page = ( 10, 15, 20, 25, 30, 40, 50 )[ int( self.__settings__.getSetting( "perpage" ) ) ]
 		
-		store = self.__storage__.retrieve(params)
+		if ( page != 0):
+			result = self.__storage__.retrieve(params)
 		
-		if ( page != 0 and store != ""):
-			try:
-				result = eval(store)
-			except:
-				print self.__plugin__ + " folder - eval failed "	
-		
-		if not get("page"):
+		elif not get("page"):
 			result = self.listAll(params)
 			
 			if len(result) == 0:
