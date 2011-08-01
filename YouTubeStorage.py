@@ -41,36 +41,17 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 		get = params.get
 		if get("store") == "contact_options":
 			return self.getUserOptionFolder(params)
-		elif get("store") == "artists":
-			return self.getStoredArtists(params)
-		elif get("store") == "searches" or get("store") == "disco_searches":
-			return self.getStoredSearches(params)
-	
-	def getStoredArtists(self, params = {}):
+		elif get("store"):
+			return self.getStoredList(params)
+		
+	def getStoredList(self, params = {}):
 		get = params.get
-		result = []
 		
-		key = self.getStorageKey(params)
-		result = self.retrieveResultSet(key)
+		authors = []
+		searches = self.retrieve(params)
 		
-		return (result, 200)
-	
-	def getStoredSearches(self, params = {}):
-		get = params.get
-		key = self.getStorageKey(params)
-		author_key = self.getStorageKey({"store":"searches_author"})
-		searches = []
-		authors = {}
-		
-		try:
-			searches = eval(self.retrieveValue(key))
-		except:
-			print self.__plugin__ + " failed to retrieve stored searches"
-		
-		try:
-			authors = eval(self.retrieveValue(author_key))
-		except:
-			print self.__plugin__ + " failed to retrieve stored searches"
+		if get("store") == "searches":
+			authors = self.retrieve({"store":"searches_author"})
 		
 		result = []
 		for search in searches:
@@ -84,75 +65,57 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 				item["icon"] = "search" 
 				if search in authors:
 					item["refined"] = "true"
-			else:
+			elif get("store") == "disco_searches":
 				item["scraper"] = "search_disco"
 				item["icon"] = "discoball"
+			else:
+				item["thumbnail"] = "music"
 			
 			params["thumb"] = "true"
 			
-			thumb_key = self.getStorageKey(params, "thumbnail", item)
-			item["thumbnail"] = self.retrieveValue(thumb_key)
+			item["thumbnail"] = self.retrieve(params, "thumbnail", item)
 			result.append(item)
 				
 		return (result, 200)
 						
-	def deleteStoredSearch(self, params = {}):
+	def deleteFromStoredList(self, params = {}):
 		get = params.get
-		params["store"] = "searches"
-		if get("action") == "delete_disco":
-			params["store"] = "disco_searches"
 		
-		key = self.getStorageKey(params) 
-		query = urllib.unquote_plus(get("delete"))
+		query = urllib.unquote_plus(get("delete"))		
+		searches = self.retrieve(params)
 		
-		searches = []
-		try:
-			searches = eval(self.retrieveValue(key))
-		except:
-			print self.__plugin__ + "failed to retrieve stored searches"
-			
+		print repr(searches)
 		for count, search in enumerate(searches):
 			if (search.lower() == query.lower()):
 				del(searches[count])
 				break
 		
-		self.storeValue(key, repr(searches))
+		self.store(params, searches)
 		
 		xbmc.executebuiltin( "Container.Refresh" )
 		
-	def saveSearch(self, params = {}):
+	def saveInStoredList(self, params = {}):
 		get = params.get
 		
-		searches = []
-		
 		if get("search"):
-			params["store"] = "searches"
-			if get("scraper"):
-				params["store"] = "disco_searches"
-			
-			key = self.getStorageKey(params)
+			searches = self.retrieve(params)
 			
 			new_query = urllib.unquote_plus(get("search"))
 			old_query = new_query
 			
 			if get("old_search"):
 				old_query = urllib.unquote_plus(get("old_search"))
-			try:
-				searches = eval(self.retrieveValue(key))
-			except:
-				print self.__plugin__ + "failed to retrieve stored searches"
 			
 			for count, search in enumerate(searches):
 				if (search.lower() == old_query.lower()):
 					del(searches[count])
 					break
 			
-			del params["store"]
 			searchCount = ( 10, 20, 30, 40, )[ int( self.__settings__.getSetting( "saved_searches" ) ) ]
 			searches = [new_query] + searches[:searchCount]
-			self.storeValue(key, repr(searches))
+			self.store(params, searches)
 	
-	def editStoredSearch(self, params = {}):
+	def editItemInStoredList(self, params = {}):
 		get = params.get
 
 		if (get("search")):
@@ -172,38 +135,32 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 
 			params["search"] = urllib.quote_plus(new_query)
 			del params["old_search"]
-			del params["store"]
-
-		del params["action"]
-	
-	def refineStoredSearch(self, params = {}):
-		get = params.get
-		params["store"] = "searches_author"
-		key = self.getStorageKey(params) 
-		query = urllib.unquote_plus(get("search"))
 		
-		try:
-			searches = eval(self.retrieveValue(key))
-		except :
-			searches = {}
+		del params["action"]
+		del params["store"]
+	
+	def refineItemInStoredList(self, params = {}):
+		get = params.get
+		
+		query = urllib.unquote_plus(get("search"))
+		authors = self.retrieve({"store":"searches_author"})		
+		searches = self.retrieve(params)
 		
 		if query in searches:
 			author = self.getUserInput(self.__language__(30517), searches[query])
-		else:
-			author = self.getUserInput(self.__language__(30517), '')
-
-		if author == "":
-			if author in searches:
-				del searches[query]
-				xbmc.executebuiltin( "Container.Refresh" )
-		elif author:
-			searches[query] = author
-			
-			self.storeValue(key, repr(searches))
-			self.showMessage(self.__language__(30006), self.__language__(30616))
-			xbmc.executebuiltin( "Container.Refresh" )
 		
-	def deleteStoredSearchRefinement(self, params = {}):
+			if author == "":
+				if query in authors:
+					del authors[query]
+					xbmc.executebuiltin( "Container.Refresh" )
+			elif author:
+				authors[query] = author
+				
+				self.store({"store":"searches_author"}, authors)
+				self.showMessage(self.__language__(30006), self.__language__(30616))
+				xbmc.executebuiltin( "Container.Refresh" )
+		
+	def deleteStoredListItemRefinement(self, params = {}):
 		get = params.get
 		params["store"] = "searches_author"
 		key = self.getStorageKey(params)

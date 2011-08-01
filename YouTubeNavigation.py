@@ -171,13 +171,7 @@ class YouTubeNavigation(YouTubeUtils.YouTubeUtils):
 		get = params.get
 		results = []
 		if (get("feed") == "search" or get("scraper") == "search_disco"):
-			if not get("search"):
-				query = self.getUserInput(self.__language__(30006), '')
-				if not query:
-					return False
-				params["search"] = query
 			
-			self.__storage__.saveSearch(params)
 		
 		if get("scraper"):
 			(results , status) = self.__scraper__.scrape(params)
@@ -513,20 +507,18 @@ class YouTubeNavigation(YouTubeUtils.YouTubeUtils):
 			
 		if (item("scraper") == "search_disco"):
 			cm.append( (self.__language__( 30520 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&search_disco=%s&)" % ( sys.argv[0], item("path"), item("search") ) ) )
-			cm.append( (self.__language__( 30522 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&shuffle=true&search_disco=%s&)" % ( sys.argv[0], item("path"), item("search") ) ) )
-		
+			cm.append( (self.__language__( 30522 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&shuffle=true&search_disco=%s&)" % ( sys.argv[0], item("path"), item("search") ) ) )			
+			cm.append( ( self.__language__( 30524 ), 'XBMC.Container.Update(%s?path=%s&action=edit_disco&store=disco_searches&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
+			cm.append( ( self.__language__( 30525 ), 'XBMC.RunPlugin(%s?path=%s&action=delete_disco&store=disco_searches&delete=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )								
+
 		if (item("feed") == "search"):
-			cm.append( ( self.__language__( 30515 ), 'XBMC.Container.Update(%s?path=%s&action=edit_search&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
-			cm.append( ( self.__language__( 30505 ), 'XBMC.RunPlugin(%s?path=%s&action=refine_user&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
-			cm.append( ( self.__language__( 30508 ), 'XBMC.RunPlugin(%s?path=%s&action=delete_search&delete=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
+			cm.append( ( self.__language__( 30515 ), 'XBMC.Container.Update(%s?path=%s&action=edit_search&store=searches&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
+			cm.append( ( self.__language__( 30505 ), 'XBMC.RunPlugin(%s?path=%s&action=refine_user&store=searches&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
+			cm.append( ( self.__language__( 30508 ), 'XBMC.RunPlugin(%s?path=%s&action=delete_search&store=searches&delete=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
 			
 			if item("refined"):
-				cm.append( ( self.__language__( 30500 ), 'XBMC.RunPlugin(%s?path=%s&action=delete_refinements&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
-		
-		if item("scraper") == "search_disco":			
-			cm.append( ( self.__language__( 30524 ), 'XBMC.Container.Update(%s?path=%s&action=edit_disco&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
-			cm.append( ( self.__language__( 30525 ), 'XBMC.RunPlugin(%s?path=%s&action=delete_disco&delete=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )								
-		
+				cm.append( ( self.__language__( 30500 ), 'XBMC.RunPlugin(%s?path=%s&action=delete_refinements&store=searches&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
+				
 		if (item("view_mode")):
 			cm_url = 'XBMC.Container.Update(%s?path=%s&channel=%s&action=change_subscription_view&view_mode=%s&' % ( sys.argv[0], item("path"), item("channel"), "%s")
 			if (item("external")):
