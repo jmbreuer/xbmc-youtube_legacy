@@ -357,10 +357,17 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 						if pl_obj.has_key("url") or True:
 							final_url += " swfurl=" + pl_obj["url"] + " swfvfy=1"
 
-						final_url += " playpath=" +  fmt_url_map[index - 1]
+						playpath = False
+						if final_url.find("stream=") > -1:
+							playpath = final_url[final_url.find("stream=")+7:]
+							if playpath.find("&") > -1:
+								playpath = playpath[:playpath.find("&")]
+						else:
+							playpath = fmt_url_map[index - 1]
 
-						if pl_obj["args"].has_key("ptk") and pl_obj["args"].has_key("ptchn"):
-							final_url += "?ptchn=" + pl_obj["args"]["ptchn"] + "&ptk=" + pl_obj["args"]["ptk"] 
+						if playpath:
+							if pl_obj["args"].has_key("ptk") and pl_obj["args"].has_key("ptchn"):
+								final_url += " playpath=" + playpath + "?ptchn=" + pl_obj["args"]["ptchn"] + "&ptk=" + pl_obj["args"]["ptk"] 
 
 					links[int(quality)] = final_url.replace('\/','/')
 		
