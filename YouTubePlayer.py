@@ -571,13 +571,14 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 	def _getVideoLinks(self, video, params):
 		get = params.get
 		vget = video.get
-		player_object = False
+		player_object = {}
 		links = []
 
 		if self.__dbg__:
 			print self.__plugin__ + " _getVideoLinks trying website"
 
 		result = self._fetchPage({"link": self.urls["video_stream"] % get("videoid")})
+
 		if result["status"] == 200:
 			data = result["content"].find("PLAYER_CONFIG")
 			if data > -1:
