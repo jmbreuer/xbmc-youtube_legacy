@@ -290,7 +290,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 
 	def getVideoUrlMap(self, pl_obj, video = {}):
 		if self.__dbg__:
-			print self.__plugin__ + " getVideoUrlMap " 
+			print self.__plugin__ + " getVideoUrlMap: " 
 		links = {}
 		video["url_map"] = "true"
 					
@@ -353,7 +353,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 						final_url = final_url.replace(host, fmt_fallback[:fmt_fallback.rfind(",")])
 						print self.__plugin__ + " final_url" + repr(final_url)
 
-					if final_url.find("rtmp") > -1 and index > 0:
+					if final_url.find("rtmp") > -1 and index > 0 and False:
 						if pl_obj.has_key("url") or True:
 							final_url += " swfurl=" + pl_obj["url"] + " swfvfy=1"
 

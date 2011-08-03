@@ -33,7 +33,7 @@ class YouTubeNavigation(YouTubeUtils.YouTubeUtils):
 	__downloader__ = sys.modules[ "__main__" ].__downloader__
 	__storage__ = sys.modules[ "__main__" ].__storage__
 	__scraper__ = sys.modules[ "__main__" ].__scraper__
-		
+	
 	# This list contains the main menu structure the user first encounters when running the plugin
 	#			   label						  , path									        , thumbnail					  		,  login		  ,  feed / action
 	categories = (
@@ -85,7 +85,7 @@ class YouTubeNavigation(YouTubeUtils.YouTubeUtils):
 				  {'Title':__language__( 30027 )  ,'path':"/root/login"			 					, 'thumbnail':"login"				, 'login':"false" , 'action':"settings" },
 				  {'Title':__language__( 30028 )  ,'path':"/root/settings"		  					, 'thumbnail':"settings"			, 'login':"true"  , 'action':"settings" }
 				  )
-
+	
 	#==================================== Main Entry Points===========================================
 	def listMenu(self, params = {}):
 		get = params.get
@@ -122,17 +122,17 @@ class YouTubeNavigation(YouTubeUtils.YouTubeUtils):
 	def executeAction(self, params = {}):
 		get = params.get
 		if (get("action") == "refine_user"):
-			self.__storage__.refineStoredSearch(params)
+			self.__storage__.refineItemInStoredList(params)
 		if (get("action") == "delete_refinements"):
-			self.__storage__.deleteStoredSearchRefinement(params)
+			self.__storage__.deleteStoredListItemRefinement(params)
 		if (get("action") == "settings"):
 			self.__login__.login(params)
 		if (get("action") == "test"):
 			self.__downloader__.test(params)
-		if (get("action") == "delete_search" or get("action") == "delete_disco"):
-			self.__storage__.deleteStoredSearch(params)
-		if (get("action") == "edit_search" or get("action") == "edit_disco"):
-			self.__storage__.editStoredSearch(params)
+		if (get("action") in ["delete_search", "delete_disco", "delete_artist"]):
+			self.__storage__.deleteFromStoredList(params)
+		if (get("action") in ["edit_search", "edit_disco"]):
+			self.__storage__.editItemInStoredList(params)
 			self.listMenu(params)
 		if (get("action") == "remove_favorite"):
 			self.removeFromFavorites(params)
@@ -171,13 +171,13 @@ class YouTubeNavigation(YouTubeUtils.YouTubeUtils):
 		get = params.get
 		results = []
 		if (get("feed") == "search" or get("scraper") == "search_disco"):
-                        if not get("search"):
-                                query = self.getUserInput(self.__language__(30006), '')
-                                if not query:
-                                        return False
-                                params["search"] = query
-
-			#self.__storage__.saveSearch(params)			
+			if not get("search"):
+				query = self.getUserInput(self.__language__(30006), '')
+				if not query:
+					return False
+				params["search"] = query
+			
+			self.__storage__.saveInStoredList(params)
 		
 		if get("scraper"):
 			(results , status) = self.__scraper__.scrape(params)

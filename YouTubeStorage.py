@@ -84,7 +84,6 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 		query = urllib.unquote_plus(get("delete"))		
 		searches = self.retrieve(params)
 		
-		print repr(searches)
 		for count, search in enumerate(searches):
 			if (search.lower() == query.lower()):
 				del(searches[count])
