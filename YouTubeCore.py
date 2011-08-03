@@ -416,7 +416,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 		
 	def _verifyAge(self, result, new_url, params = {}):
 		get = params.get
-		login_info = self.__login__._httpLogin(True)
+		login_info = self.__login__._httpLogin({ "new": "true" })
 		confirmed = "0"
 		if self.__settings__.getSetting( "safe_search" ) != "2":
 			confirmed = "1"

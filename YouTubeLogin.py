@@ -46,11 +46,13 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 	urllib2.install_opener(__opener__)
 	
 	def login(self, params = {}):
+		oname = self.__settings__.getSetting("username")
+		opass = self.__settings__.getSetting( "user_password" )
 		self.__settings__.openSettings()
-		
+
 		if self.__settings__.getSetting("username") and self.__settings__.getSetting( "user_password" ):
 			refreshed = False
-			if self.__settings__.getSetting( "oauth2_refresh_token" ):
+			if self.__settings__.getSetting( "oauth2_refresh_token" ) and oname == self.__settings__.getSetting("username") and opass == self.__settings__.getSetting( "user_password" ):
 				if self.__dbg__:
 					print self.__plugin__ + " login refreshing token: " + str(refreshed)
 				refreshed = self._oRefreshToken()
@@ -65,7 +67,7 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 				self.__settings__.setSetting("oauth2_refresh_token","")
 				self.__settings__.setSetting("oauth2_expires at", "")
 				self.__settings__.setSetting("nick","")
-				(result, status) = self._httpLogin(True)
+				(result, status) = self._httpLogin({ "new": "true"})
 
 				if status == 200:
 					(result, status) = self._apiLogin()
@@ -156,11 +158,12 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			print self.__plugin__ + " _apiLogin default return. failing. " 
 		return ( self.__language__(30609), 303 )
 	
-	def _httpLogin(self, new = False, error = 0):
+	def _httpLogin(self, params = {}):
+		get = params.get
 		if self.__dbg__:
-			print self.__plugin__ + " _httpLogin errors: " + str(error)
+			print self.__plugin__ + " _httpLogin "
 		result = ""
-		status = 200
+		status = 500
 		
 		uname = self.__settings__.getSetting( "username" )
 		pword = self.__settings__.getSetting( "user_password" )
@@ -168,204 +171,180 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		if uname == "" and pword == "":
 			return ( "", 303)
 
-		if new:
+		if get("new", "false") == "true":
 			self.__settings__.setSetting( "login_info", "" )
 		elif self.__settings__.getSetting( "login_info" ) != "":
 			if self.__dbg__:
 				print self.__plugin__ + " returning existing login info: " + self.__settings__.getSetting( "login_info" )
 			return ( self.__settings__.getSetting( "login_info" ), 200)
 
-
-		if self.__dbg__:
-			print self.__plugin__ + " _httpLogin step 1"
-		ret = self._fetchPage({ "link": "http://www.youtube.com/"})
-		newurl = self.parseDOM(ret["content"], { "name": "a", "class": "end", "return": "href"})
-		if len(newurl) == 0:
-			return ( "", 0)
-
-		if self.__dbg__:
-			print self.__plugin__ + " _httpLogin step 2 : "+ repr(newurl)
-		ret = self._fetchPage({ "link": newurl[0]})
-
-		newurl = self.parseDOM(ret["content"].replace("\n", " "), { "name": "form", "id": "id", "id-match": "gaia_loginform", "return": "action"})
-		rmShown = re.compile('<input type="hidden" name=\'rmShown\' value="(.*?)" />').findall(ret["content"])
-		#cont = re.compile('<input type="hidden" name="continue" id="continue"\n           value="(.*?)" /> ').findall(ret["content"])
-		#cont2 = self.parseDOM(ret["content"].replace("\n", " "), { "name": "input", "id": "id", "id-match": "continue", "return": "value"})
-		cont = ["http://www.youtube.com/signin?action_handle_signin=true&amp;nomobiletemp=1&amp;hl=en_US&amp;next=%2F"]
-		uilel = re.compile('<input type="hidden" name="uilel" id="uilel"\n           value="(.*?)" />').findall(ret["content"])
-		dsh = re.compile('<input type="hidden" name="dsh" id="dsh"\n           value="(.*?)" />').findall(ret["content"])
-		galx = re.compile('Set-Cookie: GALX=(.*);Path=/accounts;Secure').findall(str(ret["header"]))
-
-		if len(galx) == 0 or len(cont) == 0 or len(uilel) == 0 or len(dsh) == 0 or len(rmShown) == 0 or len(newurl) == 0:
+		logged_in = False
+		fetch_options = { "link": get("link", "http://www.youtube.com/") }
+		step = 0
+		galx = ""
+		twofactor = False
+		while not logged_in and fetch_options:
 			if self.__dbg__:
-				print self.__plugin__ + " _httpLogin missing values for login form " + repr(galx) + repr(cont) + repr(uilel) + repr(dsh) + repr(rmShown) + str(len(newurl))
-			return ( "", 0)
+				print self.__plugin__ + " _httpLogin step " + str(step)
+				step += 1
 
-		galx = galx[0]
-		url_data = { "pstMsg": "0",
-			     "ltmpl": "sso",
-			     "dnConn": "",
-			     "continue": cont[0],
-			     "service": "youtube",
-			     "uilel": uilel[0],
-			     "dsh": dsh[0],
-			     "hl": "en_US",
-			     "timeStmp": "",
-			     "secTok": "",
-			     "GALX": galx,
-			     "Email": uname,
-			     "Passwd": pword,
-			     "PersistentCookie": "yes",
-			     "rmShown": rmShown[0],
-			     "signin": "Sign in",
-			     "asts": ""
-			}
+			ret = self._fetchPage(fetch_options)
+			fetch_options = False
 
-		if self.__dbg__:
-			print self.__plugin__ + " _httpLogin step 3 : " + repr(url_data)
-		ret = self._fetchPage({ "link": newurl[0], "no-language-cookie": "true", "url_data": url_data });
+			# Click login link on youtube.com
+			newurl = self.parseDOM(ret["content"], { "name": "a", "class": "end", "return": "href"})
+			if len(newurl) > 0:
+				# Start login procedure
+				if newurl[0] != "#":
+					fetch_options = { "link": newurl[0] }
+					if self.__dbg__:
+						print self.__plugin__ + " _httpLogin part A: " + repr(fetch_options)
 
-		# Login to youtube
-		newurl = re.compile('<meta http-equiv="refresh" content="0; url=&#39;(.*)&#39;"></head>').findall(ret["content"])
+			# Fill out login information and send.
+			newurl = self.parseDOM(ret["content"].replace("\n", " "), { "name": "form", "id": "id", "id-match": "gaia_loginform", "return": "action"})
+			if len(newurl) > 0:
+				rmShown = re.compile('<input type="hidden" name=\'rmShown\' value="(.*?)" />').findall(ret["content"])
+				#cont = re.compile('<input type="hidden" name="continue" id="continue"\n           value="(.*?)" /> ').findall(ret["content"])
+				#cont2 = self.parseDOM(ret["content"].replace("\n", " "), { "name": "input", "id": "id", "id-match": "continue", "return": "value"})
+				cont = ["http://www.youtube.com/signin?action_handle_signin=true&amp;nomobiletemp=1&amp;hl=en_US&amp;next=%2F"]
+				uilel = re.compile('<input type="hidden" name="uilel" id="uilel"\n           value="(.*?)" />').findall(ret["content"])
+				dsh = re.compile('<input type="hidden" name="dsh" id="dsh"\n           value="(.*?)" />').findall(ret["content"])
+				galx = re.compile('Set-Cookie: GALX=(.*);Path=/accounts;Secure').findall(str(ret["header"]))
 
-		if len(newurl): # Normal login
-			if self.__dbg__:
-				print self.__plugin__ + " _httpLogin: Normal login"
-			newurl = newurl[0].replace("&amp;", "&")
+				if len(galx) == 0 or len(cont) == 0 or len(uilel) == 0 or len(dsh) == 0 or len(rmShown) == 0 or len(newurl) == 0:
+					if self.__dbg__:
+						print self.__plugin__ + " _httpLogin missing values for login form " + repr(galx) + repr(cont) + repr(uilel) + repr(dsh) + repr(rmShown) + repr(newurl)
+				else:	
+					galx = galx[0]
+					url_data = { "pstMsg": "0",
+						     "ltmpl": "sso",
+						     "dnConn": "",
+						     "continue": cont[0],
+						     "service": "youtube",
+						     "uilel": uilel[0],
+						     "dsh": dsh[0],
+						     "hl": "en_US",
+						     "timeStmp": "",
+						     "secTok": "",
+						     "GALX": galx,
+						     "Email": uname,
+						     "Passwd": pword,
+						     "PersistentCookie": "yes",
+						     "rmShown": rmShown[0],
+						     "signin": "Sign in",
+						     "asts": ""
+						     }
 
-			# We need to do this twice now.
-
-			if self.__dbg__:
-				print self.__plugin__ + " _httpLogin step 4 - normal login"
-			ret = self._fetchPage({ "link": newurl});
-
-			# Login to youtube
+					fetch_options = { "link": newurl[0], "no-language-cookie": "true", "url_data": url_data }
+					if self.__dbg__:
+						print self.__plugin__ + " _httpLogin part B:" + repr(fetch_options)
+					continue
+						
 			newurl = re.compile('<meta http-equiv="refresh" content="0; url=&#39;(.*)&#39;"></head>').findall(ret["content"])
-			if len(newurl) == 0:
+			if len(newurl) > 0 :
+				fetch_options = { "link": newurl[0].replace("&amp;", "&"), "no-language-cookie": "true" }
 				if self.__dbg__:
-					print self.__plugin__ + " _httpLogin: Couldn't get new url"
-				return ( "", 0)
+					print self.__plugin__ + " _httpLogin part C: "  + repr(fetch_options)
+				continue
 
-			newurl = newurl[0].replace("&amp;", "&")
-			
-			if self.__dbg__:
-				print self.__plugin__ + " _httpLogin step 5 - normal login"
-			ret = self._fetchPage({ "link": newurl, "no-language-cookie": "true" })
-		elif ret["content"].find("smsToken") > -1:
-			smsToken = re.compile('<input type="hidden" name="smsToken"\n        value="(.*?)">').findall(ret["content"])
-			if len(smsToken) == 0:
-				return ( "", 0)
+			## 2-factor login start
+			if ret["content"].find("smsUserPin") > -1:
+				smsToken = re.compile('<input type="hidden" name="smsToken"\n        value="(.*?)">').findall(ret["content"])
+				email = re.compile('<input type="hidden" name="email"\n          value="(.*?)">').findall(ret["content"])
+				if len(smsToken) > 0 and len(email) > 0:
+					url_data = { "smsToken": smsToken[0],
+						     "PersistentCookie": "yes",
+						     "service": "youtube",
+						     "smsUserPin" : self.getUserInput(self.__language__(30627)),
+						     "smsVerifyPin" : "Verify",
+						     "timeStmp" : "",
+						     "secTok" : "",
+					     "email" : email[0]}
+					# i want to extract this link. grrr.
+					fetch_options = { "link": "https://www.google.com/accounts/SmsAuth?persistent=yes", "url_data": url_data, "no-language-cookie": "true" }
+					if self.__dbg__:
+						print self.__plugin__ + " _httpLogin part D: " + repr(fetch_options)
+					continue
 
-			email = re.compile('<input type="hidden" name="email"\n          value="(.*?)">').findall(ret["content"])
-			if len(email) == 0:
-				return ( "", 0)
-
-			url_data = { "smsToken": smsToken[0],
-				     "PersistentCookie": "yes",
-				     "service": "youtube",
-				     "smsUserPin" : self.getUserInput(self.__language__(30627)),
-				     "smsVerifyPin" : "Verify",
-				     "timeStmp" : "",
-				     "secTok" : "",
-				     "email" : email[0]}
-
-			if self.__dbg__:
-				print self.__plugin__ + " _httpLogin step 4 - 2-factor login"
-			ret = self._fetchPage({ "link": "https://www.google.com/accounts/SmsAuth?persistent=yes", "url_data": url_data, "no-language-cookie": "true" })
-			
-			error = self.parseDOM(ret['content'], { "name": "div", "class": "error smaller", "content": "true"})
-			if len(error) > 0:
-				error = error[0]
-				error = urllib.unquote(error[0:error.find("<")]).replace("&#39;", "'")
-				return ( error.strip(), 303)
-			
 			smsToken = re.compile('<input type="hidden" name="smsToken" value="(.*?)">').findall(ret["content"])
-			if len(smsToken) == 0:
-				return ( "", 0)
-			
 			cont = re.compile('<input type="hidden" name="continue" value="(.*?)">').findall(ret["content"])
-			if len(cont) == 0:
-				return ( "", 0)
+			if len(cont) > 0 and smsToken > 0 :
+				url_data = { "smsToken": smsToken[0],
+					     "continue": cont[0],
+					     "PersistentCookie": "yes",
+					     "service": "youtube",
+					     "GALX": galx}
 
-			url_data = { "smsToken": smsToken[0],
-				     "continue": cont[0],
-				     "PersistentCookie": "yes",
-				     "service": "youtube",
-				     "GALX": galx}
-
-			if self.__dbg__:
-				print self.__plugin__ + " _httpLogin step 5 - 2-factor login"
-			ret = self._fetchPage({ "link": "https://www.google.com/accounts/ServiceLoginAuth?service=youtube", "url_data": url_data, "no-language-cookie": "true"})
-
-			newurl = re.compile('<meta http-equiv="refresh" content="0; url=&#39;(.*)&#39;"></head>').findall(ret["content"])
-			if len(newurl) == 0:
-				return ("", 0)
-			
-			newurl = newurl[0].replace("&amp;", "&").replace("http%25253A%252F", "http%253A%252F") # Google has an extra 25 in their code.
-
-			if self.__dbg__:
-				print self.__plugin__ + " new_url3: " + newurl
-
-			if self.__dbg__:
-				print self.__plugin__ + " _httpLogin step 6 - 2-factor login"
-			ret = self._fetchPage({ "link": newurl});
-
-			if self.__dbg__:
-				print self.__plugin__ + " new_url4: " + repr(ret)
-			
-			newurl = re.compile('<meta http-equiv="refresh" content="0; url=&#39;(.*)&#39;"></head>').findall(ret["content"])
-			if len(newurl) == 0:
-				return ("", 0)
-			newurl = urllib.unquote(newurl[0])
-
-			if self.__dbg__:
-				print self.__plugin__ + " _httpLogin step 7 - 2-factor login"
-			ret = self._fetchPage({ "link": newurl, "no-language-cookie": "true"});
-		else:
-			error = self.parseDOM(ret['content'], { "name": "div", "class": "errormsg", "content": "true"})
-			if len(error) > 0:
-				error = error[0]
-				error = urllib.unquote(error[0:error.find("[")]).replace("&#39;", "'")
-				return ( error.strip(), 303)
+				# I so want to extract this link.
+				fetch_options = { "link": "https://www.google.com/accounts/ServiceLoginAuth?service=youtube", "url_data": url_data, "no-language-cookie": "true"}
 				if self.__dbg__:
-					print self.__plugin__ + " _login couldn't find method to authenticate: " + repr(ret)
+					print self.__plugin__ + " _httpLogin part E: " + repr(fetch_options)
+				continue
 
-			return ( "", 0)
+			## 2-factor login finish
 
-		if self.__dbg__:
-			print self.__plugin__ + " _httpLogin: Logged in. Parsing data."
+			if not fetch_options:
+				# Check if we are logged in.
+				if ret["content"].find("USERNAME', ") > 0:
+					logged_in = True
+					if self.__dbg__:
+						print self.__plugin__ + " _httpLogin: Logged in. Parsing data. : " + ret["content"][ret["content"].find("USERNAME', ") + 12:ret["content"].find("USERNAME', ") + 30]
+						break;
+				# Look for errors and return error.
+				if self.__dbg__:
+					print self.__plugin__ + " _httpLogin Didn't find any action."
+				## Couldn't find 2 factor or normal login 
+				error = self.parseDOM(ret['content'], { "name": "div", "class": "errormsg", "content": "true"})
+				if len(error) == 0:
+					# An error in 2-factor
+					error = self.parseDOM(ret['content'], { "name": "div", "class": "error smaller", "content": "true"})
 
-		nick = ""
-		if ret["content"].find("USERNAME', ") > 0:
-			nick = ret["content"][ret["content"].find("USERNAME', ") + 12:]
-			nick = nick[:nick.find('")')]
+				if len(error) > 0:
+					error = error[0]
+					error = urllib.unquote(error[0:error.find("[")]).replace("&#39;", "'")
+					if self.__dbg__:
+						print self.__plugin__ + " _httpLogin returning error :" + error.strip()
+					return ( error.strip(), 303)
+
+				if self.__dbg__:
+					print self.__plugin__ + " _login couldn't find action or error on : " + repr(ret)
+				return ( "ERROR IN LOGIN", 303)
+
+		if logged_in:
+			nick = ""
+			if ret["content"].find("USERNAME', ") > 0:
+				nick = ret["content"][ret["content"].find("USERNAME', ") + 12:]
+				nick = nick[:nick.find('")')]
+				
+			if nick:
+				self.__settings__.setSetting("nick", nick)
+			else:
+				status = 303
+				if self.__dbg__:
+					print self.__plugin__ + " _httpLogin failed to get usename from youtube"
+
+			# Save cookiefile in settings
+			if self.__dbg__:
+				print self.__plugin__ + " _httpLogin scanning cookies for login info: "
 		
-		if nick:
-			self.__settings__.setSetting("nick", nick)
-		else:
-			status = 303
-			print self.__plugin__ + " _httpLogin failed to get usename from youtube"
-		
-		# Save cookiefile in settings
-		if self.__dbg__:
-			print self.__plugin__ + " _httpLogin scanning cookies for login info: "
-		
-		login_info = ""
-		cookies = repr(self.__cj__)
+			login_info = ""
+			cookies = repr(self.__cj__)
 			
-		if cookies.find("name='LOGIN_INFO', value='") > 0:
-			start = cookies.find("name='LOGIN_INFO', value='") + len("name='LOGIN_INFO', value='")
-			login_info = cookies[start:cookies.find("', port=None", start)]
+			if cookies.find("name='LOGIN_INFO', value='") > 0:
+				start = cookies.find("name='LOGIN_INFO', value='") + len("name='LOGIN_INFO', value='")
+				login_info = cookies[start:cookies.find("', port=None", start)]
 		
-		if login_info:
-			self.__settings__.setSetting( "login_info", login_info )
-		else:
-			status = 303
+			if login_info:
+				self.__settings__.setSetting( "login_info", login_info )
+			else:
+				status = 303
+
+			if self.__dbg__:
+				print self.__plugin__ + " _httpLogin done : " + str(status) + " - " + login_info
 		
-		if self.__dbg__:
-			print self.__plugin__ + " _httpLogin done : " + str(status) + " - " + login_info
-		
-		result = self.__settings__.getSetting( "login_info" )
-		
+			status = 200
+			result = self.__settings__.getSetting( "login_info" )
+			## Maybe verify age here?
+
 		return (result, status)
 
