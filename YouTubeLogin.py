@@ -95,67 +95,57 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			return ( "", 0 )
 
 		url = "https://accounts.google.com/o/oauth2/auth?client_id=208795275779.apps.googleusercontent.com&redirect_uri=urn:ietf:wg:oauth:2.0:oob&scope=http%3A%2F%2Fgdata.youtube.com&response_type=code"
-		ret = self._fetchPage({ "link": url, "no-language-cookie": "true" })
-		#print self.__plugin__ + " _apiLogin : " + repr(ret)
 
-		newurl = re.compile('<form action="(.*?)" method="POST">').findall(ret["content"])
-		if len(newurl) == 0:
-			if self.__dbg__:
-				print self.__plugin__ + " _apiLogin no form method : " + repr(ret)
-			return ( "", 0)
+		logged_in = False
+		fetch_options = { "link": url , "no-language-cookie": "true" }
+		step = 0
 
-		state_wrapper = re.compile('<input type="hidden" id="state_wrapper" name="state_wrapper" value="(.*?)">').findall(ret["content"])
-		if len(state_wrapper) == 0:
+		while not logged_in and fetch_options and step < 6:
 			if self.__dbg__:
-				print self.__plugin__ + " _apiLogin no state_wrapper "
-			return ( "", 0)
+				print self.__plugin__ + " _apiLogin step " + str(step)
+				step += 1
+
+			ret = self._fetchPage(fetch_options)
+			fetch_options = False
+
+			newurl = re.compile('<form action="(.*?)" method="POST">').findall(ret["content"])
+			state_wrapper = re.compile('<input type="hidden" id="state_wrapper" name="state_wrapper" value="(.*?)">').findall(ret["content"])
+			submit_approve_access = re.compile('<input id="submit_approve_access" name="submit_approve_access" type="submit" tabindex="1" value="(.*?)" class="').findall(ret["content"])
+			if len(newurl) > 0 and len(state_wrapper) > 0 and len(submit_approve_access) > 0:
+				url_data = { "state_wrapper": state_wrapper[0],
+					     "submit_approve_access": submit_approve_access[0]}
+
+				fetch_options = { "link": newurl[0], "url_data": url_data, "no-language-cookie": "true" }
+				continue;
+
+			code = re.compile('code=(.*)</title>').findall(ret['content'])
+			if len(code) > 0:
+				url = "https://accounts.google.com/o/oauth2/token"
+				url_data = { "client_id": "208795275779.apps.googleusercontent.com",
+					     "client_secret": "sZn1pllhAfyonULAWfoGKCfp",
+					     "code": code[0],
+					     "redirect_uri": "urn:ietf:wg:oauth:2.0:oob",
+					     "grant_type": "authorization_code" }
+				fetch_options = { "link": url, "url_data": url_data}
+				continue
+			
+			# use token
+			oauth = json.loads(ret["content"])
+			if len(oauth) > 0:
+				#self.__settings__.setSetting("oauth2_expires at", oauth["expires_in"] + current time. ) 
+				self.__settings__.setSetting("oauth2_access_token", oauth["access_token"])
+				self.__settings__.setSetting('auth', oauth["access_token"])
+				self.__settings__.setSetting("oauth2_refresh_token", oauth["refresh_token"])
+
+				if self.__dbg__:
+					print self.__plugin__ + " _apiLogin done: " + uname
+				logged_in = True
 		
-		submit_approve_access = re.compile('<input id="submit_approve_access" name="submit_approve_access" type="submit" tabindex="1" value="(.*?)" class="').findall(ret["content"])
-		if len(submit_approve_access) == 0:
-			if self.__dbg__:
-				print self.__plugin__ + " _apiLogin no submit_approve_access "
-			return ( "", 0)
-
-		url_data = { "state_wrapper": state_wrapper[0],
-			     "submit_approve_access": submit_approve_access[0]}
-		ret = self._fetchPage({ "link": newurl[0], "url_data": url_data, "no-language-cookie": "true" })
-
-		code = re.compile('code=(.*)</title>').findall(ret['content'])
-		if len(code) == 0:
-			if self.__dbg__:
-				print self.__plugin__ + " _apiLogin no 2-factor confirmation code found"
-			return ( "", 0)
-		code = code[0]
-
-		url = "https://accounts.google.com/o/oauth2/token"
-		url_data = { "client_id": "208795275779.apps.googleusercontent.com",
-			     "client_secret": "sZn1pllhAfyonULAWfoGKCfp",
-			     "code": code,
-			     "redirect_uri": "urn:ietf:wg:oauth:2.0:oob",
-			     "grant_type": "authorization_code"}
-		ret = self._fetchPage({ "link": url, "url_data": url_data})
-		
-		oauth = json.loads(ret["content"])
-		#print self.__plugin__ + " _apiLogin3 : " + repr(oauth)
-		self.__settings__.setSetting("oauth2_access_token", oauth["access_token"])
-		self.__settings__.setSetting("oauth2_refresh_token", oauth["refresh_token"])
-
-		# use token
-
-		# curl https://www.google.com/m8/feeds/contacts/default/full?oauth_token=1/fFAGRNJru1FTz70BzhT3Zg
-		
-		if len(oauth) > 0:
-			#self.__settings__.setSetting("oauth2_expires at", oauth["expires_in"] + current time. ) 
-			self.__settings__.setSetting("oauth2_access_token", oauth["access_token"])
-			self.__settings__.setSetting('auth', oauth["access_token"])
-			self.__settings__.setSetting("oauth2_refresh_token", oauth["refresh_token"])
-
-			if self.__dbg__:
-				print self.__plugin__ + " _apiLogin done: " + uname
+		if logged_in:
 			return ( self.__language__(30030), 200 )
-		
-		if self.__dbg__:
-			print self.__plugin__ + " _apiLogin default return. failing. " 
+		else:
+			if self.__dbg__:
+				print self.__plugin__ + " _apiLogin default return. failing. " 
 		return ( self.__language__(30609), 303 )
 	
 	def _httpLogin(self, params = {}):
@@ -182,7 +172,7 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		fetch_options = { "link": get("link", "http://www.youtube.com/") }
 		step = 0
 		galx = ""
-		while not logged_in and fetch_options:
+		while not logged_in and fetch_options and step < 18: # 6 steps for 2-factor login
 			if self.__dbg__:
 				print self.__plugin__ + " _httpLogin step " + str(step)
 				step += 1
@@ -203,10 +193,11 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			newurl = self.parseDOM(ret["content"].replace("\n", " "), { "name": "form", "id": "id", "id-match": "gaia_loginform", "return": "action"})
 			if len(newurl) > 0:
 				( galx, url_data ) = self._fillLoginInfo(ret)
-				fetch_options = { "link": newurl[0], "no-language-cookie": "true", "url_data": url_data }
-				if self.__dbg__:
-					print self.__plugin__ + " _httpLogin part B:" + repr(fetch_options)
-				continue
+				if len(galx) > 0 and len(url_data) > 0:
+					fetch_options = { "link": newurl[0], "no-language-cookie": "true", "url_data": url_data }
+					if self.__dbg__:
+						print self.__plugin__ + " _httpLogin part B:" + repr(fetch_options)
+					continue
 						
 			newurl = re.compile('<meta http-equiv="refresh" content="0; url=&#39;(.*)&#39;"></head>').findall(ret["content"])
 			if len(newurl) > 0 :
@@ -245,10 +236,10 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 				if ret["content"].find("USERNAME', ") > 0:
 					logged_in = True
 					if self.__dbg__:
-						print self.__plugin__ + " _httpLogin: Logged in. Parsing data. : " + ret["content"][ret["content"].find("USERNAME', ") + 12:ret["content"].find("USERNAME', ") + 30]
+						print self.__plugin__ + " _httpLogin: Logged in. Parsing data. : "
 						break;
 				# Look for errors and return error.
-				return self._findErrors(ret)
+				return ( self._findErrors(ret), 303)
 
 		if logged_in:
 			status = self._getLoginInfo(ret["content"])
@@ -260,24 +251,27 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 
 	def _findErrors(self, ret):
 		if self.__dbg__:
-			print self.__plugin__ + " _httpLogin Didn't find any action."
+			print self.__plugin__ + " _findErrors"
 
 		## Couldn't find 2 factor or normal login 
 		error = self.parseDOM(ret['content'], { "name": "div", "class": "errormsg", "content": "true"})
 		if len(error) == 0:
 			# An error in 2-factor
 			error = self.parseDOM(ret['content'], { "name": "div", "class": "error smaller", "content": "true"})
+		if len(error) == 0:
+			# Playback
+			error = self.parseDOM(ret['content'], { "name": "div", "class": "yt-alert-content", "content": "true"})
 
 		if len(error) > 0:
 			error = error[0]
 			error = urllib.unquote(error[0:error.find("[")]).replace("&#39;", "'")
 			if self.__dbg__:
-				print self.__plugin__ + " _httpLogin returning error :" + error.strip()
-			return ( error.strip(), 303)
+				print self.__plugin__ + " _findErrors returning error :" + error.strip()
+			return error.strip()
 
 		if self.__dbg__:
-			print self.__plugin__ + " _login couldn't find action or error on : " + repr(ret)
-		return ( "ERROR IN LOGIN", 303)
+			print self.__plugin__ + " _findErrors couldn't find anything : " + repr(ret)
+		return "ERROR"
 
 	def _fillLoginInfo(self, ret):
 		rmShown = re.compile('<input type="hidden" name=\'rmShown\' value="(.*?)" />').findall(ret["content"])

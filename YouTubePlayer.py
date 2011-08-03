@@ -374,17 +374,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		if self.__dbg__:
 			print self.__plugin__ + " getVideoUrlMap done " + repr(links)
 		return links 
-		
-	def getAlert(self, html, params = {}):
-		get = params.get
-		result = self.__language__(30617)	
-		
-		search_string = 'class="yt-alert-content">'
-		if html.find(search_string) > 0:
-			result = html[html.find(search_string) + len(search_string): html.find('</div>', len(search_string))].strip()
-		
-		return result
-	
+			
 	def getInfo(self, params):
 		get = params.get
 		video = {}
@@ -596,7 +586,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		else:
 			# Default error reporting.
 			if result["status"] == 403:
-				video['apierror'] = self.getAlert(result["content"], params)
+				video['apierror'] = self._findErrors(result)
 			elif result["status"] != 200:
 				if not vget('apierror'):
 					video['apierror'] = self.__language__(30617)
