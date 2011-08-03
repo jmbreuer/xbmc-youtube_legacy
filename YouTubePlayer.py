@@ -346,14 +346,21 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 					if final_url.find("&type") > 0:
 						final_url = final_url[:final_url.find("&type")]
 					
-					if self.__settings__.getSetting("preferred") == "true" and index + 3 < len(fmt_url_map) and False:
-						print self.__plugin__ + " removing preferred servers" 
-						host = final_url[final_url.find("://") + 3:final_url.find("/", final_url.find("://") +3)]
-						fmt_fallback = fmt_url_map[index + 2]
-						final_url = final_url.replace(host, fmt_fallback[:fmt_fallback.rfind(",")])
-						print self.__plugin__ + " final_url" + repr(final_url)
+					if self.__settings__.getSetting("preferred") == "true":
+						pos = final_url.find("://")
+						fpos = final_url.find("fallback_host")
+						if pos > -1 and fpos > -1:
+							host = final_url[pos + 3:]
+							if host.find("/") > -1:
+								host = host[:host.find("/")]
+							fmt_fallback = final_url[fpos + 14:]
+							if fmt_fallback.find("&") > -1:
+								fmt_fallback = fmt_fallback[:fmt_fallback.find("&")]
+							#print self.__plugin__ + " Swapping cached host [%s] and fallback host [%s] " % ( host, fmt_fallback )
+							final_url = final_url.replace(host, fmt_fallback)
+							final_url = final_url.replace("fallback_host=" + fmt_fallback, "fallback_host=" + host)
 
-					if final_url.find("rtmp") > -1 and index > 0 and False:
+					if final_url.find("rtmp") > -1 and index > 0:
 						if pl_obj.has_key("url") or True:
 							final_url += " swfurl=" + pl_obj["url"] + " swfvfy=1"
 
