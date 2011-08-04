@@ -262,11 +262,11 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 				key += "_" + get("playlist")
 			
 			if iget("playlist"):
-				key += "_" + iget("playlist")
+				key = "playlist_" + iget("playlist")
 			
 			if get("channel"):
-				key += "_" + get("channel")
-				
+				key = "subscriptions_" + get("channel")
+			
 			if iget("channel"):
 				key += "_" + iget("channel")
 		
@@ -344,6 +344,8 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 	def store(self, params = {}, results = [], type = "", item = {}):
 		key = self.getStorageKey(params, type, item)
 		
+		print self.__plugin__ + "Got key " + repr(key)
+		
 		if type == "thumbnail" or type == "viewmode" or type == "value":
 			self.storeValue(key, results)
 		else:
@@ -373,6 +375,8 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 	#============================= Retrieval Functions =================================
 	def retrieve(self, params = {}, type = "", item = {}):
 		key = self.getStorageKey(params, type, item)
+		
+		print self.__plugin__ + "Got key " + repr(key)
 		
 		if type == "thumbnail" or type == "viewmode" or type == "value":
 			return self.retrieveValue(key)
