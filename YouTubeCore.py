@@ -744,19 +744,19 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 				if len(lst) == 0:
 					lst = re.compile('(<' + get("name") + ' ' + get("id") + '=[\'"]+' + get("id-match") + '[\'"]+.*?>)').findall(html)
 					if len(lst) == 0:
-						lst = re.compile('(<' + get("name") + '.*' + get("id") + '=[\'"]+' + get("id-match") + '[\'"]+.*?>)').findall(html)
+						lst = re.compile('(<' + get("name") + '.*?' + get("id") + '=[\'"]+' + get("id-match") + '[\'"]+.*?>)').findall(html)
 			else:
 				lst = re.compile('(<' + get("name") + ' ' + get("id") + '=[\'"].*?[\'"]+.*?>)').findall(html)
 				if len(lst) == 0:
-					lst = re.compile('(<' + get("name") + '.*' + get("id") + '=[\'"]+.*?[\'"]+.*?>)').findall(html)
+					lst = re.compile('(<' + get("name") + '.*?' + get("id") + '=[\'"]+.*?[\'"]+.*?>)').findall(html)
 		elif get("class"):
 			lst = re.compile('(<' + get("name") + ' class=[\'"]+' + get("class") + '[\'"]+.*?>)').findall(html)
 			if len(lst) == 0:
-				lst = re.compile('(<' + get("name") + '.*class=[\'"]+' + get("class") + '[\'"]+.*?>)').findall(html)
+				lst = re.compile('(<' + get("name") + '.*?class=[\'"]+' + get("class") + '[\'"]+.*?>)').findall(html)
 		elif get("return"):
 			lst = re.compile('(<' + get("name") + ' ' + get("return") + '=[\'"]+.*?[\'"]+.*?>)').findall(html)
 			if len(lst) == 0:
-				lst = re.compile('(<' + get("name") + '.*' + get("return") + '=[\'"]+.*?[\'"]+.*?>)').findall(html) 
+				lst = re.compile('(<' + get("name") + '.*?' + get("return") + '=[\'"]+.*?[\'"]+.*?>)').findall(html) 
 		else:
 			lst = re.compile('(<' + get("name") + '.*?>)').findall(html)
 		

@@ -540,6 +540,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		
 		# If the show contains more than one season the function will return a list of folder items,
 		# otherwise a paginated list of video items is returned
+
 	def scrapeShow(self, params = {}):
 		get = params.get
 		if self.__dbg__:
@@ -559,33 +560,39 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			print self.__plugin__ + " scrapeShow done"
 		return self.scrapeShowSeasons(result["content"], params)
 	
-	def scrapeShowSeasons(self, html, params = {}): # TODO
+	def scrapeShowSeasons(self, html, params = {}): 
 		get = params.get
 		params["folder"] = "true"
 		if self.__dbg__:
 			print self.__plugin__ + " scrapeShowSeasons : " + repr(params)
 		
 		yobjects = []
-		list = SoupStrainer(name="div", attrs = {'class':"seasons"})
-		seasons = BeautifulSoup(html, parseOnlyThese=list)
+
+		seasons = self.parseDOM(html, { "name": "div", "class": "seasons"})
 		if (len(seasons) > 0):
 			params["folder"] = "true"
-			season = seasons.div.div.span.button
-			
-			while (season != None):
-				item = {}
+			#<button href="/show/isitagoodideatomicrowavethis?s=9" onclick=";window.location.href=this.getAttribute(&#39;href&#39;);return false;" title="Episodes: 33" type="button" 
+			#class=" yt-uix-button yt-uix-tooltip" 
+			#data-slide-index="0" role="button" aria-pressed="false">
+			#</button>
+
+			season_list = self.parseDOM(seasons, { "name": "span", "class": "yt-uix-button-content", "content": "true"})
+			atitle = self.parseDOM(seasons, { "name": "button", "id": "type", "id-match": "button", "return": "title"})
+
+			if len(season_list) == len(atitle) and len(atitle) > 0:
+				for i in range(0, len(atitle)):
+					item = {}
 				
-				season_id = season.span.contents[0]
-				title = self.__language__(30058) % season_id.encode("utf-8")
-				title += " - " + season["title"].encode("utf-8")
-				item["Title"] = title
-				item["season"] = season_id.encode("utf-8")
-				item["thumbnail"] = "shows"
-				item["scraper"] = "shows"
-				item["icon"] = "shows"
-				item["show"] = get("show")
-				yobjects.append(item)
-				season = season.findNextSibling()			
+					season_id = season_list[i]
+					title = self.__language__(30058) % season_id.encode("utf-8")
+					title += " - " + atitle[i].encode("utf-8")
+					item["Title"] = title
+					item["season"] = season_id.encode("utf-8")
+					item["thumbnail"] = "shows"
+					item["scraper"] = "shows"
+					item["icon"] = "shows"
+					item["show"] = get("show")
+					yobjects.append(item)
 		
 		if (len(yobjects) > 0):
 			if self.__dbg__:
@@ -599,7 +606,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 	def scrapeShowsGrid(self, params = {}):
 		get = params.get
 		if self.__dbg__:
-			print self.__plugin__ + " scrapeShowsGrid : " + repr(params)
+			print self.__plugin__ + " scrapeShowsGrid : " 
 		
 		next = "true"
 		items = []
@@ -612,25 +619,30 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			url = self.createUrl(params)
 			result = self._fetchPage({"link":url})
 			
-			list = SoupStrainer(name="ul", attrs = {"class":"browse-item-list"})
-			shows = BeautifulSoup(result["content"], parseOnlyThese=list)
-			
-			if (len(shows) > 0):
+			showcont = self.parseDOM(result["content"], { "name": "ul", "class": "browse-item-list"})
+
+			if (len(showcont) > 0):
 				page += 1
 				next = "true"
-				show = shows.ul.li 
-				while (show != None):
-					
-					if (show.a):
+			showcont = "".join(showcont)
+
+			shows = self.parseDOM(showcont, { "name": "div", "class": "browse-item-content", "content": "true" })
+
+			if len(shows) > 0:
+				shows = "".join(shows)
+				ahref = self.parseDOM(shows, { "name": "a", "return": "href" })
+				acont = self.parseDOM(shows, { "name": "a", "content": "true" })
+				acount = self.parseDOM(shows, { "name": "span", "class": "show-counts", "content": "true" })
+				athumb = self.parseDOM(showcont, { "name": "img", "id": "alt", "id-match": "Thumbnail", "return": "src"})
+				
+				if len(ahref) == len(acont) and len(ahref) == len(acount) and len(ahref) > 0:
+					for i in range(0, len(athumb)):
 						item = {}
-						episodes = show.find(name = "div", attrs= {'class':"browse-item-content"})
-						title = show.div.h3.a["title"]
-						if (episodes and episodes.span):
-							title = title + " (" + episodes.span.contents[0].lstrip().rstrip() + ")"
+						title = acont[i] + " (" + acount[i].strip() + ")"
 						title = self.replaceHtmlCodes(title)
 						item['Title'] = title
 						
-						show_url = show.a["href"]
+						show_url = ahref[i]
 						if (show_url.find("?p=") > 0):
 							show_url = show_url[show_url.find("?p=") + 1:]
 						else :
@@ -640,7 +652,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 						
 						item['icon'] = "shows"
 						item['scraper'] = "shows"
-						thumbnail = show.a.span.img['src']
+						thumbnail = athumb[i]
 						if ( thumbnail.find("_thumb.") > 0):
 							thumbnail = thumbnail.replace("_thumb.",".")
 						else:
@@ -648,13 +660,12 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 						
 						item["thumbnail"] = thumbnail						
 						items.append(item)
-						
-					show = show.findNextSibling(name="li")
 			del params["page"]
 		
 		if self.__dbg__:
-			print self.__plugin__ + " scrapeShowsGrid done"
+			print self.__plugin__ + " scrapeShowsGrid done " 
 		return (items, result["status"])
+
 
 #=================================== Music ============================================
 
@@ -691,7 +702,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		for item in dom_pages:
 			ahref = self.parseDOM(item, { "name": "a", "return": "href" })
 			acont = self.parseDOM(item, { "name": "a", "content": "true" })
-			if len(ahref) > 0 and len(acont) > 0:
+			if len(ahref) == len(acont) and len(ahref) > 0:
 				item = {}
 				cat = ahref[0]
 				title = acont[0].replace("&raquo;", "").strip()
