@@ -41,14 +41,15 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 	# ================================ Subtitle Downloader ====================================
 	def downloadSubtitle(self, video = {}):
 		get = video.get
-		
+
+		style = ""
 		result = ""
 		
 		if self.__settings__.getSetting("annotations") == "true" and not video.has_key("downloadPath"):
 
 			xml = self._fetchPage({"link": self.urls["annotation_url"] % get('videoid')})
 			if xml["status"] == 200 and xml["content"]:
-				result += self.transformAnnotationToSSA(xml["content"])
+				( result, style ) = self.transformAnnotationToSSA(xml["content"])
 		
 		if self.__settings__.getSetting("lang_code") != "0":
 			subtitle_url = self.getSubtitleUrl(video)
@@ -62,7 +63,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 					result += self.transformSubtitleXMLtoSRT(xml["content"])
 
 		if len(result) > 0:
-			result = "[Script Info]\r\n; This is a Sub Station Alpha v4 script.\r\n; For Sub Station Alpha info and downloads,\r\n; go to http://www.eswat.demon.co.uk/\r\n; or email kotus@eswat.demon.co.uk\r\nTitle: Auto Generated\r\nScriptType: v4.00\r\nCollisions: Normal\r\nPlayResY: 1280\r\nPlayResX: 800\r\n\r\n[V4 Styles]\r\nFormat: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, TertiaryColour, BackColour, Bold, Italic, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, AlphaLevel, Encoding\r\nStyle: Default,Arial,80,&H00FFFFFF&,65535,65535,&00000000&,-1,0,1,3,2,2,30,30,30,0,0\r\nStyle: speech,Arial,60,0,65535,65535,&H4BFFFFFF&,0,0,3,1,0,1,30,30,30,0,0\r\nStyle: popup,Arial,60,0,65535,65535,&H4BFFFFFF&,0,0,3,3,0,1,30,30,30,0,0\r\nStyle: highlightText,Wolf_Rain,60,15724527,15724527,15724527,&H4BFFFFFF&,0,0,1,1,2,2,5,5,30,0,0\r\n\r\n[Events]\r\nFormat: Marked, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\r\n" + result
+			result = "[Script Info]\r\n; This is a Sub Station Alpha v4 script.\r\n; For Sub Station Alpha info and downloads,\r\n; go to http://www.eswat.demon.co.uk/\r\n; or email kotus@eswat.demon.co.uk\r\nTitle: Auto Generated\r\nScriptType: v4.00\r\nCollisions: Normal\r\nPlayResY: 1280\r\nPlayResX: 800\r\n\r\n[V4 Styles]\r\nFormat: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, TertiaryColour, BackColour, Bold, Italic, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, AlphaLevel, Encoding\r\nStyle: Default,Arial,80,&H00FFFFFF&,65535,65535,&00000000&,-1,0,1,3,2,2,0,0,0,0,0\r\nStyle: speech,Arial,60,0,65535,65535,&H4BFFFFFF&,0,0,3,1,0,1,0,0,0,0,0\r\nStyle: popup,Arial,60,0,65535,65535,&H4BFFFFFF&,0,0,3,3,0,1,0,0,0,0,0\r\nStyle: highlightText,Wolf_Rain,60,15724527,15724527,15724527,&H4BFFFFFF&,0,0,1,1,2,2,5,5,0,0,0\r\n" + style + "\r\n[Events]\r\nFormat: Marked, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\r\n" + result
 
 			result += "Dialogue: Marked=0,0:00:0.00,0:00:0.00,Default,Name,0000,0000,0000,,\r\n" # This solves a bug.
 			self.saveSubtitle(result, video)
@@ -170,7 +171,9 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		dom = parseString(xml)
 		entries = dom.getElementsByTagName("annotation")
 		result = ""
-		
+		style_template = "Style: annot%s,Arial,60,&H%s&,&H%s&,&H%s&,&H%s&,0,0,3,3,0,1,0,0,0,0,0\r\n"
+		styles_count = 0
+		append_style = ""
 		for node in entries:
 			if node:
 				stype = node.getAttribute("type")
@@ -187,17 +190,6 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 						text = self._getNodeValue(node, "TEXT", "").replace("\n", "\\n")
 						start = ""
 
-						if node.getAttribute("start"):
-							start = str(datetime.timedelta(seconds=float(node.getAttribute("start")))).replace("000", "")
-							if ( start.find(".") == -1 ):
-								start += ".000"
-						
-						dur = ""
-						if node.getAttribute("dur"):
-							dur = str(datetime.timedelta(seconds=float(node.getAttribute("start")) + float(node.getAttribute("dur")))).replace("000", "")
-							if ( dur.find(".") == -1 ):
-								dur += ".000"
-
 						if style == "popup":
 							cnode = node.getElementsByTagName("rectRegion")
 						elif style == "speech":
@@ -207,6 +199,24 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 						else:
 							cnode = False
 
+						#style = "Style: popup,Arial,60,0,65535,65535,&H4BFFFFFF&,0,0,3,3,0,1,30,30,30,0,0\r\n"
+
+						snode = node.getElementsByTagName("appearance")
+						if snode:
+							ns_fcolor = snode.item(0).getAttribute("fgColor").replace("0x0000000000", "")
+							ns_fcolor = ns_fcolor[4:6] + ns_fcolor[2:4] + ns_fcolor[0:2]
+							ns_bcolor = snode.item(0).getAttribute("bgColor").replace("0x0000000000", "")
+							ns_bcolor = ns_bcolor[4:6] + ns_bcolor[2:4] + ns_bcolor[0:2]
+							ns_alpha = snode.item(0).getAttribute("bgAlpha")
+							if ns_alpha == "0":
+								ns_alpha = "-1"
+							else:
+								ns_alpha = hex(int(float(ns_alpha) * 100))[2:]
+
+							append_style += style_template % ( styles_count, ns_fcolor, ns_fcolor, ns_fcolor, ns_alpha + ns_bcolor )
+							style = "annot" + str(styles_count)
+							styles_count += 1
+
 						if cnode:
 							if cnode.item(0):
 								start = cnode.item(0).getAttribute("t")
@@ -214,18 +224,18 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 								dur = cnode.item(1).getAttribute("t")
 						
 						if start and dur and style != "highlightText":
-							marginL = "0000"
 							marginV = 1280 * float(cnode.item(0).getAttribute("y")) / 100
 							marginV += 1280 * float(cnode.item(0).getAttribute("h")) / 100
 							marginV = 1280 - int(marginV)
-							old_x = int((800 * float(cnode.item(0).getAttribute("x")) / 100) )
-							marginL = old_x
+							marginL = int((800 * float(cnode.item(0).getAttribute("x")) / 100) )
+							if marginL > 3:
+								marginL -= 3
 							result += "Dialogue: Marked=%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\r\n" % ( "0", start, dur, style, "Name", marginL, "0000", marginV, "", text )
 				else:
 					if self.__dbg__:
 						print self.__plugin__ + " transformAnnotationToSSA wrong type"
 
-		return result
+		return ( result, append_style)
 		
 	def addSubtitles(self, video = {}):
 		get = video.get
