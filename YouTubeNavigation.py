@@ -121,10 +121,6 @@ class YouTubeNavigation(YouTubeUtils.YouTubeUtils):
 
 	def executeAction(self, params = {}):
 		get = params.get
-		if (get("action") == "refine_user"):
-			self.__storage__.refineItemInStoredList(params)
-		if (get("action") == "delete_refinements"):
-			self.__storage__.deleteStoredListItemRefinement(params)
 		if (get("action") == "settings"):
 			self.__login__.login(params)
 		if (get("action") == "test"):
@@ -521,12 +517,8 @@ class YouTubeNavigation(YouTubeUtils.YouTubeUtils):
 
 		if (item("feed") == "search"):
 			cm.append( ( self.__language__( 30515 ), 'XBMC.Container.Update(%s?path=%s&action=edit_search&store=searches&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
-			cm.append( ( self.__language__( 30505 ), 'XBMC.RunPlugin(%s?path=%s&action=refine_user&store=searches&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
 			cm.append( ( self.__language__( 30508 ), 'XBMC.RunPlugin(%s?path=%s&action=delete_search&store=searches&delete=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
-			
-			if item("refined"):
-				cm.append( ( self.__language__( 30500 ), 'XBMC.RunPlugin(%s?path=%s&action=delete_refinements&store=searches&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
-				
+					
 		if (item("view_mode")):
 			cm_url = 'XBMC.Container.Update(%s?path=%s&channel=%s&action=change_subscription_view&view_mode=%s&' % ( sys.argv[0], item("path"), item("channel"), "%s")
 			if (item("external")):

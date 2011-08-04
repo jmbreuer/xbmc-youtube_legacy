@@ -47,12 +47,8 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 	def getStoredList(self, params = {}):
 		get = params.get
 		
-		authors = []
 		searches = self.retrieve(params)
-		
-		if get("store") == "searches":
-			authors = self.retrieve({"store":"searches_author"})
-		
+				
 		result = []
 		for search in searches:
 			item = {}
@@ -63,8 +59,6 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 			if (get("store") == "searches"):
 				item["feed"] = "search"
 				item["icon"] = "search" 
-				if search in authors:
-					item["refined"] = "true"
 			elif get("store") == "disco_searches":
 				item["scraper"] = "search_disco"
 				item["icon"] = "discoball"
@@ -96,7 +90,6 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 	def saveInStoredList(self, params = {}):
 		get = params.get
 		
-		print "save search"
 		if get("search"):
 			searches = self.retrieve(params)
 			
@@ -138,44 +131,6 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 		
 		del params["action"]
 		del params["store"]
-	
-	def refineItemInStoredList(self, params = {}):
-		get = params.get
-		
-		query = urllib.unquote_plus(get("search"))
-		authors = self.retrieve({"store":"searches_author"})		
-		searches = self.retrieve(params)
-		
-		if query in searches:
-			author = self.getUserInput(self.__language__(30517), searches[query])
-		
-			if author == "":
-				if query in authors:
-					del authors[query]
-					xbmc.executebuiltin( "Container.Refresh" )
-			elif author:
-				authors[query] = author
-				
-				self.store({"store":"searches_author"}, authors)
-				self.showMessage(self.__language__(30006), self.__language__(30616))
-				xbmc.executebuiltin( "Container.Refresh" )
-		
-	def deleteStoredListItemRefinement(self, params = {}):
-		get = params.get
-		params["store"] = "searches_author"
-		key = self.getStorageKey(params)
-		searches = {}
-		query = urllib.unquote_plus(get("search",""))
-		try:
-			searches = eval(self.retrieveValue(key))
-		except:
-			searches = {}
-		
-		if query in searches:
-			del searches[query]
-			self.storeValue(key, repr(searches))
-			self.showMessage(self.__language__(30006), self.__language__(30610))
-			xbmc.executebuiltin( "Container.Refresh" )
 		
 	def getUserOptionFolder(self, params = {}):
 		get = params.get
