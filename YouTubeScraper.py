@@ -193,7 +193,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			print self.__plugin__ + " scrapeArtist done"
 		return ( items, result["status"] )
 	
-	def scrapeSimilarArtists(self, params = {}): # TODO
+	def scrapeSimilarArtists(self, params = {}):
 		get = params.get
 		if self.__dbg__:
 			print self.__plugin__ + " scrapeSimilarArtists"
@@ -204,22 +204,23 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			result = self._fetchPage({"link": url})
 			
 			if result["status"] == 200:
-				list = SoupStrainer(name="div", id ="similar-artists")
-				content = BeautifulSoup(result["content"], parseOnlyThese=list)
-				artists = content.findAll(name = "div", attrs = {"class":"similar-artist"})
-				for artist in artists:
-					item = {}
-					title = self.makeAscii(artist.a.contents[0])
-					title = self.replaceHtmlCodes(title)
-					item["Title"] = title
+				artists = self.parseDOM(result["content"], { "name": "div", "id": "id", "id-match": "similar-artists"});
+				ahref = self.parseDOM(artists, {"name": "a", "return": "href" })
+				atitle = self.parseDOM(artists, {"name": "a", "content": "true"})
+				if len(ahref) == len(atitle):
+					for i in range(0, len(ahref)):
+						item = {}
+						title = self.makeAscii(atitle[i])
+						title = self.replaceHtmlCodes(title)
+						item["Title"] = title
 					
-					id = artist.a["href"]
-					id = id[id.find("?a=") + 3:id.find("&")]
-					item["artist"] = id
-					item["icon"] = "music"
-					item["scraper"] = "music_artist"
-					item["thumbnail"] = "music"
-					items.append(item)
+						link = ahref[i]
+						link = link[link.find("?a=") + 3:link.find("&")]
+						item["artist"] = link
+						item["icon"] = "music"
+						item["scraper"] = "music_artist"
+						item["thumbnail"] = "music"
+						items.append(item)
 		
 		if self.__dbg__:
 			print self.__plugin__ + " scrapeSimilarArtists done"
