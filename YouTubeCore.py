@@ -405,6 +405,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 					#return self._verifyAge(ret_obj["content"], ret_obj["new_url"], params)
 		
 		except urllib2.HTTPError, e:
+			cont = False
 			err = str(e)
 			if self.__dbg__:
 				print self.__plugin__ + " _fetchPage HTTPError : " + err
@@ -414,13 +415,19 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 					print self.__plugin__ + " _fetchPage refreshing token"
 				self._oRefreshToken()
 			else:
-				print self.__plugin__ + " _fetchPage HTTPError - Headers: " + str(e.headers) + " - Content: " + e.fp.read()
-			
+				if e.fp:
+					cont = e.fp.read()
+				print self.__plugin__ + " _fetchPage HTTPError - Headers: " + str(e.headers) + " - Content: " + cont
+
 			params["error"] = str(int(get("error", "0")) + 1)
-			ret = self._fetchPage(params)
-			if not ret.has_key("content") and e.fp:
-				ret["content"] = e.fp.read()
-			return ret
+			ret_obj = self._fetchPage(params)
+
+			if cont and ret_obj["content"] == "":
+				ret_obj["content"] = cont
+				ret_obj["status"] = 303
+
+			print self.__plugin__ + " _fetchPage HTTPError - returning : " + repr(ret_obj)
+			return ret_obj
 
 		except urllib2.URLError, e:
 			err = str(e)
@@ -429,11 +436,36 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 			
 			time.sleep(3)
 			params["error"] = str(int(get("error", "0")) + 1)
-			ret = self._fetchPage(params)
-			if not ret.has_key("content") and e.fp:
-				ret["content"] = e.fp.read()
-			return ret
+			ret_obj = self._fetchPage(params)
+			if not ret_obj.has_key("content") and e.fp:
+				ret_obj["content"] = e.fp.read()
+			return ret_obj
 		
+	def _findErrors(self, ret):
+		if self.__dbg__:
+			print self.__plugin__ + " _findErrors"
+
+		## Couldn't find 2 factor or normal login
+		error = self.parseDOM(ret['content'], { "name": "div", "class": "errormsg", "content": "true"})
+		if len(error) == 0:   
+			# An error in 2-factor
+			error = self.parseDOM(ret['content'], { "name": "div", "class": "error smaller", "content": "true"})
+		if len(error) == 0:
+			error = self.parseDOM(ret['content'], { "name": "div", "id": "id", "id-match": "unavailable-message", "content": "true"})
+		if len(error) == 0 and False: # This hits flash quite often.
+			# Playback
+			error = self.parseDOM(ret['content'], { "name": "div", "class": "yt-alert-content", "content": "true"})
+		if len(error) > 0:
+			error = error[0]
+			error = urllib.unquote(error[0:error.find("[")]).replace("&#39;", "'")
+			if self.__dbg__:
+				print self.__plugin__ + " _findErrors returning error :" + error.strip()
+			return error.strip()
+
+		if self.__dbg__:
+			print self.__plugin__ + " _findErrors couldn't find anything : " + repr(ret)
+		return False
+
 	def _verifyAge(self, result, new_url, params = {}):
 		get = params.get
 		login_info = self.__login__._httpLogin({ "new": "true" })
@@ -784,6 +816,4 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 
 		#print self.__plugin__ + " parseDOM done return html for " + repr(params) + " : " + str(len(html2))
 		return html2
-
-
 

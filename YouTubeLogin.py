@@ -248,30 +248,6 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 
 		return (result, status)
 
-	def _findErrors(self, ret):
-		if self.__dbg__:
-			print self.__plugin__ + " _findErrors"
-
-		## Couldn't find 2 factor or normal login 
-		error = self.parseDOM(ret['content'], { "name": "div", "class": "errormsg", "content": "true"})
-		if len(error) == 0:
-			# An error in 2-factor
-			error = self.parseDOM(ret['content'], { "name": "div", "class": "error smaller", "content": "true"})
-		if len(error) == 0:
-			# Playback
-			error = self.parseDOM(ret['content'], { "name": "div", "class": "yt-alert-content", "content": "true"})
-
-		if len(error) > 0:
-			error = error[0]
-			error = urllib.unquote(error[0:error.find("[")]).replace("&#39;", "'")
-			if self.__dbg__:
-				print self.__plugin__ + " _findErrors returning error :" + error.strip()
-			return error.strip()
-
-		if self.__dbg__:
-			print self.__plugin__ + " _findErrors couldn't find anything : " + repr(ret)
-		return "ERROR"
-
 	def _fillLoginInfo(self, ret):
 		rmShown = re.compile('<input type="hidden" name=\'rmShown\' value="(.*?)" />').findall(ret["content"])
 		#cont = re.compile('<input type="hidden" name="continue" id="continue"\n           value="(.*?)" /> ').findall(ret["content"])

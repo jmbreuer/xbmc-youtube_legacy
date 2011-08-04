@@ -553,12 +553,13 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		else:
 			status = 303
 			vget = video.get
-			if vget("live_play"):
-				video['apierror'] = self.__language__(30612)
-			elif vget("stream_map"):
-				video['apierror'] = self.__language__(30620)
-			else:
-				video['apierror'] = self.__language__(30618)
+			if not video.has_key("apierror"):
+				if vget("live_play"):
+					video['apierror'] = self.__language__(30612)
+				elif vget("stream_map"):
+					video['apierror'] = self.__language__(30620)
+				else:
+					video['apierror'] = self.__language__(30618)
 		
 		return (video, status)
 
@@ -599,26 +600,19 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 						player_object["PLAYER_CONFIG"]["url"] = src[0]
 
 		else:
-			# Default error reporting.
-			if result["status"] == 403:
-				video['apierror'] = self._findErrors(result)
-			elif result["status"] != 200:
-				if not vget('apierror'):
-					video['apierror'] = self.__language__(30617)
-
 			if self.__dbg__:
 				print self.__plugin__ + " _getVideoLinks Falling back to embed"
 
-			result = self._fetchPage({"link": self.urls["embed_stream"] % get("videoid") })
+			#result = self._fetchPage({"link": self.urls["embed_stream"] % get("videoid") })
 		
 			# Fallback error reporting
-			if result["content"].find("status=fail") > -1:
-				result["status"] = 303
-				video["apierror"] = re.compile('reason=(.*)%3Cbr').findall(result["content"])[0]
+			#if result["content"].find("status=fail") > -1:
+			#	result["status"] = 303
+			#	video["apierror"] = re.compile('reason=(.*)%3Cbr').findall(result["content"])[0]
 
-			if result["status"] == 200:
-				# this gives no player_object["PLAYER_CONFIG"]["url"] for rtmpe...
-				player_object = self._convertFlashVars(result["content"])
+			#if result["status"] == 200:
+			#	# this gives no player_object["PLAYER_CONFIG"]["url"] for rtmpe...
+			#	player_object = self._convertFlashVars(result["content"])
 
 		# Find playback URI
 		if player_object.has_key("PLAYER_CONFIG"):
@@ -628,8 +622,11 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 
 				links = self.getVideoUrlMap(player_object["PLAYER_CONFIG"], video)
 
-				if len(links) == 0:
-					if self.__dbg__:
-						print self.__plugin__ + " _getVideoLinks Couldn't find url map or stream map."
+
+		if len(links) == 0:
+			if self.__dbg__:
+				print self.__plugin__ + " _getVideoLinks Couldn't find url map or stream map."
+		if not video.has_key("apierror"):
+			video['apierror'] = self._findErrors(result)
 
 		return (links, video)
