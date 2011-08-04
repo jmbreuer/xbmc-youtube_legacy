@@ -631,8 +631,6 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 				match = re.match('.*?v=(.*)\&.*', video['videolink'])
 				if match:
 					video['videoid'] = match.group(1)
-				else:
-					video['videoid'] = "false"
 
 			if node.getElementsByTagName("id"):
 				entryid = self._getNodeValue(node, "id","")
