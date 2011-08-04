@@ -491,7 +491,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 	def scrapeShowEpisodes(self, params = {}): # TODO
 		get = params.get
 		if self.__dbg__:
-			print self.__plugin__ + " scrapeShowEpisodes"
+			print self.__plugin__ + " scrapeShowEpisodes: " + repr(params)
 		
 		url = self.createUrl(params)
 		result = self._fetchPage({"link":url})
@@ -558,7 +558,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		get = params.get
 		params["folder"] = "true"
 		if self.__dbg__:
-			print self.__plugin__ + " scrapeShowSeasons"
+			print self.__plugin__ + " scrapeShowSeasons : " + repr(params)
 		
 		yobjects = []
 		list = SoupStrainer(name="div", attrs = {'class':"seasons"})
@@ -594,7 +594,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 	def scrapeShowsGrid(self, html, params = {}): # TODO
 		get = params.get
 		if self.__dbg__:
-			print self.__plugin__ + " scrapeShowsGrid : "
+			print self.__plugin__ + " scrapeShowsGrid : " + repr(params)
 		
 		next = "true"
 		items = []
@@ -605,7 +605,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			params["page"] = str(page)
 			
 			url = self.createUrl(params)
-			print self.__plugin__ + "some url " + repr(url)
+			print self.__plugin__ + " some url " + repr(url)
 			result = self._fetchPage({"link":url})
 			
 			list = SoupStrainer(name="div", attrs = {"class":"popular-show-list"})
@@ -673,7 +673,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 	def scrapeMovieSubCategory(self, params = {}): # TODO
 		get = params.get
 		if self.__dbg__:
-			print self.__plugin__ + " scrapeMovieSubCategory"
+			print self.__plugin__ + " scrapeMovieSubCategory : " + repr(params)
 		
 		url = self.createUrl(params)
 		result = self._fetchPage({"link":url})
@@ -721,6 +721,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			
 			dom_pages = self.parseDOM(result["content"], {"name": "div", "class": "yt-uix-pager"})
 			links = self.parseDOM(dom_pages, {"name": "a", "class": "yt-uix-pager-link", "return": "data-page"})
+			print self.__plugin__ + " scrapeMoviesGrid " + str(len(dom_pages)) + " - " + str(len(links))
 			if len(links) > 0:
 				for link in links:
 					if int(link) > page:
@@ -815,6 +816,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		return True
 	
 	def createUrl(self, params = {}):
+		print self.__plugin__ + " createUrl : " + repr(params)
 		get = params.get
 		page = str(int(get("page","0")) + 1)
 		url = ""
@@ -945,7 +947,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			if (len(categories) > 0):
 				ahref = self.parseDOM(categories, {"name": "a", "return": "href"})
 				acontent = self.parseDOM(categories, {"name": "a", "content": "true"})
-				print self.__plugin__ + " TEST BLA : " + repr(ahref) + "\n\n\n" + repr(acontent)
+
 				if len(acontent) == len(ahref) and len(ahref) > 0:
 					for i in range(0 , len(ahref)):
 						item = {}
@@ -997,7 +999,9 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
 				
 		if not get("page"):
+			print self.__plugin__ + " TEST BLA : " + repr(params)
 			(result, status) = params["new_results_function"](params)
+			print self.__plugin__ + " TEST BLA2 : " + repr(params)
 			
 			print self.__plugin__ + " paginator new result " + repr(result)
 			

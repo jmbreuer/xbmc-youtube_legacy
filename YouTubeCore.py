@@ -290,7 +290,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 	def _fetchPage(self, params = {}): # This does not handle cookie timeout for _httpLogin
 		get = params.get
 		link = get("link")
-		ret_obj = {}
+		ret_obj = { "status": 500, "content": ""}
 		if self.__dbg__:
 			if (get("url_data") or get("request")):
 				print self.__plugin__ + " _fetchPage called for : " + repr(params['link'])
@@ -313,7 +313,6 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 		if not link or int(get("error", "0")) > 2 :
 			if self.__dbg__:
 				print self.__plugin__ + " _fetchPage giving up "
-			ret_obj["status"] = 500
 			return ret_obj
 
 		if get("url_data"):
@@ -414,7 +413,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 				ret["content"] = e.fp.read()
 			return ret
 
-			ret_obj["status"] = 505
+			ret_obj["status"] = 500
 			return ret_obj
 		
 	def _verifyAge(self, result, new_url, params = {}):
