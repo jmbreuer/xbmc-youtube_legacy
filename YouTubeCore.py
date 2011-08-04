@@ -625,6 +625,14 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 				video['videoid'] = self._getNodeAttribute(node, "content", "src", "missing")
 				video['videoid'] = video['videoid'][video['videoid'].rfind("/") + 1:]
 
+			if video['videoid'] == "missing" and node.getElementsByTagName("link").item(0):
+				video['videolink'] = node.getElementsByTagName("link").item(0).getAttribute('href')
+				match = re.match('.*?v=(.*)\&.*', video['videolink'])
+				if match:
+					video['videoid'] = match.group(1)
+				else:
+					video['videoid'] = "false"
+
 			if node.getElementsByTagName("id"):
 				entryid = self._getNodeValue(node, "id","")
 				entryid = entryid[entryid.rfind(":")+1:]
@@ -649,15 +657,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 						if self.__dbg__:
 							print self.__plugin__ + " _getvideoinfo removing video, reason: %s value: %s" % ( reason, value)
 						video['videoid'] = "false";
-						
-			if ( video['videoid'] == "missing" ):
-				video['videolink'] = node.getElementsByTagName("link").item(0).getAttribute('href')
-				match = re.match('.*?v=(.*)\&.*', video['videolink'])
-				if match:
-					video['videoid'] = match.group(1)
-				else:
-					video['videoid'] = "false"
-			
+									
 			video['Title'] = self._getNodeValue(node, "media:title", "Unknown Title2").encode('utf-8') # Convert from utf-16 to combat breakage
 			video['Plot'] = self._getNodeValue(node, "media:description", "Unknown Plot").encode( "utf-8" )
 			video['Date'] = self._getNodeValue(node, "published", "Unknown Date").encode( "utf-8" )
