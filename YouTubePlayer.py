@@ -555,14 +555,14 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		return (video, status)
 
 	def _convertFlashVars(self, html):
-		print self.__plugin__ + " _convertFlashVars : " + repr(html)
+		#print self.__plugin__ + " _convertFlashVars : " + repr(html)
 		obj = { "PLAYER_CONFIG": { "args": {} } }
 		temp = html.split("&")
-		print self.__plugin__ + " _convertFlashVars : " + str(len(temp))
+		#print self.__plugin__ + " _convertFlashVars : " + str(len(temp))
 		for item in temp:
 			it = item.split("=")
 			obj["PLAYER_CONFIG"]["args"][it[0]] = urllib.unquote_plus(it[1])
-		print self.__plugin__ + " _convertFlashVars done : " + repr(obj)
+		#print self.__plugin__ + " _convertFlashVars done : " + repr(obj)
 		return obj
 
 	def _getVideoLinks(self, video, params):
@@ -611,6 +611,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 				video["apierror"] = re.compile('reason=(.*)%3Cbr').findall(result["content"])[0]
 
 			if result["status"] == 200:
+				# this gives no player_object["PLAYER_CONFIG"]["url"] for rtmpe...
 				player_object = self._convertFlashVars(result["content"])
 
 		# Find playback URI
