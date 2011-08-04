@@ -66,7 +66,7 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 				self.__settings__.setSetting("oauth2_access_token","")
 				self.__settings__.setSetting("oauth2_refresh_token","")
 				self.__settings__.setSetting("oauth2_expires at", "")
-				self.__settings__.setSetting("nick","")
+				self.__settings__.setSetting("nick", "")
 				(result, status) = self._httpLogin({ "new": "true"})
 
 				if status == 200:
@@ -87,7 +87,6 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		passwd = self.__settings__.getSetting( "user_password" )
 		
 		self.__settings__.setSetting('auth', "")
-		self.__settings__.setSetting('nick', "")
 		
 		if ( uname == "" or passwd == "" ):
 			if self.__dbg__:
