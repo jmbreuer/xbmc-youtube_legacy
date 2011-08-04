@@ -374,6 +374,8 @@ class YouTubeNavigation(YouTubeUtils.YouTubeUtils):
 			icon = "movies"
 		elif(get("scraper","").find("disco") > 0):
 			icon = "discoball"
+		elif(get("feed","").find("live") > 0):
+			icon = "live"
 		
 		icon = self.getThumbnail(icon)
 		
