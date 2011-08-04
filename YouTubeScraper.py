@@ -646,12 +646,12 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 						else:
 							thumbnail = "shows"
 						
-						item["thumbnail"] = thumbnail
-						print " adding show " + repr(item)						
+						item["thumbnail"] = thumbnail						
 						items.append(item)
 						
 					show = show.findNextSibling(name="li")
-
+			del params["page"]
+		
 		if self.__dbg__:
 			print self.__plugin__ + " scrapeShowsGrid done"
 		return (items, result["status"])
@@ -765,8 +765,6 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		if (get("scraper") == "liked_videos"):
 			function = self.scrapeLikedVideos
 			params["batch"] = "true"
-		if (get("scraper") == "live"):
-			function = self.scrapeLiveNow
 		if (get("scraper") == "disco_top_50"):
 			function = self.scrapeDiscoTop50
 			params["batch"] = "true"
@@ -800,10 +798,11 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		if get("scraper") == "shows" and get("category"):
 			params["folder"] = "true"
 			function = self.scrapeShowsGrid
-			if get("show"):
-				del params["folder"]
-				params["batch"] = "true"
-				function = self.scrapeShow
+			
+		if get("scraper") == "shows" and get("show"):
+			del params["folder"]
+			params["batch"] = "true"
+			function = self.scrapeShow
 			
 		if get("scraper") == "movies" and get("category"):
 			params["batch"] = "thumbnails"
@@ -1010,9 +1009,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
 				
 		if not get("page"):
-			#print self.__plugin__ + " TEST BLA : " + repr(params)
 			(result, status) = params["new_results_function"](params)
-			#print self.__plugin__ + " TEST BLA2 : " + repr(params)
 
 			if self.__dbg__ and False:
 				print self.__plugin__ + " paginator new result " + repr(result)
@@ -1025,18 +1022,18 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 				self.__storage__.store(params, result)
 		else:
 			result = self.__storage__.retrieve(params)
-			print self.__plugin__ + " retrieved result " + repr(result)
+			if len(result) > 0:
+				status = 200
 		
-		if not get("folder"):
+		if not get("folder") or (get("scraper") == "shows" and get("category")):
 			if ( per_page * ( page + 1 ) < len(result) ):
 				next = 'true'
 			
 			if (get("fetch_all") != "true"):
 				result = result[(per_page * page):(per_page * (page + 1))]
-			
 			if len(result) == 0:
 				return (result, status)
-				
+		
 		if get("batch") == "thumbnails":
 			(result, status) = self.getBatchDetailsThumbnails(result, params)
 		elif get("batch"):
@@ -1051,7 +1048,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 
 		if next == "true":
 			self.addNextFolder(result, params)
-		
+		print "paginated " + repr(result) + " - " + repr(status)
 		return (result, status)
 	
 	def scrape(self, params = {}):

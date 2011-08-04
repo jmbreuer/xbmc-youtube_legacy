@@ -280,6 +280,9 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 			if get("scraper") == "disco_search":
 				key = "store_disco_searches"
 			
+			if get("category"):
+				key += "_category_" + get("category")
+			
 			if get("show"):
 				key += "_season_" + get("season","0")
 		
