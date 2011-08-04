@@ -555,14 +555,14 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		return (video, status)
 
 	def _convertFlashVars(self, html):
-		#print self.__plugin__ + " _convertFlashVars : " + repr(html)
+		print self.__plugin__ + " _convertFlashVars : " + repr(html)
 		obj = { "PLAYER_CONFIG": { "args": {} } }
 		temp = html.split("&")
 		print self.__plugin__ + " _convertFlashVars : " + str(len(temp))
 		for item in temp:
 			it = item.split("=")
 			obj["PLAYER_CONFIG"]["args"][it[0]] = urllib.unquote_plus(it[1])
-		#print self.__plugin__ + " _convertFlashVars done : " + repr(obj)
+		print self.__plugin__ + " _convertFlashVars done : " + repr(obj)
 		return obj
 
 	def _getVideoLinks(self, video, params):
@@ -578,17 +578,19 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 
 		if result["status"] == 200:
 			data = result["content"].find("PLAYER_CONFIG")
-			if data > -1:
+			if data > -1 and False:
 				data = result["content"].rfind("yt.setConfig", 0, data)
 				data = re.compile('yt.setConfig\((.*?PLAYER_CONFIG.*?)\)').findall(result["content"][data:].replace("\n", ""))
 				if len(data) > 0:
 					player_object = json.loads(data[0].replace('\'PLAYER_CONFIG\'', '"PLAYER_CONFIG"'))
 			else:
-				data = result["content"]
-				data = data[data.find('flashvars'):].replace("\n", "").replace("&amp;", "&")
-				data = re.findall('="(ttsurl=.*?)"', data)
-				if len(data) > 0:
-					player_object = self._convertFlashVars(data[0])
+				data = self.parseDOM(result["content"], { "name": "embed", "id": "id", "id-match": "movie_player", "return": "flashvars"})
+				src = self.parseDOM(result["content"], { "name": "embed", "id": "id", "id-match": "movie_player", "return": "src"})
+				if len(data) > 0 and len(src) > 0:
+					data = data[0].replace("&amp;", "&")
+					player_object = self._convertFlashVars(data)
+					if player_object.has_key("PLAYER_CONFIG"):
+						player_object["PLAYER_CONFIG"]["url"] = src[0]
 
 		else:
 			# Default error reporting.
