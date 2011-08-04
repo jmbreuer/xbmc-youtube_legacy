@@ -463,7 +463,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 			return error.strip()
 
 		if self.__dbg__:
-			print self.__plugin__ + " _findErrors couldn't find anything : " + repr(ret)
+			print self.__plugin__ + " _findErrors couldn't find anything " 
 		return False
 
 	def _verifyAge(self, result, new_url, params = {}):
