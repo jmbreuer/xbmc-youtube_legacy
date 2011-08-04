@@ -209,9 +209,9 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 							if ns_alpha == "0":
 								ns_alpha = "-1"
 							else:
-								ns_alpha = hex(int(float(ns_alpha) * 100))[2:]
-
-							append_style += style_template % ( styles_count, ns_alpha + ns_fcolor, ns_alpha + ns_fcolor, ns_alpha + ns_fcolor, ns_alpha + ns_bcolor )
+								ns_alpha = int(265 - (float(ns_alpha) * 100))
+								ns_alpha = hex(ns_alpha)[2:]
+							append_style += style_template % ( styles_count, ns_fcolor, ns_fcolor, ns_fcolor, ns_alpha + ns_bcolor )
 							style = "annot" + str(styles_count)
 							styles_count += 1
 
