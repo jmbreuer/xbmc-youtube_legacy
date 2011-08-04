@@ -576,7 +576,6 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		vget = video.get
 		player_object = {}
 		links = []
-
 		if self.__dbg__:
 			print self.__plugin__ + " _getVideoLinks trying website"
 
@@ -599,20 +598,23 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 					if player_object.has_key("PLAYER_CONFIG"):
 						player_object["PLAYER_CONFIG"]["url"] = src[0]
 
+			fresult = False
 		else:
 			if self.__dbg__:
 				print self.__plugin__ + " _getVideoLinks Falling back to embed"
 
-			#result = self._fetchPage({"link": self.urls["embed_stream"] % get("videoid") })
+			fresult = self._fetchPage({"link": self.urls["embed_stream"] % get("videoid") })
 		
 			# Fallback error reporting
-			#if result["content"].find("status=fail") > -1:
-			#	result["status"] = 303
-			#	video["apierror"] = re.compile('reason=(.*)%3Cbr').findall(result["content"])[0]
+			if fresult["content"].find("status=fail") > -1:
+				fresult["status"] = 303
+				error = re.compile('reason=(.*)%3Cbr').findall(fresult["content"])
+				if len(error) > 0:
+					video["apierror"] = re.compile('reason=(.*)%3Cbr').findall(fresult["content"])[0].replace("+", " ")
 
-			#if result["status"] == 200:
-			#	# this gives no player_object["PLAYER_CONFIG"]["url"] for rtmpe...
-			#	player_object = self._convertFlashVars(result["content"])
+			if fresult["status"] == 200:
+				# this gives no player_object["PLAYER_CONFIG"]["url"] for rtmpe...
+				player_object = self._convertFlashVars(fresult["content"])
 
 		# Find playback URI
 		if player_object.has_key("PLAYER_CONFIG"):
@@ -626,7 +628,10 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		if len(links) == 0:
 			if self.__dbg__:
 				print self.__plugin__ + " _getVideoLinks Couldn't find url map or stream map."
-		if not video.has_key("apierror"):
-			video['apierror'] = self._findErrors(result)
+
+			if not video.has_key("apierror"):
+				video['apierror'] = self._findErrors(result)
+				if not video['apierror'] and fresult:
+					video['apierror'] = self._findErrors(fresult)
 
 		return (links, video)

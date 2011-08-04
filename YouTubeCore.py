@@ -426,7 +426,6 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 				ret_obj["content"] = cont
 				ret_obj["status"] = 303
 
-			print self.__plugin__ + " _fetchPage HTTPError - returning : " + repr(ret_obj)
 			return ret_obj
 
 		except urllib2.URLError, e:
@@ -463,7 +462,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 			return error.strip()
 
 		if self.__dbg__:
-			print self.__plugin__ + " _findErrors couldn't find anything " 
+			print self.__plugin__ + " _findErrors couldn't find anything: " + repr(ret)
 		return False
 
 	def _verifyAge(self, result, new_url, params = {}):
