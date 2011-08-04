@@ -92,10 +92,11 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 		self.store(params, searches)
 		
 		xbmc.executebuiltin( "Container.Refresh" )
-		
+	
 	def saveInStoredList(self, params = {}):
 		get = params.get
 		
+		print "save search"
 		if get("search"):
 			searches = self.retrieve(params)
 			
@@ -130,7 +131,7 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 				params["store"] = "searches"
 				params["feed"] = "search"
 			
-			self.saveSearch(params)
+			self.saveInStoredList(params)
 
 			params["search"] = urllib.quote_plus(new_query)
 			del params["old_search"]
@@ -246,7 +247,10 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 		
 		if get("search") or iget("search"):
 			key = "disco_search_"
-			if get("user_feed"):
+			if get("feed"):
+				key = "search_"
+			
+			if get("store") == "searches":
 				key = "search_"
 			
 			if get("search"):
@@ -302,8 +306,6 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 		elif (iget("channel")):  
 			key += "view_mode_" + iget("channel")
 		
-		
-		
 		return key
 		
 	def _getResultSetStorageKey(self, params = {}):
@@ -320,9 +322,12 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 			if get("scraper") == "music_artist" and get("artist"):
 				key += "_" + get("artist")
 			
+			if get("scraper") == "disco_search":
+				key = "store_disco_searches"
+			
 			if get("show"):
 				key += "_season_" + get("season","0")
-						
+		
 		if get("user_feed"):
 			key = "result_" + get("user_feed")
 			
@@ -334,7 +339,10 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 			
 			if get("external") and not get("thumb"):
 				key += "_external_" + get("contact")
-				
+		
+		if get("feed") == "search":
+			key = "store_searches"
+		
 		if get("store"):
 			key = "store_"+ get("store")
 		
@@ -344,7 +352,7 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 	def store(self, params = {}, results = [], type = "", item = {}):
 		key = self.getStorageKey(params, type, item)
 		
-		print self.__plugin__ + "Got key " + repr(key)
+		print self.__plugin__ + " Got key " + repr(key)
 		
 		if type == "thumbnail" or type == "viewmode" or type == "value":
 			self.storeValue(key, results)
@@ -376,7 +384,7 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 	def retrieve(self, params = {}, type = "", item = {}):
 		key = self.getStorageKey(params, type, item)
 		
-		print self.__plugin__ + "Got key " + repr(key)
+		print self.__plugin__ + " Got key " + repr(key)
 		
 		if type == "thumbnail" or type == "viewmode" or type == "value":
 			return self.retrieveValue(key)
