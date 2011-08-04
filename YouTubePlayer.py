@@ -585,8 +585,9 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			data = result["content"].find("PLAYER_CONFIG")
 			if data > -1:
 				data = result["content"].rfind("yt.setConfig", 0, data)
-				data = re.compile('yt.setConfig\((.*?PLAYER_CONFIG.*?)\)').findall(result["content"][data:].replace("\n", ""))
+				data = re.compile('yt.setConfig\((.*?PLAYER_CONFIG.*?)\);').findall(result["content"][data:].replace("\n", ""))
 				if len(data) > 0:
+					print self.__plugin__ + " _getVideoLinks trying website : " + repr(data)
 					player_object = json.loads(data[0].replace('\'PLAYER_CONFIG\'', '"PLAYER_CONFIG"'))
 			else:
 				data = self.parseDOM(result["content"], { "name": "embed", "id": "id", "id-match": "movie_player", "return": "flashvars"})
