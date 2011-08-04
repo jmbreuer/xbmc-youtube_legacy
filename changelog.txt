@@ -1,9 +1,7 @@
 [B]TODO:[/B]
 - Add support for play all on Watch Later [Henrik]
-- Age verification is broken again [Tobias]
 - Music scraper should remember previously listed artists 
 - Go through every menu to check if things are still working
-- Annotations need colors specified in xml
 - Context menu "more videos by user" shouldnt be visible when viewing a users upload
 - Check all context menu items again some seem to be broken
 
@@ -17,6 +15,7 @@
 
 [B]Version 2.6.0 (Beta)[B]
 - Added New playback function. Now uses unified code accross all pages(html scraping, embeded, flash fallback). Supports fallback server.
+- Use fallback for age restricted videos (Will fail if embedding is disabled)
 - Added Support for Oauth2 authentication
 - Added Suppert for 2 factor authentication
 - Added Support OAuth2 token refresh when login token expires (reducing the need to re-login all the time) 
