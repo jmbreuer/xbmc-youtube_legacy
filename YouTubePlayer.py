@@ -555,14 +555,11 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		return (video, status)
 
 	def _convertFlashVars(self, html):
-		#print self.__plugin__ + " _convertFlashVars : " + repr(html)
 		obj = { "PLAYER_CONFIG": { "args": {} } }
 		temp = html.split("&")
-		#print self.__plugin__ + " _convertFlashVars : " + str(len(temp))
 		for item in temp:
 			it = item.split("=")
 			obj["PLAYER_CONFIG"]["args"][it[0]] = urllib.unquote_plus(it[1])
-		#print self.__plugin__ + " _convertFlashVars done : " + repr(obj)
 		return obj
 
 	def _getVideoLinks(self, video, params):
@@ -578,7 +575,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 
 		if result["status"] == 200:
 			data = result["content"].find("PLAYER_CONFIG")
-			if data > -1 and False:
+			if data > -1:
 				data = result["content"].rfind("yt.setConfig", 0, data)
 				data = re.compile('yt.setConfig\((.*?PLAYER_CONFIG.*?)\)').findall(result["content"][data:].replace("\n", ""))
 				if len(data) > 0:
