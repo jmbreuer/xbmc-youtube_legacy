@@ -318,8 +318,8 @@ class YouTubeNavigation(YouTubeUtils.YouTubeUtils):
 		item = item_params.get
 		
 		icon = "DefaultFolder.png"
-		if get("icon"):
-			icon = get("icon")
+		if item("icon"):
+			icon = self.getThumbnail(item("icon"))
 				
 		thumbnail = item("thumbnail")
 		
