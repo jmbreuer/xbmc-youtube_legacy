@@ -69,7 +69,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 		timeout = [5, 10, 15, 20, 25][int(self.__settings__.getSetting( "timeout" ))]
 		if not timeout:
 			timeout = "15"
-			socket.setdefaulttimeout(float(timeout))
+			#socket.setdefaulttimeout(float(timeout))
 		return None
 	
 	def delete_favorite(self, params = {}):
@@ -260,7 +260,17 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 				video_request +=	"<entry> \n <id>http://gdata.youtube.com/feeds/api/videos/" + videoid+ "</id>\n</entry> \n"
 				if i == 50:
 					final_request = request_start + video_request + request_end
-					result = self._fetchPage({"link": "http://gdata.youtube.com/feeds/api/videos/batch", "request": final_request})
+					status = 403
+					while status == 403:
+						result = self._fetchPage({"link": "http://gdata.youtube.com/feeds/api/videos/batch", "request": final_request})
+						status = self.parseDOM(result["content"], { "name": "batch:status", "return": "code"})
+						if len(status) > 0:
+							if int(status[len(status) - 1]) == 403:
+								print self.__plugin__ + " XXXX delay " + repr(status)
+								status = 403
+								time.sleep(30)
+
+					print self.__plugin__ + " XXXX delay done " + repr(status)
 					(temp, status) = self.getVideoInfoBatch(result["content"], params)
 					ytobjects += temp
 					if status != 200:
@@ -413,8 +423,17 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 				ret["content"] = e.fp.read()
 			return ret
 
-			ret_obj["status"] = 500
-			return ret_obj
+		except urllib2.URLError, e:
+			err = str(e)
+			if self.__dbg__:
+				print self.__plugin__ + " _fetchPage URLError : " + err
+			
+			time.sleep(3)
+			params["error"] = str(int(get("error", "0")) + 1)
+			ret = self._fetchPage(params)
+			if not ret.has_key("content") and e.fp:
+				ret["content"] = e.fp.read()
+			return ret
 		
 	def _verifyAge(self, result, new_url, params = {}):
 		get = params.get
@@ -553,6 +572,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 	def getVideoInfoBatch(self, xml, params = {}):
 		get = params.get
 		dom = parseString(xml)
+		#print self.__plugin__ + " XXX " + repr(xml)
 		entries = dom.getElementsByTagName("atom:entry");
 		
 		ytobjects = [];
@@ -589,7 +609,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 						elif reason != 'limitedSyndication':
 							video['videoid'] = "false";
 				
-				video['Title'] = self._getNodeValue(node, "media:title", "Unknown Title").encode('utf-8')
+				video['Title'] = self._getNodeValue(node, "media:title", "Unknown Title1").encode('utf-8')
 				video['Plot'] = self._getNodeValue(node, "media:description", "Unknown Plot").encode( "utf-8" )
 				video['Date'] = self._getNodeValue(node, "atom:published", "Unknown Date").encode( "utf-8" )
 				video['user'] = self._getNodeValue(node, "atom:name", "Unknown Name").encode( "utf-8" )
@@ -688,7 +708,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 				else:
 					video['videoid'] = "false"
 			
-			video['Title'] = self._getNodeValue(node, "media:title", "Unknown Title").encode('utf-8') # Convert from utf-16 to combat breakage
+			video['Title'] = self._getNodeValue(node, "media:title", "Unknown Title2").encode('utf-8') # Convert from utf-16 to combat breakage
 			video['Plot'] = self._getNodeValue(node, "media:description", "Unknown Plot").encode( "utf-8" )
 			video['Date'] = self._getNodeValue(node, "published", "Unknown Date").encode( "utf-8" )
 			video['user'] = self._getNodeValue(node, "name", "Unknown Name").encode( "utf-8" )
