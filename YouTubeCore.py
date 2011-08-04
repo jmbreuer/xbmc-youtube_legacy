@@ -254,38 +254,37 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 		video_request = ""
 		
 		ytobjects = []
+		status = 500
 		i = 1
 		for videoid in items:
 			if videoid:
 				video_request +=	"<entry> \n <id>http://gdata.youtube.com/feeds/api/videos/" + videoid+ "</id>\n</entry> \n"
 				if i == 50:
 					final_request = request_start + video_request + request_end
-					status = 403
-					while status == 403:
-						result = self._fetchPage({"link": "http://gdata.youtube.com/feeds/api/videos/batch", "request": final_request})
-						status = self.parseDOM(result["content"], { "name": "batch:status", "return": "code"})
-						if len(status) > 0:
-							if int(status[len(status) - 1]) == 403:
-								print self.__plugin__ + " XXXX delay " + repr(status)
-								status = 403
-								time.sleep(30)
+					rstat = 403
+					while rstat == 403:
+						result = self._fetchPage({"link": "http://gdata.youtube.com/feeds/api/videos/batch", "api": "true", "request": final_request})
+						rstat = self.parseDOM(result["content"], { "name": "batch:status", "return": "code"})
+						if len(rstat) > 0:
+							if int(rstat[len(rstat) - 1]) == 403:
+								print self.__plugin__ + " getBatchDetails quota exceeded. Waiting 5 seconds. " + repr(rstat)
+								rstat = 403
+								time.sleep(5)
 
-					print self.__plugin__ + " XXXX delay done " + repr(status)
-					(temp, status) = self.getVideoInfoBatch(result["content"], params)
+					temp = self.getVideoInfo(result["content"], params)
 					ytobjects += temp
-					if status != 200:
-						return (ytobjects, status)
 					video_request = ""
 					i = 1
 				i+=1
 		
 		final_request = request_start + video_request + request_end
-		result = self._fetchPage({"link": "http://gdata.youtube.com/feeds/api/videos/batch", "request": final_request})
+		result = self._fetchPage({"link": "http://gdata.youtube.com/feeds/api/videos/batch", "api": "true", "request": final_request})
 				
-		(temp, status) = self.getVideoInfoBatch(result["content"], params)
+		temp = self.getVideoInfo(result["content"], params)
 		ytobjects += temp
-				
-		return ( ytobjects, 200)
+		if len(ytobjects) > 0:
+			status = 200
+		return ( ytobjects, status)
 		
 	#===============================================================================
 	#
@@ -340,7 +339,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 
 		if get("api", "false") == "true":
 			if self.__dbg__:
-				print self.__plugin__ + " got api"
+				print self.__plugin__ + " _fetchPage got api"
 			request.add_header('GData-Version', '2') #confirmed
 			request.add_header('X-GData-Key', 'key=' + self.APIKEY)
 		else:
@@ -568,89 +567,6 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 				return node.getElementsByTagName(tag).item(0).firstChild.nodeValue
 		
 		return default;
-
-	def getVideoInfoBatch(self, xml, params = {}):
-		get = params.get
-		dom = parseString(xml)
-		#print self.__plugin__ + " XXX " + repr(xml)
-		entries = dom.getElementsByTagName("atom:entry");
-		
-		ytobjects = [];
-		for node in entries:
-			video = {};
-			videoid = self._getNodeValue(node, "atom:id", "")
-			
-			if (not videoid):
-				if node.getElementsByTagName("link").item(0):
-					videoid = node.getElementsByTagName("link").item(0).getAttribute('href')
-					match = re.match('.*?v=(.*)\&.*', videoid)
-					if match:
-						videoid = match.group(1)
-			
-			if (videoid):
-				if (videoid.rfind("/") != -1):
-					video['videoid'] = videoid[videoid.rfind("/") + 1:]
-				
-				if node.getElementsByTagName("batch:status").item(0).hasAttribute('code'):
-					code = self._getNodeAttribute(node, "batch:status", 'code', 'unknown')
-					if code == "404":
-						video["videoid"] = "false"
-					
-				if node.getElementsByTagName("yt:state").item(0):
-					state = self._getNodeAttribute(node, "yt:state", 'name', 'Unknown Name')
-					if ( state == 'deleted' or state == 'rejected'):
-						video['videoid'] = "false"
-						
-					# Get reason for why we can't playback the file.		
-					if node.getElementsByTagName("yt:state").item(0).hasAttribute('reasonCode'):
-						reason = self._getNodeAttribute(node, "yt:state", 'reasonCode', 'Unknown reasonCode')
-						if reason == "private" or reason == 'requesterRegion':
-							video['videoid'] = "false"
-						elif reason != 'limitedSyndication':
-							video['videoid'] = "false";
-				
-				video['Title'] = self._getNodeValue(node, "media:title", "Unknown Title1").encode('utf-8')
-				video['Plot'] = self._getNodeValue(node, "media:description", "Unknown Plot").encode( "utf-8" )
-				video['Date'] = self._getNodeValue(node, "atom:published", "Unknown Date").encode( "utf-8" )
-				video['user'] = self._getNodeValue(node, "atom:name", "Unknown Name").encode( "utf-8" )
-				
-				# media:credit is not set for favorites, playlists or inbox
-				video['Studio'] = self._getNodeValue(node, "media:credit", "").encode( "utf-8" )
-				if video['Studio'] == "":
-					video['Studio'] = self._getNodeValue(node, "atom:name", "Unknown Uploader").encode( "utf-8" )
-					
-				duration = int(self._getNodeAttribute(node, "yt:duration", 'seconds', '0'))
-				video['Duration'] = "%02d:%02d" % ( duration / 60, duration % 60 )
-				video['Rating'] = float(self._getNodeAttribute(node,"gd:rating", 'average', "0.0"))
-				video['count'] = int(self._getNodeAttribute(node, "yt:statistics", 'viewCount', "0"))
-				video['Genre'] = self._getNodeAttribute(node, "media:category", "label", "Unknown Genre").encode( "utf-8" )
-				infoString =""
-				if video['Date'] != "Unknown Date":
-					c = time.strptime(video['Date'][:video['Date'].find(".000Z")], "%Y-%m-%dT%H:%M:%S")
-					video['Date'] = time.strftime("%d-%m-%Y",c)
-					infoString += "Date Uploaded: " + time.strftime("%Y-%m-%d %H:%M:%S",c) + ", "
-				infoString += "View count: " + str(video['count'])
-				video['Plot'] = infoString + "\n" + video['Plot']
-
-				if node.getElementsByTagName("atom:link"):
-					link = node.getElementsByTagName("atom:link")
-					for i in range(len(link)):
-						if link.item(i).getAttribute('rel') == 'edit':
-							obj = link.item(i).getAttribute('href')
-							video['editid'] = obj[obj.rfind('/')+1:]
-				
-				video['thumbnail'] = self.urls["thumbnail"] % video['videoid']
-				
-				overlay = self.__storage__.retrieveValue("vidstatus-" + video['videoid'] )
-				if overlay:
-					video['Overlay'] = int(overlay)
-				
-				ytobjects.append(video);
-							
-		if (ytobjects):
-			return (ytobjects, 200);
-		
-		return ( "", 500 )
 	
 	def getVideoInfo(self, xml, params = {}):
 		get = params.get

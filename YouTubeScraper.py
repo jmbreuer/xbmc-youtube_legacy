@@ -403,7 +403,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			athumb = self.parseDOM(live, {"name": "img", "id": "alt", "id-match": "Thumbnail", "return": "src"})
 			astudio = self.parseDOM(live, {"name": "a", "id": "title", "return": "title"})
 
-			print self.__plugin__ + " BLA BLA BTEST2 " + str(len(ahref)) +  " - " + str(len(atitle))  + " - " + str(len(athumb)) + " - " + str(len(astudio)) #+  " - " + str(len(result["content"])) + " - " + str(len(live))
+			#print self.__plugin__ + " BLA BLA BTEST2 " + str(len(ahref)) +  " - " + str(len(atitle))  + " - " + str(len(athumb)) + " - " + str(len(astudio)) #+  " - " + str(len(result["content"])) + " - " + str(len(live))
 			if len(ahref) == len(atitle) and len(ahref) == len(astudio) and len(ahref) == len(athumb):
 				for i in range(0 , len(ahref)):
 					item = {}
@@ -694,8 +694,11 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 				cat = ahref[0]
 				title = acont[0].replace("&raquo;", "").strip()
                                 item['Title'] = title
-                                cat = cat.replace("/movies/", "")
+				#print self.__plugin__ + " scrapeMovieSubCategory : " + cat
+                                cat = cat.replace("/movies/", "") # indian
+                                cat = cat.replace("/movies", "") # Foreign
                                 cat = urllib.quote_plus(cat)
+				#print self.__plugin__ + " scrapeMovieSubCategory : " + cat
                                 item['category'] = cat
                                 item['scraper'] = "movies"
                                 item["thumbnail"] = "movies"
@@ -705,38 +708,6 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			print self.__plugin__ + " scrapeMovieSubCategory done"
 		return (ytobjects, result["status"])
 
-	def scrapeMovieSubCategoryOld(self, params = {}): # TODO
-		get = params.get
-		if self.__dbg__:
-			print self.__plugin__ + " scrapeMovieSubCategory : " + repr(params)
-		
-		url = self.createUrl(params)
-		result = self._fetchPage({"link":url})
-		
-		params["folder"] = "true"
-
-		ytobjects = []
-		list = SoupStrainer(name="div", attrs = {'class':"ytg-fl browse-content"})
-		categories = BeautifulSoup(result["content"], parseOnlyThese=list)		
-		
-		if len(categories):
-			categorylist = categories.findAll(name="div", attrs = {'class':"yt-uix-slider-head"})
-			for category in categorylist:
-				item = {}
-				cat = category.div.button["href"]
-				title = category.div.findNextSibling(name="div")
-				title = title.h2.contents[0].strip()
-				item['Title'] = title
-				cat = cat.replace("/movies/", "")
-				cat = urllib.quote_plus(cat)
-				item['category'] = cat
-				item['scraper'] = "movies"
-				item["thumbnail"] = "movies"
-				ytobjects.append(item)
-		
-		if self.__dbg__:
-			print self.__plugin__ + " scrapeMovieSubCategory done"
-		return (ytobjects, result["status"])
 	
 	def scrapeMoviesGrid(self, params = {}):
 		get = params.get
@@ -776,7 +747,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 				
 		del params["page"]
 		if self.__dbg__:
-			print self.__plugin__ + " scrapeMoviesGrid done"
+			print self.__plugin__ + " scrapeMoviesGrid done : " + str(len(items))
 		return (items, result["status"])
 
 	
@@ -990,23 +961,23 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 						title = title.replace("&amp;", "&")
 						item['Title'] = title
 						cat = ahref[i].replace("/" + scraper + "/", "")
+
+						if cat.find("?") > -1:
+							cat = cat[:cat.find("?")]
+							
 						if get("scraper") == "categories":
 							if title == "Music":
 								continue
-							if cat.find("?") != -1:
-								cat = cat[cat.find("?"):]
 							if cat.find("comedy") > 0:
 								cat = "?c=23"
 							if cat.find("gaming") > 0:
 								cat = "?c=20"
+
 						if get("scraper") == "movies":
 							if cat.find("pt=nr") > 0:
 								continue
-							elif cat.find("indian-cinema") == 0 or cat.find("foreign-film") == 0:
+							elif cat ==  "indian-cinema" or cat == "foreign-film":
 								item["subcategory"] = "true"
-							
-						if cat.find("?") > 0:
-							cat = cat[0:cat.find("?")]
 
 						cat = urllib.quote_plus(cat)
 						item['category'] = cat
