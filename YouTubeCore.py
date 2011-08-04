@@ -602,6 +602,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 	def getVideoInfo(self, xml, params = {}):
 		get = params.get
 		dom = parseString(xml);
+		print self.__plugin__ + " _getvideoinfo : " + str(len(xml))
 		links = dom.getElementsByTagName("link");
 		entries = dom.getElementsByTagName("entry");
 		if (not entries):
@@ -620,12 +621,12 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 		for node in entries:
 			video = {};
 
-			video['videoid'] = self._getNodeValue(node, "yt:videoid", "missing")
-			if video['videoid'] == "missing":
-				video['videoid'] = self._getNodeAttribute(node, "content", "src", "missing")
+			video['videoid'] = self._getNodeValue(node, "yt:videoid", "false")
+			if video['videoid'] == "false":
+				video['videoid'] = self._getNodeAttribute(node, "content", "src", "false")
 				video['videoid'] = video['videoid'][video['videoid'].rfind("/") + 1:]
 
-			if video['videoid'] == "missing" and node.getElementsByTagName("link").item(0):
+			if video['videoid'] == "false" and node.getElementsByTagName("link").item(0):
 				video['videolink'] = node.getElementsByTagName("link").item(0).getAttribute('href')
 				match = re.match('.*?v=(.*)\&.*', video['videolink'])
 				if match:
@@ -696,8 +697,8 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 			
 			if video['videoid'] == "false":
 				if self.__dbg__:
-					print self.__plugin__ + " _getvideoinfo videoid set to false"
-						
+					print self.__plugin__ + " _getvideoinfo videoid set to false : " + repr(video)
+
 			ytobjects.append(video);
 		
 		if next:
