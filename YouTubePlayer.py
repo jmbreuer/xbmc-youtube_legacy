@@ -199,8 +199,6 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 						else:
 							cnode = False
 
-						#style = "Style: popup,Arial,60,0,65535,65535,&H4BFFFFFF&,0,0,3,3,0,1,30,30,30,0,0\r\n"
-
 						snode = node.getElementsByTagName("appearance")
 						if snode:
 							ns_fcolor = snode.item(0).getAttribute("fgColor").replace("0x0000000000", "")
@@ -213,7 +211,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 							else:
 								ns_alpha = hex(int(float(ns_alpha) * 100))[2:]
 
-							append_style += style_template % ( styles_count, ns_fcolor, ns_fcolor, ns_fcolor, ns_alpha + ns_bcolor )
+							append_style += style_template % ( styles_count, ns_alpha + ns_fcolor, ns_alpha + ns_fcolor, ns_alpha + ns_fcolor, ns_alpha + ns_bcolor )
 							style = "annot" + str(styles_count)
 							styles_count += 1
 
@@ -228,8 +226,8 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 							marginV += 1280 * float(cnode.item(0).getAttribute("h")) / 100
 							marginV = 1280 - int(marginV)
 							marginL = int((800 * float(cnode.item(0).getAttribute("x")) / 100) )
-							if marginL > 3:
-								marginL -= 3
+							if marginL > 10:
+								marginL -= 10
 							result += "Dialogue: Marked=%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\r\n" % ( "0", start, dur, style, "Name", marginL, "0000", marginV, "", text )
 				else:
 					if self.__dbg__:
