@@ -451,6 +451,10 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 			error = self.parseDOM(ret['content'], { "name": "div", "class": "error smaller", "content": "true"})
 		if len(error) == 0:
 			error = self.parseDOM(ret['content'], { "name": "div", "id": "id", "id-match": "unavailable-message", "content": "true"})
+		if len(error) == 0 and ret['content'].find("yt:quota") > -1:
+			# Api quota
+			html = self.parseDOM(ret['content'], { "name": "error"})
+			error = self.parseDOM(html, { "name": "code", "content": "true"})
 		if len(error) == 0 and False: # This hits flash quite often.
 			# Playback
 			error = self.parseDOM(ret['content'], { "name": "div", "class": "yt-alert-content", "content": "true"})
