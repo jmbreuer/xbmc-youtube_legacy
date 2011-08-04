@@ -590,7 +590,10 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 			video = {};
 
 			video['videoid'] = self._getNodeValue(node, "yt:videoid", "missing")
-			
+			if video['videoid'] == "missing":
+				video['videoid'] = self._getNodeAttribute(node, "content", "src", "missing")
+				video['videoid'] = video['videoid'][video['videoid'].rfind("/") + 1:]
+
 			if node.getElementsByTagName("id"):
 				entryid = self._getNodeValue(node, "id","")
 				entryid = entryid[entryid.rfind(":")+1:]
