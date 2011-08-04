@@ -48,6 +48,7 @@ class YouTubeFeeds(YouTubeCore.YouTubeCore):
 		self.urls['feed_linked'] = "http://gdata.youtube.com/feeds/api/standardfeeds/most_popular?time=%s" 
 		self.urls['feed_discussed'] = "http://gdata.youtube.com/feeds/api/standardfeeds/most_discussed?time=%s"
 		self.urls['feed_responded'] = "http://gdata.youtube.com/feeds/api/standardfeeds/most_responded?time=%s"
+		self.urls['feed_live'] = "http://gdata.youtube.com/feeds/api/charts/live/events/live_now"
 	
 		# Wont work with time parameter
 		self.urls['feed_recent'] = "http://gdata.youtube.com/feeds/api/standardfeeds/most_recent" 

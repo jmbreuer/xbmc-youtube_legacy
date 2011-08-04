@@ -68,7 +68,7 @@ class YouTubeNavigation(YouTubeUtils.YouTubeUtils):
 				  {'Title':__language__( 30047 )  ,'path':"/root/explore/trailers/latest_game"  	, 'thumbnail':"trailers"			, 'login':"false" , 'scraper':"latest_game_trailers" },
 				  {'Title':__language__( 30048 )  ,'path':"/root/explore/trailers/upcoming_game"  	, 'thumbnail':"trailers"			, 'login':"false" , 'scraper':"upcoming_game_trailers" },
 				  {'Title':__language__( 30046 )  ,'path':"/root/explore/trailers/popular_game"  	, 'thumbnail':"trailers"			, 'login':"false" , 'scraper':"popular_game_trailers" },
-				  {'Title':__language__( 30051 )  ,'path':"/root/explore/live"  					, 'thumbnail':"live"				, 'login':"false" , 'scraper':"live" },
+				  {'Title':__language__( 30051 )  ,'path':"/root/explore/live"  					, 'thumbnail':"live"				, 'login':"false" , 'feed':"feed_live" },
 				  {'Title':__language__( 30019 )  ,'path':"/root/recommended"						, 'thumbnail':"recommended"			, 'login':"true"  , 'scraper':"recommended" },
 				  {'Title':__language__( 30008 )  ,'path':"/root/watch_later"						, 'thumbnail':"watch_later"			, 'login':"true"  , 'scraper':"watch_later" },
 				  {'Title':__language__( 30056 )  ,'path':"/root/liked"								, 'thumbnail':"liked"				, 'login':"true"  , 'scraper':"liked_videos" },
