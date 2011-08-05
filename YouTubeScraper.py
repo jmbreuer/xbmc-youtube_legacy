@@ -1066,10 +1066,10 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		if get("batch"):
 			del params["batch"]
 		
-		if get("scraper") == "search_disco":
+		if not get("page") and (get("scraper") == "search_disco" or get("scraper") == "music_artist"):
 			thumbnail = result[0].get("thumbnail")
 			self.__storage__.store(params, thumbnail, "thumbnail")
-
+		
 		if next == "true":
 			self.addNextFolder(result, params)
 		
