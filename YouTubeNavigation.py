@@ -55,7 +55,7 @@ class YouTubeNavigation(YouTubeUtils.YouTubeUtils):
 				  {'Title':__language__( 30015 )  ,'path':"/root/explore/feeds/favorites"			, 'thumbnail':"top"					, 'login':"false" , 'feed':"feed_favorites" },
 				  {'Title':__language__( 30016 )  ,'path':"/root/explore/feeds/rated"				, 'thumbnail':"top"					, 'login':"false" , 'feed':"feed_rated" },
 				  {'Title':__language__( 30043 )  ,'path':"/root/explore/movies"					, 'thumbnail':"movies"				, 'login':"false" , 'scraper':'movies', 'folder':'true'},
-				  {'Title':__language__( 30052 )  ,'path':"/root/explore/music"						, 'thumbnail':"music"				, 'login':"false" , 'store':"artists" },
+				  {'Title':__language__( 30052 )  ,'path':"/root/explore/music"						, 'thumbnail':"music"				, 'login':"false" , 'store':"artists", "folder":"true" },
 				  {'Title':__language__( 30053 )  ,'path':"/root/explore/music/hits"				, 'thumbnail':"music"				, 'login':"false" , 'scraper':'music_hits', "folder":"true"},
 				  {'Title':__language__( 30054 )  ,'path':"/root/explore/music/artists"				, 'thumbnail':"music"				, 'login':"false" , 'scraper':'music_artists', "folder":"true" },
 				  {'Title':__language__( 30055 )  ,'path':"/root/explore/music/top100"				, 'thumbnail':"music"				, 'login':"false" , 'scraper':'music_top100'},
@@ -92,7 +92,7 @@ class YouTubeNavigation(YouTubeUtils.YouTubeUtils):
 		cache = True
 		
 		path = get("path", "/root")
-		if not get("feed") == "search" and not get("feed") == "related" and not get("channel") and not get("contact") and not get("playlist") and get("page","0") == "0" and not get("scraper") == "search_disco":
+		if not get("feed") == "search" and not get("feed") == "related" and not get("channel") and not get("contact") and not get("playlist") and get("page","0") == "0" and not get("scraper") == "search_disco" and not get("scraper") == "music_artist":
 			for category in self.categories:
 				cat_get = category.get 
 				if (cat_get("path").find(path +"/") > -1 ):
@@ -125,11 +125,13 @@ class YouTubeNavigation(YouTubeUtils.YouTubeUtils):
 			self.__login__.login(params)
 		if (get("action") == "test"):
 			self.__downloader__.test(params)
-		if (get("action") in ["delete_search", "delete_disco", "delete_artist"]):
+		if (get("action") in ["delete_search", "delete_disco"]):
 			self.__storage__.deleteStoredSearch(params)
 		if (get("action") in ["edit_search", "edit_disco"]):
 			self.__storage__.editStoredSearch(params)
 			self.listMenu(params)
+		if (get("action") == "delete_artist"):
+			self.__storage__.deleteStoredArtist(params)
 		if (get("action") == "remove_favorite"):
 			self.removeFromFavorites(params)
 		if (get("action") == "add_favorite"):
@@ -500,7 +502,11 @@ class YouTubeNavigation(YouTubeUtils.YouTubeUtils):
 			return cm
 		
 		if item("artist"):
-			cm.append ( (self.__language__(30507), "XBMC.Container.Update(%s?path=%s&scraper=similar_artist&artist=%s&folder=true&)" % ( sys.argv[0], item("path"), item("artist") ) ) )			
+			cm.append ( (self.__language__(30507), "XBMC.Container.Update(%s?path=%s&scraper=similar_artist&artist=%s&folder=true&)" % ( sys.argv[0], item("path"), item("artist") ) ) )
+			cm.append ( (self.__language__(30540), "XBMC.RunPlugin(%s?path=%s&action=delete_artist&store=artists&artist=%s&)" % ( sys.argv[0], item("path"), item("artist") ) ) )			
+			cm.append( (self.__language__( 30520 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&scraper=music_artists&artist=%s&)" % ( sys.argv[0], item("path"), item("artist") ) ) )
+			cm.append( (self.__language__( 30522 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&shuffle=true&scraper=music_artists&artist=%s&)" % ( sys.argv[0], item("path"), item("artist") ) ) )
+
 			
 		if (item("user_feed") == "favorites" or item("user_feed") == "newsubscriptions"):
 			cm.append ( (self.__language__(30520), "XBMC.RunPlugin(%s?path=%s&action=play_all&user_feed=%s&contact=%s&)" % ( sys.argv[0], item("path"), item("user_feed"), "default" ) ) )
@@ -519,11 +525,7 @@ class YouTubeNavigation(YouTubeUtils.YouTubeUtils):
 		if item("scraper") == "recommended":
 			cm.append( (self.__language__( 30520 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&scraper=recommended&login=true&)" % ( sys.argv[0], item("path") ) ) )
 			cm.append( (self.__language__( 30522 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&shuffle=true&scraper=recommended&login=true&)" % ( sys.argv[0], item("path") ) ) )
-		
-		if item("artist"):
-			cm.append( (self.__language__( 30520 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&scraper=music_artists&artist=%s&)" % ( sys.argv[0], item("path"), item("artist") ) ) )
-			cm.append( (self.__language__( 30522 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&shuffle=true&scraper=music_artists&artist=%s&)" % ( sys.argv[0], item("path"), item("artist") ) ) )
-		
+				
 		if (item("scraper") == "liked_videos"):
 			cm.append( (self.__language__( 30520 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&scraper=liked_videos&login=true&)" % ( sys.argv[0], item("path") ) ) )
 			cm.append( (self.__language__( 30522 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&shuffle=true&scraper=liked_videos&login=true&)" % ( sys.argv[0], item("path") ) ) )
@@ -566,7 +568,7 @@ class YouTubeNavigation(YouTubeUtils.YouTubeUtils):
 					if item("editid") and item("channel"):
 						cm.append( ( self.__language__( 30513 ) % item("channel"), 'XBMC.RunPlugin(%s?path=%s&editid=%s&action=remove_subscription)' % ( sys.argv[0], item("path"), item("editid") ) ) )
 		
-		if (item("contact")):
+		if (item("contact") and not get("store")):
 			if ( self.__settings__.getSetting( "username" ) != "" and self.__settings__.getSetting( "oauth2_access_token" ) ):
 				if (item("external")):
 					cm.append( (self.__language__(30026), 'XBMC.RunPlugin(%s?path=%s&action=add_contact&)' % ( sys.argv[0], item("path") ) ) )
