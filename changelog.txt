@@ -3,7 +3,6 @@
 - Music scraper should remember previously listed artists 
 - Go through every menu to check if things are still working
 - Check all context menu items again some seem to be broken
-- Shows Scraper
 
 [B]Errata[/B]
 - [XBMC] Thumbnails sometimes turns into black box or Folder (XBMC not detecting when thumbnail is set and defaulting to icon?)
