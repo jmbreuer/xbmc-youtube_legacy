@@ -102,7 +102,7 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		while not logged_in and fetch_options and step < 6:
 			if self.__dbg__:
 				print self.__plugin__ + " _apiLogin step " + str(step)
-				step += 1
+			step += 1
 
 			ret = self._fetchPage(fetch_options)
 			fetch_options = False
@@ -174,7 +174,7 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		while not logged_in and fetch_options and step < 18: # 6 steps for 2-factor login
 			if self.__dbg__:
 				print self.__plugin__ + " _httpLogin step " + str(step)
-				step += 1
+			step += 1
 
 			ret = self._fetchPage(fetch_options)
 			fetch_options = False
@@ -236,7 +236,7 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 					logged_in = True
 					if self.__dbg__:
 						print self.__plugin__ + " _httpLogin: Logged in. Parsing data. : "
-						break;
+					break;
 				# Look for errors and return error.
 				return ( self._findErrors(ret), 303)
 
@@ -263,7 +263,7 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		if len(galx) == 0 or len(cont) == 0 or len(uilel) == 0 or len(dsh) == 0 or len(rmShown) == 0 or uname == "" or pword == "":
 			if self.__dbg__:
 				print self.__plugin__ + " _httpLogin missing values for login form " + repr(galx) + repr(cont) + repr(uilel) + repr(dsh) + repr(rmShown) + repr(uname) + str(len(pword))
-				return ( "", {} )
+			return ( "", {} )
 		else:	
 			galx = galx[0]
 			url_data = { "pstMsg": "0",
