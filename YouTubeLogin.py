@@ -49,6 +49,7 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		oname = self.__settings__.getSetting("username")
 		opass = self.__settings__.getSetting( "user_password" )
 		self.__settings__.openSettings()
+		self.__dbg__ = self.__settings__.getSetting("debug") == "true"
 
 		if self.__settings__.getSetting("username") and self.__settings__.getSetting( "user_password" ):
 			refreshed = False

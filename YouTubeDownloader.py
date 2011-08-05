@@ -41,6 +41,7 @@ class YouTubeDownloader(YouTubeUtils.YouTubeUtils):
 		if (not path):
 			self.showMessage(self.__language__(30600), self.__language__(30611))
 			self.__settings__.openSettings()
+			self.__dbg__ = self.__settings__.getSetting("debug") == "true"
 			path = self.__settings__.getSetting( "downloadPath" )
 		
 		if sys.platform == "win32":
