@@ -1,8 +1,6 @@
 [B]TODO:[/B]
-- Music scraper should remember previously listed artists
 - Pagination <- Passed.
 - Settings
-- Music Top 50 ( no results ) 
 - Categories -> Education is broken (It is now a folder)
 
 - Go through every menu to check if things are still working
@@ -12,28 +10,22 @@
 
 - Check all context menu items again some seem to be broken
   - explore 
-    - Categories
-    - Disco fails. (can change/delete search in most popular artists. Can't delete old search)
+    - Categories confirmed
+    - Disco confirmed
     - Feeds confirmed
-    - Movies 
-    - Music ( Missing play all, shuffle and reverse )
-    - Shows ( Missing play all, shuffle and reverse )
+    - Movies confirmed
+    - Music ( Missing reverse :ignore ) confirmed
+    - Shows ( Missing play all, shuffle and reverse :ignore ) confirmed
     - Trailers confirmed
     - Live confirmed
-  - Youtube suggests ( no play all, no reverse, no shuffle )
-  - my watch later  ( no reverse )
-  - my liked videos ( no play all, no reverse, no shuffle )
-  - my playlist ( extra "add to playlist? )
-  - my contacts 
-    - contact items(sans playlists) have "Add contact" item that makes no sense.
-    - contact items -> my uploads have irrelevant "more videos by <user>"
-    - contact items -> subsriptions -> items "view favorites" doesn't change to "view uploads" after toggle
-    - For ALL levels, related videos gives a "Add contact.." folder
-  - my favorites ( no reverse )
+  - Youtube suggests ( no reverse :ignore ) confirmed
+  - my liked videos ( no reverse :ignore ) confirmed
+  - my contacts confirmed
+  - my favorites ( no reverse :ignore ) confirmed
   - my playlist confirmed
   - my uploads -> add to favorites, subscripe, more videos by <user> and add to playlist are all in context menu.. should they be? (Might conflict with uploads in contacts if this is changed?? )
-  - my downloads confirmed(naught)
-  - search (no play_all, yet)
+  - my downloads confirmed
+  - search confirmed
   - my subscriptions confirmed
 
 [B]Errata[/B]
@@ -47,7 +39,11 @@
 [B]Version 2.6.0 (Beta)[B]
 - Added New playback function. Now uses unified code accross all pages(html scraping, embeded, flash fallback). Supports fallback server.
 - Added fallback for age restricted videos (Will fail if embedding is disabled)
-- Added support for play all on Watch Later
+- Added support for locally stored artists in Youtube Music
+- Added support for play all on My Liked Videos
+- Added support for play all on YouTube suggests
+- Added support for play all on Music Artist
+- Added support for play all on My Watch Later
 - Added Support for Oauth2 authentication
 - Added Suppert for 2 factor authentication
 - Added Support OAuth2 token refresh when login token expires (reducing the need to re-login all the time) 
@@ -58,6 +54,7 @@
 - Changed Caching of playlists, to support playlist editid accross all pages
 - Changed Scraper to use custom dom parsing with regexe's as it greatly improves speed 
 - Changed Caching to a common storage system
+- Fixed playback after youtube changes
 - Fixed RTMPe support (we now provide playpath correctly) - NOTE: this requires and updated version of librtmp
 
 [B]Version 2.5.0 (Beta)[B]
