@@ -18,7 +18,6 @@
 
 import sys, urllib, re
 import YouTubeCore, YouTubeUtils
-from BeautifulSoup import BeautifulSoup, SoupStrainer
 
 class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):	 
 
@@ -503,6 +502,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			
 		videos = re.compile('<a href="/watch\?v=(.*)&amp;feature=sh_e_sl&amp;list=SL"').findall(result["content"])
 			
+
 		nexturl = self.parseDOM(result["content"], { "name": "button", "id": "data-next-url", "return": "data-next-url"  })
 
 		if (len(nexturl) > 0):
