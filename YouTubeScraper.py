@@ -503,14 +503,12 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			
 		videos = re.compile('<a href="/watch\?v=(.*)&amp;feature=sh_e_sl&amp;list=SL"').findall(result["content"])
 			
-		list = SoupStrainer(name="div", attrs = {'class':"show-more-ctrl"})
-		nexturl = BeautifulSoup(result["content"], parseOnlyThese=list)
+		nexturl = self.parseDOM(result["content"], { "name": "button", "id": "data-next-url", "return": "data-next-url"  })
+
 		if (len(nexturl) > 0):
-			nexturl = nexturl.find(name="div", attrs = {'class':"button-container"})
-			if (nexturl.button):
-				nexturl = nexturl.button["data-next-url"]
-			else:
-				nexturl = ""
+			nexturl = nexturl[0]
+		else:
+			nexturl = ""
 		
 		if nexturl.find("start=") > 0:
 			fetch = True
