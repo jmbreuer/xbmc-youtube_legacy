@@ -321,7 +321,7 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 		get = params.get
 		iget = item.get
 		key = ""
-		print "value storage key " + repr(params)
+		
 		if ((get("action") == "reverse_order" or get("user_feed") == "playlist") and (iget("playlist") or get("playlist"))):
 			
 			key = "reverse_playlist_" 
