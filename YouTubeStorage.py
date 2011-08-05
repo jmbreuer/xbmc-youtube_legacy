@@ -41,8 +41,10 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 		get = params.get
 		if get("store") == "contact_options":
 			return self.getUserOptionFolder(params)
+		elif get("store") == "artists":
+			return self.getStoredArtists(params)
 		elif get("store"):
-			return self.getStoredList(params)
+			return self.getStoredSearches(params)
 	
 	def getStoredArtists(self, params = {}):
 		get = params.get
@@ -88,7 +90,7 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 			searches = [(get("Title"), get("artist"))] + artists[:searchCount]
 			self.store(params, searches)
 		
-	def getStoredSearch(self, params = {}):
+	def getStoredSearches(self, params = {}):
 		get = params.get
 		
 		searches = self.retrieve(params)
