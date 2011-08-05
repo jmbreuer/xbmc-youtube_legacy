@@ -16,7 +16,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, urllib, urllib2, re, time, socket, cookielib, json
+import sys, urllib, urllib2, re, time, socket, cookielib
+try: import simplejson as json
+except ImportError: import json
 from xml.dom.minidom import parseString
 import YouTubeUtils
 # ERRORCODES:

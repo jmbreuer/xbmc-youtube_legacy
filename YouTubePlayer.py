@@ -16,7 +16,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, urllib, re, os.path, datetime, time, json
+import sys, urllib, re, os.path, datetime, time
+try: import simplejson as json
+except ImportError: import json
 import xbmc, xbmcgui, xbmcplugin, xbmcvfs
 import YouTubeCore, YouTubeUtils
 from xml.dom.minidom import parseString

@@ -16,7 +16,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, urllib, urllib2, re, socket, json, cookielib
+import sys, urllib, urllib2, re, socket, cookielib
+try: import simplejson as json
+except ImportError: import json
+
 import xbmc
 import YouTubeUtils
 import YouTubeCore
