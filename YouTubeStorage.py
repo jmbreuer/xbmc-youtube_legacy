@@ -48,6 +48,8 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 	
 	def getStoredArtists(self, params = {}):
 		get = params.get
+		if self.__dbg__:
+			print self.__plugin__ + " getStoredArtists"
 		
 		artists = self.retrieve(params)
 				
@@ -55,7 +57,7 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 		for title, artist in artists:
 			item = {}
 			item["path"] = get("path")
-			item["Title"] = title
+			item["Title"] = urllib.unquote_plus(title)
 			item["artist"] = artist
 			item["scraper"] = "artist"
 			item["icon"] = "music" 
@@ -67,6 +69,9 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 	
 	def deleteStoredArtist(self, params = {}):
 		get = params.get
+		if self.__dbg__:
+			print self.__plugin__ + " deleteStoredArtist"
+
 		
 		artist = get("artist")
 		artists = self.retrieve(params)
@@ -83,15 +88,22 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 		
 	def saveStoredArtist(self, params = {}):
 		get = params.get
+		if self.__dbg__:
+			print self.__plugin__ + " saveStoredArtist"
+
 		
-		if get("artist") and get("Title"):
-			artists = self.retrieve(params)			
+		if get("artist") and get("artist_name"):
+			params["store"] = "artists"
+			artists = self.retrieve(params)
 			searchCount = ( 10, 20, 30, 40, )[ int( self.__settings__.getSetting( "saved_searches" ) ) ]
-			searches = [(get("Title"), get("artist"))] + artists[:searchCount]
-			self.store(params, searches)
+			artists = [(get("artist_name"), get("artist"))] + artists[:searchCount]
+			self.store(params, artists)
+			del params["store"]
 		
 	def getStoredSearches(self, params = {}):
 		get = params.get
+		if self.__dbg__:
+			print self.__plugin__ + " getStoredSearches"
 		
 		searches = self.retrieve(params)
 				
@@ -108,14 +120,21 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 			elif get("store") == "disco_searches":
 				item["scraper"] = "search_disco"
 				item["icon"] = "discoball"
-						
-			item["thumbnail"] = self.retrieve(params, "thumbnail", item)
+			
+			thumbnail = self.retrieve(params, "thumbnail", item)
+			if thumbnail:
+				item["thumbnail"] = thumbnail
+			else: 
+				item["thumbnail"] = item["icon"] 
 			result.append(item)
 				
 		return (result, 200)
 			
 	def deleteStoredSearch(self, params = {}):
 		get = params.get
+		if self.__dbg__:
+			print self.__plugin__ + " deleteStoredSearch"
+
 		
 		query = urllib.unquote_plus(get("delete"))		
 		searches = self.retrieve(params)
@@ -131,6 +150,8 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 	
 	def saveStoredSearch(self, params = {}):
 		get = params.get
+		if self.__dbg__:
+			print self.__plugin__ + " saveStoredSearch"
 		
 		if get("search"):
 			searches = self.retrieve(params)
@@ -152,6 +173,9 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 	
 	def editStoredSearch(self, params = {}):
 		get = params.get
+		if self.__dbg__:
+			print self.__plugin__ + " editStoredSearch"
+
 
 		if (get("search")):
 			old_query = urllib.unquote_plus(get("search"))
@@ -166,7 +190,7 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 				params["store"] = "searches"
 				params["feed"] = "search"
 			
-			self.saveInStoredList(params)
+			self.saveStoredSearch(params)
 
 			params["search"] = urllib.quote_plus(new_query)
 			del params["old_search"]
@@ -176,6 +200,9 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 		
 	def getUserOptionFolder(self, params = {}):
 		get = params.get
+		if self.__dbg__:
+			print self.__plugin__ + " getUserOptionsFolder"
+
 		result = []
 		for item in self.user_options:
 			item["path"] = get("path")
@@ -186,6 +213,9 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 	
 	def changeSubscriptionView(self, params = {}):
 		get = params.get
+		if self.__dbg__:
+			print self.__plugin__ + " changeSubscriptionsView"
+
 		
 		if (get("view_mode")):  
 			key = self.getStorageKey(params, "viewmode")
@@ -198,12 +228,15 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 	
 	def reversePlaylistOrder(self, params = {}):
 		get = params.get
+		if self.__dbg__:
+			print self.__plugin__ + " reversePlaylistOrder"
+
 		
 		if (get("playlist")):
 			key = self.getStorageKey(params)
 			
 			value = "true"
-			existing = self.retrieveValue(key)
+			existing = self.retrieveValue(key, "value")
 			if existing == "true":
 				value = "false"
 					
@@ -213,8 +246,10 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 		
 	def getReversePlaylistOrder(self, params = {}):
 		get = params.get 
-		result = False
+		if self.__dbg__:
+			print self.__plugin__ + " getReversePlaylistOrder"
 		
+		result = False
 		if (get("playlist")):
 			key = self.getStorageKey(params) 
 						

@@ -126,9 +126,9 @@ class YouTubeNavigation(YouTubeUtils.YouTubeUtils):
 		if (get("action") == "test"):
 			self.__downloader__.test(params)
 		if (get("action") in ["delete_search", "delete_disco", "delete_artist"]):
-			self.__storage__.deleteFromStoredList(params)
+			self.__storage__.deleteStoredSearch(params)
 		if (get("action") in ["edit_search", "edit_disco"]):
-			self.__storage__.editItemInStoredList(params)
+			self.__storage__.editStoredSearch(params)
 			self.listMenu(params)
 		if (get("action") == "remove_favorite"):
 			self.removeFromFavorites(params)
@@ -172,8 +172,11 @@ class YouTubeNavigation(YouTubeUtils.YouTubeUtils):
 				if not query:
 					return False
 				params["search"] = query
-			
-			self.__storage__.saveInStoredList(params)
+			if get("scraper") == "search_disco":
+				params["store"] = "disco_searches"
+			self.__storage__.saveStoredSearch(params)
+			if get("scraper") == "search_disco":
+				del params["store"]
 		
 		if get("scraper"):
 			(results , status) = self.__scraper__.scrape(params)

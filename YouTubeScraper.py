@@ -72,7 +72,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		if (len(trailers) > 0):
 			items = []
 			ahref = self.parseDOM(trailers, { "name": "a", "class": " yt-uix-hovercard-target", "return": "href"})
-                        athumb = self.parseDOM(trailers, {"name": "img", "id": "alt", "id-match": "Thumbnail", "return": "src"})
+			athumb = self.parseDOM(trailers, {"name": "img", "id": "alt", "id-match": "Thumbnail", "return": "src"})
 			if len(ahref) == len(athumb):
 				for i in range(0, len(ahref)):
 					videoid = ahref[i]
@@ -177,13 +177,14 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		items = []
 		videos = []
 		
-		if get("artist"):
+		if get("artist") and get("artist_name"):
+			self.__storage__.saveStoredArtist(params)
 			url = self.urls["artist"] % get("artist")
 			result = self._fetchPage({"link": url})
 			
 			if result["status"] == 200:
 				videos = re.compile('<a href="/watch\?v=(.*)&amp;feature=artist" title="').findall(result["content"]);
-				
+			
 		for v in videos:
 			if v not in items:
 				items.append(v)
@@ -212,7 +213,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 						title = self.makeAscii(atitle[i])
 						title = self.replaceHtmlCodes(title)
 						item["Title"] = title
-					
+						item["artist_name"] = urllib.quote_plus(title)
 						link = ahref[i]
 						link = link[link.find("?a=") + 3:link.find("&")]
 						item["artist"] = link
@@ -250,7 +251,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 						title = self.replaceHtmlCodes(title)
 						item["Title"] = title
 						item["scraper"] = "music_artist"
-
+						item["artist_name"] = urllib.quote_plus(title)
 						link = ahref[i]
 						link = link[link.find("?a=") + 3:link.find("&")]
 						item["artist"] = link
@@ -293,7 +294,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			print self.__plugin__ + " searchDisco"
 		
 		items = []
-
+		
 		url = self.urls["disco_search"] % urllib.quote_plus(get("search"))
 		result = self._fetchPage({"link": url})
 		
@@ -868,8 +869,8 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			if (get("category")):
 				category = get("category")
 				category = urllib.unquote_plus(category)
-                                category = category.replace("/shows/", "")
-                                category = category.replace("/shows", "")
+				category = category.replace("/shows/", "")
+				category = category.replace("/shows", "")
 				url = self.urls["shows"] + "/" + category
 				if category.find("?") > -1:
 					url += "&p=" + page + "&hl=en"
@@ -1069,7 +1070,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 
 		if next == "true":
 			self.addNextFolder(result, params)
-		print self.__plugin__ + " paginated " + repr(result) + " - " + repr(status)
+		
 		return (result, status)
 	
 	def scrape(self, params = {}):
