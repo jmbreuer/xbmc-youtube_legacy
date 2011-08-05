@@ -55,7 +55,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		self.urls['artist'] = "http://www.youtube.com/artist?a=%s&feature=artist"	
 		
 #=================================== Trailers ============================================
-	def scrapeTrailersListFormat (self, params = {}): # NOT UPDATED.. NOT USED... DELETE???
+	def scrapeTrailersListFormat (self, params = {}):
 		get = params.get
 		if self.__dbg__:
 			print self.__plugin__ + " scrapeTrailersListFormat"
@@ -65,22 +65,22 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		url = self.createUrl(params)
 		result = self._fetchPage({"link":url})
 		
-		list = SoupStrainer(id="recent-trailers-container", name="div")
-		trailers = BeautifulSoup(result["content"], parseOnlyThese=list)
+		#list = SoupStrainer(id="recent-trailers-container", name="div")
+		#trailers = BeautifulSoup(result["content"], parseOnlyThese=list)
+		trailers = self.parseDOM(result["content"], { "name": "div", "id": "id", "id-match": "recent-trailers-container"})
 		
 		if (len(trailers) > 0):
-			trailer = trailers.div.div
 			items = []
-			
-			while (trailer != None):
-				videoid = trailer.div.div.a['href']
+			ahref = self.parseDOM(trailers, { "name": "a", "class": " yt-uix-hovercard-target", "return": "href"})
+                        athumb = self.parseDOM(trailers, {"name": "img", "id": "alt", "id-match": "Thumbnail", "return": "src"})
+			if len(ahref) == len(athumb):
+				for i in range(0, len(ahref)):
+					videoid = ahref[i]
 				
-				if (videoid):
-					if (videoid.find("=") > -1):
-						videoid = videoid[videoid.find("=")+1:]  
-						items.append( (videoid, trailer.div.div.a.span.img['src']) )
-				
-				trailer = trailer.findNextSibling(name="div")
+					if (videoid):
+						if (videoid.find("=") > -1):
+							videoid = videoid[videoid.find("=")+1:]  
+							items.append( (videoid, athumb[i]) )
 		
 		if (items):
 			(yobjects, status) = self.getBatchDetailsThumbnails(items)
@@ -783,6 +783,8 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		if (get("scraper") == "music_artist"):
 			function = self.scrapeArtist
 			params["batch"] = "true"
+		if (get("scraper") in [ "latest_game_trailers", "latest_trailers"]):
+			function = self.scrapeTrailersListFormat
 		if (get("scraper") == "similar_artist"):
 			function = self.scrapeSimilarArtists
 			params["folder"] = "true"

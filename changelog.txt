@@ -3,7 +3,6 @@
 - Pagination <- Passed.
 - Settings
 - Music Top 50 ( no results ) 
-- Trailers -> Latest and latest games fails [ (result, status) = params["new_results_function"](params) -  KeyError: ('new_results_function',) ]
 - Categories -> Education is broken (It is now a folder)
 
 - Go through every menu to check if things are still working
