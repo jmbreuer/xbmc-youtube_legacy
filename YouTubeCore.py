@@ -709,6 +709,16 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 				
 		return ytobjects;
 
+	def stripTags(self, html):
+		sub_start = html.find("<")
+		sub_end = html.find(">")
+		while sub_start < sub_end and sub_start > -1:
+			html = html.replace(html[sub_start:sub_end + 1], "").strip()
+			sub_start = html.find("<")
+			sub_end = html.find(">")
+
+		return html
+
 	def getDOMContent(self, html, params, match):
 		get = params.get
 		#print self.__plugin__ + " getDOMContent match: " + match
@@ -726,7 +736,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 			pos = html.find("<" + get("name"), pos + 1)
 			if pos == -1:
 				break;
-			tend = html.find(endstr, end + 1)
+			tend = html.find(endstr, end + len(endstr))
 			if tend != -1:
 				end = tend
 			#print self.__plugin__ + " getDOMContent2 loop: " + str(start) + " < " + str(end) + " pos = " + str(pos)
@@ -814,8 +824,8 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 			for match in lst:
 				temp = self.getDOMContent(html, params, match)
 				html = html.replace(temp, "")
-				contlst.append(temp[temp.find(">")+1:temp.find("</" + get("name") + ">")])
-			#print self.__plugin__ + " parseDOM return lst for " + repr(params) + " : " + str(len(lst)) + " - " + repr(lst)
+				contlst.append(temp[temp.find(">")+1:temp.rfind("</" + get("name") + ">")])
+			#print self.__plugin__ + " parseDOM return lst for " + repr(params) + " : " + str(len(lst)) + " - " + repr(contlst)
 			return contlst
 
 		#print self.__plugin__ + " parseDOM done return html for " + repr(params) + " : " + str(len(html2))

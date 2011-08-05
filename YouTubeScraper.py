@@ -623,18 +623,21 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 				next = "true"
 			showcont = "".join(showcont)
 
-			shows = self.parseDOM(showcont, { "name": "div", "class": "browse-item-content", "content": "true" })
-			athumb = self.parseDOM(showcont, { "name": "img", "id": "alt", "id-match": "Thumbnail", "return": "src"})
+			shows = self.parseDOM(showcont, { "name": "div", "class": "browse-item show-item yt-uix-hovercard ", "content": "true" })
 
-			for index, show in enumerate(shows):
-				ahref = self.parseDOM(show, { "name": "a", "return": "href" })
-				acont = self.parseDOM(show, { "name": "a", "content": "true" })
-				acount = self.parseDOM(show, { "name": "span", "class": "show-counts", "content": "true" })
-				
-				if len(ahref) == len(acont) and len(ahref) == len(acount) and len(shows) == len(athumb) and len(ahref) > 0:
+			for show in shows:
+				ahref = self.parseDOM(show, { "name": "a", "id": "title", "return": "href" })
+				acont = self.parseDOM(show, { "name": "a", "id": "title", "return": "title" })
+				athumb = self.parseDOM(show, { "name": "img", "id": "alt", "id-match": "Thumbnail", "return": "src"})
+				acount = self.parseDOM(show, { "name": "span", "class": "show-video-counts", "content": "true" })
+
+				#print self.__plugin__ + " XXX " + str(len(ahref)) + " - " +  str(len(acont)) + " - " + str(len(athumb)) + " - " + str(len(acount)) + repr(show)
+				if len(ahref) == len(acont) and len(ahref) == len(acount) and len(ahref) == len(athumb) and len(ahref) > 0:
 					for i in range(0, len(ahref)):
 						item = {}
-						title = acont[i] + " (" + acount[i].strip() + ")"
+
+						count = self.stripTags(acount[i].replace("\n", "").replace(",", ", "))
+						title = acont[i] + " (" + count + ")"
 						title = self.replaceHtmlCodes(title)
 						item['Title'] = title
 						
@@ -648,7 +651,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 						
 						item['icon'] = "shows"
 						item['scraper'] = "shows"
-						thumbnail = athumb[index]
+						thumbnail = athumb[i]
 						if ( thumbnail.find("_thumb.") > 0):
 							thumbnail = thumbnail.replace("_thumb.",".")
 						else:
