@@ -232,17 +232,14 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 		get = params.get
 		if self.__dbg__:
 			print self.__plugin__ + " reversePlaylistOrder"
-
 		
-		if (get("playlist")):
-			key = self.getStorageKey(params)
-			
+		if (get("playlist")):			
 			value = "true"
-			existing = self.retrieveValue(key, "value")
+			existing = self.retrieve(params, "value")
 			if existing == "true":
 				value = "false"
-					
-			self.storeValue(key, value)
+			
+			self.store(params, value, "value")
 		
 		xbmc.executebuiltin( "Container.Refresh" )
 		
@@ -253,9 +250,7 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 		
 		result = False
 		if (get("playlist")):
-			key = self.getStorageKey(params) 
-						
-			existing = self.retrieveValue(key)
+			existing = self.retrieve(params, "value")
 			if existing == "true":
 				result = True
 		
@@ -326,9 +321,16 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 		get = params.get
 		iget = item.get
 		key = ""
-		
-		if (get("action") == "reverse_order" and iget("playlist")):
-			key = "reverse_playlist_" + iget("playlist")
+		print "value storage key " + repr(params)
+		if ((get("action") == "reverse_order" or get("user_feed") == "playlist") and (iget("playlist") or get("playlist"))):
+			
+			key = "reverse_playlist_" 
+			if iget("playlist"):
+				key += iget("playlist")
+			
+			if get("playlist"):
+				key += get("playlist")
+				
 			if (get("external")):
 				key += "_external_" + get("contact")
 		
