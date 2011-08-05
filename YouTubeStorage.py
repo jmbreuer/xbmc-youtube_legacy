@@ -59,10 +59,14 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 			item["path"] = get("path")
 			item["Title"] = urllib.unquote_plus(title)
 			item["artist"] = artist
-			item["scraper"] = "artist"
+			item["scraper"] = "music_artist"
 			item["icon"] = "music" 
+			item["thumbnail"] = "music"
+			thumbnail = self.retrieve(params, "thumbnail", item)
 			
-			item["thumbnail"] = self.retrieve(params, "thumbnail", item)
+			if thumbnail:
+				item["thumbnail"] = thumbnail	
+			
 			result.append(item)
 				
 		return (result, 200)
@@ -72,10 +76,8 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 		if self.__dbg__:
 			print self.__plugin__ + " deleteStoredArtist"
 
-		
 		artist = get("artist")
 		artists = self.retrieve(params)
-		
 		
 		for count, (title, artist_id) in enumerate(artists):
 			if (artist == artist_id):
@@ -291,6 +293,15 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 			if iget("search"):
 				key += urllib.unquote_plus(iget("search",""))
 		
+		if get("artist") or iget("artist"):
+			key = "artist_"
+			
+			if get("artist"):
+				key += get("artist")
+			
+			if iget("artist"):
+				key += iget("artist")
+			
 		if get("user_feed"):
 			key = get("user_feed")
 			
