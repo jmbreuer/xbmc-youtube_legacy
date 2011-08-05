@@ -42,6 +42,8 @@ class YouTubePlaylistControl(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils)
 			result = self.getDiscoSearch(params)
 		elif get("user_feed") == "favorites":
 			result = self.getFavorites(params)
+		elif get("scraper") == "watch_later":
+			result = self.getWatchLater(params)
 		elif get("user_feed") == "newsubscriptions":
 			result = self.getNewSubscriptions(params)
 		elif get("video_list", False) :
@@ -49,8 +51,7 @@ class YouTubePlaylistControl(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils)
 			video_list = get("video_list", "").split(",")
 			for videoid in video_list:
 				(video, status) = self.__player__.getVideoObject({ "videoid": videoid})
-				result.append(video);
-			
+				result.append(video);	
 		else:
 			return
 		
@@ -131,6 +132,10 @@ class YouTubePlaylistControl(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils)
 		params["user_feed"] = "playlist" 
 		return self.__feeds__.listAll(params)
 	
+	def getWatchLater(self, params = {}):
+		(result, status ) = self.__scraper__.scrapeWatchLater(params)
+		return result
+
 	def getDiscoSearch(self, params = {}):
 		(result, status) = self.__scraper__.searchDisco(params)
 		

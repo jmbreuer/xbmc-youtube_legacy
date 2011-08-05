@@ -1,8 +1,25 @@
 [B]TODO:[/B]
-- Add support for play all on Watch Later [Henrik]
 - Music scraper should remember previously listed artists 
 - Go through every menu to check if things are still working
+  - All items except explore and contact verified as working.
+  - my playlist -> "item" -> "reverse playlist" | no worky
+
 - Check all context menu items again some seem to be broken
+  - explore
+    -
+  - Youtube suggests is verified as working ( no play all, no reverse, no shuffle )
+  - my watch later is verified as working ( no reverse )
+  - my liked videos is verified as working ( no play all, no reverse, no shuffle )
+  - my playlist
+    - playlist items work ( Should playlist video item have "add to playlist? )
+  - my contacts
+    -
+  - my favorites is verified as working ( no reverse )
+  - my playlist is verified as working
+  - my uploads -> add to favorites, subscripe, more videos by <user> and add to playlist are all in context menu.. should they be?
+  - my downloads has nothing to verify
+  - search -> is verified as working (no play_all, yet)
+  - my subscriptions is verified as working
 
 [B]Errata[/B]
 - [XBMC] Thumbnails sometimes turns into black box or Folder (XBMC not detecting when thumbnail is set and defaulting to icon?)
@@ -14,7 +31,8 @@
 
 [B]Version 2.6.0 (Beta)[B]
 - Added New playback function. Now uses unified code accross all pages(html scraping, embeded, flash fallback). Supports fallback server.
-- Use fallback for age restricted videos (Will fail if embedding is disabled)
+- Added fallback for age restricted videos (Will fail if embedding is disabled)
+- Added support for play all on Watch Later
 - Added Support for Oauth2 authentication
 - Added Suppert for 2 factor authentication
 - Added Support OAuth2 token refresh when login token expires (reducing the need to re-login all the time) 
