@@ -22,13 +22,16 @@
 - Added Support for Oauth2 authentication
 - Added Suppert for 2 factor authentication
 - Added Support OAuth2 token refresh when login token expires (reducing the need to re-login all the time) 
-- Added YouTube Annotations to subtitles
+- Added support for YouTube Annotations to subtitles
 - Added PlayAll support for artist listings
 - Added Support for enabling and disabling youtube caching servers (aka o-preffered-yourisp urls)
+- Changed YouTube live scraper to use API feed instead, this nearly doubled the amount of live events. 
+- Changed Plugin now honors YouTube rules for use of their batch api which sould prevent "Unkown Title" errors from batch queries 
 - Changed Subtitle format to SSA to support merging of annotations and subtitles
 - Changed Caching of playlists, to support playlist editid accross all pages
 - Changed Scraper to use custom dom parsing with regexe's as it greatly improves speed 
 - Changed Caching to a common storage system
+- Removed old outdated translations
 - Fixed playback after youtube changes
 - Fixed RTMPe support (we now provide playpath correctly) - NOTE: this requires and updated version of librtmp
 
