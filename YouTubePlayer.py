@@ -354,7 +354,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 					if final_url.find("&type") > 0:
 						final_url = final_url[:final_url.find("&type")]
 					
-					if self.__settings__.getSetting("preferred") == "true":
+					if self.__settings__.getSetting("preferred") == "false":
 						pos = final_url.find("://")
 						fpos = final_url.find("fallback_host")
 						if pos > -1 and fpos > -1:
