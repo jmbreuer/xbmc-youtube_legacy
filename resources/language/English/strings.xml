@@ -181,6 +181,7 @@
     <string id="30530">Remove from Playlist</string>
     <string id="30531">Reverse Playlist</string>
     <string id="30539">Delete Playlist</string>
+    <string id="30540">Delete artist</string>
 	
     <!-- messages -->
     <string id="30600">Error</string>
