@@ -51,6 +51,8 @@ class YouTubePlaylistControl(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils)
 			result = self.getLikedVideos(params)
 		elif get("scraper") == "music_artists":
 			result = self.getArtist(params)
+		elif get("scraper") == "recommended":
+			result = self.getRecommended(params)
 		elif get("user_feed") == "newsubscriptions":
 			result = self.getNewSubscriptions(params)
 		elif get("video_list", False) :
@@ -58,7 +60,7 @@ class YouTubePlaylistControl(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils)
 			video_list = get("video_list", "").split(",")
 			for videoid in video_list:
 				(video, status) = self.__player__.getVideoObject({ "videoid": videoid})
-				result.append(video);	
+				result.append(video)
 		else:
 			return
 		
@@ -167,6 +169,19 @@ class YouTubePlaylistControl(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils)
 			return False
 		params["user_feed"] = "newsubscriptions"
 		return self.__feeds__.listAll(params)
+	
+	def getRecommended(self, params = {}):
+		get = params.get
+		
+		if not get("scraper") or not get("login"):
+			return False
+		
+		(result, status) = self.__scraper__.scrapeRecommended(params)
+		
+		if status == 200:
+			(result, status) = self.getBatchDetails(result, params)
+		
+		return result
 	
 	def getArtist(self, params = {}):
 		get = params.get
