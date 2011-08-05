@@ -294,18 +294,18 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 		if get("user_feed"):
 			key = get("user_feed")
 			
+			if get("channel"):
+				key = "subscriptions_" + get("channel")
+
+			if iget("channel"):
+				key += "_" + iget("channel")
+		
 			if get("playlist"):
 				key += "_" + get("playlist")
 			
 			if iget("playlist"):
 				key = "playlist_" + iget("playlist")
 			
-			if get("channel"):
-				key = "subscriptions_" + get("channel")
-			
-			if iget("channel"):
-				key += "_" + iget("channel")
-		
 		if key:
 			key += "_thumb"
 		
