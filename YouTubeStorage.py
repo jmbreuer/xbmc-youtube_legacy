@@ -43,8 +43,52 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 			return self.getUserOptionFolder(params)
 		elif get("store"):
 			return self.getStoredList(params)
+	
+	def getStoredArtists(self, params = {}):
+		get = params.get
 		
-	def getStoredList(self, params = {}):
+		artists = self.retrieve(params)
+				
+		result = []
+		for title, artist in artists:
+			item = {}
+			item["path"] = get("path")
+			item["Title"] = title
+			item["artist"] = artist
+			item["scraper"] = "artist"
+			item["icon"] = "music" 
+			
+			item["thumbnail"] = self.retrieve(params, "thumbnail", item)
+			result.append(item)
+				
+		return (result, 200)
+	
+	def deleteStoredArtist(self, params = {}):
+		get = params.get
+		
+		artist = get("artist")
+		artists = self.retrieve(params)
+		
+		
+		for count, (title, artist_id) in enumerate(artists):
+			if (artist == artist_id):
+				del(artists[count])
+				break
+		
+		self.store(params, artists)
+		
+		xbmc.executebuiltin( "Container.Refresh" )
+		
+	def saveStoredArtist(self, params = {}):
+		get = params.get
+		
+		if get("artist") and get("Title"):
+			artists = self.retrieve(params)			
+			searchCount = ( 10, 20, 30, 40, )[ int( self.__settings__.getSetting( "saved_searches" ) ) ]
+			searches = [(get("Title"), get("artist"))] + artists[:searchCount]
+			self.store(params, searches)
+		
+	def getStoredSearch(self, params = {}):
 		get = params.get
 		
 		searches = self.retrieve(params)
@@ -62,17 +106,13 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 			elif get("store") == "disco_searches":
 				item["scraper"] = "search_disco"
 				item["icon"] = "discoball"
-			else:
-				item["thumbnail"] = "music"
-			
-			params["thumb"] = "true"
-			
+						
 			item["thumbnail"] = self.retrieve(params, "thumbnail", item)
 			result.append(item)
 				
 		return (result, 200)
-						
-	def deleteFromStoredList(self, params = {}):
+			
+	def deleteStoredSearch(self, params = {}):
 		get = params.get
 		
 		query = urllib.unquote_plus(get("delete"))		
@@ -87,7 +127,7 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 		
 		xbmc.executebuiltin( "Container.Refresh" )
 	
-	def saveInStoredList(self, params = {}):
+	def saveStoredSearch(self, params = {}):
 		get = params.get
 		
 		if get("search"):
@@ -108,7 +148,7 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 			searches = [new_query] + searches[:searchCount]
 			self.store(params, searches)
 	
-	def editItemInStoredList(self, params = {}):
+	def editStoredSearch(self, params = {}):
 		get = params.get
 
 		if (get("search")):
