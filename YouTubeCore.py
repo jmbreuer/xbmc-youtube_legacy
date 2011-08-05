@@ -544,6 +544,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 				"grant_type": "refresh_token"}
 			ret = self._fetchPage({ "link": url, "no-language-cookie": "true", "url_data": data}) # "no-language-cookie": "true" <- might be needed here..
 			if ret["status"] == 200:
+				oauth = ""
 				try:
 					oauth = json.loads(ret["content"])
 				except:
@@ -556,9 +557,9 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 			
 				self.__settings__.setSetting("oauth2_access_token", oauth["access_token"])
 				return True
-
-			if self.__dbg__:
-				print self.__plugin__ + " _oRefreshToken - returning, got result a: " + repr(oauth)
+			
+				if self.__dbg__:
+					print self.__plugin__ + " _oRefreshToken - returning, got result a: " + repr(oauth)
 
 			return False
 
