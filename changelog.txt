@@ -1,10 +1,14 @@
 [B]TODO:[/B]
 - Music scraper should remember previously listed artists
+- Pagination <- Passed.
 - Settings
-- Pagination
-- Top 50 ( no results ) 
+- Music Top 50 ( no results ) 
 - Movies -> All categories/new releases is empty??
 - Shows -> All categories is empty??
+  - Season sometimes has no number
+- Trailers -> Latest and latest games fails
+- Some folders in categories fail.
+
 - Go through every menu to check if things are still working
   - my playlist -> "item" -> "reverse playlist" | no worky
     - Same goes for playlists under contacts

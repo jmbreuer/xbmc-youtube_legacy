@@ -129,7 +129,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 				items.append(link)
 				
 		if self.__dbg__:
-			print self.__plugin__ + " scrapeCategoriesGrid done"
+			print self.__plugin__ + " scrapeCategoriesGrid done " 
 		return (items, result["status"])
 		
 #=================================== Music  ============================================
@@ -976,6 +976,8 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 						title = title.replace("&amp;", "&")
 						item['Title'] = title
 						cat = ahref[i].replace("/" + scraper + "/", "")
+						if cat[0] == "/" and False:
+							cat = cat[1:]
 
 						if cat.find("?") > -1:
 							cat = cat[:cat.find("?")]
