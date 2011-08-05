@@ -51,10 +51,12 @@
   <!-- Explore YouTube -->
   <category label="30270">
     <setting id="categories" type="bool" label="30266" default="true" />
-    <setting id="feeds" type="bool" label="30249" default="true" />
-    <setting id="trailers" type="bool" label="30264" default="true" />
-    <setting id="shows" type="bool" label="30267" default="true" />
-    <setting id="movies" type="bool" label="30268" default="true" /> 
     <setting id="disco" type="bool" label="30263" default="true" />
+    <setting id="feeds" type="bool" label="30249" default="true" />
+    <setting id="movies" type="bool" label="30268" default="true" /> 
+    <setting id="music" type="bool" label="30286" default="true" />
+    <setting id="shows" type="bool" label="30267" default="true" />
+    <setting id="trailers" type="bool" label="30264" default="true" />
+    <setting id="live" type="bool" label="30287" default="true" />
   </category>
 </settings>
