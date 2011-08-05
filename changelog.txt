@@ -1,25 +1,40 @@
 [B]TODO:[/B]
-- Music scraper should remember previously listed artists 
+- Music scraper should remember previously listed artists
+- Settings
+- Pagination
+- Top 50 ( no results ) 
+- Movies -> All categories/new releases is empty??
+- Shows -> All categories is empty??
 - Go through every menu to check if things are still working
-  - All items except explore and contact verified as working.
   - my playlist -> "item" -> "reverse playlist" | no worky
+    - Same goes for playlists under contacts
+  - Explore not checked, everything else is working
 
 - Check all context menu items again some seem to be broken
-  - explore
-    -
-  - Youtube suggests is verified as working ( no play all, no reverse, no shuffle )
-  - my watch later is verified as working ( no reverse )
-  - my liked videos is verified as working ( no play all, no reverse, no shuffle )
-  - my playlist
-    - playlist items work ( Should playlist video item have "add to playlist? )
-  - my contacts
-    -
-  - my favorites is verified as working ( no reverse )
-  - my playlist is verified as working
-  - my uploads -> add to favorites, subscripe, more videos by <user> and add to playlist are all in context menu.. should they be?
-  - my downloads has nothing to verify
-  - search -> is verified as working (no play_all, yet)
-  - my subscriptions is verified as working
+  - explore 
+    - Categories
+    - Disco fails. (can change/delete search in most popular artists. Can't delete old search)
+    - Feeds confirmed
+    - Movies 
+    - Music ( Missing play all, shuffle and reverse )
+    - Shows ( Missing play all, shuffle and reverse )
+    - Trailers confirmed
+    - Live confirmed
+  - Youtube suggests ( no play all, no reverse, no shuffle )
+  - my watch later  ( no reverse )
+  - my liked videos ( no play all, no reverse, no shuffle )
+  - my playlist ( extra "add to playlist? )
+  - my contacts 
+    - contact items(sans playlists) have "Add contact" item that makes no sense.
+    - contact items -> my uploads have irrelevant "more videos by <user>"
+    - contact items -> subsriptions -> items "view favorites" doesn't change to "view uploads" after toggle
+    - For ALL levels, related videos gives a "Add contact.." folder
+  - my favorites ( no reverse )
+  - my playlist confirmed
+  - my uploads -> add to favorites, subscripe, more videos by <user> and add to playlist are all in context menu.. should they be? (Might conflict with uploads in contacts if this is changed?? )
+  - my downloads confirmed(naught)
+  - search (no play_all, yet)
+  - my subscriptions confirmed
 
 [B]Errata[/B]
 - [XBMC] Thumbnails sometimes turns into black box or Folder (XBMC not detecting when thumbnail is set and defaulting to icon?)
