@@ -1,32 +1,10 @@
 [B]TODO:[/B]
-- Pagination <- Passed.
 - Settings
 - Categories -> Education is broken (It is now a folder)
 
 - Go through every menu to check if things are still working
   - my playlist -> "item" -> "reverse playlist" | no worky
     - Same goes for playlists under contacts
-  - Explore not checked, everything else is working
-
-- Check all context menu items again some seem to be broken
-  - explore 
-    - Categories confirmed
-    - Disco confirmed
-    - Feeds confirmed
-    - Movies confirmed
-    - Music ( Missing reverse :ignore ) confirmed
-    - Shows ( Missing play all, shuffle and reverse :ignore ) confirmed
-    - Trailers confirmed
-    - Live confirmed
-  - Youtube suggests ( no reverse :ignore ) confirmed
-  - my liked videos ( no reverse :ignore ) confirmed
-  - my contacts confirmed
-  - my favorites ( no reverse :ignore ) confirmed
-  - my playlist confirmed
-  - my uploads -> add to favorites, subscripe, more videos by <user> and add to playlist are all in context menu.. should they be? (Might conflict with uploads in contacts if this is changed?? )
-  - my downloads confirmed
-  - search confirmed
-  - my subscriptions confirmed
 
 [B]Errata[/B]
 - [XBMC] Thumbnails sometimes turns into black box or Folder (XBMC not detecting when thumbnail is set and defaulting to icon?)
