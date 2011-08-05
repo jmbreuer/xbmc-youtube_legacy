@@ -179,6 +179,8 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		
 		if get("artist") and get("artist_name"):
 			self.__storage__.saveStoredArtist(params)
+		
+		if get("artist"):
 			url = self.urls["artist"] % get("artist")
 			result = self._fetchPage({"link": url})
 			

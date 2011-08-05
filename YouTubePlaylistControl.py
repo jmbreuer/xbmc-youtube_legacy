@@ -32,6 +32,9 @@ class YouTubePlaylistControl(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils)
 	
 	def playAll(self, params={}):
 		get = params.get
+		if self.__dbg__:
+			print self.__plugin__ + " playAll"
+
 		params["fetch_all"] = "true"
 		result = []
 		# fetch the video entries
@@ -44,6 +47,10 @@ class YouTubePlaylistControl(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils)
 			result = self.getFavorites(params)
 		elif get("scraper") == "watch_later":
 			result = self.getWatchLater(params)
+		elif get("scraper") == "liked_videos":
+			result = self.getLikedVideos(params)
+		elif get("scraper") == "music_artists":
+			result = self.getArtist(params)
 		elif get("user_feed") == "newsubscriptions":
 			result = self.getNewSubscriptions(params)
 		elif get("video_list", False) :
@@ -140,7 +147,7 @@ class YouTubePlaylistControl(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils)
 		(result, status) = self.__scraper__.searchDisco(params)
 		
 		if status == 200:
-			(result, status) = self.__feeds__.getBatchDetails(result, params)
+			(result, status) = self.getBatchDetails(result, params)
 		
 		return result
 	
@@ -161,6 +168,31 @@ class YouTubePlaylistControl(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils)
 		params["user_feed"] = "newsubscriptions"
 		return self.__feeds__.listAll(params)
 	
+	def getArtist(self, params = {}):
+		get = params.get
+		
+		if not get("artist"):
+			return False
+		
+		(result, status) = self.__scraper__.scrapeArtist(params)
+		
+		if status == 200:
+			(result, status) = self.getBatchDetails(result, params)
+		
+		return result
+	
+	def getLikedVideos(self, params = {}):
+		get = params.get
+		if not get("scraper") or not get("login"):
+			return False
+		
+		(result, status) = self.__scraper__.scrapeLikedVideos(params)
+		print " liked videos "  + repr(result)
+		if status == 200:
+			(result, status) = self.getBatchDetails(result, params)
+			
+		return result
+		
 	def addToPlaylist(self, params = {}):
 		get = params.get
 		
