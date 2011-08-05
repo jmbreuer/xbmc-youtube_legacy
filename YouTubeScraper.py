@@ -624,16 +624,15 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			showcont = "".join(showcont)
 
 			shows = self.parseDOM(showcont, { "name": "div", "class": "browse-item-content", "content": "true" })
+			athumb = self.parseDOM(showcont, { "name": "img", "id": "alt", "id-match": "Thumbnail", "return": "src"})
 
-			if len(shows) > 0:
-				shows = "".join(shows)
-				ahref = self.parseDOM(shows, { "name": "a", "return": "href" })
-				acont = self.parseDOM(shows, { "name": "a", "content": "true" })
-				acount = self.parseDOM(shows, { "name": "span", "class": "show-counts", "content": "true" })
-				athumb = self.parseDOM(showcont, { "name": "img", "id": "alt", "id-match": "Thumbnail", "return": "src"})
+			for index, show in enumerate(shows):
+				ahref = self.parseDOM(show, { "name": "a", "return": "href" })
+				acont = self.parseDOM(show, { "name": "a", "content": "true" })
+				acount = self.parseDOM(show, { "name": "span", "class": "show-counts", "content": "true" })
 				
-				if len(ahref) == len(acont) and len(ahref) == len(acount) and len(ahref) > 0:
-					for i in range(0, len(athumb)):
+				if len(ahref) == len(acont) and len(ahref) == len(acount) and len(shows) == len(athumb) and len(ahref) > 0:
+					for i in range(0, len(ahref)):
 						item = {}
 						title = acont[i] + " (" + acount[i].strip() + ")"
 						title = self.replaceHtmlCodes(title)
@@ -649,7 +648,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 						
 						item['icon'] = "shows"
 						item['scraper'] = "shows"
-						thumbnail = athumb[i]
+						thumbnail = athumb[index]
 						if ( thumbnail.find("_thumb.") > 0):
 							thumbnail = thumbnail.replace("_thumb.",".")
 						else:
@@ -660,7 +659,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			del params["page"]
 		
 		if self.__dbg__:
-			print self.__plugin__ + " scrapeShowsGrid done " 
+			print self.__plugin__ + " scrapeShowsGrid done : "
 		return (items, result["status"])
 
 
