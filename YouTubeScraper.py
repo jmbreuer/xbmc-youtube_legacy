@@ -841,7 +841,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			url = self.urls[get("scraper")]
 			if url.find('%s') > 0:
 				url = url % page
-			elif url.find('?') > 0:
+			elif url.find('?') > -1:
 				url += "&p=" + page
 			else:
 				url += "?p=" + page
@@ -849,11 +849,18 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		if (get("scraper") == "categories"):
 			if (get("category")):
 				category = get("category")
-				category = urllib.unquote_plus(category)  
-				if (category.find("/") != -1):
-					url = self.urls["main"] + category + "?hl=en" + "&p=" + page
+				category = urllib.unquote_plus(category)
+				category = category.replace("/videos", "")
+				if (category.find("/") > -1):
+					if category.find("?") > -1:
+						url = self.urls["main"] + category + "&hl=en" + "&p=" + page
+					else:
+						url = self.urls["main"] + category + "?hl=en" + "&p=" + page
 				else:
-					url = self.urls["main"] + "/categories" + category + "&hl=en" + "&p=" + page
+					if category.find("?") > -1:
+						url = self.urls["main"] + "/categories" + category + "&hl=en" + "&p=" + page
+					else:
+						url = self.urls["main"] + "/categories" + category + "?hl=en" + "&p=" + page
 			else:
 				url = self.urls["categories"] + "?hl=en"
 		
@@ -866,10 +873,10 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
                                 category = category.replace("/shows/", "")
                                 category = category.replace("/shows", "")
 				url = self.urls["shows"] + "/" + category
-				if url.find("?") < 0:
-					url += "?p=" + page + "&hl=en"
-				else:
+				if category.find("?") > -1:
 					url += "&p=" + page + "&hl=en"
+				else:
+					url += "?p=" + page + "&hl=en"
 			
 			if (get("show")):
 				show = urllib.unquote_plus(get("show"))
@@ -889,7 +896,11 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 				if get("subcategory"):
 					url = self.urls["main"] + "/movies/" + category + "?hl=en"
 				else:
-					url = self.urls["main"] + "/movies/" + category + "?p=" + page + "&hl=en"
+					if category.find("?") > -1:
+						url = self.urls["main"] + "/movies/" + category + "&p=" + page + "&hl=en"
+					else:
+						url = self.urls["main"] + "/movies/" + category + "?p=" + page + "&hl=en"
+
 			else:
 				url = self.urls["movies"] + "?hl=en"
 		
@@ -976,12 +987,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 						title = title.replace("&amp;", "&")
 						item['Title'] = title
 						cat = ahref[i].replace("/" + scraper + "/", "")
-						if cat[0] == "/" and False:
-							cat = cat[1:]
 
-						if cat.find("?") > -1:
-							cat = cat[:cat.find("?")]
-							
 						if get("scraper") == "categories":
 							if title == "Music":
 								continue
@@ -989,11 +995,13 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 								cat = "?c=23"
 							if cat.find("gaming") > 0:
 								cat = "?c=20"
+							if cat.find("education") > 0:
+								item["subcategory"] = "true"
 
 						if get("scraper") == "movies":
 							if cat.find("pt=nr") > 0:
 								continue
-							elif cat ==  "indian-cinema" or cat == "foreign-film":
+							elif cat.find("indian-cinema") > -1 or cat.find("foreign-film") > -1:
 								item["subcategory"] = "true"
 
 						cat = urllib.quote_plus(cat)
@@ -1061,7 +1069,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 
 		if next == "true":
 			self.addNextFolder(result, params)
-		print "paginated " + repr(result) + " - " + repr(status)
+		print self.__plugin__ + " paginated " + repr(result) + " - " + repr(status)
 		return (result, status)
 	
 	def scrape(self, params = {}):

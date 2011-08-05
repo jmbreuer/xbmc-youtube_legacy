@@ -7,7 +7,7 @@
 - Shows -> All categories is empty??
   - Season sometimes has no number
 - Trailers -> Latest and latest games fails
-- Some folders in categories fail.
+- Categories -> Education is broken (It is now a folder)
 
 - Go through every menu to check if things are still working
   - my playlist -> "item" -> "reverse playlist" | no worky
