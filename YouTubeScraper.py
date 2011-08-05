@@ -492,7 +492,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		return (items, result["status"])
 			
 #=================================== Shows ============================================
-	def scrapeShowEpisodes(self, params = {}): # TODO
+	def scrapeShowEpisodes(self, params = {}):
 		get = params.get
 		if self.__dbg__:
 			print self.__plugin__ + " scrapeShowEpisodes: " + repr(params)
@@ -706,8 +706,6 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 				title = acont[0].replace("&raquo;", "").strip()
 				item['Title'] = title
 				#print self.__plugin__ + " scrapeMovieSubCategory : " + cat
-				cat = cat.replace("/movies/", "") # indian
-				cat = cat.replace("/movies", "") # Foreign
 				cat = urllib.quote_plus(cat)
 				#print self.__plugin__ + " scrapeMovieSubCategory : " + cat
 				item['category'] = cat
@@ -865,6 +863,8 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			if (get("category")):
 				category = get("category")
 				category = urllib.unquote_plus(category)
+                                category = category.replace("/shows/", "")
+                                category = category.replace("/shows", "")
 				url = self.urls["shows"] + "/" + category
 				if url.find("?") < 0:
 					url += "?p=" + page + "&hl=en"
@@ -884,6 +884,8 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			if (get("category")):
 				category = get("category")
 				category = urllib.unquote_plus(category)
+				category = category.replace("/movies/", "") # indian
+				category = category.replace("/movies", "") # Foreign
 				if get("subcategory"):
 					url = self.urls["main"] + "/movies/" + category + "?hl=en"
 				else:
