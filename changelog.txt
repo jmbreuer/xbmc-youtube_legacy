@@ -3,9 +3,8 @@
 - Pagination <- Passed.
 - Settings
 - Music Top 50 ( no results ) 
-- Movies -> All categories/new releases is empty??
-- Shows -> All categories is empty??
-  - Season sometimes has no number
+- Movies -> All categories/new releases <- remove
+- Shows -> All categories is empty?? <- remove
 - Trailers -> Latest and latest games fails
 - Categories -> Education is broken (It is now a folder)
 

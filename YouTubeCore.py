@@ -773,7 +773,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 				html2 += "\n" + self.getDOMContent(html, params, match)
 
 		if len(lst) > 0 and get("class"):
-			lst = re.compile('(<.*class=[\'"]' + get("class") + '[\'"].*>)').findall(html2)
+			lst = re.compile('(<.*?class=[\'"]' + get("class") + '[\'"].*?>)').findall(html2)
 			if get("return"):
 				html2 = "\n".join(lst)
 			else:
@@ -800,6 +800,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 					for match in lst:
 						html2 += "\n" + self.getDOMContent(html, params, match)
 				#print self.__plugin__ + " parseDOM id-match: " + str(len(lst))
+
 		#print self.__plugin__ + " parseDOM id - html2 length: " + str(len(html2)) +  " - " + str(len(lst))
 
 		if len(lst) > 0 and get("return"):

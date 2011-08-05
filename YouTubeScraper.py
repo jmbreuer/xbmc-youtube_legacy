@@ -569,10 +569,6 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		seasons = self.parseDOM(html, { "name": "div", "class": "seasons"})
 		if (len(seasons) > 0):
 			params["folder"] = "true"
-			#<button href="/show/isitagoodideatomicrowavethis?s=9" onclick=";window.location.href=this.getAttribute(&#39;href&#39;);return false;" title="Episodes: 33" type="button" 
-			#class=" yt-uix-button yt-uix-tooltip" 
-			#data-slide-index="0" role="button" aria-pressed="false">
-			#</button>
 
 			season_list = self.parseDOM(seasons, { "name": "span", "class": "yt-uix-button-content", "content": "true"})
 			atitle = self.parseDOM(seasons, { "name": "button", "id": "type", "id-match": "button", "return": "title"})
