@@ -985,7 +985,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 						item = {}
 						title = acontent[i]
 						title = title.replace("&amp;", "&")
-						if title == "All Categories" or title == "":
+						if title == "All Categories" or title == "Education" or title == "":
 							continue
 						item['Title'] = title
 						cat = ahref[i].replace("/" + scraper + "/", "")
