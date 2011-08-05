@@ -92,7 +92,7 @@ class YouTubeNavigation(YouTubeUtils.YouTubeUtils):
 		cache = True
 		
 		path = get("path", "/root")
-		if not get("feed") == "search" and not get("channel") and not get("contact") and not get("playlist") and get("page","0") == "0" and not get("scraper") == "search_disco":
+		if not get("feed") == "search" and not get("feed") == "related" and not get("channel") and not get("contact") and not get("playlist") and get("page","0") == "0" and not get("scraper") == "search_disco":
 			for category in self.categories:
 				cat_get = category.get 
 				if (cat_get("path").find(path +"/") > -1 ):
