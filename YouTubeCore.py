@@ -447,17 +447,17 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 	def cacheFunction(self, funct = False, params = {}):
 		if funct:
 			name = repr(funct)
-			#self.sqlSet("cache", "")
+			if params.has_key("new_results_function"):
+				del(params["new_results_function"])
 			name = name[name.find("method") + 7 :name.find(" of ")]
 			print self.__plugin__ + " _cacheFunction: " + name + repr(params)
 			cache = {}
 			ret = False
-			if params.has_key("new_results_function"):
-				del(params["new_results_function"])
+
 			if self.sqlGet("cache"):
 				print self.__plugin__ + " _cacheFunction cache exists "
 				cache = eval(self.sqlGet("cache"))
-				print self.__plugin__ + " _cacheFunction cache exists: " + repr(name + repr(params) in cache)
+				print self.__plugin__ + " _cacheFunction: " + name + repr(params) + " in cache: " + repr(name + repr(params) in cache) 
 				if name + repr(params) in cache:
 					print self.__plugin__ + " _cacheFunction returning cache for : " + name + repr(params)
 					#print self.__plugin__ + " _cacheFunction returning : " + str(len(cache[name + repr(params)]["res"])) + " - " + str(cache[name + repr(params)]["timestamp"])
@@ -929,14 +929,14 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 
 	def sqlSet(self, name, data):
 		if os.path.exists(os.path.join( xbmc.translatePath( "special://temp" ), 'commoncache.socket')):
-			print self.__plugin__ + " XXX SET1 "
+			#print self.__plugin__ + " XXX SET1 "
 			s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 			s.connect(os.path.join( xbmc.translatePath( "special://temp" ), 'commoncache.socket'))
 			s.send(repr({ "action": "set", "name": name, "data": data}) + "\n")
 
 	def sqlGet(self, name):
                 if os.path.exists(os.path.join( xbmc.translatePath( "special://temp" ), 'commoncache.socket')):
-			print self.__plugin__ + " XXX GET1 "
+			#print self.__plugin__ + " XXX GET1 "
 			s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 			s.connect(os.path.join( xbmc.translatePath( "special://temp" ), 'commoncache.socket'))
 			s.send(repr({ "action": "get", "name": name}) + "\n")
