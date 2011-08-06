@@ -299,6 +299,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			self.remove_from_playlist(params)
 			
 		self.__settings__.setSetting( "vidstatus-" + video['videoid'], "7" )
+		self.clearCache()
 
 	def getVideoUrlMap(self, pl_obj, video = {}):
 		if self.__dbg__:

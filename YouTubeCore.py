@@ -496,9 +496,12 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 				#print self.__plugin__ + " _cacheFunction cache exists: " + repr(name + repr(items) + repr(params) in cache) + repr(cache)
 				if name + repr(items) + repr(params) in cache:
 					#print self.__plugin__ + " _cacheFunction returning cache for : " + name + repr(items) + repr(params)
-					cache = cache[name + repr(items) + repr(params)]
-					#print self.__plugin__ + " _cacheFunction returning : " + str(len(cache["res"])) + " - " + str(cache["timestamp"])
-					ret = cache["res"]
+					#print self.__plugin__ + " _cacheFunction returning : " + str(len(cache[name + repr(items) + repr(params)]["res"])) + " - " + str(cache[name + repr(items) + repr(params)]["timestamp"])
+					if cache[name + repr(items) + repr(params)]["timestamp"] > time.time() - (3600 * 24):
+						ret = cache[name + repr(items) + repr(params)]["res"]
+					else:
+						print self.__plugin__ + " _cacheFunction Deleting old cache"
+						del(cache[name + repr(items) + repr(params)])
 			if not ret :
 				#print self.__plugin__ + " _cacheFunction no match in cache : " + repr(ret)
 				cache[name + repr(items) + repr(params)] = { "timestamp": time.time(),
@@ -514,6 +517,21 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 				return ret
 
 		print self.__plugin__ + " _cacheFunction Error " 
+		return False
+
+	def clearCache(self):
+		cache = False
+		if self.__settings__.getSetting("cache"):
+			cache = eval(self.__settings__.getSetting("cache"))
+
+		if cache:
+			for item in cache:
+				if cache[item]["timestamp"] < time.time() - (3600 * 24):
+					print self.__plugin__ + " _clearCache clearing old item : " + cache[item]
+					del(cache[item])
+
+			self.__settings__.setSetting("cache", "")
+			return True
 		return False
 
 	def _findErrors(self, ret):
