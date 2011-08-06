@@ -274,8 +274,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 	def playVideo(self, params = {}):
 		get = params.get
 		
-		#(video, status) = self.getVideoObject(params);
-		(video, status) = self.cacheFunction(self.getVideoObject, params)
+		(video, status) = self.getVideoObject(params);
 		
 		if status != 200:
 			if self.__dbg__ : 
@@ -535,7 +534,8 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		video = {}
 		links = []
 				
-		(video, status) = self.getInfo(params)
+		#(video, status) = self.getInfo(params)
+		(video, status) = self.cacheFunction(self.getInfo, params)
 		
 		#Check if file has been downloaded locally and use that as a source instead
 		if (status == 200 and get("action","") != "download"):
