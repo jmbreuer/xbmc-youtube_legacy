@@ -280,6 +280,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 				i+=1
 		
 		final_request = request_start + video_request + request_end
+		print self.__plugin__ + " _getBatchDetails XXX2 request"
 		result = self._fetchPage({"link": "http://gdata.youtube.com/feeds/api/videos/batch", "api": "true", "request": final_request})
 				
 		temp = self.getVideoInfo(result["content"], params)
@@ -302,6 +303,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 		get = params.get
 		link = get("link")
 		ret_obj = { "status": 500, "content": ""}
+
 		if self.__dbg__:
 			if (get("url_data") or get("request")):
 				print self.__plugin__ + " _fetchPage called for : " + repr(params['link'])
@@ -442,6 +444,72 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 				ret_obj["content"] = e.fp.read()
 			return ret_obj
 		
+	def cacheFunction(self, funct = False, params = {}):
+		if funct:
+			print self.__plugin__ + " _cacheFunction " + repr(params)
+			cache = {}
+			ret = False
+			if params.has_key("new_results_function"):
+				del(params["new_results_function"])
+			if self.__settings__.getSetting("cache"):
+				#print self.__plugin__ + " _cacheFunction cache exists "
+				cache = eval(self.__settings__.getSetting("cache"))
+				#print self.__plugin__ + " _cacheFunction cache exists: " + repr(repr(params) in cache) + repr(cache)
+				if repr(params) in cache:
+					#print self.__plugin__ + " _cacheFunction returning cache for : " + repr(params)
+					cache = cache[repr(params)]
+					#print self.__plugin__ + " _cacheFunction returning : " + str(len(cache["res"])) + " - " + str(cache["timestamp"])
+					ret = cache["res"]
+			if not ret :
+				#print self.__plugin__ + " _cacheFunction no match in cache : " + repr(ret)
+				cache[repr(params)] = { "timestamp": time.time(),
+						       "res": funct(params)}
+				#print self.__plugin__ + " _cacheFunction no match in cache2: " + repr(repr(params) in cache)
+				#print self.__plugin__ + " _cacheFunction saving: " + repr(cache[repr(params)]["timestamp"]) + repr(params)
+				self.__settings__.setSetting("cache", repr(cache))
+				#self.__settings__.setSetting("cache", "")
+				ret = cache[repr(params)]["res"]
+
+			if ret:
+				print self.__plugin__ + " _cacheFunction returning "
+				return ret
+
+		print self.__plugin__ + " _cacheFunction Error " 
+		return False
+
+	def cacheFunctionThree(self, funct = False, items = [], params = {}):
+		if funct:
+			print self.__plugin__ + " _cacheFunction " + repr(params)
+			cache = {}
+			ret = False
+			if params.has_key("new_results_function"):
+				del(params["new_results_function"])
+			if self.__settings__.getSetting("cache"):
+				#print self.__plugin__ + " _cacheFunction cache exists "
+				cache = eval(self.__settings__.getSetting("cache"))
+				#print self.__plugin__ + " _cacheFunction cache exists: " + repr(repr(items) + repr(params) in cache) + repr(cache)
+				if repr(items) + repr(params) in cache:
+					#print self.__plugin__ + " _cacheFunction returning cache for : " + repr(items) + repr(params)
+					cache = cache[repr(items) + repr(params)]
+					#print self.__plugin__ + " _cacheFunction returning : " + str(len(cache["res"])) + " - " + str(cache["timestamp"])
+					ret = cache["res"]
+			if not ret :
+				#print self.__plugin__ + " _cacheFunction no match in cache : " + repr(ret)
+				cache[repr(items) + repr(params)] = { "timestamp": time.time(),
+						       "res": funct(items, params)}
+				#print self.__plugin__ + " _cacheFunction no match in cache2: " + repr(repr(items) + repr(params) in cache)
+				#print self.__plugin__ + " _cacheFunction saving: " + repr(cache[repr(items) + repr(params)]["timestamp"]) + repr(items) + repr(params)
+				self.__settings__.setSetting("cache", repr(cache))
+				#self.__settings__.setSetting("cache", "")
+				ret = cache[repr(items) + repr(params)]["res"]
+
+			if ret:
+				print self.__plugin__ + " _cacheFunction returning "
+				return ret
+
+		print self.__plugin__ + " _cacheFunction Error " 
+		return False
+
 	def _findErrors(self, ret):
 		if self.__dbg__:
 			print self.__plugin__ + " _findErrors"
