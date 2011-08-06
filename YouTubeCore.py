@@ -731,18 +731,19 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 			endstr = "</" + get("name") + ">"
 		end = html.find(endstr, start)
 
-		#print self.__plugin__ + " getDOMContent " + str(start) + " < " + str(end)
+		pos = html.find("<" + get("name"), start + 1 )
 
-		pos = html.find("<" + get("name"), start + 1)
-		while pos < end:
+		#print self.__plugin__ + " getDOMContent " + str(start) + " < " + str(end) + " pos = " + str(pos)
+
+		while pos < end and pos != -1:
 			pos = html.find("<" + get("name"), pos + 1)
-			if pos == -1:
-				break;
-			tend = html.find(endstr, end + len(endstr))
-			if tend != -1:
-				end = tend
+			if pos > -1:
+				tend = html.find(endstr, end + len(endstr))
+				if tend != -1:
+					end = tend
 			#print self.__plugin__ + " getDOMContent2 loop: " + str(start) + " < " + str(end) + " pos = " + str(pos)
 
+		#print self.__plugin__ + " getDOMContent XXX: " + str(start) + " < " + str(end) + " pos = " + str(pos)
 		html = html[start:end + len(endstr)]
 		#print self.__plugin__ + " getDOMContent done html length: " + str(len(html)) + repr(html)
 		return html
