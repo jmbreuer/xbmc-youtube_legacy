@@ -19,7 +19,9 @@
 import sys, urllib, re, os.path, datetime, time
 try: import simplejson as json
 except ImportError: import json
-import xbmc, xbmcgui, xbmcplugin, xbmcvfs
+import xbmc, xbmcgui, xbmcplugin
+try: import xbmcvfs
+except ImportError: import xbmcvfsdummy as xbmcvfs
 import YouTubeCore, YouTubeUtils
 from xml.dom.minidom import parseString
 

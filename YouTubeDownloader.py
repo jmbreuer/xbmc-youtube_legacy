@@ -19,7 +19,9 @@
 import sys, urllib2, os
 from DialogDownloadProgress import DownloadProgress
 import YouTubeUtils
-import xbmc, xbmcvfs
+import xbmc
+try: import xbmcvfs
+except ImportError: import xbmcvfsdummy as xbmcvfs
 from filelock import FileLock
 
 class YouTubeDownloader(YouTubeUtils.YouTubeUtils):
