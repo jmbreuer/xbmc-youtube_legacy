@@ -274,7 +274,8 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 	def playVideo(self, params = {}):
 		get = params.get
 		
-		(video, status) = self.getVideoObject(params);
+		#(video, status) = self.getVideoObject(params);
+		(video, status) = self.cacheFunction(self.getVideoObject, params)
 		
 		if status != 200:
 			if self.__dbg__ : 
@@ -299,7 +300,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			self.remove_from_playlist(params)
 			
 		self.__settings__.setSetting( "vidstatus-" + video['videoid'], "7" )
-		self.clearCache()
+		self.cleanCache()
 
 	def getVideoUrlMap(self, pl_obj, video = {}):
 		if self.__dbg__:

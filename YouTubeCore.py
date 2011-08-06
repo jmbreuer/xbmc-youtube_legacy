@@ -446,18 +446,19 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 	def cacheFunction(self, funct = False, params = {}):
 		if funct:
 			name = repr(funct)
-			name = name[1:name.find(" of ")]
-			print self.__plugin__ + " _cacheFunction " + repr(name)
+			#self.__settings__.setSetting("cache", "")
+			name = name[name.find("method") + 7 :name.find(" of ")]
+			print self.__plugin__ + " _cacheFunction: " + name + repr(params)
 			cache = {}
 			ret = False
 			if params.has_key("new_results_function"):
 				del(params["new_results_function"])
 			if self.__settings__.getSetting("cache"):
-				#print self.__plugin__ + " _cacheFunction cache exists "
+				print self.__plugin__ + " _cacheFunction cache exists "
 				cache = eval(self.__settings__.getSetting("cache"))
-				#print self.__plugin__ + " _cacheFunction cache exists: " + repr(name + repr(params) in cache) + repr(cache)
+				print self.__plugin__ + " _cacheFunction cache exists: " + repr(name + repr(params) in cache)
 				if name + repr(params) in cache:
-					#print self.__plugin__ + " _cacheFunction returning cache for : " + name + repr(params)
+					print self.__plugin__ + " _cacheFunction returning cache for : " + name + repr(params)
 					#print self.__plugin__ + " _cacheFunction returning : " + str(len(cache[name + repr(params)]["res"])) + " - " + str(cache[name + repr(params)]["timestamp"])
 					if cache[name + repr(params)]["timestamp"] > time.time() - (3600 * 24):
 						ret = cache[name + repr(params)]["res"]
@@ -465,13 +466,12 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 						print self.__plugin__ + " _cacheFunction Deleting old cache"
 						del(cache[name + repr(params)])
 			if not ret :
-				#print self.__plugin__ + " _cacheFunction no match in cache : " + repr(ret)
+				print self.__plugin__ + " _cacheFunction no match in cache : " + repr(ret)
 				cache[name + repr(params)] = { "timestamp": time.time(),
 						       "res": funct(params)}
 				#print self.__plugin__ + " _cacheFunction no match in cache2: " + repr(name + repr(params) in cache)
-				#print self.__plugin__ + " _cacheFunction saving: " + repr(cache[name + repr(params)]["timestamp"]) + name + repr(params)
+				print self.__plugin__ + " _cacheFunction saving: " + name + repr(params) + " - " + str(len(cache[name + repr(params)]["res"])) + repr(cache[name + repr(params)]["res"])
 				self.__settings__.setSetting("cache", repr(cache))
-				#self.__settings__.setSetting("cache", "")
 				ret = cache[name + repr(params)]["res"]
 
 			if ret:
@@ -485,52 +485,51 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 		if funct:
 			name = repr(funct)
 			name = name[1:name.find(" of ")]
-			print self.__plugin__ + " _cacheFunction " + name
+			print self.__plugin__ + " _cacheFunctionThree " + name
 			cache = {}
 			ret = False
 			if params.has_key("new_results_function"):
 				del(params["new_results_function"])
 			if self.__settings__.getSetting("cache"):
-				#print self.__plugin__ + " _cacheFunction cache exists "
+				#print self.__plugin__ + " _cacheFunctionThree cache exists "
 				cache = eval(self.__settings__.getSetting("cache"))
-				#print self.__plugin__ + " _cacheFunction cache exists: " + repr(name + repr(items) + repr(params) in cache) + repr(cache)
+				#print self.__plugin__ + " _cacheFunctionThree cache exists: " + repr(name + repr(items) + repr(params) in cache) + repr(cache)
 				if name + repr(items) + repr(params) in cache:
-					#print self.__plugin__ + " _cacheFunction returning cache for : " + name + repr(items) + repr(params)
-					#print self.__plugin__ + " _cacheFunction returning : " + str(len(cache[name + repr(items) + repr(params)]["res"])) + " - " + str(cache[name + repr(items) + repr(params)]["timestamp"])
+					#print self.__plugin__ + " _cacheFunctionThree returning cache for : " + name + repr(items) + repr(params)
+					#print self.__plugin__ + " _cacheFunctionThree returning : " + str(len(cache[name + repr(items) + repr(params)]["res"])) + " - " + str(cache[name + repr(items) + repr(params)]["timestamp"])
 					if cache[name + repr(items) + repr(params)]["timestamp"] > time.time() - (3600 * 24):
 						ret = cache[name + repr(items) + repr(params)]["res"]
 					else:
-						print self.__plugin__ + " _cacheFunction Deleting old cache"
+						print self.__plugin__ + " _cacheFunctionThree Deleting old cache"
 						del(cache[name + repr(items) + repr(params)])
 			if not ret :
-				#print self.__plugin__ + " _cacheFunction no match in cache : " + repr(ret)
+				#print self.__plugin__ + " _cacheFunctionThree no match in cache : " + repr(ret)
 				cache[name + repr(items) + repr(params)] = { "timestamp": time.time(),
 						       "res": funct(items, params)}
-				#print self.__plugin__ + " _cacheFunction no match in cache2: " + repr(name + repr(items) + repr(params) in cache)
-				#print self.__plugin__ + " _cacheFunction saving: " + repr(cache[name + repr(items) + repr(params)]["timestamp"]) + name + repr(items) + repr(params)
+				#print self.__plugin__ + " _cacheFunctionThree no match in cache2: " + repr(name + repr(items) + repr(params) in cache)
+				#print self.__plugin__ + " _cacheFunctionThree saving: " + repr(cache[name + repr(items) + repr(params)]["timestamp"]) + name + repr(items) + repr(params)
 				self.__settings__.setSetting("cache", repr(cache))
 				#self.__settings__.setSetting("cache", "")
 				ret = cache[name + repr(items) + repr(params)]["res"]
 
 			if ret:
-				print self.__plugin__ + " _cacheFunction returning "
+				print self.__plugin__ + " _cacheFunctionThree returning "
 				return ret
 
-		print self.__plugin__ + " _cacheFunction Error " 
+		print self.__plugin__ + " _cacheFunctionThree Error " 
 		return False
 
-	def clearCache(self):
-		cache = False
+	def cleanCache(self):
+		cache = {}
 		if self.__settings__.getSetting("cache"):
 			cache = eval(self.__settings__.getSetting("cache"))
 
 		if cache:
 			for item in cache:
 				if cache[item]["timestamp"] < time.time() - (3600 * 24):
-					print self.__plugin__ + " _clearCache clearing old item : " + cache[item]
 					del(cache[item])
 
-			self.__settings__.setSetting("cache", "")
+			self.__settings__.setSetting("cache", repr(cache))
 			return True
 		return False
 
