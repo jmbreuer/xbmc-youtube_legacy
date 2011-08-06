@@ -932,18 +932,19 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 			print self.__plugin__ + " XXX SET1 "
 			s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 			s.connect(os.path.join( xbmc.translatePath( "special://temp" ), 'commoncache.socket'))
-			s.send(repr({ "action": "set", "name": name, "data": data}))
+			s.send(repr({ "action": "set", "name": name, "data": data}) + "\n")
 
 	def sqlGet(self, name):
                 if os.path.exists(os.path.join( xbmc.translatePath( "special://temp" ), 'commoncache.socket')):
 			print self.__plugin__ + " XXX GET1 "
 			s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 			s.connect(os.path.join( xbmc.translatePath( "special://temp" ), 'commoncache.socket'))
-			s.send(repr({ "action": "get", "name": name}))
-			res = s.recv(409600)
+			s.send(repr({ "action": "get", "name": name}) + "\n")
+			res = s.recv(4096 * 4096)
+			while res[len(res)-1] != "\n":
+				res += s.recv(4096 * 4096)
 			if res:
 				res = eval(res)
-				print self.__plugin__ + " XXX GET1 " + str(len(res))
 				return res
 
 		return False
