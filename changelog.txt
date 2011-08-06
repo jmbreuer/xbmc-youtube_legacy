@@ -15,7 +15,7 @@
 [B]Version 2.7.0 (Beta)[/B]
 - Dharma compatability (Dummy xbmcvfs)
 - Fixed Downloads messages.
-- New caching system [ Alpha ]
+- New caching system [ Beta ]
 
 [B]Version 2.6.0 (Beta)[/B]
 - Added New playback function. Now uses unified code accross all pages(html scraping, embeded, flash fallback). Supports fallback server.
