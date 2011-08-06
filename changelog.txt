@@ -3,7 +3,6 @@
 - Scrape Education. [2.7]
 - Search [2.7]
   - Sometimes a list will be returned with all items restricted. This causes a slight error. Safesearch : strict, search query : "strip tease"
-- New caching system [2.7] ( Only fetch pages if more than a day has passed )
 
 [B]Errata[/B]
 - [XBMC] Thumbnails sometimes turns into black box or Folder (XBMC not detecting when thumbnail is set and defaulting to icon?)
@@ -16,6 +15,7 @@
 [B]Version 2.7.0 (Beta)[/B]
 - Dharma compatability (Dummy xbmcvfs)
 - Fixed Downloads messages.
+- New caching system [ Alpha ]
 
 [B]Version 2.6.0 (Beta)[/B]
 - Added New playback function. Now uses unified code accross all pages(html scraping, embeded, flash fallback). Supports fallback server.

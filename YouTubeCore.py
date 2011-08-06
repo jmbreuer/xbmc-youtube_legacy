@@ -21,7 +21,7 @@ try: import simplejson as json
 except ImportError: import json
 from xml.dom.minidom import parseString
 import YouTubeUtils
-import sqlite
+
 # ERRORCODES:
 # 200 = OK
 # 303 = See other (returned an error message)
@@ -50,7 +50,6 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 
 	__cj__ = cookielib.LWPCookieJar()
 	__opener__ = urllib2.build_opener(urllib2.HTTPCookieProcessor(__cj__))
-	__conn__ = sqlite.connect(os.path.join( xbmc.translatePath( "special://temp" ), 'youtube.db'))
 	urllib2.install_opener(__opener__)
 
 	APIKEY = "AI39si6hWF7uOkKh4B9OEAX-gK337xbwR9Vax-cdeF9CF9iNAcQftT8NVhEXaORRLHAmHxj6GjM-Prw04odK4FxACFfKkiH9lg";
@@ -74,7 +73,6 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 		if not timeout:
 			timeout = "15"
 			socket.setdefaulttimeout(float(timeout))
-		self.sql()
 		return None
 	
 	def delete_favorite(self, params = {}):
@@ -929,35 +927,23 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 		return html2
 
 
-	def sql(self):
-		curs = self.__conn__.cursor()
-		try:
-			curs.execute("create table items (name text, data text)")
-			self.__conn__.commit()
-		except:
-			print "naught"
-		
-
 	def sqlSet(self, name, data):
-		#print self.__plugin__ + " sqlSet " 
-		curs = self.__conn__.cursor()
-		#data = data.replace("{", "[").replace("}","]")
-		if self.sqlGet(name):
-			#print self.__plugin__ + " sqlSet Update : " + data
-			curs.execute('UPDATE items SET data = %s WHERE name = %s', ( data, name ))
-		else:
-			print self.__plugin__ + " sqlSet Insert  "
-			curs.execute("INSERT INTO items VALUES ( %s , %s )", ( name, data) )
-		#print self.__plugin__ + " sqlSet commit"
-		self.__conn__.commit()
+		if os.path.exists(os.path.join( xbmc.translatePath( "special://temp" ), 'commoncache.socket')):
+			print self.__plugin__ + " XXX SET1 "
+			s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+			s.connect(os.path.join( xbmc.translatePath( "special://temp" ), 'commoncache.socket'))
+			s.send(repr({ "action": "set", "name": name, "data": data}))
 
 	def sqlGet(self, name):
-		#print self.__plugin__ + " sqlGet " + name
-		curs = self.__conn__.cursor()
-		curs.execute("SELECT data FROM items WHERE name = %s", ( name))
-		for row in curs:
-			#print self.__plugin__ + " sqlGet returning : " + row[0]
-			return row[0]
-		return ""
+                if os.path.exists(os.path.join( xbmc.translatePath( "special://temp" ), 'commoncache.socket')):
+			print self.__plugin__ + " XXX GET1 "
+			s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+			s.connect(os.path.join( xbmc.translatePath( "special://temp" ), 'commoncache.socket'))
+			s.send(repr({ "action": "get", "name": name}))
+			res = s.recv(409600)
+			if res:
+				res = eval(res)
+				print self.__plugin__ + " XXX GET1 " + str(len(res))
+				return res
 
-
+		return False
