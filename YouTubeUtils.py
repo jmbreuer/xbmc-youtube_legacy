@@ -109,13 +109,6 @@ class YouTubeUtils:
 		
 		return thumbnail
 	
-	# Transforms a list of video id's to a pipe delimited string
-	def arrayToPipeDelimitedString(self, input):
-		pipedItems = ""
-		for item in input:
-			pipedItems += item + "|"
-		return pipedItems
-	
 	# Standardised error handler
 	def showErrorMessage(self, title = "", result = "", status = 500):
 		if title == "":
