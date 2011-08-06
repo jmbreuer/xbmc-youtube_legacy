@@ -1,9 +1,8 @@
 [B]TODO:[/B]
 - Proper resolutions for rtmp.
 - Scrape Education. [2.7]
-- Search
+- Search [2.7]
   - Sometimes a list will be returned with all items restricted. This causes a slight error. Safesearch : strict, search query : "strip tease"
-- Dharma compatability [2.7]
 - New caching system [2.7] ( Only fetch pages if more than a day has passed )
 
 [B]Errata[/B]
@@ -14,7 +13,11 @@
 - [XBMC] Subtitles and Annotations dont work the first time 90% of the time
 - Download of rtmpe streams not supported.
 
-[B]Version 2.6.0 (Beta)[B]
+[B]Version 2.7.0 (Beta)[/B]
+- Dharma compatability (Dummy xbmcvfs)
+- Fixed Downloads messages.
+
+[B]Version 2.6.0 (Beta)[/B]
 - Added New playback function. Now uses unified code accross all pages(html scraping, embeded, flash fallback). Supports fallback server.
 - Added fallback for age restricted videos (Will fail if embedding is disabled)
 - Added support for locally stored artists in Youtube Music
@@ -38,7 +41,7 @@
 - Fixed playback after youtube changes
 - Fixed RTMPe support (we now provide playpath correctly) - NOTE: this requires and updated version of librtmp
 
-[B]Version 2.5.0 (Beta)[B]
+[B]Version 2.5.0 (Beta)[/B]
 - Added new option to select playback and download quality with dialogs
 - Added Caching and alphabetically sorting of My playlists, My contacts and My subscriptions 
 - Added "Play all" context menu on certain folders 

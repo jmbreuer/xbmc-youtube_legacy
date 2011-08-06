@@ -82,7 +82,7 @@ class YouTubeDownloader(YouTubeUtils.YouTubeUtils):
 					continue
 				item = video.get
 				if item("stream_map"):
-					self.showMessage(self.__language__(30607), self.__language__("30619"))
+					self.showMessage(self.__language__(30607), self.__language__(30619))
 					self.__storage__.removeVideoFromDownloadQueue(videoid)
 					videoid = self.__storage__.getNextVideoFromDownloadQueue()
 					continue
@@ -179,8 +179,8 @@ class YouTubeDownloader(YouTubeUtils.YouTubeUtils):
 			return ([], status)
 
 		video["downloadPath"] = self.__settings__.getSetting( "downloadPath" )
-		self.showMessage(self.__language__(30626), self.makeAscii(video['Title']))
-		
+		self.showMessage(self.__language__(30624), self.makeAscii(video['Title']))
+
 		self.__player__.downloadSubtitle(video)
 		url = urllib2.Request(video['video_url'])
 		url.add_header('User-Agent', self.USERAGENT);
