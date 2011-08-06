@@ -16,11 +16,12 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, urllib, urllib2, re, time, socket, cookielib
+import os, xbmc, sys, urllib, urllib2, re, time, socket, cookielib
 try: import simplejson as json
 except ImportError: import json
 from xml.dom.minidom import parseString
 import YouTubeUtils
+import sqlite3 as sqlite
 # ERRORCODES:
 # 200 = OK
 # 303 = See other (returned an error message)
@@ -49,6 +50,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 
 	__cj__ = cookielib.LWPCookieJar()
 	__opener__ = urllib2.build_opener(urllib2.HTTPCookieProcessor(__cj__))
+	__conn__ = sqlite.connect(os.path.join( xbmc.translatePath( "special://temp" ), 'youtube.db'))
 	urllib2.install_opener(__opener__)
 
 	APIKEY = "AI39si6hWF7uOkKh4B9OEAX-gK337xbwR9Vax-cdeF9CF9iNAcQftT8NVhEXaORRLHAmHxj6GjM-Prw04odK4FxACFfKkiH9lg";
@@ -71,7 +73,8 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 		timeout = [5, 10, 15, 20, 25][int(self.__settings__.getSetting( "timeout" ))]
 		if not timeout:
 			timeout = "15"
-			#socket.setdefaulttimeout(float(timeout))
+			socket.setdefaulttimeout(float(timeout))
+		self.sql()
 		return None
 	
 	def delete_favorite(self, params = {}):
@@ -446,16 +449,16 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 	def cacheFunction(self, funct = False, params = {}):
 		if funct:
 			name = repr(funct)
-			#self.__settings__.setSetting("cache", "")
+			#self.sqlSet("cache", "")
 			name = name[name.find("method") + 7 :name.find(" of ")]
 			print self.__plugin__ + " _cacheFunction: " + name + repr(params)
 			cache = {}
 			ret = False
 			if params.has_key("new_results_function"):
 				del(params["new_results_function"])
-			if self.__settings__.getSetting("cache"):
+			if self.sqlGet("cache"):
 				print self.__plugin__ + " _cacheFunction cache exists "
-				cache = eval(self.__settings__.getSetting("cache"))
+				cache = eval(self.sqlGet("cache"))
 				print self.__plugin__ + " _cacheFunction cache exists: " + repr(name + repr(params) in cache)
 				if name + repr(params) in cache:
 					print self.__plugin__ + " _cacheFunction returning cache for : " + name + repr(params)
@@ -471,7 +474,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 						       "res": funct(params)}
 				#print self.__plugin__ + " _cacheFunction no match in cache2: " + repr(name + repr(params) in cache)
 				print self.__plugin__ + " _cacheFunction saving: " + name + repr(params) + " - " + str(len(cache[name + repr(params)]["res"])) + repr(cache[name + repr(params)]["res"])
-				self.__settings__.setSetting("cache", repr(cache))
+				self.sqlSet("cache", repr(cache))
 				ret = cache[name + repr(params)]["res"]
 
 			if ret:
@@ -490,9 +493,9 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 			ret = False
 			if params.has_key("new_results_function"):
 				del(params["new_results_function"])
-			if self.__settings__.getSetting("cache"):
+			if self.sqlGet("cache"):
 				#print self.__plugin__ + " _cacheFunctionThree cache exists "
-				cache = eval(self.__settings__.getSetting("cache"))
+				cache = eval(self.sqlGet("cache"))
 				#print self.__plugin__ + " _cacheFunctionThree cache exists: " + repr(name + repr(items) + repr(params) in cache) + repr(cache)
 				if name + repr(items) + repr(params) in cache:
 					#print self.__plugin__ + " _cacheFunctionThree returning cache for : " + name + repr(items) + repr(params)
@@ -508,8 +511,8 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 						       "res": funct(items, params)}
 				#print self.__plugin__ + " _cacheFunctionThree no match in cache2: " + repr(name + repr(items) + repr(params) in cache)
 				#print self.__plugin__ + " _cacheFunctionThree saving: " + repr(cache[name + repr(items) + repr(params)]["timestamp"]) + name + repr(items) + repr(params)
-				self.__settings__.setSetting("cache", repr(cache))
-				#self.__settings__.setSetting("cache", "")
+				self.sqlSet("cache", repr(cache))
+				#self.sqlSet("cache", "")
 				ret = cache[name + repr(items) + repr(params)]["res"]
 
 			if ret:
@@ -521,15 +524,15 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 
 	def cleanCache(self):
 		cache = {}
-		if self.__settings__.getSetting("cache"):
-			cache = eval(self.__settings__.getSetting("cache"))
+		if self.sqlGet("cache"):
+			cache = eval(self.sqlGet("cache"))
 
 		if cache:
 			for item in cache:
 				if cache[item]["timestamp"] < time.time() - (3600 * 24):
 					del(cache[item])
 
-			self.__settings__.setSetting("cache", repr(cache))
+			self.sqlSet("cache", repr(cache))
 			return True
 		return False
 
@@ -924,4 +927,37 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 
 		#print self.__plugin__ + " parseDOM done return html for " + repr(params) + " : " + str(len(html2))
 		return html2
+
+
+	def sql(self):
+		curs = self.__conn__.cursor()
+		try:
+			curs.execute("create table items (name text, data text)")
+			self.__conn__.commit()
+		except:
+			print "naught"
+		
+
+	def sqlSet(self, name, data):
+		#print self.__plugin__ + " sqlSet " + name + " " + data
+		curs = self.__conn__.cursor()
+		#data = data.replace("{", "[").replace("}","]")
+		if self.sqlGet(name):
+			#print self.__plugin__ + " sqlSet Update : " + data
+			curs.execute('UPDATE items SET data = ? WHERE name = ?', ( data, name ))
+		else:
+			print self.__plugin__ + " sqlSet Insert  "
+			curs.execute("INSERT INTO items VALUES ( ? , ? )", ( name, data) )
+		#print self.__plugin__ + " sqlSet commit"
+		self.__conn__.commit()
+
+	def sqlGet(self, name):
+		#print self.__plugin__ + " sqlGet " + name
+		curs = self.__conn__.cursor()
+		curs.execute("SELECT data FROM items WHERE name = '%s'" % ( name))
+		for row in curs:
+			#print self.__plugin__ + " sqlGet returning : " + row[0]
+			return row[0]
+		return ""
+
 
