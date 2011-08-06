@@ -280,7 +280,6 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 				i+=1
 		
 		final_request = request_start + video_request + request_end
-		print self.__plugin__ + " _getBatchDetails XXX2 request"
 		result = self._fetchPage({"link": "http://gdata.youtube.com/feeds/api/videos/batch", "api": "true", "request": final_request})
 				
 		temp = self.getVideoInfo(result["content"], params)
@@ -446,7 +445,9 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 		
 	def cacheFunction(self, funct = False, params = {}):
 		if funct:
-			print self.__plugin__ + " _cacheFunction " + repr(params)
+			name = repr(funct)
+			name = name[1:name.find(" of ")]
+			print self.__plugin__ + " _cacheFunction " + repr(name)
 			cache = {}
 			ret = False
 			if params.has_key("new_results_function"):
@@ -454,21 +455,24 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 			if self.__settings__.getSetting("cache"):
 				#print self.__plugin__ + " _cacheFunction cache exists "
 				cache = eval(self.__settings__.getSetting("cache"))
-				#print self.__plugin__ + " _cacheFunction cache exists: " + repr(repr(params) in cache) + repr(cache)
-				if repr(params) in cache:
-					#print self.__plugin__ + " _cacheFunction returning cache for : " + repr(params)
-					cache = cache[repr(params)]
-					#print self.__plugin__ + " _cacheFunction returning : " + str(len(cache["res"])) + " - " + str(cache["timestamp"])
-					ret = cache["res"]
+				#print self.__plugin__ + " _cacheFunction cache exists: " + repr(name + repr(params) in cache) + repr(cache)
+				if name + repr(params) in cache:
+					#print self.__plugin__ + " _cacheFunction returning cache for : " + name + repr(params)
+					#print self.__plugin__ + " _cacheFunction returning : " + str(len(cache[name + repr(params)]["res"])) + " - " + str(cache[name + repr(params)]["timestamp"])
+					if cache[name + repr(params)]["timestamp"] > time.time() - (3600 * 24):
+						ret = cache[name + repr(params)]["res"]
+					else:
+						print self.__plugin__ + " _cacheFunction Deleting old cache"
+						del(cache[name + repr(params)])
 			if not ret :
 				#print self.__plugin__ + " _cacheFunction no match in cache : " + repr(ret)
-				cache[repr(params)] = { "timestamp": time.time(),
+				cache[name + repr(params)] = { "timestamp": time.time(),
 						       "res": funct(params)}
-				#print self.__plugin__ + " _cacheFunction no match in cache2: " + repr(repr(params) in cache)
-				#print self.__plugin__ + " _cacheFunction saving: " + repr(cache[repr(params)]["timestamp"]) + repr(params)
+				#print self.__plugin__ + " _cacheFunction no match in cache2: " + repr(name + repr(params) in cache)
+				#print self.__plugin__ + " _cacheFunction saving: " + repr(cache[name + repr(params)]["timestamp"]) + name + repr(params)
 				self.__settings__.setSetting("cache", repr(cache))
 				#self.__settings__.setSetting("cache", "")
-				ret = cache[repr(params)]["res"]
+				ret = cache[name + repr(params)]["res"]
 
 			if ret:
 				print self.__plugin__ + " _cacheFunction returning "
@@ -479,7 +483,9 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 
 	def cacheFunctionThree(self, funct = False, items = [], params = {}):
 		if funct:
-			print self.__plugin__ + " _cacheFunction " + repr(params)
+			name = repr(funct)
+			name = name[1:name.find(" of ")]
+			print self.__plugin__ + " _cacheFunction " + name
 			cache = {}
 			ret = False
 			if params.has_key("new_results_function"):
@@ -487,21 +493,21 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 			if self.__settings__.getSetting("cache"):
 				#print self.__plugin__ + " _cacheFunction cache exists "
 				cache = eval(self.__settings__.getSetting("cache"))
-				#print self.__plugin__ + " _cacheFunction cache exists: " + repr(repr(items) + repr(params) in cache) + repr(cache)
-				if repr(items) + repr(params) in cache:
-					#print self.__plugin__ + " _cacheFunction returning cache for : " + repr(items) + repr(params)
-					cache = cache[repr(items) + repr(params)]
+				#print self.__plugin__ + " _cacheFunction cache exists: " + repr(name + repr(items) + repr(params) in cache) + repr(cache)
+				if name + repr(items) + repr(params) in cache:
+					#print self.__plugin__ + " _cacheFunction returning cache for : " + name + repr(items) + repr(params)
+					cache = cache[name + repr(items) + repr(params)]
 					#print self.__plugin__ + " _cacheFunction returning : " + str(len(cache["res"])) + " - " + str(cache["timestamp"])
 					ret = cache["res"]
 			if not ret :
 				#print self.__plugin__ + " _cacheFunction no match in cache : " + repr(ret)
-				cache[repr(items) + repr(params)] = { "timestamp": time.time(),
+				cache[name + repr(items) + repr(params)] = { "timestamp": time.time(),
 						       "res": funct(items, params)}
-				#print self.__plugin__ + " _cacheFunction no match in cache2: " + repr(repr(items) + repr(params) in cache)
-				#print self.__plugin__ + " _cacheFunction saving: " + repr(cache[repr(items) + repr(params)]["timestamp"]) + repr(items) + repr(params)
+				#print self.__plugin__ + " _cacheFunction no match in cache2: " + repr(name + repr(items) + repr(params) in cache)
+				#print self.__plugin__ + " _cacheFunction saving: " + repr(cache[name + repr(items) + repr(params)]["timestamp"]) + name + repr(items) + repr(params)
 				self.__settings__.setSetting("cache", repr(cache))
 				#self.__settings__.setSetting("cache", "")
-				ret = cache[repr(items) + repr(params)]["res"]
+				ret = cache[name + repr(items) + repr(params)]["res"]
 
 			if ret:
 				print self.__plugin__ + " _cacheFunction returning "
