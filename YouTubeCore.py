@@ -21,7 +21,7 @@ try: import simplejson as json
 except ImportError: import json
 from xml.dom.minidom import parseString
 import YouTubeUtils
-import sqlite3 as sqlite
+import sqlite
 # ERRORCODES:
 # 200 = OK
 # 303 = See other (returned an error message)
@@ -939,22 +939,22 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 		
 
 	def sqlSet(self, name, data):
-		#print self.__plugin__ + " sqlSet " + name + " " + data
+		#print self.__plugin__ + " sqlSet " 
 		curs = self.__conn__.cursor()
 		#data = data.replace("{", "[").replace("}","]")
 		if self.sqlGet(name):
 			#print self.__plugin__ + " sqlSet Update : " + data
-			curs.execute('UPDATE items SET data = ? WHERE name = ?', ( data, name ))
+			curs.execute('UPDATE items SET data = %s WHERE name = %s', ( data, name ))
 		else:
 			print self.__plugin__ + " sqlSet Insert  "
-			curs.execute("INSERT INTO items VALUES ( ? , ? )", ( name, data) )
+			curs.execute("INSERT INTO items VALUES ( %s , %s )", ( name, data) )
 		#print self.__plugin__ + " sqlSet commit"
 		self.__conn__.commit()
 
 	def sqlGet(self, name):
 		#print self.__plugin__ + " sqlGet " + name
 		curs = self.__conn__.cursor()
-		curs.execute("SELECT data FROM items WHERE name = '%s'" % ( name))
+		curs.execute("SELECT data FROM items WHERE name = %s", ( name))
 		for row in curs:
 			#print self.__plugin__ + " sqlGet returning : " + row[0]
 			return row[0]
