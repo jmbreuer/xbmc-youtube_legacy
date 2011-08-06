@@ -454,9 +454,13 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 			cache = {}
 			ret = False
 
-			if self.sqlGet("cache"):
+			if self.sqlGet("cache" + name):
 				print self.__plugin__ + " _cacheFunction cache exists "
-				cache = eval(self.sqlGet("cache"))
+				cache = self.sqlGet("cache" + name)
+				if cache.strip() == "":
+					cache = {}
+				else:
+					cache = eval(cache)
 				print self.__plugin__ + " _cacheFunction: " + name + repr(params) + " in cache: " + repr(name + repr(params) in cache) 
 				if name + repr(params) in cache:
 					print self.__plugin__ + " _cacheFunction returning cache for : " + name + repr(params)
@@ -471,8 +475,8 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 				cache[name + repr(params)] = { "timestamp": time.time(),
 						       "res": funct(params)}
 				#print self.__plugin__ + " _cacheFunction no match in cache2: " + repr(name + repr(params) in cache)
-				print self.__plugin__ + " _cacheFunction saving: " + name + repr(params) + " - " + str(len(cache[name + repr(params)]["res"])) + repr(cache[name + repr(params)]["res"])
-				self.sqlSet("cache", repr(cache))
+				#print self.__plugin__ + " _cacheFunction saving: " + name + repr(params) + " - " + str(len(cache[name + repr(params)]["res"])) + repr(cache[name + repr(params)]["res"])
+				self.sqlSet("cache" + name, repr(cache))
 				ret = cache[name + repr(params)]["res"]
 
 			if ret:
@@ -484,16 +488,20 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 
 	def cacheFunctionThree(self, funct = False, items = [], params = {}):
 		if funct:
+			if params.has_key("new_results_function"):
+				del(params["new_results_function"])
 			name = repr(funct)
-			name = name[1:name.find(" of ")]
+			name = name[name.find("method") + 7 :name.find(" of ")]
 			print self.__plugin__ + " _cacheFunctionThree " + name
 			cache = {}
 			ret = False
-			if params.has_key("new_results_function"):
-				del(params["new_results_function"])
-			if self.sqlGet("cache"):
+			if self.sqlGet("cache" + name):
 				#print self.__plugin__ + " _cacheFunctionThree cache exists "
-				cache = eval(self.sqlGet("cache"))
+				cache = self.sqlGet("cache" + name)
+				if cache.strip() == "":
+					cache = {}
+				else:
+					cache = eval(cache)
 				#print self.__plugin__ + " _cacheFunctionThree cache exists: " + repr(name + repr(items) + repr(params) in cache) + repr(cache)
 				if name + repr(items) + repr(params) in cache:
 					#print self.__plugin__ + " _cacheFunctionThree returning cache for : " + name + repr(items) + repr(params)
@@ -509,7 +517,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 						       "res": funct(items, params)}
 				#print self.__plugin__ + " _cacheFunctionThree no match in cache2: " + repr(name + repr(items) + repr(params) in cache)
 				#print self.__plugin__ + " _cacheFunctionThree saving: " + repr(cache[name + repr(items) + repr(params)]["timestamp"]) + name + repr(items) + repr(params)
-				self.sqlSet("cache", repr(cache))
+				self.sqlSet("cache" + name, repr(cache))
 				#self.sqlSet("cache", "")
 				ret = cache[name + repr(items) + repr(params)]["res"]
 
@@ -522,6 +530,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 
 	def cleanCache(self):
 		cache = {}
+		return False
 		if self.sqlGet("cache"):
 			cache = eval(self.sqlGet("cache"))
 
@@ -790,6 +799,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 			
 			overlay = self.__storage__.retrieveValue("vidstatus-" + video['videoid'] )
 			if overlay:
+				print self.__plugin__ + " _getvideoinfo videoid set to false XXXX XXXX : " + repr(overlay)
 				video['Overlay'] = int(overlay)
 			
 			if video['videoid'] == "false":
@@ -929,26 +939,43 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 
 	def sqlSet(self, name, data):
 		if os.path.exists(os.path.join( xbmc.translatePath( "special://temp" ), 'commoncache.socket')):
-			#print self.__plugin__ + " sqlSet "
+			print self.__plugin__ + " sqlSet " + name
 			s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 			s.connect(os.path.join( xbmc.translatePath( "special://temp" ), 'commoncache.socket'))
-			s.send(repr({ "action": "set", "name": name, "data": data}) + "\n")
+			temp = repr({ "action": "set", "name": name, "data": data})
+			while len(temp) > 0:
+				if len(temp) > 50000:
+					data = temp[:50000]
+					temp = temp[50000:]
+				else:
+					data = temp + "\r\n"
+					temp = ""
+				s.send(data)
+			res = s.recv(4096 * 4096)
+			#print self.__plugin__ + " sqlGet sending ACK "
+			s.send("ACK\r\n")
+			#print self.__plugin__ + " sqlset GOT " + res
+
 
 	def sqlGet(self, name):
                 if os.path.exists(os.path.join( xbmc.translatePath( "special://temp" ), 'commoncache.socket')):
-			#print self.__plugin__ + " sqlGet "
+			print self.__plugin__ + " sqlGet " + name
 			s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 			s.connect(os.path.join( xbmc.translatePath( "special://temp" ), 'commoncache.socket'))
-			s.send(repr({ "action": "get", "name": name}) + "\n")
+			s.send(repr({ "action": "get", "name": name}) + "\r\n")
 			res = s.recv(4096 * 4096)
-			while res[len(res)-1] != "\n":
+			s.send("ACK\r\n")
+			#print self.__plugin__ + " sqlGet sending ACK "
+			i = 0
+			while res[len(res)-2:] != "\r\n":
 				#print self.__plugin__ + " sqlGet while res : " + str(len(res)) + " - " + res[len(res)-1]
-				print self.__plugin__ + " sqlGet sending ACK"
-				s.send("ACK")
+				#print self.__plugin__ + " sqlGet sending ACK " + str(i)
+				i += 1
 				res += s.recv(4096 * 4096)
-
+				s.send("ACK\r\n")
+			
 			if res:
 				res = eval(res)
-				return res
+				return res.strip() # We return " " as nothing. Strip it out.
 
 		return False

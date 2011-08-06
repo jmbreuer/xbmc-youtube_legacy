@@ -18,10 +18,10 @@
 
 import sys, urllib, os
 import xbmc
-import YouTubeUtils
+import YouTubeUtils, YouTubeCore
 from filelock import FileLock
 	
-class YouTubeStorage(YouTubeUtils.YouTubeUtils):
+class YouTubeStorage(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 	__settings__ = sys.modules[ "__main__"].__settings__ 
 	__plugin__ = sys.modules[ "__main__"].__plugin__
 	__language__ = sys.modules[ "__main__" ].__language__
@@ -409,7 +409,7 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 
 	def storeValue(self, key, value):
 		if value:
-			self.__settings__.setSetting(key, value)
+			self.sqlSet(key, value)
 
 	def storeResultSet(self, key, results = [], params = {}):
 		get = params.get
@@ -419,14 +419,14 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 				searchCount = ( 10, 20, 30, 40, )[ int( self.__settings__.getSetting( "saved_searches" ) ) ]
 				existing = self.retrieveResultSet(key)  
 				existing = [results] + existing[:searchCount]
-				self.__settings__.setSetting(key, repr(existing))
+				self.sqlSet(key, repr(existing))
 			elif get("append"):
 				existing = self.retrieveResultSet(key)  
 				existing = existing.append(results)
-				self.__settings__.setSetting(key, repr(existing))
+				self.sqlSet(key, repr(existing))
 			else:
 				value = repr(results)
-				self.__settings__.setSetting(key,value)
+				self.sqlSet(key,value)
 	
 	#============================= Retrieval Functions =================================
 	def retrieve(self, params = {}, type = "", item = {}):
@@ -442,14 +442,14 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 	def retrieveValue(self, key):
 		value = ""
 		if key:
-			value = self.__settings__.getSetting(key)
+			value = self.sqlGet(key)
 		
 		return value
 	
 	def retrieveResultSet(self, key):
 		results = []
 		
-		value = self.__settings__.getSetting(key)		
+		value = self.sqlGet(key)		
 		if value: 
 			try:
 				results = eval(value)
