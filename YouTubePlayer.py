@@ -30,7 +30,8 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 	__language__ = sys.modules[ "__main__" ].__language__
 	__plugin__ = sys.modules[ "__main__" ].__plugin__ 
 	__dbg__ = sys.modules[ "__main__" ].__dbg__
-	
+	__storage__ = sys.modules[ "__main__" ].__storage__
+
 	def __init__(self):
 		# YouTube Playback Feeds
 		self.urls['video_stream'] = "http://www.youtube.com/watch?v=%s&safeSearch=none"
@@ -299,7 +300,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			self.remove_from_playlist(params)
 			
 		self.__settings__.setSetting( "vidstatus-" + video['videoid'], "7" )
-		self.cleanCache()
+		#self.__storage__.cleanCache()
 
 	def getVideoUrlMap(self, pl_obj, video = {}):
 		if self.__dbg__:
@@ -535,7 +536,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		links = []
 				
 		#(video, status) = self.getInfo(params)
-		(video, status) = self.cacheFunction(self.getInfo, params)
+		(video, status) = self.__storage__.cacheFunction(self.getInfo, params)
 		
 		#Check if file has been downloaded locally and use that as a source instead
 		if (status == 200 and get("action","") != "download"):

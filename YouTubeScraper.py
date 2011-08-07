@@ -27,7 +27,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 	__dbg__ = sys.modules[ "__main__" ].__dbg__
 	
 	__feeds__ = sys.modules[ "__main__" ].__feeds__
-	__storage__ = sys.modules [ "__main__" ].__storage__
+	__storage__ = sys.modules[ "__main__" ].__storage__
 	
 	def __init__(self):
 		self.urls['categories'] = "http://www.youtube.com/videos"
@@ -1036,7 +1036,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 				
 		if not get("page"):
 			#(result, status) = params["new_results_function"](params)
-			(result, status) = self.cacheFunction(params["new_results_function"], params)
+			(result, status) = self.__storage__.cacheFunction(params["new_results_function"], params)
 			
 			if self.__dbg__ and False:
 				print self.__plugin__ + " paginator new result " + repr(result)
@@ -1065,7 +1065,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			(result, status) = self.getBatchDetailsThumbnails(result, params)
 		elif get("batch"):
 			#(result, status) = self.getBatchDetails(result, params)
-                        (result, status) = self.cacheFunctionThree(self.getBatchDetails, result, params)
+                        (result, status) = self.__storage__.cacheFunctionThree(self.getBatchDetails, result, params)
 
 		
 		if get("batch"):
