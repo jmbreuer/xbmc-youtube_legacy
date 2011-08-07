@@ -24,7 +24,7 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 	__settings__ = sys.modules[ "__main__"].__settings__ 
 	__plugin__ = sys.modules[ "__main__"].__plugin__
 	__language__ = sys.modules[ "__main__" ].__language__
-	__socket__ = (socket.gethostname(), 51998)
+	__socket__ = (socket.gethostname(), 51993)
 	
 	# This list contains the list options a user sees when indexing a contact 
 	#				label					  , external		 , login		 ,	thumbnail					, feed
