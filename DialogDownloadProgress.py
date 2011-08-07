@@ -181,7 +181,7 @@ class Window:
 		self.label	  = None
 		self.progress   = None
 
-	def setupWindow( self ):
+	def setupWindow( self, visible = True ):
 		error = 0
 		try: xbmcgui.lock()
 		except: pass
@@ -190,26 +190,22 @@ class Window:
 		try: currentWindowId = xbmcgui.getCurrentWindowId()
 		except: currentWindowId = self.window
 
-		if hasattr( self.window, "setProperty" ):
-			self.window.setProperty( "DialogDownloadProgress.Hide", __settings__.getSetting( "hidedialog" ) )
-
-		#if self.window is None and hasattr( currentWindowId, "__int__" ):
-		#	self.window = xbmcgui.Window( currentWindowId )
-		if hasattr( currentWindowId, "__int__" ) and currentWindowId != self.windowId:
+		if hasattr( currentWindowId, "__int__" ) and currentWindowId != self.windowId and visible:
 			self.removeControls()
 			self.windowId = currentWindowId
 			self.window = xbmcgui.Window( self.windowId )
-			self.initialize()
+			if visible:
+				self.initialize()
 
-		if not self.window or not hasattr( self.window, "addControl" ):
+		if not self.window or not hasattr( self.window, "addControl" ) or not visible:
 			self.removeControls()
-			error = 1
-		self.window.setProperty( "DialogDownloadProgress.Hide", __settings__.getSetting( "hidedialog" ) )
+			if visible:
+				error = 1
 		xbmcgui.unlock()
 		if error:
 			raise xbmcguiWindowError( "xbmcgui.Window(%s)" % repr( currentWindowId ) )
 		
-		self.window.setProperty( "DialogDownloadProgress.IsAlive", "true" )
+		#self.window.setProperty( "DialogDownloadProgress.IsAlive", "true" )
 
 	def initialize( self ):
 		try:
@@ -278,7 +274,9 @@ class DownloadProgress( Window ):
 		return self.canceled
 
 	def update( self, percent=0, heading="", label="" ):
-		self.setupWindow()
+		player = xbmc.Player()
+		self.setupWindow(player.isPlaying() == 0)
+
 		if heading and hasattr( self.heading, "setLabel" ):
 			# set heading
 			try: self.heading.setLabel( heading )

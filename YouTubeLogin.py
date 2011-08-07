@@ -37,7 +37,6 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 	__dbg__ = sys.modules[ "__main__" ].__dbg__
 
 	APIKEY = "AI39si6hWF7uOkKh4B9OEAX-gK337xbwR9Vax-cdeF9CF9iNAcQftT8NVhEXaORRLHAmHxj6GjM-Prw04odK4FxACFfKkiH9lg";
-	USERAGENT = "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-GB; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8"
 		
 	urls = {};
 	urls['http_login'] = "https://www.google.com/accounts/ServiceLogin?service=youtube"

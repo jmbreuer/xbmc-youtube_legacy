@@ -149,6 +149,7 @@ class YouTubeDownloader(YouTubeUtils.YouTubeUtils):
 					videos = []
 
 				heading = "[" + str(len(videos)) + "] " +  self.__language__(30624) + " - " + str(percent) + "%"
+
 				self.dialog.update(percent=percent, heading = heading, label=video["Title"])
 
 				if not chunk:
