@@ -267,7 +267,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 					rstat = 403
 					while rstat == 403:
 						result = self._fetchPage({"link": "http://gdata.youtube.com/feeds/api/videos/batch", "api": "true", "request": final_request})
-						rstat = self.parseDOM(result["content"], { "name": "batch:status", "return": "code"})
+						rstat = self.parseDOM(result["content"], "batch:status", ret = "code")
 						if len(rstat) > 0:
 							if int(rstat[len(rstat) - 1]) == 403:
 								print self.__plugin__ + " getBatchDetails quota exceeded. Waiting 5 seconds. " + repr(rstat)
@@ -447,19 +447,19 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 			print self.__plugin__ + " _findErrors"
 
 		## Couldn't find 2 factor or normal login
-		error = self.parseDOM(ret['content'], { "name": "div", "class": "errormsg", "content": "true"})
+		error = self.parseDOM(ret['content'], "div", attrs = { "class": "errormsg" })
 		if len(error) == 0:   
 			# An error in 2-factor
-			error = self.parseDOM(ret['content'], { "name": "div", "class": "error smaller", "content": "true"})
+			error = self.parseDOM(ret['content'], "div", attrs = { "class": "error smaller"})
 		if len(error) == 0:
-			error = self.parseDOM(ret['content'], { "name": "div", "id": "id", "id-match": "unavailable-message", "content": "true"})
+			error = self.parseDOM(ret['content'], "div", attrs = { "id": "unavailable-message"})
 		if len(error) == 0 and ret['content'].find("yt:quota") > -1:
 			# Api quota
-			html = self.parseDOM(ret['content'], { "name": "error"})
-			error = self.parseDOM(html, { "name": "code", "content": "true"})
+			html = self.parseDOM(ret['content'],"error")
+			error = self.parseDOM(html, "code")
 		if len(error) == 0 and False: # This hits flash quite often.
 			# Playback
-			error = self.parseDOM(ret['content'], { "name": "div", "class": "yt-alert-content", "content": "true"})
+			error = self.parseDOM(ret['content'], "div", attrs = { "class": "yt-alert-content"})
 		if len(error) > 0:
 			error = error[0]
 			error = urllib.unquote(error[0:error.find("[")]).replace("&#39;", "'")
@@ -722,22 +722,21 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 
 		return html
 
-	def getDOMContent(self, html, params, match):
-		get = params.get
+	def getDOMContent(self, html, name, match):
 		#print self.__plugin__ + " getDOMContent match: " + match
 		start = html.find(match)
-		if get("name") == "img":
+		if name == "img":
 			endstr = ">"
 		else:
-			endstr = "</" + get("name") + ">"
+			endstr = "</" + name + ">"
 		end = html.find(endstr, start)
 
-		pos = html.find("<" + get("name"), start + 1 )
+		pos = html.find("<" + name, start + 1 )
 
 		#print self.__plugin__ + " getDOMContent " + str(start) + " < " + str(end) + " pos = " + str(pos)
 
 		while pos < end and pos != -1:
-			pos = html.find("<" + get("name"), pos + 1)
+			pos = html.find("<" + name, pos + 1)
 			if pos > -1:
 				tend = html.find(endstr, end + len(endstr))
 				if tend != -1:
@@ -749,90 +748,67 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 		#print self.__plugin__ + " getDOMContent done html length: " + str(len(html)) + repr(html)
 		return html
 
-	def parseDOM(self, html, params):
-		get = params.get
-		#if self.__dbg__:
-		#	print self.__plugin__ + " parseDOM : " + repr(params)
-		if get("id"):
-			if get("id-match"):
-				lst = re.compile('(<' + get("name") + ' ' + get("id") + '=[\'"]+' + get("id-match") + '[\'"]>)').findall(html)
-				if len(lst) == 0:
-					lst = re.compile('(<' + get("name") + ' ' + get("id") + '=[\'"]+' + get("id-match") + '[\'"]+.*?>)').findall(html)
-					if len(lst) == 0:
-						lst = re.compile('(<' + get("name") + '.*?' + get("id") + '=[\'"]+' + get("id-match") + '[\'"]+.*?>)').findall(html)
-			else:
-				lst = re.compile('(<' + get("name") + ' ' + get("id") + '=[\'"].*?[\'"]+.*?>)').findall(html)
-				if len(lst) == 0:
-					lst = re.compile('(<' + get("name") + '.*?' + get("id") + '=[\'"]+.*?[\'"]+.*?>)').findall(html)
-		elif get("class"):
-			lst = re.compile('(<' + get("name") + ' class=[\'"]+' + get("class") + '[\'"]+.*?>)').findall(html)
-			if len(lst) == 0:
-				lst = re.compile('(<' + get("name") + '.*?class=[\'"]+' + get("class") + '[\'"]+.*?>)').findall(html)
-		elif get("return"):
-			lst = re.compile('(<' + get("name") + ' ' + get("return") + '=[\'"]+.*?[\'"]+.*?>)').findall(html)
-			if len(lst) == 0:
-				lst = re.compile('(<' + get("name") + '.*?' + get("return") + '=[\'"]+.*?[\'"]+.*?>)').findall(html) 
-		else:
-			lst = re.compile('(<' + get("name") + '.*?>)').findall(html)
+	def parseDOM(self, html, name = "", attrs = {}, ret = False):
+		# html <- text to scan.
+		# name <- Element name
+		# attrs <- { "id": "my-div", "class": "oneclass.*anotherclass", "attribute": "a random tag" }
+		# ret <- Return content of element
+		# Default return <- Returns a list with the content
 		
-		if len(lst) == 0:
-			#print self.__plugin__ + " parseDOM Couldn't find any matches. Returning empty handed : " + html
+		if self.__dbg__:
+			print self.__plugin__ + " parseDOM : " + repr(name) + " - " + repr(attrs) + " - " + repr(ret) + " - " + str(type(html))
+		if type(html) == type([]):
+			html = "".join(html)
+		html = html.replace("\n", "")
+		if not name.strip():
+			if self.__dbg__:
+				print self.__plugin__ + " parseDOM - Missing tag name "
 			return ""
 
-		if get("return"):
-			#these must be \n, at least for login and live.
-			html2 = "\n".join(lst)
-		else:
-			html2 = ""
-			for match in lst:
-				html2 += "\n" + self.getDOMContent(html, params, match)
+		lst = []
 
-		if len(lst) > 0 and get("class"):
-			lst = re.compile('(<.*?class=[\'"]' + get("class") + '[\'"].*?>)').findall(html2)
-			if get("return"):
-				html2 = "\n".join(lst)
-			else:
-				html2 = ""
-				for match in lst:
-					html2 += "\n" + self.getDOMContent(html, params, match)
-			#print self.__plugin__ + " parseDOM class: " + str(len(lst))
+		# Find all elements with the tag
+		for key in attrs:
+			lst2 = re.compile('(<' + name + ' ' + key + '=[\'"]+' + attrs[key] + '[\'"]>)').findall(html) ### ADDED THE LAST +
+			#print self.__plugin__ + " parseDOM scanning1  " + str(len(lst2)) + " - " + repr(lst2)
+			if len(lst2) == 0:
+				lst2 = re.compile('(<' + name + ' ' + key + '=[\'"]+' + attrs[key] + '[\'"]+.*?>)').findall(html)
+				#print self.__plugin__ + " parseDOM scanning2 " + str(len(lst2)) + " - " + repr(lst2)
+				if len(lst2) == 0:
+					lst2 = re.compile('(<' + name + '.*?' + key + '=[\'"]+' + attrs[key] + '[\'"]+.*?>)').findall(html)
+					#print self.__plugin__ + " parseDOM scanning3 " + str(len(lst2)) + " - " + repr(lst2)
 
-		if len(lst) > 0 and get("id"):
-			lst = re.compile('(<.*' + get("id") + '=.*>)').findall(html2)
-			if get("return"):
-				html2 = "\n".join(lst)
-			else:
-				html2 = ""
-				for match in lst:
-					html2 += "\n" + self.getDOMContent(html, params, match)
-			#print self.__plugin__ + " parseDOM id: " + str(len(lst))
-			if len(lst) > 0 and get("id-match"):
-				lst = re.compile('(<.*' + get("id") + '=[\'"]' + get("id-match") + '[\'"].*>)').findall(html2)
-				if get("return"):
-					html2 = "\n".join(lst)
+			if len(lst2) > 0:
+				if len(lst) == 0:
+					lst = lst2;
+					lst2 = []
 				else:
-					html2 = ""
-					for match in lst:
-						html2 += "\n" + self.getDOMContent(html, params, match)
-				#print self.__plugin__ + " parseDOM id-match: " + str(len(lst))
+					for i in range(len(lst)): # Delete anything missing from the next list.
+						if not lst[i] in lst2:
+							if self.__dbg__:
+								print self.__plugin__ + " parseDOM Purging mismatch " + str(len(lst)) + " - " + repr(lst[i])
+							del(lst[i])
 
-		#print self.__plugin__ + " parseDOM id - html2 length: " + str(len(html2)) +  " - " + str(len(lst))
+		if len(lst) == 0 and attrs == {}:
+			#print self.__plugin__ + " parseDOM no list found, making one on just the element name"
+			lst = re.compile('(<' + name + '.*?>)').findall(html)
 
-		if len(lst) > 0 and get("return"):
-			lst = re.compile('<' + get("name") + '.*' + get("return") + '=[\'"](.*?)[\'"].*>').findall(html2)
-			#print self.__plugin__ + " parseDOM return lst for " + repr(params) + " : " + str(len(lst)) + repr(lst)
-			return lst
-
-		if len(lst) > 0 and get("content"):
-			contlst = []
+		if ret != False:
+			#print self.__plugin__ + " parseDOM Getting attribute %s content for %s matches " % ( ret, len(lst) )
+			lst2 = []
 			for match in lst:
-				temp = self.getDOMContent(html, params, match)
+				lst2 += re.compile('<' + name + '.*' + ret + '=[\'"](.*?)[\'"].*>').findall(match)
+			lst = lst2
+		else:
+			#print self.__plugin__ + " parseDOM Getting element content for %s matches " % len(lst)
+			lst2 = []
+			for match in lst:
+				temp = self.getDOMContent(html, name, match)
 				html = html.replace(temp, "")
-				contlst.append(temp[temp.find(">")+1:temp.rfind("</" + get("name") + ">")])
-			#print self.__plugin__ + " parseDOM return lst for " + repr(params) + " : " + str(len(lst)) + " - " + repr(contlst)
-			return contlst
+				lst2.append(temp[temp.find(">")+1:temp.rfind("</" + name + ">")])
+			lst = lst2
 
-		#print self.__plugin__ + " parseDOM done return html for " + repr(params) + " : " + str(len(html2))
-		return html2
-
+		if self.__dbg__:
+			print self.__plugin__ + " parseDOM Done " + str(len(lst))
+		return lst
 

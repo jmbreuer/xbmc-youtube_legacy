@@ -183,7 +183,7 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			fetch_options = False
 
 			# Click login link on youtube.com
-			newurl = self.parseDOM(ret["content"], { "name": "a", "class": "end", "return": "href"})
+			newurl = self.parseDOM(ret["content"], "a", attrs = {"class": "end" }, ret = "href")
 			if len(newurl) > 0:
 				# Start login procedure
 				if newurl[0] != "#":
@@ -192,7 +192,7 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 						print self.__plugin__ + " _httpLogin part A: " + repr(fetch_options)
 
 			# Fill out login information and send.
-			newurl = self.parseDOM(ret["content"].replace("\n", " "), { "name": "form", "id": "id", "id-match": "gaia_loginform", "return": "action"})
+			newurl = self.parseDOM(ret["content"].replace("\n", " "), "form", attrs = { "id": "gaia_loginform"}, ret = "action")
 			if len(newurl) > 0:
 				( galx, url_data ) = self._fillLoginInfo(ret)
 				if len(galx) > 0 and len(url_data) > 0:
@@ -254,7 +254,7 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 	def _fillLoginInfo(self, ret):
 		rmShown = re.compile('<input type="hidden" name=\'rmShown\' value="(.*?)" />').findall(ret["content"])
 		#cont = re.compile('<input type="hidden" name="continue" id="continue"\n           value="(.*?)" /> ').findall(ret["content"])
-		#cont2 = self.parseDOM(ret["content"].replace("\n", " "), { "name": "input", "id": "id", "id-match": "continue", "return": "value"})
+		#cont2 = self.parseDOM(ret["content"].replace("\n", " "), "input", attrs = { "id": "continue" }, ret = "value")
 		cont = ["http://www.youtube.com/signin?action_handle_signin=true&amp;nomobiletemp=1&amp;hl=en_US&amp;next=%2F"]
 		uilel = re.compile('<input type="hidden" name="uilel" id="uilel"\n           value="(.*?)" />').findall(ret["content"])
 		dsh = re.compile('<input type="hidden" name="dsh" id="dsh"\n           value="(.*?)" />').findall(ret["content"])

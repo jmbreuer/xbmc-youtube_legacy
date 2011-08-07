@@ -597,8 +597,8 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 					print self.__plugin__ + " _getVideoLinks trying website : " + repr(data)
 					player_object = json.loads(data[0].replace('\'PLAYER_CONFIG\'', '"PLAYER_CONFIG"'))
 			else:
-				data = self.parseDOM(result["content"], { "name": "embed", "id": "id", "id-match": "movie_player", "return": "flashvars"})
-				src = self.parseDOM(result["content"], { "name": "embed", "id": "id", "id-match": "movie_player", "return": "src"})
+				data = self.parseDOM(result["content"], "embed", attrs = {"id": "movie_player" }, ret = "flashvars")
+				src = self.parseDOM(result["content"], "embed", attrs = {"id": "movie_player"}, ret = "src")
 				if len(data) > 0 and len(src) > 0:
 					data = data[0].replace("&amp;", "&")
 					player_object = self._convertFlashVars(data)

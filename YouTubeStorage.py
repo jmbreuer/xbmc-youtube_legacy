@@ -558,7 +558,7 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 					else:
 						print self.__plugin__ + " _cacheFunction Deleting old cache"
 						del(cache[name + repr(params)])
-			if not ret :
+			if not ret: 
 				print self.__plugin__ + " _cacheFunction no match in cache : " + repr(ret)
 				cache[name + repr(params)] = { "timestamp": time.time(),
 						       "res": funct(params)}
@@ -599,14 +599,13 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 					else:
 						print self.__plugin__ + " _cacheFunctionThree Deleting old cache"
 						del(cache[name + repr(items) + repr(params)])
-			if not ret :
+			if not ret:
 				#print self.__plugin__ + " _cacheFunctionThree no match in cache : " + repr(ret)
 				cache[name + repr(items) + repr(params)] = { "timestamp": time.time(),
 						       "res": funct(items, params)}
 				#print self.__plugin__ + " _cacheFunctionThree no match in cache2: " + repr(name + repr(items) + repr(params) in cache)
 				#print self.__plugin__ + " _cacheFunctionThree saving: " + repr(cache[name + repr(items) + repr(params)]["timestamp"]) + name + repr(items) + repr(params)
 				self.sqlSet("cache" + name, repr(cache))
-				#self.sqlSet("cache", "")
 				ret = cache[name + repr(items) + repr(params)]["res"]
 
 			if ret:
