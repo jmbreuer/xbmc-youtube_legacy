@@ -25,7 +25,8 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 	__plugin__ = sys.modules[ "__main__"].__plugin__
 	__language__ = sys.modules[ "__main__" ].__language__
 	__socket__ = (socket.gethostname(), 51993)
-	__store_in_settings__ = True
+	__store_in_settings__ = False
+	__disable_cache__ = True
 
 	# This list contains the list options a user sees when indexing a contact 
 	#				label					  , external		 , login		 ,	thumbnail					, feed
@@ -533,7 +534,9 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 			print self.__plugin__ + " removeVideoFromDownloadQueue Exception "
 
 	def cacheFunction(self, funct = False, params = {}):
-		if funct:
+		if self.__disable_cache__:
+			return funct(params)
+		elif funct:
 			name = repr(funct)
 			if params.has_key("new_results_function"):
 				del(params["new_results_function"])
@@ -575,7 +578,9 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 		return False
 
 	def cacheFunctionThree(self, funct = False, items = [], params = {}):
-		if funct:
+		if self.__disable_cache__:
+			return funct(items, params)
+		elif funct:
 			if params.has_key("new_results_function"):
 				del(params["new_results_function"])
 			name = repr(funct)

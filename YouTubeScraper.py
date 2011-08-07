@@ -1035,10 +1035,9 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
 				
 		if not get("page"):
-			#(result, status) = params["new_results_function"](params)
 			(result, status) = self.__storage__.cacheFunction(params["new_results_function"], params)
 			
-			if self.__dbg__ and False:
+			if self.__dbg__:
 				print self.__plugin__ + " paginator new result " + repr(result)
 			
 			if len(result) == 0:
@@ -1061,12 +1060,11 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			if len(result) == 0:
 				return (result, status)
 		
+		print self.__plugin__ + " paginator new result XXXX " + repr(result)
 		if get("batch") == "thumbnails":
 			(result, status) = self.getBatchDetailsThumbnails(result, params)
 		elif get("batch"):
-			#(result, status) = self.getBatchDetails(result, params)
                         (result, status) = self.__storage__.cacheFunctionThree(self.getBatchDetails, result, params)
-
 		
 		if get("batch"):
 			del params["batch"]
