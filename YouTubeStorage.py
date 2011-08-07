@@ -25,7 +25,8 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 	__plugin__ = sys.modules[ "__main__"].__plugin__
 	__language__ = sys.modules[ "__main__" ].__language__
 	__socket__ = (socket.gethostname(), 51993)
-	
+	__store_in_settings__ = True
+
 	# This list contains the list options a user sees when indexing a contact 
 	#				label					  , external		 , login		 ,	thumbnail					, feed
 	user_options = (
@@ -661,6 +662,9 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 			print self.__plugin__ + " unlock GOT " + res
 
 	def sqlSet(self, name, data):
+		if self.__store_in_settings__:
+			self.__settings__.setSetting(name, data)
+		else:
 			print self.__plugin__ + " sqlSet " + name
 			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			s.connect(self.__socket__)
@@ -680,6 +684,9 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 
 
 	def sqlGet(self, name):
+		if self.__store_in_settings__:
+			return self.__settings__.getSetting(name)
+		else:
 			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			s.connect(self.__socket__)
 			s.send(repr({ "action": "get", "name": name}) + "\r\n")
