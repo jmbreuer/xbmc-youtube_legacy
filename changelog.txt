@@ -4,7 +4,6 @@
 - Search [2.7]
   - Sometimes a list will be returned with all items restricted. This causes a slight error. Safesearch : strict, search query : "strip tease"
 - Movie downloads to database.
-- Get new download function working in windows.
 - Ignore vp8 files(if doable)
 
 [B]Errata[/B]
@@ -19,6 +18,7 @@
 - Hide download progress bar while viewing videos.
 - Dharma compatability (Dummy xbmcvfs)
 - Fixed Downloads messages.
+- Remove legacy download and move windows to new download system.
 - New caching system [ Beta ]
 
 [B]Version 2.6.0 (Beta)[/B]
