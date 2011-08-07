@@ -24,6 +24,7 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 	__settings__ = sys.modules[ "__main__"].__settings__ 
 	__plugin__ = sys.modules[ "__main__"].__plugin__
 	__language__ = sys.modules[ "__main__" ].__language__
+	__socket__ = (socket.gethostname(), 51999)
 	
 	# This list contains the list options a user sees when indexing a contact 
 	#				label					  , external		 , login		 ,	thumbnail					, feed
@@ -630,10 +631,9 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 		return False
 
 	def lock(self, name):
-		if os.path.exists(os.path.join( xbmc.translatePath( "special://temp" ), 'commoncache.socket')):
 			print self.__plugin__ + " lock " + name
-			s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-			s.connect(os.path.join( xbmc.translatePath( "special://temp" ), 'commoncache.socket'))
+			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			s.connect(self.__socket__)
 			data = repr({ "action": "lock", "name": name})
 			#print self.__plugin__ + " lock sending data "
 			s.send(data + "\r\n")
@@ -650,10 +650,9 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 					return False
 
 	def unlock(self, name):
-		if os.path.exists(os.path.join( xbmc.translatePath( "special://temp" ), 'commoncache.socket')):
 			print self.__plugin__ + " unlock " + name
-			s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-			s.connect(os.path.join( xbmc.translatePath( "special://temp" ), 'commoncache.socket'))
+			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			s.connect(self.__socket__)
 			data = repr({ "action": "unlock", "name": name})
 			s.send(data + "\r\n")
 			res = s.recv(4096 * 4096)
@@ -662,10 +661,9 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 			print self.__plugin__ + " unlock GOT " + res
 
 	def sqlSet(self, name, data):
-		if os.path.exists(os.path.join( xbmc.translatePath( "special://temp" ), 'commoncache.socket')):
 			print self.__plugin__ + " sqlSet " + name
-			s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-			s.connect(os.path.join( xbmc.translatePath( "special://temp" ), 'commoncache.socket'))
+			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			s.connect(self.__socket__)
 			temp = repr({ "action": "set", "name": name, "data": data})
 			while len(temp) > 0:
 				if len(temp) > 50000:
@@ -682,10 +680,8 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 
 
 	def sqlGet(self, name):
-		#print self.__plugin__ + " sqlGet " + name
-                if os.path.exists(os.path.join( xbmc.translatePath( "special://temp" ), 'commoncache.socket')):
-			s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-			s.connect(os.path.join( xbmc.translatePath( "special://temp" ), 'commoncache.socket'))
+			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			s.connect(self.__socket__)
 			s.send(repr({ "action": "get", "name": name}) + "\r\n")
 			res = s.recv(4096 * 4096)
 			s.send("ACK\r\n")
@@ -702,6 +698,6 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 				res = eval(res)
 				return res.strip() # We return " " as nothing. Strip it out.
 
-		return False
+			return False
 
 
