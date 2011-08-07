@@ -642,7 +642,7 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 			#print self.__plugin__ + " lock sending ACK "
 			s.send("ACK\r\n")
 			if res:
-				if eval(res) == "true":
+				if eval(res.strip()) == "true":
 					print self.__plugin__ + " lock GOT True : " + res.strip()
 					return True
 				else:
