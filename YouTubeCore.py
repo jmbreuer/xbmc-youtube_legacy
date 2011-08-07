@@ -440,8 +440,6 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 			time.sleep(3)
 			params["error"] = str(int(get("error", "0")) + 1)
 			ret_obj = self._fetchPage(params)
-			if not ret_obj.has_key("content") and e.fp:
-				ret_obj["content"] = e.fp.read()
 			return ret_obj
 		
 	def _findErrors(self, ret):

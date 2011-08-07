@@ -22,7 +22,6 @@ import YouTubeUtils
 import xbmc
 try: import xbmcvfs
 except ImportError: import xbmcvfsdummy as xbmcvfs
-from filelock import FileLock
 
 class YouTubeDownloader(YouTubeUtils.YouTubeUtils):
 	__settings__ = sys.modules[ "__main__" ].__settings__
@@ -32,10 +31,9 @@ class YouTubeDownloader(YouTubeUtils.YouTubeUtils):
 	
 	__player__ = sys.modules["__main__" ].__player__
 	__storage__ = sys.modules[ "__main__" ].__storage__
-	__lock__ = FileLock(os.path.join( xbmc.translatePath( "special://temp" ), "YouTubeDownloadProgress.lock"), 0)
 
 	dialog = ""
-						
+
 	def downloadVideo(self, params = {}):
 		get = params.get
 		
@@ -45,25 +43,20 @@ class YouTubeDownloader(YouTubeUtils.YouTubeUtils):
 			self.__settings__.openSettings()
 			self.__dbg__ = self.__settings__.getSetting("debug") == "true"
 			path = self.__settings__.getSetting( "downloadPath" )
-		
-		if sys.platform == "win32":
-			return self.downloadVideoURLNoQueue(params)
-		
-		try:
-			print self.__plugin__ + " trying to acquire"
-			self.__lock__.acquire()
-		except:
-			if self.__dbg__:
-				print self.__plugin__ + " Downloader is active, Queueing video "
-			self.__storage__.addVideoToDownloadQeueu(params)
-		else:
+
+		if self.__storage__.lock("YouTubeDownloadLock"):
 			params["silent"] = "true"
 			if self.__plugin__:
 				print self.__plugin__ + " Downloader not active, initializing downloader"
 			
 			self.__storage__.addVideoToDownloadQeueu(params)
 			self.processQueue(params)
-	
+			self.__storage__.unlock("YouTubeDownloadLock")
+		else:
+			if self.__dbg__:
+				print self.__plugin__ + " Downloader is active, Queueing video "
+			self.__storage__.addVideoToDownloadQeueu(params)
+
 	def processQueue(self, params = {}):
 		videoid = self.__storage__.getNextVideoFromDownloadQueue()
 		
@@ -95,7 +88,7 @@ class YouTubeDownloader(YouTubeUtils.YouTubeUtils):
 			self.dialog.close()
 			self.dialog = ""
 
-			self.__lock__.release()
+			#self.__lock__.release()
 
 			
 	def downloadVideoURL(self, video, params = {}):
@@ -136,10 +129,8 @@ class YouTubeDownloader(YouTubeUtils.YouTubeUtils):
 				percent = int(float(bytes_so_far) / float(total_size) * 100)
 				file.write(chunk)
 
-				fd = os.open(os.path.join( xbmc.translatePath( "special://temp" ), "YouTubeDownloadQueue"), os.O_CREAT|os.O_RDWR)
-				queue = os.read(fd, 65535)
-				os.close(fd)
-				
+				queue = self.__storage__.sqlGet("YouTubeDownloadQueue")
+
 				if queue:
 					try:
 						videos = eval(queue)
