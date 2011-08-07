@@ -695,7 +695,7 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 				s.send("ACK\r\n")
 			
 			if res:
-				res = eval(res)
+				res = eval(res.strip())
 				return res.strip() # We return " " as nothing. Strip it out.
 
 			return False
