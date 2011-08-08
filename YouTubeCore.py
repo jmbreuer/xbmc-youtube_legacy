@@ -772,27 +772,25 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 			
 		i = 0
 		for key in attrs:
-			scripts = [ '(<' + name + ' (?:' + key + '=[\'"]' + attrs[key] + '[\'"]>))', # Hit often.
+			scripts = [ '(<' + name + '[^>]*?(?:' + key + '=[\'"]' + attrs[key] + '[\'"][^>]*?>))', # Hit often.
 				    '(<' + name + ' (?:' + key + '=[\'"]' + attrs[key] + '[\'"])[^>]*?>)', # Hit twice
-				    '(<' + name + '[^>]*?(?:' + key + '=[\'"]' + attrs[key] + '[\'"])[^>]*?>)', # Hit once. but faulty-
-				    '(<' + name + ' ' + key + '=[\'"]+' + attrs[key] + '[\'"]>)',
-				    '(<' + name + ' ' + key + '=[\'"]+' + attrs[key] + '[\'"]+[^>]*?>)',
-				    '(<' + name + '[^>]*?' + key + '=[\'"]+' + attrs[key] + '[\'"]+[^>]*?>)'] 
+				    '(<' + name + '[^>]*?(?:' + key + '=[\'"]' + attrs[key] + '[\'"])[^>]*?>)'] # 
 
 			lst2 = []
 			for script in scripts:
 				if len(lst2) == 0:
-					#print self.__plugin__ + " parseDOM scanning " + str(i) + " " + str(len(lst)) + " Running :" + script
-					lst2 = re.compile(script).findall(html)
-					#print self.__plugin__ + " parseDOM scanning " + str(i) + " " + str(len(lst2)) + " Result : " + repr(lst2)
-					#print self.__plugin__ + " parseDOM test " + str(html.find('="' + attrs[key] + '"'))
+					print self.__plugin__ + " parseDOM scanning " + str(i) + " " + str(len(lst)) + " Running :" + script
+					lst2 = re.compile(script).findall(html, re.DOTALL)
+					print self.__plugin__ + " parseDOM scanning " + str(i) + " " + str(len(lst2)) + " Result : " #+ repr(lst2[:2])
 					i += 1
 			if len(lst2) > 0:
 				if len(lst) == 0:
 					lst = lst2;
 					lst2 = []
 				else:
-					for i in range(len(lst)): # Delete anything missing from the next list.
+					test = range(len(lst))
+					test.reverse()
+					for i in test: # Delete anything missing from the next list.
 						if not lst[i] in lst2:
 							if self.__dbg__:
 								print self.__plugin__ + " parseDOM Purging mismatch " + str(len(lst)) + " - " + repr(lst[i])

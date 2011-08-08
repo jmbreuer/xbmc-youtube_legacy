@@ -71,7 +71,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		
 		if (len(trailers) > 0):
 			items = []
-			ahref = self.parseDOM(trailers, "a", attrs = {"class": " yt-uix-hovercard-target" }, ret = "href")
+			ahref = self.parseDOM(trailers, "a", attrs = {"class": " yt-uix-hovercard-target", "id": ".*?" }, ret = "href")
 			athumb = self.parseDOM(trailers, "img", attrs = { "alt": "Thumbnail" }, ret = "src")
 			if len(ahref) == len(athumb):
 				for i in range(0, len(ahref)):
