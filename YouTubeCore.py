@@ -710,6 +710,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 		if next:
 			self.addNextFolder(ytobjects,params)
 				
+		print self.__plugin__ + " _getvideoinfo Done: " + str(len(ytobjects)) #+ repr(ytobjects)
 		return ytobjects;
 
 	def stripTags(self, html):
@@ -768,16 +769,24 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 		lst = []
 
 		# Find all elements with the tag
+			
+		i = 0
 		for key in attrs:
-			lst2 = re.compile('(<' + name + ' ' + key + '=[\'"]+' + attrs[key] + '[\'"]>)').findall(html) ### ADDED THE LAST +
-			#print self.__plugin__ + " parseDOM scanning1  " + str(len(lst2)) + " - " + repr(lst2)
-			if len(lst2) == 0:
-				lst2 = re.compile('(<' + name + ' ' + key + '=[\'"]+' + attrs[key] + '[\'"]+.*?>)').findall(html)
-				#print self.__plugin__ + " parseDOM scanning2 " + str(len(lst2)) + " - " + repr(lst2)
-				if len(lst2) == 0:
-					lst2 = re.compile('(<' + name + '.*?' + key + '=[\'"]+' + attrs[key] + '[\'"]+.*?>)').findall(html)
-					#print self.__plugin__ + " parseDOM scanning3 " + str(len(lst2)) + " - " + repr(lst2)
+			scripts = [ '(<' + name + ' (?:' + key + '=[\'"]' + attrs[key] + '[\'"]>))', # Hit often.
+				    '(<' + name + ' (?:' + key + '=[\'"]' + attrs[key] + '[\'"])[^>]*?>)', # Hit twice
+				    '(<' + name + '[^>]*?(?:' + key + '=[\'"]' + attrs[key] + '[\'"])[^>]*?>)', # Hit once. but faulty-
+				    '(<' + name + ' ' + key + '=[\'"]+' + attrs[key] + '[\'"]>)',
+				    '(<' + name + ' ' + key + '=[\'"]+' + attrs[key] + '[\'"]+[^>]*?>)',
+				    '(<' + name + '[^>]*?' + key + '=[\'"]+' + attrs[key] + '[\'"]+[^>]*?>)'] 
 
+			lst2 = []
+			for script in scripts:
+				if len(lst2) == 0:
+					#print self.__plugin__ + " parseDOM scanning " + str(i) + " " + str(len(lst)) + " Running :" + script
+					lst2 = re.compile(script).findall(html)
+					#print self.__plugin__ + " parseDOM scanning " + str(i) + " " + str(len(lst2)) + " Result : " + repr(lst2)
+					#print self.__plugin__ + " parseDOM test " + str(html.find('="' + attrs[key] + '"'))
+					i += 1
 			if len(lst2) > 0:
 				if len(lst) == 0:
 					lst = lst2;
@@ -791,13 +800,13 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 
 		if len(lst) == 0 and attrs == {}:
 			#print self.__plugin__ + " parseDOM no list found, making one on just the element name"
-			lst = re.compile('(<' + name + '.*?>)').findall(html)
+			lst = re.compile('(<' + name + '[^>]*?>)').findall(html)
 
 		if ret != False:
 			#print self.__plugin__ + " parseDOM Getting attribute %s content for %s matches " % ( ret, len(lst) )
 			lst2 = []
 			for match in lst:
-				lst2 += re.compile('<' + name + '.*' + ret + '=[\'"](.*?)[\'"].*>').findall(match)
+				lst2 += re.compile('<' + name + '.*' + ret + '=[\'"]([^>]*?)[\'"].*>').findall(match)
 			lst = lst2
 		else:
 			#print self.__plugin__ + " parseDOM Getting element content for %s matches " % len(lst)
