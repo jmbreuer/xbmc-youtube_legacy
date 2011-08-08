@@ -779,9 +779,9 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 			lst2 = []
 			for script in scripts:
 				if len(lst2) == 0:
-					print self.__plugin__ + " parseDOM scanning " + str(i) + " " + str(len(lst)) + " Running :" + script
-					lst2 = re.compile(script).findall(html, re.DOTALL)
-					print self.__plugin__ + " parseDOM scanning " + str(i) + " " + str(len(lst2)) + " Result : " #+ repr(lst2[:2])
+					#print self.__plugin__ + " parseDOM scanning " + str(i) + " " + str(len(lst)) + " Running :" + script
+					lst2 = re.compile(script).findall(html)
+					#print self.__plugin__ + " parseDOM scanning " + str(i) + " " + str(len(lst2)) + " Result : " #+ repr(lst2[:2])
 					i += 1
 			if len(lst2) > 0:
 				if len(lst) == 0:

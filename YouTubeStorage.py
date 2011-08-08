@@ -19,15 +19,23 @@
 import sys, urllib, os, socket, time
 import xbmc
 import YouTubeUtils
-	
+import StorageServer		
+try: import xbmcvfs
+except ImportError: import xbmcvfsdummy as xbmcvfs
+
 class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 	__settings__ = sys.modules[ "__main__"].__settings__ 
 	__plugin__ = sys.modules[ "__main__"].__plugin__
 	__language__ = sys.modules[ "__main__" ].__language__
-	__socket__ = (socket.gethostname(), 51993)
+	if sys.platform == "win32":
+		port = 51992
+		__socket__ = (socket.gethostname(), port)
+	else:
+		__socket__ = os.path.join( xbmc.translatePath( "special://temp" ), 'commoncache.socket')
 	__store_in_settings__ = False
-	__disable_cache__ = True
-
+	__disable_cache__ = False
+	__connected__ = False
+	__soccon__ = False
 	# This list contains the list options a user sees when indexing a contact 
 	#				label					  , external		 , login		 ,	thumbnail					, feed
 	user_options = (
@@ -563,8 +571,9 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 						del(cache[name + repr(params)])
 			if not ret: 
 				print self.__plugin__ + " _cacheFunction no match in cache : " + repr(ret)
-				cache[name + repr(params)] = { "timestamp": time.time(),
-						       "res": funct(params)}
+				org_params = params
+				cache[name + repr(org_params)] = { "timestamp": time.time(),
+								   "res": funct(params)}
 				#print self.__plugin__ + " _cacheFunction no match in cache2: " + repr(name + repr(params) in cache)
 				#print self.__plugin__ + " _cacheFunction saving: " + name + repr(params) + " - " + str(len(cache[name + repr(params)]["res"])) + repr(cache[name + repr(params)]["res"])
 				self.sqlSet("cache" + name, repr(cache))
@@ -630,6 +639,7 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 			for item in cache:
 				if cache[item]["timestamp"] < time.time() - (3600 * 24):
 					del(cache[item])
+				## Expand this to refresh content instead of deleting it if the item is acced over a certain threshold.
 
 			self.sqlSet("cache", repr(cache))
 			return True
@@ -665,13 +675,85 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 			s.send("ACK\r\n")
 			print self.__plugin__ + " unlock GOT " + res
 
+	def sqlDisconnect(self):
+		print self.__plugin__ + " sqlDisconnect "
+		return True
+		start = time.time()
+		self.__connected__ = True
+		while start + 1 > time.time() and self.__connected__:
+			try:
+				self.__soccon__.send(repr("SHUTDOWN!") + "\r\n")
+				print self.__plugin__ + " sqlDisconnect Trying to disconnect DATA SENT!!!!"
+				res = self.__soccon__.recv(4096 * 4096)
+				self.__connected__ = False
+			except:
+				try:
+					self.__soccon__.connect(self.__socket__)
+					print self.__plugin__ + " sqlDisconnect Trying to disconnect ESTABLISHED FALLBACK CONNECTION"
+				except:
+					pass
+	
+		if self.__connected__:
+			StorageServer.stop()
+			if sys.platform != "win32":
+				os.unlink(self.__socket__)
+				
+				self.__connected__ = False
+
+	def sqlConnect(self):
+		if self.__dbg__:
+			print self.__plugin__ + " sqlConnect " 
+
+		if sys.platform == "win32":
+			self.__soccon__ = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		else:
+			self.__soccon__ = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+			if not self.__connected__ and xbmcvfs.exists(self.__socket__) and False:
+				#print self.__plugin__ + " sqlConnect NOT CONNECTED, BUT FILE EXISTS.. CONSIDER IT STALE"
+				self.sqlDisconnect()
+
+		start = time.time()
+		running = False
+		#print self.__plugin__ + " sqlConnect trying to connect"
+		try:
+			self.__soccon__.connect(self.__socket__)
+			self.__connected__ = True
+		except socket.error, e:
+			print self.__plugin__ + " sqlConnect exception : " + repr(e)
+			#if e.errno == 111 or e.errno == 2:
+			#	StorageServer.restart()
+			#self.__soccon__.connect(self.__socket__)
+			#self.__connected__ = True
+
+		#print self.__plugin__ + " sqlConnect connected"
+		while not self.__connected__ and start + 1 > time.time() and False:
+			try:
+				self.__soccon__.connect(self.__socket__)
+				self.__connected__ = True
+				#print self.__plugin__ + " sqlConnect connected"
+			except:
+				if sys.platform == "win32":
+					#print self.__plugin__ + " sqlConnect Trying to spawn"
+					#s = StorageServer.StorageServer()
+					running = True
+				elif sys.platform in [ "linux2" ] :
+				        #StorageServer.run()
+					running = True
+						
+				#time.sleep(1)
+				#print self.__plugin__ + " sqlConnect exception... waiting" 
+		#print self.__plugin__ + " sqlConnect Returning " + repr(self.__connected__)
+		return self.__connected__
+
 	def sqlSet(self, name, data):
 		if self.__store_in_settings__:
+			print self.__plugin__ + " sqlSet ( in settings ) " + name
 			self.__settings__.setSetting(name, data)
 		else:
 			print self.__plugin__ + " sqlSet " + name
-			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-			s.connect(self.__socket__)
+			self.sqlConnect()
+			if not self.sqlConnect():
+				return ""
 			temp = repr({ "action": "set", "name": name, "data": data})
 			while len(temp) > 0:
 				if len(temp) > 50000:
@@ -680,31 +762,37 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 				else:
 					data = temp + "\r\n"
 					temp = ""
-				s.send(data)
-			res = s.recv(4096 * 4096)
+				self.__soccon__.send(data)
+			res = self.__soccon__.recv(4096 * 4096)
 			#print self.__plugin__ + " sqlset sending ACK "
-			s.send("ACK\r\n")
+			self.__soccon__.send("ACK\r\n")
 			#print self.__plugin__ + " sqlset GOT " + res
+			self.sqlDisconnect()
 
 
 	def sqlGet(self, name):
 		if self.__store_in_settings__:
+			print self.__plugin__ + " sqlGet ( from settings ) " + name + repr(self.__store_in_settings__)
 			return self.__settings__.getSetting(name)
 		else:
-			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-			s.connect(self.__socket__)
-			s.send(repr({ "action": "get", "name": name}) + "\r\n")
-			res = s.recv(4096 * 4096)
-			s.send("ACK\r\n")
-			#print self.__plugin__ + " sqlGet sending ACK "
+			if not self.sqlConnect():
+				return ""
+			print self.__plugin__ + " sqlGet " + name 
+			self.__soccon__.send(repr({ "action": "get", "name": name}) + "\r\n")
+			print self.__plugin__ + " sqlGet - receive "
+			res = self.__soccon__.recv(4096 * 4096)
+			print self.__plugin__ + " sqlGet sending ACK "
+			self.__soccon__.send("ACK\r\n")
 			i = 0
 			while res[len(res)-2:] != "\r\n":
 				#print self.__plugin__ + " sqlGet while res : " + str(len(res)) + " - " + res[len(res)-1]
 				#print self.__plugin__ + " sqlGet sending ACK " + str(i)
 				i += 1
-				res += s.recv(4096 * 4096)
-				s.send("ACK\r\n")
-			
+				res += self.__soccon__.recv(4096 * 4096)
+				self.__soccon__.send("ACK\r\n")
+			self.__soccon__.close()
+			self.sqlDisconnect()
+
 			if res:
 				res = eval(res.strip())
 				return res.strip() # We return " " as nothing. Strip it out.

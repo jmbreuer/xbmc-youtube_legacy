@@ -75,3 +75,7 @@ if (__name__ == "__main__" ):
 			__navigation__.executeAction(params)
 		elif (get("path")):
 			__navigation__.listMenu(params)
+		else:
+			print __plugin__ + " ARGV Nothing done.. verify params " + repr(params)
+
+

@@ -161,7 +161,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 					items.append(item)
 
 		if self.__dbg__:
-			print self.__plugin__ + " scrapeMusicCategories done"
+			print self.__plugin__ + " scrapeMusicCategories done" 
 		return (items, result["status"]) 
 
 	
@@ -279,6 +279,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			
 			for video in content: 
 				videoid = self.parseDOM(video, "a", attrs = {"class": "ux-thumb-wrap " }, ret = "href")
+				print self.__plugin__ + " scrapeMusicCategoryHits " + repr(videoid) + " - " + repr(video)
 				videoid = videoid[0]
 				videoid = videoid[videoid.find("?v=") + 3:videoid.find("&")]
 				items.append(videoid)
