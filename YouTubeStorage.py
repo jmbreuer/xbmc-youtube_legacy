@@ -27,8 +27,8 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 	__settings__ = sys.modules[ "__main__"].__settings__ 
 	__plugin__ = sys.modules[ "__main__"].__plugin__
 	__language__ = sys.modules[ "__main__" ].__language__
-	if sys.platform == "win32":
-		port = 51992
+	if sys.platform == "win32" and True:
+		port = 53992
 		__socket__ = (socket.gethostname(), port)
 	else:
 		__socket__ = os.path.join( xbmc.translatePath( "special://temp" ), 'commoncache.socket')
@@ -704,7 +704,7 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 		if self.__dbg__:
 			print self.__plugin__ + " sqlConnect " 
 
-		if sys.platform == "win32":
+		if sys.platform == "win32" and True:
 			self.__soccon__ = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		else:
 			self.__soccon__ = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
@@ -732,7 +732,7 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 				self.__connected__ = True
 				#print self.__plugin__ + " sqlConnect connected"
 			except:
-				if sys.platform == "win32":
+				if sys.platform == "win32" and True:
 					#print self.__plugin__ + " sqlConnect Trying to spawn"
 					#s = StorageServer.StorageServer()
 					running = True

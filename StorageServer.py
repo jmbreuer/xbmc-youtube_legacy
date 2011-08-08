@@ -59,7 +59,7 @@ class StorageServer():
 		except:
 			print self.__plugin__ + " Database already exists"
 
-                if sys.platform == "win32":
+                if sys.platform == "win32" and True:
 			port = 53992
 			self.__socket__ = (socket.gethostname(), port)
 			sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
