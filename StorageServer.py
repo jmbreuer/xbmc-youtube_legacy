@@ -47,7 +47,7 @@ class StorageServer():
 	if sql2:
 		__conn__ = sqlite.connect(__path__)
 	elif sql3:
-		__conn__ = sqlite3.connect(__path__)
+		__conn__ = sqlite3.connect(__path__, check_same_thread=False)
 	__threads__ = []
 
 	def run(self):
@@ -59,8 +59,8 @@ class StorageServer():
 		except:
 			print self.__plugin__ + " Database already exists"
 
-                if sys.platform == "win32" and True:
-			port = 53992
+                if sys.platform == "win32":
+			port = 59994
 			self.__socket__ = (socket.gethostname(), port)
 			sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		else:
@@ -73,7 +73,7 @@ class StorageServer():
 
 		sock.bind(self.__socket__)
 		sock.listen(5)
-		#sock.setblocking(0)
+		sock.setblocking(0)
 		
 		start = time.time()
 		i = 0
@@ -81,33 +81,37 @@ class StorageServer():
 			if i == 0:
 				print self.__plugin__ + " accepting"
 				i = 1
-			sock.setblocking(0)
+			#sock.setblocking(0)
+			#socket.setdefaulttimeout(30)
+			clientsocket = False
 			try:
 				(clientsocket, address) = sock.accept()
 				start = time.time()
 			except socket.error, e:
-				if start + 30 < time.time():
+				if start + 300 < time.time():
 					print self.__plugin__ + " EXCEPTION OVER TIME : " + repr(e)
-					break;
-				if e.errno == 11:
+					#exit(0)
+				if e.errno == 11 or e.errno == 10035 or e.errno == 35:
 					continue
 				print self.__plugin__ + " EXCEPTION : " + repr(e)
 				#self.stop()
 
+			if not clientsocket:
+				continue
 			print self.__plugin__ + " accepted"
 			#socket.setdefaulttimeout(30)
-
-			data = clientsocket.recv(4096)
+			data = "    "
 			i = 0
 			#print self.__plugin__ + "  LOOP2 : " + str(i) + " - "  + str(len(data)) + data[len(data) -10:]
-			while data[len(data)-2:] != "\r\n" and data != "": # This is a server, so we need to tell it when to stop. hence \n
+			while data[len(data)-2:] != "\r\n":
 				#print self.__plugin__ + "  LOOP2 : " + str(i) + " - "  + str(len(data)) + data[len(data) -10:] + repr(data)
 				i += 1
 				try:
 					data += clientsocket.recv(4096)
-				except:
-					print self.__plugin__ + " except ERROROR !!!!!!!!!!!!!!!!!"
-					data += "\r\n"
+				except socket.error, e:
+					if e.errno != 10035 and e.errno != 35 :
+						print self.__plugin__ + " except ERROROR !!!!!!!!!!!!!!!!! " + repr(e)
+						data += "\r\n"
 
 			try:
 				data = eval(data.strip())
@@ -134,27 +138,36 @@ class StorageServer():
 			elif data["action"] == "unlock":
 				res = self.unlock(data["name"])
 
-			i = 0
+			ack = 0
 			if len(res) > 0:
 				res = repr(res)
 			while len(res) > 0:
-				if len(res) > 50000:
-					data = res[:50000]
-					res = res[50000:]
-				else:
-					data = res + "\r\n"
-					res = ""
-					   
-				#print self.__plugin__ + " Sending : " + str(len(data)) #+ " - " + repr(data)[len(data) - 10:]
+				data = ""
+				if ack == 0:
+					if len(res) > 5000:
+						data = res[:5000]
+						res = res[5000:]
+					else:
+						data = res + "\r\n"
+						res = ""
 
 				try:
-					clientsocket.send(data)
-					print self.__plugin__ + " res waiting for ACK " + str(i)
-					i += 1
-					status = clientsocket.recv(4096)
+					if len(data) > 0:
+						clientsocket.send(data)
+						ack += 1
+						print self.__plugin__ + " res waiting for ACK " + str(ack) + " - " + str(len(data)) + " -  " + repr(data)[len(data) - 10:]
+					
+					status = ""
+					while status != "COMPLETE\r\n" and status != "ACK\r\n":
+						status = clientsocket.recv(4096)
+						ack -= 1
+						print self.__plugin__ + " res waiting got ACK " + str(ack) + " - " + repr(status)
 				except:
-					break;
-			clientsocket.close()
+					pass
+			print self.__plugin__ + " Done sending data.. Closing socket."
+
+			if clientsocket:
+				clientsocket.close()
 
 	def lock(self, name): # This is NOT atomic
 		#print self.__plugin__ + " lock " + name
