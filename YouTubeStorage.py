@@ -560,7 +560,8 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 						if key not in [ "new_results_function" ]:
 							name += "'%s'='%s'" % (key, params[key])
 				elif type(params) == type([]):
-					name += ",".join(params)
+					print self.__plugin__ + " _cacheFunction: " + str(type(params)) 
+					name += ",".join(["%s" % el for el in params])
 				else:
 					name += params
 
@@ -581,7 +582,7 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 						print self.__plugin__ + " _cacheFunction Deleting old cache"
 						del(cache[name])
 			if not ret_val: 
-				print self.__plugin__ + " _cacheFunction Sending request " + str(len(args))
+				print self.__plugin__ + " _cacheFunction Sending request " + str(len(args)) + " - " + repr(args)
 				ret_val = funct(*args)
 				if ret_val[1] == 200:
 					cache[name] = { "timestamp": time.time(),
