@@ -278,7 +278,7 @@ class StorageServer():
 				self.__curs__.execute("SELECT data FROM items WHERE name = ?", ( name,))
 		except :
 			print self.__plugin__ + " sqlGet Got exception"
-			return
+			return " "
 
 		for row in self.__curs__:
 			#print self.__plugin__ + " sqlGet returning : " + row[0]
