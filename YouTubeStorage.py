@@ -552,6 +552,11 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 			print self.__plugin__ + " _cacheFunction: " + name + repr(params)
 			cache = {}
 			ret = False
+			
+			name += "|"
+			for key in sorted(params.iterkeys()):
+				name += "'%s'='%s'" % (key, params[key])
+			name += "|"
 
 			if self.sqlGet("cache" + name):
 				print self.__plugin__ + " _cacheFunction cache exists "
@@ -560,31 +565,31 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 					cache = {}
 				else:
 					cache = eval(cache)
-				print self.__plugin__ + " _cacheFunction: " + name + repr(params) + " in cache: " + repr(name + repr(params) in cache) 
-				if name + repr(params) in cache:
-					print self.__plugin__ + " _cacheFunction returning cache for : " + name + repr(params)
-					#print self.__plugin__ + " _cacheFunction returning : " + str(len(cache[name + repr(params)]["res"])) + " - " + str(cache[name + repr(params)]["timestamp"])
-					if cache[name + repr(params)]["timestamp"] > time.time() - (3600 * 24):
-						ret = cache[name + repr(params)]["res"]
+				print self.__plugin__ + " _cacheFunction: " + name + " in cache: " + repr(name in cache) 
+				if name in cache:
+					print self.__plugin__ + " _cacheFunction returning cache for : " + name
+					#print self.__plugin__ + " _cacheFunction returning : " + str(len(cache[name]["res"])) + " - " + str(cache[name]["timestamp"])
+					if cache[name]["timestamp"] > time.time() - (3600 * 24):
+						ret = cache[name]["res"]
 					else:
 						print self.__plugin__ + " _cacheFunction Deleting old cache"
-						del(cache[name + repr(params)])
+						del(cache[name])
 			if not ret: 
 				print self.__plugin__ + " _cacheFunction no match in cache : " + repr(ret)
 				org_params = params
-				cache[name + repr(org_params)] = { "timestamp": time.time(),
-								   "res": funct(params)}
-				#print self.__plugin__ + " _cacheFunction no match in cache2: " + repr(name + repr(params) in cache)
-				#print self.__plugin__ + " _cacheFunction saving: " + name + repr(params) + " - " + str(len(cache[name + repr(params)]["res"])) + repr(cache[name + repr(params)]["res"])
-				self.sqlSet("cache" + name, repr(cache))
-				ret = cache[name + repr(params)]["res"]
+				ret = funct(params)
+				if ret[1] == 200:
+					cache[name] = { "timestamp": time.time(),
+							"res": ret}
+					print self.__plugin__ + " _cacheFunction saving: " # + repr(cache[name]["res"])
+					self.sqlSet("cache" + name, repr(cache))
 
 			if ret:
-				print self.__plugin__ + " _cacheFunction returning "
+				print self.__plugin__ + " _cacheFunction returning : " # + repr(ret)
 				return ret
 
 		print self.__plugin__ + " _cacheFunction Error " 
-		return False
+		return ( "", 500 )
 
 	def cacheFunctionThree(self, funct = False, items = [], params = {}):
 		if self.__disable_cache__:
@@ -595,39 +600,54 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 			name = repr(funct)
 			name = name[name.find("method") + 7 :name.find(" of ")]
 			print self.__plugin__ + " _cacheFunctionThree " + name
+			
+			name += "|"
+			if type(items) == type({}):
+				for key in sorted(items.iterkeys()):
+					name += "'%s'='%s'" % (key, items[key])
+			else:
+				name += ",".join(items)
+			name += "|"
+			for key in sorted(params.iterkeys()):
+				name += "'%s'='%s'" % (key, params[key])
+			name += "|"
+
 			cache = {}
 			ret = False
 			if self.sqlGet("cache" + name):
-				#print self.__plugin__ + " _cacheFunctionThree cache exists "
+				#print self.__plugin__ + " _cacheFunctionThree cache exists : " + name
 				cache = self.sqlGet("cache" + name)
 				if cache.strip() == "":
 					cache = {}
 				else:
 					cache = eval(cache)
 				#print self.__plugin__ + " _cacheFunctionThree cache exists: " + repr(name + repr(items) + repr(params) in cache) + repr(cache)
-				if name + repr(items) + repr(params) in cache:
+				if name in cache:
 					#print self.__plugin__ + " _cacheFunctionThree returning cache for : " + name + repr(items) + repr(params)
 					#print self.__plugin__ + " _cacheFunctionThree returning : " + str(len(cache[name + repr(items) + repr(params)]["res"])) + " - " + str(cache[name + repr(items) + repr(params)]["timestamp"])
-					if cache[name + repr(items) + repr(params)]["timestamp"] > time.time() - (3600 * 24):
-						ret = cache[name + repr(items) + repr(params)]["res"]
+					if cache[name]["timestamp"] > time.time() - (3600 * 24):
+						ret = cache[name]["res"]
+						print self.__plugin__ + " _cacheFunctionThree FOUND CACHE XXXX XXXXXXX " + repr(ret)
 					else:
 						print self.__plugin__ + " _cacheFunctionThree Deleting old cache"
-						del(cache[name + repr(items) + repr(params)])
-			if not ret:
-				#print self.__plugin__ + " _cacheFunctionThree no match in cache : " + repr(ret)
-				cache[name + repr(items) + repr(params)] = { "timestamp": time.time(),
-						       "res": funct(items, params)}
-				#print self.__plugin__ + " _cacheFunctionThree no match in cache2: " + repr(name + repr(items) + repr(params) in cache)
-				#print self.__plugin__ + " _cacheFunctionThree saving: " + repr(cache[name + repr(items) + repr(params)]["timestamp"]) + name + repr(items) + repr(params)
-				self.sqlSet("cache" + name, repr(cache))
-				ret = cache[name + repr(items) + repr(params)]["res"]
+						del(cache[name])
+			if not ret: 
+				print self.__plugin__ + " _cacheFunction no match in cache : " + repr(ret)
+				org_params = params
+				ret = funct(items, params)
+				if ret[1] == 200:
+					cache[name] = { "timestamp": time.time(),
+							"res": ret}
+					print self.__plugin__ + " _cacheFunctionThree saving: " + name #+ " - "  + repr(cache[name]["res"])
+					self.sqlSet("cache" + name, repr(cache))
+					print self.__plugin__ + " _cacheFunctionThree saving2: " + name #+ " - "  + repr(cache[name]["res"])
 
 			if ret:
-				print self.__plugin__ + " _cacheFunctionThree returning "
+				print self.__plugin__ + " _cacheFunctionThree returning : " + repr(ret)
 				return ret
 
 		print self.__plugin__ + " _cacheFunctionThree Error " 
-		return False
+		return ( "", 500 )
 
 	def cleanCache(self):
 		cache = {}

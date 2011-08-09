@@ -271,10 +271,14 @@ class StorageServer():
 
 	def sqlGet(self, name):
 		#print self.__plugin__ + " sqlGet " + name
-		if self.sql2:
-			self.__curs__.execute("SELECT data FROM items WHERE name = %s", ( name))
-		elif self.sql3:
-			self.__curs__.execute("SELECT data FROM items WHERE name = ?", ( name,))
+		try:
+			if self.sql2:
+				self.__curs__.execute("SELECT data FROM items WHERE name = %s", ( name))
+			elif self.sql3:
+				self.__curs__.execute("SELECT data FROM items WHERE name = ?", ( name,))
+		except :
+			print self.__plugin__ + " sqlGet Got exception"
+			return
 
 		for row in self.__curs__:
 			#print self.__plugin__ + " sqlGet returning : " + row[0]
