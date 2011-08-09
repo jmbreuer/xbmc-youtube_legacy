@@ -31,12 +31,13 @@ class StorageServer():
 	#socket.setdefaulttimeout(30)
 	#__plugin__ = sys.modules[ "__main__" ].__plugin__
 	#__dbg__ = sys.modules[ "__main__" ].__dbg__
-	__plugin__ =" StorageServer"
+	__plugin__ = "StorageClient"
 	__dbg__ = True
 	
 	__path__ = os.path.join( xbmc.translatePath( "special://database" ), 'commoncache.db')
 	#__path__ = "/home/tobias/.xbmc/temp/bla.db"
 	__socket__ = ""
+	__clientscoket__ = False
 
 	sql2 = False
 	sql3 = False
@@ -49,12 +50,13 @@ class StorageServer():
 	elif sql3:
 		__conn__ = sqlite3.connect(__path__, check_same_thread=False)
 	__threads__ = []
+	__curs__ = __conn__.cursor()
 
 	def run(self):
+		self.__plugin__ = "StorageServer"
 		print self.__plugin__ + " Storage Server starting " + self.__path__
-		curs = self.__conn__.cursor()
 		try:
-			curs.execute("create table items (name text uniq, data text)")
+			self.__curs__.execute("create table items (name text uniq, data text)")
 			self.__conn__.commit()
 		except:
 			print self.__plugin__ + " Database already exists"
@@ -79,57 +81,39 @@ class StorageServer():
 		i = 0
 		while not xbmc.abortRequested:
 			if i == 0:
-				print self.__plugin__ + " accepting"
+				print self.__plugin__ + " Daemon accepting"
 				i = 1
 			#sock.setblocking(0)
 			#socket.setdefaulttimeout(30)
-			clientsocket = False
+			self.__clientsocket__ = False
 			try:
-				(clientsocket, address) = sock.accept()
+				(self.__clientsocket__, address) = sock.accept()
 				start = time.time()
 			except socket.error, e:
 				if start + 300 < time.time():
-					print self.__plugin__ + " EXCEPTION OVER TIME : " + repr(e)
+					print self.__plugin__ + " Daemon EXCEPTION OVER TIME : " + repr(e)
 					#exit(0)
 				if e.errno == 11 or e.errno == 10035 or e.errno == 35:
 					continue
-				print self.__plugin__ + " EXCEPTION : " + repr(e)
+				print self.__plugin__ + " Daemon EXCEPTION : " + repr(e)
 				#self.stop()
 
-			if not clientsocket:
+			if not self.__clientsocket__:
 				continue
-			print self.__plugin__ + " accepted"
-			#socket.setdefaulttimeout(30)
-			data = "    "
-			i = 0
-			#print self.__plugin__ + "  LOOP2 : " + str(i) + " - "  + str(len(data)) + data[len(data) -10:]
-			while data[len(data)-2:] != "\r\n":
-				#print self.__plugin__ + "  LOOP2 : " + str(i) + " - "  + str(len(data)) + data[len(data) -10:] + repr(data)
-				i += 1
-				try:
-					data += clientsocket.recv(4096)
-				except socket.error, e:
-					if e.errno != 10035 and e.errno != 35 :
-						print self.__plugin__ + " except ERROROR !!!!!!!!!!!!!!!!! " + repr(e)
-						data += "\r\n"
+			print self.__plugin__ + " Daemon accepted"
+
+			data = self.recv(self.__clientsocket__)
 
 			try:
-				data = eval(data.strip())
+				data = eval(data)
 			except:
-				print self.__plugin__ + " Couldn't evaluate message : " + repr(data)
+				print self.__plugin__ + " Daemon Couldn't evaluate message : " + repr(data)
 				data = {"action": "stop"}
 
-			res = ""
-			#print self.__plugin__ + " XXX XXX XXX : " + repr(data)
-			if data == "SHUTDOWN!":
-				print self.__plugin__ + " Stopping Server"
-				clientsocket.send(repr("stopping") + "\r\n")
-				clientsocket.close()
-				os.unlink(self.__socket__)	
-				print self.__plugin__ + " Stopping Server Done"
-				exit(0)
+			print self.__plugin__ + " Daemon got data: " + str(len(data))
 
-			elif data["action"] == "get":
+			res = ""
+			if data["action"] == "get":
 				res = self.sqlGet(data["name"])
 			elif data["action"] == "set":
 				res = self.sqlSet(data["name"], data["data"])
@@ -138,42 +122,99 @@ class StorageServer():
 			elif data["action"] == "unlock":
 				res = self.unlock(data["name"])
 
-			ack = 0
 			if len(res) > 0:
-				res = repr(res)
-			while len(res) > 0:
-				data = ""
-				if ack == 0:
-					if len(res) > 5000:
-						data = res[:5000]
-						res = res[5000:]
+				print self.__plugin__ + " Daemon got response: " + str(len(res)) + " - " + repr(res)
+				self.send(self.__clientsocket__, repr(res))
+
+			print self.__plugin__ + " Daemon done"
+
+		print self.__plugin__ + " Daemon Closing down"
+		self.__curs__.close()
+		self.__conn__.close()
+		print self.__plugin__ + " Daemon Closing release"
+
+	def recv(self, sock):
+		data = "   "
+		idle = True
+		temp = ""
+		print self.__plugin__ + " recv "
+		i = 0
+		while data[len(data)-2:] != "\r\n" or not idle:
+			print self.__plugin__ + " recv data : " + str(len(data))
+			try:
+				if idle:
+					temp = sock.recv(4096 * 4096)
+					idle = False
+					i += 1
+					print self.__plugin__ + " recv got data  : " + str(i) + " - " + repr(idle) + " - " + str(len(data)) + " + " + str(len(temp)) + " | " + repr(temp)[len(temp) -5:]
+					data += temp
+				elif not idle:
+					if data[len(data)-2:] == "\r\n":
+						sock.send("COMPLETE\r\n" + ( " " * ( 15 - len("COMPLETE\r\n") ) ) )
+						idle = True
+						print self.__plugin__ + " recv sent COMPLETE " + str(i)
+					elif len(temp) > 0:
+						print self.__plugin__ + " recv trying to sent ACK " + str(i)
+						sock.send("ACK\r\n" + ( " " * ( 15 - len("ACK\r\n") )) )
+						idle = True
+						print self.__plugin__ + " recv sent ACK " + str(i)
+					temp = ""
+					print self.__plugin__ + " recv status " + repr( not idle) + " - " + repr(data[len(data)-2:] != "\r\n")
+					
+			except socket.error, e:
+				if e.errno != 10035 and e.errno != 35:
+					print self.__plugin__ + " recv except error " + repr(e)
+				print self.__plugin__ + " recv except error " + repr(e)
+		print self.__plugin__ + " recv DONE " + repr( not idle) + " - " + repr(data[len(data)-2:] != "\r\n")
+		return data.strip()
+
+	def send(self, sock, res):
+		idle = True
+		status = ""
+		if len(res) < 100:
+			print self.__plugin__ + " send : " + str(len(res)) + " - " + repr(res)
+		else:
+			print self.__plugin__ + " send : " + str(len(res))
+
+		i = 0
+		while len(res) > 0 or not idle:
+			#print self.__plugin__ + " send to go " + str(len(res))
+			data = " "
+			try:
+				if idle:
+					if len(res) > 4096:
+						data = res[:4096]
 					else:
 						data = res + "\r\n"
+
+					result = sock.send(data)
+					i += 1
+					idle = False
+				elif not idle:
+					status = ""
+					while status.find("COMPLETE\r\n") == -1 and status.find("ACK\r\n") == -1:
+						status = sock.recv(15)
+						i -= 1
+					print self.__plugin__ + " send waiting for response4 " 
+
+					idle =  True
+					if len(res) > 4096:
+						res = res[4096:]
+					else:
 						res = ""
 
-				try:
-					if len(data) > 0:
-						clientsocket.send(data)
-						ack += 1
-						print self.__plugin__ + " res waiting for ACK " + str(ack) + " - " + str(len(data)) + " -  " + repr(data)[len(data) - 10:]
-					
-					status = ""
-					while status != "COMPLETE\r\n" and status != "ACK\r\n":
-						status = clientsocket.recv(4096)
-						ack -= 1
-						print self.__plugin__ + " res waiting got ACK " + str(ack) + " - " + repr(status)
-				except:
-					pass
-			print self.__plugin__ + " Done sending data.. Closing socket."
+					print self.__plugin__ + " send Got response " + str(i) + " - " + str(result) + " == " + str(len(data)) + " | " + str(len(res)) + " - " + repr(data)[len(data)-5:]
 
-			if clientsocket:
-				clientsocket.close()
+			except socket.error, e:
+				if e.errno != 10035 and e.errno != 35 and e.errno != 107 and e.errno != 32:
+					print self.__plugin__ + " send except error " + repr(e)
+		print self.__plugin__ + " send DONE " +  repr(status) + " - " + repr(idle) + " - " + str(len(res)) + " - " + str(i)
+		return status.find("COMPLETE\r\n") > -1
 
 	def lock(self, name): # This is NOT atomic
 		#print self.__plugin__ + " lock " + name
 		locked = True
 		curlock = self.sqlGet(name)
-		curs = self.__conn__.cursor()
 		#print self.__plugin__ + " lock curlock " + repr(curlock)
 		if curlock.strip():
 			#print self.__plugin__ + " lock curlock " + repr(curlock) + " - cur time " + str(time.time())
@@ -181,9 +222,9 @@ class StorageServer():
 			if float(curlock) + 10 < time.time():
 				#print self.__plugin__ + " lock was older than 10 seconds, considered stale, removing"
 				if self.sql2:
-					curs.execute("DELETE FROM items WHERE name = %s", ( name, ) )
+					self.__curs__.execute("DELETE FROM items WHERE name = %s", ( name, ) )
 				elif self.sql3:
-					curs.execute("DELETE FROM items WHERE name = ?", ( name, ) )
+					self.__curs__.execute("DELETE FROM items WHERE name = ?", ( name, ) )
 				self.__conn__.commit()
 				locked = False
 		else:
@@ -191,9 +232,9 @@ class StorageServer():
 
 		if not locked:
 			if self.sql2:
-				curs.execute("INSERT INTO items VALUES ( %s , %s )", ( name, time.time()) )
+				self.__curs__.execute("INSERT INTO items VALUES ( %s , %s )", ( name, time.time()) )
 			elif self.sql3:
-				curs.execute("INSERT INTO items VALUES ( ? , ? )", ( name, time.time()) )
+				self.__curs__.execute("INSERT INTO items VALUES ( ? , ? )", ( name, time.time()) )
 			self.__conn__.commit()
 			return "true"
 
@@ -202,43 +243,40 @@ class StorageServer():
 
 	def unlock(self, name):
 		#print self.__plugin__ + " unlock " + name
-		curs = self.__conn__.cursor()
 		if self.sql2:
-			curs.execute("DELETE FROM items WHERE name = %s", ( name, ) )
+			self.__curs__.execute("DELETE FROM items WHERE name = %s", ( name, ) )
 		elif self.sql3:
-			curs.execute("DELETE FROM items WHERE name = ?", ( name, ) )
+			self.__curs__.execute("DELETE FROM items WHERE name = ?", ( name, ) )
 		self.__conn__.commit()
 		#print self.__plugin__ + " unlock DONE "
 		return " "
 
 	def sqlSet(self, name, data):
 		#print self.__plugin__ + " sqlSet " + name
-		curs = self.__conn__.cursor()
 		if self.sqlGet(name).strip():
 			#print self.__plugin__ + " sqlSet Update : " + data
 			if self.sql2:
-				curs.execute('UPDATE items SET data = %s WHERE name = %s', ( data, name ))
+				self.__curs__.execute('UPDATE items SET data = %s WHERE name = %s', ( data, name ))
 			elif self.sql3:
-				curs.execute('UPDATE items SET data = ? WHERE name = ?', ( data, name ))
+				self.__curs__.execute('UPDATE items SET data = ? WHERE name = ?', ( data, name ))
 		else:
 			#print self.__plugin__ + " sqlSet Insert  "
 			if self.sql2:
-				curs.execute("INSERT INTO items VALUES ( %s , %s )", ( name, data) )
+				self.__curs__.execute("INSERT INTO items VALUES ( %s , %s )", ( name, data) )
 			elif self.sql3:
-				curs.execute("INSERT INTO items VALUES ( ? , ? )", ( name, data) )
+				self.__curs__.execute("INSERT INTO items VALUES ( ? , ? )", ( name, data) )
 		#print self.__plugin__ + " sqlSet commit"
 		self.__conn__.commit()
-		return "true"
+		return ""
 
 	def sqlGet(self, name):
 		#print self.__plugin__ + " sqlGet " + name
-		curs = self.__conn__.cursor()
 		if self.sql2:
-			curs.execute("SELECT data FROM items WHERE name = %s", ( name))
+			self.__curs__.execute("SELECT data FROM items WHERE name = %s", ( name))
 		elif self.sql3:
-			curs.execute("SELECT data FROM items WHERE name = ?", ( name,))
+			self.__curs__.execute("SELECT data FROM items WHERE name = ?", ( name,))
 
-		for row in curs:
+		for row in self.__curs__:
 			#print self.__plugin__ + " sqlGet returning : " + row[0]
 			return row[0]
 		return " "

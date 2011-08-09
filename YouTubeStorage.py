@@ -748,7 +748,7 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 		#print self.__plugin__ + " sqlConnect Returning " + repr(self.__connected__)
 		return self.__connected__
 
-	def sqlSet(self, name, data):
+	def sqlSet2(self, name, data):
 		if self.__store_in_settings__:
 			print self.__plugin__ + " sqlSet ( in settings ) " + name
 			self.__settings__.setSetting(name, data)
@@ -775,8 +775,41 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 			print self.__plugin__ + " sqlset GOT " + res
 			self.sqlDisconnect()
 
+	def sqlSet(self, name, data):
+		if self.__store_in_settings__:
+			print self.__plugin__ + " sqlSet ( in settings ) " + name
+			self.__settings__.setSetting(name, data)
+		else:
+			print self.__plugin__ + " sqlSet " + name
+			self.sqlConnect()
+			temp = repr({ "action": "set", "name": name, "data": data})
+			storage_server = StorageServer.StorageServer()
+			res = storage_server.send(self.__soccon__, temp)
+			print self.__plugin__ + " sqlset GOT " + repr(res)
+			self.sqlDisconnect()
+
 
 	def sqlGet(self, name):
+		if self.__store_in_settings__:
+			print self.__plugin__ + " sqlGet ( from settings ) " + name + repr(self.__store_in_settings__)
+			return self.__settings__.getSetting(name)
+		else:
+			print self.__plugin__ + " sqlGet " + name
+			self.sqlConnect()
+			storage_server = StorageServer.StorageServer()
+			print self.__plugin__ + " sqlGet " + name 
+			storage_server.send(self.__soccon__, repr({ "action": "get", "name": name}))
+			print self.__plugin__ + " sqlGet - receive "
+			res = storage_server.recv(self.__soccon__)
+
+			print self.__plugin__ + " sqlGet res : " + repr(res)
+			if res:
+				res = eval(res.strip())
+				return res.strip() # We return " " as nothing. Strip it out.
+
+		return ""
+
+	def sqlGet2(self, name):
 		if self.__store_in_settings__:
 			print self.__plugin__ + " sqlGet ( from settings ) " + name + repr(self.__store_in_settings__)
 			return self.__settings__.getSetting(name)
