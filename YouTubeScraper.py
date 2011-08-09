@@ -94,7 +94,6 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 	
 #=================================== Categories  ============================================
 	def scrapeCategoriesGrid(self, params = {}):
-		print self.__plugin__ + " scrapeCategoriesGrid: "
 		get = params.get
 		if self.__dbg__:
 			print self.__plugin__ + " scrapeCategoriesGrid: "
