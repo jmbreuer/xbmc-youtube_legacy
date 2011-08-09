@@ -560,7 +560,6 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 						if key not in [ "new_results_function" ]:
 							name += "'%s'='%s'" % (key, params[key])
 				elif type(params) == type([]):
-					print self.__plugin__ + " _cacheFunction: " + str(type(params)) 
 					name += ",".join(["%s" % el for el in params])
 				else:
 					name += params
