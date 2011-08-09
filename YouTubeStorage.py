@@ -802,7 +802,7 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 			print self.__plugin__ + " sqlGet - receive "
 			res = storage_server.recv(self.__soccon__)
 
-			print self.__plugin__ + " sqlGet res : " + len(str(res))
+			print self.__plugin__ + " sqlGet res : " + str(len(res))
 			if res:
 				res = eval(res.strip())
 				return res.strip() # We return " " as nothing. Strip it out.
