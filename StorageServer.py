@@ -123,7 +123,7 @@ class StorageServer():
 				res = self.unlock(data["name"])
 
 			if len(res) > 0:
-				print self.__plugin__ + " Daemon got response: " + str(len(res)) + " - " + repr(res)
+				print self.__plugin__ + " Daemon got response: " + str(len(res)) # + " - " + repr(res)
 				self.send(self.__clientsocket__, repr(res))
 
 			print self.__plugin__ + " Daemon done"
