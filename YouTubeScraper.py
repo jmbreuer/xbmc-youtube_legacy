@@ -505,8 +505,8 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		videos = re.compile('<a href="/watch\?v=(.*)&amp;feature=sh_e_sl&amp;list=SL"').findall(result["content"])
 			
 
-		nexturl = self.parseDOM(result["content"], "button", { "id": "data-next-url" }, ret = "data-next-url")
-
+		nexturl = self.parseDOM(result["content"], "button", { "class": " yt-uix-button" }, ret = "data-next-url")
+		print "smoker "+ repr(nexturl)
 		if (len(nexturl) > 0):
 			nexturl = nexturl[0]
 		else:
@@ -1007,15 +1007,15 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 
 					if get("scraper") == "movies":
 						if cat.find("pt=nr") > 0:
-					       		continue
+							continue
 						elif cat.find("indian-cinema") > -1 or cat.find("foreign-film") > -1:
-							item["subcategory"] = "true"
-
-				       	cat = urllib.quote_plus(cat)
-			       		item['category'] = cat
-		       			item['scraper'] = scraper
-	       				item["thumbnail"] = thumbnail
-       					yobjects.append(item)
+							item["subcategory"] = "true"	
+						
+					cat = urllib.quote_plus(cat)
+					item['category'] = cat
+					item['scraper'] = scraper
+					item["thumbnail"] = thumbnail
+					yobjects.append(item)
 		
 			if (not yobjects):
 				if self.__dbg__:
