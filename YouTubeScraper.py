@@ -552,13 +552,13 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		if ((result["content"].find('class="seasons"') == -1) or get("season")):
 			if self.__dbg__:
 				print self.__plugin__ + " scrapeShow parsing videolist for single season"
-			return self.scrapeShowEpisodes(params)
+			return self.__storage__.cacheFunction(self.scrapeShowEpisodes, params)
 		
 		params["folder"] = "true"
 		del params["batch"]
 		if self.__dbg__:
 			print self.__plugin__ + " scrapeShow done"
-		return self.scrapeShowSeasons(result["content"], params)
+		return self.__storage__.cacheFunction(self.scrapeShowSeasons, result["content"], params)
 	
 	def scrapeShowSeasons(self, html, params = {}): 
 		get = params.get
@@ -945,9 +945,9 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 				for i in range(0 , len(ahref)):
 					videoid = ahref[i] 
 						
-				       	if (videoid):
+					if (videoid):
 						if (videoid.find("=") > -1):
-					       		videoid = videoid[videoid.find("=")+1:]
+							videoid = videoid[videoid.find("=")+1:]
 					thumb = self.parseDOM(athumbs[i], "img", attrs = { "alt": "Thumbnail"}, ret = "src")
 					if len(thumb) > 0:
 						thumb = thumb[0]
@@ -1037,10 +1037,13 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
 				
 		if not get("page"):
-			(result, status) = self.__storage__.cacheFunction(params["new_results_function"], params)
+			if get("scraper") == "shows" and get("show"):
+				(result, status) = params["new_results_function"](params)
+			else:
+				(result, status) = self.__storage__.cacheFunction(params["new_results_function"], params)
 			
-			#if self.__dbg__:
-			#	print self.__plugin__ + " paginator new result " + repr(result)
+			if self.__dbg__:
+				print self.__plugin__ + " paginator new result " + repr(result)
 			
 			if len(result) == 0:
 				if get("scraper") not in ["music_top100"]:
@@ -1065,7 +1068,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		if get("batch") == "thumbnails":
 			(result, status) = self.getBatchDetailsThumbnails(result, params)
 		elif get("batch"):
-                        (result, status) = self.__storage__.cacheFunction(self.getBatchDetails, result, params)
+			(result, status) = self.__storage__.cacheFunction(self.getBatchDetails, result, params)
 		
 		if get("batch"):
 			del params["batch"]
