@@ -116,15 +116,12 @@ class YouTubeDownloader(YouTubeUtils.YouTubeUtils):
 		total_size = 8192 * 25
 		chunk_size = 8192
 		
-		print self.__plugin__ + " XXXXXXXXXXXXXX 1 -  %s - %s" % (  total_size, chunk_size)
 		if con.info().getheader('Content-Length').strip():			
 			total_size = int(con.info().getheader('Content-Length').strip())	
-			chunk_size = int(total_size / 100)
-			print self.__plugin__ + " XXXXXXXXXXXXXX 2 -  %s - %s" % (  total_size, chunk_size)
-		
+			chunk_size = int(total_size / 100) # We only want 100 updates of the status bar.
+
 		try:
 			bytes_so_far = 0
-			old_percent = -1
 			
 			videos = []
 			while 1:
@@ -133,21 +130,18 @@ class YouTubeDownloader(YouTubeUtils.YouTubeUtils):
 				percent = int(float(bytes_so_far) / float(total_size) * 100)
 				file.write(chunk)
 				
-				if percent > old_percent:
-					queue = self.__storage__.sqlGet("YouTubeDownloadQueue")
-					old_percent = 0 + percent
+				queue = self.__storage__.sqlGet("YouTubeDownloadQueue")
 
-					if queue:
-						try:
-							videos = eval(queue)
-						except:
-							videos = []
-					else:
+				if queue:
+					try:
+						videos = eval(queue)
+					except:
 						videos = []
+				else:
+					videos = []
 
-					heading = "[" + str(len(videos)) + "] " +  self.__language__(30624) + " - " + str(percent) + "%"
-
-					self.dialog.update(percent=percent, heading = heading, label=video["Title"])
+				heading = "[%s] %s - %s" % ( str(len(videos)), self.__language__(30624), str(percent))
+				self.dialog.update(percent=percent, heading = heading, label=video["Title"])
 
 				if not chunk:
 					break
@@ -165,52 +159,3 @@ class YouTubeDownloader(YouTubeUtils.YouTubeUtils):
 		self.dialog.update(heading = self.__language__(30604), label=video["Title"])
 		self.__settings__.setSetting( "vidstatus-" + video['videoid'], "1" )
 		return ( video, 200 )
-
-	def downloadVideoURLNoQueue(self, params = {}):
-		get = params.get
-		( video, status ) = self.__player__.getVideoObject(params)
-		if self.__dbg__:
-			print self.__plugin__ + " downloadVideoNoQueue : " + video['Title']
-		status = 303
-		if video["video_url"].find("swfurl") > 0:
-			self.showMessage(self.__language__( 30625 ), self.__language__(30619))
-			return ([], status)
-
-		video["downloadPath"] = self.__settings__.getSetting( "downloadPath" )
-		self.showMessage(self.__language__(30624), self.makeAscii(video['Title']))
-
-		self.__player__.downloadSubtitle(video)
-		url = urllib2.Request(video['video_url'])
-		url.add_header('User-Agent', self.USERAGENT);
-		filename = "%s-[%s].mp4" % ( ''.join(c for c in video['Title'] if c in self.VALID_CHARS), video["videoid"] )
-		filename_incomplete = os.path.join(xbmc.translatePath( "special://temp" ), filename )
-		filename_complete = os.path.join(self.__settings__.getSetting( "downloadPath" ), filename )
-
-		if xbmcvfs.exists(filename_complete):
-			xbmcvfs.delete(filename_complete)
-		
-		try:
-			file = open(filename_incomplete, "wb")
-			con = urllib2.urlopen(url);
-			file.write(con.read())
-			con.close()
-			file.close()
-			status = 200
-		except:
-			print self.__plugin__ + " download failed"
-			try:
-				con.close()
-				file.close()
-			except:
-				
-				print self.__plugin__ + " Failed to close download stream and file handle"
-
-		xbmcvfs.rename(filename_incomplete, filename_complete)
-		self.__settings__.setSetting( "vidstatus-" + video['videoid'], "1" )
-		
-		if status == 200:
-			self.showMessage(self.__language__( 30604 ), self.makeAscii(video['Title']))
-		else:
-			self.showMessage(self.__language__(30625), self.makeAscii(video['Title']))
-		
-		return ( video, status )

@@ -18,7 +18,7 @@
 - Hide download progress bar while viewing videos.
 - Dharma compatability (Dummy xbmcvfs)
 - Fixed Downloads messages.
-- Remove legacy download and move windows to new download system.
+- Remove legacy download and moved windows to new download system.
 - New caching system [ Beta ]
 
 [B]Version 2.6.0 (Beta)[/B]

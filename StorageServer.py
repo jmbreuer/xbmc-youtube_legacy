@@ -136,28 +136,31 @@ class StorageServer():
 		data = "   "
 		idle = True
 		temp = ""
-		print self.__plugin__ + " recv "
+		if self.__dbg__:
+			print self.__plugin__ + " recv "
 		i = 0
 		start = time.time()
 		while data[len(data)-2:] != "\r\n" or not idle:
-			print self.__plugin__ + " recv data : " + str(len(data))
 			try:
 				if idle:
-					recv_buffer = sock.recv(4096 * 4096)
+					recv_buffer = sock.recv(4096)
 					idle = False
 					i += 1
-					#print self.__plugin__ + " recv got data  : " + str(i) + " - " + repr(idle) + " - " + str(len(data)) + " + " + str(len(recv_buffer)) + " | " + repr(recv_buffer)[len(recv_buffer) -5:]
+					#if self.__dbg__:
+					#	print self.__plugin__ + " recv got data  : " + str(i) + " - " + repr(idle) + " - " + str(len(data)) + " + " + str(len(recv_buffer)) + " | " + repr(recv_buffer)[len(recv_buffer) -5:]
 					data += recv_buffer
 					start = time.time()
 				elif not idle:
 					if data[len(data)-2:] == "\r\n":
 						sock.send("COMPLETE\r\n" + ( " " * ( 15 - len("COMPLETE\r\n") ) ) )
 						idle = True
-						print self.__plugin__ + " recv sent COMPLETE " + str(i)
+						if self.__dbg__:
+							print self.__plugin__ + " recv sent COMPLETE " + str(i)
 					elif len(recv_buffer) > 0:
 						sock.send("ACK\r\n" + ( " " * ( 15 - len("ACK\r\n") )) )
 						idle = True
-						print self.__plugin__ + " recv sent ACK " + str(i)
+						if self.__dbg__:
+							print self.__plugin__ + " recv sent ACK " + str(i)
 					recv_buffer = ""
 					#print self.__plugin__ + " recv status " + repr( not idle) + " - " + repr(data[len(data)-2:] != "\r\n")
 					
@@ -169,19 +172,21 @@ class StorageServer():
 					return ""
 
 				if start + 10 < time.time():
-					print self.__plugin__ + " recv over time"
+					if self.__dbg__:
+						print self.__plugin__ + " recv over time"
 					break
-		print self.__plugin__ + " recv DONE " + repr( not idle) + " - " + repr(data[len(data)-2:] != "\r\n")
+		if self.__dbg__:
+			print self.__plugin__ + " recv done "
 		return data.strip()
 
 	def send(self, sock, data):
 		idle = True
 		status = ""
-		print self.__plugin__ + " send : " + str(len(data)) + " - " + repr(data)[0:20]
+		if self.__dbg__:
+			print self.__plugin__ + " send : " + str(len(data)) + " - " + repr(data)[0:20]
 		i = 0
 		start = time.time()
 		while len(data) > 0 or not idle:
-			#print self.__plugin__ + " send to go " + str(len(data))
 			send_buffer = " "
 			try:
 				if idle:
@@ -199,7 +204,6 @@ class StorageServer():
 					while status.find("COMPLETE\r\n") == -1 and status.find("ACK\r\n") == -1:
 						status = sock.recv(15)
 						i -= 1
-					print self.__plugin__ + " send waiting for response4 " 
 
 					idle = True
 					if len(data) > 4096:
@@ -207,27 +211,30 @@ class StorageServer():
 					else:
 						data = ""
 
-					print self.__plugin__ + " send Got response " + str(i) + " - " + str(result) + " == " + str(len(send_buffer)) + " | " + str(len(data)) + " - " + repr(send_buffer)[len(send_buffer)-5:]
+					#print self.__plugin__ + " send Got response " + str(i) + " - " + str(result) + " == " + str(len(send_buffer)) + " | " + str(len(data)) + " - " + repr(send_buffer)[len(send_buffer)-5:]
 
 			except socket.error, e:
 				if e.errno != 10035 and e.errno != 35 and e.errno != 107 and e.errno != 32:
 					print self.__plugin__ + " send except error " + repr(e)
 				if start + 10 < time.time():
-					print self.__plugin__ + " recv over time"
+					if self.__dbg__:
+						print self.__plugin__ + " recv over time"
 					break;
-		print self.__plugin__ + " send DONE " +  repr(status) + " - " + repr(idle) + " - " + str(len(data)) + " - " + str(i)
+		if self.__dbg__:
+			print self.__plugin__ + " send done " 
 		return status.find("COMPLETE\r\n") > -1
 
 	def lock(self, name): # This is NOT atomic
-		print self.__plugin__ + " lock " + name
+		if self.__dbg__:
+			print self.__plugin__ + " lock " + name
 		locked = True
 		curlock = self.sqlGet(name)
-		print self.__plugin__ + " lock curlock " + repr(curlock)
+		if self.__dbg__:
+			print self.__plugin__ + " lock curlock " + repr(curlock)
 		if curlock.strip():
-			#print self.__plugin__ + " lock curlock " + repr(curlock) + " - cur time " + str(time.time())
-			#check timestamp in data.
 			if float(curlock) + 10 < time.time():
-				#print self.__plugin__ + " lock was older than 10 seconds, considered stale, removing"
+				if self.__dbg__:
+					print self.__plugin__ + " lock was older than 10 seconds, considered stale, removing"
 				if self.sql2:
 					self.__curs__.execute("DELETE FROM items WHERE name = %s", ( name, ) )
 				elif self.sql3:
@@ -245,21 +252,25 @@ class StorageServer():
 			self.__conn__.commit()
 			return "true"
 
-		print self.__plugin__ + " lock return"
+		if self.__dbg__:
+			print self.__plugin__ + " lock done"
 		return "false"
 
 	def unlock(self, name):
-		print self.__plugin__ + " unlock " + name
+		if self.__dbg__:
+			print self.__plugin__ + " unlock " + name
 		if self.sql2:
 			self.__curs__.execute("DELETE FROM items WHERE name = %s", ( name, ) )
 		elif self.sql3:
 			self.__curs__.execute("DELETE FROM items WHERE name = ?", ( name, ) )
 		self.__conn__.commit()
-		print self.__plugin__ + " unlock DONE "
+		if self.__dbg__:
+			print self.__plugin__ + " unlock done"
 		return "true"
 
 	def sqlSet(self, name, data):
-		#print self.__plugin__ + " sqlSet " + name
+		if self.__dbg__:
+			print self.__plugin__ + " sqlSet " + name + str(repr(data))[0:20]
 		if self.sqlGet(name).strip():
 			#print self.__plugin__ + " sqlSet Update : " + data
 			if self.sql2:
@@ -272,107 +283,50 @@ class StorageServer():
 				self.__curs__.execute("INSERT INTO items VALUES ( %s , %s )", ( name, data) )
 			elif self.sql3:
 				self.__curs__.execute("INSERT INTO items VALUES ( ? , ? )", ( name, data) )
-		#print self.__plugin__ + " sqlSet commit"
 		self.__conn__.commit()
+		if self.__dbg__:
+			print self.__plugin__ + " sqlSet done"
 		return ""
 
 	def sqlGet(self, name):
-		#print self.__plugin__ + " sqlGet " + name
-		try:
-			if self.sql2:
-				self.__curs__.execute("SELECT data FROM items WHERE name = %s", ( name))
-			elif self.sql3:
-				self.__curs__.execute("SELECT data FROM items WHERE name = ?", ( name,))
-		except :
-			print self.__plugin__ + " sqlGet Got exception"
-			return " "
+		if self.__dbg__:
+			print self.__plugin__ + " sqlGet " + name
+
+		if self.sql2:
+			self.__curs__.execute("SELECT data FROM items WHERE name = %s", ( name))
+		elif self.sql3:
+			self.__curs__.execute("SELECT data FROM items WHERE name = ?", ( name,))
 
 		for row in self.__curs__:
-			#print self.__plugin__ + " sqlGet returning : " + row[0]
+			if self.__dbg__:
+				print self.__plugin__ + " sqlGet returning : " + str(repr(row[0]))[0:20]
 			return row[0]
+		if self.__dbg__:
+				print self.__plugin__ + " sqlGet returning empty"
 		return " "
 
 
 __workersByName = {}
 def run_async(func, *args, **kwargs):
-    """
-        run_async(func)
-            function decorator, intended to make "func" run in a separate
-            thread (asynchronously).
-            Returns the created Thread object
-
-            E.g.:
-            @run_async
-            def task1():
-                do_something
-
-            @run_async
-            def task2():
-                do_something_too
-
-            t1 = task1()
-            t2 = task2()
-            ...
-            t1.join()
-            t2.join()
-    """
     from threading import Thread
     worker = Thread(target = func, args = args, kwargs = kwargs)
     __workersByName[worker.getName()] = worker
     worker.start()
-    # TODO: attach post-func decorator to target function and remove thread from __workersByName
     return worker
 
-#@run_async
 def run():
 	s = StorageServer()
 	print " StorageServer Module loaded RUN : " + str(len(__workersByName)) + " - " + repr(__workersByName)
 	if len(__workersByName) > 1:
 		print s.__plugin__ + " Starting Child already exists"
 		#waitForWorkersToDie(1)
+		return False
 	print s.__plugin__ + " Starting server run called "
 	s.run()
 	return True
 
-def stop():
-	print " StorageServer Module STOPPING "
-	s = StorageServer() 
-	for name in __workersByName:
-		print " StorageServer Module STOPPING worker : " + repr(name)
-		__workersByName[name].join(1)
-		print " StorageServer Module STOPPED worker : " + repr(name)
-	return s.stop()
-
-def restart():
-	#waitForWorkersTxoDie(1)
-	@run_async
-	def bla():
-		s = StorageServer()
-		print " StorageServer restart : " + str(len(__workersByName)) + " - " + repr(__workersByName)
-		s.run()
-
-def waitForWorkersToDie(timeout=None):
-    """
-    If the main python thread exits w/o first letting all child threads die, then
-    xbmc has a bad habit of coredumping. Certainly not desired from a user experience
-    perspective. 
-    """
-    print ' StorageServer Total threads spawned = %d' % len(__workersByName)
-    for workerName, worker in __workersByName.items():
-        if worker:
-            if worker.isAlive():
-		    print ' StorageServer Waiting for thread %s to die...' % workerName
-		    worker.join(timeout)
-		    if worker.isAlive():
-			    # apparently, join timed out
-			    print ' StorageServer Thread %s still alive after timeout' % workerName
-                    
-    print 'Done waiting for threads to die'
 
 if __name__ == "__main__": 
 	run()
 elif False:
 	run_async(run)
-
-print " StorageServer Module Loaded "
-#run()
