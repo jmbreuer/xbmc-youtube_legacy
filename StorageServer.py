@@ -70,7 +70,7 @@ class StorageServer():
 			sock = socket.socket(socket.AF_UNIX)
 
 		sock.bind(self.__socket__)
-		sock.listen(5)
+		sock.listen(1)
 		sock.setblocking(0)
 		
 		start = time.time()
@@ -162,8 +162,12 @@ class StorageServer():
 					#print self.__plugin__ + " recv status " + repr( not idle) + " - " + repr(data[len(data)-2:] != "\r\n")
 					
 			except socket.error, e:
-				if e.errno != 10035 and e.errno != 35:
+				if not e.errno in [ 10035, 35 ]:
 					print self.__plugin__ + " recv except error " + repr(e)
+
+				if e.errno in [ 22 ]: # We can't fix this.
+					return ""
+
 				if start + 10 < time.time():
 					print self.__plugin__ + " recv over time"
 					break

@@ -63,7 +63,7 @@ class YouTubeDownloader(YouTubeUtils.YouTubeUtils):
 		if videoid:
 			if not self.dialog:
 				self.dialog = DownloadProgress()
-			self.dialog.create( heading = self.__language__( 30605 ), label = "")
+			#self.dialog.create( heading = self.__language__( 30605 ), label = "")
 	
 			while videoid:
 				params["videoid"] = videoid
@@ -112,36 +112,42 @@ class YouTubeDownloader(YouTubeUtils.YouTubeUtils):
 
 		file = open(filename_incomplete, "wb")
 		con = urllib2.urlopen(url);
+
 		total_size = 8192 * 25
+		chunk_size = 8192
 		
+		print self.__plugin__ + " XXXXXXXXXXXXXX 1 -  %s - %s" % (  total_size, chunk_size)
 		if con.info().getheader('Content-Length').strip():			
-			total_size = int(con.info().getheader('Content-Length').strip())
-			
-		chunk_size = int(total_size / 25)
+			total_size = int(con.info().getheader('Content-Length').strip())	
+			chunk_size = int(total_size / 100)
+			print self.__plugin__ + " XXXXXXXXXXXXXX 2 -  %s - %s" % (  total_size, chunk_size)
 		
 		try:
 			bytes_so_far = 0
-			chunk_size = 8192
+			old_percent = -1
 			
+			videos = []
 			while 1:
 				chunk = con.read(chunk_size)
 				bytes_so_far += len(chunk)
 				percent = int(float(bytes_so_far) / float(total_size) * 100)
 				file.write(chunk)
+				
+				if percent > old_percent:
+					queue = self.__storage__.sqlGet("YouTubeDownloadQueue")
+					old_percent = 0 + percent
 
-				queue = self.__storage__.sqlGet("YouTubeDownloadQueue")
-
-				if queue:
-					try:
-						videos = eval(queue)
-					except:
+					if queue:
+						try:
+							videos = eval(queue)
+						except:
+							videos = []
+					else:
 						videos = []
-				else:
-					videos = []
 
-				heading = "[" + str(len(videos)) + "] " +  self.__language__(30624) + " - " + str(percent) + "%"
+					heading = "[" + str(len(videos)) + "] " +  self.__language__(30624) + " - " + str(percent) + "%"
 
-				self.dialog.update(percent=percent, heading = heading, label=video["Title"])
+					self.dialog.update(percent=percent, heading = heading, label=video["Title"])
 
 				if not chunk:
 					break

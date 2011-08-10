@@ -34,8 +34,8 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 		__socket__ = os.path.join( xbmc.translatePath( "special://temp" ), 'commoncache.socket')
 	__store_in_settings__ = False
 	__disable_cache__ = False
-	__connected__ = False
 	__soccon__ = False
+
 	# This list contains the list options a user sees when indexing a contact 
 	#				label					  , external		 , login		 ,	thumbnail					, feed
 	user_options = (
@@ -613,34 +613,41 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 		return False
 
 	def lock(self, name):
+		if self.__dbg__:
 			print self.__plugin__ + " lock " + name
 
-			self.sqlConnect()
+		if self.sqlConnect():
 			data = repr({ "action": "lock", "name": name})
 			storage_server = StorageServer.StorageServer()
 			storage_server.send(self.__soccon__, data)
 			res = storage_server.recv(self.__soccon__)
 			if res:
 				if eval(res.strip()) == "true":
-					print self.__plugin__ + " lock GOT True : " + res.strip()
+					if self.__dbg__:
+						print self.__plugin__ + " lock done : " + res.strip()
 					return True
-			print self.__plugin__ + " lock GOT False : " + res.strip()
+
+		if self.__dbg__:
+			print self.__plugin__ + " lock failed"
 			return False
 
 	def unlock(self, name):
+		if self.__dbg__:
 			print self.__plugin__ + " unlock " + name
 
-			self.sqlConnect()
+		if self.sqlConnect():
 			data = repr({ "action": "unlock", "name": name})
 			storage_server = StorageServer.StorageServer()
 			storage_server.send(self.__soccon__, data)
 			res = storage_server.recv(self.__soccon__)
 			if res:
 				if eval(res.strip()) == "true":
-					print self.__plugin__ + " lock GOT True : " + res.strip()
+					if self.__dbg__:
+						print self.__plugin__ + " unlock done : " + res.strip()
 					return True
-			print self.__plugin__ + " lock GOT False : " + res.strip()
-			return False
+		if self.__dbg__:
+			print self.__plugin__ + " unlock failed : "
+		return False
 
 	def sqlConnect(self):
 		if sys.platform == "win32":
@@ -649,14 +656,16 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 			self.__soccon__ = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 
 		start = time.time()
-		running = False
+		connected = False
 		try:
 			self.__soccon__.connect(self.__socket__)
-			self.__connected__ = True
+			connected= True
 		except socket.error, e:
 			print self.__plugin__ + " sqlConnect exception : " + repr(e)
+			if e.errno in [ 111 ]:
+				print self.__plugin__ + " sqlConnect StorageServer isn't running"
 
-		return self.__connected__
+		return connected
 
 	def sqlSet(self, name, data):
 		if self.__store_in_settings__:
@@ -664,11 +673,11 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 			self.__settings__.setSetting(name, data)
 		else:
 			print self.__plugin__ + " sqlSet " + name
-			self.sqlConnect()
-			temp = repr({ "action": "set", "name": name, "data": data})
-			storage_server = StorageServer.StorageServer()
-			res = storage_server.send(self.__soccon__, temp)
-			print self.__plugin__ + " sqlset GOT " + repr(res)
+			if self.sqlConnect():
+				temp = repr({ "action": "set", "name": name, "data": data})
+				storage_server = StorageServer.StorageServer()
+				res = storage_server.send(self.__soccon__, temp)
+				print self.__plugin__ + " sqlset GOT " + repr(res)
 
 	def sqlGet(self, name):
 		if self.__store_in_settings__:
@@ -676,16 +685,16 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 			return self.__settings__.getSetting(name)
 		else:
 			print self.__plugin__ + " sqlGet " + name
-			self.sqlConnect()
-			storage_server = StorageServer.StorageServer()
-			print self.__plugin__ + " sqlGet " + name 
-			storage_server.send(self.__soccon__, repr({ "action": "get", "name": name}))
-			print self.__plugin__ + " sqlGet - receive "
-			res = storage_server.recv(self.__soccon__)
+			if self.sqlConnect():
+				storage_server = StorageServer.StorageServer()
+				print self.__plugin__ + " sqlGet " + name 
+				storage_server.send(self.__soccon__, repr({ "action": "get", "name": name}))
+				print self.__plugin__ + " sqlGet - receive "
+				res = storage_server.recv(self.__soccon__)
 
-			print self.__plugin__ + " sqlGet res : " + str(len(res))
-			if res:
-				res = eval(res.strip())
-				return res.strip() # We return " " as nothing. Strip it out.
+				print self.__plugin__ + " sqlGet res : " + str(len(res))
+				if res:
+					res = eval(res.strip())
+					return res.strip() # We return " " as nothing. Strip it out.
 
 		return ""

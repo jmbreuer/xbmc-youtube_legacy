@@ -124,11 +124,9 @@ class DialogDownloadProgressXML( xbmcgui.WindowXMLDialog ):
 	def onInit( self ):
 		self.controls = {}
 		try:
-			xbmcgui.lock()
 			self.getControls()
 		except:
 			print_exc()
-		xbmcgui.unlock()
 		self.close()
 
 	def getControls( self ):
@@ -183,8 +181,6 @@ class Window:
 
 	def setupWindow( self, visible = True ):
 		error = 0
-		try: xbmcgui.lock()
-		except: pass
 		# get the id for the current 'active' window as an integer.
 		# http://wiki.xbmc.org/index.php?title=Window_IDs
 		try: currentWindowId = xbmcgui.getCurrentWindowId()
@@ -201,7 +197,6 @@ class Window:
 			self.removeControls()
 			if visible:
 				error = 1
-		xbmcgui.unlock()
 		if error:
 			raise xbmcguiWindowError( "xbmcgui.Window(%s)" % repr( currentWindowId ) )
 		
