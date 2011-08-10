@@ -1,4 +1,6 @@
 [B]TODO:[/B]
+- add setting to control if download dialog is visible during playback
+- ensure that dialog is visible if user "tab's" out of playback
 - If Caching service is unavailable plugin should continue without it and not fail like it doesn now.
 - Proper resolutions for rtmp. <-- Henrik: HUH?
 - Scrape Education. [2.7]
