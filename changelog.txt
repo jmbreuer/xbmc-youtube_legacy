@@ -1,8 +1,10 @@
 [B]TODO:[/B]
-- Proper resolutions for rtmp.
+- If Caching service is unavailable plugin should continue without it and not fail like it doesn now.
+- Proper resolutions for rtmp. <-- Henrik: HUH?
 - Scrape Education. [2.7]
 - Search [2.7]
   - Sometimes a list will be returned with all items restricted. This causes a slight error. Safesearch : strict, search query : "strip tease"
+  		Henrik: i dissagree with this one, the example you found did return 1 item that was just not availabel in your region and the got removed from the list.
 - Movie downloads to database.
 - Ignore vp8 files(if doable)
 
@@ -15,11 +17,13 @@
 - Download of rtmpe streams not supported.
 
 [B]Version 2.7.0 (Beta)[/B]
-- Hide download progress bar while viewing videos.
-- Dharma compatability (Dummy xbmcvfs)
+- Added new sqllite based caching system with script.common.plugin.cache
 - Fixed Downloads messages.
-- Remove legacy download and moved windows to new download system.
-- New caching system [ Beta ]
+- Changed Reworked Regex based scraper framework to be more reliable and easier to use 
+- Changed Improved Dharma compatability by adding dummy xbmcvfs
+- Changed Download progress bar now auto hides when playing a videos.
+- Changed Remove legacy download and moved windows to new download system.
+- Changed moved from file based locking to new storage service based lock
 
 [B]Version 2.6.0 (Beta)[/B]
 - Added New playback function. Now uses unified code accross all pages(html scraping, embeded, flash fallback). Supports fallback server.
