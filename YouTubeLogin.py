@@ -198,7 +198,7 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 				if len(galx) > 0 and len(url_data) > 0:
 					fetch_options = { "link": newurl[0], "no-language-cookie": "true", "url_data": url_data }
 					if self.__dbg__:
-						print self.__plugin__ + " _httpLogin part B:" + repr(fetch_options)
+						print self.__plugin__ + " _httpLogin part B:" #+ repr(fetch_options) ## WARNING, SHOWS LOGIN INFO
 					continue
 						
 			newurl = re.compile('<meta http-equiv="refresh" content="0; url=&#39;(.*)&#39;"></head>').findall(ret["content"])
