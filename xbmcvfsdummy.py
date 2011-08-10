@@ -1,5 +1,6 @@
 ''' 
      XBMCVFS override for Dharma.
+     Version: 1.0
 '''
 
 import os, sys, time, errno

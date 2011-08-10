@@ -16,7 +16,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, urllib, os, socket, time
+import sys, urllib, os, socket, time, md5
 import xbmc
 import YouTubeUtils
 import StorageServer		
@@ -547,24 +547,24 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 		elif funct:
 			name = repr(funct)
 			name = name[name.find("method") + 7 :name.find(" of ")]
-			print self.__plugin__ + " _cacheFunction: " + name  + " - " + repr(args)
+			print self.__plugin__ + " _cacheFunction: " + name  + " - " + str(repr(args))[0:50]
 
 			cache = {}
 			ret_val = False
 
 			# Build unique name
+			keyhash = md5.new()
 			for params in args:
-				name += "|"
 				if type(params) == type({}):
 					for key in sorted(params.iterkeys()):
 						if key not in [ "new_results_function" ]:
-							name += "'%s'='%s'" % (key, params[key])
+							keyhash.update("'%s'='%s'" % (key, params[key]))
 				elif type(params) == type([]):
-					name += ",".join(["%s" % el for el in params])
+					keyhash.update(",".join(["%s" % el for el in params]))
 				else:
-					name += params
+					keyhash.update(params)
 
-			name += "|"
+			name += "|" + keyhash.hexdigest() + "|"
 
 			print self.__plugin__ + " _cacheFunction: " + name + " in cache: " + repr(name in cache) 
 			if self.sqlGet("cache" + name):
@@ -581,16 +581,16 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 						print self.__plugin__ + " _cacheFunction Deleting old cache"
 						del(cache[name])
 			if not ret_val: 
-				print self.__plugin__ + " _cacheFunction Sending request " + str(len(args)) + " - " + repr(args)
+				print self.__plugin__ + " _cacheFunction Sending request " + str(len(args)) + " - " + str(repr(args))[0:50]
 				ret_val = funct(*args)
 				if ret_val[1] == 200:
 					cache[name] = { "timestamp": time.time(),
 							"res": ret_val}
-					print self.__plugin__ + " _cacheFunction saving: " # + repr(cache[name]["res"])
+					print self.__plugin__ + " _cacheFunction saving: " + name  + str(repr(cache[name]["res"]))[0:50]
 					self.sqlSet("cache" + name, repr(cache))
 
 			if ret_val:
-				print self.__plugin__ + " _cacheFunction returning : " # + repr(ret_val)
+				print self.__plugin__ + " _cacheFunction returning : " + name # + repr(ret_val)
 				return ret_val
 
 		print self.__plugin__ + " _cacheFunction Error " 
@@ -614,133 +614,49 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 
 	def lock(self, name):
 			print self.__plugin__ + " lock " + name
-			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-			s.connect(self.__socket__)
+
+			self.sqlConnect()
 			data = repr({ "action": "lock", "name": name})
-			#print self.__plugin__ + " lock sending data "
-			s.send(data + "\r\n")
-			#print self.__plugin__ + " lock waiting for data "
-			res = s.recv(4096 * 4096)
-			#print self.__plugin__ + " lock sending ACK "
-			try:
-				s.send("ACK\r\n")
-			except:
-				pass
+			storage_server = StorageServer.StorageServer()
+			storage_server.send(self.__soccon__, data)
+			res = storage_server.recv(self.__soccon__)
 			if res:
 				if eval(res.strip()) == "true":
 					print self.__plugin__ + " lock GOT True : " + res.strip()
 					return True
-				else:
-					print self.__plugin__ + " lock GOT False : " + res.strip()
-					return False
+			print self.__plugin__ + " lock GOT False : " + res.strip()
+			return False
 
 	def unlock(self, name):
 			print self.__plugin__ + " unlock " + name
-			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-			s.connect(self.__socket__)
-			data = repr({ "action": "unlock", "name": name})
-			s.send(data + "\r\n")
-			res = s.recv(4096 * 4096)
-			print self.__plugin__ + " unlock sending ACK "
-			s.send("ACK\r\n")
-			print self.__plugin__ + " unlock GOT " + res
 
-	def sqlDisconnect(self):
-		print self.__plugin__ + " sqlDisconnect "
-		return True
-		start = time.time()
-		self.__connected__ = True
-		while start + 1 > time.time() and self.__connected__:
-			try:
-				self.__soccon__.send(repr("SHUTDOWN!") + "\r\n")
-				print self.__plugin__ + " sqlDisconnect Trying to disconnect DATA SENT!!!!"
-				res = self.__soccon__.recv(4096 * 4096)
-				self.__connected__ = False
-			except:
-				try:
-					self.__soccon__.connect(self.__socket__)
-					print self.__plugin__ + " sqlDisconnect Trying to disconnect ESTABLISHED FALLBACK CONNECTION"
-				except:
-					pass
-	
-		if self.__connected__:
-			StorageServer.stop()
-			if sys.platform != "win32":
-				os.unlink(self.__socket__)
-				
-				self.__connected__ = False
+			self.sqlConnect()
+			data = repr({ "action": "unlock", "name": name})
+			storage_server = StorageServer.StorageServer()
+			storage_server.send(self.__soccon__, data)
+			res = storage_server.recv(self.__soccon__)
+			if res:
+				if eval(res.strip()) == "true":
+					print self.__plugin__ + " lock GOT True : " + res.strip()
+					return True
+			print self.__plugin__ + " lock GOT False : " + res.strip()
+			return False
 
 	def sqlConnect(self):
-		if self.__dbg__:
-			print self.__plugin__ + " sqlConnect " 
-
 		if sys.platform == "win32":
 			self.__soccon__ = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		else:
 			self.__soccon__ = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-			if not self.__connected__ and xbmcvfs.exists(self.__socket__) and False:
-				#print self.__plugin__ + " sqlConnect NOT CONNECTED, BUT FILE EXISTS.. CONSIDER IT STALE"
-				self.sqlDisconnect()
 
 		start = time.time()
 		running = False
-		#print self.__plugin__ + " sqlConnect trying to connect"
 		try:
 			self.__soccon__.connect(self.__socket__)
 			self.__connected__ = True
 		except socket.error, e:
 			print self.__plugin__ + " sqlConnect exception : " + repr(e)
-			#if e.errno == 111 or e.errno == 2:
-			#	StorageServer.restart()
-			#self.__soccon__.connect(self.__socket__)
-			#self.__connected__ = True
 
-		#print self.__plugin__ + " sqlConnect connected"
-		while not self.__connected__ and start + 1 > time.time() and False:
-			try:
-				self.__soccon__.connect(self.__socket__)
-				self.__connected__ = True
-				#print self.__plugin__ + " sqlConnect connected"
-			except:
-				if sys.platform == "win32":
-					#print self.__plugin__ + " sqlConnect Trying to spawn"
-					#s = StorageServer.StorageServer()
-					running = True
-				elif sys.platform in [ "linux2" ] :
-				        #StorageServer.run()
-					running = True
-						
-				#time.sleep(1)
-				#print self.__plugin__ + " sqlConnect exception... waiting" 
-		#print self.__plugin__ + " sqlConnect Returning " + repr(self.__connected__)
 		return self.__connected__
-
-	def sqlSet2(self, name, data):
-		if self.__store_in_settings__:
-			print self.__plugin__ + " sqlSet ( in settings ) " + name
-			self.__settings__.setSetting(name, data)
-		else:
-			print self.__plugin__ + " sqlSet " + name
-			self.sqlConnect()
-			#if not self.sqlConnect():
-			#	return ""
-			temp = repr({ "action": "set", "name": name, "data": data})
-			while len(temp) > 0:
-				if len(temp) > 50000:
-					data = temp[:50000]
-					temp = temp[50000:]
-				else:
-					data = temp + "\r\n"
-					temp = ""
-				self.__soccon__.send(data)
-			res = self.__soccon__.recv(4096 * 4096)
-			print self.__plugin__ + " sqlset sending ACK "
-			try:
-				self.__soccon__.send("ACK\r\n")
-			except:
-				pass
-			print self.__plugin__ + " sqlset GOT " + res
-			self.sqlDisconnect()
 
 	def sqlSet(self, name, data):
 		if self.__store_in_settings__:
@@ -753,8 +669,6 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 			storage_server = StorageServer.StorageServer()
 			res = storage_server.send(self.__soccon__, temp)
 			print self.__plugin__ + " sqlset GOT " + repr(res)
-			self.sqlDisconnect()
-
 
 	def sqlGet(self, name):
 		if self.__store_in_settings__:
@@ -775,67 +689,3 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 				return res.strip() # We return " " as nothing. Strip it out.
 
 		return ""
-
-	def sqlGet2(self, name):
-		if self.__store_in_settings__:
-			print self.__plugin__ + " sqlGet ( from settings ) " + name + repr(self.__store_in_settings__)
-			return self.__settings__.getSetting(name)
-		else:
-			#if not self.sqlConnect():
-			#	return ""
-			self.sqlConnect()
-			print self.__plugin__ + " sqlGet " + name 
-			self.__soccon__.send(repr({ "action": "get", "name": name}) + "\r\n")
-			print self.__plugin__ + " sqlGet - receive "
-			res = ""
-			i = 0
-			while res[len(res)-2:] != "\r\n":
-				try:
-					if i == 0:
-						res += self.__soccon__.recv(4096 * 4096)
-						print self.__plugin__ + " sqlGet sending ACK " + res[len(res)-10:]
-						i += 1
-				except:
-					pass
-
-				try:
-					if i > 0:
-						self.__soccon__.send("ACK\r\n")
-						i -= 1
-				except:
-					pass
-
-			i = 0
-
-			while res[len(res)-2:] != "\r\n":
-				try:
-					if i == 0:
-						print self.__plugin__ + " sqlGet while res : " + str(len(res)) + " - " + res[len(res)-10:]
-						res += self.__soccon__.recv(4096 * 4096)
-						i += 1
-				except:
-					pass
-
-				try:
-					if i > 0:
-						print self.__plugin__ + " sqlGet sending ACK " + repr(res)[len(res)-10:]
-						if res[len(res)-2:] == "\r\n":
-							self.__soccon__.send("COMPLETE\r\n")
-						else:
-							self.__soccon__.send("ACK\r\n")
-						i -= 1
-				except:
-					pass
-
-			#self.__soccon__.close()
-			self.sqlDisconnect()
-			print self.__plugin__ + " sqlGet sending DONE " + repr(res)
-            
-		if res:
-			res = eval(res.strip())
-			print self.__plugin__ + " sqlGet res : " + repr(res.strip())
-			return res.strip() # We return " " as nothing. Strip it out.
-
-		return ""
-
-

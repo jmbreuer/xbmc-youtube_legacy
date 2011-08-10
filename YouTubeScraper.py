@@ -940,8 +940,6 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 				athumbs = self.parseDOM(trailers, "a", attrs = { "class": "ux-thumb-wrap "})
 				if len(athumbs) == 0:
 					athumbs = self.parseDOM(trailers, "a", attrs = { "class": "ux-thumb-wrap contains-addto"})
-				print self.__plugin__ + " scrapeGridFormat XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXxx " + repr(athumbs[0:10])
-				#athumbs += 2
 				for i in range(0 , len(ahref)):
 					videoid = ahref[i] 
 						
@@ -1043,7 +1041,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 				(result, status) = self.__storage__.cacheFunction(params["new_results_function"], params)
 			
 			if self.__dbg__:
-				print self.__plugin__ + " paginator new result " + repr(result)
+				print self.__plugin__ + " paginator new result " + str(repr(result))[0:50]
 			
 			if len(result) == 0:
 				if get("scraper") not in ["music_top100"]:

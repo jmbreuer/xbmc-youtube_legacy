@@ -14,6 +14,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    Version 0.8
 '''
 
 import os, sys, socket, time
@@ -22,20 +23,12 @@ try: import xbmcvfs
 except: import xbmcvfsdummy as xbmcvfs
 try: import sqlite
 except: import sqlite3
+
 class StorageServer():
-
-	## MOVE THIS BACK INTO YOUTUBE.
-	# Test if it is running, if not, launch it through xbmc.
-	# Then we can also give arguments ( ie, do this for mac, do this for windows ).
-
-	#socket.setdefaulttimeout(30)
-	#__plugin__ = sys.modules[ "__main__" ].__plugin__
-	#__dbg__ = sys.modules[ "__main__" ].__dbg__
 	__plugin__ = "StorageClient"
 	__dbg__ = True
 	
 	__path__ = os.path.join( xbmc.translatePath( "special://database" ), 'commoncache.db')
-	#__path__ = "/home/tobias/.xbmc/temp/bla.db"
 	__socket__ = ""
 	__clientscoket__ = False
 
@@ -45,11 +38,12 @@ class StorageServer():
 		sql3 = True
 	else: # Verify this better
 		sql2 = True
+
 	if sql2:
 		__conn__ = sqlite.connect(__path__)
 	elif sql3:
 		__conn__ = sqlite3.connect(__path__, check_same_thread=False)
-	__threads__ = []
+
 	__curs__ = __conn__.cursor()
 
 	def run(self):
@@ -59,7 +53,8 @@ class StorageServer():
 			self.__curs__.execute("create table items (name text uniq, data text)")
 			self.__conn__.commit()
 		except:
-			print self.__plugin__ + " Database already exists"
+			if self.__dbg__:
+				print self.__plugin__ + " Database already exists"
 
                 if sys.platform == "win32":
 			port = 59994
@@ -69,7 +64,8 @@ class StorageServer():
 			self.__socket__ = os.path.join( xbmc.translatePath( "special://temp" ), 'commoncache.socket')
 			#self.__socket__ = "/home/tobias/.xbmc/temp/commoncache.socket"
 			if xbmcvfs.exists(self.__socket__):
-				print self.__plugin__ + " Unlinking stale socket file"
+				if self.__dbg__:
+					print self.__plugin__ + " Unlinking stale socket file"
 				os.unlink(self.__socket__)	
 			sock = socket.socket(socket.AF_UNIX)
 
@@ -81,36 +77,36 @@ class StorageServer():
 		i = 0
 		while not xbmc.abortRequested:
 			if i == 0:
-				print self.__plugin__ + " Daemon accepting"
+				if self.__dbg__:
+					print self.__plugin__ + " Daemon accepting"
 				i = 1
-			#sock.setblocking(0)
-			#socket.setdefaulttimeout(30)
 			self.__clientsocket__ = False
 			try:
 				(self.__clientsocket__, address) = sock.accept()
 				start = time.time()
 			except socket.error, e:
-				if start + 300 < time.time():
-					print self.__plugin__ + " Daemon EXCEPTION OVER TIME : " + repr(e)
-					#exit(0)
 				if e.errno == 11 or e.errno == 10035 or e.errno == 35:
 					continue
-				print self.__plugin__ + " Daemon EXCEPTION : " + repr(e)
-				#self.stop()
+				if self.__dbg__:
+					print self.__plugin__ + " Daemon EXCEPTION : " + repr(e)
 
 			if not self.__clientsocket__:
 				continue
-			print self.__plugin__ + " Daemon accepted"
+
+			if self.__dbg__:
+				print self.__plugin__ + " Daemon accepted"
 
 			data = self.recv(self.__clientsocket__)
 
 			try:
 				data = eval(data)
 			except:
-				print self.__plugin__ + " Daemon Couldn't evaluate message : " + repr(data)
+				if self.__dbg__:
+					print self.__plugin__ + " Daemon Couldn't evaluate message : " + repr(data)
 				data = {"action": "stop"}
 
-			print self.__plugin__ + " Daemon got data: " + str(len(data))
+			if self.__dbg__:
+				print self.__plugin__ + " Daemon got data: " + str(len(data)) + " - " + str(repr(data))[0:50]
 
 			res = ""
 			if data["action"] == "get":
@@ -123,15 +119,18 @@ class StorageServer():
 				res = self.unlock(data["name"])
 
 			if len(res) > 0:
-				print self.__plugin__ + " Daemon got response: " + str(len(res)) # + " - " + repr(res)
+				if self.__dbg__:
+					print self.__plugin__ + " Daemon got response: " + str(len(res))  + " - " + str(repr(res))[0:50]
 				self.send(self.__clientsocket__, repr(res))
 
-			print self.__plugin__ + " Daemon done"
+			if self.__dbg__:
+				print self.__plugin__ + " Daemon done"
 
-		print self.__plugin__ + " Daemon Closing down"
+		if self.__dbg__:
+			print self.__plugin__ + " Daemon Closing down"
 		self.__curs__.close()
 		self.__conn__.close()
-		print self.__plugin__ + " Daemon Closing release"
+		print self.__plugin__ + " Daemon Closed"
 
 	def recv(self, sock):
 		data = "   "
@@ -139,57 +138,58 @@ class StorageServer():
 		temp = ""
 		print self.__plugin__ + " recv "
 		i = 0
+		start = time.time()
 		while data[len(data)-2:] != "\r\n" or not idle:
 			print self.__plugin__ + " recv data : " + str(len(data))
 			try:
 				if idle:
-					temp = sock.recv(4096 * 4096)
+					recv_buffer = sock.recv(4096 * 4096)
 					idle = False
 					i += 1
-					print self.__plugin__ + " recv got data  : " + str(i) + " - " + repr(idle) + " - " + str(len(data)) + " + " + str(len(temp)) + " | " + repr(temp)[len(temp) -5:]
-					data += temp
+					#print self.__plugin__ + " recv got data  : " + str(i) + " - " + repr(idle) + " - " + str(len(data)) + " + " + str(len(recv_buffer)) + " | " + repr(recv_buffer)[len(recv_buffer) -5:]
+					data += recv_buffer
+					start = time.time()
 				elif not idle:
 					if data[len(data)-2:] == "\r\n":
 						sock.send("COMPLETE\r\n" + ( " " * ( 15 - len("COMPLETE\r\n") ) ) )
 						idle = True
 						print self.__plugin__ + " recv sent COMPLETE " + str(i)
-					elif len(temp) > 0:
-						print self.__plugin__ + " recv trying to sent ACK " + str(i)
+					elif len(recv_buffer) > 0:
 						sock.send("ACK\r\n" + ( " " * ( 15 - len("ACK\r\n") )) )
 						idle = True
 						print self.__plugin__ + " recv sent ACK " + str(i)
-					temp = ""
-					print self.__plugin__ + " recv status " + repr( not idle) + " - " + repr(data[len(data)-2:] != "\r\n")
+					recv_buffer = ""
+					#print self.__plugin__ + " recv status " + repr( not idle) + " - " + repr(data[len(data)-2:] != "\r\n")
 					
 			except socket.error, e:
 				if e.errno != 10035 and e.errno != 35:
 					print self.__plugin__ + " recv except error " + repr(e)
-				print self.__plugin__ + " recv except error " + repr(e)
+				if start + 10 < time.time():
+					print self.__plugin__ + " recv over time"
+					break
 		print self.__plugin__ + " recv DONE " + repr( not idle) + " - " + repr(data[len(data)-2:] != "\r\n")
 		return data.strip()
 
-	def send(self, sock, res):
+	def send(self, sock, data):
 		idle = True
 		status = ""
-		if len(res) < 100:
-			print self.__plugin__ + " send : " + str(len(res)) + " - " + repr(res)
-		else:
-			print self.__plugin__ + " send : " + str(len(res))
-
+		print self.__plugin__ + " send : " + str(len(data)) + " - " + repr(data)[0:20]
 		i = 0
-		while len(res) > 0 or not idle:
-			#print self.__plugin__ + " send to go " + str(len(res))
-			data = " "
+		start = time.time()
+		while len(data) > 0 or not idle:
+			#print self.__plugin__ + " send to go " + str(len(data))
+			send_buffer = " "
 			try:
 				if idle:
-					if len(res) > 4096:
-						data = res[:4096]
+					if len(data) > 4096:
+						send_buffer = data[:4096]
 					else:
-						data = res + "\r\n"
+						send_buffer = data + "\r\n"
 
-					result = sock.send(data)
+					result = sock.send(send_buffer)
 					i += 1
 					idle = False
+					start = time.time()
 				elif not idle:
 					status = ""
 					while status.find("COMPLETE\r\n") == -1 and status.find("ACK\r\n") == -1:
@@ -197,25 +197,28 @@ class StorageServer():
 						i -= 1
 					print self.__plugin__ + " send waiting for response4 " 
 
-					idle =  True
-					if len(res) > 4096:
-						res = res[4096:]
+					idle = True
+					if len(data) > 4096:
+						data = data[4096:]
 					else:
-						res = ""
+						data = ""
 
-					print self.__plugin__ + " send Got response " + str(i) + " - " + str(result) + " == " + str(len(data)) + " | " + str(len(res)) + " - " + repr(data)[len(data)-5:]
+					print self.__plugin__ + " send Got response " + str(i) + " - " + str(result) + " == " + str(len(send_buffer)) + " | " + str(len(data)) + " - " + repr(send_buffer)[len(send_buffer)-5:]
 
 			except socket.error, e:
 				if e.errno != 10035 and e.errno != 35 and e.errno != 107 and e.errno != 32:
 					print self.__plugin__ + " send except error " + repr(e)
-		print self.__plugin__ + " send DONE " +  repr(status) + " - " + repr(idle) + " - " + str(len(res)) + " - " + str(i)
+				if start + 10 < time.time():
+					print self.__plugin__ + " recv over time"
+					break;
+		print self.__plugin__ + " send DONE " +  repr(status) + " - " + repr(idle) + " - " + str(len(data)) + " - " + str(i)
 		return status.find("COMPLETE\r\n") > -1
 
 	def lock(self, name): # This is NOT atomic
-		#print self.__plugin__ + " lock " + name
+		print self.__plugin__ + " lock " + name
 		locked = True
 		curlock = self.sqlGet(name)
-		#print self.__plugin__ + " lock curlock " + repr(curlock)
+		print self.__plugin__ + " lock curlock " + repr(curlock)
 		if curlock.strip():
 			#print self.__plugin__ + " lock curlock " + repr(curlock) + " - cur time " + str(time.time())
 			#check timestamp in data.
@@ -238,18 +241,18 @@ class StorageServer():
 			self.__conn__.commit()
 			return "true"
 
-		#print self.__plugin__ + " lock return"
+		print self.__plugin__ + " lock return"
 		return "false"
 
 	def unlock(self, name):
-		#print self.__plugin__ + " unlock " + name
+		print self.__plugin__ + " unlock " + name
 		if self.sql2:
 			self.__curs__.execute("DELETE FROM items WHERE name = %s", ( name, ) )
 		elif self.sql3:
 			self.__curs__.execute("DELETE FROM items WHERE name = ?", ( name, ) )
 		self.__conn__.commit()
-		#print self.__plugin__ + " unlock DONE "
-		return " "
+		print self.__plugin__ + " unlock DONE "
+		return "true"
 
 	def sqlSet(self, name, data):
 		#print self.__plugin__ + " sqlSet " + name
@@ -285,16 +288,6 @@ class StorageServer():
 			return row[0]
 		return " "
 
-	def stop(self):
-		print self.__plugin__ + " Stopping Server"
-		self.__conn__.close()
-		if sys.platform != "win32":
-                        #self.__socket__ = os.path.join( xbmc.translatePath( "special://temp" ), 'commoncache.socket')
-                        self.__socket__ = "/home/tobias/.xbmc/temp/commoncache.socket"
-			os.unlink(self.__socket__)	
-		print self.__plugin__ + " Stopping Server Done"
-		exit(0)
-
 
 __workersByName = {}
 def run_async(func, *args, **kwargs):
@@ -326,7 +319,7 @@ def run_async(func, *args, **kwargs):
     # TODO: attach post-func decorator to target function and remove thread from __workersByName
     return worker
 
-@run_async
+#@run_async
 def run():
 	s = StorageServer()
 	print " StorageServer Module loaded RUN : " + str(len(__workersByName)) + " - " + repr(__workersByName)
@@ -374,7 +367,8 @@ def waitForWorkersToDie(timeout=None):
 
 if __name__ == "__main__": 
 	run()
-
+elif False:
+	run_async(run)
 
 print " StorageServer Module Loaded "
 #run()
