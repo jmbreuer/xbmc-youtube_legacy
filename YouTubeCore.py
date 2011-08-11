@@ -72,7 +72,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 		timeout = [5, 10, 15, 20, 25][int(self.__settings__.getSetting( "timeout" ))]
 		if not timeout:
 			timeout = "15"
-			socket.setdefaulttimeout(float(timeout))
+		socket.setdefaulttimeout(float(timeout))
 		return None
 	
 	def delete_favorite(self, params = {}):
