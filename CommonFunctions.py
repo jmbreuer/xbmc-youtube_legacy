@@ -304,3 +304,51 @@ class CommonFunctions():
 			print self.__plugin__ + " parseDOM Done " + str(len(lst))
 		return lst
 
+	def _fetchPage(self, params = {}):
+		get = params.get
+		link = get("link")
+		ret_obj = {}
+		if self.__dbg__:
+			print self.__plugin__ + " _fetchPage called for : " + repr(params)
+
+		if not link or int(get("error", "0")) > 2 :
+			if self.__dbg__:
+				print self.__plugin__ + " _fetchPage giving up "
+			ret_obj["status"] = 500
+			return ret_obj
+
+		request = urllib2.Request(link)
+		request.add_header('User-Agent', self.USERAGENT)
+
+		try:
+			if self.__dbg__:
+				print self.__plugin__ + " _fetchPage connecting to server... "
+
+			con = urllib2.urlopen(request)
+			
+			ret_obj["content"] = con.read()
+			ret_obj["new_url"] = con.geturl()
+			ret_obj["header"] = str(con.info())
+			con.close()
+
+			# Return result if it isn't age restricted
+			if self.__dbg__:
+				print self.__plugin__ + " _fetchPage done"
+			ret_obj["status"] = 200
+			return ret_obj
+		
+		except urllib2.HTTPError, e:
+			err = str(e)
+			if self.__dbg__:
+				print self.__plugin__ + " _fetchPage HTTPError : " + err
+				print self.__plugin__ + " _fetchPage HTTPError - Headers: " + str(e.headers) + " - Content: " + e.fp.read()
+			
+			params["error"] = str(int(get("error", "0")) + 1)
+			ret = self._fetchPage(params)
+			if not ret.has_key("content") and e.fp:
+				ret["content"] = e.fp.read()
+			return ret
+
+			ret_obj["status"] = 505
+			return ret_obj
+

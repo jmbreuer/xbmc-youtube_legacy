@@ -71,7 +71,7 @@ class StorageServer():
 		idle_since = time.time()
 		waiting = 0
 		while not xbmc.abortRequested:
-			if waiting == 0:
+			if waiting == 0 :
 				if self.__dbg__:
 					print self.__plugin__ + " Daemon accepting"
 				waiting = 1
@@ -81,7 +81,7 @@ class StorageServer():
 			except socket.error, e:
 				if e.errno == 11 or e.errno == 10035 or e.errno == 35:
 					# There has to be a better way to accomplish this.
-					if idle_since + 10 < time.time():
+					if idle_since + 5 < time.time():
 						if waiting == 1:
 							if self.__dbg__:
 								print self.__plugin__ + " Daemon has been idle for 10 seconds. Going to sleep. zzzzzzzz "
@@ -91,7 +91,7 @@ class StorageServer():
 				if self.__dbg__:
 					print self.__plugin__ + " Daemon EXCEPTION : " + repr(e)
 
-			if not waiting:
+			if waiting:
 				continue
 
 			if self.__dbg__:
