@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, urllib, urllib2, re, socket, cookielib
+import sys, urllib, urllib2, re, socket, cookielib, time
 try: import simplejson as json
 except ImportError: import json
 
@@ -48,14 +48,17 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 	urllib2.install_opener(__opener__)
 	
 	def login(self, params = {}):
-		oname = self.__settings__.getSetting("username")
+		if self.__dbg__:
+			print self.__plugin__ + " login "
+		ouname = self.__settings__.getSetting("username")
 		opass = self.__settings__.getSetting( "user_password" )
 		self.__settings__.openSettings()
+		uname = self.__settings__.getSetting("username")
 		self.__dbg__ = self.__settings__.getSetting("debug") == "true"
 
-		if self.__settings__.getSetting("username") and self.__settings__.getSetting( "user_password" ):
+		if uname != "":
 			refreshed = False
-			if self.__settings__.getSetting( "oauth2_refresh_token" ) and oname == self.__settings__.getSetting("username") and opass == self.__settings__.getSetting( "user_password" ):
+			if self.__settings__.getSetting( "oauth2_refresh_token" ) and ouname == uname and opass == self.__settings__.getSetting( "user_password" ):
 				if self.__dbg__:
 					print self.__plugin__ + " login refreshing token: " + str(refreshed)
 				refreshed = self._oRefreshToken()
@@ -86,15 +89,7 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		if self.__dbg__:
 			print self.__plugin__ + " _apiLogin - errors: " + str(error)
 		
-		uname = self.__settings__.getSetting( "username" )
-		passwd = self.__settings__.getSetting( "user_password" )
-		
 		self.__settings__.setSetting('auth', "")
-		
-		if ( uname == "" or passwd == "" ):
-			if self.__dbg__:
-				print self.__plugin__ + " _apiLogin no username or password set "
-			return ( "", 0 )
 
 		url = "https://accounts.google.com/o/oauth2/auth?client_id=208795275779.apps.googleusercontent.com&redirect_uri=urn:ietf:wg:oauth:2.0:oob&scope=http%3A%2F%2Fgdata.youtube.com&response_type=code"
 
@@ -102,6 +97,8 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		fetch_options = { "link": url , "no-language-cookie": "true" }
 		step = 0
 
+		if self.__dbg__:
+			print self.__plugin__ + " _apiLogin part A"
 		while not logged_in and fetch_options and step < 6:
 			if self.__dbg__:
 				print self.__plugin__ + " _apiLogin step " + str(step)
@@ -110,17 +107,20 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			ret = self._fetchPage(fetch_options)
 			fetch_options = False
 
-			newurl = re.compile('<form action="(.*?)" method="POST">').findall(ret["content"])
-			state_wrapper = re.compile('<input type="hidden" id="state_wrapper" name="state_wrapper" value="(.*?)">').findall(ret["content"])
-			submit_access = "true"#re.compile('<button id="submit_approve_access" name="submit_approve_access" type="submit" tabindex="1" value="(.*?)" class="').findall(ret["content"])
-			if len(newurl) > 0 and len(state_wrapper) > 0 and len(submit_access) > 0:
+			newurl = self.parseDOM(ret["content"], "form", attrs= { "method": "POST"}, ret = "action")
+			state_wrapper = self. parseDOM(ret["content"], "input", attrs= { "id": "state_wrapper" }, ret = "value")
+			#submit_access = self.parseDOM(ret["content"], "button", attrs = { "name": "submit_access", "type": "submit"}, ret = "value")
+
+			if len(newurl) > 0 and len(state_wrapper) > 0:
 				url_data = { "state_wrapper": state_wrapper[0],
-					     "submit_access": submit_access}
+					     "submit_access": "true"}
 
 				fetch_options = { "link": newurl[0], "url_data": url_data, "no-language-cookie": "true" }
+				if self.__dbg__:
+					print self.__plugin__ + " _apiLogin part B"
 				continue;
 
-			code = re.compile('code=(.*)</title>').findall(ret['content'])
+			code = self.parseDOM(ret["content"], "textarea", attrs = { "id": "code"})
 			if len(code) > 0:
 				url = "https://accounts.google.com/o/oauth2/token"
 				url_data = { "client_id": "208795275779.apps.googleusercontent.com",
@@ -129,24 +129,26 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 					     "redirect_uri": "urn:ietf:wg:oauth:2.0:oob",
 					     "grant_type": "authorization_code" }
 				fetch_options = { "link": url, "url_data": url_data}
+				if self.__dbg__:
+					print self.__plugin__ + " _apiLogin part C"
 				continue
 			
 			# use token
-			try:
+			if ret["content"].find("access_token") > -1:
+				if self.__dbg__:
+					print self.__plugin__ + " _apiLogin part D"
 				oauth = json.loads(ret["content"])
-			except:
-				if self.__dbg__:
-					print self.__plugin__ + " _apiLogin JSON FAILED : " + repr(ret["content"])
 
-			if len(oauth) > 0:
-				#self.__settings__.setSetting("oauth2_expires at", oauth["expires_in"] + current time. ) 
-				self.__settings__.setSetting("oauth2_access_token", oauth["access_token"])
-				self.__settings__.setSetting('auth', oauth["access_token"])
-				self.__settings__.setSetting("oauth2_refresh_token", oauth["refresh_token"])
+				if len(oauth) > 0:
+					print self.__plugin__ + " _apiLogin part D " + repr(oauth["expires_in"])
+					self.__settings__.setSetting("oauth2_expires_at", str(int(oauth["expires_in"]) + time.time()) ) 
+					self.__settings__.setSetting("oauth2_access_token", oauth["access_token"])
+					self.__settings__.setSetting('auth', oauth["access_token"])
+					self.__settings__.setSetting("oauth2_refresh_token", oauth["refresh_token"])
 
-				if self.__dbg__:
-					print self.__plugin__ + " _apiLogin done: " + uname
-				logged_in = True
+					logged_in = True
+					if self.__dbg__:
+						print self.__plugin__ + " _apiLogin done: " + self.__settings__.getSetting( "username" )
 		
 		if logged_in:
 			return ( self.__language__(30030), 200 )
@@ -161,12 +163,6 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 			print self.__plugin__ + " _httpLogin "
 		result = ""
 		status = 500
-		
-		uname = self.__settings__.getSetting( "username" )
-		pword = self.__settings__.getSetting( "user_password" )
-		
-		if uname == "" and pword == "":
-			return ( "", 303)
 
 		if get("new", "false") == "true":
 			self.__settings__.setSetting( "login_info", "" )
@@ -266,7 +262,9 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 		galx = re.compile('Set-Cookie: GALX=(.*);Path=/accounts;Secure').findall(str(ret["header"]))
 		uname = self.__settings__.getSetting( "username" )
 		pword = self.__settings__.getSetting( "user_password" )
-		
+
+		if pword == "":
+			pword = self.getUserInput(self.__language__(30628), True)
 
 		if len(galx) == 0 or len(cont) == 0 or len(uilel) == 0 or len(dsh) == 0 or len(rmShown) == 0 or uname == "" or pword == "":
 			if self.__dbg__:
@@ -297,11 +295,12 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 	def _fillUserPin(self, content):
 		smsToken = re.compile('<input type="hidden" name="smsToken"\n        value="(.*?)">').findall(content)
 		email = re.compile('<input type="hidden" name="email"\n          value="(.*?)">').findall(content)
-		if len(smsToken) > 0 and len(email) > 0:
+		userpin = self.getUserInput(self.__language__(30627))
+		if len(smsToken) > 0 and len(email) > 0 and len(userpin) > 0:
 			url_data = { "smsToken": smsToken[0],
 				     "PersistentCookie": "yes",
 				     "service": "youtube",
-				     "smsUserPin" : self.getUserInput(self.__language__(30627)),
+				     "smsUserPin" : userpin,
 				     "smsVerifyPin" : "Verify",
 				     "timeStmp" : "",
 				     "secTok" : "",

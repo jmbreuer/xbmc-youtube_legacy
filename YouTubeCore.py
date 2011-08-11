@@ -346,6 +346,9 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 				print self.__plugin__ + " _fetchPage got api"
 			request.add_header('GData-Version', '2') #confirmed
 			request.add_header('X-GData-Key', 'key=' + self.APIKEY)
+			if self.__settings__.getSetting("oauth2_expires_at") < time.time():
+				self._oRefreshToken()
+
 		else:
 			request.add_header('User-Agent', self.USERAGENT)
 

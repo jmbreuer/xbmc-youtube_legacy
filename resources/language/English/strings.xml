@@ -214,5 +214,6 @@
     <string id="30625">Download Failed</string>
     <string id="30626">RTMPe playback currently not supported</string> 
     <string id="30627">Please provide 2-factor authentication PIN</string> 
+    <string id="30628">Please provide your password</string> 
 
 </strings>
