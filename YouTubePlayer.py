@@ -22,10 +22,10 @@ except ImportError: import json
 import xbmc, xbmcgui, xbmcplugin
 try: import xbmcvfs
 except ImportError: import xbmcvfsdummy as xbmcvfs
-import YouTubeCore, YouTubeUtils
+import YouTubeCore, YouTubeUtils, CommonFunctions
 from xml.dom.minidom import parseString
 
-class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
+class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions):
 	__settings__ = sys.modules[ "__main__" ].__settings__
 	__language__ = sys.modules[ "__main__" ].__language__
 	__plugin__ = sys.modules[ "__main__" ].__plugin__ 

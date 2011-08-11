@@ -28,6 +28,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonF
 	
 	__feeds__ = sys.modules[ "__main__" ].__feeds__
 	__storage__ = sys.modules[ "__main__" ].__storage__
+        __table_name__ = "YouTube"
 	
 	def __init__(self):
 		self.urls['categories'] = "http://www.youtube.com/videos"

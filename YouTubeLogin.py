@@ -45,6 +45,7 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonFun
 	__cj__ = cookielib.LWPCookieJar()
 	__opener__ = urllib2.build_opener(urllib2.HTTPCookieProcessor(__cj__))
 	urllib2.install_opener(__opener__)
+        __table_name__ = "YouTube"
 	
 	def login(self, params = {}):
 		if self.__dbg__:

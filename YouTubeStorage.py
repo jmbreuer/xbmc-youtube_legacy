@@ -32,9 +32,6 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions)
 		__socket__ = (socket.gethostname(), port)
 	else:
 		__socket__ = os.path.join( xbmc.translatePath( "special://temp" ), 'commoncache.socket')
-	__store_in_settings__ = False
-	__disable_cache__ = False
-	__soccon__ = False
 	__table_name__ = "YouTube"
 
 	# This list contains the list options a user sees when indexing a contact 

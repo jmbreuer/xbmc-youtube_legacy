@@ -16,7 +16,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, urllib, re, os, socket, time, hashlib
+import sys, urllib, urllib2, re, os, socket, time, hashlib
 import xbmc
 import StorageServer		
 try: import xbmcvfs
