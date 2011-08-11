@@ -16,7 +16,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, urllib, os, socket, time, md5
+import sys, urllib, os, socket, time, hashlib
 import xbmc
 import YouTubeUtils
 import StorageServer		
@@ -553,7 +553,7 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils):
 			ret_val = False
 
 			# Build unique name
-			keyhash = md5.new()
+			keyhash = hashlib.md5()
 			for params in args:
 				if type(params) == type({}):
 					for key in sorted(params.iterkeys()):

@@ -132,7 +132,12 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
 				continue
 			
 			# use token
-			oauth = json.loads(ret["content"])
+			try:
+				oauth = json.loads(ret["content"])
+			except:
+				if self.__dbg__:
+					print self.__plugin__ + " _apiLogin JSON FAILED : " + repr(ret["content"])
+
 			if len(oauth) > 0:
 				#self.__settings__.setSetting("oauth2_expires at", oauth["expires_in"] + current time. ) 
 				self.__settings__.setSetting("oauth2_access_token", oauth["access_token"])
