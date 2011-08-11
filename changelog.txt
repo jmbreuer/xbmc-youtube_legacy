@@ -2,12 +2,8 @@
 - Lookinto annotations placement again, new videos look wierd
 - add setting to control if download dialog is visible during playback
 - ensure that dialog is visible if user "tab's" out of playback
-- If Caching service is unavailable plugin should continue without it and not fail like it doesn now.
 - Proper resolutions for rtmp. <-- Henrik: HUH?
 - Scrape Education. [2.7]
-- Search [2.7]
-  - Sometimes a list will be returned with all items restricted. This causes a slight error. Safesearch : strict, search query : "strip tease"
-  		Henrik: i dissagree with this one, the example you found did return 1 item that was just not availabel in your region and the got removed from the list.
 - Movie downloads to database.
 - Ignore vp8 files(if doable)
 
