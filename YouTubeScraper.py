@@ -17,9 +17,9 @@
 '''
 
 import sys, urllib, re
-import YouTubeCore, YouTubeUtils
+import YouTubeCore, YouTubeUtils, CommonFunctions
 
-class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):	 
+class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions):
 
 	__settings__ = sys.modules[ "__main__" ].__settings__
 	__language__ = sys.modules[ "__main__" ].__language__

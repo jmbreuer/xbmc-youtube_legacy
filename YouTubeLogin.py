@@ -21,8 +21,7 @@ try: import simplejson as json
 except ImportError: import json
 
 import xbmc
-import YouTubeUtils
-import YouTubeCore
+import YouTubeUtils, YouTubeCore, CommonFunctions
 
 # ERRORCODES:
 # 0 = Ignore
@@ -30,7 +29,7 @@ import YouTubeCore
 # 303 = See other (returned an error message)
 # 500 = uncaught error
 
-class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
+class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions):
 	__settings__ = sys.modules[ "__main__" ].__settings__
 	__language__ = sys.modules[ "__main__" ].__language__
 	__plugin__ = sys.modules[ "__main__" ].__plugin__

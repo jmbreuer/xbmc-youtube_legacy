@@ -49,12 +49,6 @@ class StorageServer():
 	def run(self):
 		self.__plugin__ = "StorageServer"
 		print self.__plugin__ + " Storage Server starting " + self.__path__
-		try:
-			self.__curs__.execute("create table items (name text uniq, data text)")
-			self.__conn__.commit()
-		except:
-			if self.__dbg__:
-				print self.__plugin__ + " Database already exists"
 
                 if sys.platform == "win32":
 			port = 59994
@@ -72,30 +66,36 @@ class StorageServer():
 		sock.bind(self.__socket__)
 		sock.listen(1)
 		sock.setblocking(0)
+		#socket.setdefaulttimeout(15)
 		
-		start = time.time()
-		i = 0
+		idle_since = time.time()
+		waiting = 0
 		while not xbmc.abortRequested:
-			if i == 0:
+			if waiting == 0:
 				if self.__dbg__:
 					print self.__plugin__ + " Daemon accepting"
-				i = 1
-			self.__clientsocket__ = False
+				waiting = 1
 			try:
 				(self.__clientsocket__, address) = sock.accept()
-				start = time.time()
+				waiting = 0
 			except socket.error, e:
 				if e.errno == 11 or e.errno == 10035 or e.errno == 35:
+					# There has to be a better way to accomplish this.
+					if idle_since + 10 < time.time():
+						if waiting == 1:
+							if self.__dbg__:
+								print self.__plugin__ + " Daemon has been idle for 10 seconds. Going to sleep. zzzzzzzz "
+						time.sleep(0.5)
+						waiting = 2
 					continue
 				if self.__dbg__:
 					print self.__plugin__ + " Daemon EXCEPTION : " + repr(e)
 
-			if not self.__clientsocket__:
+			if not waiting:
 				continue
 
 			if self.__dbg__:
 				print self.__plugin__ + " Daemon accepted"
-
 			data = self.recv(self.__clientsocket__)
 
 			try:
@@ -110,25 +110,25 @@ class StorageServer():
 
 			res = ""
 			if data["action"] == "get":
-				res = self.sqlGet(data["name"])
+				res = self.sqlGet(data["table"], data["name"])
 			elif data["action"] == "set":
-				res = self.sqlSet(data["name"], data["data"])
+				res = self.sqlSet(data["table"], data["name"], data["data"])
 			elif data["action"] == "lock":
-				res = self.lock(data["name"])
+				res = self.lock(data["table"], data["name"])
 			elif data["action"] == "unlock":
-				res = self.unlock(data["name"])
+				res = self.unlock(data["table"], data["name"])
 
 			if len(res) > 0:
 				if self.__dbg__:
 					print self.__plugin__ + " Daemon got response: " + str(len(res))  + " - " + str(repr(res))[0:50]
 				self.send(self.__clientsocket__, repr(res))
 
+			idle_since = time.time()
 			if self.__dbg__:
 				print self.__plugin__ + " Daemon done"
 
 		if self.__dbg__:
 			print self.__plugin__ + " Daemon Closing down"
-		self.__curs__.close()
 		self.__conn__.close()
 		print self.__plugin__ + " Daemon Closed"
 
@@ -224,7 +224,7 @@ class StorageServer():
 			print self.__plugin__ + " send done " 
 		return status.find("COMPLETE\r\n") > -1
 
-	def lock(self, name): # This is NOT atomic
+	def lock(self, table, name): # This is NOT atomic
 		if self.__dbg__:
 			print self.__plugin__ + " lock " + name
 		locked = True
@@ -236,9 +236,9 @@ class StorageServer():
 				if self.__dbg__:
 					print self.__plugin__ + " lock was older than 10 seconds, considered stale, removing"
 				if self.sql2:
-					self.__curs__.execute("DELETE FROM items WHERE name = %s", ( name, ) )
+					self.__curs__.execute("DELETE FROM " + table + " WHERE name = %s", ( name, ) )
 				elif self.sql3:
-					self.__curs__.execute("DELETE FROM items WHERE name = ?", ( name, ) )
+					self.__curs__.execute("DELETE FROM " + table + " WHERE name = ?", ( name, ) )
 				self.__conn__.commit()
 				locked = False
 		else:
@@ -246,9 +246,9 @@ class StorageServer():
 
 		if not locked:
 			if self.sql2:
-				self.__curs__.execute("INSERT INTO items VALUES ( %s , %s )", ( name, time.time()) )
+				self.__curs__.execute("INSERT INTO " + table + " VALUES ( %s , %s )", ( name, time.time()) )
 			elif self.sql3:
-				self.__curs__.execute("INSERT INTO items VALUES ( ? , ? )", ( name, time.time()) )
+				self.__curs__.execute("INSERT INTO " + table + " VALUES ( ? , ? )", ( name, time.time()) )
 			self.__conn__.commit()
 			return "true"
 
@@ -256,46 +256,51 @@ class StorageServer():
 			print self.__plugin__ + " lock done"
 		return "false"
 
-	def unlock(self, name):
+	def unlock(self, table, name):
 		if self.__dbg__:
-			print self.__plugin__ + " unlock " + name
+			print self.__plugin__ + " unlock " + name	
+
+		self.checkTable(table)
 		if self.sql2:
-			self.__curs__.execute("DELETE FROM items WHERE name = %s", ( name, ) )
+			self.__curs__.execute("DELETE FROM " + table + " WHERE name = %s", ( name, ) )
 		elif self.sql3:
-			self.__curs__.execute("DELETE FROM items WHERE name = ?", ( name, ) )
+			self.__curs__.execute("DELETE FROM " + table + " WHERE name = ?", ( name, ) )
 		self.__conn__.commit()
 		if self.__dbg__:
 			print self.__plugin__ + " unlock done"
 		return "true"
 
-	def sqlSet(self, name, data):
+	def sqlSet(self, table, name, data):
 		if self.__dbg__:
 			print self.__plugin__ + " sqlSet " + name + str(repr(data))[0:20]
-		if self.sqlGet(name).strip():
+
+		self.checkTable(table)
+		if self.sqlGet(table, name).strip():
 			#print self.__plugin__ + " sqlSet Update : " + data
 			if self.sql2:
-				self.__curs__.execute('UPDATE items SET data = %s WHERE name = %s', ( data, name ))
+				self.__curs__.execute("UPDATE " + table + " SET data = %s WHERE name = %s", ( data, name ))
 			elif self.sql3:
-				self.__curs__.execute('UPDATE items SET data = ? WHERE name = ?', ( data, name ))
+				self.__curs__.execute("UPDATE " + table + " SET data = ? WHERE name = ?", ( data, name ))
 		else:
 			#print self.__plugin__ + " sqlSet Insert  "
 			if self.sql2:
-				self.__curs__.execute("INSERT INTO items VALUES ( %s , %s )", ( name, data) )
+				self.__curs__.execute("INSERT INTO " + table + " VALUES ( %s , %s )", ( name, data) )
 			elif self.sql3:
-				self.__curs__.execute("INSERT INTO items VALUES ( ? , ? )", ( name, data) )
+				self.__curs__.execute("INSERT INTO " + table + " VALUES ( ? , ? )", ( name, data) )
 		self.__conn__.commit()
 		if self.__dbg__:
 			print self.__plugin__ + " sqlSet done"
 		return ""
 
-	def sqlGet(self, name):
+	def sqlGet(self, table, name):
 		if self.__dbg__:
 			print self.__plugin__ + " sqlGet " + name
 
+		self.checkTable(table)
 		if self.sql2:
-			self.__curs__.execute("SELECT data FROM items WHERE name = %s", ( name))
+			self.__curs__.execute("SELECT data FROM " + table + " WHERE name = %s", ( name))
 		elif self.sql3:
-			self.__curs__.execute("SELECT data FROM items WHERE name = ?", ( name,))
+			self.__curs__.execute("SELECT data FROM " + table + " WHERE name = ?", ( name,))
 
 		for row in self.__curs__:
 			if self.__dbg__:
@@ -304,6 +309,15 @@ class StorageServer():
 		if self.__dbg__:
 				print self.__plugin__ + " sqlGet returning empty"
 		return " "
+
+	def checkTable(self, table):
+		try:
+			self.__curs__.execute("create table " + table + " (name text uniq, data text)")
+			self.__conn__.commit()
+		except:
+			pass
+
+
 
 
 __workersByName = {}

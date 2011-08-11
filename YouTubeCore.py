@@ -20,7 +20,7 @@ import os, xbmc, sys, urllib, urllib2, re, time, socket, cookielib
 try: import simplejson as json
 except ImportError: import json
 from xml.dom.minidom import parseString
-import YouTubeUtils
+import YouTubeUtils, CommonFunctions
 
 # ERRORCODES:
 # 200 = OK
@@ -39,7 +39,7 @@ class url2request(urllib2.Request):
 		else:
 			return urllib2.Request.get_method(self) 
 
-class YouTubeCore(YouTubeUtils.YouTubeUtils):
+class YouTubeCore(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions):
 	__settings__ = sys.modules[ "__main__" ].__settings__
 	__language__ = sys.modules[ "__main__" ].__language__
 	__plugin__ = sys.modules[ "__main__" ].__plugin__
@@ -715,110 +715,4 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils):
 				
 		print self.__plugin__ + " _getvideoinfo Done: " + str(len(ytobjects)) #+ repr(ytobjects)
 		return ytobjects;
-
-	def stripTags(self, html):
-		sub_start = html.find("<")
-		sub_end = html.find(">")
-		while sub_start < sub_end and sub_start > -1:
-			html = html.replace(html[sub_start:sub_end + 1], "").strip()
-			sub_start = html.find("<")
-			sub_end = html.find(">")
-
-		return html
-
-	def getDOMContent(self, html, name, match):
-		#print self.__plugin__ + " getDOMContent match: " + match
-		start = html.find(match)
-		if name == "img":
-			endstr = ">"
-		else:
-			endstr = "</" + name + ">"
-		end = html.find(endstr, start)
-
-		pos = html.find("<" + name, start + 1 )
-
-		#print self.__plugin__ + " getDOMContent " + str(start) + " < " + str(end) + " pos = " + str(pos)
-
-		while pos < end and pos != -1:
-			pos = html.find("<" + name, pos + 1)
-			if pos > -1:
-				tend = html.find(endstr, end + len(endstr))
-				if tend != -1:
-					end = tend
-			#print self.__plugin__ + " getDOMContent2 loop: " + str(start) + " < " + str(end) + " pos = " + str(pos)
-
-		#print self.__plugin__ + " getDOMContent XXX: " + str(start) + " < " + str(end) + " pos = " + str(pos)
-		html = html[start:end + len(endstr)]
-		#print self.__plugin__ + " getDOMContent done html length: " + str(len(html)) + repr(html)
-		return html
-
-	def parseDOM(self, html, name = "", attrs = {}, ret = False):
-		# html <- text to scan.
-		# name <- Element name
-		# attrs <- { "id": "my-div", "class": "oneclass.*anotherclass", "attribute": "a random tag" }
-		# ret <- Return content of element
-		# Default return <- Returns a list with the content
-		
-		if self.__dbg__:
-			print self.__plugin__ + " parseDOM : " + repr(name) + " - " + repr(attrs) + " - " + repr(ret) + " - " + str(type(html))
-		if type(html) == type([]):
-			html = "".join(html)
-		html = html.replace("\n", "")
-		if not name.strip():
-			if self.__dbg__:
-				print self.__plugin__ + " parseDOM - Missing tag name "
-			return ""
-
-		lst = []
-
-		# Find all elements with the tag
-			
-		i = 0
-		for key in attrs:
-			scripts = [ '(<' + name + '[^>]*?(?:' + key + '=[\'"]' + attrs[key] + '[\'"][^>]*?>))', # Hit often.
-				    '(<' + name + ' (?:' + key + '=[\'"]' + attrs[key] + '[\'"])[^>]*?>)', # Hit twice
-				    '(<' + name + '[^>]*?(?:' + key + '=[\'"]' + attrs[key] + '[\'"])[^>]*?>)'] # 
-
-			lst2 = []
-			for script in scripts:
-				if len(lst2) == 0:
-					#print self.__plugin__ + " parseDOM scanning " + str(i) + " " + str(len(lst)) + " Running :" + script
-					lst2 = re.compile(script).findall(html)
-					#print self.__plugin__ + " parseDOM scanning " + str(i) + " " + str(len(lst2)) + " Result : " #+ repr(lst2[:2])
-					i += 1
-			if len(lst2) > 0:
-				if len(lst) == 0:
-					lst = lst2;
-					lst2 = []
-				else:
-					test = range(len(lst))
-					test.reverse()
-					for i in test: # Delete anything missing from the next list.
-						if not lst[i] in lst2:
-							if self.__dbg__:
-								print self.__plugin__ + " parseDOM Purging mismatch " + str(len(lst)) + " - " + repr(lst[i])
-							del(lst[i])
-
-		if len(lst) == 0 and attrs == {}:
-			#print self.__plugin__ + " parseDOM no list found, making one on just the element name"
-			lst = re.compile('(<' + name + '[^>]*?>)').findall(html)
-
-		if ret != False:
-			#print self.__plugin__ + " parseDOM Getting attribute %s content for %s matches " % ( ret, len(lst) )
-			lst2 = []
-			for match in lst:
-				lst2 += re.compile('<' + name + '.*' + ret + '=[\'"]([^>]*?)[\'"].*>').findall(match)
-			lst = lst2
-		else:
-			#print self.__plugin__ + " parseDOM Getting element content for %s matches " % len(lst)
-			lst2 = []
-			for match in lst:
-				temp = self.getDOMContent(html, name, match)
-				html = html.replace(temp, "")
-				lst2.append(temp[temp.find(">")+1:temp.rfind("</" + name + ">")])
-			lst = lst2
-
-		if self.__dbg__:
-			print self.__plugin__ + " parseDOM Done " + str(len(lst))
-		return lst
 
