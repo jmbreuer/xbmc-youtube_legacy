@@ -31,24 +31,43 @@ class StorageServer():
 	__path__ = os.path.join( xbmc.translatePath( "special://database" ), 'commoncache.db')
 	__socket__ = ""
 	__clientscoket__ = False
+	__sql2__ = False
+	__sql3__ = False
 
-	sql2 = False
-	sql3 = False
-	if repr(sys.modules).find("sqlite3") > -1:
-		sql3 = True
-	else: # Verify this better
-		sql2 = True
+	def startDB(self):
+		try:
+			self.sql2 = False
+			self.sql3 = False
+			if repr(sys.modules).find("sqlite3") > -1:
+				self.sql3 = True
+			else: # Verify this better
+				self.sql2 = True
 
-	if sql2:
-		__conn__ = sqlite.connect(__path__)
-	elif sql3:
-		__conn__ = sqlite3.connect(__path__, check_same_thread=False)
+			if self.__dbg__:
+				print self.__plugin__ + " startDB 1 : " + repr(self.sql2) + " - " + repr(self.sql3)
 
-	__curs__ = __conn__.cursor()
+			if self.sql2:
+				if self.__dbg__:
+					print self.__plugin__ + " startDB 2 "
+				self.__conn__ = sqlite.connect(self.__path__)
+			elif self.sql3:
+				if self.__dbg__:
+					print self.__plugin__ + " startDB 3 "
+				self.__conn__ = sqlite3.connect(self.__path__, check_same_thread=False)
+
+			self.__curs__ = self.__conn__.cursor()
+			return True
+		except sqlite.Error, e:
+			if self.__dbg__:
+				print self.__plugin__ + " startDB exception: " + repr(e)
+			xbmcvfs.delete(self.__path__)
+			return False	
 
 	def run(self):
 		self.__plugin__ = "StorageServer"
 		print self.__plugin__ + " Storage Server starting " + self.__path__
+		if not self.startDB():
+			self.startDB()
 
                 if sys.platform == "win32":
 			port = 59994
@@ -335,12 +354,12 @@ def run():
 		print s.__plugin__ + " Starting Child already exists"
 		#waitForWorkersToDie(1)
 		return False
-	print s.__plugin__ + " Starting server run called "
+	print s.__plugin__ + " Starting server"
 	s.run()
 	return True
 
 
-if __name__ == "__main__": 
+if __name__ == "__main__": 	
 	run()
-elif False:
-	run_async(run)
+#elif False:
+	#run_async(run)
