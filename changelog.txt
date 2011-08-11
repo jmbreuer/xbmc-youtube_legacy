@@ -1,4 +1,5 @@
 [B]TODO:[/B]
+- Lookinto annotations placement again, new videos look wierd
 - add setting to control if download dialog is visible during playback
 - ensure that dialog is visible if user "tab's" out of playback
 - If Caching service is unavailable plugin should continue without it and not fail like it doesn now.
