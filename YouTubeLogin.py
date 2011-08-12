@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, urllib, urllib2, re, socket, cookielib, time
+import sys, urllib, urllib2, socket, cookielib, time
 try: import simplejson as json
 except ImportError: import json
 
@@ -195,16 +195,18 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonFun
 			# Fill out login information and send.
 			newurl = self.parseDOM(ret["content"].replace("\n", " "), "form", attrs = { "id": "gaia_loginform"}, ret = "action")
 			if len(newurl) > 0:
-				( galx, url_data ) = self._fillLoginInfo(ret)
+				( galx, url_data ) = self._fillLoginInfo(ret["content"])
 				if len(galx) > 0 and len(url_data) > 0:
 					fetch_options = { "link": newurl[0], "no-language-cookie": "true", "url_data": url_data }
 					if self.__dbg__:
-						print self.__plugin__ + " _httpLogin part B:" #+ repr(fetch_options) ## WARNING, SHOWS LOGIN INFO
+						print self.__plugin__ + " _httpLogin part B:" + repr(fetch_options) ## WARNING, SHOWS LOGIN INFO
 					continue
-						
-			newurl = re.compile('<meta http-equiv="refresh" content="0; url=&#39;(.*)&#39;"></head>').findall(ret["content"])
+
+			newurl = self.parseDOM(ret["content"], "meta", attrs = { "http-equiv": "refresh"}, ret = "content")
 			if len(newurl) > 0 :
-				fetch_options = { "link": newurl[0].replace("&amp;", "&"), "no-language-cookie": "true" }
+				newurl = newurl[0].replace("&amp;", "&")
+				newurl = newurl[newurl.find("&#39;") + 5 : newurl.rfind("&#39;")]
+				fetch_options = { "link": newurl, "no-language-cookie": "true" }
 				if self.__dbg__:
 					print self.__plugin__ + " _httpLogin part C: "  + repr(fetch_options)
 				continue
@@ -217,8 +219,8 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonFun
 					print self.__plugin__ + " _httpLogin part D: " + repr(fetch_options)
 				continue
 
-			smsToken = re.compile('<input type="hidden" name="smsToken" value="(.*?)">').findall(ret["content"])
-			cont = re.compile('<input type="hidden" name="continue" value="(.*?)">').findall(ret["content"])
+			smsToken = self.parseDOM(ret["content"], "input", attrs= { "name": "smsToken" }, ret= "value")
+			cont = self.parseDOM(ret["content"], "input", attrs= { "name": "continue"}, ret="value" )
 			if len(cont) > 0 and smsToken > 0 and galx != "" :
 				url_data = { "smsToken": smsToken[0],
 					     "continue": cont[0],
@@ -252,14 +254,20 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonFun
 
 		return (result, status)
 
-	def _fillLoginInfo(self, ret):
-		rmShown = re.compile('<input type="hidden" name=\'rmShown\' value="(.*?)" />').findall(ret["content"])
-		#cont = re.compile('<input type="hidden" name="continue" id="continue"\n           value="(.*?)" /> ').findall(ret["content"])
-		#cont2 = self.parseDOM(ret["content"].replace("\n", " "), "input", attrs = { "id": "continue" }, ret = "value")
+	def _fillLoginInfo(self, content):
+		rmShown = self.parseDOM(content, "input", attrs = { "name": "rmShown"}, ret = "value" )
+		#cont2= self.parseDOM(content, "input", attrs = { "id": "continue" }, ret = "value")
+		#print self.__plugin__ + " _httpLogin missing values for login form XXXXXXXXXXXX " + repr(cont2) + "\n" + repr(content)
 		cont = ["http://www.youtube.com/signin?action_handle_signin=true&amp;nomobiletemp=1&amp;hl=en_US&amp;next=%2F"]
-		uilel = re.compile('<input type="hidden" name="uilel" id="uilel"\n           value="(.*?)" />').findall(ret["content"])
-		dsh = re.compile('<input type="hidden" name="dsh" id="dsh"\n           value="(.*?)" />').findall(ret["content"])
-		galx = re.compile('Set-Cookie: GALX=(.*);Path=/accounts;Secure').findall(str(ret["header"]))
+		uilel = self.parseDOM(content, "input", attrs = { "name": "uilel" }, ret= "value")
+		if len(uilel) == 0:
+			uilel = self.parseDOM(content, "input", attrs= { "id": "uilel" }, ret= "value")
+		dsh = self.parseDOM(content, "input", attrs = { "name": "dsh" }, ret = "value")
+		if len(dsh) == 0:
+			dsh = self.parseDOM(content, "input", attrs = { "id": "dsh" }, ret = "value")
+
+		# Can we get this elsewhere?
+		galx = self.parseDOM(content, "input", attrs = { "name": "GALX"}, ret = "value")
 		uname = self.__settings__.getSetting( "username" )
 		pword = self.__settings__.getSetting( "user_password" )
 
@@ -293,8 +301,8 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonFun
 			return ( galx, url_data)
 
 	def _fillUserPin(self, content):
-		smsToken = re.compile('<input type="hidden" name="smsToken"\n        value="(.*?)">').findall(content)
-		email = re.compile('<input type="hidden" name="email"\n          value="(.*?)">').findall(content)
+		smsToken = self.parseDOM(content, "input", attrs = { "name": "smsToken" }, ret = "value")
+		email = self.parseDOM(content, "input", attrs = { "name": "email" }, ret = "value")
 		userpin = self.getUserInput(self.__language__(30627))
 		if len(smsToken) > 0 and len(email) > 0 and len(userpin) > 0:
 			url_data = { "smsToken": smsToken[0],
