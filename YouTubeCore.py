@@ -548,7 +548,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions):
 				"client_secret": "sZn1pllhAfyonULAWfoGKCfp",
 				"refresh_token": self.__settings__.getSetting( "oauth2_refresh_token" ),
 				"grant_type": "refresh_token"}
-			ret = self._fetchPage({ "link": url, "no-language-cookie": "true", "url_data": data}) # "no-language-cookie": "true" <- might be needed here..
+			ret = self._fetchPage({ "link": url, "no-language-cookie": "true", "url_data": data})
 			if ret["status"] == 200:
 				oauth = ""
 				try:

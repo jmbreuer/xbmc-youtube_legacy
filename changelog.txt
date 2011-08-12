@@ -1,11 +1,11 @@
 [B]TODO:[/B]
-- Lookinto annotations placement again, new videos look wierd
-- add setting to control if download dialog is visible during playback
-- ensure that dialog is visible if user "tab's" out of playback
+- Lookinto annotations placement again, new videos look wierd [2.7]
+- add setting to control if download dialog is visible during playback [2.7]
+- ensure that dialog is visible if user "tab's" out of playback [2.7]
 - Proper resolutions for rtmp. <-- Henrik: HUH?
 - Scrape Education. [2.7]
-- Movie downloads to database.
-- Ignore vp8 files(if doable)
+- Movie downloads to database. <-- Huh?
+- Ignore vp8 files(if doable) [3.0 (baring dharma support)]
 
 [B]Errata[/B]
 - [XBMC] Thumbnails sometimes turns into black box or Folder (XBMC not detecting when thumbnail is set and defaulting to icon?)
@@ -16,9 +16,9 @@
 - Download of rtmpe streams not supported.
 
 [B]Version 2.7.0 (Beta)[/B]
-- Added new sqllite based caching system with script.common.plugin.cache
+- Added new sqlite based caching system with script.common.plugin.cache
 - Fixed Downloads messages.
-- Changed Reworked Regex based scraper framework to be more reliable and easier to use 
+- Changed Reworked Regex based scraper framework to be more reliable and easier to use
 - Changed Improved Dharma compatability by adding dummy xbmcvfs
 - Changed Download progress bar now auto hides when playing a videos.
 - Changed Remove legacy download and moved windows to new download system.
@@ -166,7 +166,7 @@
 - Hardened handling of age restricted videos
 - No longer try login when no credentials have been provided.
 
-[B]Version 1.9.2[/B
+[B]Version 1.9.2[/B]
 - Disable socket timeout since that makes login fail on windows.
 
 [B]Version 1.9.1[/B]
