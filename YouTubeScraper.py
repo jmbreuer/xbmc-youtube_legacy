@@ -258,13 +258,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonF
 						item["icon"] = "music"
 						item["thumbnail"] = athumb[i]
 						items.append(item)
-
-#				tmp = self.parseDOM(result["content"], name = "div",{"id":"artist-recs-container"})
-#				artists = self.parseDOM(tmp, name = "h3")
-#				
-#				for artist in artist
-
-
+		
 		if self.__dbg__:
 			print self.__plugin__ + " scrapeMusicCategoryArtists done"
 		return (items, status)
@@ -273,7 +267,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonF
 		get = params.get
 		if self.__dbg__:
 			print self.__plugin__ + " scrapeMusicCategoryHits"
-
+		
 		status = 200
 		items = []
 		params["batch"] = "true"
@@ -283,20 +277,18 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonF
 			url = self.urls["music"] + category
 			result = self._fetchPage({"link":url})
 			
-			content = self.parseDOM(result["content"], "div", { "class": "browse-item music-item "})
+			content = self.parseDOM(result["content"], "li", { "class": "yt-uix-slider-slide-item "})
 			
-			for video in content: 
+			for video in content:
 				videoid = self.parseDOM(video, "a", attrs = {"class": "ux-thumb-wrap " }, ret = "href")
-				print self.__plugin__ + " scrapeMusicCategoryHits " + repr(videoid) + " - " + repr(video)
 				videoid = videoid[0]
 				videoid = videoid[videoid.find("?v=") + 3:videoid.find("&")]
 				items.append(videoid)
-
+		
 		if self.__dbg__:
 			print self.__plugin__ + " scrapeMusicCategoryHits done"		
 		return (items, status)
 	
-
 	def searchDisco(self, params = {}):
 		get = params.get
 		if self.__dbg__:
