@@ -28,7 +28,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonF
 	
 	__feeds__ = sys.modules[ "__main__" ].__feeds__
 	__storage__ = sys.modules[ "__main__" ].__storage__
-        __table_name__ = "YouTube"
+	__table_name__ = "YouTube"
 	
 	def __init__(self):
 		self.urls['categories'] = "http://www.youtube.com/videos"
@@ -238,7 +238,8 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonF
 			url = self.urls["music"] + category
 			result = self._fetchPage({"link":url})
 
-			artists = self.parseDOM(result["content"], "div",  { "class": "browse-item artist-item"})
+			artists = self.parseDOM(result["content"], "div",  { "id": "artist-recs-container"})
+			print 
 			for artist in artists:
 				ahref = self.parseDOM(artist, "a", { "title": ".*?" }, ret = "href")
 				atitle = self.parseDOM(artist, "a", ret = "title")
@@ -257,7 +258,13 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonF
 						item["icon"] = "music"
 						item["thumbnail"] = athumb[i]
 						items.append(item)
-		
+
+#				tmp = self.parseDOM(result["content"], name = "div",{"id":"artist-recs-container"})
+#				artists = self.parseDOM(tmp, name = "h3")
+#				
+#				for artist in artist
+
+
 		if self.__dbg__:
 			print self.__plugin__ + " scrapeMusicCategoryArtists done"
 		return (items, status)
@@ -1036,10 +1043,10 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonF
 		per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
 				
 		if not get("page"):
-			if get("scraper") == "shows" and get("show"):
-				(result, status) = params["new_results_function"](params)
-			else:
-				(result, status) = self.__storage__.cacheFunction(params["new_results_function"], params)
+			#if get("scraper") == "shows" and get("show"):
+			(result, status) = params["new_results_function"](params)
+#			else:
+#				(result, status) = self.__storage__.cacheFunction(params["new_results_function"], params)
 			
 			if self.__dbg__:
 				print self.__plugin__ + " paginator new result " + str(repr(result))[0:50]
