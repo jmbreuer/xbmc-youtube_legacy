@@ -239,7 +239,6 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonF
 			result = self._fetchPage({"link":url})
 
 			artists = self.parseDOM(result["content"], "div",  { "id": "artist-recs-container"})
-			print 
 			for artist in artists:
 				ahref = self.parseDOM(artist, "a", { "title": ".*?" }, ret = "href")
 				atitle = self.parseDOM(artist, "a", ret = "title")
