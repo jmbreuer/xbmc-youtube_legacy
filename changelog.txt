@@ -1,5 +1,4 @@
 [B]TODO:[/B]
-- Lookinto annotations placement again, new videos look wierd [2.7]
 - Proper resolutions for rtmp. <-- Henrik: HUH?
 - Scrape Education. [2.7]
 - Ignore vp8 files(if doable) [3.0 (baring dharma support)]
