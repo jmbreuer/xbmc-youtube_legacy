@@ -272,7 +272,7 @@ class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonFun
 		pword = self.__settings__.getSetting( "user_password" )
 
 		if pword == "":
-			pword = self.getUserInput(self.__language__(30628), True)
+			pword = self.getUserInput(self.__language__(30628), hidden = True)
 
 		if len(galx) == 0 or len(cont) == 0 or len(uilel) == 0 or len(dsh) == 0 or len(rmShown) == 0 or uname == "" or pword == "":
 			if self.__dbg__:
