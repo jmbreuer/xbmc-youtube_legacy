@@ -176,6 +176,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonFu
 		dom = parseString(xml)
 		entries = dom.getElementsByTagName("annotation")
 		result = ""
+		ssa_fixes = []
 		style_template = "Style: annot%s,Arial,%s,&H%s&,&H%s&,&H%s&,&H%s&,0,0,3,3,0,1,0,0,0,0,0\r\n"
 		styles_count = 0
 		append_style = ""
@@ -229,9 +230,9 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonFu
 							if cnode.item(0):
 								start = cnode.item(0).getAttribute("t")
 							if cnode.item(1):
-								dur = cnode.item(1).getAttribute("t")
+								end = cnode.item(1).getAttribute("t")
 						
-						if start and dur and style != "highlightText":
+						if start and end and style != "highlightText":
 							marginV = 1280 * float(cnode.item(0).getAttribute("y")) / 100
 							marginV += 1280 * float(cnode.item(0).getAttribute("h")) / 100
 							marginV = 1280 - int(marginV)
@@ -241,10 +242,17 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonFu
 							marginR = 800 - marginL - int( (800 * float(cnode.item(0).getAttribute("w")) / 100) ) - 15
 							if marginR < 0:
 								marginR = 0
-							result += "Dialogue: Marked=%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\r\n" % ( "0", start, dur, style, "Name", marginL, marginR, marginV, "", text )
+							result += "Dialogue: Marked=%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\r\n" % ( "0", start, end, style, "Name", marginL, marginR, marginV, "", text )
+							ssa_fixes.append( [start, end] )
 				else:
 					if self.__dbg__:
 						print self.__plugin__ + " transformAnnotationToSSA wrong type"
+		# Fix errors in the SSA specs.
+		if len(ssa_fixes) > 0:
+			for a_start, a_end in ssa_fixes:
+				for b_start, b_end in ssa_fixes:
+					if time.strptime(a_end[0:a_end.rfind(".")], "%H:%M:%S") < time.strptime(b_start[0:b_start.rfind(".")], "%H:%M:%S"):
+						result += "Dialogue: Marked=0,%s,%s,Default,Name,0000,0000,0000,,\r\n" % ( a_end, b_start )
 
 		return ( result, append_style)
 		
