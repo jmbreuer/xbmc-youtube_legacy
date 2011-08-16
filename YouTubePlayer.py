@@ -239,6 +239,8 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonFu
 							marginL = int((800 * float(cnode.item(0).getAttribute("x")) / 100) )
 							marginL += 5
 							marginR = 800 - marginL - int( (800 * float(cnode.item(0).getAttribute("w")) / 100) ) - 15
+							if marginR < 0:
+								marginR = 0
 							result += "Dialogue: Marked=%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\r\n" % ( "0", start, dur, style, "Name", marginL, marginR, marginV, "", text )
 				else:
 					if self.__dbg__:
