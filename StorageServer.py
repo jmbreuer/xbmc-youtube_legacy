@@ -26,7 +26,7 @@ except: import sqlite3
 
 class StorageServer():
 	__plugin__ = "StorageClient"
-	__dbg__ = 4
+	__dbg__ = 1
 	
 	__path__ = os.path.join( xbmc.translatePath( "special://database" ), 'commoncache.db')
 	__socket__ = ""
