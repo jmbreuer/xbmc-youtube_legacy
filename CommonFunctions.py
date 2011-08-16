@@ -32,7 +32,7 @@ class CommonFunctions():
 	else:
 		__socket__ = os.path.join( xbmc.translatePath( "special://temp" ), 'commoncache.socket')
 	__store_in_settings__ = False
-	__disable_cache__ = False
+	__disable_cache__ = True
 	__soccon__ = False
 	__table_name__ = False
 

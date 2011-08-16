@@ -92,7 +92,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonF
 		if self.__dbg__:
 			print self.__plugin__ + " scrapeTrailersListFormat Done"
 		return (yobjects, status)
-	
+		
 #=================================== Categories  ============================================
 	def scrapeCategoriesGrid(self, params = {}):
 		get = params.get
@@ -113,6 +113,9 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonF
 		videos = self.parseDOM(result["content"], "div", { "id": "browse-video-data"})
 		if len(videos) == 0:
 			videos = self.parseDOM(result["content"], "div", attrs= { "class": "most-viewed-list paginated"})
+
+		if len(videos) == 0: # Videos from education.
+			videos = self.parseDOM(result["content"], "div", attrs= { "class": "ytg-fl browse-content"})
 		
 		items = []
 		if (len(videos) > 0):
@@ -428,6 +431,143 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonF
 			print self.__plugin__ + " scrapeLiveNow Done"
 		return (videos, result["status"])
 				
+#=================================== Eduction ============================================
+	def scrapeEducationCategories(self, params = {}):
+		get = params.get
+		if self.__dbg__:
+			print self.__plugin__ + " scrapeEducationCategories"
+
+		#url = self.urls[get("scraper")]
+		url = "http://www.youtube.com/education?hl=en&p=1"
+		result = self._fetchPage({"link": url})
+		
+		categories = self.parseDOM(result["content"], "div", { "id": "browse-filter-menu-0"})
+		items = []
+
+		if len(categories) > 0:
+			ahref = self.parseDOM(categories, "a", ret = "href" )
+			atitle = self.parseDOM(categories, "a" )
+
+			for i in range(0 , len(ahref)):
+				item = {}
+
+				item['Title'] = atitle[i]
+				show_url = ahref[i]
+				show_url = show_url.replace("/education?category=", "")
+				show_url = urllib.quote_plus(show_url)
+				item['subcategory'] = show_url
+				
+				item['icon'] = "feeds"
+				item['scraper'] = "education"
+
+				items.append(item)
+		
+		if self.__dbg__:
+			print self.__plugin__ + " scrapeEducationCategories Done"
+		return (items, result["status"])
+
+	def scrapeEducationSubCategories(self, params = {}):
+		get = params.get
+		if self.__dbg__:
+			print self.__plugin__ + " scrapeEducationSubCategories"
+
+		#url = self.urls[get("scraper")]
+		url = "http://www.youtube.com/education?category=University/Arts/Architecture"
+		result = self._fetchPage({"link": url})
+		
+		categories = self.parseDOM(result["content"], "div", { "id": "browse-filter-menu-1"})
+		items = []
+
+		if len(categories) > 0:
+			ahref = self.parseDOM(categories, "a", ret = "href" )
+			atitle = self.parseDOM(categories, "a" )
+
+			for i in range(0 , len(ahref)):
+				item = {}
+
+				item['Title'] = atitle[i]
+				show_url = ahref[i]
+				show_url = show_url.replace("/education?category=", "")
+				show_url = urllib.quote_plus(show_url)
+				item['subcategory'] = show_url
+				#item['subcategory'] = "XXXXXXXXXXXXX"
+				item['videos'] = "true"
+				item['icon'] = "feeds"
+				item['scraper'] = "education"
+
+				items.append(item)
+		
+		if self.__dbg__:
+			print self.__plugin__ + " scrapeEducationSubCategories Done : " + repr(items)
+		return (items, result["status"])
+
+	def scrapeEducationCourse(self, params = {}):
+		get = params.get
+		if self.__dbg__:
+			print self.__plugin__ + " scrapeEducationCourse"
+
+		#url = self.urls[get("scraper")]
+		url = "http://www.youtube.com/course?list=PL59C08AE05E752758&category=University/Science/Biology/Cell%20Biology"
+		result = self._fetchPage({"link": url})
+		
+		categories = self.parseDOM(result["content"], "li", { "class": " yt-uix-expander"})
+		items = []
+
+		if len(categories) > 0:
+			ahref = self.parseDOM(categories, "a", ret = "href" )
+			atitle = self.parseDOM(categories, "a" )
+
+			for i in range(0 , len(ahref)):
+				item = {}
+
+				item['Title'] = atitle[i]
+				show_url = ahref[i]
+				show_url = show_url.replace("/education?category=", "")
+				show_url = urllib.quote_plus(show_url)
+				item['subcategory'] = show_url
+				#item['subcategory'] = "XXXXXXXXXXXXX"
+				item['videos'] = "true"
+				item['icon'] = "feeds"
+				item['scraper'] = "education"
+
+				items.append(item)
+		
+		if self.__dbg__:
+			print self.__plugin__ + " scrapeEducationCourse Done : " + repr(items)
+		return (items, result["status"])
+
+	def scrapeEducationVideos(self, params = {}):
+		get = params.get
+		if self.__dbg__:
+			print self.__plugin__ + " scrapeEducationVideos: "
+		
+		#url = self.createUrl(params)
+		url = "http://www.youtube.com/course?list=PL59C08AE05E752758&category=University/Science/Biology/Cell%20Biology"
+		result = self._fetchPage({"link":url})
+
+		next = "false"
+		pagination = self.parseDOM(result["content"], "div", attrs = { "class": "yt-uix-pager"})
+
+		if (len(pagination) > 0):
+			tmp = str(pagination)
+			if (tmp.find("Next") > 0):
+				next = "true"
+		
+		videos = self.parseDOM(result["content"], "div", attrs= { "class": "ytg-fl browse-content"})
+		
+		items = []
+		if (len(videos) > 0):
+			links = self.parseDOM(videos, "a", ret = "href")
+			for link in links:
+				if (link.find("/watch?v=") != -1):
+					link = link[link.find("=") + 1:]
+				if (link.find("&") > 0):
+					link = link[:link.find("&")]
+				items.append(link)
+		if self.__dbg__:
+			print self.__plugin__ + " scrapeEducationVideos done " + repr(items)
+		return (items, result["status"])
+				
 #=================================== User Scraper ============================================
 	
 	def scrapeRecommended(self, params = {}):
@@ -546,6 +686,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonF
 		# otherwise a paginated list of video items is returned
 
 	def scrapeShow(self, params = {}):
+
 		get = params.get
 		if self.__dbg__:
 			print self.__plugin__ + " scrapeShow"
@@ -826,12 +967,13 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonF
 				function = self.scrapeMovieSubCategory
 		
 		if get("scraper") == "education":
+			params["folder"] = "true"
 			function = self.scrapeEducationCategories
-			if get("category") and not get("subcategory"):
+			if ( get("category") and get("subcategory") ): # or True:
 				function = self.scrapeEducationSubCategories
-			
-			if get("subcategory") and get("category"):
-				function = self.scrapeEducationVideos
+			if ( get("category") and get("course") ):# or True:
+				del(params["folder"])
+				function = self.scrapeEducationCourse # This is broken
 			
 		if get("scraper") == "categories" and get("category"):
 			params["batch"] = "true"
