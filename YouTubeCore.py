@@ -722,7 +722,6 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions):
 			
 			overlay = self.__storage__.retrieveValue("vidstatus-" + video['videoid'] )
 			if overlay:
-				print self.__plugin__ + " _getvideoinfo videoid set to false XXXX XXXX : " + repr(overlay)
 				video['Overlay'] = int(overlay)
 			
 			if video['videoid'] == "false":

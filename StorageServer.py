@@ -26,7 +26,7 @@ except: import sqlite3
 
 class StorageServer():
 	__plugin__ = "StorageClient"
-	__dbg__ = 1
+	__dbg__ = 4
 	
 	__path__ = os.path.join( xbmc.translatePath( "special://database" ), 'commoncache.db')
 	__socket__ = ""
@@ -34,6 +34,8 @@ class StorageServer():
 	__sql2__ = False
 	__sql3__ = False
 	__daemon_start_time__ = time.time()
+	__idle__ = 3
+
 	def startDB(self):
 		try:
 			self.sql2 = False
@@ -85,13 +87,12 @@ class StorageServer():
 		sock.bind(self.__socket__)
 		sock.listen(1)
 		sock.setblocking(0)
-		#socket.setdefaulttimeout(15)
 		
 		idle_since = time.time()
 		waiting = 0
 		while not xbmc.abortRequested:
 			if waiting == 0 :
-				if self.__dbg__ > 1:
+				if self.__dbg__ > 0:
 					print self.__plugin__ + " Daemon accepting"
 				waiting = 1
 			try:
@@ -100,10 +101,10 @@ class StorageServer():
 			except socket.error, e:
 				if e.errno == 11 or e.errno == 10035 or e.errno == 35:
 					# There has to be a better way to accomplish this.
-					if idle_since + 5 < time.time():
+					if idle_since + self.__idle__ < time.time():
 						if waiting == 1:
 							if self.__dbg__ > 0:
-								print self.__plugin__ + " Daemon has been idle for 10 seconds. Going to sleep. zzzzzzzz "
+								print self.__plugin__ + " Daemon has been idle for %s seconds. Going to sleep. zzzzzzzz " % self.__idle__
 						time.sleep(0.5)
 						waiting = 2
 					continue
@@ -111,6 +112,7 @@ class StorageServer():
 					print self.__plugin__ + " Daemon EXCEPTION : " + repr(e)
 
 			if waiting:
+				print self.__plugin__ + " Daemon continue : " + repr(waiting)
 				continue
 
 			if self.__dbg__ > 1:

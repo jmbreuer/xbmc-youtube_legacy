@@ -1,7 +1,5 @@
 [B]TODO:[/B]
 - Lookinto annotations placement again, new videos look wierd [2.7]
-- add setting to control if download dialog is visible during playback [2.7]
-- ensure that dialog is visible if user "tab's" out of playback [2.7]
 - Proper resolutions for rtmp. <-- Henrik: HUH?
 - Scrape Education. [2.7]
 - Movie downloads to database. <-- Huh?

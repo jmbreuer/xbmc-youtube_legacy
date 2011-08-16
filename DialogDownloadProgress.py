@@ -179,26 +179,28 @@ class Window:
 		self.label	  = None
 		self.progress   = None
 
-	def setupWindow( self, visible = True ):
+	def setupWindow( self):
 		error = 0
 		# get the id for the current 'active' window as an integer.
 		# http://wiki.xbmc.org/index.php?title=Window_IDs
 		try: currentWindowId = xbmcgui.getCurrentWindowId()
 		except: currentWindowId = self.window
 
-		if hasattr( currentWindowId, "__int__" ) and currentWindowId != self.windowId and visible:
+		if hasattr( currentWindowId, "__int__" ) and currentWindowId != self.windowId:
 			self.removeControls()
 			self.windowId = currentWindowId
 			self.window = xbmcgui.Window( self.windowId )
-			if visible:
-				self.initialize()
+			print " XXXXXXXXXXXXXXXXXXXXXXXX 1 INIT"
+			self.initialize()
 
-		if not self.window or not hasattr( self.window, "addControl" ) or not visible:
+		if not self.window or not hasattr( self.window, "addControl" ):
+			print " XXXXXXXXXXXXXXXXXXXXXXXX 2 REMOVE"
 			self.removeControls()
-			if visible:
-				error = 1
+			error = 1
 		if error:
+			print " XXXXXXXXXXXXXXXXXXXXXXXX 3 ERROR "
 			raise xbmcguiWindowError( "xbmcgui.Window(%s)" % repr( currentWindowId ) )
+
 		
 		#self.window.setProperty( "DialogDownloadProgress.IsAlive", "true" )
 
@@ -270,7 +272,7 @@ class DownloadProgress( Window ):
 
 	def update( self, percent=0, heading="", label="" ):
 		player = xbmc.Player()
-		self.setupWindow(player.isPlaying() == 0)
+		self.setupWindow()
 
 		if heading and hasattr( self.heading, "setLabel" ):
 			# set heading

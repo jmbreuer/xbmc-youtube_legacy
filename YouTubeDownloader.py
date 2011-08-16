@@ -118,8 +118,7 @@ class YouTubeDownloader(YouTubeUtils.YouTubeUtils):
 		
 		if con.info().getheader('Content-Length').strip():			
 			total_size = int(con.info().getheader('Content-Length').strip())	
-			chunk_size = int(total_size / 100) # We only want 100 updates of the status bar.
-
+			chunk_size = int(total_size / 200) # We only want 200 updates of the status bar.
 		try:
 			bytes_so_far = 0
 			
