@@ -503,7 +503,11 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonF
 		result = self._fetchPage({"link":url})
 			
 		videos = re.compile('<a href="/watch\?v=(.*)&amp;feature=sh_e_sl&amp;list=SL"').findall(result["content"])
-			
+		if len(videos) == 0:
+			temp_videos = self.parseDOM(result["content"], "div", attrs = { "class": "entity-video-item-content" } ) 
+			temp_videos = self.parseDOM(temp_videos, "a", ret = "href")
+			for vid in temp_videos:
+				videos.append(vid[vid.find("v=") + 2 : vid.find("&", vid.find("v="))])
 
 		nexturl = self.parseDOM(result["content"], "button", { "class": " yt-uix-button" }, ret = "data-next-url")
 		print "smoker "+ repr(nexturl)
@@ -535,7 +539,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonF
 						start += 20
 		
 		if self.__dbg__:
-			print self.__plugin__ + " scrapeShowEpisodes done"
+			print self.__plugin__ + " scrapeShowEpisodes done "
 		return (videos, result["status"])
 		
 		# If the show contains more than one season the function will return a list of folder items,
@@ -1035,10 +1039,10 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonF
 		per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
 				
 		if not get("page"):
-			#if get("scraper") == "shows" and get("show"):
-			(result, status) = params["new_results_function"](params)
-#			else:
-#				(result, status) = self.__storage__.cacheFunction(params["new_results_function"], params)
+			if get("scraper") == "shows" and get("show"):
+				(result, status) = params["new_results_function"](params)
+			else:
+				(result, status) = self.__storage__.cacheFunction(params["new_results_function"], params)
 			
 			if self.__dbg__:
 				print self.__plugin__ + " paginator new result " + str(repr(result))[0:50]

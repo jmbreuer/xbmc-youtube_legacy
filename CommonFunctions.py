@@ -84,7 +84,7 @@ class CommonFunctions():
 					self.sqlSet("cache" + name, repr(cache))
 
 			if ret_val:
-				print self.__plugin__ + " _cacheFunction returning : " + name # + repr(ret_val)
+				print self.__plugin__ + " _cacheFunction returning : " + name #+ " - " + str(len(ret_val)) + repr(ret_val))
 				return ret_val
 
 		print self.__plugin__ + " _cacheFunction Error " 

@@ -273,7 +273,8 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions):
 				if temp_objs[index]:
 					#print self.__plugin__ + " XXXXXXXXXX " + temp_objs[index]
 					ytobjects.append(eval(temp_objs[index]))
-			elif videoid:
+					continue
+			if videoid:
 				video_request +=	"<entry> \n <id>http://gdata.youtube.com/feeds/api/videos/" + videoid+ "</id>\n</entry> \n"
 				if i == 50:
 					final_request = request_start + video_request + request_end
