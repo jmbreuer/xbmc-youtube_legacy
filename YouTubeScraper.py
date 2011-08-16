@@ -53,7 +53,9 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonF
 		self.urls['watch_later'] = "http://www.youtube.com/my_watch_later_list"
 		self.urls['liked_videos'] = "http://www.youtube.com/my_liked_videos"
 		self.urls['music'] = "http://www.youtube.com/music"
-		self.urls['artist'] = "http://www.youtube.com/artist?a=%s&feature=artist"	
+		self.urls['artist'] = "http://www.youtube.com/artist?a=%s&feature=artist"
+		self.urls['education'] = "http://www.youtube.com/education"
+		self.urls['education_category'] = "http://www.youtube.com/education?category=%s"
 		
 #=================================== Trailers ============================================
 	def scrapeTrailersListFormat (self, params = {}):
@@ -438,7 +440,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonF
 			print self.__plugin__ + " scrapeEducationCategories"
 
 		#url = self.urls[get("scraper")]
-		url = "http://www.youtube.com/education?hl=en&p=1"
+		url = self.createUrl(params)
 		result = self._fetchPage({"link": url})
 		
 		categories = self.parseDOM(result["content"], "div", { "id": "browse-filter-menu-0"})
@@ -470,8 +472,8 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonF
 		if self.__dbg__:
 			print self.__plugin__ + " scrapeEducationSubCategories"
 
-		#url = self.urls[get("scraper")]
-		url = "http://www.youtube.com/education?category=University/Arts/Architecture"
+		url = self.createUrl(params)
+#		url = "http://www.youtube.com/education?category=University/Arts/Architecture"
 		result = self._fetchPage({"link": url})
 		
 		categories = self.parseDOM(result["content"], "div", { "id": "browse-filter-menu-1"})
@@ -1013,7 +1015,11 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonF
 					url = url + "&s=" + get("season")
 		
 		if (get("scraper") == "education"):
-			url = "myfirsturl"
+			url = self.urls["education"]
+			if get("category"):
+				url = self.urls["education_category"] % get("category")
+			if get("subcategory"):
+				url = self.urls["education_category"] % get("subcategory")
 				
 		if (get("scraper") == "movies"):
 			if (get("category")):
