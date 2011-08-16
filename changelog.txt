@@ -2,7 +2,6 @@
 - Lookinto annotations placement again, new videos look wierd [2.7]
 - Proper resolutions for rtmp. <-- Henrik: HUH?
 - Scrape Education. [2.7]
-- Movie downloads to database. <-- Huh?
 - Ignore vp8 files(if doable) [3.0 (baring dharma support)]
 
 [B]Errata[/B]
