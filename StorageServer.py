@@ -33,7 +33,7 @@ class StorageServer():
 	__clientscoket__ = False
 	__sql2__ = False
 	__sql3__ = False
-
+	__daemon_start_time__ = time.time()
 	def startDB(self):
 		try:
 			self.sql2 = False
@@ -252,12 +252,10 @@ class StorageServer():
 			print self.__plugin__ + " lock " + name
 		locked = True
 		curlock = self.sqlGet(table, name)
-		if self.__dbg__ > 0:
-			print self.__plugin__ + " lock curlock " + repr(curlock)
 		if curlock.strip():
-			if float(curlock) + 10 < time.time():
+			if float(curlock) < self.__daemon_start_time__:
 				if self.__dbg__ > 0:
-					print self.__plugin__ + " lock was older than 10 seconds, considered stale, removing"
+					print self.__plugin__ + " lock removing stale lock."
 				if self.sql2:
 					self.__curs__.execute("DELETE FROM " + table + " WHERE name = %s", ( name, ) )
 				elif self.sql3:
@@ -273,10 +271,12 @@ class StorageServer():
 			elif self.sql3:
 				self.__curs__.execute("INSERT INTO " + table + " VALUES ( ? , ? )", ( name, time.time()) )
 			self.__conn__.commit()
+			if self.__dbg__ > 0:
+				print self.__plugin__ + " lock locked: " + name
 			return "true"
 
 		if self.__dbg__ > 0:
-			print self.__plugin__ + " lock done"
+			print self.__plugin__ + " lock failed for : " + name
 		return "false"
 
 	def unlock(self, table, name):
