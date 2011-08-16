@@ -164,39 +164,72 @@ class CommonFunctions():
 
 		return connected
 
+	def sqlSetMulti(self, name, data):
+		if self.__store_in_settings__:
+			print self.__plugin__ + " sqlSetMulti ( in settings ) " + name
+			self.__settings__.setSetting(name, data)
+		else:
+			#print self.__plugin__ + " sqlSetMulti " + name
+			if self.sqlConnect():
+				temp = repr({ "action": "set_multi", "table": self.__table_name__, "name": name, "data": data})
+				storage_server = StorageServer.StorageServer()
+				res = storage_server.send(self.__soccon__, temp)
+				#print self.__plugin__ + " sqlset GOT " + repr(res)
+
+	def sqlGetMulti(self, name, items):
+		if self.__store_in_settings__:
+			#print self.__plugin__ + " sqlGetMulti ( from settings ) " + name + repr(self.__store_in_settings__)
+			return self.__settings__.getSetting(name)
+		else:
+			#print self.__plugin__ + " sqlGetMulti " + name
+			if self.sqlConnect():
+				storage_server = StorageServer.StorageServer()
+				#print self.__plugin__ + " sqlGetMulti " + name 
+				storage_server.send(self.__soccon__, repr({ "action": "get_multi", "table": self.__table_name__, "name": name, "items": items}))
+				#print self.__plugin__ + " sqlGetMulti - receive "
+				res = storage_server.recv(self.__soccon__)
+
+				#print self.__plugin__ + " sqlGetMulti res : " + str(len(res))
+				if res:
+					res = eval(res.strip())
+					if res == " ":# We return " " as nothing.
+						return ""
+					else:
+						return res
+
+		return ""
+
 	def sqlSet(self, name, data):
 		if self.__store_in_settings__:
 			print self.__plugin__ + " sqlSet ( in settings ) " + name
 			self.__settings__.setSetting(name, data)
 		else:
-			print self.__plugin__ + " sqlSet " + name
+			#print self.__plugin__ + " sqlSet " + name
 			if self.sqlConnect():
 				temp = repr({ "action": "set", "table": self.__table_name__, "name": name, "data": data})
 				storage_server = StorageServer.StorageServer()
 				res = storage_server.send(self.__soccon__, temp)
-				print self.__plugin__ + " sqlset GOT " + repr(res)
+				#print self.__plugin__ + " sqlset GOT " + repr(res)
 
 	def sqlGet(self, name):
 		if self.__store_in_settings__:
 			print self.__plugin__ + " sqlGet ( from settings ) " + name + repr(self.__store_in_settings__)
 			return self.__settings__.getSetting(name)
 		else:
-			print self.__plugin__ + " sqlGet " + name
+			#print self.__plugin__ + " sqlGet " + name
 			if self.sqlConnect():
 				storage_server = StorageServer.StorageServer()
-				print self.__plugin__ + " sqlGet " + name 
+				#print self.__plugin__ + " sqlGet " + name 
 				storage_server.send(self.__soccon__, repr({ "action": "get", "table": self.__table_name__, "name": name}))
-				print self.__plugin__ + " sqlGet - receive "
+				#print self.__plugin__ + " sqlGet - receive "
 				res = storage_server.recv(self.__soccon__)
 
-				print self.__plugin__ + " sqlGet res : " + str(len(res))
+				#print self.__plugin__ + " sqlGet res : " + str(len(res))
 				if res:
 					res = eval(res.strip())
 					return res.strip() # We return " " as nothing. Strip it out.
 
 		return ""
-
-
 
 	def stripTags(self, html):
 		sub_start = html.find("<")

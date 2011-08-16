@@ -140,7 +140,7 @@ class YouTubeDownloader(YouTubeUtils.YouTubeUtils):
 				else:
 					videos = []
 
-				heading = "[%s] %s - %s" % ( str(len(videos)), self.__language__(30624), str(percent))
+				heading = "[%s] %s - %s%%" % ( str(len(videos)), self.__language__(30624), str(percent))
 				self.dialog.update(percent=percent, heading = heading, label=video["Title"])
 
 				if not chunk:
@@ -157,5 +157,5 @@ class YouTubeDownloader(YouTubeUtils.YouTubeUtils):
 		
 		xbmcvfs.rename(filename_incomplete, filename_complete)
 		self.dialog.update(heading = self.__language__(30604), label=video["Title"])
-		self.__settings__.setSetting( "vidstatus-" + video['videoid'], "1" )
+		self.__storage__.storeValue( "vidstatus-" + video['videoid'], "1" )
 		return ( video, 200 )

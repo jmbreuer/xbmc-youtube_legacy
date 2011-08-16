@@ -299,7 +299,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonFu
 				print self.__plugin__ + " removing video from watch later playlist"
 			self.remove_from_playlist(params)
 			
-		self.__settings__.setSetting( "vidstatus-" + video['videoid'], "7" )
+		self.__storage__.storeValue( "vidstatus-" + video['videoid'], "7" )
 		#self.__storage__.cleanCache()
 
 	def getVideoUrlMap(self, pl_obj, video = {}):
@@ -332,7 +332,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonFu
 			video["stream_map"] = "true"
 			fmt_url_map = html.split('&conn=')
 		
-		print self.__plugin__ + " getVideoUrlMap Searching for fmt_url_map 2: "  + repr(fmt_url_map)
+		#print self.__plugin__ + " getVideoUrlMap Searching for fmt_url_map 2: "  + repr(fmt_url_map)
 		
 		if len(fmt_url_map) > 0:
 			for index, fmt_url in enumerate(fmt_url_map):
@@ -398,8 +398,11 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonFu
 			
 	def getInfo(self, params):
 		get = params.get
-		video = {}
-		
+		video = self.sqlGet("videoidcache" + get("videoid"))
+		if len(video) > 0:
+			print self.__plugin__ + " getInfo returning cache "
+			return ( eval(video), 200)
+
 		result = self._fetchPage({"link": self.urls["video_info"] % get("videoid"), "api": "true"})
 
 		if result["status"] == 200:
@@ -407,16 +410,17 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonFu
 		
 			if len(result) == 0:
 				if self.__dbg__:
-					print self.__plugin__ + " Couldn't parse API output, YouTube doesn't seem to know this video id?"
+					print self.__plugin__ + " getInfo - Couldn't parse API output, YouTube doesn't seem to know this video id?"
 				video["apierror"] = self.__language__(30608)
 				return (video, 303)
 		else:
 			if self.__dbg__:
-				print self.__plugin__ + " Got API Error from YouTube!"
+				print self.__plugin__ + " getInfo - Got API Error from YouTube!"
 			video["apierror"] = result["content"]
 			
 			return (video,303)
 		video = video[0]
+		self.sqlSet("videoidcache" + get("videoid"), repr(video))
 		return (video, result["status"])
 	
 	def selectVideoQuality(self, links, params):
@@ -535,8 +539,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonFu
 		video = {}
 		links = []
 				
-		#(video, status) = self.getInfo(params)
-		(video, status) = self.__storage__.cacheFunction(self.getInfo, params)
+		(video, status) = self.getInfo(params)
 		
 		#Check if file has been downloaded locally and use that as a source instead
 		if (status == 200 and get("action","") != "download"):
@@ -594,7 +597,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonFu
 				data = result["content"].rfind("yt.setConfig", 0, data)
 				data = re.compile('yt.setConfig\((.*?PLAYER_CONFIG.*?)\);').findall(result["content"][data:].replace("\n", ""))
 				if len(data) > 0:
-					print self.__plugin__ + " _getVideoLinks trying website : " + repr(data)
+					#print self.__plugin__ + " _getVideoLinks trying website : " + repr(data)
 					player_object = json.loads(data[0].replace('\'PLAYER_CONFIG\'', '"PLAYER_CONFIG"'))
 			else:
 				data = self.parseDOM(result["content"], "embed", attrs = {"id": "movie_player" }, ret = "flashvars")

@@ -1065,7 +1065,8 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonF
 		if get("batch") == "thumbnails":
 			(result, status) = self.getBatchDetailsThumbnails(result, params)
 		elif get("batch"):
-			(result, status) = self.__storage__.cacheFunction(self.getBatchDetails, result, params)
+			#(result, status) = self.__storage__.cacheFunction(self.getBatchDetails, result, params)
+			(result, status) = self.getBatchDetails(result, params)
 		
 		if get("batch"):
 			del params["batch"]

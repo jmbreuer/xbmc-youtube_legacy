@@ -250,7 +250,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions):
 			ytobjects.append({'videoid': 'false'});
 		
 		return ( ytobjects, 200)
-	
+
 	def getBatchDetails(self, items, params = {}):
 		request_start = "<feed xmlns='http://www.w3.org/2005/Atom'\n xmlns:media='http://search.yahoo.com/mrss/'\n xmlns:batch='http://schemas.google.com/gdata/batch'\n xmlns:yt='http://gdata.youtube.com/schemas/2007'>\n <batch:operation type='query'/> \n"
 		request_end = "</feed>"
@@ -260,8 +260,20 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions):
 		ytobjects = []
 		status = 500
 		i = 1
-		for videoid in items:
-			if videoid:
+		## Call to cache
+		# Filter matches.
+		# Run the following for the missing.
+		# Update cache in the end.
+
+		temp_objs = self.sqlGetMulti("videoidcache", items)
+		#status = 200
+		#return ( ytobjects, status)
+		for index, videoid in enumerate(items):
+			if index < len(temp_objs):
+				if temp_objs[index]:
+					#print self.__plugin__ + " XXXXXXXXXX " + temp_objs[index]
+					ytobjects.append(eval(temp_objs[index]))
+			elif videoid:
 				video_request +=	"<entry> \n <id>http://gdata.youtube.com/feeds/api/videos/" + videoid+ "</id>\n</entry> \n"
 				if i == 50:
 					final_request = request_start + video_request + request_end
@@ -281,13 +293,21 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions):
 					i = 1
 				i+=1
 		
-		final_request = request_start + video_request + request_end
-		result = self._fetchPage({"link": "http://gdata.youtube.com/feeds/api/videos/batch", "api": "true", "request": final_request})
+		if i > 1:
+			final_request = request_start + video_request + request_end
+			result = self._fetchPage({"link": "http://gdata.youtube.com/feeds/api/videos/batch", "api": "true", "request": final_request})
 				
-		temp = self.getVideoInfo(result["content"], params)
-		ytobjects += temp
+			temp = self.getVideoInfo(result["content"], params)
+			ytobjects += temp
+
+			save_data = {}
+			for item in ytobjects:
+				save_data[item["videoid"]] = repr(item)
+			self.sqlSetMulti("videoidcache", save_data)
+
 		if len(ytobjects) > 0:
 			status = 200
+
 		return ( ytobjects, status)
 		
 	#===============================================================================
@@ -710,10 +730,14 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions):
 					print self.__plugin__ + " _getvideoinfo videoid set to false : " + repr(video)
 
 			ytobjects.append(video);
-		
 		if next:
 			self.addNextFolder(ytobjects,params)
 				
 		print self.__plugin__ + " _getvideoinfo Done: " + str(len(ytobjects)) #+ repr(ytobjects)
+		save_data = {}
+		for item in ytobjects:
+			if item.has_key("videoid"):
+				save_data[item["videoid"]] = repr(item)
+		self.sqlSetMulti("videoidcache", save_data)
 		return ytobjects;
 
