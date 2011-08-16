@@ -825,6 +825,14 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonF
 				del params["batch"]
 				function = self.scrapeMovieSubCategory
 		
+		if get("scraper") == "education":
+			function = self.scrapeEducationCategories
+			if get("category") and not get("subcategory"):
+				function = self.scrapeEducationSubCategories
+			
+			if get("subcategory") and get("category"):
+				function = self.scrapeEducationVideos
+			
 		if get("scraper") == "categories" and get("category"):
 			params["batch"] = "true"
 			function = self.scrapeCategoriesGrid
@@ -892,6 +900,9 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonF
 					url = self.urls["show_list"] + "?" + show + "&hl=en"
 				if (get("season")):
 					url = url + "&s=" + get("season")
+		
+		if (get("scraper") == "education"):
+			url = "myfirsturl"
 				
 		if (get("scraper") == "movies"):
 			if (get("category")):

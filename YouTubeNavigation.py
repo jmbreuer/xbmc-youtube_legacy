@@ -43,6 +43,7 @@ class YouTubeNavigation(YouTubeUtils.YouTubeUtils):
 				  {'Title':__language__( 30040 )  ,'path':"/root/explore/disco/new"					, 'thumbnail':"search"		   		, 'login':"false" , 'scraper':"search_disco"},
 				  {'Title':__language__( 30055 )  ,'path':"/root/explore/disco/top100"				, 'thumbnail':"discoball"		 	, 'login':"false" , 'scraper':"music_top100"},
 				  {'Title':__language__( 30039 )  ,'path':"/root/explore/disco/popular"				, 'thumbnail':"discoball"		 	, 'login':"false" , 'scraper':"disco_top_artist", 'folder':'true'},
+				  {'Title':__language__( 30057 )  ,'path':"/root/explore/education"					, 'thumbnail':"feeds"			 	, 'login':"false" , 'scraper':"education", 'folder':'true'},
 				  {'Title':__language__( 30001 )  ,'path':"/root/explore/feeds"						, 'thumbnail':"feeds"			 	, 'login':"false" },
 				  {'Title':__language__( 30009 )  ,'path':"/root/explore/feeds/discussed"			, 'thumbnail':"most"			 	, 'login':"false" , 'feed':"feed_discussed" },
 				  {'Title':__language__( 30010 )  ,'path':"/root/explore/feeds/linked"				, 'thumbnail':"most"			 	, 'login':"false" , 'feed':"feed_linked" },
