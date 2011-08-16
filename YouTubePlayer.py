@@ -176,7 +176,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonFu
 		dom = parseString(xml)
 		entries = dom.getElementsByTagName("annotation")
 		result = ""
-		style_template = "Style: annot%s,Arial,60,&H%s&,&H%s&,&H%s&,&H%s&,0,0,3,3,0,1,0,0,0,0,0\r\n"
+		style_template = "Style: annot%s,Arial,%s,&H%s&,&H%s&,&H%s&,&H%s&,0,0,3,3,0,1,0,0,0,0,0\r\n"
 		styles_count = 0
 		append_style = ""
 		for node in entries:
@@ -205,7 +205,12 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonFu
 							cnode = False
 
 						snode = node.getElementsByTagName("appearance")
+						ns_fsize = 60
 						if snode:
+							if snode.item(0).hasAttribute("textSize"):
+								ns_fsize = int(1.2 * (1280 * float(snode.item(0).getAttribute("textSize")) / 100) ) 
+							else:
+								ns_fsize = 60
 							ns_fcolor = snode.item(0).getAttribute("fgColor").replace("0x0000000000", "")
 							ns_fcolor = ns_fcolor[4:6] + ns_fcolor[2:4] + ns_fcolor[0:2]
 							ns_bcolor = snode.item(0).getAttribute("bgColor").replace("0x0000000000", "")
@@ -216,7 +221,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonFu
 							else:
 								ns_alpha = int(265 - (float(ns_alpha) * 100))
 								ns_alpha = hex(ns_alpha)[2:]
-							append_style += style_template % ( styles_count, ns_fcolor, ns_fcolor, ns_fcolor, ns_alpha + ns_bcolor )
+							append_style += style_template % ( styles_count, ns_fsize, ns_fcolor, ns_fcolor, ns_fcolor, ns_alpha + ns_bcolor )
 							style = "annot" + str(styles_count)
 							styles_count += 1
 
@@ -230,10 +235,11 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonFu
 							marginV = 1280 * float(cnode.item(0).getAttribute("y")) / 100
 							marginV += 1280 * float(cnode.item(0).getAttribute("h")) / 100
 							marginV = 1280 - int(marginV)
+							marginV += 5
 							marginL = int((800 * float(cnode.item(0).getAttribute("x")) / 100) )
-							if marginL > 10:
-								marginL -= 10
-							result += "Dialogue: Marked=%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\r\n" % ( "0", start, dur, style, "Name", marginL, "0000", marginV, "", text )
+							marginL += 5
+							marginR = 800 - marginL - int( (800 * float(cnode.item(0).getAttribute("w")) / 100) ) - 15
+							result += "Dialogue: Marked=%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\r\n" % ( "0", start, dur, style, "Name", marginL, marginR, marginV, "", text )
 				else:
 					if self.__dbg__:
 						print self.__plugin__ + " transformAnnotationToSSA wrong type"
