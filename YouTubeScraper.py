@@ -455,8 +455,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonF
 				show_url = ahref[i]
 				show_url = show_url.replace("/education?category=", "")
 				show_url = urllib.quote_plus(show_url)
-				item['subcategory'] = show_url
-				
+				item['category'] = show_url
 				item['icon'] = "feeds"
 				item['scraper'] = "education"
 
@@ -485,13 +484,11 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonF
 			for i in range(0 , len(ahref)):
 				item = {}
 
-				item['Title'] = atitle[i]
+				item['Title'] = self.replaceHtmlCodes(atitle[i])
 				show_url = ahref[i]
 				show_url = show_url.replace("/education?category=", "")
 				show_url = urllib.quote_plus(show_url)
-				item['subcategory'] = show_url
-				#item['subcategory'] = "XXXXXXXXXXXXX"
-				item['videos'] = "true"
+				item['course'] = show_url
 				item['icon'] = "feeds"
 				item['scraper'] = "education"
 
@@ -969,10 +966,12 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonF
 		if get("scraper") == "education":
 			params["folder"] = "true"
 			function = self.scrapeEducationCategories
-			if ( get("category") and get("subcategory") ): # or True:
+			if ( get("category")):
+				print "hit subcategory"
 				function = self.scrapeEducationSubCategories
-			if ( get("category") and get("course") ):# or True:
-				del(params["folder"])
+			if ( get("course") ):
+				params["batch"] = "true"
+				del params["folder"] 
 				function = self.scrapeEducationCourse # This is broken
 			
 		if get("scraper") == "categories" and get("category"):
