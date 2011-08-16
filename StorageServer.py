@@ -247,7 +247,7 @@ class StorageServer():
 		if self.__dbg__:
 			print self.__plugin__ + " lock " + name
 		locked = True
-		curlock = self.sqlGet(name)
+		curlock = self.sqlGet(table, name)
 		if self.__dbg__:
 			print self.__plugin__ + " lock curlock " + repr(curlock)
 		if curlock.strip():
