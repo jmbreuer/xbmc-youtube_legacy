@@ -456,7 +456,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonF
 				item['Title'] = atitle[i]
 				show_url = ahref[i]
 				show_url = show_url.replace("/education?category=", "")
-				show_url = urllib.quote_plus(show_url).replace("%2520", "%20")
+				show_url = urllib.quote_plus(show_url).replace("%25", "%")
 				item['category'] = show_url
 				item['icon'] = "feeds"
 				item['scraper'] = "education"
@@ -488,7 +488,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonF
 			item['Title'] = "Videos"
 			show_url = ahref[0]
 			show_url = show_url.replace("/education?category=", "")
-			show_url = urllib.quote_plus(show_url)
+			show_url = urllib.quote_plus(show_url).replace("%25", "%")
 			if show_url == "":
 				show_url = get("category")
 			item['videos'] = show_url
@@ -516,7 +516,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonF
 				item['Title'] = self.replaceHtmlCodes(atitle[i])
 				show_url = ahref[i]
 				show_url = show_url.replace("/education?category=", "")
-				show_url = urllib.quote_plus(show_url)
+				show_url = urllib.quote_plus(show_url).replace("%25", "%")
 				if show_url.count("%2F") > 1:
 					item["courses"] = show_url
 				else:
