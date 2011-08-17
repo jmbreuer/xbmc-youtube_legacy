@@ -456,7 +456,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonF
 				item['Title'] = atitle[i]
 				show_url = ahref[i]
 				show_url = show_url.replace("/education?category=", "")
-				show_url = urllib.quote_plus(show_url)
+				show_url = urllib.quote_plus(show_url).replace("%2520", "%20")
 				item['category'] = show_url
 				item['icon'] = "feeds"
 				item['scraper'] = "education"
