@@ -546,12 +546,15 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonF
 			if (tmp.find("Next") > 0):
 				next = "true"
 
-		items = []
-                categories = self.parseDOM(result["content"], "div", { "class": "ytg-fl browse-content"})
+		categories = self.parseDOM(result["content"], "div", { "class": "playlist-extra-thumb-outer "})
+		if len(categories) == 0:
+			categories = self.parseDOM(result["content"], "div", { "class": "ytg-fl browse-content"})
 
+		items = []
 		if len(categories) > 0:
 			ahref = self.parseDOM(categories, "a", attrs = { "href": "/course.*?", "title": ".*?" }, ret = "href" )
-			atitle = self.parseDOM(categories, "a", attrs = { "href": "/course.*?" }, ret = "title" )
+			atitle = self.parseDOM(result["content"], "a", attrs = { "href": "/course.*?" }, ret = "title" )
+			athumb = self.parseDOM(categories, "img", attrs = { "alt": "Thumbnail" }, ret = "data-thumb")
 
 			item = {}
 
@@ -575,11 +578,13 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonF
 				item['playlist'] = show_url
 				item['icon'] = "feeds"
 				item['scraper'] = "education"
-
+				item["thumbnail"] = athumb[i]
+				if item["thumbnail"].find("//") == 0:
+					item["thumbnail"] = "http:" + item["thumbnail"]
 				items.append(item)
 				
 		if self.__dbg__:
-			print self.__plugin__ + " scrapeEducationCourses done " 
+			print self.__plugin__ + " scrapeEducationCourses done : " + repr(items)
 		return (items, result["status"])
 
 	def scrapeEducationVideos(self, params = {}):
