@@ -267,7 +267,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonF
 						items.append(item)
 		
 		if self.__dbg__:
-			print self.__plugin__ + " scrapeMusicCategoryArtists done"
+			print self.__plugin__ + " scrapeMusicCategoryArtists done "
 		return (items, status)
 	
 	def scrapeMusicCategoryHits(self, params = {}):

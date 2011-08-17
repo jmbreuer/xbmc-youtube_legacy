@@ -75,6 +75,11 @@ class YouTubeUtils:
 	
 	# This function implements a horrible hack related to python 2.4's terrible unicode handling
 	def makeAscii(self, str):
+		req_version = (2,5)
+		cur_version = sys.version_info
+
+		if (cur_version[0] > req_version[0] or (cur_version[0] == req_version[0] and cur_version[1] >= req_version[1])):
+			return str
 		try:
 			return str.encode('ascii')
 		except:
