@@ -628,7 +628,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonF
 					link = link[:link.find("&")]
 				items.append(link)
 		if self.__dbg__:
-			print self.__plugin__ + " scrapeEducationVideos done " + repr(items)
+			print self.__plugin__ + " scrapeEducationVideos done " 
 		return (items, result["status"])
 				
 #=================================== User Scraper ============================================
