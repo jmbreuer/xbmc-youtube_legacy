@@ -245,11 +245,12 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonF
 			url = self.urls["music"] + category
 			result = self._fetchPage({"link":url})
 
-			artists = self.parseDOM(result["content"], "div",  { "id": "artist-recs-container"})
+			#artists = self.parseDOM(result["content"], "div",  { "id": "artist-recs-container"})
+			artists = self.parseDOM(result["content"], "div",  { "class": "browse-item collection-item browse-item-inline"})
 			for artist in artists:
-				ahref = self.parseDOM(artist, "a", { "title": ".*?" }, ret = "href")
+				ahref = self.parseDOM(artist, "a", attrs = { "title": ".*?" }, ret = "href")
 				atitle = self.parseDOM(artist, "a", ret = "title")
-				athumb = self.parseDOM(artist, "img", ret = "data-thumb")
+				athumb = self.parseDOM(artist, "img", attrs = { "alt": "Thumbnail"},  ret = "data-thumb")
 				if len(atitle) == len(ahref) == len(athumb) and len(ahref) > 0:
 					for i in range(0 , len(ahref)):
 						item = {}
