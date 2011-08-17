@@ -56,6 +56,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonF
 		self.urls['artist'] = "http://www.youtube.com/artist?a=%s&feature=artist"
 		self.urls['education'] = "http://www.youtube.com/education"
 		self.urls['education_category'] = "http://www.youtube.com/education?category=%s"
+		self.urls['playlist'] = "http://www.youtube.com/view_play_list?p=%s"
 		
 #=================================== Trailers ============================================
 	def scrapeTrailersListFormat (self, params = {}):
@@ -439,7 +440,6 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonF
 		if self.__dbg__:
 			print self.__plugin__ + " scrapeEducationCategories"
 
-		#url = self.urls[get("scraper")]
 		url = self.createUrl(params)
 		result = self._fetchPage({"link": url})
 		
@@ -473,7 +473,6 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonF
 			print self.__plugin__ + " scrapeEducationSubCategories"
 
 		url = self.createUrl(params)
-#		url = "http://www.youtube.com/education?category=University/Arts/Architecture"
 		result = self._fetchPage({"link": url})
 		
 		categories = self.parseDOM(result["content"], "div", { "id": "browse-filter-menu-1"})
@@ -482,15 +481,46 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonF
 		if len(categories) > 0:
 			ahref = self.parseDOM(categories, "a", ret = "href" )
 			atitle = self.parseDOM(categories, "a" )
+			
+			item = {}
 
-			for i in range(0 , len(ahref)):
+			item['Title'] = self.replaceHtmlCodes(atitle[0])
+			item['Title'] = "Videos"
+			show_url = ahref[0]
+			show_url = show_url.replace("/education?category=", "")
+			show_url = urllib.quote_plus(show_url)
+			if show_url == "":
+				show_url = get("category")
+			item['videos'] = show_url
+			item['icon'] = "feeds"
+			item['scraper'] = "education"
+				
+			items.append(item)
+
+			item = {}
+			item['Title'] = self.replaceHtmlCodes(atitle[0])
+			item['Title'] = "Courses"
+			show_url = ahref[0]
+			show_url = show_url.replace("/education?category=", "")
+			show_url = urllib.quote_plus(show_url)
+			if show_url == "":
+				show_url = get("category")
+			item['courses'] = show_url
+			item['icon'] = "feeds"
+			item['scraper'] = "education"
+				
+			items.append(item)
+			for i in range(1 , len(ahref)):
 				item = {}
 
 				item['Title'] = self.replaceHtmlCodes(atitle[i])
 				show_url = ahref[i]
 				show_url = show_url.replace("/education?category=", "")
 				show_url = urllib.quote_plus(show_url)
-				item['course'] = show_url
+				if show_url.count("%2F") > 1:
+					item["courses"] = show_url
+				else:
+					item['category'] = show_url
 				item['icon'] = "feeds"
 				item['scraper'] = "education"
 
@@ -500,13 +530,12 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonF
 			print self.__plugin__ + " scrapeEducationSubCategories Done : " + repr(items)
 		return (items, result["status"])
 
-	def scrapeEducationVideos(self, params = {}):
+	def scrapeEducationCourses(self, params = {}):
 		get = params.get
 		if self.__dbg__:
-			print self.__plugin__ + " scrapeEducationVideos: "
+			print self.__plugin__ + " scrapeEducationCourses: "
 		
-		#url = self.createUrl(params)
-		url = "http://www.youtube.com/course?list=PL59C08AE05E752758&category=University/Science/Biology/Cell%20Biology"
+		url = self.createUrl(params)
 		result = self._fetchPage({"link":url})
 
 		next = "false"
@@ -516,15 +545,75 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonF
 			tmp = str(pagination)
 			if (tmp.find("Next") > 0):
 				next = "true"
+
+		items = []
+                categories = self.parseDOM(result["content"], "div", { "class": "ytg-fl browse-content"})
+
+		if len(categories) > 0:
+			ahref = self.parseDOM(categories, "a", attrs = { "href": "/course.*?", "title": ".*?" }, ret = "href" )
+			atitle = self.parseDOM(categories, "a", attrs = { "href": "/course.*?" }, ret = "title" )
+
+			item = {}
+
+			item['Title'] = "Videos"
+			item['videos'] = get("courses")
+			item['icon'] = "feeds"
+			item['scraper'] = "education"
+				
+			items.append(item)
+
+			for i in range(1 , len(ahref)):
+				item = {}
+
+				item['Title'] = self.replaceHtmlCodes(atitle[i])
+				show_url = ahref[i]
+				show_url = show_url.replace("/education?category=", "")
+				if (show_url.find("list=") != -1):
+					show_url = show_url[show_url.find("list=") + 5:]
+				if (show_url.find("&") > 0):
+					show_url = show_url[:show_url.find("&")]
+				item['playlist'] = show_url
+				item['icon'] = "feeds"
+				item['scraper'] = "education"
+
+				items.append(item)
+				
+		if self.__dbg__:
+			print self.__plugin__ + " scrapeEducationCourses done " 
+		return (items, result["status"])
+
+	def scrapeEducationVideos(self, params = {}):
+		get = params.get
+		if self.__dbg__:
+			print self.__plugin__ + " scrapeEducationVideos: "
 		
+		url = self.createUrl(params)
+		result = self._fetchPage({"link":url})
 
+		next = "false"
+		pagination = self.parseDOM(result["content"], "div", attrs = { "class": "yt-uix-pager"})
 
-		categories = self.parseDOM(result["content"], "li", { "class": " yt-uix-expander"})
+		if (len(pagination) > 0):
+			tmp = str(pagination)
+			if (tmp.find("Next") > 0):
+				next = "true"
+
+		categories = self.parseDOM(result["content"], "li", attrs = { "class": " yt-uix-expander"})
+		if len(categories) == 0:
+			categories = self.parseDOM(result["content"], "div", attrs = { "class": "ytg-fl browse-content"})
+
+		if len(categories) == 0:
+			categories = self.parseDOM(result["content"], "li", attrs = { "class": "video"})
+			
 		items = []
 
 		if len(categories) > 0:
-			ahref = self.parseDOM(categories, "a", attrs = { "title": ".*?" }, ret = "href" )
-			ahref = self.parseDOM(categories, "a", ret = "href" )
+			#ahref = self.parseDOM(categories, "a", attrs = { "title": ".*?" }, ret = "href" )
+			#ahref = self.parseDOM(categories, "a", ret = "href" )
+			ahref = self.parseDOM(categories, "a", attrs = { "class": "ux-thumb-wrap contains-addto"}, ret = "href")
+			if len(ahref) == 0:
+				ahref = self.parseDOM(categories, "a", attrs = { "class": "tile-link-block video-tile.*?"}, ret = "href")
+			
 
 			for i in range(0 , len(ahref)):
 				link = ahref[i]
@@ -941,10 +1030,12 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonF
 			if ( get("category")):
 				print "hit subcategory"
 				function = self.scrapeEducationSubCategories
-			if ( get("course") ):
+			if ( get("courses") ):
+				function = self.scrapeEducationCourses
+			if ( get("playlist") or  get("videos") ):
 				params["batch"] = "true"
 				del params["folder"] 
-				function = self.scrapeEducationVideos # This is broken
+				function = self.scrapeEducationVideos
 			
 		if get("scraper") == "categories" and get("category"):
 			params["batch"] = "true"
@@ -1020,6 +1111,12 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonF
 				url = self.urls["education_category"] % get("category")
 			if get("subcategory"):
 				url = self.urls["education_category"] % get("subcategory")
+			if get("videos"):
+				url = self.urls["education_category"] % get("videos")
+			if get("courses"):
+				url = self.urls["education_category"] % get("courses")
+			if get("playlist"):
+				url = self.urls["playlist"] % get("playlist")
 				
 		if (get("scraper") == "movies"):
 			if (get("category")):
