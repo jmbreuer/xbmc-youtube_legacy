@@ -4,6 +4,22 @@
 '''
 abortRequested = False
 
+class Player():
+    def isPlaying(*args, **kwargs):
+        print "XBMC : Player->isPlaying : " + repr(args) + " - " + repr(kwargs)
+        return True
+
+
+    def setSubtitles(*args, **kwargs):
+        print "XBMC : Player->setSubtitles : " + repr(args) + " - " + repr(kwargs)
+        return True
+
+
+    def stop(*args, **kwargs):
+        print "XBMC : Player->Stop : " + repr(args) + " - " + repr(kwargs)
+        return True
+
+
 def translatePath(*args, **kwargs):
     print "XBMC : translatePath : " + repr(args) + " - " + repr(kwargs)
     return True
@@ -22,10 +38,6 @@ def getInfoLabel(*args, **kwargs):
 
 def executebuiltin(*args, **kwargs):
     print "XBMC : executebuiltin : " + repr(args) + " - " + repr(kwargs)
-    return True
-
-def Player(*args, **kwargs): # Needs to return something that can do ().setSubtitles
-    print "XBMC : Player : " + repr(args) + " - " + repr(kwargs)
     return True
 
 def PlayList(*args, **kwargs):
