@@ -28,6 +28,7 @@ __url__ = "www.xbmc.com"
 __settings__ = xbmcaddon.Addon(id='plugin.video.youtube.beta')
 __language__ = __settings__.getLocalizedString
 __dbg__ = __settings__.getSetting("debug") == "true"
+__dbglevel__ = 1
 
 # plugin structure 
 __feeds__ = ""

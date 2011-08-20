@@ -274,13 +274,13 @@ class CommonFunctions():
 		# ret <- Return content of element
 		# Default return <- Returns a list with the content
 		
-		if self.__dbg__:
+		if self.__dbg__ and self.__dbglevel__ > 1:
 			print self.__plugin__ + " parseDOM : " + repr(name) + " - " + repr(attrs) + " - " + repr(ret) + " - " + str(type(html))
 		if type(html) == type([]):
 			html = "".join(html)
 		html = html.replace("\n", "")
 		if not name.strip():
-			if self.__dbg__:
+			if self.__dbg__ :
 				print self.__plugin__ + " parseDOM - Missing tag name "
 			return ""
 
@@ -310,22 +310,25 @@ class CommonFunctions():
 					test.reverse()
 					for i in test: # Delete anything missing from the next list.
 						if not lst[i] in lst2:
-							if self.__dbg__:
+							if self.__dbg__ and self.__dbglevel__ > 1:
 								print self.__plugin__ + " parseDOM Purging mismatch " + str(len(lst)) + " - " + repr(lst[i])
 							del(lst[i])
 
 		if len(lst) == 0 and attrs == {}:
-			#print self.__plugin__ + " parseDOM no list found, making one on just the element name"
+			if self.__dbg__ and self.__dbglevel__ > 1:
+				print self.__plugin__ + " parseDOM no list found, making one on just the element name"
 			lst = re.compile('(<' + name + '[^>]*?>)').findall(html)
 
 		if ret != False:
-			#print self.__plugin__ + " parseDOM Getting attribute %s content for %s matches " % ( ret, len(lst) )
+			if self.__dbg__ and self.__dbglevel__ > 2:
+				print self.__plugin__ + " parseDOM Getting attribute %s content for %s matches " % ( ret, len(lst) )
 			lst2 = []
 			for match in lst:
 				lst2 += re.compile('<' + name + '.*' + ret + '=[\'"]([^>]*?)[\'"].*>').findall(match)
 			lst = lst2
 		else:
-			#print self.__plugin__ + " parseDOM Getting element content for %s matches " % len(lst)
+			if self.__dbg__ and self.__dbglevel__ > 2:
+				print self.__plugin__ + " parseDOM Getting element content for %s matches " % len(lst)
 			lst2 = []
 			for match in lst:
 				temp = self.getDOMContent(html, name, match)
@@ -333,7 +336,7 @@ class CommonFunctions():
 				lst2.append(temp[temp.find(">")+1:temp.rfind("</" + name + ">")])
 			lst = lst2
 
-		if self.__dbg__:
+		if self.__dbg__ and self.__dbglevel__ > 1:
 			print self.__plugin__ + " parseDOM Done " + str(len(lst))
 		return lst
 
