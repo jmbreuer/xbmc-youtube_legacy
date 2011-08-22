@@ -34,7 +34,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonFu
 
 	fmt_value = { 35 : "480p h264 flv container",
 		      59 : "480 for rtmpe",
-		      44 : "480p vp8 web container",
+		      44 : "480p vp8 webm container",
 		      78 : "seems to be around 400 for rtmpe",
 		      34 : "360p h264 flv container",
 		      43 : "360p h264 flv container",
@@ -460,7 +460,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonFu
 		video_url = ""
 
 		if self.__dbg__:
-			print self.__plugin__ + " selectVideoQuality : " + repr(links) + " - " + repr(self.fmt_value)
+			print self.__plugin__ + " selectVideoQuality : " #+ repr(links)
 					
 		if get("action") == "download":
 			hd_quality = int(self.__settings__.getSetting( "hd_videos_download" ))
@@ -503,7 +503,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonFu
 		if hd_quality > 1: #<-- 720p
 			if (link(22)): 
 				video_url = link(22)
-			if (link(45)):
+			elif (link(45)):
 				video_url = link(45)
 		if hd_quality > 2: 
 			if (link(37)):
