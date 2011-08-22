@@ -32,6 +32,21 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonFu
 	__dbg__ = sys.modules[ "__main__" ].__dbg__
 	__storage__ = sys.modules[ "__main__" ].__storage__
 
+	fmt_value = { 35 : "480p h264 flv container",
+		      59 : "480 for rtmpe",
+		      44 : "480p vp8 web container",
+		      78 : "seems to be around 400 for rtmpe",
+		      34 : "360p h264 flv container",
+		      43 : "360p h264 flv container",
+		      26 : "???",
+		      18 : "360p h264 mp4 container | 270 for rtmpe?",
+		      33 : "???",
+		      5 : "240p h263 flv container",
+		      22 : "720p h264 mp4 container",
+		      45 : "720p vp8 webm container",
+		      37 : "1080p h264 mp4 container",
+		      38 : "720p vp8 webm container" }
+
 	def __init__(self):
 		# YouTube Playback Feeds
 		self.urls['video_stream'] = "http://www.youtube.com/watch?v=%s&safeSearch=none"
@@ -303,7 +318,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonFu
 		listitem.setInfo(type='Video', infoLabels=video)
 		
 		if self.__dbg__:
-			print self.__plugin__ + " - Playing video: " + self.makeAscii(video['Title']) + " - " + get('videoid') + " - " + video['video_url']
+			print self.__plugin__ + " - Playing video: " + repr(video['Title']) + " - " + repr(get('videoid')) + " - " + repr(video['video_url'])
 		
 		xbmcplugin.setResolvedUrl(handle=int(sys.argv[1]), succeeded=True, listitem=listitem)
 		
@@ -445,8 +460,8 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonFu
 		video_url = ""
 
 		if self.__dbg__:
-			print self.__plugin__ + " selectVideoQuality : " #+ repr(links)
-		
+			print self.__plugin__ + " selectVideoQuality : " + repr(links) + " - " + repr(self.fmt_value)
+					
 		if get("action") == "download":
 			hd_quality = int(self.__settings__.getSetting( "hd_videos_download" ))
 			if ( hd_quality == 0 ):
@@ -462,21 +477,23 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonFu
 					hd_quality = 2
 				else: 
 					hd_quality = 1
-		
+
 		# SD videos are default, but we go for the highest res
-		if (link(35)):
+		if (link(35)): 
 			video_url = link(35)
+		elif (link(59)):
+			video_url = link(59)
+		elif link(44):
+			video_url = link(44)
+		elif (link(78)):
+			video_url = link(78)
 		elif (link(34)):
 			video_url = link(34)
-		elif (link(59)): #<-- 480 for rtmpe
-			video_url = link(59)
-		elif (link(78)): #<-- seems to be around 400 for rtmpe
-			video_url = link(78)
 		elif (link(43)):
 			video_url = link(43)
 		elif (link(26)):
 			video_url = link(26)
-		elif (link(18)): #<-- 270 for rtmpe but 360 for http?
+		elif (link(18)):
 			video_url = link(18)
 		elif (link(33)):
 			video_url = link(33)
@@ -484,13 +501,28 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonFu
 			video_url = link(5)
 		
 		if hd_quality > 1: #<-- 720p
-			if (link(22)):
+			if (link(22)): 
 				video_url = link(22)
 			if (link(45)):
 				video_url = link(45)
-		if hd_quality > 2: #<-- 1080p
+		if hd_quality > 2: 
 			if (link(37)):
 				video_url = link(37)
+
+		if link(38) and False:
+			video_url = link(37)
+
+
+		for fmt_key in links.iterkeys():
+			if link(int(fmt_key)):
+				if self.__dbg__:
+					if ( link(int(fmt_key)) == video_url):
+						print self.__plugin__ + " selectVideoQuality : " + repr(fmt_key) + " - " + self.fmt_value[fmt_key] + "*"
+					else:
+						print self.__plugin__ + " selectVideoQuality : " + repr(fmt_key) + " - " + self.fmt_value[fmt_key]
+			else:
+				if self.__dbg__:
+					print self.__plugin__ + " selectVideoQuality - Missing fmt_value: " + repr(fmt_key)
 		
 		if hd_quality == 0 and not get("quality"):
 			return self.userSelectsVideoQuality(params, links)
@@ -512,32 +544,34 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonFu
 		link = links.get
 		list = []
 		choices = []
-		
-		if link(37):
+
+		if link(37): 
 			list.append((37,"1080p"))
-		if link(22):
+		if link(22): 
 			list.append((22,"720p"))
-		elif link(45):
+		elif link(45): 
 			list.append((45,"720p"))	
 		
-		if link(35):
+		if link(35): 
 			list.append((18,"480p"))
-		elif link(44):
+		elif link(44): 
 			list.append((44,"480p"))
-		
-		if link(18):
+
+		if link(18): 
 			list.append((18,"380p"))
-		
-		if link(34):
+		elif link(34):
 			list.append((34,"360p"))
 		elif link(43):
 			list.append((43,"360p"))
 		
-		if link(5):
+		if link(5): 
 			list.append((5,"240p"))
 		if link(17):
 			list.append((17,"144p"))
 		
+		if link(38) and False: 
+			list.append((37,"2304p"))
+
 		for (quality, message) in list:
 			choices.append(message)
 		

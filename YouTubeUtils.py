@@ -77,7 +77,6 @@ class YouTubeUtils:
 	def makeAscii(self, str):
 		if sys.hexversion >= 0x02050000:
 			return str
-
 		try:
 			return str.encode('ascii')
 		except:
