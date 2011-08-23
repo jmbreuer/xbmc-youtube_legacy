@@ -20,6 +20,7 @@ import sys, urllib, os, socket, time, hashlib
 import xbmc
 import YouTubeUtils
 import CommonFunctions
+import StorageServer
 try: import xbmcvfs
 except ImportError: import xbmcvfsdummy as xbmcvfs
 
@@ -27,12 +28,13 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions)
 	__settings__ = sys.modules[ "__main__"].__settings__ 
 	__plugin__ = sys.modules[ "__main__"].__plugin__
 	__language__ = sys.modules[ "__main__" ].__language__
+        __storage_server__ = StorageServer.StorageServer()
 	if sys.platform == "win32":
 		port = 59994
 		__socket__ = (socket.gethostname(), port)
 	else:
 		__socket__ = os.path.join( xbmc.translatePath( "special://temp" ), 'commoncache.socket')
-	__table_name__ = "YouTube"
+	__storage_server__.__table_name__ = "YouTube"
 
 	# This list contains the list options a user sees when indexing a contact 
 	#				label					  , external		 , login		 ,	thumbnail					, feed
@@ -415,7 +417,7 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions)
 
 	def storeValue(self, key, value):
 		if value:
-			self.sqlSet(key, value)
+			self.__storage_server__.sqlSet(key, value)
 
 	def storeResultSet(self, key, results = [], params = {}):
 		get = params.get
@@ -425,14 +427,14 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions)
 				searchCount = ( 10, 20, 30, 40, )[ int( self.__settings__.getSetting( "saved_searches" ) ) ]
 				existing = self.retrieveResultSet(key)  
 				existing = [results] + existing[:searchCount]
-				self.sqlSet(key, repr(existing))
+				self.__storage_server__.sqlSet(key, repr(existing))
 			elif get("append"):
 				existing = self.retrieveResultSet(key)  
 				existing = existing.append(results)
-				self.sqlSet(key, repr(existing))
+				self.__storage_server__.sqlSet(key, repr(existing))
 			else:
 				value = repr(results)
-				self.sqlSet(key,value)
+				self.__storage_server__.sqlSet(key,value)
 	
 	#============================= Retrieval Functions =================================
 	def retrieve(self, params = {}, type = "", item = {}):
@@ -448,14 +450,14 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions)
 	def retrieveValue(self, key):
 		value = ""
 		if key:
-			value = self.sqlGet(key)
+			value = self.__storage_server__.sqlGet(key)
 		
 		return value
 	
 	def retrieveResultSet(self, key):
 		results = []
 		
-		value = self.sqlGet(key)		
+		value = self.__storage_server__.sqlGet(key)		
 		if value: 
 			try:
 				results = eval(value)
@@ -469,7 +471,7 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions)
 		if self.lock("YouTubeQueueLock"):
 			videos = []
 			
-			queue = self.sqlGet("YouTubeDownloadQueue")
+			queue = self.__storage_server__.sqlGet("YouTubeDownloadQueue")
 			print self.__plugin__ + " queue loaded : " + repr(queue)
 
 			if queue:
@@ -494,7 +496,7 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions)
 
 			videos = []
 			if get("videoid"):
-				queue = self.sqlGet("YouTubeDownloadQueue")
+				queue = self.__storage_server__.sqlGet("YouTubeDownloadQueue")
 				print self.__plugin__ + " queue loaded : " + repr(queue)
 
 				if queue:
@@ -506,7 +508,7 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions)
 				if get("videoid") not in videos:
 					videos.append(get("videoid"))
 					
-					self.sqlSet("YouTubeDownloadQueue", repr(videos))
+					self.__storage_server__.sqlSet("YouTubeDownloadQueue", repr(videos))
 					print self.__plugin__ + " Added: " + get("videoid") + " to: " + repr(videos)
 
 			self.unlock("YouTubeQueueLock")
@@ -518,7 +520,7 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions)
 		if self.lock("YouTubeQueueLock"):
 			videos = []
 			
-			queue = self.sqlGet("YouTubeDownloadQueue")
+			queue = self.__storage_server__.sqlGet("YouTubeDownloadQueue")
 			print self.__plugin__ + " queue loaded : " + repr(queue)
 			if queue:
 				try:
@@ -529,7 +531,7 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions)
 			if videoid in videos:
 				videos.remove(videoid)
 
-				self.sqlSet("YouTubeDownloadQueue", repr(videos))
+				self.__storage_server__.sqlSet("YouTubeDownloadQueue", repr(videos))
 				print self.__plugin__ + " Removed: " + videoid + " from: " + repr(videos)
 			else:
 				print self.__plugin__ + " Didn't remove: " + videoid + " from: " + repr(videos)

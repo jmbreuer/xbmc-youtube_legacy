@@ -17,6 +17,7 @@
 '''
 
 import os, xbmc, sys, urllib, urllib2, re, time, socket, cookielib
+import StorageServer
 try: import simplejson as json
 except ImportError: import json
 from xml.dom.minidom import parseString
@@ -51,7 +52,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions):
 	__cj__ = cookielib.LWPCookieJar()
 	__opener__ = urllib2.build_opener(urllib2.HTTPCookieProcessor(__cj__))
 	urllib2.install_opener(__opener__)
-        __table_name__ = "YouTube"
+        __storage_server__ = StorageServer.StorageServer()
 
 	APIKEY = "AI39si6hWF7uOkKh4B9OEAX-gK337xbwR9Vax-cdeF9CF9iNAcQftT8NVhEXaORRLHAmHxj6GjM-Prw04odK4FxACFfKkiH9lg";
 	
@@ -265,7 +266,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions):
 		# Run the following for the missing.
 		# Update cache in the end.
 
-		temp_objs = self.sqlGetMulti("videoidcache", items)
+		temp_objs = self.__storage_server__.sqlGetMulti("videoidcache", items)
 		#status = 200
 		#return ( ytobjects, status)
 		for index, videoid in enumerate(items):
@@ -304,7 +305,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions):
 			save_data = {}
 			for item in ytobjects:
 				save_data[item["videoid"]] = repr(item)
-			self.sqlSetMulti("videoidcache", save_data)
+			self.__storage_server__.sqlSetMulti("videoidcache", save_data)
 
 		if len(ytobjects) > 0:
 			status = 200
@@ -738,6 +739,6 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions):
 		for item in ytobjects:
 			if item.has_key("videoid"):
 				save_data[item["videoid"]] = repr(item)
-		self.sqlSetMulti("videoidcache", save_data)
+		self.__storage_server__.sqlSetMulti("videoidcache", save_data)
 		return ytobjects;
 

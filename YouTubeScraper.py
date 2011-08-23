@@ -18,6 +18,7 @@
 
 import sys, urllib, re
 import YouTubeCore, YouTubeUtils, CommonFunctions
+import StorageServer
 
 class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions):
 
@@ -25,10 +26,11 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonF
 	__language__ = sys.modules[ "__main__" ].__language__
 	__plugin__ = sys.modules[ "__main__"].__plugin__	
 	__dbg__ = sys.modules[ "__main__" ].__dbg__
+	__storage_server__ = StorageServer.StorageServer()
 	
 	__feeds__ = sys.modules[ "__main__" ].__feeds__
 	__storage__ = sys.modules[ "__main__" ].__storage__
-	__table_name__ = "YouTube"
+	__storage_server__.__table_name__ = "YouTube"
 	
 	def __init__(self):
 		self.urls['categories'] = "http://www.youtube.com/videos"
@@ -761,13 +763,13 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonF
 		if ((result["content"].find('class="seasons"') == -1) or get("season")):
 			if self.__dbg__:
 				print self.__plugin__ + " scrapeShow parsing videolist for single season"
-			return self.__storage__.cacheFunction(self.scrapeShowEpisodes, params)
+			return self.__storage_server__.cacheFunction(self.scrapeShowEpisodes, params)
 		
 		params["folder"] = "true"
 		del params["batch"]
 		if self.__dbg__:
 			print self.__plugin__ + " scrapeShow done"
-		return self.__storage__.cacheFunction(self.scrapeShowSeasons, result["content"], params)
+		return self.__storage_server__.cacheFunction(self.scrapeShowSeasons, result["content"], params)
 	
 	def scrapeShowSeasons(self, html, params = {}): 
 		get = params.get
@@ -1273,7 +1275,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonF
 			if get("scraper") == "shows" and get("show"):
 				(result, status) = params["new_results_function"](params)
 			else:
-				(result, status) = self.__storage__.cacheFunction(params["new_results_function"], params)
+				(result, status) = self.__storage_server__.cacheFunction(params["new_results_function"], params)
 			
 			if self.__dbg__:
 				print self.__plugin__ + " paginator new result " + str(repr(result))[0:50]
@@ -1301,7 +1303,7 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonF
 		if get("batch") == "thumbnails":
 			(result, status) = self.getBatchDetailsThumbnails(result, params)
 		elif get("batch"):
-			#(result, status) = self.__storage__.cacheFunction(self.getBatchDetails, result, params)
+			#(result, status) = self.__storage_server__.cacheFunction(self.getBatchDetails, result, params)
 			(result, status) = self.getBatchDetails(result, params)
 		
 		if get("batch"):
