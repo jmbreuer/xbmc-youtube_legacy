@@ -28,12 +28,8 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions)
 	__settings__ = sys.modules[ "__main__"].__settings__ 
 	__plugin__ = sys.modules[ "__main__"].__plugin__
 	__language__ = sys.modules[ "__main__" ].__language__
+
         __storage_server__ = StorageServer.StorageServer()
-	if sys.platform == "win32":
-		port = 59994
-		__socket__ = (socket.gethostname(), port)
-	else:
-		__socket__ = os.path.join( xbmc.translatePath( "special://temp" ), 'commoncache.socket')
 	__storage_server__.__table_name__ = "YouTube"
 
 	# This list contains the list options a user sees when indexing a contact 

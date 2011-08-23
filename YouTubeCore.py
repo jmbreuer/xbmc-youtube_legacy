@@ -52,8 +52,9 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions):
 	__cj__ = cookielib.LWPCookieJar()
 	__opener__ = urllib2.build_opener(urllib2.HTTPCookieProcessor(__cj__))
 	urllib2.install_opener(__opener__)
-        __storage_server__ = StorageServer.StorageServer()
 
+        __storage_server__ = StorageServer.StorageServer()
+	__storage_server__.__table_name__ = "YouTube"
 	APIKEY = "AI39si6hWF7uOkKh4B9OEAX-gK337xbwR9Vax-cdeF9CF9iNAcQftT8NVhEXaORRLHAmHxj6GjM-Prw04odK4FxACFfKkiH9lg";
 	
 	#===============================================================================

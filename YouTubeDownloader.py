@@ -34,6 +34,7 @@ class YouTubeDownloader(YouTubeUtils.YouTubeUtils):
 	__storage__ = sys.modules[ "__main__" ].__storage__
 
         __storage_server__ = StorageServer.StorageServer()
+	__storage_server__.__table_name__ = "YouTube"
 
 	dialog = ""
 
