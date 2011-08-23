@@ -16,7 +16,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, urllib, urllib2, re, os, socket, time
+import sys, urllib, urllib2, re, os, socket, time, hashlib
 import xbmc
 try: import xbmcvfs
 except ImportError: import xbmcvfsdummy as xbmcvfs
@@ -25,13 +25,213 @@ class CommonFunctions():
 	__settings__ = sys.modules[ "__main__"].__settings__ 
 	__plugin__ = sys.modules[ "__main__"].__plugin__
 	__language__ = sys.modules[ "__main__" ].__language__
-        __dbglevel__ = sys.modules[ "__main__" ].__dbglevel__
+	__dbg__ = sys.modules[ "__main__" ].__dbg__
+	__dbglevel__ = sys.modules[ "__main__" ].__dbglevel__
 
 	if sys.platform == "win32":
 		port = 59994
 		__socket__ = (socket.gethostname(), port)
 	else:
 		__socket__ = os.path.join( xbmc.translatePath( "special://temp" ), 'commoncache.socket')
+	__store_in_settings__ = False
+	__disable_cache__ = False
+	__soccon__ = False
+	__table_name__ = False
+
+	def cacheFunction(self, funct = False, *args):
+		if self.__disable_cache__:
+			return funct(*args)
+		elif funct and self.__table_name__:
+			name = repr(funct)
+			name = name[name.find("method") + 7 :name.find(" of ")]
+			print self.__plugin__ + " _cacheFunction: " + name  + " - " + str(repr(args))[0:50]
+
+			ret_val = False
+
+			# Build unique name
+			keyhash = hashlib.md5()
+			for params in args:
+				if type(params) == type({}):
+					for key in sorted(params.iterkeys()):
+						if key not in [ "new_results_function" ]:
+							keyhash.update("'%s'='%s'" % (key, params[key]))
+				elif type(params) == type([]):
+					keyhash.update(",".join(["%s" % el for el in params]))
+				else:
+					keyhash.update(params)
+	
+			name += "|" + keyhash.hexdigest() + "|"
+
+			cache = self.sqlGet("cache" + name)
+			if cache.strip() == "":
+				cache = {}
+			else:
+				cache = eval(cache)
+
+			if name in cache:
+				#print self.__plugin__ + " _cacheFunction returning cache for : " + name
+				if cache[name]["timestamp"] > time.time() - (3600 * 24):
+					ret_val = cache[name]["res"]
+				else:
+					print self.__plugin__ + " _cacheFunction Deleting old cache"
+					del(cache[name])
+
+			if not ret_val: 
+				print self.__plugin__ + " _cacheFunction Sending request " + str(len(args)) + " - " + str(repr(args))[0:50]
+				ret_val = funct(*args)
+				if ret_val[1] == 200:
+					cache[name] = { "timestamp": time.time(),
+							"res": ret_val}
+					print self.__plugin__ + " _cacheFunction saving: " + name  + str(repr(cache[name]["res"]))[0:50]
+					self.sqlSet("cache" + name, repr(cache))
+
+			if ret_val:
+				print self.__plugin__ + " _cacheFunction returning : " + name #+ " - " + str(len(ret_val)) + repr(ret_val))
+				return ret_val
+
+		print self.__plugin__ + " _cacheFunction Error " 
+		return ( "", 500 )
+
+	def getOldCache(self):
+		return True
+
+	def cleanCache(self):
+		cache = {}
+		return False
+		if self.sqlGet("cache"):
+			cache = eval(self.sqlGet("cache"))
+
+		if cache:
+			for item in cache:
+				if cache[item]["timestamp"] < time.time() - (3600 * 24):
+					del(cache[item])
+				## Expand this to refresh content instead of deleting it if the item is acced over a certain threshold.
+
+			self.sqlSet("cache", repr(cache))
+			return True
+		return False
+
+	def lock(self, name):
+		if self.__dbg__:
+			print self.__plugin__ + " lock " + name
+
+		if self.sqlConnect():
+			data = repr({ "action": "lock", "table": self.__table_name__, "name": name})
+			storage_server = StorageServer.StorageServer()
+			storage_server.send(self.__soccon__, data)
+			res = storage_server.recv(self.__soccon__)
+			if res:
+				if eval(res.strip()) == "true":
+					if self.__dbg__:
+						print self.__plugin__ + " lock done : " + res.strip()
+					return True
+
+		if self.__dbg__:
+			print self.__plugin__ + " lock failed"
+			return False
+
+	def unlock(self, name):
+		if self.__dbg__:
+			print self.__plugin__ + " unlock " + name
+
+		if self.sqlConnect():
+			data = repr({ "action": "unlock", "table": self.__table_name__, "name": name})
+			storage_server = StorageServer.StorageServer()
+			storage_server.send(self.__soccon__, data)
+			res = storage_server.recv(self.__soccon__)
+			if res:
+				if eval(res.strip()) == "true":
+					if self.__dbg__:
+						print self.__plugin__ + " unlock done : " + res.strip()
+					return True
+		if self.__dbg__:
+			print self.__plugin__ + " unlock failed : "
+		return False
+
+	def sqlConnect(self):
+		if sys.platform == "win32":
+			self.__soccon__ = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		else:
+			self.__soccon__ = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+
+		start = time.time()
+		connected = False
+		try:
+			self.__soccon__.connect(self.__socket__)
+			connected= True
+		except socket.error, e:
+			print self.__plugin__ + " sqlConnect exception : " + repr(e)
+			if e.errno in [ 111 ]:
+				print self.__plugin__ + " sqlConnect StorageServer isn't running"
+
+		return connected
+
+	def sqlSetMulti(self, name, data):
+		if self.__store_in_settings__:
+			print self.__plugin__ + " sqlSetMulti ( in settings ) " + name
+			self.__settings__.setSetting(name, data)
+		else:
+			#print self.__plugin__ + " sqlSetMulti " + name
+			if self.sqlConnect():
+				temp = repr({ "action": "set_multi", "table": self.__table_name__, "name": name, "data": data})
+				storage_server = StorageServer.StorageServer()
+				res = storage_server.send(self.__soccon__, temp)
+				#print self.__plugin__ + " sqlset GOT " + repr(res)
+
+	def sqlGetMulti(self, name, items):
+		if self.__store_in_settings__:
+			#print self.__plugin__ + " sqlGetMulti ( from settings ) " + name + repr(self.__store_in_settings__)
+			return self.__settings__.getSetting(name)
+		else:
+			#print self.__plugin__ + " sqlGetMulti " + name
+			if self.sqlConnect():
+				storage_server = StorageServer.StorageServer()
+				#print self.__plugin__ + " sqlGetMulti " + name 
+				storage_server.send(self.__soccon__, repr({ "action": "get_multi", "table": self.__table_name__, "name": name, "items": items}))
+				#print self.__plugin__ + " sqlGetMulti - receive "
+				res = storage_server.recv(self.__soccon__)
+
+				#print self.__plugin__ + " sqlGetMulti res : " + str(len(res))
+				if res:
+					res = eval(res.strip())
+					if res == " ":# We return " " as nothing.
+						return ""
+					else:
+						return res
+
+		return ""
+
+	def sqlSet(self, name, data):
+		if self.__store_in_settings__:
+			print self.__plugin__ + " sqlSet ( in settings ) " + name
+			self.__settings__.setSetting(name, data)
+		else:
+			#print self.__plugin__ + " sqlSet " + name
+			if self.sqlConnect():
+				temp = repr({ "action": "set", "table": self.__table_name__, "name": name, "data": data})
+				storage_server = StorageServer.StorageServer()
+				res = storage_server.send(self.__soccon__, temp)
+				#print self.__plugin__ + " sqlset GOT " + repr(res)
+
+	def sqlGet(self, name):
+		if self.__store_in_settings__:
+			print self.__plugin__ + " sqlGet ( from settings ) " + name + repr(self.__store_in_settings__)
+			return self.__settings__.getSetting(name)
+		else:
+			#print self.__plugin__ + " sqlGet " + name
+			if self.sqlConnect():
+				storage_server = StorageServer.StorageServer()
+				#print self.__plugin__ + " sqlGet " + name 
+				storage_server.send(self.__soccon__, repr({ "action": "get", "table": self.__table_name__, "name": name}))
+				#print self.__plugin__ + " sqlGet - receive "
+				res = storage_server.recv(self.__soccon__)
+
+				#print self.__plugin__ + " sqlGet res : " + str(len(res))
+				if res:
+					res = eval(res.strip())
+					return res.strip() # We return " " as nothing. Strip it out.
+
+		return ""
 
 	def stripTags(self, html):
 		sub_start = html.find("<")
@@ -189,4 +389,3 @@ class CommonFunctions():
 
 			ret_obj["status"] = 505
 			return ret_obj
-
