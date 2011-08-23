@@ -26,6 +26,9 @@ class CommonFunctions():
 	__settings__ = sys.modules[ "__main__"].__settings__ 
 	__plugin__ = sys.modules[ "__main__"].__plugin__
 	__language__ = sys.modules[ "__main__" ].__language__
+	__dbg__ = sys.modules[ "__main__" ].__dbg__
+	__dbglevel__ = sys.modules[ "__main__" ].__dbglevel__
+
 	if sys.platform == "win32":
 		port = 59994
 		__socket__ = (socket.gethostname(), port)
