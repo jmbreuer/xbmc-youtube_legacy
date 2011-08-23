@@ -18,7 +18,6 @@
 
 import sys, urllib, urllib2, re, os, socket, time
 import xbmc
-import StorageServer		
 try: import xbmcvfs
 except ImportError: import xbmcvfsdummy as xbmcvfs
 

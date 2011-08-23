@@ -17,12 +17,15 @@
 '''
 
 import sys, urllib, re, os.path, datetime, time
+import xbmc, xbmcgui, xbmcplugin
+import YouTubeCore, YouTubeUtils, CommonFunctions
+import StorageServer
+
 try: import simplejson as json
 except ImportError: import json
-import xbmc, xbmcgui, xbmcplugin
 try: import xbmcvfs
 except ImportError: import xbmcvfsdummy as xbmcvfs
-import YouTubeCore, YouTubeUtils, CommonFunctions
+
 from xml.dom.minidom import parseString
 
 class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions):
@@ -31,6 +34,9 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonFu
 	__plugin__ = sys.modules[ "__main__" ].__plugin__ 
 	__dbg__ = sys.modules[ "__main__" ].__dbg__
 	__storage__ = sys.modules[ "__main__" ].__storage__
+
+        __storage_server__ = StorageServer.StorageServer()
+        __storage_server__.__table_name__ = "YouTube"
 
 	fmt_value = { 35 : "480p h264 flv container",
 		      59 : "480 for rtmpe",
@@ -429,7 +435,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonFu
 			
 	def getInfo(self, params):
 		get = params.get
-		video = self.sqlGet("videoidcache" + get("videoid"))
+		video = self.__storage_server__.sqlGet("videoidcache" + get("videoid"))
 		if len(video) > 0:
 			print self.__plugin__ + " getInfo returning cache "
 			return ( eval(video), 200)
@@ -451,7 +457,7 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonFu
 			
 			return (video,303)
 		video = video[0]
-		self.sqlSet("videoidcache" + get("videoid"), repr(video))
+		self.__storage_server__.sqlSet("videoidcache" + get("videoid"), repr(video))
 		return (video, result["status"])
 	
 	def selectVideoQuality(self, links, params):
