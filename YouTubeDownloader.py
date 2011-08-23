@@ -22,6 +22,7 @@ import YouTubeUtils
 import xbmc
 try: import xbmcvfs
 except ImportError: import xbmcvfsdummy as xbmcvfs
+import StorageServer
 
 class YouTubeDownloader(YouTubeUtils.YouTubeUtils):
 	__settings__ = sys.modules[ "__main__" ].__settings__
@@ -31,6 +32,8 @@ class YouTubeDownloader(YouTubeUtils.YouTubeUtils):
 	
 	__player__ = sys.modules["__main__" ].__player__
 	__storage__ = sys.modules[ "__main__" ].__storage__
+
+        __storage_server__ = StorageServer.StorageServer()
 
 	dialog = ""
 
@@ -44,14 +47,14 @@ class YouTubeDownloader(YouTubeUtils.YouTubeUtils):
 			self.__dbg__ = self.__settings__.getSetting("debug") == "true"
 			path = self.__settings__.getSetting( "downloadPath" )
 
-		if self.__storage__.lock("YouTubeDownloadLock"):
+		if self.__storage_server__.lock("YouTubeDownloadLock"):
 			params["silent"] = "true"
 			if self.__plugin__:
 				print self.__plugin__ + " Downloader not active, initializing downloader"
 			
 			self.__storage__.addVideoToDownloadQeueu(params)
 			self.processQueue(params)
-			self.__storage__.unlock("YouTubeDownloadLock")
+			self.__storage_server__.unlock("YouTubeDownloadLock")
 		else:
 			if self.__dbg__:
 				print self.__plugin__ + " Downloader is active, Queueing video "

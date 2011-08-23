@@ -468,7 +468,7 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions)
 		
 	#============================= Download Queue =================================
 	def getNextVideoFromDownloadQueue(self):
-		if self.lock("YouTubeQueueLock"):
+		if self.__storage_server__.lock("YouTubeQueueLock"):
 			videos = []
 			
 			queue = self.__storage_server__.sqlGet("YouTubeDownloadQueue")
@@ -484,14 +484,14 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions)
 			if videos:
 				videoid = videos[0]
 
-			self.unlock("YouTubeQueueLock")
+			self.__storage_server__.unlock("YouTubeQueueLock")
 			print self.__plugin__ + " getNextVideoFromDownloadQueue released. returning : " + videoid
 			return videoid
 		else:
 			print self.__plugin__ + " getNextVideoFromDownloadQueue Exception "
 
 	def addVideoToDownloadQeueu(self, params = {}):
-		if self.lock("YouTubeQueueLock"):
+		if self.__storage_server__.lock("YouTubeQueueLock"):
 			get = params.get
 
 			videos = []
@@ -511,13 +511,13 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions)
 					self.__storage_server__.sqlSet("YouTubeDownloadQueue", repr(videos))
 					print self.__plugin__ + " Added: " + get("videoid") + " to: " + repr(videos)
 
-			self.unlock("YouTubeQueueLock")
+			self.__storage_server__.unlock("YouTubeQueueLock")
 			print self.__plugin__ + " addVideoToDownloadQeueu released"
 		else:
 			print self.__plugin__ + " addVideoToDownloadQeueu Exception "
 		
 	def removeVideoFromDownloadQueue(self, videoid):
-		if self.lock("YouTubeQueueLock"):
+		if self.__storage_server__.lock("YouTubeQueueLock"):
 			videos = []
 			
 			queue = self.__storage_server__.sqlGet("YouTubeDownloadQueue")
@@ -536,7 +536,7 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions)
 			else:
 				print self.__plugin__ + " Didn't remove: " + videoid + " from: " + repr(videos)
 
-			self.unlock("YouTubeQueueLock")
+			self.__storage_server__.unlock("YouTubeQueueLock")
 			print self.__plugin__ + " removeVideoFromDownloadQueue released"
 		else:
 			print self.__plugin__ + " removeVideoFromDownloadQueue Exception "
