@@ -16,7 +16,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, urllib, urllib2, re, os, socket, time, hashlib
+import sys, urllib, urllib2, re, os, socket, time, hashlib, inspect
 import xbmc
 import StorageServer		
 try: import xbmcvfs
@@ -45,7 +45,7 @@ class CommonFunctions():
 		return html
 
 	def getDOMContent(self, html, name, match): # convert to log.
-		self.log("getDOMContent", "match:" + match, 2)
+		self.log("match:" + match, 2)
 		start = html.find(match)
 		if name == "img":
 			endstr = ">"
@@ -55,7 +55,7 @@ class CommonFunctions():
 
 		pos = html.find("<" + name, start + 1 )
 
-		self.log("getDOMContent", str(start) + " < " + str(end) + " pos = " + str(pos), 2)
+		self.log(str(start) + " < " + str(end) + " pos = " + str(pos), 2)
 
 		while pos < end and pos != -1:
 			pos = html.find("<" + name, pos + 1)
@@ -63,10 +63,10 @@ class CommonFunctions():
 				tend = html.find(endstr, end + len(endstr))
 				if tend != -1:
 					end = tend
-			self.log("getDOMContent", "loop: " + str(start) + " < " + str(end) + " pos = " + str(pos), 3)
+			self.log("loop: " + str(start) + " < " + str(end) + " pos = " + str(pos), 3)
 
 		html = html[start:end + len(endstr)]
-		self.log("getDOMContent", "done html length: " + str(len(html)) + repr(html), 2)
+		self.log("done html length: " + str(len(html)) + repr(html), 2)
 		return html
 
 	def parseDOM(self, html, name = "", attrs = {}, ret = False):
@@ -75,12 +75,12 @@ class CommonFunctions():
 		# attrs <- { "id": "my-div", "class": "oneclass.*anotherclass", "attribute": "a random tag" }
 		# ret <- Return content of element
 		# Default return <- Returns a list with the content
-		self.log("parseDOM", repr(name) + " - " + repr(attrs) + " - " + repr(ret) + " - " + str(type(html)), 1)
+		self.log(repr(name) + " - " + repr(attrs) + " - " + repr(ret) + " - " + str(type(html)), 1)
 		if type(html) == type([]):
 			html = "".join(html)
 		html = html.replace("\n", "")
 		if not name.strip():
-			self.log("parseDOM", "Missing tag name")
+			self.log("Missing tag name")
 			return ""
 
 		lst = []
@@ -96,7 +96,7 @@ class CommonFunctions():
 			lst2 = []
 			for script in scripts:
 				if len(lst2) == 0:
-					#self.log("parseDOM", "scanning " + str(i) + " " + str(len(lst)) + " Running :" + script, 2)
+					#self.log("scanning " + str(i) + " " + str(len(lst)) + " Running :" + script, 2)
 					lst2 = re.compile(script).findall(html)
 					i += 1
 			if len(lst2) > 0:
@@ -108,21 +108,21 @@ class CommonFunctions():
 					test.reverse()
 					for i in test: # Delete anything missing from the next list.
 						if not lst[i] in lst2:
-							self.log("parseDOM", "Purging mismatch " + str(len(lst)) + " - " + repr(lst[i]), 1)
+							self.log("Purging mismatch " + str(len(lst)) + " - " + repr(lst[i]), 1)
 							del(lst[i])
 
 		if len(lst) == 0 and attrs == {}:
-			self.log("parseDOM", "no list found, making one on just the element name", 1)
+			self.log("no list found, making one on just the element name", 1)
 			lst = re.compile('(<' + name + '[^>]*?>)').findall(html)
 
 		if ret != False:
-			self.log("parseDOM", "Getting attribute %s content for %s matches " % ( ret, len(lst) ), 2)
+			self.log("Getting attribute %s content for %s matches " % ( ret, len(lst) ), 2)
 			lst2 = []
 			for match in lst:
 				lst2 += re.compile('<' + name + '.*' + ret + '=[\'"]([^>]*?)[\'"].*>').findall(match)
 			lst = lst2
 		else:
-			self.log("parseDOM", "Getting element content for %s matches " % len(lst), 2)
+			self.log("Getting element content for %s matches " % len(lst), 2)
 			lst2 = []
 			for match in lst:
 				temp = self.getDOMContent(html, name, match)
@@ -130,17 +130,17 @@ class CommonFunctions():
 				lst2.append(temp[temp.find(">")+1:temp.rfind("</" + name + ">")])
 			lst = lst2
 
-		self.log("parseDOM", "Done", 1)
+		self.log("Done", 1)
 		return lst
 
 	def _fetchPage(self, params = {}):
 		get = params.get
 		link = get("link")
 		ret_obj = {}
-		self.log("_fetchPage", "called for : " + repr(params))
+		self.log("called for : " + repr(params))
 
 		if not link or int(get("error", "0")) > 2 :
-			self.log("_fetchPage", "giving up")
+			self.log("giving up")
 			ret_obj["status"] = 500
 			return ret_obj
 
@@ -148,7 +148,7 @@ class CommonFunctions():
 		request.add_header('User-Agent', self.USERAGENT)
 
 		try:
-			self.log("_fetchPage", "connecting to server...", 1)
+			self.log("connecting to server...", 1)
 
 			con = urllib2.urlopen(request)
 			
@@ -158,14 +158,14 @@ class CommonFunctions():
 			con.close()
 
 			# Return result if it isn't age restricted
-			self.log("_fetchPage", "Done")
+			self.log("Done")
 			ret_obj["status"] = 200
 			return ret_obj
 		
 		except urllib2.HTTPError, e:
 			err = str(e)
-			self.log("_fetchPage", "HTTPError : " + err)
-			self.log("_fetchPage", "HTTPError - Headers: " + str(e.headers) + " - Content: " + e.fp.read())
+			self.log("HTTPError : " + err)
+			self.log("HTTPError - Headers: " + str(e.headers) + " - Content: " + e.fp.read())
 			
 			params["error"] = str(int(get("error", "0")) + 1)
 			ret = self._fetchPage(params)
@@ -176,6 +176,6 @@ class CommonFunctions():
 			ret_obj["status"] = 505
 			return ret_obj
 
-	def log(self, function, description, level = 0):
+	def log(self, description, level = 0):
 		if self.__dbg__ and self.__dbglevel__ > level:
-			xbmc.log("[%s] %s : '%s'" % (self.__plugin__, function, description), xbmc.LOGNOTICE)
+			xbmc.log("[%s] %s : '%s'" % (self.__plugin__, inspect.stack()[2][3], description), xbmc.LOGNOTICE)
