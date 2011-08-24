@@ -44,8 +44,8 @@ class CommonFunctions():
 
 		return html
 
-	def getDOMContent(self, html, name, match):
-		#print self.__plugin__ + " getDOMContent match: " + match
+	def getDOMContent(self, html, name, match): # convert to log.
+		self.log("getDOMContent", "match:" + match, 2)
 		start = html.find(match)
 		if name == "img":
 			endstr = ">"
@@ -55,7 +55,7 @@ class CommonFunctions():
 
 		pos = html.find("<" + name, start + 1 )
 
-		#print self.__plugin__ + " getDOMContent " + str(start) + " < " + str(end) + " pos = " + str(pos)
+		self.log("getDOMContent", str(start) + " < " + str(end) + " pos = " + str(pos), 2)
 
 		while pos < end and pos != -1:
 			pos = html.find("<" + name, pos + 1)
@@ -63,11 +63,10 @@ class CommonFunctions():
 				tend = html.find(endstr, end + len(endstr))
 				if tend != -1:
 					end = tend
-			#print self.__plugin__ + " getDOMContent2 loop: " + str(start) + " < " + str(end) + " pos = " + str(pos)
+			self.log("getDOMContent", "loop: " + str(start) + " < " + str(end) + " pos = " + str(pos), 3)
 
-		#print self.__plugin__ + " getDOMContent XXX: " + str(start) + " < " + str(end) + " pos = " + str(pos)
 		html = html[start:end + len(endstr)]
-		#print self.__plugin__ + " getDOMContent done html length: " + str(len(html)) + repr(html)
+		self.log("getDOMContent", "done html length: " + str(len(html)) + repr(html), 2)
 		return html
 
 	def parseDOM(self, html, name = "", attrs = {}, ret = False):
@@ -97,9 +96,8 @@ class CommonFunctions():
 			lst2 = []
 			for script in scripts:
 				if len(lst2) == 0:
-					#print self.__plugin__ + " parseDOM scanning " + str(i) + " " + str(len(lst)) + " Running :" + script
+					#self.log("parseDOM", "scanning " + str(i) + " " + str(len(lst)) + " Running :" + script, 2)
 					lst2 = re.compile(script).findall(html)
-					#print self.__plugin__ + " parseDOM scanning " + str(i) + " " + str(len(lst2)) + " Result : " #+ repr(lst2[:2])
 					i += 1
 			if len(lst2) > 0:
 				if len(lst) == 0:
@@ -180,4 +178,4 @@ class CommonFunctions():
 
 	def log(self, function, description, level = 0):
 		if self.__dbg__ and self.__dbglevel__ > level:
-			xbmc.log("[ADD-ON] '%s' - %s : '%s'" % (self.__plugin__, function, description), xbmc.LOGNOTICE)
+			xbmc.log("[%s] %s : '%s'" % (self.__plugin__, function, description), xbmc.LOGNOTICE)
