@@ -76,15 +76,12 @@ class CommonFunctions():
 		# attrs <- { "id": "my-div", "class": "oneclass.*anotherclass", "attribute": "a random tag" }
 		# ret <- Return content of element
 		# Default return <- Returns a list with the content
-		
-		if self.__dbg__ and self.__dbglevel__ > 1:
-			print self.__plugin__ + " parseDOM : " + repr(name) + " - " + repr(attrs) + " - " + repr(ret) + " - " + str(type(html))
+		self.log("parseDOM", repr(name) + " - " + repr(attrs) + " - " + repr(ret) + " - " + str(type(html)), 1)
 		if type(html) == type([]):
 			html = "".join(html)
 		html = html.replace("\n", "")
 		if not name.strip():
-			if self.__dbg__ :
-				print self.__plugin__ + " parseDOM - Missing tag name "
+			self.log("parseDOM", "Missing tag name")
 			return ""
 
 		lst = []
@@ -113,25 +110,21 @@ class CommonFunctions():
 					test.reverse()
 					for i in test: # Delete anything missing from the next list.
 						if not lst[i] in lst2:
-							if self.__dbg__ and self.__dbglevel__ > 1:
-								print self.__plugin__ + " parseDOM Purging mismatch " + str(len(lst)) + " - " + repr(lst[i])
+							self.log("parseDOM", "Purging mismatch " + str(len(lst)) + " - " + repr(lst[i]), 1)
 							del(lst[i])
 
 		if len(lst) == 0 and attrs == {}:
-			if self.__dbg__ and self.__dbglevel__ > 1:
-				print self.__plugin__ + " parseDOM no list found, making one on just the element name"
+			self.log("parseDOM", "no list found, making one on just the element name", 1)
 			lst = re.compile('(<' + name + '[^>]*?>)').findall(html)
 
 		if ret != False:
-			if self.__dbg__ and self.__dbglevel__ > 2:
-				print self.__plugin__ + " parseDOM Getting attribute %s content for %s matches " % ( ret, len(lst) )
+			self.log("parseDOM", "Getting attribute %s content for %s matches " % ( ret, len(lst) ), 2)
 			lst2 = []
 			for match in lst:
 				lst2 += re.compile('<' + name + '.*' + ret + '=[\'"]([^>]*?)[\'"].*>').findall(match)
 			lst = lst2
 		else:
-			if self.__dbg__ and self.__dbglevel__ > 2:
-				print self.__plugin__ + " parseDOM Getting element content for %s matches " % len(lst)
+			self.log("parseDOM", "Getting element content for %s matches " % len(lst), 2)
 			lst2 = []
 			for match in lst:
 				temp = self.getDOMContent(html, name, match)
@@ -139,20 +132,17 @@ class CommonFunctions():
 				lst2.append(temp[temp.find(">")+1:temp.rfind("</" + name + ">")])
 			lst = lst2
 
-		if self.__dbg__ and self.__dbglevel__ > 1:
-			print self.__plugin__ + " parseDOM Done " + str(len(lst))
+		self.log("parseDOM", "Done", 1)
 		return lst
 
 	def _fetchPage(self, params = {}):
 		get = params.get
 		link = get("link")
 		ret_obj = {}
-		if self.__dbg__:
-			print self.__plugin__ + " _fetchPage called for : " + repr(params)
+		self.log("_fetchPage", "called for : " + repr(params))
 
 		if not link or int(get("error", "0")) > 2 :
-			if self.__dbg__:
-				print self.__plugin__ + " _fetchPage giving up "
+			self.log("_fetchPage", "giving up")
 			ret_obj["status"] = 500
 			return ret_obj
 
@@ -160,8 +150,7 @@ class CommonFunctions():
 		request.add_header('User-Agent', self.USERAGENT)
 
 		try:
-			if self.__dbg__:
-				print self.__plugin__ + " _fetchPage connecting to server... "
+			self.log("_fetchPage", "connecting to server...", 1)
 
 			con = urllib2.urlopen(request)
 			
@@ -171,16 +160,14 @@ class CommonFunctions():
 			con.close()
 
 			# Return result if it isn't age restricted
-			if self.__dbg__:
-				print self.__plugin__ + " _fetchPage done"
+			self.log("_fetchPage", "Done")
 			ret_obj["status"] = 200
 			return ret_obj
 		
 		except urllib2.HTTPError, e:
 			err = str(e)
-			if self.__dbg__:
-				print self.__plugin__ + " _fetchPage HTTPError : " + err
-				print self.__plugin__ + " _fetchPage HTTPError - Headers: " + str(e.headers) + " - Content: " + e.fp.read()
+			self.log("_fetchPage", "HTTPError : " + err)
+			self.log("_fetchPage", "HTTPError - Headers: " + str(e.headers) + " - Content: " + e.fp.read())
 			
 			params["error"] = str(int(get("error", "0")) + 1)
 			ret = self._fetchPage(params)
@@ -191,3 +178,6 @@ class CommonFunctions():
 			ret_obj["status"] = 505
 			return ret_obj
 
+	def log(self, function, description, level = 0):
+		if self.__dbg__ and self.__dbglevel__ > level:
+			xbmc.log("[ADD-ON] '%s' - %s : '%s'" % (self.__plugin__, function, description), xbmc.LOGNOTICE)
