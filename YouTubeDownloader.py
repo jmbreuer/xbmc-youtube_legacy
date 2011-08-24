@@ -50,15 +50,13 @@ class YouTubeDownloader(YouTubeUtils.YouTubeUtils):
 
 		if self.__storage_server__.lock("YouTubeDownloadLock"):
 			params["silent"] = "true"
-			if self.__plugin__:
-				print self.__plugin__ + " Downloader not active, initializing downloader"
+			self.log("Downloader not active, initializing downloader.")
 			
 			self.__storage__.addVideoToDownloadQeueu(params)
 			self.processQueue(params)
 			self.__storage_server__.unlock("YouTubeDownloadLock")
 		else:
-			if self.__dbg__:
-				print self.__plugin__ + " Downloader is active, Queueing video "
+			self.log("Downloader is active, Queueing video.")
 			self.__storage__.addVideoToDownloadQeueu(params)
 
 	def processQueue(self, params = {}):
@@ -88,7 +86,7 @@ class YouTubeDownloader(YouTubeUtils.YouTubeUtils):
 				self.__storage__.removeVideoFromDownloadQueue(videoid)
 				videoid = self.__storage__.getNextVideoFromDownloadQueue()
 
-			print self.__plugin__  +  " Finished download queue."
+			self.log("Finished download queue.")
 			self.dialog.close()
 			self.dialog = ""
 
@@ -96,8 +94,7 @@ class YouTubeDownloader(YouTubeUtils.YouTubeUtils):
 
 			
 	def downloadVideoURL(self, video, params = {}):
-		if self.__dbg__:
-			print self.__plugin__ + " downloadVideo: " + video['Title']
+		self.log(video['Title'])
 		
 		if video["video_url"].find("swfurl") > 0:
 			self.showMessage(self.__language__( 30625 ), self.__language__(30619))
@@ -156,7 +153,7 @@ class YouTubeDownloader(YouTubeUtils.YouTubeUtils):
 				con.close()
 				file.close()
 			except:
-				print self.__plugin__ + " downloadVideoURL - Failed to close download stream and file handle"	
+				self.log("Failed to close download stream and file handle")
 		
 		xbmcvfs.rename(filename_incomplete, filename_complete)
 		self.dialog.update(heading = self.__language__(30604), label=video["Title"])

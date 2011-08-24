@@ -190,17 +190,13 @@ class Window:
 			self.removeControls()
 			self.windowId = currentWindowId
 			self.window = xbmcgui.Window( self.windowId )
-			print " XXXXXXXXXXXXXXXXXXXXXXXX 1 INIT"
 			self.initialize()
 
 		if not self.window or not hasattr( self.window, "addControl" ):
-			print " XXXXXXXXXXXXXXXXXXXXXXXX 2 REMOVE"
 			self.removeControls()
 			error = 1
 		if error:
-			print " XXXXXXXXXXXXXXXXXXXXXXXX 3 ERROR "
 			raise xbmcguiWindowError( "xbmcgui.Window(%s)" % repr( currentWindowId ) )
-
 		
 		#self.window.setProperty( "DialogDownloadProgress.IsAlive", "true" )
 

@@ -83,7 +83,7 @@ class YouTubeFeeds(YouTubeCore.YouTubeCore):
 					if query in authors:
 						url += "&" + urllib.urlencode({'author': authors[query]})
 				except:
-					print self.__plugin__ + " search - eval failed "	
+					self.log("Search - eval failed")
 			
 		if (url.find("%s") > 0):
 			if ( get("contact") and not (get("external") and get("channel"))):
@@ -125,8 +125,7 @@ class YouTubeFeeds(YouTubeCore.YouTubeCore):
 		
 		if get("login") == "true":
 			if ( not self._getAuth() ):
-				if self.__dbg__:
-					print self.__plugin__ + " login required but auth wasn't set!"
+				self.log("Login required but auth wasn't set!")
 				return ( self.__language__(30609) , 303 )
 
 		url = self.createUrl(params)
@@ -257,8 +256,7 @@ class YouTubeFeeds(YouTubeCore.YouTubeCore):
 		
 		if get("login") == "true":
 			if ( not self._getAuth() ):
-				if self.__dbg__:
-					print self.__plugin__ + " login required but auth wasn't set!"
+				self.log("login required but auth wasn't set!")
 				return ( self.__language__(30609) , 303 )
 		
 		feed = self.createUrl(params)

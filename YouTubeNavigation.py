@@ -18,9 +18,9 @@
 
 import sys, urllib
 import xbmc, xbmcgui, xbmcplugin
-import YouTubeUtils
-	
-class YouTubeNavigation(YouTubeUtils.YouTubeUtils): 
+import YouTubeUtils, CommonFunctions
+
+class YouTubeNavigation(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions):
 	__settings__ = sys.modules[ "__main__" ].__settings__
 	__plugin__ = sys.modules[ "__main__"].__plugin__	
 	__language__ = sys.modules[ "__main__" ].__language__
@@ -185,7 +185,7 @@ class YouTubeNavigation(YouTubeUtils.YouTubeUtils):
 			(results , status) = self.__scraper__.scrape(params)
 		elif get("store"):
 			(results , status) = self.__storage__.list(params)
-			print self.__plugin__ + " store returned " + repr(results)
+			self.log("store returned " + repr(results))
 		else:
 			(results , status) = self.__feeds__.list(params)
 		

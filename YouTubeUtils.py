@@ -80,8 +80,7 @@ class YouTubeUtils:
 		try:
 			return str.encode('ascii')
 		except:
-			if self.__dbg__:
-				print self.__plugin__ + " makeAscii hit except on : " + repr(str)
+			self.log("Hit except on : " + repr(str))
 			s = ""
 			for i in str:
 				try:
@@ -130,29 +129,7 @@ class YouTubeUtils:
 			if key not in blacklist:
 				url += key + "=" + value + "&"
 		return url
-	
-	# Prints usefull information about and item
-	def interrogate(self, item):
-		if hasattr(item, '__name__'):
-			print "NAME:    ", item.__name__
-		if hasattr(item, '__class__'):
-			print "CLASS:   ", item.__class__.__name__
-		print "ID:      ", id(item)
-		print "TYPE:    ", type(item)
-		print "VALUE:   ", repr(item)
-		print "CALLABLE:",
-		if callable(item):
-			print "Yes"
-		else:
-			print "No"
 		
-		if hasattr(item, '__doc__'):
-			doc = getattr(item, '__doc__')
-			if doc:
-				doc = doc.strip()
-				firstline = doc.split('\n')[0]
-				print "DOC:     ", firstline
-	
 	# Adds a default next folder to a result set
 	def addNextFolder(self, items = [], params = {}):
 		get = params.get

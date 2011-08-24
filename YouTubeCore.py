@@ -273,7 +273,6 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions):
 		for index, videoid in enumerate(items):
 			if index < len(temp_objs):
 				if temp_objs[index]:
-					#print self.__plugin__ + " XXXXXXXXXX " + temp_objs[index]
 					ytobjects.append(eval(temp_objs[index]))
 					continue
 			if videoid:
@@ -286,7 +285,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions):
 						rstat = self.parseDOM(result["content"], "batch:status", ret = "code")
 						if len(rstat) > 0:
 							if int(rstat[len(rstat) - 1]) == 403:
-								print self.__plugin__ + " getBatchDetails quota exceeded. Waiting 5 seconds. " + repr(rstat)
+								self.log("quota exceeded. Waiting 5 seconds. " + repr(rstat))
 								rstat = 403
 								time.sleep(5)
 
@@ -328,28 +327,25 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions):
 		link = get("link")
 		ret_obj = { "status": 500, "content": ""}
 
-		if self.__dbg__:
-			if (get("url_data") or get("request")):
-				print self.__plugin__ + " _fetchPage called for : " + repr(params['link'])
-			else:
-				print self.__plugin__ + " _fetchPage called for : " + repr(params)
+		if (get("url_data") or get("request")):
+			self.log("called for : " + repr(params['link']))
+		else:
+			self.log("called for : " + repr(params))
 
 		if get("auth", "false") == "true":
-			if self.__dbg__:
-				print self.__plugin__ + " got auth"
+			self.log("got auth")
 			if self._getAuth():
 				if link.find("?") > -1:
 					link += "&oauth_token=" + self.__settings__.getSetting("oauth2_access_token")
 				else:
 					link += "?oauth_token=" + self.__settings__.getSetting("oauth2_access_token")
 
-				print self.__plugin__ + " _fetchPage updated link: " + link
+				self.log("updated link: " + link)
 			else:
-				print self.__plugin__ + " _fetchPage couldn't get login token"
+				self.log("couldn't get login token")
 
 		if not link or int(get("error", "0")) > 2 :
-			if self.__dbg__:
-				print self.__plugin__ + " _fetchPage giving up "
+			self.log("giving up ")
 			return ret_obj
 
 		if get("url_data"):
@@ -358,16 +354,14 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions):
 		elif get("request", "false") == "false":
 			request = url2request(link, get("method", "GET"));
 		else:
-			if self.__dbg__:
-				print self.__plugin__ + " _fetchPage got request"
+			self.log("got request")
 			request = urllib2.Request(link, get("request"))
 			request.add_header('X-GData-Client', "")
 			request.add_header('Content-Type', 'application/atom+xml') 
 			request.add_header('Content-Length', str(len(get("request")))) 
 
 		if get("api", "false") == "true":
-			if self.__dbg__:
-				print self.__plugin__ + " _fetchPage got api"
+			self.log("got api")
 			request.add_header('GData-Version', '2') #confirmed
 			request.add_header('X-GData-Key', 'key=' + self.APIKEY)
 			if self.__settings__.getSetting("oauth2_expires_at") < time.time():
@@ -380,32 +374,27 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions):
 				request.add_header('Cookie', 'PREF=f1=50000000&hl=en')
 		
 		if get("login", "false") == "true":
-			if self.__dbg__:
-				print self.__plugin__ + " got login"
+			self.log("got login")
 			if ( self.__settings__.getSetting( "username" ) == "" or self.__settings__.getSetting( "user_password" ) == "" ):
-				if self.__dbg__:
-					print self.__plugin__ + " _fetchPage, login required but no credentials provided"
+				self.log("_fetchPage, login required but no credentials provided")
 				ret_obj["status"] = 303
 				ret_obj["content"] = self.__language__( 30622 )
 				return ret_obj
 			# This should be a call to self.__login__._httpLogin()
 			if self.__settings__.getSetting( "login_info" ) != "":
-				if self.__dbg__:
-					print self.__plugin__ + " returning existing login info: " + self.__settings__.getSetting( "login_info" )
+				self.log("returning existing login info: " + self.__settings__.getSetting( "login_info" ))
 				info = self.__settings__.getSetting( "login_info" )
 				request.add_header('Cookie', 'LOGIN_INFO=' + info )
 		
 		if get("auth", "false") == "true":
-			if self.__dbg__:
-				print self.__plugin__ + " got auth"
+			self.log("got auth")
 			if self._getAuth():
 				request.add_header('Authorization', 'GoogleLogin auth=' + self.__settings__.getSetting("auth"))
 			else:
-				print self.__plugin__ + " _fetchPage couldn't get login token"
+				self.log("couldn't get login token")
 		
 		try:
-			if self.__dbg__:
-				print self.__plugin__ + " _fetchPage connecting to server... "
+			self.log("connecting to server... ")
 
 			con = urllib2.urlopen(request)
 			
@@ -416,14 +405,11 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions):
 
 			# Return result if it isn't age restricted
 			if ( ret_obj["content"].find("verify-actions") == -1 and ret_obj["content"].find("verify-age-actions") == -1):
-				if self.__dbg__:
-					print self.__plugin__ + " _fetchPage done"
-				#print repr(ret_obj["content"])
-				#print self.__plugin__ + " _bla: cj2 : " + repr(self.__cj__)
+				self.log("done")
 				ret_obj["status"] = 200
 				return ret_obj
 			else:
-				print self.__plugin__ + " _fetchPage found verify age request: " + repr(params) 
+				self.log("found verify age request: " + repr(params) )
 				# We need login to verify age
 				if not get("login"):
 					params["error"] = get("error", "0")
@@ -438,17 +424,15 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions):
 		except urllib2.HTTPError, e:
 			cont = False
 			err = str(e)
-			if self.__dbg__:
-				print self.__plugin__ + " _fetchPage HTTPError : " + err
+			self.log("HTTPError : " + err)
 
 			if err.find("Token invalid") > -1:
-				if self.__dbg__:
-					print self.__plugin__ + " _fetchPage refreshing token"
+				self.log("refreshing token")
 				self._oRefreshToken()
 			else:
 				if e.fp:
 					cont = e.fp.read()
-				print self.__plugin__ + " _fetchPage HTTPError - Headers: " + str(e.headers) + " - Content: " + cont
+				self.log("HTTPError - Headers: " + str(e.headers) + " - Content: " + cont)
 
 			params["error"] = str(int(get("error", "0")) + 1)
 			ret_obj = self._fetchPage(params)
@@ -461,8 +445,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions):
 
 		except urllib2.URLError, e:
 			err = str(e)
-			if self.__dbg__:
-				print self.__plugin__ + " _fetchPage URLError : " + err
+			self.log("URLError : " + err)
 			
 			time.sleep(3)
 			params["error"] = str(int(get("error", "0")) + 1)
@@ -470,8 +453,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions):
 			return ret_obj
 		
 	def _findErrors(self, ret):
-		if self.__dbg__:
-			print self.__plugin__ + " _findErrors"
+		self.log("")
 
 		## Couldn't find 2 factor or normal login
 		error = self.parseDOM(ret['content'], "div", attrs = { "class": "errormsg" })
@@ -490,12 +472,10 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions):
 		if len(error) > 0:
 			error = error[0]
 			error = urllib.unquote(error[0:error.find("[")]).replace("&#39;", "'")
-			if self.__dbg__:
-				print self.__plugin__ + " _findErrors returning error :" + error.strip()
+			self.log("returning error :" + error.strip())
 			return error.strip()
 
-		if self.__dbg__:
-			print self.__plugin__ + " _findErrors couldn't find anything: " + repr(ret)
+		self.log("couldn't find anything: " + repr(ret))
 		return False
 
 	def _verifyAge(self, result, new_url, params = {}):
@@ -514,9 +494,8 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions):
 		
 		# Fallback for missing confirm form.
 		if result.find("confirm-age-form") == -1:
-			if self.__dbg__ or True:
-				print self.__plugin__ + " Failed trying to verify-age could find confirm age form."
-				print self.__plugin__ + " html page given: " + repr(result)
+			self.log("Failed trying to verify-age could find confirm age form.")
+			self.log("html page given: " + repr(result))
 			return ( self.__language__( 30606 ) , 303 )
 						
 		# get next_url
@@ -524,16 +503,14 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions):
 		next_url_stop = result.find('">',next_url_start)
 		next_url = result[next_url_start:next_url_stop]
 		
-		if self.__dbg__:
-			print self.__plugin__ + " next_url=" + next_url
+		self.log("next_url=" + next_url)
 		
 		# get session token to get around the cross site scripting prevetion
 		session_token_start = result.find("'XSRF_TOKEN': '") + len("'XSRF_TOKEN': '")
 		session_token_stop = result.find("',",session_token_start) 
 		session_token = result[session_token_start:session_token_stop]
 		
-		if self.__dbg__:
-			print self.__plugin__ + " session_token=" + session_token
+		self.log("session_token=" + session_token)
 		
 		# post collected information to age the verifiaction page
 		request = urllib2.Request(new_url)
@@ -542,8 +519,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions):
 		request.add_header("Content-Type","application/x-www-form-urlencoded")
 		values = urllib.urlencode( { "next_url": next_url, "action_confirm": confirmed, "session_token":session_token })
 		
-		if self.__dbg__:
-			print self.__plugin__ + " post page content: " + values
+		self.log("post page content: " + values)
 		
 		con = urllib2.urlopen(request, values)
 		new_url = con.geturl()
@@ -557,10 +533,9 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions):
 			return self._fetchPage(params)
 		
 		# If verification failed we dump a shit load of info to the logs
-		if self.__dbg__:
-			print self.__plugin__ + " result url: " + repr(new_url)
+		self.log("result url: " + repr(new_url))
 		
-		print self.__plugin__ + " age verification failed with result: " + repr(result)
+		self.log("age verification failed with result: " + repr(result))
 		return (self.__language__(30606), 303)
 
 	def _oRefreshToken(self):
@@ -577,45 +552,36 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions):
 				try:
 					oauth = json.loads(ret["content"])
 				except:
-					if self.__dbg__:
-						print self.__plugin__ + " _oRefreshToken: " + repr(ret)
+					self.log(repr(ret))
 					return False
 			
-				if self.__dbg__:
-					print self.__plugin__ + " _oRefreshToken: " + repr(oauth)
+				self.log("- returning, got result a: " + repr(oauth))
 			
 				self.__settings__.setSetting("oauth2_access_token", oauth["access_token"])
 				return True
-			
-				if self.__dbg__:
-					print self.__plugin__ + " _oRefreshToken - returning, got result a: " + repr(oauth)
+
 
 			return False
 
-		if self.__dbg__:
-			print self.__plugin__ + " _oRefreshToken didn't even try"
+		self.log("didn't even try")
 
 		return False
 
 	def _getAuth(self):
-		if self.__dbg__:
-			print self.__plugin__ + " _getAuth"
+		self.log("")
 		
 		auth = self.__settings__.getSetting( "oauth2_access_token" )
 
 		if ( auth ):
-			if self.__dbg__:
-				print self.__plugin__ + " _getAuth returning stored auth"
+			self.log("returning stored auth")
 			return auth
 		else:   
 			(result, status ) =  self.login()
 			if status == 200:
-				if self.__dbg__:
-					print self.__plugin__ + " _getAuth returning new auth"
+				self.log("returning new auth")
 				return self.__settings__.getSetting( "oauth2_access_token" )
 			
-		if self.__dbg__:
-			print self.__plugin__ + " _getAuth failed because login failed"
+		self.log("failed because login failed")
 		
 		return False
 	
@@ -636,7 +602,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions):
 	def getVideoInfo(self, xml, params = {}):
 		get = params.get
 		dom = parseString(xml);
-		print self.__plugin__ + " _getvideoinfo : " + str(len(xml))
+		self.log(str(len(xml)))
 		links = dom.getElementsByTagName("link");
 		entries = dom.getElementsByTagName("entry");
 		if (not entries):
@@ -687,8 +653,7 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions):
 					elif reason == 'requesterRegion':
 						video['videoid'] = "false"
 					elif reason != 'limitedSyndication':
-						if self.__dbg__:
-							print self.__plugin__ + " _getvideoinfo removing video, reason: %s value: %s" % ( reason, value)
+						self.log("removing video, reason: %s value: %s" % ( reason, value))
 						video['videoid'] = "false";
 									
 			video['Title'] = self._getNodeValue(node, "media:title", "Unknown Title2").encode('utf-8') # Convert from utf-16 to combat breakage
@@ -728,14 +693,13 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions):
 				video['Overlay'] = int(overlay)
 			
 			if video['videoid'] == "false":
-				if self.__dbg__:
-					print self.__plugin__ + " _getvideoinfo videoid set to false : " + repr(video)
+				self.log("videoid set to false : " + repr(video))
 
 			ytobjects.append(video);
 		if next:
 			self.addNextFolder(ytobjects,params)
 				
-		print self.__plugin__ + " _getvideoinfo Done: " + str(len(ytobjects)) #+ repr(ytobjects)
+		self.log("Done: " + str(len(ytobjects)))
 		save_data = {}
 		for item in ytobjects:
 			if item.has_key("videoid"):

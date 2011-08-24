@@ -52,8 +52,7 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions)
 	
 	def getStoredArtists(self, params = {}):
 		get = params.get
-		if self.__dbg__:
-			print self.__plugin__ + " getStoredArtists"
+		self.log("")
 		
 		artists = self.retrieve(params)
 				
@@ -77,8 +76,7 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions)
 	
 	def deleteStoredArtist(self, params = {}):
 		get = params.get
-		if self.__dbg__:
-			print self.__plugin__ + " deleteStoredArtist"
+		self.log("")
 
 		artist = get("artist")
 		artists = self.retrieve(params)
@@ -94,8 +92,7 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions)
 		
 	def saveStoredArtist(self, params = {}):
 		get = params.get
-		if self.__dbg__:
-			print self.__plugin__ + " saveStoredArtist"
+		self.log("")
 
 		
 		if get("artist") and get("artist_name"):
@@ -108,8 +105,7 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions)
 		
 	def getStoredSearches(self, params = {}):
 		get = params.get
-		if self.__dbg__:
-			print self.__plugin__ + " getStoredSearches"
+		self.log("")
 		
 		searches = self.retrieve(params)
 				
@@ -138,8 +134,7 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions)
 			
 	def deleteStoredSearch(self, params = {}):
 		get = params.get
-		if self.__dbg__:
-			print self.__plugin__ + " deleteStoredSearch"
+		self.log("")
 
 		
 		query = urllib.unquote_plus(get("delete"))		
@@ -156,8 +151,7 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions)
 	
 	def saveStoredSearch(self, params = {}):
 		get = params.get
-		if self.__dbg__:
-			print self.__plugin__ + " saveStoredSearch"
+		self.log("")
 		
 		if get("search"):
 			searches = self.retrieve(params)
@@ -179,8 +173,7 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions)
 	
 	def editStoredSearch(self, params = {}):
 		get = params.get
-		if self.__dbg__:
-			print self.__plugin__ + " editStoredSearch"
+		self.log("")
 
 
 		if (get("search")):
@@ -206,8 +199,7 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions)
 		
 	def getUserOptionFolder(self, params = {}):
 		get = params.get
-		if self.__dbg__:
-			print self.__plugin__ + " getUserOptionsFolder"
+		self.log("")
 
 		result = []
 		for item in self.user_options:
@@ -219,8 +211,7 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions)
 	
 	def changeSubscriptionView(self, params = {}):
 		get = params.get
-		if self.__dbg__:
-			print self.__plugin__ + " changeSubscriptionsView"
+		self.log("")
 
 		
 		if (get("view_mode")):  
@@ -234,8 +225,7 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions)
 	
 	def reversePlaylistOrder(self, params = {}):
 		get = params.get
-		if self.__dbg__:
-			print self.__plugin__ + " reversePlaylistOrder"
+		self.log("")
 		
 		if (get("playlist")):			
 			value = "true"
@@ -249,8 +239,7 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions)
 		
 	def getReversePlaylistOrder(self, params = {}):
 		get = params.get 
-		if self.__dbg__:
-			print self.__plugin__ + " getReversePlaylistOrder"
+		self.log("")
 		
 		result = False
 		if (get("playlist")):
@@ -404,7 +393,7 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions)
 	def store(self, params = {}, results = [], type = "", item = {}):
 		key = self.getStorageKey(params, type, item)
 		
-		print self.__plugin__ + " Got key " + repr(key)
+		self.log("Got key " + repr(key))
 		
 		if type == "thumbnail" or type == "viewmode" or type == "value":
 			self.storeValue(key, results)
@@ -436,7 +425,7 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions)
 	def retrieve(self, params = {}, type = "", item = {}):
 		key = self.getStorageKey(params, type, item)
 		
-		print self.__plugin__ + " Got key " + repr(key)
+		self.log("Got key " + repr(key))
 		
 		if type == "thumbnail" or type == "viewmode" or type == "value":
 			return self.retrieveValue(key)
@@ -468,7 +457,7 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions)
 			videos = []
 			
 			queue = self.__storage_server__.sqlGet("YouTubeDownloadQueue")
-			print self.__plugin__ + " queue loaded : " + repr(queue)
+			self.log("queue loaded : " + repr(queue))
 
 			if queue:
 				try:
@@ -481,10 +470,10 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions)
 				videoid = videos[0]
 
 			self.__storage_server__.unlock("YouTubeQueueLock")
-			print self.__plugin__ + " getNextVideoFromDownloadQueue released. returning : " + videoid
+			self.log("getNextVideoFromDownloadQueue released. returning : " + videoid)
 			return videoid
 		else:
-			print self.__plugin__ + " getNextVideoFromDownloadQueue Exception "
+			self.log("getNextVideoFromDownloadQueue Exception")
 
 	def addVideoToDownloadQeueu(self, params = {}):
 		if self.__storage_server__.lock("YouTubeQueueLock"):
@@ -493,7 +482,7 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions)
 			videos = []
 			if get("videoid"):
 				queue = self.__storage_server__.sqlGet("YouTubeDownloadQueue")
-				print self.__plugin__ + " queue loaded : " + repr(queue)
+				self.log("queue loaded : " + repr(queue))
 
 				if queue:
 					try:
@@ -505,19 +494,19 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions)
 					videos.append(get("videoid"))
 					
 					self.__storage_server__.sqlSet("YouTubeDownloadQueue", repr(videos))
-					print self.__plugin__ + " Added: " + get("videoid") + " to: " + repr(videos)
+					self.log("Added: " + get("videoid") + " to: " + repr(videos))
 
 			self.__storage_server__.unlock("YouTubeQueueLock")
-			print self.__plugin__ + " addVideoToDownloadQeueu released"
+			self.log("addVideoToDownloadQeueu released")
 		else:
-			print self.__plugin__ + " addVideoToDownloadQeueu Exception "
+			self.log("addVideoToDownloadQeueu Exception")
 		
 	def removeVideoFromDownloadQueue(self, videoid):
 		if self.__storage_server__.lock("YouTubeQueueLock"):
 			videos = []
 			
 			queue = self.__storage_server__.sqlGet("YouTubeDownloadQueue")
-			print self.__plugin__ + " queue loaded : " + repr(queue)
+			self.log("queue loaded : " + repr(queue))
 			if queue:
 				try:
 					videos = eval(queue)
@@ -528,11 +517,11 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions)
 				videos.remove(videoid)
 
 				self.__storage_server__.sqlSet("YouTubeDownloadQueue", repr(videos))
-				print self.__plugin__ + " Removed: " + videoid + " from: " + repr(videos)
+				self.log("Removed: " + videoid + " from: " + repr(videos))
 			else:
-				print self.__plugin__ + " Didn't remove: " + videoid + " from: " + repr(videos)
+				self.log("Didn't remove: " + videoid + " from: " + repr(videos))
 
 			self.__storage_server__.unlock("YouTubeQueueLock")
-			print self.__plugin__ + " removeVideoFromDownloadQueue released"
+			self.log("removeVideoFromDownloadQueue released")
 		else:
-			print self.__plugin__ + " removeVideoFromDownloadQueue Exception "
+			self.log("removeVideoFromDownloadQueue Exception")

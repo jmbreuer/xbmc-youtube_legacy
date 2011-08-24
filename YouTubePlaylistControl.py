@@ -32,8 +32,7 @@ class YouTubePlaylistControl(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils)
 	
 	def playAll(self, params={}):
 		get = params.get
-		if self.__dbg__:
-			print self.__plugin__ + " playAll"
+		self.log("")
 
 		params["fetch_all"] = "true"
 		result = []
@@ -67,8 +66,7 @@ class YouTubePlaylistControl(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils)
 		if len(result) == 0:
 			return
 		
-		if self.__dbg__:
-			print self.__plugin__ + " " + repr(len(result)) + " video results "
+		self.log(repr(len(result)) + " video results ")
 		
 		if get("videoid"):
 			video_index = -1
@@ -103,8 +101,7 @@ class YouTubePlaylistControl(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils)
 		
 	def queueVideo(self, params = {}):
 		get = params.get
-		if self.__dbg__:
-			print self.__plugin__ + " - Queuing videos: " + get("videoid")
+		self.log("Queuing videos: " + get("videoid"))
 		
 		items =[]
 		videoids = get("videoid")
@@ -117,8 +114,7 @@ class YouTubePlaylistControl(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils)
 		(video, status) = self.__core__.getBatchDetails(items, params);
 
 		if status != 200:
-			if self.__dbg__ :
-				print self.__plugin__ + " construct video url failed contents of video item " + repr(video)
+			self.log("construct video url failed contents of video item " + repr(video))
 				
 			self.showErrorMessage(self.__language__(30603), video["apierror"], status)
 			return False
@@ -127,8 +123,7 @@ class YouTubePlaylistControl(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils)
 		listitem.setProperty('IsPlayable', 'true')
 		listitem.setInfo(type='Video', infoLabels=video)
 
-		if self.__dbg__:
-			print self.__plugin__ + " - Queuing video: " + self.makeAscii(video['Title']) + " - " + get('videoid') + " - " + video['video_url']
+		self.log("Queuing video: " + self.makeAscii(video['Title']) + " - " + get('videoid') + " - " + video['video_url'])
 
 		playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
 		playlist.add("%s?path=/root&action=play_video&videoid=%s" % (sys.argv[0], video["videoid"] ), listitem)
@@ -202,7 +197,7 @@ class YouTubePlaylistControl(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils)
 			return False
 		
 		(result, status) = self.__scraper__.scrapeLikedVideos(params)
-		print " liked videos "  + repr(result)
+		self.log("Liked videos "  + repr(result))
 		if status == 200:
 			(result, status) = self.getBatchDetails(result, params)
 			
