@@ -20,7 +20,7 @@ import sys
 import xbmc, xbmcgui
 import YouTubeCore, YouTubeUtils
 
-class YouTubePlaylistControl(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils):
+class YouTubePlaylistControl():
 	__settings__ = sys.modules[ "__main__" ].__settings__
 	__language__ = sys.modules[ "__main__" ].__language__
 	__plugin__ = sys.modules[ "__main__"].__plugin__	
@@ -29,6 +29,10 @@ class YouTubePlaylistControl(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils)
 	__feeds__ = sys.modules[ "__main__" ].__feeds__
 	__scraper__ = sys.modules[ "__main__" ].__scraper__
 	__player__ = sys.modules[ "__main__" ].__player__
+	
+	def __init__(self, core = YouTubeCore.YouTubeCore(), utils = YouTubeUtils.YouTubeUtils()):
+		self.core = core
+		self.utils = utils
 	
 	def playAll(self, params={}):
 		get = params.get

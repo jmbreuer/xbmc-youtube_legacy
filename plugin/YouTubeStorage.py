@@ -29,7 +29,7 @@ class YouTubeStorage(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions)
 	__plugin__ = sys.modules[ "__main__"].__plugin__
 	__language__ = sys.modules[ "__main__" ].__language__
 
-        __storage_server__ = StorageServer.StorageServer()
+	__storage_server__ = StorageServer.StorageServer()
 	__storage_server__.__table_name__ = "YouTube"
 
 	# This list contains the list options a user sees when indexing a contact 

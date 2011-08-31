@@ -28,15 +28,15 @@ except ImportError: import xbmcvfsdummy as xbmcvfs
 
 from xml.dom.minidom import parseString
 
-class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions):
+class YouTubePlayer():
 	__settings__ = sys.modules[ "__main__" ].__settings__
 	__language__ = sys.modules[ "__main__" ].__language__
 	__plugin__ = sys.modules[ "__main__" ].__plugin__ 
 	__dbg__ = sys.modules[ "__main__" ].__dbg__
 	__storage__ = sys.modules[ "__main__" ].__storage__
-
-        __storage_server__ = StorageServer.StorageServer()
-        __storage_server__.__table_name__ = "YouTube"
+	
+	__storage_server__ = StorageServer.StorageServer()
+	__storage_server__.__table_name__ = "YouTube"
 
 	fmt_value = { 35 : "480p h264 flv container",
 		      59 : "480 for rtmpe",
@@ -52,18 +52,23 @@ class YouTubePlayer(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonFu
 		      45 : "720p vp8 webm container",
 		      37 : "1080p h264 mp4 container",
 		      38 : "720p vp8 webm container" }
-
-	def __init__(self):
-		# YouTube Playback Feeds
-		self.urls['video_stream'] = "http://www.youtube.com/watch?v=%s&safeSearch=none"
-		self.urls['embed_stream'] = "http://www.youtube.com/get_video_info?video_id=%s"
-		self.urls['timed_text_index'] = "http://www.youtube.com/api/timedtext?type=list&v=%s"
-		self.urls['video_info'] = "http://gdata.youtube.com/feeds/api/videos/%s"
-		self.urls['close_caption_url'] = "http://www.youtube.com/api/timedtext?type=track&v=%s&name=%s&lang=%s"
-		self.urls['transcription_url'] = "http://www.youtube.com/api/timedtext?sparams=asr_langs,caps,expire,v&asr_langs=en,ja&caps=asr&expire=%s&key=yttt1&signature=%s&hl=en&type=trackformat=1&lang=en&kind=asr&name=&v=%s&tlang=en"
-		self.urls['annotation_url'] = "http://www.youtube.com/api/reviews/y/read2?video_id=%s"
-		self.urls['remove_watch_later'] = "http://www.youtube.com/addto_ajax?action_delete_from_playlist=1"
-		
+	
+	# YouTube Playback Feeds
+	urls = {}
+	urls['video_stream'] = "http://www.youtube.com/watch?v=%s&safeSearch=none"
+	urls['embed_stream'] = "http://www.youtube.com/get_video_info?video_id=%s"
+	urls['timed_text_index'] = "http://www.youtube.com/api/timedtext?type=list&v=%s"
+	urls['video_info'] = "http://gdata.youtube.com/feeds/api/videos/%s"
+	urls['close_caption_url'] = "http://www.youtube.com/api/timedtext?type=track&v=%s&name=%s&lang=%s"
+	urls['transcription_url'] = "http://www.youtube.com/api/timedtext?sparams=asr_langs,caps,expire,v&asr_langs=en,ja&caps=asr&expire=%s&key=yttt1&signature=%s&hl=en&type=trackformat=1&lang=en&kind=asr&name=&v=%s&tlang=en"
+	urls['annotation_url'] = "http://www.youtube.com/api/reviews/y/read2?video_id=%s"
+	urls['remove_watch_later'] = "http://www.youtube.com/addto_ajax?action_delete_from_playlist=1"
+	
+	def __init__(self, core = YouTubeCore.YouTubeCore(), utils = YouTubeUtils.YouTubeUtils(), common = CommonFunctions.CommonFunctions()):
+		self.core = core
+		self.utils = utils
+		self.common = common
+				
 	# ================================ Subtitle Downloader ====================================
 	def downloadSubtitle(self, video = {}):
 		get = video.get

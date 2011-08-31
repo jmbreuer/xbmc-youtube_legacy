@@ -20,7 +20,7 @@ import sys, urllib, re
 import YouTubeCore, YouTubeUtils, CommonFunctions
 import StorageServer
 
-class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions):
+class YouTubeScraper():
 
 	__settings__ = sys.modules[ "__main__" ].__settings__
 	__language__ = sys.modules[ "__main__" ].__language__
@@ -32,34 +32,38 @@ class YouTubeScraper(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonF
 	__storage__ = sys.modules[ "__main__" ].__storage__
 	__storage_server__.__table_name__ = "YouTube"
 	
-	def __init__(self):
-		self.urls['categories'] = "http://www.youtube.com/videos"
-		self.urls['current_trailers'] = "http://www.youtube.com/trailers?s=trit&p=%s&hl=en"
-		self.urls['disco_main'] = "http://www.youtube.com/disco" 
-		self.urls['disco_mix_list'] = "http://www.youtube.com/watch?v=%s&feature=disco&playnext=1&list=%s"
-		self.urls['disco_search'] = "http://www.youtube.com/disco?action_search=1&query=%s"
-		self.urls['game_trailers'] = "http://www.youtube.com/trailers?s=gtcs"
-		self.urls['live'] = "http://www.youtube.com/live"
-		self.urls['main'] = "http://www.youtube.com"
-		self.urls['movies'] = "http://www.youtube.com/ytmovies"
-		self.urls['popular_game_trailers'] = "http://www.youtube.com/trailers?s=gtp&p=%s&hl=en"
-		self.urls['popular_trailers'] = "http://www.youtube.com/trailers?s=trp&p=%s&hl=en"
-		self.urls['recommended'] = "http://www.youtube.com/videos?r=1&hl=en"
-		self.urls['show_list'] = "http://www.youtube.com/show"
-		self.urls['shows'] = "http://www.youtube.com/shows"
-		self.urls['trailers'] = "http://www.youtube.com/trailers?s=tr"
-		self.urls['latest_trailers'] = "http://www.youtube.com/trailers?s=tr"
-		self.urls['latest_game_trailers'] = "http://www.youtube.com/trailers?s=gtcs"
-		self.urls['upcoming_game_trailers'] = "http://www.youtube.com/trailers?s=gtcs&p=%s&hl=en"
-		self.urls['upcoming_trailers'] = "http://www.youtube.com/trailers?s=tros&p=%s&hl=en"
-		self.urls['watch_later'] = "http://www.youtube.com/my_watch_later_list"
-		self.urls['liked_videos'] = "http://www.youtube.com/my_liked_videos"
-		self.urls['music'] = "http://www.youtube.com/music"
-		self.urls['artist'] = "http://www.youtube.com/artist?a=%s&feature=artist"
-		self.urls['education'] = "http://www.youtube.com/education"
-		self.urls['education_category'] = "http://www.youtube.com/education?category=%s"
-		self.urls['playlist'] = "http://www.youtube.com/view_play_list?p=%s"
-		
+	urls = {}
+	urls['categories'] = "http://www.youtube.com/videos"
+	urls['current_trailers'] = "http://www.youtube.com/trailers?s=trit&p=%s&hl=en"
+	urls['disco_main'] = "http://www.youtube.com/disco" 
+	urls['disco_mix_list'] = "http://www.youtube.com/watch?v=%s&feature=disco&playnext=1&list=%s"
+	urls['disco_search'] = "http://www.youtube.com/disco?action_search=1&query=%s"
+	urls['game_trailers'] = "http://www.youtube.com/trailers?s=gtcs"
+	urls['live'] = "http://www.youtube.com/live"
+	urls['main'] = "http://www.youtube.com"
+	urls['movies'] = "http://www.youtube.com/ytmovies"
+	urls['popular_game_trailers'] = "http://www.youtube.com/trailers?s=gtp&p=%s&hl=en"
+	urls['popular_trailers'] = "http://www.youtube.com/trailers?s=trp&p=%s&hl=en"
+	urls['recommended'] = "http://www.youtube.com/videos?r=1&hl=en"
+	urls['show_list'] = "http://www.youtube.com/show"
+	urls['shows'] = "http://www.youtube.com/shows"
+	urls['trailers'] = "http://www.youtube.com/trailers?s=tr"
+	urls['latest_trailers'] = "http://www.youtube.com/trailers?s=tr"
+	urls['latest_game_trailers'] = "http://www.youtube.com/trailers?s=gtcs"
+	urls['upcoming_game_trailers'] = "http://www.youtube.com/trailers?s=gtcs&p=%s&hl=en"
+	urls['upcoming_trailers'] = "http://www.youtube.com/trailers?s=tros&p=%s&hl=en"
+	urls['watch_later'] = "http://www.youtube.com/my_watch_later_list"
+	urls['liked_videos'] = "http://www.youtube.com/my_liked_videos"
+	urls['music'] = "http://www.youtube.com/music"
+	urls['artist'] = "http://www.youtube.com/artist?a=%s&feature=artist"
+	urls['education'] = "http://www.youtube.com/education"
+	urls['education_category'] = "http://www.youtube.com/education?category=%s"
+	urls['playlist'] = "http://www.youtube.com/view_play_list?p=%s"
+	
+	def __init__(self, core = YouTubeCore.YouTubeCore(), utils = YouTubeUtils.YouTubeUtils(), common = CommonFunctions.CommonFunctions()):
+		self.core = core
+		self.utils = utils
+		self.common = common
 #=================================== Trailers ============================================
 	def scrapeTrailersListFormat (self, params = {}):
 		get = params.get
