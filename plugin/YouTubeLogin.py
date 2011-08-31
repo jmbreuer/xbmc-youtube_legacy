@@ -29,24 +29,28 @@ import YouTubeUtils, YouTubeCore, CommonFunctions
 # 303 = See other (returned an error message)
 # 500 = uncaught error
 
-class YouTubeLogin(YouTubeCore.YouTubeCore, YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions):
+class YouTubeLogin():
 	__settings__ = sys.modules[ "__main__" ].__settings__
 	__language__ = sys.modules[ "__main__" ].__language__
 	__plugin__ = sys.modules[ "__main__" ].__plugin__
 	__dbg__ = sys.modules[ "__main__" ].__dbg__
 
 	APIKEY = "AI39si6hWF7uOkKh4B9OEAX-gK337xbwR9Vax-cdeF9CF9iNAcQftT8NVhEXaORRLHAmHxj6GjM-Prw04odK4FxACFfKkiH9lg";
-		
+	__table_name__ = "YouTube"
+			
 	urls = {};
 	urls['http_login'] = "https://www.google.com/accounts/ServiceLogin?service=youtube"
 	urls['http_login_confirmation'] = "http://www.youtube.com/signin?action_handle_signin=true&nomobiletemp=1&hl=en_US&next=/index&hl=en_US&ltmpl=sso"
 	urls['gdata_login'] = "https://www.google.com/accounts/ClientLogin"
-
-	__cj__ = cookielib.LWPCookieJar()
-	__opener__ = urllib2.build_opener(urllib2.HTTPCookieProcessor(__cj__))
-	urllib2.install_opener(__opener__)
-	__table_name__ = "YouTube"
 	
+	def __init__(self, core = YouTubeCore.YouTubeCore(), utils = YouTubeUtils.YouTubeUtils(), common = CommonFunctions.CommonFunctions):
+		self.cookiejar = cookielib.LWPCookieJar()
+		self.opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar))
+		urllib2.install_opener(self.opener)
+		self.core = core
+		self.utils = utils
+		self.common = common 
+		
 	def login(self, params = {}):
 		self.log("")
 		ouname = self.__settings__.getSetting("username")

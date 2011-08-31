@@ -21,18 +21,23 @@ import xbmc, xbmcgui, xbmcplugin
 import YouTubeUtils, CommonFunctions
 
 class YouTubeNavigation(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions):
-	__settings__ = sys.modules[ "__main__" ].__settings__
-	__plugin__ = sys.modules[ "__main__"].__plugin__	
-	__language__ = sys.modules[ "__main__" ].__language__
-	__dbg__ = sys.modules[ "__main__" ].__dbg__
+
+	def __init__(self, utils = YouTubeUtils.YouTubeUtils(), common = CommonFunctions.CommonFunctions()):
+		self.utils = utils
+		self.common = common
 	
-	__playlist__ = sys.modules[ "__main__" ].__playlist__
-	__login__ = sys.modules[ "__main__" ].__login__
-	__feeds__ = sys.modules[ "__main__" ].__feeds__
-	__player__ = sys.modules[ "__main__" ].__player__
-	__downloader__ = sys.modules[ "__main__" ].__downloader__
-	__storage__ = sys.modules[ "__main__" ].__storage__
-	__scraper__ = sys.modules[ "__main__" ].__scraper__
+		self.__playlist__ = sys.modules[ "__main__" ].__playlist__
+		self.__login__ = sys.modules[ "__main__" ].__login__
+		self.__feeds__ = sys.modules[ "__main__" ].__feeds__
+		self.__player__ = sys.modules[ "__main__" ].__player__
+		self.__downloader__ = sys.modules[ "__main__" ].__downloader__
+		self.__storage__ = sys.modules[ "__main__" ].__storage__
+		self.__scraper__ = sys.modules[ "__main__" ].__scraper__
+	
+	__settings__ = sys.modules[ "__main__" ].__settings__
+	__language__ = sys.modules[ "__main__" ].__language__
+	__plugin__ = sys.modules[ "__main__"].__plugin__	
+	__dbg__ = sys.modules[ "__main__" ].__dbg__
 	
 	# This list contains the main menu structure the user first encounters when running the plugin
 	#			   label						  , path									        , thumbnail					  		,  login		  ,  feed / action
