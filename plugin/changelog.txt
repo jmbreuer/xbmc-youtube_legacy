@@ -1,5 +1,6 @@
-dddd[B]TODO:[/B]
+[B]TODO:[/B]
 - Unit test [2.8]
+- Integration tests of scraper module (i.e. hit YouTube and ensure that the scraper gets the correct information)
 - Scrape Education.
 - Caching the right places. And only the right places.
 
