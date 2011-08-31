@@ -40,21 +40,8 @@ class url2request(urllib2.Request):
 		else:
 			return urllib2.Request.get_method(self) 
 
-class YouTubeCore(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions):
-	__settings__ = sys.modules[ "__main__" ].__settings__
-	__language__ = sys.modules[ "__main__" ].__language__
-	__plugin__ = sys.modules[ "__main__" ].__plugin__
-	__dbg__ = sys.modules[ "__main__" ].__dbg__
+class YouTubeCore():
 	
-	__storage__ = sys.modules[ "__main__" ].__storage__
-	__login__ = sys.modules[ "__main__" ].__login__
-
-	__cj__ = cookielib.LWPCookieJar()
-	__opener__ = urllib2.build_opener(urllib2.HTTPCookieProcessor(__cj__))
-	urllib2.install_opener(__opener__)
-
-        __storage_server__ = StorageServer.StorageServer()
-	__storage_server__.__table_name__ = "YouTube"
 	APIKEY = "AI39si6hWF7uOkKh4B9OEAX-gK337xbwR9Vax-cdeF9CF9iNAcQftT8NVhEXaORRLHAmHxj6GjM-Prw04odK4FxACFfKkiH9lg";
 	
 	#===============================================================================
@@ -71,7 +58,22 @@ class YouTubeCore(YouTubeUtils.YouTubeUtils, CommonFunctions.CommonFunctions):
 	urls['thumbnail'] = "http://i.ytimg.com/vi/%s/0.jpg"
 	urls['remove_watch_later'] = "http://www.youtube.com/addto_ajax?action_delete_from_playlist=1"	
 
-	def __init__(self):
+
+	def __init__(self, utils = YouTubeUtils(), common = CommonFunctions.CommonFunctions(), storage_server = StorageServer.StorageServer()):
+		self.__settings__ = sys.modules[ "__main__" ].__settings__
+		self.__language__ = sys.modules[ "__main__" ].__language__
+		self.__plugin__ = sys.modules[ "__main__" ].__plugin__
+		self.__dbg__ = sys.modules[ "__main__" ].__dbg__
+		self.__storage__ = sys.modules[ "__main__" ].__storage__
+		self.__login__ = sys.modules[ "__main__" ].__login__
+
+		self.cookiejar = cookielib.LWPCookieJar()
+		self.opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar))
+		urllib2.install_opener(self.opener)
+		
+		self.storage_server = StorageServer.StorageServer()
+		storage_server.__table_name__ = "YouTube"
+	
 		timeout = [5, 10, 15, 20, 25][int(self.__settings__.getSetting( "timeout" ))]
 		if not timeout:
 			timeout = "15"

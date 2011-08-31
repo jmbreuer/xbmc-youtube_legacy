@@ -24,19 +24,23 @@ try: import xbmcvfs
 except ImportError: import xbmcvfsdummy as xbmcvfs
 import StorageServer
 
-class YouTubeDownloader(YouTubeUtils.YouTubeUtils):
-	__settings__ = sys.modules[ "__main__" ].__settings__
-	__language__ = sys.modules[ "__main__" ].__language__
-	__plugin__ = sys.modules[ "__main__"].__plugin__	
-	__dbg__ = sys.modules[ "__main__" ].__dbg__
+class YouTubeDownloader():
 	
-	__player__ = sys.modules["__main__" ].__player__
-	__storage__ = sys.modules[ "__main__" ].__storage__
-
-        __storage_server__ = StorageServer.StorageServer()
-	__storage_server__.__table_name__ = "YouTube"
-
 	dialog = ""
+	
+	def __init__(self, utils = YouTubeUtils.YouTubeUtils()):
+		self.__settings__ = sys.modules[ "__main__" ].__settings__
+		self.__language__ = sys.modules[ "__main__" ].__language__
+		self.__plugin__ = sys.modules[ "__main__"].__plugin__	
+		self.__dbg__ = sys.modules[ "__main__" ].__dbg__
+		
+		self.__player__ = sys.modules["__main__" ].__player__
+		self.__storage__ = sys.modules[ "__main__" ].__storage__
+	
+		self.__storage_server__ = StorageServer.StorageServer()
+		self.__storage_server__.__table_name__ = "YouTube"
+		
+		self.utils = utils
 
 	def downloadVideo(self, params = {}):
 		get = params.get

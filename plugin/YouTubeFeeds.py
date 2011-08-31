@@ -19,42 +19,45 @@
 import sys, urllib
 import YouTubeCore
 
-class YouTubeFeeds(YouTubeCore.YouTubeCore):
-	__settings__ = sys.modules[ "__main__" ].__settings__
-	__language__ = sys.modules[ "__main__" ].__language__
-	__plugin__ = sys.modules[ "__main__" ].__plugin__
-	__dbg__ = sys.modules[ "__main__" ].__dbg__
+class YouTubeFeeds():
 	
-	__storage__ = sys.modules[ "__main__" ].__storage__
+	# YouTube General Feeds
+	urls = {}
+	urls['playlist'] = "http://gdata.youtube.com/feeds/api/playlists/%s"
+	urls['related'] = "http://gdata.youtube.com/feeds/api/videos/%s/related"
+	urls['search'] = "http://gdata.youtube.com/feeds/api/videos?q=%s&safeSearch=%s"
+	
+	# YouTube User specific Feeds
+	urls['uploads'] = "http://gdata.youtube.com/feeds/api/users/%s/uploads"
+	urls['favorites'] = "http://gdata.youtube.com/feeds/api/users/%s/favorites"
+	urls['playlists'] = "http://gdata.youtube.com/feeds/api/users/%s/playlists"
+	urls['contacts'] = "http://gdata.youtube.com/feeds/api/users/default/contacts"
+	urls['subscriptions'] = "http://gdata.youtube.com/feeds/api/users/%s/subscriptions"
+	urls['newsubscriptions'] = "http://gdata.youtube.com/feeds/api/users/%s/newsubscriptionvideos"
+	
+	# YouTube Standard feeds
+	urls['feed_rated'] = "http://gdata.youtube.com/feeds/api/standardfeeds/top_rated?time=%s"
+	urls['feed_favorites'] = "http://gdata.youtube.com/feeds/api/standardfeeds/top_favorites?time=%s"
+	urls['feed_viewed'] = "http://gdata.youtube.com/feeds/api/standardfeeds/most_viewed?time=%s"
+	urls['feed_linked'] = "http://gdata.youtube.com/feeds/api/standardfeeds/most_popular?time=%s" 
+	urls['feed_discussed'] = "http://gdata.youtube.com/feeds/api/standardfeeds/most_discussed?time=%s"
+	urls['feed_responded'] = "http://gdata.youtube.com/feeds/api/standardfeeds/most_responded?time=%s"
+	urls['feed_live'] = "http://gdata.youtube.com/feeds/api/charts/live/events/live_now"
+	
+	# Wont work with time parameter
+	urls['feed_recent'] = "http://gdata.youtube.com/feeds/api/standardfeeds/most_recent" 
+	urls['feed_featured'] = "http://gdata.youtube.com/feeds/api/standardfeeds/recently_featured"
+	urls['feed_trending'] = "http://gdata.youtube.com/feeds/api/standardfeeds/on_the_web"
+	urls['feed_shared'] = "http://gdata.youtube.com/feeds/api/standardfeeds/most_shared"
+	
+	def __init__(self, core = YouTubeCore.YouTubeCore()):
+		self.__settings__ = sys.modules[ "__main__" ].__settings__
+		self.__language__ = sys.modules[ "__main__" ].__language__
+		self.__plugin__ = sys.modules[ "__main__" ].__plugin__
+		self.__dbg__ = sys.modules[ "__main__" ].__dbg__
+		self.__storage__ = sys.modules[ "__main__" ].__storage__
 		
-	def __init__(self):
-		# YouTube General Feeds
-		self.urls['playlist'] = "http://gdata.youtube.com/feeds/api/playlists/%s"
-		self.urls['related'] = "http://gdata.youtube.com/feeds/api/videos/%s/related"
-		self.urls['search'] = "http://gdata.youtube.com/feeds/api/videos?q=%s&safeSearch=%s"
-	
-		# YouTube User specific Feeds
-		self.urls['uploads'] = "http://gdata.youtube.com/feeds/api/users/%s/uploads"
-		self.urls['favorites'] = "http://gdata.youtube.com/feeds/api/users/%s/favorites"
-		self.urls['playlists'] = "http://gdata.youtube.com/feeds/api/users/%s/playlists"
-		self.urls['contacts'] = "http://gdata.youtube.com/feeds/api/users/default/contacts"
-		self.urls['subscriptions'] = "http://gdata.youtube.com/feeds/api/users/%s/subscriptions"
-		self.urls['newsubscriptions'] = "http://gdata.youtube.com/feeds/api/users/%s/newsubscriptionvideos"
-	
-		# YouTube Standard feeds
-		self.urls['feed_rated'] = "http://gdata.youtube.com/feeds/api/standardfeeds/top_rated?time=%s"
-		self.urls['feed_favorites'] = "http://gdata.youtube.com/feeds/api/standardfeeds/top_favorites?time=%s"
-		self.urls['feed_viewed'] = "http://gdata.youtube.com/feeds/api/standardfeeds/most_viewed?time=%s"
-		self.urls['feed_linked'] = "http://gdata.youtube.com/feeds/api/standardfeeds/most_popular?time=%s" 
-		self.urls['feed_discussed'] = "http://gdata.youtube.com/feeds/api/standardfeeds/most_discussed?time=%s"
-		self.urls['feed_responded'] = "http://gdata.youtube.com/feeds/api/standardfeeds/most_responded?time=%s"
-		self.urls['feed_live'] = "http://gdata.youtube.com/feeds/api/charts/live/events/live_now"
-	
-		# Wont work with time parameter
-		self.urls['feed_recent'] = "http://gdata.youtube.com/feeds/api/standardfeeds/most_recent" 
-		self.urls['feed_featured'] = "http://gdata.youtube.com/feeds/api/standardfeeds/recently_featured"
-		self.urls['feed_trending'] = "http://gdata.youtube.com/feeds/api/standardfeeds/on_the_web"
-		self.urls['feed_shared'] = "http://gdata.youtube.com/feeds/api/standardfeeds/most_shared"
+		self.core = core
 	
 	def createUrl(self, params = {}):
 		get = params.get
