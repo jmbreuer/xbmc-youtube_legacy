@@ -38,7 +38,8 @@ class YouTubePlayer():
 	__storage_server__ = StorageServer.StorageServer()
 	__storage_server__.__table_name__ = "YouTube"
 
-	fmt_value = { 35 : "480p h264 flv container",
+	fmt_value = { 
+			  35 : "480p h264 flv container",
 		      59 : "480 for rtmpe",
 		      44 : "480p vp8 webm container",
 		      78 : "seems to be around 400 for rtmpe",
