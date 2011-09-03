@@ -50,20 +50,19 @@ class YouTubeFeeds():
 	urls['feed_trending'] = "http://gdata.youtube.com/feeds/api/standardfeeds/on_the_web"
 	urls['feed_shared'] = "http://gdata.youtube.com/feeds/api/standardfeeds/most_shared"
 	
-	def __init__(self, core = YouTubeCore.YouTubeCore()):
-		self.__settings__ = sys.modules[ "__main__" ].__settings__
-		self.__language__ = sys.modules[ "__main__" ].__language__
-		self.__plugin__ = sys.modules[ "__main__" ].__plugin__
-		self.__dbg__ = sys.modules[ "__main__" ].__dbg__
-		self.__storage__ = sys.modules[ "__main__" ].__storage__
-		
-		self.core = core
+	def __init__(self):
+		self.settings = sys.modules[ "__main__" ].settings
+		self.language = sys.modules[ "__main__" ].language
+		self.plugin = sys.modules[ "__main__" ].plugin
+		self.dbg = sys.modules[ "__main__" ].dbg
+		self.storage = sys.modules[ "__main__" ].storage
+		self.core = sys.modules[ "__main__" ].core
 	
 	def createUrl(self, params = {}):
 		get = params.get
 		time = "this_week"
-		per_page = ( 10, 15, 20, 25, 30, 40, 50 )[ int( self.__settings__.getSetting( "perpage" ) ) ]
-		region = ('', 'AU', 'BR', 'CA', 'CZ', 'FR', 'DE', 'GB', 'NL', 'HK', 'IN', 'IE', 'IL', 'IT', 'JP', 'MX', 'NZ', 'PL', 'RU', 'KR', 'ES','SE', 'TW', 'US', 'ZA' )[ int( self.__settings__.getSetting( "region_id" ) ) ]
+		per_page = ( 10, 15, 20, 25, 30, 40, 50 )[ int( self.settings.getSetting( "perpage" ) ) ]
+		region = ('', 'AU', 'BR', 'CA', 'CZ', 'FR', 'DE', 'GB', 'NL', 'HK', 'IN', 'IE', 'IL', 'IT', 'JP', 'MX', 'NZ', 'PL', 'RU', 'KR', 'ES','SE', 'TW', 'US', 'ZA' )[ int( self.settings.getSetting( "region_id" ) ) ]
 		
 		page = get("page","0")
 		start_index = per_page * int(page) + 1
@@ -77,9 +76,9 @@ class YouTubeFeeds():
 		
 		if get("search"):
 			query = urllib.unquote_plus(get("search"))
-			safe_search = ("none", "moderate", "strict" ) [int( self.__settings__.getSetting( "safe_search" ) ) ]	
+			safe_search = ("none", "moderate", "strict" ) [int( self.settings.getSetting( "safe_search" ) ) ]	
 			url = url % (query, safe_search)  
-			authors = self.__settings__.getSetting("stored_searches_author")
+			authors = self.settings.getSetting("stored_searches_author")
 			if len(authors) > 0:
 				try:
 					authors = eval(authors)
@@ -129,7 +128,7 @@ class YouTubeFeeds():
 		if get("login") == "true":
 			if ( not self.core._getAuth() ):
 				self.core.common.log("Login required but auth wasn't set!")
-				return ( self.__language__(30609) , 303 )
+				return ( self.language(30609) , 303 )
 
 		url = self.createUrl(params)
 		
@@ -148,17 +147,17 @@ class YouTubeFeeds():
 		thumbnail = videos[0].get('thumbnail', "")
 		
 		if thumbnail:
-			self.__storage__.store(params, thumbnail, "thumbnail")
+			self.storage.store(params, thumbnail, "thumbnail")
 						
 		return (videos, 200)
 	
 	def listPlaylist(self, params = {}):
 		get = params.get
 		page = int(get("page", "0"))
-		per_page = ( 10, 15, 20, 25, 30, 40, 50 )[ int( self.__settings__.getSetting( "perpage" ) ) ]
+		per_page = ( 10, 15, 20, 25, 30, 40, 50 )[ int( self.settings.getSetting( "perpage" ) ) ]
 		next = 'false'
 		
-		videos = self.__storage__.retrieve(params)
+		videos = self.storage.retrieve(params)
 		
 		if page != 0 and videos:
 			if ( per_page * ( page + 1 ) < len(videos) ):
@@ -181,11 +180,11 @@ class YouTubeFeeds():
 				item["videoid"] = vget("videoid")
 				videos.append(item)
 			
-			self.__storage__.store(params, videos)
+			self.storage.store(params, videos)
 			
 			thumbnail = result[0].get('thumbnail', "")
 			if (thumbnail):
-				self.__storage__.store(params, thumbnail, "thumbnail")
+				self.storage.store(params, thumbnail, "thumbnail")
 			
 			if (len(result) > 0):
 				if ( per_page * ( page + 1 ) < len(result) ):
@@ -204,15 +203,15 @@ class YouTubeFeeds():
 		
 		if get("store"): 
 			if get("store") == "contact_options":
-				return self.__storage__.getUserOptionFolder(params)
+				return self.storage.getUserOptionFolder(params)
 			else:
-				return self.__storage__.getStoredSearches(params)
+				return self.storage.getStoredSearches(params)
 
 		page = int(get("page", "0"))
-		per_page = ( 10, 15, 20, 25, 30, 40, 50 )[ int( self.__settings__.getSetting( "perpage" ) ) ]
+		per_page = ( 10, 15, 20, 25, 30, 40, 50 )[ int( self.settings.getSetting( "perpage" ) ) ]
 		
 		if ( page != 0):
-			result = self.__storage__.retrieve(params)
+			result = self.storage.retrieve(params)
 		
 		elif not get("page"):
 			result = self.listAll(params)
@@ -220,7 +219,7 @@ class YouTubeFeeds():
 			if len(result) == 0:
 				return (result, 303)
 			
-			self.__storage__.store(params, result)
+			self.storage.store(params, result)
 		
 		next = 'false'
 		if (len(result) > 0):
@@ -231,7 +230,7 @@ class YouTubeFeeds():
 		
 		if get("user_feed") == "subscriptions":
 			for item in result:
-				viewmode = self.__storage__.retrieve(params, "viewmode", item)
+				viewmode = self.storage.retrieve(params, "viewmode", item)
 				
 				if (get("external")):
 					item["external"] = "true"
@@ -260,7 +259,7 @@ class YouTubeFeeds():
 		if get("login") == "true":
 			if ( not self.core._getAuth() ):
 				self.log("login required but auth wasn't set!")
-				return ( self.__language__(30609) , 303 )
+				return ( self.language(30609) , 303 )
 		
 		feed = self.createUrl(params)
 		index = 1
@@ -307,7 +306,7 @@ class YouTubeFeeds():
 			if get("user_feed") != "playlist" and get("action") != "play_all":
 				ytobjects.sort(key=lambda item:item["Title"].lower(), reverse=False)
 			else:
-				if (self.__storage__.getReversePlaylistOrder(params)):
+				if (self.storage.getReversePlaylistOrder(params)):
 					ytobjects.reverse()
 		
 		return ytobjects
