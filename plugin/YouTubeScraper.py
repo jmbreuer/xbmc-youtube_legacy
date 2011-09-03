@@ -22,15 +22,20 @@ import StorageServer
 
 class YouTubeScraper():
 
-	__settings__ = sys.modules[ "__main__" ].__settings__
-	__language__ = sys.modules[ "__main__" ].__language__
-	__plugin__ = sys.modules[ "__main__"].__plugin__	
-	__dbg__ = sys.modules[ "__main__" ].__dbg__
-	__storage_server__ = StorageServer.StorageServer()
+	settings = sys.modules[ "__main__" ].settings
+	language = sys.modules[ "__main__" ].language
+	plugin = sys.modules[ "__main__"].plugin	
+	dbg = sys.modules[ "__main__" ].dbg
 	
-	__feeds__ = sys.modules[ "__main__" ].__feeds__
-	__storage__ = sys.modules[ "__main__" ].__storage__
-	__storage_server__.__table_name__ = "YouTube"
+	feeds = sys.modules[ "__main__" ].feeds
+	core = sys.modules[ "__main__" ].core
+	utils = sys.modules[ "__main__" ].utils
+	common = sys.modules[ "__main__" ].common
+	storage = sys.modules[ "__main__" ].storage
+
+	storage_server = StorageServer.StorageServer()
+	storage_server.__table_name__ = "YouTube"
+	
 	
 	urls = {}
 	urls['categories'] = "http://www.youtube.com/videos"
@@ -61,9 +66,7 @@ class YouTubeScraper():
 	urls['playlist'] = "http://www.youtube.com/view_play_list?p=%s"
 	
 	def __init__(self, core = YouTubeCore.YouTubeCore(), utils = YouTubeUtils.YouTubeUtils(), common = CommonFunctions.CommonFunctions()):
-		self.core = core
-		self.utils = utils
-		self.common = common
+		
 		
 #=================================== Trailers ============================================
 	def scrapeTrailersListFormat (self, params = {}):
@@ -183,7 +186,7 @@ class YouTubeScraper():
 		videos = []
 		
 		if get("artist") and get("artist_name"):
-			self.__storage__.saveStoredArtist(params)
+			self.storage.saveStoredArtist(params)
 		
 		if get("artist"):
 			url = self.urls["artist"] % get("artist")
@@ -366,7 +369,7 @@ class YouTubeScraper():
 				item["Title"] = title
 				
 				params["thumb"] = "true"
-				thumb = self.__storage__.retrieve(params, "thumbnail", item)
+				thumb = self.storage.retrieve(params, "thumbnail", item)
 				if not thumb:
 					item["thumbnail"] = "discoball"
 				else:
@@ -644,7 +647,7 @@ class YouTubeScraper():
 				params["login"] = "true"
 				params["playlist"] = playlist_id
 				self.log("Done")
-				return self.__feeds__.list(params)
+				return self.feeds.list(params)
 		
 		self.log("Failed")
 		return ([], 303)
@@ -728,12 +731,12 @@ class YouTubeScraper():
 		
 		if ((result["content"].find('class="seasons"') == -1) or get("season")):
 			self.log("scrapeShow parsing videolist for single season")
-			return self.__storage_server__.cacheFunction(self.scrapeShowEpisodes, params)
+			return self.storage_server.cacheFunction(self.scrapeShowEpisodes, params)
 		
 		params["folder"] = "true"
 		del params["batch"]
 		self.log("Done")
-		return self.__storage_server__.cacheFunction(self.scrapeShowSeasons, result["content"], params)
+		return self.storage_server.cacheFunction(self.scrapeShowSeasons, result["content"], params)
 	
 	def scrapeShowSeasons(self, html, params = {}): 
 		get = params.get
@@ -754,7 +757,7 @@ class YouTubeScraper():
 					item = {}
 				
 					season_id = season_list[i]
-					title = self.__language__(30058) % season_id.encode("utf-8")
+					title = self.language(30058) % season_id.encode("utf-8")
 					title += " - " + atitle[i].encode("utf-8")
 					item["Title"] = title
 					item["season"] = season_id.encode("utf-8")
@@ -1203,7 +1206,7 @@ class YouTubeScraper():
 		
 			if (not yobjects):
 				self.log("Failed")
-				return (self.__language__(30601), 303)
+				return (self.language(30601), 303)
 		
 		self.log("Done")
 		return (yobjects, result["status"])
@@ -1216,24 +1219,24 @@ class YouTubeScraper():
 		result = []
 		next = 'false'
 		page = int(get("page", "0"))
-		per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.__settings__.getSetting( "perpage" ) ) ]
+		per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.settings.getSetting( "perpage" ) ) ]
 				
 		if not get("page"):
 			if get("scraper") == "shows" and get("show"):
 				(result, status) = params["new_results_function"](params)
 			else:
-				(result, status) = self.__storage_server__.cacheFunction(params["new_results_function"], params)
+				(result, status) = self.storage_server.cacheFunction(params["new_results_function"], params)
 			
 			self.log("paginator new result " + str(repr(result))[0:50])
 			
 			if len(result) == 0:
 				if get("scraper") not in ["music_top100"]:
 					return (result, 303)
-				result = self.__storage__.retrieve(params)
+				result = self.storage.retrieve(params)
 			else:
-				self.__storage__.store(params, result)
+				self.storage.store(params, result)
 		else:
-			result = self.__storage__.retrieve(params)
+			result = self.storage.retrieve(params)
 			if len(result) > 0:
 				status = 200
 		
@@ -1249,7 +1252,7 @@ class YouTubeScraper():
 		if get("batch") == "thumbnails":
 			(result, status) = self.getBatchDetailsThumbnails(result, params)
 		elif get("batch"):
-			#(result, status) = self.__storage_server__.cacheFunction(self.getBatchDetails, result, params)
+			#(result, status) = self.storage_server.cacheFunction(self.getBatchDetails, result, params)
 			(result, status) = self.getBatchDetails(result, params)
 		
 		if get("batch"):
@@ -1257,7 +1260,7 @@ class YouTubeScraper():
 		
 		if not get("page") and (get("scraper") == "search_disco" or get("scraper") == "music_artist"):
 			thumbnail = result[0].get("thumbnail")
-			self.__storage__.store(params, thumbnail, "thumbnail")
+			self.storage.store(params, thumbnail, "thumbnail")
 		
 		if next == "true":
 			self.addNextFolder(result, params)
