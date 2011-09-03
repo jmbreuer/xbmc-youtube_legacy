@@ -16,18 +16,17 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, urllib, urllib2, re, os, socket, time, hashlib, inspect
+import sys, urllib2, re, os, socket, inspect
 import xbmc
-import StorageServer		
-try: import xbmcvfs
-except ImportError: import xbmcvfsdummy as xbmcvfs
+import StorageServer
 
 class CommonFunctions():
 	__settings__ = sys.modules[ "__main__"].__settings__ 
 	__plugin__ = sys.modules[ "__main__"].__plugin__
 	__language__ = sys.modules[ "__main__" ].__language__
-        __dbglevel__ = sys.modules[ "__main__" ].__dbglevel__
-
+	__dbglevel__ = sys.modules[ "__main__" ].__dbglevel__
+	__dbg__ = sys.modules[ "__main__" ].__dbg__
+	
 	if sys.platform == "win32":
 		port = 59994
 		__socket__ = (socket.gethostname(), port)
@@ -175,7 +174,7 @@ class CommonFunctions():
 
 			ret_obj["status"] = 505
 			return ret_obj
-
+	
 	def log(self, description, level = 0):
 		if self.__dbg__ and self.__dbglevel__ > level:
 			xbmc.log("[%s] %s : '%s'" % (self.__plugin__, inspect.stack()[2][3], description), xbmc.LOGNOTICE)
