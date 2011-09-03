@@ -59,24 +59,24 @@ class YouTubeCore():
 	urls['remove_watch_later'] = "http://www.youtube.com/addto_ajax?action_delete_from_playlist=1"	
 
 
-	def __init__(self, utils=YouTubeUtils.YouTubeUtils(), common=CommonFunctions.CommonFunctions(), storage_server=StorageServer.StorageServer()):
-		self.__settings__ = sys.modules[ "__main__" ].__settings__
-		self.__language__ = sys.modules[ "__main__" ].__language__
-		self.__plugin__ = sys.modules[ "__main__" ].__plugin__
-		self.__dbg__ = sys.modules[ "__main__" ].__dbg__
-		self.__storage__ = sys.modules[ "__main__" ].__storage__
-		self.__login__ = sys.modules[ "__main__" ].__login__
+	def __init__(self, storage_server=StorageServer.StorageServer()):
+		self.settings = sys.modules[ "__main__" ].settings
+		self.language = sys.modules[ "__main__" ].language
+		self.plugin = sys.modules[ "__main__" ].plugin
+		self.dbg = sys.modules[ "__main__" ].dbg
+		self.storage = sys.modules[ "__main__" ].storage
+		self.login = sys.modules[ "__main__" ].login
+		self.utils = sys.modules[ "__main__" ].utils
+		self.common = sys.modules[ "__main__" ].common
 		
 		self.cookiejar = cookielib.LWPCookieJar()
 		self.opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar))
 		urllib2.install_opener(self.opener)
 		
-		self.common = common
-		self.utils = utils
 		self.storage_server = storage_server
 		storage_server.__table_name__ = "YouTube"
 		
-		timeout = [5, 10, 15, 20, 25][int(self.__settings__.getSetting("timeout"))]
+		timeout = [5, 10, 15, 20, 25][int(self.settings.getSetting("timeout"))]
 		if not timeout:
 			timeout = "15"
 		socket.setdefaulttimeout(float(timeout))
@@ -133,7 +133,7 @@ class YouTubeCore():
 		
 	def del_playlist(self, params={}):
 		get = params.get
-		url = "http://gdata.youtube.com/feeds/api/users/%s/playlists/%s" % (self.__settings__.getSetting("nick"), get("playlist"))
+		url = "http://gdata.youtube.com/feeds/api/users/%s/playlists/%s" % (self.settings.getSetting("nick"), get("playlist"))
 		result = self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true", "method": "DELETE"})
 		return (result["content"], result["status"])
 
@@ -195,7 +195,7 @@ class YouTubeCore():
 				folder["user_feed"] = "playlist"
 
 			params["thumb"] = "true"
-			thumb = self.__storage__.retrieve(params, "thumbnail", folder)
+			thumb = self.storage.retrieve(params, "thumbnail", folder)
 			if thumb:
 				folder["thumbnail"] = thumb 
 			
@@ -340,9 +340,9 @@ class YouTubeCore():
 			self.common.log("got auth")
 			if self._getAuth():
 				if link.find("?") > -1:
-					link += "&oauth_token=" + self.__settings__.getSetting("oauth2_access_token")
+					link += "&oauth_token=" + self.settings.getSetting("oauth2_access_token")
 				else:
-					link += "?oauth_token=" + self.__settings__.getSetting("oauth2_access_token")
+					link += "?oauth_token=" + self.settings.getSetting("oauth2_access_token")
 
 				self.common.log("updated link: " + link)
 			else:
@@ -368,7 +368,7 @@ class YouTubeCore():
 			self.common.log("got api")
 			request.add_header('GData-Version', '2') #confirmed
 			request.add_header('X-GData-Key', 'key=' + self.APIKEY)
-			if self.__settings__.getSetting("oauth2_expires_at") < time.time():
+			if self.settings.getSetting("oauth2_expires_at") < time.time():
 				self._oRefreshToken()
 
 		else:
@@ -379,21 +379,21 @@ class YouTubeCore():
 		
 		if get("login", "false") == "true":
 			self.common.log("got login")
-			if (self.__settings__.getSetting("username") == "" or self.__settings__.getSetting("user_password") == ""):
+			if (self.settings.getSetting("username") == "" or self.settings.getSetting("user_password") == ""):
 				self.common.log("_fetchPage, login required but no credentials provided")
 				ret_obj["status"] = 303
-				ret_obj["content"] = self.__language__(30622)
+				ret_obj["content"] = self.language(30622)
 				return ret_obj
-			# This should be a call to self.__login__._httpLogin()
-			if self.__settings__.getSetting("login_info") != "":
-				self.common.log("returning existing login info: " + self.__settings__.getSetting("login_info"))
-				info = self.__settings__.getSetting("login_info")
+			# This should be a call to self.login._httpLogin()
+			if self.settings.getSetting("login_info") != "":
+				self.common.log("returning existing login info: " + self.settings.getSetting("login_info"))
+				info = self.settings.getSetting("login_info")
 				request.add_header('Cookie', 'LOGIN_INFO=' + info)
 		
 		if get("auth", "false") == "true":
 			self.common.log("got auth")
 			if self._getAuth():
-				request.add_header('Authorization', 'GoogleLogin auth=' + self.__settings__.getSetting("auth"))
+				request.add_header('Authorization', 'GoogleLogin auth=' + self.settings.getSetting("auth"))
 			else:
 				self.common.log("couldn't get login token")
 		
@@ -421,7 +421,7 @@ class YouTubeCore():
 					return self._fetchPage(params)
 				else:
 					ret_obj["status"] = 303
-					ret_obj["content"] = self.__language__(30606)
+					ret_obj["content"] = self.language(30606)
 					return ret_obj
 					#return self._verifyAge(ret_obj["content"], ret_obj["new_url"], params)
 		
@@ -484,9 +484,9 @@ class YouTubeCore():
 
 	def _verifyAge(self, result, new_url, params={}):
 		get = params.get
-		login_info = self.__login__._httpLogin({ "new": "true" })
+		login_info = self.login._httpLogin({ "new": "true" })
 		confirmed = "0"
-		if self.__settings__.getSetting("safe_search") != "2":
+		if self.settings.getSetting("safe_search") != "2":
 			confirmed = "1"
 		
 		# Convert to fetchpage
@@ -500,7 +500,7 @@ class YouTubeCore():
 		if result.find("confirm-age-form") == -1:
 			self.common.log("Failed trying to verify-age could find confirm age form.")
 			self.common.log("html page given: " + repr(result))
-			return (self.__language__(30606) , 303)
+			return (self.language(30606) , 303)
 						
 		# get next_url
 		next_url_start = result.find('"next_url" value="') + len('"next_url" value="')
@@ -540,15 +540,15 @@ class YouTubeCore():
 		self.common.log("result url: " + repr(new_url))
 		
 		self.common.log("age verification failed with result: " + repr(result))
-		return (self.__language__(30606), 303)
+		return (self.language(30606), 303)
 
 	def _oRefreshToken(self):
 		# Refresh token
-		if self.__settings__.getSetting("oauth2_refresh_token"):
+		if self.settings.getSetting("oauth2_refresh_token"):
 			url = "https://accounts.google.com/o/oauth2/token"
 			data = { "client_id": "208795275779.apps.googleusercontent.com",
 				"client_secret": "sZn1pllhAfyonULAWfoGKCfp",
-				"refresh_token": self.__settings__.getSetting("oauth2_refresh_token"),
+				"refresh_token": self.settings.getSetting("oauth2_refresh_token"),
 				"grant_type": "refresh_token"}
 			ret = self._fetchPage({ "link": url, "no-language-cookie": "true", "url_data": data})
 			if ret["status"] == 200:
@@ -561,7 +561,7 @@ class YouTubeCore():
 			
 				self.common.log("- returning, got result a: " + repr(oauth))
 			
-				self.__settings__.setSetting("oauth2_access_token", oauth["access_token"])
+				self.settings.setSetting("oauth2_access_token", oauth["access_token"])
 				return True
 
 
@@ -574,7 +574,7 @@ class YouTubeCore():
 	def _getAuth(self):
 		self.common.log("")
 		
-		auth = self.__settings__.getSetting("oauth2_access_token")
+		auth = self.settings.getSetting("oauth2_access_token")
 
 		if (auth):
 			self.common.log("returning stored auth")
@@ -583,7 +583,7 @@ class YouTubeCore():
 			(result, status) = self.login()
 			if status == 200:
 				self.common.log("returning new auth")
-				return self.__settings__.getSetting("oauth2_access_token")
+				return self.settings.getSetting("oauth2_access_token")
 			
 		self.common.log("failed because login failed")
 		
@@ -692,7 +692,7 @@ class YouTubeCore():
 
 			video['thumbnail'] = self.urls["thumbnail"] % video['videoid']
 			
-			overlay = self.__storage__.retrieveValue("vidstatus-" + video['videoid'])
+			overlay = self.storage.retrieveValue("vidstatus-" + video['videoid'])
 			if overlay:
 				video['Overlay'] = int(overlay)
 			
