@@ -127,14 +127,14 @@ class YouTubeFeeds():
 			return self.listPlaylist(params)
 		
 		if get("login") == "true":
-			if ( not self._getAuth() ):
-				self.log("Login required but auth wasn't set!")
+			if ( not self.core._getAuth() ):
+				self.core.common.log("Login required but auth wasn't set!")
 				return ( self.__language__(30609) , 303 )
 
 		url = self.createUrl(params)
 		
 		if url:
-			result = self._fetchPage({"link": url, "auth": get("login"), "api": "true"})
+			result = self.core._fetchPage({"link": url, "auth": get("login"), "api": "true"})
 		
 		if result["status"] != 200:
 			return ( result["content"], result["status"] )
@@ -258,7 +258,7 @@ class YouTubeFeeds():
 		result = { "content": "", "status": 303 }
 		
 		if get("login") == "true":
-			if ( not self._getAuth() ):
+			if ( not self.core._getAuth() ):
 				self.log("login required but auth wasn't set!")
 				return ( self.__language__(30609) , 303 )
 		
