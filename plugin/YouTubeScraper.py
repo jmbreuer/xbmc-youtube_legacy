@@ -64,10 +64,11 @@ class YouTubeScraper():
 		self.core = core
 		self.utils = utils
 		self.common = common
+		
 #=================================== Trailers ============================================
 	def scrapeTrailersListFormat (self, params = {}):
 		get = params.get
-		self.log("")
+		self.core.log("")
 
 		yobjects = []
 		
