@@ -19,64 +19,63 @@
 import sys, xbmcaddon
 
 # plugin constants
-__version__ = "2.6.0"
-__plugin__ = "YouTube Beta-" + __version__
-__author__ = "TheCollective"
-__url__ = "www.xbmc.com"
+version = "2.7.0"
+plugin = "YouTube Beta-" + version
+author = "TheCollective"
+url = "www.xbmc.com"
 
 # xbmc hooks
-__settings__ = xbmcaddon.Addon(id='plugin.video.youtube.beta')
-__language__ = __settings__.getLocalizedString
-__dbg__ = __settings__.getSetting("debug") == "true"
-__dbglevel__ = 1
+settings = xbmcaddon.Addon(id='plugin.video.youtube.beta')
+language = settings.getLocalizedString
+dbg = settings.getSetting("debug") == "true"
+dbglevel = 1
 
 # plugin structure 
-__feeds__ = ""
-__scraper__ = ""
-__playlist__ = ""
-__navigation__ = ""
-__downloader__ = ""
-__storage__ = ""
-__login__ = ""
-__player__ = ""
+feeds = ""
+scraper = ""
+playlist = ""
+navigation = ""
+downloader = ""
+storage = ""
+login = ""
+player = ""
 
 if (__name__ == "__main__" ):
-	import YouTubeStorage as storage
-	__storage__ = storage.YouTubeStorage()
-	import YouTubeLogin as login
-	__login__ = login.YouTubeLogin()
-	import YouTubeFeeds as feeds
-	__feeds__ = feeds.YouTubeFeeds()
-	import YouTubePlayer as player
-	__player__ = player.YouTubePlayer()
-	import YouTubeDownloader as downloader
-	__downloader__ = downloader.YouTubeDownloader()
-	import YouTubeScraper as scraper
-	__scraper__ = scraper.YouTubeScraper()
-	import YouTubePlaylistControl as playlist
-	__playlist__ = playlist.YouTubePlaylistControl()
-	import YouTubeNavigation as navigation
-	__navigation__ = navigation.YouTubeNavigation()
+	import YouTubeStorage
+	storage = YouTubeStorage.YouTubeStorage()
+	import YouTubeLogin
+	login = YouTubeLogin.YouTubeLogin()
+	import YouTubeFeeds
+	feeds = YouTubeFeeds.YouTubeFeeds()
+	import YouTubePlayer
+	player = YouTubePlayer.YouTubePlayer()
+	import YouTubeDownloader
+	downloader = YouTubeDownloader.YouTubeDownloader()
+	import YouTubeScraper
+	scraper = YouTubeScraper.YouTubeScraper()
+	import YouTubePlaylistControl
+	playlist = YouTubePlaylistControl.YouTubePlaylistControl()
+	import YouTubeNavigation
+	navigation = YouTubeNavigation.YouTubeNavigation()
 
-	if __dbg__:
-		print __plugin__ + " ARGV: " + repr(sys.argv)
+	if dbg:
+		print plugin + " ARGV: " + repr(sys.argv)
 	else:
-		print __plugin__
+		print plugin
 	
-	if ( not __settings__.getSetting( "firstrun" ) ):
-		__login__.login()
-		__settings__.setSetting( "firstrun", '1' )
+	if ( not settings.getSetting( "firstrun" ) ):
+		login.login()
+		settings.setSetting( "firstrun", '1' )
 	
 	if (not sys.argv[2]):
-		__navigation__.listMenu()
+		navigation.listMenu()
 	else:
-		params = __navigation__.getParameters(sys.argv[2])
+		params = navigation.getParameters(sys.argv[2])
 		get = params.get
 		if (get("action")):
-			__navigation__.executeAction(params)
+			navigation.executeAction(params)
 		elif (get("path")):
-			__navigation__.listMenu(params)
+			navigation.listMenu(params)
 		else:
-			print __plugin__ + " ARGV Nothing done.. verify params " + repr(params)
-
-
+			print plugin + " ARGV Nothing done.. verify params " + repr(params)
+	
