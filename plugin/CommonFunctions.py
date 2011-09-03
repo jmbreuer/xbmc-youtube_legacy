@@ -21,11 +21,11 @@ import xbmc
 import StorageServer
 
 class CommonFunctions():
-	__settings__ = sys.modules[ "__main__"].__settings__ 
-	__plugin__ = sys.modules[ "__main__"].__plugin__
-	__language__ = sys.modules[ "__main__" ].__language__
-	__dbglevel__ = sys.modules[ "__main__" ].__dbglevel__
-	__dbg__ = sys.modules[ "__main__" ].__dbg__
+	settings = sys.modules[ "__main__"].settings 
+	plugin = sys.modules[ "__main__"].plugin
+	language = sys.modules[ "__main__" ].language
+	dbglevel = sys.modules[ "__main__" ].dbglevel
+	dbg = sys.modules[ "__main__" ].dbg
 	
 	if sys.platform == "win32":
 		port = 59994
@@ -176,5 +176,5 @@ class CommonFunctions():
 			return ret_obj
 	
 	def log(self, description, level = 0):
-		if self.__dbg__ and self.__dbglevel__ > level:
-			xbmc.log("[%s] %s : '%s'" % (self.__plugin__, inspect.stack()[2][3], description), xbmc.LOGNOTICE)
+		if self.dbg and self.dbglevel > level:
+			xbmc.log("[%s] %s : '%s'" % (self.plugin, inspect.stack()[2][3], description), xbmc.LOGNOTICE)
