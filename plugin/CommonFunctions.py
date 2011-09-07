@@ -78,62 +78,68 @@ class CommonFunctions():
 		# ret <- Return content of element
 		# Default return <- Returns a list with the content
 		self.log(repr(name) + " - " + repr(attrs) + " - " + repr(ret) + " - " + str(type(html)), 1)
-		if type(html) == type([]):
-			html = "".join(html)
-		html = html.replace("\n", "")
+
+		if type(html) != type([]):
+			html = [html]
+		
 		if not name.strip():
 			self.log("Missing tag name")
 			return ""
 
-		lst = []
+		ret_lst = []
 
 		# Find all elements with the tag
 			
 		i = 0
-		for key in attrs:
-			scripts = [ '(<' + name + '[^>]*?(?:' + key + '=[\'"]' + attrs[key] + '[\'"][^>]*?>))', # Hit often.
-				    '(<' + name + ' (?:' + key + '=[\'"]' + attrs[key] + '[\'"])[^>]*?>)', # Hit twice
-				    '(<' + name + '[^>]*?(?:' + key + '=[\'"]' + attrs[key] + '[\'"])[^>]*?>)'] # 
+		for item in html:
+			item = item.replace("\n", "")
+			lst = []
 
-			lst2 = []
-			for script in scripts:
-				if len(lst2) == 0:
-					#self.log("scanning " + str(i) + " " + str(len(lst)) + " Running :" + script, 2)
-					lst2 = re.compile(script).findall(html)
-					i += 1
-			if len(lst2) > 0:
-				if len(lst) == 0:
-					lst = lst2;
-					lst2 = []
-				else:
-					test = range(len(lst))
-					test.reverse()
-					for i in test: # Delete anything missing from the next list.
-						if not lst[i] in lst2:
-							self.log("Purging mismatch " + str(len(lst)) + " - " + repr(lst[i]), 1)
-							del(lst[i])
+			for key in attrs:
+				scripts = [ '(<' + name + '[^>]*?(?:' + key + '=[\'"]' + attrs[key] + '[\'"][^>]*?>))', # Hit often.
+					    '(<' + name + ' (?:' + key + '=[\'"]' + attrs[key] + '[\'"])[^>]*?>)', # Hit twice
+					    '(<' + name + '[^>]*?(?:' + key + '=[\'"]' + attrs[key] + '[\'"])[^>]*?>)'] # 
 
-		if len(lst) == 0 and attrs == {}:
-			self.log("no list found, making one on just the element name", 1)
-			lst = re.compile('(<' + name + '[^>]*?>)').findall(html)
-
-		if ret != False:
-			self.log("Getting attribute %s content for %s matches " % ( ret, len(lst) ), 2)
-			lst2 = []
-			for match in lst:
-				lst2 += re.compile('<' + name + '.*' + ret + '=[\'"]([^>]*?)[\'"].*>').findall(match)
-			lst = lst2
-		else:
-			self.log("Getting element content for %s matches " % len(lst), 2)
-			lst2 = []
-			for match in lst:
-				temp = self.getDOMContent(html, name, match)
-				html = html.replace(temp, "")
-				lst2.append(temp[temp.find(">")+1:temp.rfind("</" + name + ">")])
-			lst = lst2
+				lst2 = []
+				for script in scripts:
+					if len(lst2) == 0:
+						#self.log("scanning " + str(i) + " " + str(len(lst)) + " Running :" + script, 2)
+						lst2 = re.compile(script).findall(item)
+						i += 1
+				if len(lst2) > 0:
+					if len(lst) == 0:
+						lst = lst2;
+						lst2 = []
+					else:
+						test = range(len(lst))
+						test.reverse()
+						for i in test: # Delete anything missing from the next list.
+							if not lst[i] in lst2:
+								self.log("Purging mismatch " + str(len(lst)) + " - " + repr(lst[i]), 1)
+								del(lst[i])
+	
+			if len(lst) == 0 and attrs == {}:
+				self.log("no list found, making one on just the element name", 1)
+				lst = re.compile('(<' + name + '[^>]*?>)').findall(item)
+	
+			if ret != False:
+				self.log("Getting attribute %s content for %s matches " % ( ret, len(lst) ), 2)
+				lst2 = []
+				for match in lst:
+					lst2 += re.compile('<' + name + '.*' + ret + '=[\'"]([^>]*?)[\'"].*>').findall(match)
+				lst = lst2
+			else:
+				self.log("Getting element content for %s matches " % len(lst), 2)
+				lst2 = []
+				for match in lst:
+					temp = self.getDOMContent(item, name, match)
+					item = item.replace(temp, "")
+					lst2.append(temp[temp.find(">")+1:temp.rfind("</" + name + ">")])
+				lst = lst2
+			ret_lst += lst
 
 		self.log("Done", 1)
-		return lst
+		return ret_lst
 
 	def _fetchPage(self, params = {}):
 		get = params.get
