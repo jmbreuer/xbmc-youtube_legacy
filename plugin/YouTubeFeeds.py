@@ -85,7 +85,7 @@ class YouTubeFeeds():
 					if query in authors:
 						url += "&" + urllib.urlencode({'author': authors[query]})
 				except:
-					self.log("Search - eval failed")
+					self.common.log("Search - eval failed")
 			
 		if (url.find("%s") > 0):
 			if ( get("contact") and not (get("external") and get("channel"))):
@@ -258,7 +258,7 @@ class YouTubeFeeds():
 		
 		if get("login") == "true":
 			if ( not self.core._getAuth() ):
-				self.log("login required but auth wasn't set!")
+				self.common.log("login required but auth wasn't set!")
 				return ( self.language(30609) , 303 )
 		
 		feed = self.createUrl(params)
@@ -268,13 +268,13 @@ class YouTubeFeeds():
 
 		ytobjects = []
 		
-		result = self.common._fetchPage({"link":url, "auth":"true"})
+		result = self.core._fetchPage({"link":url, "auth":"true"})
 		
 		if result["status"] == 200:
 			if get("folder") == "true":
-				ytobjects = self.getFolderInfo(result["content"], params)
+				ytobjects = self.core.getFolderInfo(result["content"], params)
 			else:
-				ytobjects = self.getVideoInfo(result["content"], params)
+				ytobjects = self.core.getVideoInfo(result["content"], params)
 		
 		if len(ytobjects) == 0:
 			return ytobjects
@@ -287,15 +287,15 @@ class YouTubeFeeds():
 			index += 50
 			url = feed + "start-index=" + str(index) + "&max-results=" + repr(50)
 			url = url.replace(" ", "+")
-			result = self.common._fetchPage({"link": url, "auth":"true"})
+			result = self.core._fetchPage({"link": url, "auth":"true"})
 			
 			if result["status"] != 200:
 				break
 			temp_objects = []
 			if get("folder") == "true":
-				temp_objects = self.getFolderInfo(result["content"], params)
+				temp_objects = self.core.getFolderInfo(result["content"], params)
 			else:
-				temp_objects = self.getVideoInfo(result["content"], params)
+				temp_objects = self.core.getVideoInfo(result["content"], params)
 		
 			next = temp_objects[len(temp_objects)-1].get("next","false")
 			if next == "true":

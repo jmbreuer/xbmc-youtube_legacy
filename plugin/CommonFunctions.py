@@ -28,6 +28,7 @@ class CommonFunctions():
 		self.dbglevel = sys.modules[ "__main__" ].dbglevel
 		self.dbg = sys.modules[ "__main__" ].dbg
 		self.USERAGENT = "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-GB; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8"
+		self.login = sys.modules[ "__main__"].login
 	
 	if sys.platform == "win32":
 		port = 59994

@@ -229,7 +229,7 @@ class YouTubeNavigation():
 	def addToFavorites(self, params = {}):
 		get = params.get
 		if (get("videoid")):
-			(message, status) = self.feeds.add_favorite(params)
+			(message, status) = self.core.add_favorite(params)
 			if status != 200:
 				self.showErrorMessage(self.language(30020), message, status)
 				return False	
@@ -239,7 +239,7 @@ class YouTubeNavigation():
 		get = params.get
 		
 		if (get("editid")):
-			(message, status ) = self.feeds.delete_favorite(params)
+			(message, status ) = self.core.delete_favorite(params)
 			if status != 200:
 				self.showErrorMessage(self.language(30020), message, status)
 				return False
@@ -255,7 +255,7 @@ class YouTubeNavigation():
 			params["contact"] = contact
 			
 		if (get("contact")):
-			(result, status) = self.feeds.add_contact(params)
+			(result, status) = self.core.add_contact(params)
 			if status != 200:
 				self.showErrorMessage(self.language(30029), result, status)
 				return False
@@ -268,7 +268,7 @@ class YouTubeNavigation():
 		get = params.get
 
 		if (get("contact")):
-			(result, status) = self.feeds.remove_contact(params)
+			(result, status) = self.core.remove_contact(params)
 			if status != 200:
 				self.showErrorMessage(self.language(30029), result, status)
 				return False
@@ -280,7 +280,7 @@ class YouTubeNavigation():
 	def addSubscription(self, params = {}):
 		get = params.get
 		if (get("channel")):
-			(message, status) = self.feeds.add_subscription(params)
+			(message, status) = self.core.add_subscription(params)
 			if status != 200:
 				self.showErrorMessage(self.language(30021), message, status)
 				return False
@@ -290,7 +290,7 @@ class YouTubeNavigation():
 	def removeSubscription(self, params = {}):
 		get = params.get
 		if (get("editid")):
-			(message, status) = self.feeds.remove_subscription(params)
+			(message, status) = self.core.remove_subscription(params)
 			if status != 200:
 				self.showErrorMessage(self.language(30021), message, status)
 				return False

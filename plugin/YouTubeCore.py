@@ -80,42 +80,43 @@ class YouTubeCore():
 	
 	def delete_favorite(self, params={}):
 		get = params.get
-		delete_url = self.urls["favorites"] % "default"
+		
+		delete_url = "http://gdata.youtube.com/feeds/api/users/default/favorites"
 		delete_url += "/" + get('editid') 
 		result = self._fetchPage({"link": delete_url, "api": "true", "login": "true", "auth": "true", "method": "DELETE"})
 		return (result["content"], result["status"])
 	
 	def remove_contact(self, params={}):
 		get = params.get
-		delete_url = self.urls["contacts"] 
+		delete_url = "http://gdata.youtube.com/feeds/api/users/default/contacts" 
 		delete_url += "/" + get("contact")
 		result = self._fetchPage({"link": delete_url, "api": "true", "login": "true", "auth": "true", "method": "DELETE"})
 		return (result["content"], result["status"])
 
 	def remove_subscription(self, params={}):
 		get = params.get
-		delete_url = self.urls["subscriptions"] % "default"
+		delete_url = "http://gdata.youtube.com/feeds/api/users/default/subscriptions"
 		delete_url += "/" + get("editid")
 		result = self._fetchPage({"link": delete_url, "api": "true", "login": "true", "auth": "true", "method": "DELETE"})
 		return (result["content"], result["status"])
 			
 	def add_contact(self, params={}):
 		get = params.get
-		url = self.urls["contacts"]
+		url = "http://gdata.youtube.com/feeds/api/users/default/contacts"
 		add_request = '<?xml version="1.0" encoding="UTF-8"?> <entry xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://gdata.youtube.com/schemas/2007"><yt:username>%s</yt:username></entry>' % get("contact")
 		result = self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true", "request": add_request})
 		return (result["content"], result["status"])
 		
 	def add_favorite(self, params={}):
 		get = params.get 
-		url = self.urls["favorites"] % "default"
+		url = "http://gdata.youtube.com/feeds/api/users/default/favorites"
 		add_request = '<?xml version="1.0" encoding="UTF-8"?><entry xmlns="http://www.w3.org/2005/Atom"><id>%s</id></entry>' % get("videoid")
 		result = self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true", "request": add_request})
 		return (result["content"], result["status"])
 		
 	def add_subscription(self, params={}):
 		get = params.get
-		url = self.urls["subscriptions"] % "default"
+		url = "http://gdata.youtube.com/feeds/api/users/default/subscriptions"
 		add_request = '<?xml version="1.0" encoding="UTF-8"?><entry xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://gdata.youtube.com/schemas/2007"> <category scheme="http://gdata.youtube.com/schemas/2007/subscriptiontypes.cat" term="user"/><yt:username>%s</yt:username></entry>' % get("channel")
 		result = self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true", "request": add_request})
 		return (result["content"], result["status"])
