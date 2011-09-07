@@ -177,7 +177,7 @@ class YouTubePlayer():
 			if node:
 				if node.firstChild:
 					if node.firstChild.nodeValue:
-						text = self.replaceHtmlCodes(node.firstChild.nodeValue).replace("\n", "\\n")
+						text = self.utils.replaceHtmlCodes(node.firstChild.nodeValue).replace("\n", "\\n")
 						start = ""
 						
 						if node.getAttribute("start"):
@@ -218,7 +218,7 @@ class YouTubePlayer():
 					if node.firstChild.nodeValue:
 						text = self.core._getNodeValue(node, "TEXT", "").replace("\n", "\\n")
 						start = ""
-
+						
 						if style == "popup":
 							cnode = node.getElementsByTagName("rectRegion")
 						elif style == "speech":
@@ -314,7 +314,7 @@ class YouTubePlayer():
 		
 		if status != 200:
 			self.common.log("construct video url failed contents of video item " + repr(video))
-			self.showErrorMessage(self.language(30603), video["apierror"], status)
+			self.utils.showErrorMessage(self.language(30603), video["apierror"], status)
 			return False
 		
 		listitem=xbmcgui.ListItem(label=video['Title'], iconImage=video['thumbnail'], thumbnailImage=video['thumbnail'], path=video['video_url']);		
@@ -640,8 +640,8 @@ class YouTubePlayer():
 					#self.common.log("trying website : " + repr(data))
 					player_object = json.loads(data[0].replace('\'PLAYER_CONFIG\'', '"PLAYER_CONFIG"'))
 			else:
-				data = self.parseDOM(result["content"], "embed", attrs = {"id": "movie_player" }, ret = "flashvars")
-				src = self.parseDOM(result["content"], "embed", attrs = {"id": "movie_player"}, ret = "src")
+				data = self.common.parseDOM(result["content"], "embed", attrs = {"id": "movie_player" }, ret = "flashvars")
+				src = self.common.parseDOM(result["content"], "embed", attrs = {"id": "movie_player"}, ret = "src")
 				if len(data) > 0 and len(src) > 0:
 					data = data[0].replace("&amp;", "&")
 					player_object = self._convertFlashVars(data)
@@ -678,8 +678,8 @@ class YouTubePlayer():
 			self.common.log("Couldn't find url map or stream map.")
 
 			if not video.has_key("apierror"):
-				video['apierror'] = self._findErrors(result)
+				video['apierror'] = self.core._findErrors(result)
 				if not video['apierror'] and fresult:
-					video['apierror'] = self._findErrors(fresult)
+					video['apierror'] = self.core._findErrors(fresult)
 
 		return (links, video)

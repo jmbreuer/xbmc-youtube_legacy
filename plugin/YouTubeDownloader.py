@@ -34,8 +34,8 @@ class YouTubeDownloader():
 		self.utils =  sys.modules[ "__main__" ].utils
 		self.player = sys.modules["__main__" ].player
 		self.storage = sys.modules[ "__main__" ].storage
-	
-		self.storage_server = sys.modules[ "__main__" ].cache
+		self.common = sys.modules[ "__main__" ].common
+		self.cache = sys.modules[ "__main__" ].cache
 
 	def downloadVideo(self, params = {}):
 		get = params.get
@@ -49,13 +49,13 @@ class YouTubeDownloader():
 
 		if self.cache.lock("YouTubeDownloadLock"):
 			params["silent"] = "true"
-			self.log("Downloader not active, initializing downloader.")
+			self.common.log("Downloader not active, initializing downloader.")
 			
 			self.storage.addVideoToDownloadQeueu(params)
 			self.processQueue(params)
 			self.cache.unlock("YouTubeDownloadLock")
 		else:
-			self.log("Downloader is active, Queueing video.")
+			self.common.log("Downloader is active, Queueing video.")
 			self.storage.addVideoToDownloadQeueu(params)
 
 	def processQueue(self, params = {}):
@@ -85,12 +85,12 @@ class YouTubeDownloader():
 				self.storage.removeVideoFromDownloadQueue(videoid)
 				videoid = self.storage.getNextVideoFromDownloadQueue()
 
-			self.log("Finished download queue.")
+			self.common.log("Finished download queue.")
 			self.dialog.close()
 			self.dialog = ""
 			
 	def downloadVideoURL(self, video, params = {}):
-		self.log(video['Title'])
+		self.common.log(video['Title'])
 		
 		if video["video_url"].find("swfurl") > 0:
 			self.showMessage(self.language( 30625 ), self.language(30619))
@@ -149,7 +149,7 @@ class YouTubeDownloader():
 				con.close()
 				file.close()
 			except:
-				self.log("Failed to close download stream and file handle")
+				self.common.log("Failed to close download stream and file handle")
 		
 		xbmcvfs.rename(filename_incomplete, filename_complete)
 		self.dialog.update(heading = self.language(30604), label=video["Title"])
