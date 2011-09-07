@@ -3,6 +3,8 @@ from mock import Mock, patch
 
 sys.path.append('../plugin/')
 
+import YoutubeUtils
+
 sys.modules["xbmc"] = __import__("mock")
 sys.modules["xbmcgui"] = __import__("mock")
 sys.modules["xbmcvfs"] = __import__("mock")
@@ -14,7 +16,7 @@ sys.modules[ "__main__" ].settings.getAddonInfo.return_value = "somepath"
 
 sys.modules[ "__main__" ].language = Mock()
 sys.modules[ "__main__" ].common = Mock()
-sys.modules[ "__main__" ].utils = Mock()
+sys.modules[ "__main__" ].utils = Mock(YouTubeUtils.YouTubeUtils)
 sys.modules[ "__main__" ].cache = Mock()
 sys.modules[ "__main__" ].core = Mock()
 sys.modules[ "__main__" ].feeds = Mock()
