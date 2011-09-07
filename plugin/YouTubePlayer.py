@@ -80,7 +80,7 @@ class YouTubePlayer():
 		
 		if self.settings.getSetting("annotations") == "true" and not video.has_key("downloadPath"):
 
-			xml = self.common._fetchPage({"link": self.urls["annotation_url"] % get('videoid')})
+			xml = self.core._fetchPage({"link": self.urls["annotation_url"] % get('videoid')})
 			if xml["status"] == 200 and xml["content"]:
 				( result, style ) = self.transformAnnotationToSSA(xml["content"])
 		
@@ -91,7 +91,7 @@ class YouTubePlayer():
 					subtitle_url = self.getTranscriptionUrl(video) 
 		
 			if subtitle_url:
-				xml = self.common._fetchPage({"link": subtitle_url})
+				xml = self.core._fetchPage({"link": subtitle_url})
 				if xml["status"] == 200 and xml["content"]:
 					result += self.transformSubtitleXMLtoSRT(xml["content"])
 
@@ -108,7 +108,7 @@ class YouTubePlayer():
 		get = video.get
 		url = ""
 		
-		xml = self.common._fetchPage({"link": self.urls["timed_text_index"] % get('videoid')})
+		xml = self.core._fetchPage({"link": self.urls["timed_text_index"] % get('videoid')})
 		
 		self.common.log("subtitle index: " + repr(xml["content"]))
 		
@@ -432,7 +432,7 @@ class YouTubePlayer():
 			self.common.log("returning cache ")
 			return ( eval(video), 200)
 
-		result = self.common._fetchPage({"link": self.urls["video_info"] % get("videoid"), "api": "true"})
+		result = self.core._fetchPage({"link": self.urls["video_info"] % get("videoid"), "api": "true"})
 
 		if result["status"] == 200:
 			video = self.core.getVideoInfo(result["content"], params)
@@ -629,7 +629,7 @@ class YouTubePlayer():
 		links = []
 		self.common.log("trying website")
 
-		result = self.common._fetchPage({"link": self.urls["video_stream"] % get("videoid")})
+		result = self.core._fetchPage({"link": self.urls["video_stream"] % get("videoid")})
 
 		if result["status"] == 200:
 			data = result["content"].find("PLAYER_CONFIG")
@@ -652,7 +652,7 @@ class YouTubePlayer():
 		else:
 			self.common.log("Falling back to embed")
 
-			fresult = self.common._fetchPage({"link": self.urls["embed_stream"] % get("videoid") })
+			fresult = self.core._fetchPage({"link": self.urls["embed_stream"] % get("videoid") })
 		
 			# Fallback error reporting
 			if fresult["content"].find("status=fail") > -1:
