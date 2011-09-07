@@ -41,8 +41,17 @@ login = ""
 player = ""
 
 if (__name__ == "__main__" ):
+	import StorageServer
+	cache = StorageServer.StorageServer()
+	cache.__table_name__ = "YouTube"
+	import CommonFunctions
+	common = CommonFunctions.CommonFunctions() 
+	import YouTubeUtils
+	utils = YouTubeUtils.YouTubeUtils()
 	import YouTubeStorage
 	storage = YouTubeStorage.YouTubeStorage()
+	import YouTubeCore
+	core = YouTubeCore.YouTubeCore()
 	import YouTubeLogin
 	login = YouTubeLogin.YouTubeLogin()
 	import YouTubeFeeds
@@ -70,7 +79,7 @@ if (__name__ == "__main__" ):
 	if (not sys.argv[2]):
 		navigation.listMenu()
 	else:
-		params = navigation.getParameters(sys.argv[2])
+		params = utils.getParameters(sys.argv[2])
 		get = params.get
 		if (get("action")):
 			navigation.executeAction(params)

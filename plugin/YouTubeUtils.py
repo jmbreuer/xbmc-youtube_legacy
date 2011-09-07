@@ -20,16 +20,16 @@ import sys, os, string
 import xbmc
 
 class YouTubeUtils:
-	__settings__ = sys.modules[ "__main__" ].__settings__
-	__language__ = sys.modules[ "__main__" ].__language__
-	__plugin__ = sys.modules[ "__main__" ].__plugin__
-	__dbg__ = sys.modules[ "__main__" ].__dbg__
 	
-	PR_VIDEO_QUALITY = __settings__.getSetting("pr_video_quality") == "true"
-	VALID_CHARS = "-_.() %s%s" % (string.ascii_letters, string.digits)
-	USERAGENT = "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-GB; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8"
-	THUMBNAIL_PATH = os.path.join( __settings__.getAddonInfo('path'), "thumbnails" )
-	
+	def __init__(self):
+		self.settings = sys.modules[ "__main__" ].settings
+		self.language = sys.modules[ "__main__" ].language
+		self.plugin = sys.modules[ "__main__"].plugin
+		self.dbg = sys.modules[ "__main__" ].dbg
+		self.PR_VIDEO_QUALITY = self.settings.getSetting("pr_video_quality") == "true"
+		self.VALID_CHARS = "-_.() %s%s" % (string.ascii_letters, string.digits)
+		self.THUMBNAIL_PATH = os.path.join( self.settings.getAddonInfo('path'), "thumbnails" )
+				
 	# This function raises a keyboard for user input
 	def getUserInput(self, title = "Input", default="", hidden=False):
 		result = None
@@ -80,7 +80,7 @@ class YouTubeUtils:
 		try:
 			return str.encode('ascii')
 		except:
-			self.log("Hit except on : " + repr(str))
+			print self.plugin + " Hit except on : " + repr(str) 
 			s = ""
 			for i in str:
 				try:
@@ -93,7 +93,7 @@ class YouTubeUtils:
 	
 	# Shows a more user-friendly notification
 	def showMessage(self, heading, message):
-		duration = ([1, 2, 3, 4, 5, 6, 7, 8, 9, 10][int(self.__settings__.getSetting( 'notification_length' ))]) * 1000
+		duration = ([1, 2, 3, 4, 5, 6, 7, 8, 9, 10][int(self.settings.getSetting( 'notification_length' ))]) * 1000
 		xbmc.executebuiltin('XBMC.Notification("%s", "%s", %s)' % ( heading, message, duration) )
 	
 	# Resolves the full thumbnail path for the plugins skins directory
@@ -101,7 +101,7 @@ class YouTubeUtils:
 		if (not title):
 			title = "DefaultFolder.png"
 		
-		thumbnail = os.path.join( sys.modules[ "__main__" ].__plugin__, title + ".png" )
+		thumbnail = os.path.join( sys.modules[ "__main__" ].plugin, title + ".png" )
 		
 		if ( not xbmc.skinHasImage( thumbnail ) ):
 			thumbnail = os.path.join( self.THUMBNAIL_PATH, title + ".png" )
@@ -113,14 +113,14 @@ class YouTubeUtils:
 	# Standardised error handler
 	def showErrorMessage(self, title = "", result = "", status = 500):
 		if title == "":
-			title = self.__language__(30600)
+			title = self.language(30600)
 		if result == "":
-			result = self.__language__(30617)
+			result = self.language(30617)
 			
 		if ( status == 303):
 			self.showMessage(title, result)
 		else :
-			self.showMessage(title, self.__language__(30617))
+			self.showMessage(title, self.language(30617))
 	
 	# generic function for building the item url filters out many item params to reduce unicode problems
 	def buildItemUrl(self, item_params = {}, url = ""):
@@ -133,7 +133,7 @@ class YouTubeUtils:
 	# Adds a default next folder to a result set
 	def addNextFolder(self, items = [], params = {}):
 		get = params.get
-		item = {"Title":self.__language__( 30509 ), "thumbnail":"next", "next":"true", "page":str(int(get("page", "0")) + 1)} 
+		item = {"Title":self.language( 30509 ), "thumbnail":"next", "next":"true", "page":str(int(get("page", "0")) + 1)} 
 		for k, v in params.items():
 			if (k != "thumbnail" and k != "Title" and k != "page" and k != "new_results_function"):
 				item[k] = v

@@ -18,14 +18,16 @@
 
 import sys, urllib2, re, os, socket, inspect
 import xbmc
-import StorageServer
 
 class CommonFunctions():
-	settings = sys.modules[ "__main__"].settings 
-	plugin = sys.modules[ "__main__"].plugin
-	language = sys.modules[ "__main__" ].language
-	dbglevel = sys.modules[ "__main__" ].dbglevel
-	dbg = sys.modules[ "__main__" ].dbg
+	
+	def __init__(self):
+		self.settings = sys.modules[ "__main__"].settings 
+		self.plugin = sys.modules[ "__main__"].plugin
+		self.language = sys.modules[ "__main__" ].language
+		self.dbglevel = sys.modules[ "__main__" ].dbglevel
+		self.dbg = sys.modules[ "__main__" ].dbg
+		self.USERAGENT = "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-GB; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8"
 	
 	if sys.platform == "win32":
 		port = 59994

@@ -17,7 +17,6 @@
 '''
 
 import sys, urllib
-import YouTubeCore
 
 class YouTubeFeeds():
 	
@@ -57,6 +56,7 @@ class YouTubeFeeds():
 		self.dbg = sys.modules[ "__main__" ].dbg
 		self.storage = sys.modules[ "__main__" ].storage
 		self.core = sys.modules[ "__main__" ].core
+		self.common = sys.modules ["__main__"].common
 	
 	def createUrl(self, params = {}):
 		get = params.get
@@ -127,7 +127,7 @@ class YouTubeFeeds():
 		
 		if get("login") == "true":
 			if ( not self.core._getAuth() ):
-				self.core.common.log("Login required but auth wasn't set!")
+				self.common.log("Login required but auth wasn't set!")
 				return ( self.language(30609) , 303 )
 
 		url = self.createUrl(params)
@@ -139,7 +139,7 @@ class YouTubeFeeds():
 			return ( result["content"], result["status"] )
 		
 		if not get("folder"):
-			videos = self.getVideoInfo(result["content"], params)
+			videos = self.core.getVideoInfo(result["content"], params)
 		
 		if len(videos) == 0:
 			return (videos, 303)
@@ -165,10 +165,10 @@ class YouTubeFeeds():
 			
 			videos = videos[(per_page * page):(per_page * (page + 1))]
 			
-			(result, status) = self.getBatchDetailsOverride(videos, params)
+			(result, status) = self.core.getBatchDetailsOverride(videos, params)
 		else:
 			result = self.listAll(params)
-				
+			
 			if len(result) == 0:
 				return (result, 303)
 			
@@ -193,7 +193,7 @@ class YouTubeFeeds():
 			result = result[(per_page * page):(per_page * (page + 1))]
 		
 		if next == "true":
-			self.addNextFolder(result, params)
+			self.utils.addNextFolder(result, params)
 		
 		return (result, 200)
 	
@@ -248,7 +248,7 @@ class YouTubeFeeds():
 					item["view_mode"] = "subscriptions_favorites"
 		
 		if next == "true":
-			self.addNextFolder(result, params)
+			self.utils.addNextFolder(result, params)
 		
 		return (result,200)
 	
@@ -268,7 +268,7 @@ class YouTubeFeeds():
 
 		ytobjects = []
 		
-		result = self._fetchPage({"link":url, "auth":"true"})
+		result = self.common._fetchPage({"link":url, "auth":"true"})
 		
 		if result["status"] == 200:
 			if get("folder") == "true":
@@ -287,7 +287,7 @@ class YouTubeFeeds():
 			index += 50
 			url = feed + "start-index=" + str(index) + "&max-results=" + repr(50)
 			url = url.replace(" ", "+")
-			result = self._fetchPage({"link": url, "auth":"true"})
+			result = self.common._fetchPage({"link": url, "auth":"true"})
 			
 			if result["status"] != 200:
 				break

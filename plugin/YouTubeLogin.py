@@ -21,7 +21,6 @@ try: import simplejson as json
 except ImportError: import json
 
 import xbmc
-import YouTubeUtils, YouTubeCore, CommonFunctions
 
 # ERRORCODES:
 # 0 = Ignore
@@ -30,64 +29,66 @@ import YouTubeUtils, YouTubeCore, CommonFunctions
 # 500 = uncaught error
 
 class YouTubeLogin():
-	__settings__ = sys.modules[ "__main__" ].__settings__
-	__language__ = sys.modules[ "__main__" ].__language__
-	__plugin__ = sys.modules[ "__main__" ].__plugin__
-	__dbg__ = sys.modules[ "__main__" ].__dbg__
 
 	APIKEY = "AI39si6hWF7uOkKh4B9OEAX-gK337xbwR9Vax-cdeF9CF9iNAcQftT8NVhEXaORRLHAmHxj6GjM-Prw04odK4FxACFfKkiH9lg";
-	__table_name__ = "YouTube"
 			
 	urls = {};
 	urls['http_login'] = "https://www.google.com/accounts/ServiceLogin?service=youtube"
 	urls['http_login_confirmation'] = "http://www.youtube.com/signin?action_handle_signin=true&nomobiletemp=1&hl=en_US&next=/index&hl=en_US&ltmpl=sso"
 	urls['gdata_login'] = "https://www.google.com/accounts/ClientLogin"
 	
-	def __init__(self, core = YouTubeCore.YouTubeCore(), utils = YouTubeUtils.YouTubeUtils(), common = CommonFunctions.CommonFunctions):
+	def __init__(self):
+		self.settings = sys.modules[ "__main__" ].settings
+		self.language = sys.modules[ "__main__" ].language
+		self.plugin = sys.modules[ "__main__"].plugin
+		self.dbg = sys.modules[ "__main__" ].dbg
+
+		self.utils =  sys.modules[ "__main__" ].utils
+		self.core = sys.modules["__main__" ].core
+		self.common = sys.modules[ "__main__" ].common
+		self.cache = sys.modules[ "__main__" ].cache
+		
 		self.cookiejar = cookielib.LWPCookieJar()
 		self.opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar))
 		urllib2.install_opener(self.opener)
-		self.core = core
-		self.utils = utils
-		self.common = common 
 		
 	def login(self, params = {}):
-		self.log("")
-		ouname = self.__settings__.getSetting("username")
-		opass = self.__settings__.getSetting( "user_password" )
-		self.__settings__.openSettings()
-		uname = self.__settings__.getSetting("username")
-		self.__dbg__ = self.__settings__.getSetting("debug") == "true"
+		self.common.log("")
+		ouname = self.settings.getSetting("username")
+		opass = self.settings.getSetting( "user_password" )
+		self.settings.openSettings()
+		uname = self.settings.getSetting("username")
+		self.dbg = self.settings.getSetting("debug") == "true"
 
 		if uname != "":
 			refreshed = False
-			if self.__settings__.getSetting( "oauth2_refresh_token" ) and ouname == uname and opass == self.__settings__.getSetting( "user_password" ):
-				self.log("refreshing token: " + str(refreshed))
-				refreshed = self._oRefreshToken()
+			if self.settings.getSetting( "oauth2_refresh_token" ) and ouname == uname and opass == self.settings.getSetting( "user_password" ):
+				self.common.log("refreshing token: " + str(refreshed))
+				refreshed = self.core._oRefreshToken()
 
 			if not refreshed:
-				self.log("token not refresh, or new uname or password")
+				self.common.log("token not refresh, or new uname or password")
 
-				self.__settings__.setSetting("oauth2_access_token","")
-				self.__settings__.setSetting("oauth2_refresh_token","")
-				self.__settings__.setSetting("oauth2_expires at", "")
-				self.__settings__.setSetting("nick", "")
+				self.settings.setSetting("oauth2_access_token","")
+				self.settings.setSetting("oauth2_refresh_token","")
+				self.settings.setSetting("oauth2_expires at", "")
+				self.settings.setSetting("nick", "")
 				(result, status) = self._httpLogin({ "new": "true"})
 
 				if status == 200:
 					(result, status) = self._apiLogin()
 				
 				if status == 200:
-					self.showErrorMessage(self.__language__(30031), result, 303)
+					self.showErrorMessage(self.language(30031), result, 303)
 				else:
-					self.showErrorMessage(self.__language__(30609), result, status)
+					self.showErrorMessage(self.language(30609), result, status)
 		
 		xbmc.executebuiltin( "Container.Refresh" )
 
 	def _apiLogin(self, error = 0):
-		self.log("errors: " + str(error))
+		self.common.log("errors: " + str(error))
 		
-		self.__settings__.setSetting('auth', "")
+		self.settings.setSetting('auth', "")
 
 		url = "https://accounts.google.com/o/oauth2/auth?client_id=208795275779.apps.googleusercontent.com&redirect_uri=urn:ietf:wg:oauth:2.0:oob&scope=http%3A%2F%2Fgdata.youtube.com&response_type=code"
 
@@ -95,9 +96,9 @@ class YouTubeLogin():
 		fetch_options = { "link": url , "no-language-cookie": "true" }
 		step = 0
 
-		self.log("Part A")
+		self.common.log("Part A")
 		while not logged_in and fetch_options and step < 6:
-			self.log("Step : " + str(step))
+			self.common.log("Step : " + str(step))
 			step += 1
 
 			ret = self._fetchPage(fetch_options)
@@ -112,7 +113,7 @@ class YouTubeLogin():
 					     "submit_access": "true"}
 
 				fetch_options = { "link": newurl[0], "url_data": url_data, "no-language-cookie": "true" }
-				self.log("Part B")
+				self.common.log("Part B")
 				continue;
 
 			code = self.parseDOM(ret["content"], "textarea", attrs = { "id": "code"})
@@ -124,48 +125,48 @@ class YouTubeLogin():
 					     "redirect_uri": "urn:ietf:wg:oauth:2.0:oob",
 					     "grant_type": "authorization_code" }
 				fetch_options = { "link": url, "url_data": url_data}
-				self.log("Part C")
+				self.common.log("Part C")
 				continue
 			
 			# use token
 			if ret["content"].find("access_token") > -1:
-				self.log("Part D")
+				self.common.log("Part D")
 				oauth = json.loads(ret["content"])
 
 				if len(oauth) > 0:
-					self.log("Part D " + repr(oauth["expires_in"]))
-					self.__settings__.setSetting("oauth2_expires_at", str(int(oauth["expires_in"]) + time.time()) ) 
-					self.__settings__.setSetting("oauth2_access_token", oauth["access_token"])
-					self.__settings__.setSetting('auth', oauth["access_token"])
-					self.__settings__.setSetting("oauth2_refresh_token", oauth["refresh_token"])
+					self.common.log("Part D " + repr(oauth["expires_in"]))
+					self.settings.setSetting("oauth2_expires_at", str(int(oauth["expires_in"]) + time.time()) ) 
+					self.settings.setSetting("oauth2_access_token", oauth["access_token"])
+					self.settings.setSetting('auth', oauth["access_token"])
+					self.settings.setSetting("oauth2_refresh_token", oauth["refresh_token"])
 
 					logged_in = True
-					self.log("Done:" + self.__settings__.getSetting( "username" ))
+					self.common.log("Done:" + self.settings.getSetting( "username" ))
 		
 		if logged_in:
-			return ( self.__language__(30030), 200 )
+			return ( self.language(30030), 200 )
 		else:
-			self.log("Failed") 
-		return ( self.__language__(30609), 303 )
+			self.common.log("Failed") 
+		return ( self.language(30609), 303 )
 	
 	def _httpLogin(self, params = {}):
 		get = params.get
-		self.log("")
+		self.common.log("")
 		result = ""
 		status = 500
 
 		if get("new", "false") == "true":
-			self.__settings__.setSetting( "login_info", "" )
-		elif self.__settings__.getSetting( "login_info" ) != "":
-			self.log("returning existing login info: " + self.__settings__.getSetting( "login_info" ))
-			return ( self.__settings__.getSetting( "login_info" ), 200)
+			self.settings.setSetting( "login_info", "" )
+		elif self.settings.getSetting( "login_info" ) != "":
+			self.common.log("returning existing login info: " + self.settings.getSetting( "login_info" ))
+			return ( self.settings.getSetting( "login_info" ), 200)
 
 		logged_in = False
 		fetch_options = { "link": get("link", "http://www.youtube.com/") }
 		step = 0
 		galx = ""
 		while not logged_in and fetch_options and step < 18: # 6 steps for 2-factor login
-			self.log("Step " + str(step))
+			self.common.log("Step " + str(step))
 			step += 1
 
 			ret = self._fetchPage(fetch_options)
@@ -177,7 +178,7 @@ class YouTubeLogin():
 				# Start login procedure
 				if newurl[0] != "#":
 					fetch_options = { "link": newurl[0] }
-					self.log("Part A : " + repr(fetch_options) )
+					self.common.log("Part A : " + repr(fetch_options) )
 
 			# Fill out login information and send.
 			newurl = self.parseDOM(ret["content"].replace("\n", " "), "form", attrs = { "id": "gaia_loginform"}, ret = "action")
@@ -185,7 +186,7 @@ class YouTubeLogin():
 				( galx, url_data ) = self._fillLoginInfo(ret["content"])
 				if len(galx) > 0 and len(url_data) > 0:
 					fetch_options = { "link": newurl[0], "no-language-cookie": "true", "url_data": url_data }
-					self.log("Part B:" + repr(fetch_options)) ## WARNING, SHOWS LOGIN INFO
+					self.common.log("Part B:" + repr(fetch_options)) ## WARNING, SHOWS LOGIN INFO
 					continue
 
 			newurl = self.parseDOM(ret["content"], "meta", attrs = { "http-equiv": "refresh"}, ret = "content")
@@ -193,14 +194,14 @@ class YouTubeLogin():
 				newurl = newurl[0].replace("&amp;", "&")
 				newurl = newurl[newurl.find("&#39;") + 5 : newurl.rfind("&#39;")]
 				fetch_options = { "link": newurl, "no-language-cookie": "true" }
-				self.log("Part C: "  + repr(fetch_options))
+				self.common.log("Part C: "  + repr(fetch_options))
 				continue
 
 			## 2-factor login start
 			if ret["content"].find("smsUserPin") > -1:
 				url_data = self._fillUserPin(ret["content"])
 				fetch_options = { "link": "https://www.google.com/accounts/SmsAuth?persistent=yes", "url_data": url_data, "no-language-cookie": "true" }
-				self.log("Part D: " + repr(fetch_options))
+				self.common.log("Part D: " + repr(fetch_options))
 				continue
 
 			smsToken = self.parseDOM(ret["content"], "input", attrs= { "name": "smsToken" }, ret= "value")
@@ -214,7 +215,7 @@ class YouTubeLogin():
 
 				# I so want to extract this link.
 				fetch_options = { "link": "https://www.google.com/accounts/ServiceLoginAuth?service=youtube", "url_data": url_data, "no-language-cookie": "true"}
-				self.log("Part E: " + repr(fetch_options))
+				self.common.log("Part E: " + repr(fetch_options))
 				continue
 
 			## 2-factor login finish
@@ -223,7 +224,7 @@ class YouTubeLogin():
 				# Check if we are logged in.
 				if ret["content"].find("USERNAME', ") > 0:
 					logged_in = True
-					self.log("Logged in. Parsing data.")
+					self.common.log("Logged in. Parsing data.")
 					break;
 				# Look for errors and return error.
 				return ( self._findErrors(ret), 303)
@@ -231,7 +232,7 @@ class YouTubeLogin():
 		if logged_in:
 			status = self._getLoginInfo(ret["content"])
 			if status == 200:
-				result = self.__settings__.getSetting( "login_info" )
+				result = self.settings.getSetting( "login_info" )
 			## Maybe verify age here?
 
 		return (result, status)
@@ -249,14 +250,14 @@ class YouTubeLogin():
 
 		# Can we get this elsewhere?
 		galx = self.parseDOM(content, "input", attrs = { "name": "GALX"}, ret = "value")
-		uname = self.__settings__.getSetting( "username" )
-		pword = self.__settings__.getSetting( "user_password" )
+		uname = self.settings.getSetting( "username" )
+		pword = self.settings.getSetting( "user_password" )
 
 		if pword == "":
-			pword = self.getUserInput(self.__language__(30628), hidden = True)
+			pword = self.getUserInput(self.language(30628), hidden = True)
 
 		if len(galx) == 0 or len(cont) == 0 or len(uilel) == 0 or len(dsh) == 0 or len(rmShown) == 0 or uname == "" or pword == "":
-			self.log("missing values for login form " + repr(galx) + repr(cont) + repr(uilel) + repr(dsh) + repr(rmShown) + repr(uname) + str(len(pword)))
+			self.common.log("missing values for login form " + repr(galx) + repr(cont) + repr(uilel) + repr(dsh) + repr(rmShown) + repr(uname) + str(len(pword)))
 			return ( "", {} )
 		else:	
 			galx = galx[0]
@@ -283,7 +284,7 @@ class YouTubeLogin():
 	def _fillUserPin(self, content):
 		smsToken = self.parseDOM(content, "input", attrs = { "name": "smsToken" }, ret = "value")
 		email = self.parseDOM(content, "input", attrs = { "name": "email" }, ret = "value")
-		userpin = self.getUserInput(self.__language__(30627))
+		userpin = self.getUserInput(self.language(30627))
 		if len(smsToken) > 0 and len(email) > 0 and len(userpin) > 0:
 			url_data = { "smsToken": smsToken[0],
 				     "PersistentCookie": "yes",
@@ -304,23 +305,23 @@ class YouTubeLogin():
 			nick = nick[:nick.find('")')]
 				
 		if nick:
-			self.__settings__.setSetting("nick", nick)
+			self.settings.setSetting("nick", nick)
 		else:
-			self.log("Failed to get usename from youtube")
+			self.common.log("Failed to get usename from youtube")
 
 		# Save cookiefile in settings
-		self.log("Scanning cookies for login info")
+		self.common.log("Scanning cookies for login info")
 		
 		login_info = ""
-		cookies = repr(self.__cj__)
+		cookies = repr(self.cookiejar)
 			
 		if cookies.find("name='LOGIN_INFO', value='") > 0:
 			start = cookies.find("name='LOGIN_INFO', value='") + len("name='LOGIN_INFO', value='")
 			login_info = cookies[start:cookies.find("', port=None", start)]
 		
 		if login_info:
-			self.__settings__.setSetting( "login_info", login_info )
+			self.settings.setSetting( "login_info", login_info )
 			status = 200
 
-		self.log("Done : " + str(status) + " - " + login_info)
+		self.common.log("Done : " + str(status) + " - " + login_info)
 		return status

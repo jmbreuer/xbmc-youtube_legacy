@@ -16,27 +16,26 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys
-import xbmc, xbmcgui
-import YouTubeCore, YouTubeUtils
+import sys, xbmcgui, xbmc
 
 class YouTubePlaylistControl():
-	__settings__ = sys.modules[ "__main__" ].__settings__
-	__language__ = sys.modules[ "__main__" ].__language__
-	__plugin__ = sys.modules[ "__main__"].__plugin__	
-	__dbg__ = sys.modules[ "__main__" ].__dbg__
+	
+	def __init__(self):
+		self.settings = sys.modules[ "__main__" ].settings
+		self.language = sys.modules[ "__main__" ].language
+		self.plugin = sys.modules[ "__main__"].plugin
+		self.dbg = sys.modules[ "__main__" ].dbg
 
-	__feeds__ = sys.modules[ "__main__" ].__feeds__
-	__scraper__ = sys.modules[ "__main__" ].__scraper__
-	__player__ = sys.modules[ "__main__" ].__player__
-	
-	def __init__(self, core = YouTubeCore.YouTubeCore(), utils = YouTubeUtils.YouTubeUtils()):
-		self.core = core
-		self.utils = utils
-	
+		self.utils =  sys.modules[ "__main__" ].utils
+		self.core = sys.modules["__main__" ].core		
+			
+		self.feeds = sys.modules[ "__main__" ].feeds
+		self.scraper = sys.modules[ "__main__" ].scraper
+		self.player = sys.modules[ "__main__" ].player
+			
 	def playAll(self, params={}):
 		get = params.get
-		self.log("")
+		self.common.log("")
 
 		params["fetch_all"] = "true"
 		result = []
@@ -62,7 +61,7 @@ class YouTubePlaylistControl():
 			result = []
 			video_list = get("video_list", "").split(",")
 			for videoid in video_list:
-				(video, status) = self.__player__.getVideoObject({ "videoid": videoid})
+				(video, status) = self.player.getVideoObject({ "videoid": videoid})
 				result.append(video)
 		else:
 			return
@@ -70,7 +69,7 @@ class YouTubePlaylistControl():
 		if len(result) == 0:
 			return
 		
-		self.log(repr(len(result)) + " video results ")
+		self.common.log(repr(len(result)) + " video results ")
 		
 		if get("videoid"):
 			video_index = -1
@@ -105,7 +104,7 @@ class YouTubePlaylistControl():
 		
 	def queueVideo(self, params = {}):
 		get = params.get
-		self.log("Queuing videos: " + get("videoid"))
+		self.common.log("Queuing videos: " + get("videoid"))
 		
 		items =[]
 		videoids = get("videoid")
@@ -115,19 +114,19 @@ class YouTubePlaylistControl():
 		else:
 			items.append(videoids)
 		
-		(video, status) = self.__core__.getBatchDetails(items, params);
+		(video, status) = self.core.getBatchDetails(items, params);
 
 		if status != 200:
-			self.log("construct video url failed contents of video item " + repr(video))
+			self.common.log("construct video url failed contents of video item " + repr(video))
 				
-			self.showErrorMessage(self.__language__(30603), video["apierror"], status)
+			self.showErrorMessage(self.language(30603), video["apierror"], status)
 			return False
 
 		listitem=xbmcgui.ListItem(label=video['Title'], iconImage=video['thumbnail'], thumbnailImage=video['thumbnail'], path=video['video_url']);
 		listitem.setProperty('IsPlayable', 'true')
 		listitem.setInfo(type='Video', infoLabels=video)
 
-		self.log("Queuing video: " + self.makeAscii(video['Title']) + " - " + get('videoid') + " - " + video['video_url'])
+		self.common.log("Queuing video: " + self.makeAscii(video['Title']) + " - " + get('videoid') + " - " + video['video_url'])
 
 		playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
 		playlist.add("%s?path=/root&action=play_video&videoid=%s" % (sys.argv[0], video["videoid"] ), listitem)
@@ -138,14 +137,14 @@ class YouTubePlaylistControl():
 		if not get("playlist"):
 			return False
 		params["user_feed"] = "playlist" 
-		return self.__feeds__.listAll(params)
+		return self.feeds.listAll(params)
 	
 	def getWatchLater(self, params = {}):
-		(result, status ) = self.__scraper__.scrapeWatchLater(params)
+		(result, status ) = self.scraper.scrapeWatchLater(params)
 		return result
 
 	def getDiscoSearch(self, params = {}):
-		(result, status) = self.__scraper__.searchDisco(params)
+		(result, status) = self.scraper.searchDisco(params)
 		
 		if status == 200:
 			(result, status) = self.getBatchDetails(result, params)
@@ -159,7 +158,7 @@ class YouTubePlaylistControl():
 			return False
 		
 		params["user_feed"] = "favorites"
-		return self.__feeds__.listAll(params)
+		return self.feeds.listAll(params)
 	
 	def getNewSubscriptions(self, params = {}):
 		get = params.get
@@ -167,7 +166,7 @@ class YouTubePlaylistControl():
 		if not get("contact"):
 			return False
 		params["user_feed"] = "newsubscriptions"
-		return self.__feeds__.listAll(params)
+		return self.feeds.listAll(params)
 	
 	def getRecommended(self, params = {}):
 		get = params.get
@@ -175,7 +174,7 @@ class YouTubePlaylistControl():
 		if not get("scraper") or not get("login"):
 			return False
 		
-		(result, status) = self.__scraper__.scrapeRecommended(params)
+		(result, status) = self.scraper.scrapeRecommended(params)
 		
 		if status == 200:
 			(result, status) = self.getBatchDetails(result, params)
@@ -188,7 +187,7 @@ class YouTubePlaylistControl():
 		if not get("artist"):
 			return False
 		
-		(result, status) = self.__scraper__.scrapeArtist(params)
+		(result, status) = self.scraper.scrapeArtist(params)
 		
 		if status == 200:
 			(result, status) = self.getBatchDetails(result, params)
@@ -200,8 +199,8 @@ class YouTubePlaylistControl():
 		if not get("scraper") or not get("login"):
 			return False
 		
-		(result, status) = self.__scraper__.scrapeLikedVideos(params)
-		self.log("Liked videos "  + repr(result))
+		(result, status) = self.scraper.scrapeLikedVideos(params)
+		self.common.log("Liked videos "  + repr(result))
 		if status == 200:
 			(result, status) = self.getBatchDetails(result, params)
 			
@@ -215,21 +214,21 @@ class YouTubePlaylistControl():
 			params["user_feed"] = "playlists"
 			params["login"] = "true"
 			params["folder"] = "true"
-			result = self.__feeds__.listAll(params)
+			result = self.feeds.listAll(params)
 		
 		selected = -1
 		if result:
 			list = []
-			list.append(self.__language__(30529))
+			list.append(self.language(30529))
 			for item in result:
 				list.append(item["Title"])
 			dialog = xbmcgui.Dialog()
-			selected = dialog.select(self.__language__(30528), list)
+			selected = dialog.select(self.language(30528), list)
 			
 		if selected == 0:
 			self.createPlayList(params)
 			if get("title"):
-				result = self.__feeds__.listAll(params)
+				result = self.feeds.listAll(params)
 				for item in result:
 					if get("title") == item["Title"]:
 						params["playlist"] = item["playlist"]
@@ -246,7 +245,7 @@ class YouTubePlaylistControl():
 	def createPlayList(self, params = {}):
 		get = params.get
 		
-		input = self.getUserInput(self.__language__(30529))
+		input = self.getUserInput(self.language(30529))
 		if input:
 			params["title"] = input
 			self.add_playlist(params)
@@ -260,7 +259,7 @@ class YouTubePlaylistControl():
 			(message, status) = self.remove_from_playlist(params)
 			
 			if (status != 200):
-				self.showErrorMessage(self.__language__(30600), message, status)
+				self.showErrorMessage(self.language(30600), message, status)
 				return False
 			xbmc.executebuiltin( "Container.Refresh" )
 		return True
@@ -271,7 +270,7 @@ class YouTubePlaylistControl():
 			(message, status) = self.del_playlist(params)
 			
 			if status != 200:
-				self.showErrorMessage(self.__language__(30600), message, status)
+				self.showErrorMessage(self.language(30600), message, status)
 				return False
 			xbmc.executebuiltin( "Container.Refresh" )
 		return True

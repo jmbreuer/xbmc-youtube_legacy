@@ -3,11 +3,11 @@ import xbmc
 import xbmcgui
 from traceback import print_exc
 
-__settings__ = sys.modules[ "__main__" ].__settings__
-__addonDir__  = __settings__.getAddonInfo( "path" )
+settings = sys.modules[ "__main__" ].settings
+addonDir  = settings.getAddonInfo( "path" )
 
 XBMC_SKIN  = xbmc.getSkinDir()
-SKINS_PATH = os.path.join( __addonDir__, "resources", "skins" )
+SKINS_PATH = os.path.join( addonDir, "resources", "skins" )
 ADDON_SKIN = ( "default", XBMC_SKIN )[ os.path.exists( os.path.join( SKINS_PATH, XBMC_SKIN ) ) ]
 MEDIA_PATH = os.path.join( SKINS_PATH, ADDON_SKIN, "media" )
 
@@ -83,12 +83,6 @@ class Control:
 	def getCoords( self, default ):
 		x, y = self.controlXML.getPosition()
 		w, h = self.controlXML.getWidth(), self.controlXML.getHeight()
-		try:
-			if __settings__.getSetting( "custompos" ) == "true":
-				default = ( int( float( __settings__.getSetting( "customposx" ) ) ),
-							int( float( __settings__.getSetting( "customposy" ) ) ) )
-		except:
-			print_exc()
 		return ( default[ 0 ] + x, default[ 1 ] + y, w, h )
 
 	def getAlignment( self, alignment ):
@@ -105,7 +99,7 @@ class Control:
 		return align
 
 	def setAnimations( self ):
-		if self.anim and __settings__.getSetting( "animation" ) == "true":
+		if self.anim:
 			try: self.control.setAnimations( self.anim )
 			except: print_exc()
 

@@ -18,99 +18,91 @@
 
 import sys, urllib2, os
 from DialogDownloadProgress import DownloadProgress
-import YouTubeUtils
 import xbmc
 try: import xbmcvfs
 except ImportError: import xbmcvfsdummy as xbmcvfs
-import StorageServer
 
 class YouTubeDownloader():
 	
 	dialog = ""
 	
-	def __init__(self, utils = YouTubeUtils.YouTubeUtils()):
-		self.__settings__ = sys.modules[ "__main__" ].__settings__
-		self.__language__ = sys.modules[ "__main__" ].__language__
-		self.__plugin__ = sys.modules[ "__main__"].__plugin__	
-		self.__dbg__ = sys.modules[ "__main__" ].__dbg__
-		
-		self.__player__ = sys.modules["__main__" ].__player__
-		self.__storage__ = sys.modules[ "__main__" ].__storage__
+	def __init__(self):
+		self.settings = sys.modules[ "__main__" ].settings
+		self.language = sys.modules[ "__main__" ].language
+		self.plugin = sys.modules[ "__main__"].plugin
+		self.dbg = sys.modules[ "__main__" ].dbg
+		self.utils =  sys.modules[ "__main__" ].utils
+		self.player = sys.modules["__main__" ].player
+		self.storage = sys.modules[ "__main__" ].storage
 	
-		self.__storage_server__ = StorageServer.StorageServer()
-		self.__storage_server__.__table_name__ = "YouTube"
-		
-		self.utils = utils
+		self.storage_server = sys.modules[ "__main__" ].cache
 
 	def downloadVideo(self, params = {}):
 		get = params.get
 		
-		path = self.__settings__.getSetting( "downloadPath" )
+		path = self.settings.getSetting( "downloadPath" )
 		if (not path):
-			self.showMessage(self.__language__(30600), self.__language__(30611))
-			self.__settings__.openSettings()
-			self.__dbg__ = self.__settings__.getSetting("debug") == "true"
-			path = self.__settings__.getSetting( "downloadPath" )
+			self.showMessage(self.language(30600), self.language(30611))
+			self.settings.openSettings()
+			self.dbg = self.settings.getSetting("debug") == "true"
+			path = self.settings.getSetting( "downloadPath" )
 
-		if self.__storage_server__.lock("YouTubeDownloadLock"):
+		if self.cache.lock("YouTubeDownloadLock"):
 			params["silent"] = "true"
 			self.log("Downloader not active, initializing downloader.")
 			
-			self.__storage__.addVideoToDownloadQeueu(params)
+			self.storage.addVideoToDownloadQeueu(params)
 			self.processQueue(params)
-			self.__storage_server__.unlock("YouTubeDownloadLock")
+			self.cache.unlock("YouTubeDownloadLock")
 		else:
 			self.log("Downloader is active, Queueing video.")
-			self.__storage__.addVideoToDownloadQeueu(params)
+			self.storage.addVideoToDownloadQeueu(params)
 
 	def processQueue(self, params = {}):
-		videoid = self.__storage__.getNextVideoFromDownloadQueue()
+		videoid = self.storage.getNextVideoFromDownloadQueue()
 		
 		if videoid:
 			if not self.dialog:
 				self.dialog = DownloadProgress()
-			#self.dialog.create( heading = self.__language__( 30605 ), label = "")
+			#self.dialog.create( heading = self.language( 30605 ), label = "")
 	
 			while videoid:
 				params["videoid"] = videoid
-				( video, status ) = self.__player__.getVideoObject(params)
+				( video, status ) = self.player.getVideoObject(params)
 				if status != 200:
-					self.showMessage(self.__language__(30625), video["apierror"])
-					self.__storage__.removeVideoFromDownloadQueue(videoid)
-					videoid = self.__storage__.getNextVideoFromDownloadQueue()
+					self.showMessage(self.language(30625), video["apierror"])
+					self.storage.removeVideoFromDownloadQueue(videoid)
+					videoid = self.storage.getNextVideoFromDownloadQueue()
 					continue
 				item = video.get
 				if item("stream_map"):
-					self.showMessage(self.__language__(30607), self.__language__(30619))
-					self.__storage__.removeVideoFromDownloadQueue(videoid)
-					videoid = self.__storage__.getNextVideoFromDownloadQueue()
+					self.showMessage(self.language(30607), self.language(30619))
+					self.storage.removeVideoFromDownloadQueue(videoid)
+					videoid = self.storage.getNextVideoFromDownloadQueue()
 					continue
 				
 				( video, status ) = self.downloadVideoURL(video)
-				self.__storage__.removeVideoFromDownloadQueue(videoid)
-				videoid = self.__storage__.getNextVideoFromDownloadQueue()
+				self.storage.removeVideoFromDownloadQueue(videoid)
+				videoid = self.storage.getNextVideoFromDownloadQueue()
 
 			self.log("Finished download queue.")
 			self.dialog.close()
 			self.dialog = ""
-
-			#self.__lock__.release()
-
 			
 	def downloadVideoURL(self, video, params = {}):
 		self.log(video['Title'])
 		
 		if video["video_url"].find("swfurl") > 0:
-			self.showMessage(self.__language__( 30625 ), self.__language__(30619))
+			self.showMessage(self.language( 30625 ), self.language(30619))
 			return ([], 303)
 		
-		video["downloadPath"] = self.__settings__.getSetting( "downloadPath" )
-		self.__player__.downloadSubtitle(video) 
+		video["downloadPath"] = self.settings.getSetting( "downloadPath" )
+		self.player.downloadSubtitle(video) 
 		url = urllib2.Request(video['video_url'])
 		url.add_header('User-Agent', self.USERAGENT);
 		filename = "%s-[%s].mp4" % ( ''.join(c for c in video['Title'] if c in self.VALID_CHARS), video["videoid"] )
 		filename_incomplete = os.path.join(xbmc.translatePath( "special://temp" ), filename )
-		filename_complete = os.path.join(self.__settings__.getSetting( "downloadPath" ), filename )
+		filename_complete = os.path.join(self.settings.getSetting( "downloadPath" ), filename )
 
 		if xbmcvfs.exists(filename_complete):
 			xbmcvfs.delete(filename_complete)
@@ -134,7 +126,7 @@ class YouTubeDownloader():
 				percent = int(float(bytes_so_far) / float(total_size) * 100)
 				file.write(chunk)
 				
-				queue = self.__storage__.sqlGet("YouTubeDownloadQueue")
+				queue = self.storage.sqlGet("YouTubeDownloadQueue")
 
 				if queue:
 					try:
@@ -144,7 +136,7 @@ class YouTubeDownloader():
 				else:
 					videos = []
 
-				heading = "[%s] %s - %s%%" % ( str(len(videos)), self.__language__(30624), str(percent))
+				heading = "[%s] %s - %s%%" % ( str(len(videos)), self.language(30624), str(percent))
 				self.dialog.update(percent=percent, heading = heading, label=video["Title"])
 
 				if not chunk:
@@ -160,6 +152,6 @@ class YouTubeDownloader():
 				self.log("Failed to close download stream and file handle")
 		
 		xbmcvfs.rename(filename_incomplete, filename_complete)
-		self.dialog.update(heading = self.__language__(30604), label=video["Title"])
-		self.__storage__.storeValue( "vidstatus-" + video['videoid'], "1" )
+		self.dialog.update(heading = self.language(30604), label=video["Title"])
+		self.storage.storeValue( "vidstatus-" + video['videoid'], "1" )
 		return ( video, 200 )

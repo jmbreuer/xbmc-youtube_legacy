@@ -16,12 +16,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import os, xbmc, sys, urllib, urllib2, re, time, socket, cookielib
-import StorageServer
+import sys, urllib, urllib2, re, time, socket, cookielib
 try: import simplejson as json
 except ImportError: import json
 from xml.dom.minidom import parseString
-import YouTubeUtils, CommonFunctions
 
 # ERRORCODES:
 # 200 = OK
@@ -59,12 +57,13 @@ class YouTubeCore():
 	urls['remove_watch_later'] = "http://www.youtube.com/addto_ajax?action_delete_from_playlist=1"	
 
 
-	def __init__(self, storage_server=StorageServer.StorageServer()):
+	def __init__(self):
 		self.settings = sys.modules[ "__main__" ].settings
 		self.language = sys.modules[ "__main__" ].language
 		self.plugin = sys.modules[ "__main__" ].plugin
 		self.dbg = sys.modules[ "__main__" ].dbg
 		self.storage = sys.modules[ "__main__" ].storage
+		self.cache = sys.modules[ "__main__" ].cache
 		self.login = sys.modules[ "__main__" ].login
 		self.utils = sys.modules[ "__main__" ].utils
 		self.common = sys.modules[ "__main__" ].common
@@ -72,9 +71,6 @@ class YouTubeCore():
 		self.cookiejar = cookielib.LWPCookieJar()
 		self.opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar))
 		urllib2.install_opener(self.opener)
-		
-		self.storage_server = storage_server
-		storage_server.__table_name__ = "YouTube"
 		
 		timeout = [5, 10, 15, 20, 25][int(self.settings.getSetting("timeout"))]
 		if not timeout:
@@ -209,7 +205,7 @@ class YouTubeCore():
 			folders.append(folder);
 		
 		if next:
-			self.addNextFolder(folders, params)
+			self.utils.addNextFolder(folders, params)
 		
 		return folders;
 	
@@ -271,7 +267,7 @@ class YouTubeCore():
 		# Run the following for the missing.
 		# Update cache in the end.
 
-		temp_objs = self.__storage_server__.sqlGetMulti("videoidcache", items)
+		temp_objs = self.cache.sqlGetMulti("videoidcache", items)
 		#status = 200
 		#return ( ytobjects, status)
 		for index, videoid in enumerate(items):
@@ -286,7 +282,7 @@ class YouTubeCore():
 					rstat = 403
 					while rstat == 403:
 						result = self._fetchPage({"link": "http://gdata.youtube.com/feeds/api/videos/batch", "api": "true", "request": final_request})
-						rstat = self.parseDOM(result["content"], "batch:status", ret="code")
+						rstat = self.common.parseDOM(result["content"], "batch:status", ret="code")
 						if len(rstat) > 0:
 							if int(rstat[len(rstat) - 1]) == 403:
 								self.common.log("quota exceeded. Waiting 5 seconds. " + repr(rstat))
@@ -309,7 +305,7 @@ class YouTubeCore():
 			save_data = {}
 			for item in ytobjects:
 				save_data[item["videoid"]] = repr(item)
-			self.__storage_server__.sqlSetMulti("videoidcache", save_data)
+			self.cache.sqlSetMulti("videoidcache", save_data)
 
 		if len(ytobjects) > 0:
 			status = 200
@@ -372,7 +368,7 @@ class YouTubeCore():
 				self._oRefreshToken()
 
 		else:
-			request.add_header('User-Agent', self.USERAGENT)
+			request.add_header('User-Agent', self.common.USERAGENT)
 
 			if get("no-language-cookie", "false") == "false":
 				request.add_header('Cookie', 'PREF=f1=50000000&hl=en')
@@ -460,19 +456,19 @@ class YouTubeCore():
 		self.common.log("")
 
 		## Couldn't find 2 factor or normal login
-		error = self.parseDOM(ret['content'], "div", attrs={ "class": "errormsg" })
+		error = self.common.parseDOM(ret['content'], "div", attrs={ "class": "errormsg" })
 		if len(error) == 0:   
 			# An error in 2-factor
-			error = self.parseDOM(ret['content'], "div", attrs={ "class": "error smaller"})
+			error = self.common.parseDOM(ret['content'], "div", attrs={ "class": "error smaller"})
 		if len(error) == 0:
-			error = self.parseDOM(ret['content'], "div", attrs={ "id": "unavailable-message"})
+			error = self.common.parseDOM(ret['content'], "div", attrs={ "id": "unavailable-message"})
 		if len(error) == 0 and ret['content'].find("yt:quota") > -1:
 			# Api quota
-			html = self.parseDOM(ret['content'], "error")
-			error = self.parseDOM(html, "code")
+			html = self.common.parseDOM(ret['content'], "error")
+			error = self.common.parseDOM(html, "code")
 		if len(error) == 0 and False: # This hits flash quite often.
 			# Playback
-			error = self.parseDOM(ret['content'], "div", attrs={ "class": "yt-alert-content"})
+			error = self.common.parseDOM(ret['content'], "div", attrs={ "class": "yt-alert-content"})
 		if len(error) > 0:
 			error = error[0]
 			error = urllib.unquote(error[0:error.find("[")]).replace("&#39;", "'")
@@ -491,7 +487,7 @@ class YouTubeCore():
 		
 		# Convert to fetchpage
 		request = urllib2.Request(new_url)
-		request.add_header('User-Agent', self.USERAGENT)
+		request.add_header('User-Agent', self.common.USERAGENT)
 		request.add_header('Cookie', 'LOGIN_INFO=' + login_info)
 		con = urllib2.urlopen(request)
 		result = con.read()
@@ -518,7 +514,7 @@ class YouTubeCore():
 		
 		# post collected information to age the verifiaction page
 		request = urllib2.Request(new_url)
-		request.add_header('User-Agent', self.USERAGENT)
+		request.add_header('User-Agent', self.common.USERAGENT)
 		request.add_header('Cookie', 'LOGIN_INFO=' + login_info)
 		request.add_header("Content-Type", "application/x-www-form-urlencoded")
 		values = urllib.urlencode({ "next_url": next_url, "action_confirm": confirmed, "session_token":session_token })
@@ -701,13 +697,13 @@ class YouTubeCore():
 
 			ytobjects.append(video);
 		if next:
-			self.addNextFolder(ytobjects, params)
+			self.utils.addNextFolder(ytobjects, params)
 				
 		self.common.log("Done: " + str(len(ytobjects)))
 		save_data = {}
 		for item in ytobjects:
 			if item.has_key("videoid"):
 				save_data[item["videoid"]] = repr(item)
-		self.__storage_server__.sqlSetMulti("videoidcache", save_data)
+		self.cache.sqlSetMulti("videoidcache", save_data)
 		return ytobjects;
 
