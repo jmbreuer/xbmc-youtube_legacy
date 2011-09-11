@@ -14,7 +14,7 @@ class YouTubePlayerTests():
 		sys.modules["xbmcvfs"].translatePath = Mock()
 		sys.modules["xbmcvfs"].translatePath.return_value = "testFilePath" 
 		player = YouTubePlayer()
-		player.saveSubtitle({},{"Title":"testTitle","downloadPath":"testPath"})
+		player.saveSubtitle({},{"Title":"testTitle","videoid":"honkytonk","downloadPath":"testPath"})
 		assert(sys.modules["xbmcvfs"].recieved())
 		
 	def getVideoUrlMap_should_parse_streamMap(self):

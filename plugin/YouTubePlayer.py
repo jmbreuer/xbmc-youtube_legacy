@@ -151,7 +151,7 @@ class YouTubePlayer():
 		filename = ''.join(c for c in video['Title'] if c in self.utils.VALID_CHARS) + "-[" + get('videoid') + "]" + ".ssa"
 		path = os.path.join( xbmc.translatePath( "special://temp" ), filename )
 		
-		w = open(path, "w")
+		w = self.storage.openFile(path)
 		w.write(result.encode('utf-8'))
 		w.close()
 		

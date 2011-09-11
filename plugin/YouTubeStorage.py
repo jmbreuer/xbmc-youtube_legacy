@@ -16,7 +16,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, urllib
+import sys, urllib, os
 import xbmc
 
 class YouTubeStorage():
@@ -49,12 +49,15 @@ class YouTubeStorage():
 		elif get("store"):
 			return self.getStoredSearches(params)
 	
+	def openFile(self, filepath):
+		return os.open(filepath, "w")
+	
 	def getStoredArtists(self, params = {}):
 		get = params.get
 		self.common.log("")
 		
 		artists = self.retrieve(params)
-				
+		
 		result = []
 		for title, artist in artists:
 			item = {}
