@@ -1,4 +1,4 @@
-import sys
+import sys, inspect
 from mock import Mock, patch
 
 sys.path.append('../plugin/')
@@ -24,6 +24,7 @@ sys.modules[ "__main__" ].scraper = Mock()
 sys.modules[ "__main__" ].login = Mock()
 sys.modules[ "__main__" ].plugin = "unittest"
 sys.modules[ "__main__" ].dbg = False
+sys.modules[ "__main__" ].dbglevel = 1
 sys.modules[ "__main__" ].storage = Mock()
 
 sys.modules["xbmc"].translatePath = Mock()

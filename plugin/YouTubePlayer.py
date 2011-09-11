@@ -511,10 +511,15 @@ class YouTubePlayer():
 		for fmt_key in links.iterkeys():
 			if link(int(fmt_key)):
 				if self.dbg:
-					if ( link(int(fmt_key)) == video_url):
-						self.common.log(repr(fmt_key) + " - " + self.fmt_value[fmt_key] + "*")
+					text = repr(fmt_key) + " - "
+					if self.fmt_value.has_key(fmt_key):
+						text += self.fmt_value[fmt_key]
 					else:
-						self.common.log(repr(fmt_key) + " - " + self.fmt_value[fmt_key])
+						text += "Unknown"
+					
+					if ( link(int(fmt_key)) == video_url):
+						text += "*"
+					self.common.log(text)
 			else:
 				self.common.log("- Missing fmt_value: " + repr(fmt_key))
 		
