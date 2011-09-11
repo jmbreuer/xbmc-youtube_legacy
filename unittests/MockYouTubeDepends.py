@@ -8,6 +8,7 @@ sys.path.append('../plugin/')
 sys.modules["xbmc"] = __import__("mock")
 sys.modules["xbmcgui"] = __import__("mock")
 sys.modules["xbmcvfs"] = __import__("mock")
+sys.modules["xbmcvfs"].rename = Mock()
 sys.modules["xbmcplugin"] = __import__("mock")
 
 # Shield us from the file system
