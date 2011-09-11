@@ -1,6 +1,6 @@
 import MockYouTubeDepends
 import unittest2
-import sys
+import sys, os
 from YouTubePlayer import YouTubePlayer
 from mock import Mock, patch
 
@@ -25,12 +25,16 @@ class YouTubePlayerTests(unittest2.TestCase):
 		player.saveSubtitle("my_subtitle_stream",{"Title":"testTitle","videoid":"someVideoId","downloadPath":"downloadFilePath"})
 		sys.modules["xbmcvfs"].rename.assert_called_with("tempFilePath/testTitle-[someVideoId].ssa","downloadFilePath/testTitle-[someVideoId].ssa")
 		
-	def getVideoUrlMap_should_parse_streamMap(self):
+	def test_getVideoUrlMap_should_parse_streamMap(self):
+		os.open("./resources/streamMapTest.txt")
+		
 		player = YouTubePlayer()
 		player._fetchPage = Mock()
 		player._fetchPage.return_value = "smokey"
 		
-		player.getVideoUrlMap({"args":{}},{})
+		result = player.getVideoUrlMap({"args":{}},{})
+		assert(result != {})
+		
 		
 if __name__ == "__main__":
 #	suite = YouTubePlayerTests()
