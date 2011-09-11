@@ -101,7 +101,7 @@ class YouTubeLogin():
 			self.common.log("Step : " + str(step))
 			step += 1
 
-			ret = self._fetchPage(fetch_options)
+			ret = self.core._fetchPage(fetch_options)
 			fetch_options = False
 
 			newurl = self.parseDOM(ret["content"], "form", attrs= { "method": "POST"}, ret = "action")
@@ -166,10 +166,10 @@ class YouTubeLogin():
 		step = 0
 		galx = ""
 		while not logged_in and fetch_options and step < 18: # 6 steps for 2-factor login
-			self.common.log("Step " + str(step))
+			self.common.log("Step : " + str(step))
 			step += 1
 
-			ret = self._fetchPage(fetch_options)
+			ret = self.core._fetchPage(fetch_options)
 			fetch_options = False
 
 			# Click login link on youtube.com
