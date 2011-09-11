@@ -29,20 +29,22 @@ from xml.dom.minidom import parseString
 class YouTubePlayer():
 	
 	fmt_value = { 
-			  35 : "480p h264 flv container",
-		      59 : "480 for rtmpe",
-		      44 : "480p vp8 webm container",
-		      78 : "seems to be around 400 for rtmpe",
-		      34 : "360p h264 flv container",
-		      43 : "360p h264 flv container",
-		      26 : "???",
-		      18 : "360p h264 mp4 container | 270 for rtmpe?",
-		      33 : "???",
-		      5 : "240p h263 flv container",
-		      22 : "720p h264 mp4 container",
-		      45 : "720p vp8 webm container",
-		      37 : "1080p h264 mp4 container",
-		      38 : "720p vp8 webm container" }
+		35 : "480p h264 flv container",
+		59 : "480 for rtmpe",
+		44 : "480p vp8 webm container",
+		78 : "seems to be around 400 for rtmpe",
+		34 : "360p h264 flv container",
+		43 : "360p h264 flv container",
+		26 : "???",
+		18 : "360p h264 mp4 container | 270 for rtmpe?",
+		33 : "???",
+		5 : "240p h263 flv container",
+		22 : "720p h264 mp4 container",
+		45 : "720p vp8 webm container",
+		37 : "1080p h264 mp4 container",
+		38 : "720p vp8 webm container",
+		82 : "360p h264 stereo",
+		84 : "720p h264 stereo"}
 	
 	# YouTube Playback Feeds
 	urls = {}
@@ -366,6 +368,13 @@ class YouTubePlayer():
 		
 		if len(fmt_url_map) > 0:
 			for index, fmt_url in enumerate(fmt_url_map):
+				#self.common.log("Searching for fmt_url_map : " + repr(fmt_url))
+				if fmt_url.find("&url") > -1:
+					self.common.log("Searching for fmt_url_map : " + repr(fmt_url))
+					fmt_url = fmt_url.split("&url")
+					fmt_url_map += [fmt_url[1]]
+					fmt_url = fmt_url[0]
+
 				if (len(fmt_url) > 7 and fmt_url.find("&") > 7):
 					quality = "5"
 					final_url = fmt_url.replace(" ", "%20").replace("url=", "")
@@ -505,8 +514,7 @@ class YouTubePlayer():
 				video_url = link(37)
 
 		if link(38) and False:
-			video_url = link(37)
-
+			video_url = link(38)
 
 		for fmt_key in links.iterkeys():
 			if link(int(fmt_key)):
