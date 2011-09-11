@@ -23,7 +23,7 @@ class YouTubePlayerTests(unittest2.TestCase):
 		sys.modules["xbmcvfs"].translatePath.return_value = "tempFilePath" 
 		player = YouTubePlayer()
 		player.saveSubtitle("my_subtitle_stream",{"Title":"testTitle","videoid":"someVideoId","downloadPath":"downloadFilePath"})
-		sys.modules["xbmcvfs"].rename.assert_called_with("tempFilePath/testTitle-[someVideoId].ssa","downloadFdilePath/testTitle-[someVideoId].ssa")
+		sys.modules["xbmcvfs"].rename.assert_called_with("tempFilePath/testTitle-[someVideoId].ssa","downloadFilePath/testTitle-[someVideoId].ssa")
 		
 	def getVideoUrlMap_should_parse_streamMap(self):
 		player = YouTubePlayer()
