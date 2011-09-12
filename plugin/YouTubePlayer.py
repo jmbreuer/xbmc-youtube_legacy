@@ -339,22 +339,22 @@ class YouTubePlayer():
 		self.common.log("")
 		links = {}
 		video["url_map"] = "true"
-					
+		
 		html = ""
 		if pl_obj["args"].has_key("fmt_stream_map"):
 			html = pl_obj["args"]["fmt_stream_map"]
-
+		
 		if len(html) == 0 and pl_obj["args"].has_key("url_encoded_fmt_stream_map"):
 			html = urllib.unquote(pl_obj["args"]["url_encoded_fmt_stream_map"])
-
+		
 		if len(html) == 0 and pl_obj["args"].has_key("fmt_url_map"):
-			html = pl_obj["args"]["fmt_url_map"]
-
+			html = pl_obj["args"]["fmt_url_map"]	
+		
 		html = urllib.unquote_plus(html)
-
+		
 		if pl_obj["args"].has_key("liveplayback_module"):
 			video["live_play"] = "true"
-
+		
 		fmt_url_map = [html]
 		if html.find("|") > -1:
 			fmt_url_map = html.split('|')
@@ -628,6 +628,7 @@ class YouTubePlayer():
 		return (video, status)
 
 	def _convertFlashVars(self, html):
+		print "_convert " + repr(html)
 		obj = { "PLAYER_CONFIG": { "args": {} } }
 		temp = html.split("&")
 		for item in temp:
@@ -643,7 +644,7 @@ class YouTubePlayer():
 		self.common.log("trying website")
 
 		result = self.core._fetchPage({"link": self.urls["video_stream"] % get("videoid")})
-
+		
 		if result["status"] == 200:
 			data = result["content"].find("PLAYER_CONFIG")
 			if data > -1:
@@ -652,6 +653,7 @@ class YouTubePlayer():
 				if len(data) > 0:
 					#self.common.log("trying website : " + repr(data))
 					player_object = json.loads(data[0].replace('\'PLAYER_CONFIG\'', '"PLAYER_CONFIG"'))
+					print "player_object " + repr(player_object) 
 			else:
 				data = self.common.parseDOM(result["content"], "embed", attrs = {"id": "movie_player" }, ret = "flashvars")
 				src = self.common.parseDOM(result["content"], "embed", attrs = {"id": "movie_player"}, ret = "src")
