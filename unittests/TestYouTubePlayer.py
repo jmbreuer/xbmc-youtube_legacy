@@ -25,39 +25,43 @@ class TestYouTubePlayer():
 	def test_getVideoUrlMap_should_parse_streamMap(self):
 		player = YouTubePlayer()
 		result = player.getVideoUrlMap(self.readTestInput("streamMapTest.txt"),{})
-#		assert(result != {})
-
+		print "result length: " + repr(len(result)) + " result content: " + repr(result)
+		assert(len(result) == 11)
+		assert(result.has_key(5))
+		assert(result.has_key(18))
+		assert(result.has_key(22))
+		assert(result.has_key(34))
+		assert(result.has_key(35))
+		assert(result.has_key(37))
+		assert(result.has_key(43))
+		assert(result.has_key(44))
+		assert(result.has_key(45))
+		assert(result.has_key(82))
+		assert(result.has_key(84))
+	
 	def test_getVideoUrlMap_should_parse_url_encoded_stream_map(self):
-		testinput = io.open("resources/urlEncodedStreamMapTest.txt")
-		inputdata = eval(testinput.read())
 		player = YouTubePlayer()
-		result = player.getVideoUrlMap({"args":{"url_encoded_fmt_stream_map":inputdata}},{})
+		result = player.getVideoUrlMap(self.readTestInput("urlEncodedStreamMapTest.txt"),{})
 		
 	def test_getVideoUrlMap_should_parse_url_map(self):
-		testinput = io.open("resources/urlMapTest.txt")
-		inputdata = testinput.read()
 		player = YouTubePlayer()
-		result = player.getVideoUrlMap({"args":{"fmt_url_map":inputdata}},{})
+		result = player.getVideoUrlMap(self.readTestInput("urlMapTest.txt"),{})
 
 	def test_getVideoUrlMap_should_mark_live_play(self):
-		testinput = io.open("resources/liveStreamTest.txt")
-		inputdata = testinput.read()
 		player = YouTubePlayer()
 		video = {}
-		result = player.getVideoUrlMap({"args":{"fmt_url_map":inputdata, "liveplayback_module":"true"}},video)
+		result = player.getVideoUrlMap(self.readTestInput("liveStreamTest.txt"),video)
 		assert(video["live_play"] == "true") 
 	
 	def test_playVideo_should_call_getObject(self):
+		player = YouTubePlayer()
+		player.playVideo()
 		assert(True)
 
-#		from YouTubePlayer import YouTubePlayer
-#		player = YouTubePlayer.YouTubePlayer()
-
-	
-	def readTestInput(filename, eval = True):
+	def readTestInput(self, filename, should_eval = True):
 		testinput = io.open("resources/" + filename)
 		inputdata = testinput.read()
-		if eval :
+		if should_eval:
 			inputdata = eval(inputdata)
 		return inputdata
 	
