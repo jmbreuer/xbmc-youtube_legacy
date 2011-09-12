@@ -15,7 +15,6 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		player.saveSubtitle("my_subtitle_stream",{"Title":"testTitle","videoid":"someVideoId","downloadPath":"downloadFilePath"})
 		
 		sys.modules["xbmcvfs"].translatePath.assert_called_with("special://temp")
-		
 	
 	def test_saveSubtitle_should_call_xbmcvfs_rename(self):
 		sys.modules["xbmcvfs"].translatePath = Mock()
