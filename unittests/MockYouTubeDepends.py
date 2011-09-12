@@ -2,8 +2,6 @@ import sys, string
 import sys, inspect
 from mock import Mock, patch
 
-sys.path.append('../plugin/')
-
 # Shield us from XBMC
 sys.modules["xbmc"] = __import__("mock")
 sys.modules["xbmcgui"] = __import__("mock")
