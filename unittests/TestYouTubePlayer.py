@@ -1,10 +1,11 @@
 import nose
+import BaseTestCase
 from mock import Mock, patch
 import sys, io
 import MockYouTubeDepends
 from YouTubePlayer import YouTubePlayer
 
-class TestYouTubePlayer():
+class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		
 	def test_saveSubtitle_should_call_xbmcvfs_translatePath(self):
 		sys.modules["xbmcvfs"].translatePath = Mock()
@@ -44,7 +45,9 @@ class TestYouTubePlayer():
 		
 	def test_getVideoUrlMap_should_parse_url_encoded_stream_map(self):
 		player = YouTubePlayer()
+		
 		result = player.getVideoUrlMap(self.readTestInput("urlEncodedStreamMapTest.txt"),{})
+		
 		assert(len(result) == 11)
 		keys = [5, 18, 22, 34, 35, 37, 43, 44, 45, 82, 84]
 		for key in keys:
@@ -53,7 +56,13 @@ class TestYouTubePlayer():
 		
 	def test_getVideoUrlMap_should_parse_url_map(self):
 		player = YouTubePlayer()
+		
 		result = player.getVideoUrlMap(self.readTestInput("urlMapTest.txt"),{})
+		
+		assert(len(result) == 11)
+		keys = [5, 18, 22, 34, 35, 37, 43, 44, 45, 82, 84]
+		for key in keys:
+			assert(key in result)
 
 	def test_getVideoUrlMap_should_mark_live_play(self):
 		player = YouTubePlayer()
@@ -67,15 +76,22 @@ class TestYouTubePlayer():
 	
 	def test_playVideo_should_call_getObject(self):
 		player = YouTubePlayer()
+		player.getVideoObject = Mock()
+		player.getVideoObject.return_value = [{"apierror":"some error"},303]
+		
 		player.playVideo()
-		assert(True)
-
-	def readTestInput(self, filename, should_eval = True):
-		testinput = io.open("resources/" + filename)
-		inputdata = testinput.read()
-		if should_eval:
-			inputdata = eval(inputdata)
-		return inputdata
+		
+		player.getVideoObject.assert_called_with({})
+	
+	def test_playVideo_should_log_and_fail_gracefully_on_apierror(self):
+		player = YouTubePlayer()
+		player.getVideoObject = Mock()
+		player.getVideoObject.return_value = [{"apierror":"some error"},303]
+		
+		result = player.playVideo()
+		
+		assert(result == False)
+		sys.modules[ "__main__" ].common.log.assert_called_with("construct video url failed contents of video item {'apierror': 'some error'}")
 	
 if __name__ == '__main__':
 	nose.run()
