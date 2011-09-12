@@ -51,7 +51,7 @@ class TestYouTubePlayer():
 		result = player.getVideoUrlMap({"args":{"fmt_url_map":inputdata}},{})
 
 	def test_getVideoUrlMap_should_mark_live_play(self):
-		testinput = io.open("resources/urlMapTest.txt")
+		testinput = io.open("resources/liveStreamTest.txt")
 		inputdata = testinput.read()
 		player = YouTubePlayer()
 		video = {}
