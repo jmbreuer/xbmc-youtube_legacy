@@ -703,6 +703,6 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		player._getVideoLinks({},{"videoid":"some_id"})
 		
 		sys.modules[ "__main__"].core._fetchPage.assert_called_with({"link": player.urls["embed_stream"] % ("some_id")})
-	
+
 if __name__ == '__main__':
 	nose.run()
