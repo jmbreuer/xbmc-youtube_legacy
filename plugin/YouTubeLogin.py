@@ -79,9 +79,9 @@ class YouTubeLogin():
 					(result, status) = self._apiLogin()
 				
 				if status == 200:
-					self.showErrorMessage(self.language(30031), result, 303)
+					self.utils.showErrorMessage(self.language(30031), result, 303)
 				else:
-					self.showErrorMessage(self.language(30609), result, status)
+					self.utils.showErrorMessage(self.language(30609), result, status)
 		
 		xbmc.executebuiltin( "Container.Refresh" )
 
