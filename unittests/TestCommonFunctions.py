@@ -10,8 +10,6 @@ class TestCommonFunctions(BaseTestCase.BaseTestCase):
 	img_html = "<img src='bla.png' alt='Thumbnail' />"
 	sys.modules["xbmc"].log = Mock()
 	sys.modules["xbmc"].LOGNOTICE = 0
-	sys.modules["inspect"].stack = Mock()
-	sys.modules["inspect"].stack.return_value = [0, 1, [0, 1, 2, "Mock"]]
 		
 	def test_log_(self):
 		description = "Logging"
@@ -19,7 +17,7 @@ class TestCommonFunctions(BaseTestCase.BaseTestCase):
 		common.log(description)
 
 		sys.modules["xbmc"].log.assert_called_with("[%s] %s : '%s'" % ( sys.modules[ "__main__" ].plugin, 
-										"Mock", 
+										"run", 
 										description), 
 							   sys.modules["xbmc"].LOGNOTICE)
 

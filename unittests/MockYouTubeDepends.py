@@ -23,7 +23,9 @@ class MockYouTubeDepends:
 		sys.modules[ "__main__" ].common.log = Mock() 
 		sys.modules[ "__main__" ].log_override = self
 		sys.modules[ "__main__" ].common.log.side_effect = sys.modules[ "__main__" ].log_override.log
-
+		sys.modules[ "__main__" ].common = Mock(spec = CommonFunctions.CommonFunctions)
+		sys.modules[ "__main__" ].common.USERAGENT = "Mozilla/5.0 (MOCK)"
+		
 		sys.modules[ "__main__" ].cache = Mock()
 
 		import YouTubeStorage
@@ -54,8 +56,6 @@ class MockYouTubeDepends:
 		import YouTubeNavigation
 		sys.modules[ "__main__" ].navigation = YouTubeNavigation.YouTubeNavigation()
 
-		
-	
 	def log(self, description, level = 0):
 		import inspect
 		print "[%s] %s : '%s'" % ("YouTube", inspect.stack()[2][3], description) # inspect.stack() is dependent on testcommonfunctions.py

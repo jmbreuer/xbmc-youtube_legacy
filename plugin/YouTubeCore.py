@@ -365,8 +365,6 @@ class YouTubeCore():
 			self.common.log("got api")
 			request.add_header('GData-Version', '2') #confirmed
 			request.add_header('X-GData-Key', 'key=' + self.APIKEY)
-			if self.settings.getSetting("oauth2_expires_at") < time.time():
-				self._oRefreshToken()
 
 		else:
 			request.add_header('User-Agent', self.common.USERAGENT)
@@ -404,6 +402,7 @@ class YouTubeCore():
 			ret_obj["header"] = str(con.info())
 			con.close()
 
+			self.common.log("Result: %s " % repr(ret_obj), 5)
 			# Return result if it isn't age restricted
 			if (ret_obj["content"].find("verify-actions") == -1 and ret_obj["content"].find("verify-age-actions") == -1):
 				self.common.log("done")
@@ -547,6 +546,7 @@ class YouTubeCore():
 				"client_secret": "sZn1pllhAfyonULAWfoGKCfp",
 				"refresh_token": self.settings.getSetting("oauth2_refresh_token"),
 				"grant_type": "refresh_token"}
+			self.settings.setSetting("oauth2_access_token", "")
 			ret = self._fetchPage({ "link": url, "no-language-cookie": "true", "url_data": data})
 			if ret["status"] == 200:
 				oauth = ""
@@ -571,6 +571,9 @@ class YouTubeCore():
 	def _getAuth(self):
 		self.common.log("")
 		
+		if self.settings.getSetting("oauth2_expires_at") < time.time():
+			self._oRefreshToken()
+
 		auth = self.settings.getSetting("oauth2_access_token")
 
 		if (auth):
