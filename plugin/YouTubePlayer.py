@@ -468,7 +468,7 @@ class YouTubePlayer():
 		video_url = ""
 
 		self.common.log("")
-					
+		
 		if get("action") == "download":
 			hd_quality = int(self.settings.getSetting( "hd_videos_download" ))
 			if ( hd_quality == 0 ):
