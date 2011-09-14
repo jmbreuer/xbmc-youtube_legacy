@@ -28,6 +28,33 @@ class TestYouTubeUtils(BaseTestCase.BaseTestCase):
 		sys.modules["xbmc"].Keyboard().isConfirmed.assert_called_with()
 		assert(result == "user_result")
 		
-	
+	def test_getParameters_should_parse_param_string(self):
+		params_string = "/Some/parth?key1=value1&key2=value2&"
+		utils = YouTubeUtils()
+		
+		result = utils.getParameters(params_string)
+		
+		assert(result["key1"] == "value1")
+		assert(result["key2"] == "value2")
+		
+	def test_getParameters_should_handle_params_with_missing_value(self):
+		params_string = "/Some/parth?key1=value1&key2=&"
+		utils = YouTubeUtils()
+		
+		result = utils.getParameters(params_string)
+		
+		assert(result["key1"] == "value1")
+		assert(result["key2"] == "")
+		
+		
+	def test_getParameters_should_handle_missing_question_mark(self):
+		params_string = "key1=value1&key2=value2&"
+		utils = YouTubeUtils()
+		
+		result = utils.getParameters(params_string)
+		
+		assert(result["key1"] == "value1")
+		assert(result["key2"] == "value2")
+		
 if __name__ == '__main__':
 	nose.run()
