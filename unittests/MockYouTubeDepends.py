@@ -30,25 +30,18 @@ class MockYouTubeDepends:
 
 		import YouTubeStorage
 		sys.modules[ "__main__" ].storage = Mock(spec=YouTubeStorage.YouTubeStorage)
-
 		import YouTubeCore
 		sys.modules[ "__main__" ].core = Mock(spec=YouTubeCore.YouTubeCore)
-		
 		import YouTubeLogin 
 		sys.modules[ "__main__" ].login = Mock(spec=YouTubeLogin.YouTubeLogin)
-				
 		import YouTubeFeeds
 		sys.modules[ "__main__" ].feeds = Mock(spec=YouTubeFeeds.YouTubeFeeds())
-		
 		import YouTubeScraper 
 		sys.modules[ "__main__" ].scraper = Mock(spec=YouTubeScraper.YouTubeScraper())
-		
 		import YouTubePlayer
 		sys.modules[ "__main__" ].player = Mock(spec=YouTubePlayer.YouTubePlayer())
-		
 		import YouTubeDownloader
 		sys.modules[ "__main__" ].downloader = Mock(spec=YouTubeDownloader.YouTubeDownloader())
-		
 		import YouTubeScraper
 		sys.modules[ "__main__" ].scraper = Mock(spec=YouTubeScraper.YouTubeScraper())
 		import YouTubePlaylistControl
