@@ -442,14 +442,15 @@ class YouTubePlayer():
 		if len(video) > 0:
 			self.common.log("returning cache ")
 			return ( eval(video), 200)
-
+		
 		result = self.core._fetchPage({"link": self.urls["video_info"] % get("videoid"), "api": "true"})
-
+		
 		if result["status"] == 200:
 			video = self.core.getVideoInfo(result["content"], params)
-		
-			if len(result) == 0:
+			
+			if len(video) == 0:
 				self.common.log("- Couldn't parse API output, YouTube doesn't seem to know this video id?")
+				video = {}
 				video["apierror"] = self.language(30608)
 				return (video, 303)
 		else:
