@@ -333,7 +333,7 @@ class YouTubePlayer():
 		
 		if (get("watch_later") == "true" and get("playlist") and get("playlist_entry_id")):
 			self.common.log("removing video from watch later playlist")
-			self.remove_from_playlist(params)
+			self.core.remove_from_playlist(params)
 			
 		self.storage.storeValue( "vidstatus-" + video['videoid'], "7" )
 
