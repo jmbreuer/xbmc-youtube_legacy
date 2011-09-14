@@ -365,19 +365,71 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		
 		assert(result == False)
 		sys.modules[ "__main__" ].common.log.assert_called_with("construct video url failed contents of video item {'apierror': 'some error'}")
-'''
+
 	def test_playVideo_should_call_xbmc_setResolvedUrl(self):
-		assert(False)
+		player = YouTubePlayer()
+		player.getVideoObject = Mock()
+		player.getVideoObject.return_value = ({"Title":"someTitle","videoid":"some_id", "thumbnail":"someThumbnail", "video_url":"someUrl"}, 200)
+		sys.modules["__main__"].settings.getSetting = Mock()
+		sys.modules["__main__"].settings.getSetting.return_value = "0"
+		sys.modules["xbmcplugin"].setResolvedUrl = Mock()
+		sys.modules["xbmc"].ListItem = Mock()
+		sys.argv = ["test1","1","test2"]
+		player.addSubtitles = Mock()
+		
+		player.playVideo({"videoid":"some_id"})
+		
+		assert(sys.modules["xbmcplugin"].setResolvedUrl.call_count > 0)
+		
 		
 	def test_playVideo_should_call_addSubtitles(self):
-		assert(False)
+		player = YouTubePlayer()
+		player.getVideoObject = Mock()
+		video = {"Title":"someTitle","videoid":"some_id", "thumbnail":"someThumbnail", "video_url":"someUrl"}
+		player.getVideoObject.return_value = (video, 200)
+		sys.modules["__main__"].settings.getSetting = Mock()
+		sys.modules["__main__"].settings.getSetting.return_value = "1"
+		sys.modules["xbmcplugin"].setResolvedUrl = Mock()
+		sys.modules["xbmc"].ListItem = Mock()
+		sys.argv = ["test1","1","test2"]
+		player.addSubtitles = Mock()
+		
+		player.playVideo({"videoid":"some_id"})
+		
+		player.addSubtitles.assert_called_with(video)
 	
 	def test_playVideo_should_call_remove_from_playlist_if_viewing_video_from_watch_later_queue(self):
-		assert(False)
+		player = YouTubePlayer()
+		player.getVideoObject = Mock()
+		player.getVideoObject.return_value = ({"Title":"someTitle","videoid":"some_id", "thumbnail":"someThumbnail", "video_url":"someUrl"}, 200)
+		sys.modules["__main__"].settings.getSetting = Mock()
+		sys.modules["__main__"].settings.getSetting.return_value = "0"
+		sys.modules["xbmcplugin"].setResolvedUrl = Mock()
+		sys.modules["xbmc"].ListItem = Mock()
+		sys.modules["__main__"].core.remove_from_playlist = Mock() 
+		sys.argv = ["test1","1","test2"]
+		player.addSubtitles = Mock()
+		call_params = {"videoid":"some_id", "watch_later":"true","playlist":"playlist_id","playlist_entry_id":"entry_id"}
+		
+		player.playVideo(call_params)
+		
+		sys.modules["__main__"].core.remove_from_playlist.assert_called_with(call_params)
 		
 	def test_playVideo_should_update_locally_stored_watched_status(self):
-		assert(False)
-	
+		player = YouTubePlayer()
+		player.getVideoObject = Mock()
+		player.getVideoObject.return_value = ({"Title":"someTitle","videoid":"some_id", "thumbnail":"someThumbnail", "video_url":"someUrl"}, 200)
+		sys.modules["__main__"].settings.getSetting = Mock()
+		sys.modules["__main__"].settings.getSetting.return_value = "0"
+		sys.modules["xbmcplugin"].setResolvedUrl = Mock()
+		sys.modules["xbmc"].ListItem = Mock()
+		sys.argv = ["test1","1","test2"]
+		player.addSubtitles = Mock()
+		
+		player.playVideo({"videoid":"some_id"})
+		sys.modules["__main__"].storage.storeValue.assert_called_with("vidstatus-some_id", "7" )
+
+'''	
 	def test_getInfo_should_use_cache_when_possible(self):
 		assert(False)
 		
