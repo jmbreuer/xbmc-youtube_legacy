@@ -419,7 +419,6 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		player = YouTubePlayer()
 		player.getVideoObject = Mock()
 		player.getVideoObject.return_value = ({"Title":"someTitle","videoid":"some_id", "thumbnail":"someThumbnail", "video_url":"someUrl"}, 200)
-		sys.modules["__main__"].settings.getSetting = Mock()
 		sys.modules["__main__"].settings.getSetting.return_value = "0"
 		sys.modules["xbmcplugin"].setResolvedUrl = Mock()
 		sys.modules["xbmc"].ListItem = Mock()
@@ -480,31 +479,72 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		
 		sys.modules["__main__"].cache.sqlSet.assert_called_with('videoidcachesome_id', "{'videoid': 'some_id'}")
 
-'''
-	def test_selectVideoQuality_should_prefer_h264_over_vp8_as_appletv2_cant_handle_vp8_properly(self):
-		assert(False)
+	def test_selectVideoQuality_should_prefer_h264_over_vp8_for_720p_as_appletv2_cant_handle_vp8_properly(self):
+		player = YouTubePlayer()
+		sys.modules["__main__"].settings.getSetting.return_value = "2"
+		
+		url = player.selectVideoQuality({22:"h264",45:"vp8"},{})
+		
+		assert(url == "h264 | Mozilla/5.0 (MOCK)")
 		
 	def test_selectVideoQuality_should_choose_highest_sd_quality_if_only_multiple_sd_qualities_are_available(self):
-		assert(False)
-	
+		player = YouTubePlayer()
+		sys.modules["__main__"].settings.getSetting.return_value = "1"
+		
+		url = player.selectVideoQuality({5:"1",33:"2",18:"3",26:"4",43:"5",34:"6",78:"7",44:"8",59:"9",35:"10"},{})
+		
+		assert(url == "10 | Mozilla/5.0 (MOCK)")
+			
 	def test_selectVideoQuality_should_prefer_1080p_if_user_has_selected_that_option(self):
-		assert(False)
+		player = YouTubePlayer()
+		sys.modules["__main__"].settings.getSetting.return_value = "3"
+		
+		url = player.selectVideoQuality({35:"SD",22:"720p",37:"1080p"},{})
+		
+		assert(url == "1080p | Mozilla/5.0 (MOCK)")
 		
 	def test_selectVideoQuality_should_limit_to_720p_if_user_has_selected_that_option(self):
-		assert(False)
+		player = YouTubePlayer()
+		sys.modules["__main__"].settings.getSetting.return_value = "2"
+		
+		url = player.selectVideoQuality({35:"SD",22:"720p",37:"1080p"},{})
+		
+		assert(url == "720p | Mozilla/5.0 (MOCK)")
 		
 	def test_selectVideoQuality_should_limit_to_sd_if_user_has_selected_that_option(self):
-		assert(False)
+		player = YouTubePlayer()
+		sys.modules["__main__"].settings.getSetting.return_value = "1"
+		
+		url = player.selectVideoQuality({35:"SD",22:"720p",37:"1080p"},{})
+		
+		assert(url == "SD | Mozilla/5.0 (MOCK)")
 		
 	def test_selectVideoQuality_should_call_userSelectsVideoQuality_if_user_selected_that_option(self):
-		assert(False)
+		player = YouTubePlayer()
+		player.userSelectsVideoQuality = Mock()
+		sys.modules["__main__"].settings.getSetting.return_value = "0"
+		
+		player.selectVideoQuality({35:"SD",22:"720p",37:"1080p"},{})
+		
+		player.userSelectsVideoQuality.assert_called_with({}, {35: 'SD', 37: '1080p', 22: '720p'})
 		
 	def test_selectVideoQuality_should_add_user_agent_when_not_called_by_download_function(self):
-		assert(False)
+		player = YouTubePlayer()
+		sys.modules["__main__"].settings.getSetting.return_value = "1"
+		
+		url = player.selectVideoQuality({35:"SD",22:"720p",37:"1080p"},{})
+		
+		assert(url.find("| Mozilla/5.0 (MOCK)") > 0)
 		
 	def test_selectVideoQuality_should_not_add_user_agent_when_called_by_download_function(self):
-		assert(False)
+		player = YouTubePlayer()
+		sys.modules["__main__"].settings.getSetting.return_value = "1"
 		
+		url = player.selectVideoQuality({35:"SD",22:"720p",37:"1080p"},{"action":"download"})
+		
+		assert(url.find("| Mozilla/5.0 (MOCK)") < 0)
+	
+	'''
 	def test_userSelectsVideoQuality_should_append_list_of_known_qualities(self):
 		assert(False)
 		
