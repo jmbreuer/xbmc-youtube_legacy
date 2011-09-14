@@ -99,7 +99,7 @@ class YouTubeUtils:
 	# Resolves the full thumbnail path for the plugins skins directory
 	def getThumbnail( self, title ):
 		if (not title):
-			title = "DefaultFolder.png"
+			title = "DefaultFolder"
 		
 		thumbnail = os.path.join( sys.modules[ "__main__" ].plugin, title + ".png" )
 		
