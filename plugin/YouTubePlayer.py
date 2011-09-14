@@ -117,7 +117,7 @@ class YouTubePlayer():
 		if xml["status"] == 200:
 			dom = parseString(xml["content"])
 			entries = dom.getElementsByTagName("track")
-
+			
 			subtitle = ""
 			code = ""
 			if len(entries) > 0:
@@ -219,6 +219,7 @@ class YouTubePlayer():
 				elif node.firstChild:
 					if node.firstChild.nodeValue:
 						text = self.core._getNodeValue(node, "TEXT", "").replace("\n", "\\n")
+						text = self.utils.replaceHtmlCodes(text)
 						start = ""
 						
 						if style == "popup":
@@ -297,14 +298,15 @@ class YouTubePlayer():
 			set_subtitle = True
 		elif self.downloadSubtitle(video):
 			set_subtitle = True
-
+		
 		if xbmcvfs.exists(path) and not video.has_key("downloadPath") and set_subtitle:
 			player = xbmc.Player()
+			
 			while not player.isPlaying():
 				self.common.log("Waiting for playback to start ")
 				time.sleep(1)
+			
 			xbmc.Player().setSubtitles(path);
-
 			self.common.log("added subtitle %s to playback" % path)
 	
 	# ================================ Video Playback ====================================
