@@ -55,6 +55,47 @@ class TestYouTubeUtils(BaseTestCase.BaseTestCase):
 		
 		assert(result["key1"] == "value1")
 		assert(result["key2"] == "value2")
+	
+	def test_replaceHtmlCodes_should_handle_ampersand(self):
+		input = "&amp;"
+		utils = YouTubeUtils()
+		
+		result = utils.replaceHtmlCodes(input)
+		
+		assert(result=="&")
+		
+	def test_replaceHtmlCodes_should_handle_quotationmark(self):
+		input = "&quot;"
+		utils = YouTubeUtils()
+		
+		result = utils.replaceHtmlCodes(input)
+		
+		assert(result=='"')
+
+	def test_replaceHtmlCodes_should_handle_hellip(self):
+		input = "&hellip;"
+		utils = YouTubeUtils()
+		
+		result = utils.replaceHtmlCodes(input)
+		
+		assert(result=="...")
+
+	def test_replaceHtmlCodes_should_handle_greater_than_and_less_than(self):
+		input = "&gt;&lt;"
+		utils = YouTubeUtils()
+		
+		result = utils.replaceHtmlCodes(input)
+		
+		assert(result=="><")
+
+	def test_replaceHtmlCodes_should_handle_hyphen(self):
+		input = "&#39;"
+		utils = YouTubeUtils()
+		
+		result = utils.replaceHtmlCodes(input)
+		
+		assert(result=="'")
+
 		
 if __name__ == '__main__':
 	nose.run()
