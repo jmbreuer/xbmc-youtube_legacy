@@ -679,15 +679,30 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		player.getInfo.assert_called_with({})
 		sys.modules["__main__"].language.assert_called_with(30618)
 	
-	'''	
 	def test_convertFlashVars_should_parse_html_properly(self):
-		assert(False)
+		player = YouTubePlayer()
+		
+		result = player._convertFlashVars(self.readTestInput("flashVarsTest.html", False))
+		
+		assert(len(result["PLAYER_CONFIG"]["args"]) == 77)		
 	
 	def test_getVideoLinks_should_try_scraping_first(self):
-		assert(False)
+		player = YouTubePlayer()
+		sys.modules[ "__main__"].core._fetchPage.return_value = {"status":200, "content":"something"}
+		sys.modules[ "__main__"].common.parseDOM.return_value = ""
+		
+		player._getVideoLinks({},{"videoid":"some_id"})
+		
+		sys.modules[ "__main__"].core._fetchPage.assert_called_with({"link": player.urls["video_stream"] % ("some_id")})
 		
 	def test_getVideoLinks_should_fall_back_to_embed(self):
-		assert(False)
-	'''
+		player = YouTubePlayer()
+		
+		sys.modules[ "__main__"].core._fetchPage.return_value = {"status":303, "content":"something"}
+		
+		player._getVideoLinks({},{"videoid":"some_id"})
+		
+		sys.modules[ "__main__"].core._fetchPage.assert_called_with({"link": player.urls["embed_stream"] % ("some_id")})
+	
 if __name__ == '__main__':
 	nose.run()
