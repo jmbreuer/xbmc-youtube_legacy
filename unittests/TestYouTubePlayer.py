@@ -544,19 +544,53 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		
 		assert(url.find("| Mozilla/5.0 (MOCK)") < 0)
 	
-	'''
+	
 	def test_userSelectsVideoQuality_should_append_list_of_known_qualities(self):
-		assert(False)
+		player = YouTubePlayer()
+		sys.modules["__main__"].settings.getSetting.return_value = "1"
+		sys.modules["xbmcgui"].Dialog = Mock()
+		sys.modules["xbmcgui"].Dialog().select.return_value = -1
+		sys.modules["__main__"].language.return_value = "" 
+		
+		url = player.userSelectsVideoQuality({},{35:"SD",22:"720p",37:"1080p"})
+		
+		sys.modules["xbmcgui"].Dialog().select.assert_called_with("",["1080p","720p","480p"])
 		
 	def test_userSelectsVideoQuality_should_prefer_h264_over_vp8_as_appletv2_cant_handle_vp8_properly(self):
-		assert(False)
+		player = YouTubePlayer()
+		sys.modules["__main__"].settings.getSetting.return_value = "1"
+		sys.modules["xbmcgui"].Dialog = Mock()
+		sys.modules["xbmcgui"].Dialog().select.return_value = 0
+		sys.modules["__main__"].language.return_value = "" 
+		
+		url = player.userSelectsVideoQuality({},{22:"h264",45:"vp8"})
+		
+		assert(url == "h264")
 		
 	def test_userSelectsVideoQuality_should_select_proper_quality_based_on_user_input(self):
-		assert(False)
+		player = YouTubePlayer()
+		sys.modules["__main__"].settings.getSetting.return_value = "1"
+		sys.modules["xbmcgui"].Dialog = Mock()
+		sys.modules["xbmcgui"].Dialog().select.return_value = 0
+		sys.modules["__main__"].language.return_value = "" 
+		
+		url = player.userSelectsVideoQuality({},{35:"SD",22:"720p",37:"1080p"})
+		
+		sys.modules["xbmcgui"].Dialog().select.assert_called_with("",["1080p","720p","480p"])
+		assert(url == "1080p")
 	
 	def test_userSelectsVideoQuality_should_call_xbmc_dialog_select_to_ask_for_user_input(self):
-		assert(False)
+		player = YouTubePlayer()
+		sys.modules["__main__"].settings.getSetting.return_value = "1"
+		sys.modules["xbmcgui"].Dialog = Mock()
+		sys.modules["xbmcgui"].Dialog().select.return_value = -1
+		sys.modules["__main__"].language.return_value = "" 
 		
+		url = player.userSelectsVideoQuality({},{35:"SD",22:"720p",37:"1080p"})
+		
+		assert(sys.modules["xbmcgui"].Dialog().select.call_count > 0)
+	
+	'''	
 	def test_getVideoObject_should_get_video_information_from_getInfo(self):
 		assert(False)
 		
