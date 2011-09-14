@@ -21,7 +21,8 @@ class MockYouTubeDepends:
 
 		import CommonFunctions
 		sys.modules[ "__main__" ].common = Mock(spec = CommonFunctions.CommonFunctions)
-		sys.modules[ "__main__" ].common.log = Mock() 
+		sys.modules[ "__main__" ].common.log = Mock()
+		sys.modules[ "__main__" ].common.USERAGENT = "Mozilla/5.0 (MOCK)"
 		
 		import YouTubeUtils
 		sys.modules[ "__main__" ].utils = Mock(spec=YouTubeUtils.YouTubeUtils)
