@@ -47,7 +47,7 @@ class CommonFunctions():
 		return html
 
 	def getDOMContent(self, html, name, match): # convert to log.
-		self.log("match:" + match, 2)
+		self.log("match: " + match, 2)
 		start = html.find(match)
 		if name == "img":
 			endstr = ">"
@@ -56,8 +56,7 @@ class CommonFunctions():
 		end = html.find(endstr, start)
 
 		pos = html.find("<" + name, start + 1 )
-
-		self.log(str(start) + " < " + str(end) + " pos = " + str(pos), 2)
+		#self.log(str(start) + " < " + str(end) + ", pos = " + str(pos) + ", endpos: " + str(end), 2)
 
 		while pos < end and pos != -1:
 			pos = html.find("<" + name, pos + 1)
@@ -67,8 +66,18 @@ class CommonFunctions():
 					end = tend
 			self.log("loop: " + str(start) + " < " + str(end) + " pos = " + str(pos), 3)
 
-		html = html[start:end + len(endstr)]
-		self.log("done html length: " + str(len(html)) + repr(html), 2)
+		self.log("start: %s, end: %s" % ( start + len(match), end), 2)
+		if start == -1 and end == -1:
+			html = ""
+		elif start > -1 and end > -1:
+			html = html[start + len(match):end]
+		elif end > -1:
+			html = html[:end]
+		elif start > -1:
+			html = html[start + len(match):]
+		#html = html[start:end + len(endstr)]
+
+		self.log("done html length: " + str(len(html)) + ", content: " + html, 2)
 		return html
 
 	def parseDOM(self, html, name = "", attrs = {}, ret = False):
@@ -126,15 +135,19 @@ class CommonFunctions():
 				self.log("Getting attribute %s content for %s matches " % ( ret, len(lst) ), 2)
 				lst2 = []
 				for match in lst:
-					lst2 += re.compile('<' + name + '.*' + ret + '=[\'"]([^>]*?)[\'"].*>').findall(match)
+					lst2 += re.compile('<' + name + '.*?' + ret + '=[\'"]([^>]*?)[\'"].*>').findall(match)
+					self.log(lst, 3)
+					self.log(match, 3)
+					self.log(lst2, 3)
 				lst = lst2
 			else:
 				self.log("Getting element content for %s matches " % len(lst), 2)
 				lst2 = []
 				for match in lst:
-					temp = self.getDOMContent(item, name, match)
-					item = item.replace(temp, "")
-					lst2.append(temp[temp.find(">")+1:temp.rfind("</" + name + ">")])
+					lst2.append(self.getDOMContent(item, name, match))
+					self.log(lst, 3)
+					self.log(match, 3)
+					self.log(lst2, 3)
 				lst = lst2
 			ret_lst += lst
 
@@ -187,3 +200,4 @@ class CommonFunctions():
 	def log(self, description, level = 0):
 		if self.dbg and self.dbglevel > level:
 			xbmc.log("[%s] %s : '%s'" % (self.plugin, inspect.stack()[2][3], description), xbmc.LOGNOTICE)
+			

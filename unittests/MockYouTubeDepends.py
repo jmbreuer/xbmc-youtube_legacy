@@ -1,13 +1,13 @@
 class MockYouTubeDepends:
 	common = ""
 	def mock(self):
-		import sys, string 
+		import sys, string
 		from mock import Mock
 				
 		#Emulate more of XBMC
 		sys.modules[ "__main__" ].plugin = "unittest"
 		sys.modules[ "__main__" ].dbg = True
-		sys.modules[ "__main__" ].dbglevel = 1
+		sys.modules[ "__main__" ].dbglevel = 10
 		sys.modules[ "__main__" ].settings = Mock()
 		sys.modules[ "__main__" ].settings.getAddonInfo = Mock()
 		sys.modules[ "__main__" ].settings.getAddonInfo.return_value = "somepath"
@@ -38,3 +38,10 @@ class MockYouTubeDepends:
 		import YouTubePlayer
 		sys.modules[ "__main__" ].player = Mock(spec=YouTubePlayer.YouTubePlayer)
 		
+		sys.modules[ "__main__" ].log_override = self
+		sys.modules[ "__main__" ].common.log.side_effect = sys.modules[ "__main__" ].log_override.log
+
+	def log(self, description, level = 0):
+		import inspect
+		print "[%s] %s : '%s'" % ("YouTube", inspect.stack()[2][3], description) # inspect.stack() is dependent on testcommonfunctions.py
+		#print "[%s] %s : '%s'" % ("YouTube", "No inspect", description)
