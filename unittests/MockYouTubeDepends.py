@@ -1,5 +1,4 @@
-import sys, string
-import sys, inspect
+import os, sys, string, inspect
 from mock import Mock, patch
 
 # Shield us from XBMC
@@ -28,9 +27,17 @@ sys.modules[ "__main__" ].feeds = Mock()
 sys.modules[ "__main__" ].scraper = Mock()
 sys.modules[ "__main__" ].login = Mock()
 sys.modules[ "__main__" ].plugin = "unittest"
-sys.modules[ "__main__" ].dbg = False
-sys.modules[ "__main__" ].dbglevel = 1
+sys.modules[ "__main__" ].dbg = True
+sys.modules[ "__main__" ].dbglevel = 10
 sys.modules[ "__main__" ].storage = Mock()
 
 sys.modules["xbmc"].translatePath = Mock()
 sys.modules["xbmc"].translatePath.return_value = "testing"
+
+class temp():
+    def log(self, description, level = 0):
+        print "[%s] %s : '%s'" % ("YouTube", inspect.stack()[2][3], description) # inspect.stack() is dependent on testcommonfunctions.py
+        #print "[%s] %s : '%s'" % ("YouTube", "No inspect", description)
+
+sys.modules[ "__main__" ].log_override = temp()
+sys.modules[ "__main__" ].common.log.side_effect = sys.modules[ "__main__" ].log_override.log
