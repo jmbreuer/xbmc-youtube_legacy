@@ -590,25 +590,96 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		
 		assert(sys.modules["xbmcgui"].Dialog().select.call_count > 0)
 	
-	'''	
 	def test_getVideoObject_should_get_video_information_from_getInfo(self):
-		assert(False)
+		player = YouTubePlayer()
+		player.getInfo = Mock()
+		player.getInfo.return_value = ({},303)
+		player._getVideoLinks = Mock()
+		player._getVideoLinks.return_value = ({},{})
+		
+		player.getVideoObject({})
+		
+		player.getInfo.assert_called_with({})
 		
 	def test_getVideoObject_should_test_if_local_file_exists_if_download_path_is_set(self):
-		assert(False)
+		params = {"videoid":"some_id"}
+		player = YouTubePlayer()
+		sys.modules["__main__"].settings.getSetting.return_value = "somePath/"
+		sys.modules["xbmcvfs"].exists = Mock()
+		sys.modules["xbmcvfs"].exists.return_value = False
+		player.getInfo = Mock()
+		player.getInfo.return_value = ({"videoid":"some_id","Title":"someTitle"},200)
+		player._getVideoLinks = Mock()
+		player._getVideoLinks.return_value = ({},{})
+		
+		player.getVideoObject(params)
+		
+		sys.modules["xbmcvfs"].exists.assert_called_with("somePath/someTitle-[some_id].mp4")
 		
 	def test_getVideoObject_should_use_local_file_for_playback_if_found(self):
-		assert(False)
+		params = {"videoid":"some_id"}
+		player = YouTubePlayer()
+		sys.modules["__main__"].settings.getSetting.return_value = "somePath/"
+		sys.modules["xbmcvfs"].exists = Mock()
+		sys.modules["xbmcvfs"].exists.return_value = True
+		player.getInfo = Mock()
+		player.getInfo.return_value = ({"videoid":"some_id","Title":"someTitle"},200)
+		player._getVideoLinks = Mock()
+		player._getVideoLinks.return_value = ({},{})
+		
+		(video, status) = player.getVideoObject(params)
+		
+		sys.modules["xbmcvfs"].exists.assert_called_with("somePath/someTitle-[some_id].mp4")
+		assert(player._getVideoLinks.call_count == 0)
+		assert(video["video_url"] == "somePath/someTitle-[some_id].mp4")
 		
 	def test_getVideoObject_should_call_getVideoLinks_if_local_file_not_found(self):
-		assert(False)
+		params = {"videoid":"some_id"}
+		player = YouTubePlayer()
+		sys.modules["__main__"].settings.getSetting.return_value = "somePath/"
+		sys.modules["xbmcvfs"].exists = Mock()
+		sys.modules["xbmcvfs"].exists.return_value = False
+		player.getInfo = Mock()
+		player.getInfo.return_value = ({"videoid":"some_id","Title":"someTitle"},200)
+		player._getVideoLinks = Mock()
+		player._getVideoLinks.return_value = ({},{})
+		
+		(video, status) = player.getVideoObject(params)
+		
+		sys.modules["xbmcvfs"].exists.assert_called_with("somePath/someTitle-[some_id].mp4")
+		assert(player._getVideoLinks.call_count > 0)
 		
 	def test_getVideoObject_should_call_selectVideoQuality_if_local_file_not_found_and_remote_links_found(self):
-		assert(False)
+		params = {"videoid":"some_id"}
+		player = YouTubePlayer()
+		sys.modules["__main__"].settings.getSetting.return_value = "somePath/"
+		sys.modules["xbmcvfs"].exists = Mock()
+		sys.modules["xbmcvfs"].exists.return_value = False
+		player.getInfo = Mock()
+		player.getInfo.return_value = ({"videoid":"some_id","Title":"someTitle"},200)
+		player._getVideoLinks = Mock()
+		player._getVideoLinks.return_value = ({22:"720p"},{})
+		player.selectVideoQuality = Mock()
+		
+		(video, status) = player.getVideoObject(params)
+		
+		sys.modules["xbmcvfs"].exists.assert_called_with("somePath/someTitle-[some_id].mp4")
+		player.selectVideoQuality.assert_called_with({22:"720p"},params)
+		assert(player._getVideoLinks.call_count > 0)
 	
 	def test_getVideoObject_should_use_pre_defined_error_messages_on_missing_url(self):
-		assert(False)
+		player = YouTubePlayer()
+		player.getInfo = Mock()
+		player.getInfo.return_value = ({},303)
+		player._getVideoLinks = Mock()
+		player._getVideoLinks.return_value = ({},{})
 		
+		player.getVideoObject({})
+		
+		player.getInfo.assert_called_with({})
+		sys.modules["__main__"].language.assert_called_with(30618)
+	
+	'''	
 	def test_convertFlashVars_should_parse_html_properly(self):
 		assert(False)
 	
