@@ -17,8 +17,8 @@ sys.modules["xbmc"].translatePath.return_value = "testing"
 
 sys.path.append('../plugin/')
 
-class BaseTestCase(unittest2.TestCase):
-	
+class BaseTestCase(unittest2.TestCase):		
+		
 	def setUp(self):
 		MockYouTubeDepends.MockYouTubeDepends().mock()
 	
