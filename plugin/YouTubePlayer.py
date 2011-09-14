@@ -319,7 +319,7 @@ class YouTubePlayer():
 			self.utils.showErrorMessage(self.language(30603), video["apierror"], status)
 			return False
 		
-		listitem=xbmcgui.ListItem(label=video['Title'], iconImage=video['thumbnail'], thumbnailImage=video['thumbnail'], path=video['video_url']);		
+		listitem = xbmcgui.ListItem(label=video['Title'], iconImage=video['thumbnail'], thumbnailImage=video['thumbnail'], path=video['video_url']);		
 		listitem.setInfo(type='Video', infoLabels=video)
 		
 		self.common.log("Playing video: " + repr(video['Title']) + " - " + repr(get('videoid')) + " - " + repr(video['video_url']))
@@ -540,7 +540,7 @@ class YouTubePlayer():
 		
 		if get("action") != "download":
 			video_url += " | " + self.common.USERAGENT
-
+		
 		self.common.log("Done")
 		return video_url
 	
@@ -552,6 +552,7 @@ class YouTubePlayer():
 
 		if link(37): 
 			list.append((37,"1080p"))
+		
 		if link(22): 
 			list.append((22,"720p"))
 		elif link(45): 
@@ -564,7 +565,8 @@ class YouTubePlayer():
 
 		if link(18): 
 			list.append((18,"380p"))
-		elif link(34):
+		
+		if link(34):
 			list.append((34,"360p"))
 		elif link(43):
 			list.append((43,"360p"))
@@ -608,7 +610,7 @@ class YouTubePlayer():
 				self.common.log("attempt to locate local file failed with unknown error, trying youtube instead")
 
 		(links, video) = self._getVideoLinks(video, params)
-
+		
 		if links:
 			video["video_url"] = self.selectVideoQuality(links, params)
 			if video["video_url"] == "":
