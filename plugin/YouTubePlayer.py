@@ -18,7 +18,6 @@
 
 import sys, urllib, re, os.path, datetime, time
 import xbmc, xbmcgui, xbmcplugin
-
 try: import simplejson as json
 except ImportError: import json
 try: import xbmcvfs
@@ -58,6 +57,7 @@ class YouTubePlayer():
 	urls['remove_watch_later'] = "http://www.youtube.com/addto_ajax?action_delete_from_playlist=1"
 	
 	def __init__(self):
+		
 		self.settings = sys.modules[ "__main__" ].settings
 		self.language = sys.modules[ "__main__" ].language
 		self.plugin = sys.modules[ "__main__"].plugin
@@ -88,15 +88,15 @@ class YouTubePlayer():
 		
 		if self.settings.getSetting("lang_code") != "0":
 			subtitle_url = self.getSubtitleUrl(video)
-
+			
 			if not subtitle_url and self.settings.getSetting("transcode") == "true":
 					subtitle_url = self.getTranscriptionUrl(video) 
-		
+			
 			if subtitle_url:
 				xml = self.core._fetchPage({"link": subtitle_url})
 				if xml["status"] == 200 and xml["content"]:
 					result += self.transformSubtitleXMLtoSRT(xml["content"])
-
+		
 		if len(result) > 0:
 			result = "[Script Info]\r\n; This is a Sub Station Alpha v4 script.\r\n; For Sub Station Alpha info and downloads,\r\n; go to http://www.eswat.demon.co.uk/\r\n; or email kotus@eswat.demon.co.uk\r\nTitle: Auto Generated\r\nScriptType: v4.00\r\nCollisions: Normal\r\nPlayResY: 1280\r\nPlayResX: 800\r\n\r\n[V4 Styles]\r\nFormat: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, TertiaryColour, BackColour, Bold, Italic, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, AlphaLevel, Encoding\r\nStyle: Default,Arial,80,&H00FFFFFF&,65535,65535,&00000000&,-1,0,1,3,2,2,0,0,0,0,0\r\nStyle: speech,Arial,60,0,65535,65535,&H4BFFFFFF&,0,0,3,1,0,1,0,0,0,0,0\r\nStyle: popup,Arial,60,0,65535,65535,&H4BFFFFFF&,0,0,3,3,0,1,0,0,0,0,0\r\nStyle: highlightText,Wolf_Rain,60,15724527,15724527,15724527,&H4BFFFFFF&,0,0,1,1,2,2,5,5,0,0,0\r\n" + style + "\r\n[Events]\r\nFormat: Marked, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\r\n" + result
 
@@ -277,7 +277,7 @@ class YouTubePlayer():
 				for b_start, b_end in ssa_fixes:
 					if time.strptime(a_end[0:a_end.rfind(".")], "%H:%M:%S") < time.strptime(b_start[0:b_start.rfind(".")], "%H:%M:%S"):
 						result += "Dialogue: Marked=0,%s,%s,Default,Name,0000,0000,0000,,\r\n" % ( a_end, b_start )
-
+		
 		return ( result, append_style)
 		
 	def addSubtitles(self, video = {}):
