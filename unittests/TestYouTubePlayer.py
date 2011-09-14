@@ -72,25 +72,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		assert(video["live_play"] == "true")
 		assert(len(result) == 1)
 		assert(result.has_key(34)) 
-	
-	def test_playVideo_should_call_getObject(self):
-		player = YouTubePlayer()
-		player.getVideoObject = Mock(return_value = [{"apierror":"some error"},303]) 
-		
-		player.playVideo()
-		
-		player.getVideoObject.assert_called_with({})
-	
-	def test_playVideo_should_log_and_fail_gracefully_on_apierror(self):
-		player = YouTubePlayer()
-		player.getVideoObject = Mock()
-		player.getVideoObject.return_value = [{"apierror":"some error"},303]
-		
-		result = player.playVideo()
-		
-		assert(result == False)
-		sys.modules[ "__main__" ].common.log.assert_called_with("construct video url failed contents of video item {'apierror': 'some error'}")
-		
+				
 	def test_downloadSubtitle_should_call_transformSubtitleToSSA(self):
 		player = YouTubePlayer()
 		sys.modules[ "__main__"].core._fetchPage = Mock()
@@ -271,6 +253,113 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 	def test_addSubtitles_should_wait_for_playback_to_start_before_adding_subtitle(self):
 		assert(False)
 		
+	def test_playVideo_should_call_getVideoObject(self):
+		player = YouTubePlayer()
+		player.getVideoObject = Mock(return_value = [{"apierror":"some error"},303]) 
+		
+		player.playVideo()
+		
+		player.getVideoObject.assert_called_with({})
 	
+	def test_playVideo_should_log_and_fail_gracefully_on_apierror(self):
+		player = YouTubePlayer()
+		player.getVideoObject = Mock()
+		player.getVideoObject.return_value = [{"apierror":"some error"},303]
+		
+		result = player.playVideo()
+		
+		assert(result == False)
+		sys.modules[ "__main__" ].common.log.assert_called_with("construct video url failed contents of video item {'apierror': 'some error'}")
+
+	def test_playVideo_should_call_xbmc_setResolvedUrl(self):
+		assert(False)
+		
+	def test_playVideo_should_call_addSubtitles(self):
+		assert(False)
+	
+	def test_playVideo_should_call_remove_from_playlist_if_viewing_video_from_watch_later_queue(self):
+		assert(False)
+		
+	def test_playVideo_should_update_locally_stored_watched_status(self):
+		assert(False)
+	
+	def test_getInfo_should_use_cache_when_possible(self):
+		assert(False)
+		
+	def test_getInfo_should_call_fetchPage_with_correct_url(self):
+		assert(False)
+		
+	def test_getInfo_should_call_core_getVideoInfo_to_parse_youtube_xml(self):
+		assert(False)
+	
+	def test_getInfo_should_fail_correctly_if_api_is_unavailable(self):
+		assert(False)
+		
+	def test_getInfo_should_save_video_info_in_cache(self):
+		assert(False)
+		
+	def test_selectVideoQuality_should_prefer_h264_over_vp8_as_appletv2_cant_handle_vp8_properly(self):
+		assert(False)
+		
+	def test_selectVideoQuality_should_choose_highest_sd_quality_if_only_multiple_sd_qualities_are_available(self):
+		assert(False)
+	
+	def test_selectVideoQuality_should_prefer_1080p_if_user_has_selected_that_option(self):
+		assert(False)
+		
+	def test_selectVideoQuality_should_limit_to_720p_if_user_has_selected_that_option(self):
+		assert(False)
+		
+	def test_selectVideoQuality_should_limit_to_sd_if_user_has_selected_that_option(self):
+		assert(False)
+		
+	def test_selectVideoQuality_should_call_userSelectsVideoQuality_if_user_selected_that_option(self):
+		assert(False)
+		
+	def test_selectVideoQuality_should_add_user_agent_when_not_called_by_download_function(self):
+		assert(False)
+		
+	def test_selectVideoQuality_should_not_add_user_agent_when_called_by_download_function(self):
+		assert(False)
+		
+	def test_userSelectsVideoQuality_should_append_list_of_known_qualities(self):
+		assert(False)
+		
+	def test_userSelectsVideoQuality_should_prefer_h264_over_vp8_as_appletv2_cant_handle_vp8_properly(self):
+		assert(False)
+		
+	def test_userSelectsVideoQuality_should_select_proper_quality_based_on_user_input(self):
+		assert(False)
+	
+	def test_userSelectsVideoQuality_should_call_xbmc_dialog_select_to_ask_for_user_input(self):
+		assert(False)
+		
+	def test_getVideoObject_should_get_video_information_from_getInfo(self):
+		assert(False)
+		
+	def test_getVideoObject_should_test_if_local_file_exists_if_download_path_is_set(self):
+		assert(False)
+		
+	def test_getVideoObject_should_use_local_file_for_playback_if_found(self):
+		assert(False)
+		
+	def test_getVideoObject_should_call_getVideoLinks_if_local_file_not_found(self):
+		assert(False)
+		
+	def test_getVideoObject_should_call_selectVideoQuality_if_local_file_not_found_and_remote_links_found(self):
+		assert(False)
+	
+	def test_getVideoObject_should_use_pre_defined_error_messages_on_missing_url(self):
+		assert(False)
+		
+	def test_convertFlashVars_should_parse_html_properly(self):
+		assert(False)
+	
+	def test_getVideoLinks_should_try_scraping_first(self):
+		assert(False)
+		
+	def test_getVideoLinks_should_fall_back_to_embed(self):
+		assert(False)
+		
 if __name__ == '__main__':
 	nose.run()
