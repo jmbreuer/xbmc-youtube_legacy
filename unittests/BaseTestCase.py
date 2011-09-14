@@ -2,6 +2,7 @@ import sys
 import unittest2, io
 from mock import Mock
 import MockYouTubeDepends
+
 # Shield us from XBMC
 sys.modules["xbmc"] = __import__("mock")
 sys.modules["xbmc"].getSkinDir = Mock()
