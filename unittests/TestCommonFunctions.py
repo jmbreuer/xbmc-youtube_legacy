@@ -22,18 +22,36 @@ class TestCommonFunctions(BaseTestCase.BaseTestCase):
 							   sys.modules["xbmc"].LOGNOTICE)
 
 	def test_fetchPage_link(self):
+		patcher = patch("urllib2.urlopen")
+		patcher.start()
+		import urllib2
+		dummy_connection = Mock()
+		dummy_connection.read.return_value = "Nothing here\n"
+		patcher(urllib2.urlopen).return_value = dummy_connection
 		common  = CommonFunctions()
 		common.log = sys.modules[ "__main__" ].log_override.log
+		
 		ret = common._fetchPage({ "link": "http://tobiasussing.dk"})
+		patcher.stop()
+		
 		assert(ret['status'] == 200 and ret['content'] == "Nothing here\n")
 
 	def test_fetchPage_broken_link(self):
+		patcher = patch("urllib2.urlopen")
+		patcher.start()
+		import urllib2
+		fp = Mock()
+		fp.read.return_value = ""
+		patcher(urllib2.urlopen).side_effect = urllib2.HTTPError("http://tobiasussing.dk/DoesNotExist.html",500,"","",fp)
 		common  = CommonFunctions()
 		common.log = sys.modules[ "__main__" ].log_override.log
+		
 		ret = common._fetchPage({ "link": "http://tobiasussing.dk/DoesNotExist.html"})
+		patcher.stop()
+		
 		print repr(ret)
 		assert(ret['status'] == 500 and ret['content'] == "")
-		
+	
 	def test_stripTags_link(self):
 		common = CommonFunctions()
 		common.log = sys.modules[ "__main__" ].log_override.log
