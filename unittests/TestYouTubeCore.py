@@ -13,18 +13,17 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		val = self.settings.pop()
 		return val
 
-	def delete_favorite(self):
-		# length = 9
-		self.settings = ["4","3" ] #, "user", "pass", "true", "true", "true", "true", "true", "true", "true", "true", "true", "true" "true", "true", "true", "true", "true", "true", "true", "true", "true", "true"]
-		self.settings = []
-
-		sys.modules[ "__main__" ].settings.getSetting.side_effect = self.popSetting
-
+	def test_delete_favorite_should_call_fetchPage_with_correct_fetch_options(self):
+		settings = ["4","3" ]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		core = YouTubeCore()
-		core.delete_favorite({ "editid": "test" })
-		delete_url = "http://gdata.youtube.com/feeds/api/users/default/favorites/%s/asdfsdfsdf" % "EDIT_ID"
-		sys.modules["xbmc"]._fetchPage.assert_called_with({"link": delete_url, "api": "true", "login": "true", "auth": "true", "method": "DELETE"})
+		core._fetchPage = Mock()
+		core._fetchPage.return_value = {"content":"success", "status":200}
 
+		core.delete_favorite({ "editid": "test" })
+		
+		delete_url = "http://gdata.youtube.com/feeds/api/users/default/favorites/test" 
+		core._fetchPage.assert_called_with({"link": delete_url, "api": "true", "login": "true", "auth": "true", "method": "DELETE"})
 
 	def remove_contact(self):
 		core = YouTubeCore()
