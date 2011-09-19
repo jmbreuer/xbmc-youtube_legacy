@@ -144,5 +144,177 @@ class TestYouTubeUtils(BaseTestCase.BaseTestCase):
 		sys.modules["__main__"].utils.showErrorMessage.assert_called_with("string2","",303)
 		sys.modules["__main__"].language.assert_called_with(30031)
 	
+	def test_apiLogin_should_clear_auth_value_in_settings_before_doing_anything_else(self):
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":""}
+		sys.modules["__main__"].common.parseDOM.return_value = ""
+		login = YouTubeLogin()
+		
+		login._apiLogin()
+		
+		sys.modules["__main__"].settings.setSetting.assert_called_with("auth","")
+	
+	def test_apiLogin_should_call_oauth2_login_url_only_one_time_if_url_fails(self):
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":""}
+		sys.modules["__main__"].common.parseDOM.return_value = ""
+		login = YouTubeLogin()
+		
+		login._apiLogin()
+
+		assert(sys.modules["__main__"].core._fetchPage.call_count == 1)
+	
+	def test_apiLogin_should_call_fetchPage_with_correct_params(self):
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":""}
+		sys.modules["__main__"].common.parseDOM.return_value = ""
+		login = YouTubeLogin()
+		
+		login._apiLogin()
+		
+		args = sys.modules["__main__"].core._fetchPage.call_args
+		assert(args[0][0].has_key("link"))
+		assert(args[0][0].has_key("no-language-cookie"))
+		
+	def test_apiLogin_should_search_for_state_wrapper_and_new_url(self):
+		dom_values = ["","","","some_state_wrapper","some_new_url"]
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":""}
+		sys.modules["__main__"].common.parseDOM.side_effect = lambda x = "", y ="",attrs = {},ret = {}: dom_values.pop()
+		login = YouTubeLogin()
+		
+		login._apiLogin()
+		
+		args = sys.modules["__main__"].common.parseDOM.call_args
+		assert(args[0] == ("","textarea"))
+		assert(args[1].has_key("attrs"))
+		assert(args[1]["attrs"].has_key("id"))
+		assert(args[1]["attrs"]["id"] == "code")
+		
+	def test_apiLogin_should_follow_redirect_if_statewrapper_present(self):
+		dom_values = ["","","",["some_state_wrapper"],["some_new_url"]]
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":""}
+		sys.modules["__main__"].common.parseDOM.side_effect = lambda x = "", y ="",attrs = {},ret = {}: dom_values.pop()
+		login = YouTubeLogin()
+		
+		login._apiLogin()
+		
+		assert(sys.modules["__main__"].core._fetchPage.call_count == 2)
+			
+	def test_apiLogin_should_call_fetchPage_with_correct_params_on_redirect(self):
+		dom_values = ["","","",["some_state_wrapper"],["some_new_url"]]
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":""}
+		sys.modules["__main__"].common.parseDOM.side_effect = lambda x = "", y ="",attrs = {},ret = {}: dom_values.pop()
+		login = YouTubeLogin()
+		
+		login._apiLogin()
+		
+		args = sys.modules["__main__"].core._fetchPage.call_args
+		assert(args[0][0]["link"] == "some_new_url")
+		assert(args[0][0]["no-language-cookie"] == "true")
+		assert(args[0][0]["url_data"]["submit_access"] == "true" )
+		assert(args[0][0]["url_data"]["state_wrapper"] == "some_state_wrapper" )
+		
+		
+	def test_apiLogin_should_request_token_if_code_present(self):
+		dom_values = ["","","",["some_code"],"",""]
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":""}
+		sys.modules["__main__"].common.parseDOM.side_effect = lambda x = "", y ="",attrs = {},ret = {}: dom_values.pop()
+		login = YouTubeLogin()
+		
+		login._apiLogin()
+		
+		assert(sys.modules["__main__"].core._fetchPage.call_count == 2)
+	
+	def test_apiLogin_should_call_fetchPage_with_correct_params_when_fetching_request_token(self):
+		dom_values = ["","","",["some_code"],"",""]
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":""}
+		sys.modules["__main__"].common.parseDOM.side_effect = lambda x = "", y ="",attrs = {},ret = {}: dom_values.pop()
+		login = YouTubeLogin()
+		
+		login._apiLogin()
+		
+		args = sys.modules["__main__"].core._fetchPage.call_args
+		assert(args[0][0]["link"] == "https://accounts.google.com/o/oauth2/token")
+		assert(args[0][0].has_key("url_data"))
+		assert(args[0][0]["url_data"]["code"] == "some_code" )
+		assert(args[0][0]["url_data"]["grant_type"] == "authorization_code" )
+		
+	def test_apiLogin_should_set_oauth_specific_values_on_success(self):
+		fetch_values = [{"content":""},{"content":'{"expires_in":"12", "access_token":"my_favorite_access_token", "refresh_token":"my_favorite_refresh_token" }'}]
+		sys.modules["__main__"].core._fetchPage.side_effect = lambda x: fetch_values.pop()
+		sys.modules["__main__"].settings.getSetting.return_value = "" 
+		sys.modules["__main__"].common.parseDOM.return_value = ""
+		login = YouTubeLogin()
+		
+		login._apiLogin()
+		
+		args = sys.modules["__main__"].settings.setSetting.call_args_list
+		#print repr(args)
+		assert(args[1][0][0] == "oauth2_expires_at")
+		assert(len(args[1][0][1]) > 1)
+		assert(args[2][0][0] == "oauth2_access_token")
+		assert(args[2][0][1] == "my_favorite_access_token")
+		assert(args[3][0][0] == "auth")
+		assert(args[3][0][1] == "my_favorite_access_token")
+		assert(args[4][0][0] == "oauth2_refresh_token")
+		assert(args[4][0][1] == "my_favorite_refresh_token")
+		
+	def test_apiLogin_should_provide_correct_message_and_success_status_code_on_success(self):
+		fetch_values = [{"content":""},{"content":'{"expires_in":"12", "access_token":"my_favorite_access_token", "refresh_token":"my_favorite_refresh_token" }'}]
+		sys.modules["__main__"].core._fetchPage.side_effect = lambda x: fetch_values.pop()
+		sys.modules["__main__"].settings.getSetting.return_value = "" 
+		sys.modules["__main__"].common.parseDOM.return_value = ""
+		login = YouTubeLogin()
+		
+		result = login._apiLogin()
+		
+		sys.modules["__main__"].language.assert_called_with(30030)
+		assert(result[1] == 200)
+		
+	def test_apiLogin_should_provide_correct_message_and_failure_status_code_on_failure(self):
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":""}
+		sys.modules["__main__"].common.parseDOM.return_value = ""
+		login = YouTubeLogin()
+		
+		result = login._apiLogin()
+		
+		sys.modules["__main__"].language.assert_called_with(30609)
+		assert(result[1] == 303)	
+	'''
+	def test_httpLogin_should_check_if_new_is_in_params_before_resetting_login_info(self):
+		assert(False)
+
+	def test_httpLogin_should_return_existing_http_login_info_if_new_is_not_in_params(self):
+		assert(False)
+		
+	def test_httpLogin_should_call_fetchPage_with_proper_fetch_options_on_first_run(self):
+		assert(False)
+
+	def test_httpLogin_should_use_parseDOM_to_check_for_login_button_link(self):
+		assert(False)
+
+	def test_httpLogin_should_call_fetchPage_with_proper_redirect_url_if_login_link_is_found(self):
+		assert(False)
+
+	def test_httpLogin_should_use_parseDOM_to_check_for_login_form(self):
+		assert(False)
+
+	def test_httpLogin_should_call_fillLoginInfo_if_login_form_present(self):
+		assert(False)
+
+	def test_httpLogin_should_call_fetchPage_with_proper_fetch_options_if_fillLoginInfo_succeded(self):
+		assert(False)
+
+	def test_httpLogin_should_use_parseDOM_to_check_for_new_url_redirects(self):
+		assert(False)
+
+	def test_httpLogin_should_call_fetchPage_with_proper_redirect_url(self):
+		assert(False)
+
+	def test_httpLogin_should
+		assert(False)
+
+	def test_httpLogin_should
+		assert(False)
+'''
+	
+	
 if __name__ == '__main__':
 	nose.run()
