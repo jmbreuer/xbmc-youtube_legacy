@@ -11,7 +11,7 @@ class TestCommonFunctions(BaseTestCase.BaseTestCase):
 	sys.modules["xbmc"].log = Mock()
 	sys.modules["xbmc"].LOGNOTICE = 0
 		
-	def test_log_(self):
+	def test_log_should_call_xbmc_with_properly_formated_message(self):
 		description = "Logging"
 		common  = CommonFunctions()
 		common.log(description)
@@ -21,7 +21,7 @@ class TestCommonFunctions(BaseTestCase.BaseTestCase):
 										description), 
 							   sys.modules["xbmc"].LOGNOTICE)
 
-	def test_fetchPage_link(self):
+	def test_fetchPage_should_return_content_and_success_return_code_on_valid_link(self):
 		patcher = patch("urllib2.urlopen")
 		patcher.start()
 		import urllib2
@@ -36,7 +36,7 @@ class TestCommonFunctions(BaseTestCase.BaseTestCase):
 		
 		assert(ret['status'] == 200 and ret['content'] == "Nothing here\n")
 
-	def test_fetchPage_broken_link(self):
+	def test_fetchPage__should_return_failing_error_code_on_broken_link(self):
 		patcher = patch("urllib2.urlopen")
 		patcher.start()
 		import urllib2
@@ -52,7 +52,7 @@ class TestCommonFunctions(BaseTestCase.BaseTestCase):
 		print repr(ret)
 		assert(ret['status'] == 500 and ret['content'] == "")
 	
-	def test_stripTags_link(self):
+	def test_stripTags_should_correctly_extract_the_text_content_of_a_link_tag(self):
 		common = CommonFunctions()
 		common.log = sys.modules[ "__main__" ].log_override.log
 		inp = self.link_html
