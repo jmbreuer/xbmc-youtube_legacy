@@ -116,7 +116,7 @@ class YouTubeNavigation():
 				
 		if (get("feed") or get("user_feed") or get("options") or get("store") or get("scraper")):
 			return self.list(params)
-				
+		
 		video_view = self.settings.getSetting("list_view") == "1"
 		
 		if (get("scraper") == "shows" and get("category") and not video_view):
