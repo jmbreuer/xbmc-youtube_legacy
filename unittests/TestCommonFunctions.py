@@ -56,65 +56,94 @@ class TestCommonFunctions(BaseTestCase.BaseTestCase):
 		common = CommonFunctions()
 		common.log = sys.modules[ "__main__" ].log_override.log
 		inp = self.link_html
+		
 		ret = common.stripTags(inp)
+		
 		print repr(ret)
 		assert(ret == "Link Test")
 
-	def test_parseDOM_link_href(self):
+	def test_parseDOM_should_correctly_extract_the_href_attribute_of_a_link_tag(self):
 		common  = CommonFunctions()
 		common.log = sys.modules[ "__main__" ].log_override.log
+		
 		ret = common.parseDOM(self.link_html, "a", ret = "href")
+		
 		print repr(ret)
 		assert(ret[0] == "bla.html")
-
-	def test_parseDOM_link_content(self):
+	
+	def test_parseDOM_should_call_getDOMContent_when_extracting_content_of_a_link_tag(self):
+		common  = CommonFunctions()
+		common.getDOMContent = Mock()
+		common.getDOMContent.return_value = "Link Test"
+		common.log = sys.modules[ "__main__" ].log_override.log
+		
+		ret = common.parseDOM(self.link_html, "a", attrs = { "href": "bla.html" })
+		
+		print repr(ret)
+		common.getDOMContent.assert_called_with("<a href='bla.html'>Link Test</a>", 'a', "<a href='bla.html'>",)
+	
+	def test_parseDOM_should_correctly_extract_the_text_conten_of_a_link_tag(self):
 		common  = CommonFunctions()
 		common.log = sys.modules[ "__main__" ].log_override.log
+		
 		ret = common.parseDOM(self.link_html, "a", attrs = { "href": "bla.html" })
+		
 		print repr(ret)
 		assert(ret[0] == "Link Test")
 
-	def test_parseDOM_img_src(self):
+	def test_parseDOM_should_correctly_extract_the_src_attribute_of_an_img_tag(self):
 		common  = CommonFunctions()
 		common.log = sys.modules[ "__main__" ].log_override.log
+		
 		ret = common.parseDOM(self.img_html, "img", attrs = { "alt": "Thumbnail" }, ret = "src" )
+		
 		print repr(ret)
 		assert(ret[0] == "bla.png")
 
-	def test_parseDOM_img_alt(self):
+	def test_parseDOM_should_correctly_extract_the_alt_attribute_of_an_img_tag(self):
 		common  = CommonFunctions()
 		common.log = sys.modules[ "__main__" ].log_override.log
+		
 		ret = common.parseDOM(self.img_html, "img", ret = "alt")
+		
 		print repr(ret)
 		assert(ret[0] == "Thumbnail")
 
-	def test_parseDOM_flashvars(self):
+	def test_parseDOM_should_be_able_to_extract_flashvars_content_from_a_youtube_video_page(self):
 		common  = CommonFunctions()
 		common.log = sys.modules[ "__main__" ].log_override.log
+		
 		ret = common.parseDOM(self.readTestInput("watch-gyzlwNvf8ss-standard.html", False), "embed", attrs = {"id": "movie_player" }, ret = "flashvars")
+		
 		print repr(ret)
 		assert(ret[0].strip() == self.readTestInput("watch-gyzlwNvf8ss-flashvars.txt", False).strip())
 
-	def test_parseDOM_flashvars_src(self):
+	def test_parseDOM_should_be_able_to_extract_the_src_attribute_of_a_flashvars_element_from_a_youtube_video_page(self):
 		common  = CommonFunctions()
 		common.log = sys.modules[ "__main__" ].log_override.log
+		
 		ret = common.parseDOM(self.readTestInput("watch-gyzlwNvf8ss-standard.html", False), "embed", attrs = {"id": "movie_player"}, ret = "src")
+		
 		print repr(ret)
 		assert(ret[0] == "http://s.ytimg.com/yt/swfbin/watch_as3-vflCwc_mi.swf")
 
-	def test_getDOMContent_link(self):
+	def test_getDOMContent_should_correctly_extract_the_text_content_of_a_link_tag(self):
 		common  = CommonFunctions()
 		common.log = sys.modules[ "__main__" ].log_override.log
 		inp = self.link_html
+		
 		ret = common.getDOMContent(inp, "a", "<a href='bla.html'>")
+		
 		print repr(ret)
 		assert(ret == "Link Test")
 
-	def test_getDOMContent_link_fail(self):
+	def test_getDOMContent_should_not_extract_the_content_of_a_link_tag_that_doesnt_match_the_search_string(self):
 		common  = CommonFunctions()
 		common.log = sys.modules[ "__main__" ].log_override.log
 		inp = "<a href='bla2.html'>Link Test</a>"
+		
 		ret = common.getDOMContent(inp, "a", "<a href='bla.html'>")
+		
 		print repr(ret)
 		assert(ret == "")
 
