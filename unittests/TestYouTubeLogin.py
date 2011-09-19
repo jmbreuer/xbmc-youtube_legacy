@@ -278,7 +278,7 @@ class TestYouTubeUtils(BaseTestCase.BaseTestCase):
 		sys.modules["__main__"].language.assert_called_with(30609)
 		assert(result[1] == 303)	
 	'''
-	def test_httpLogin_should_check_if_new_is_in_params_before_resetting_login_info(self):
+	def test_httpLogin_should_check_if_new_is_in_params_collection_before_resetting_login_info(self):
 		assert(False)
 
 	def test_httpLogin_should_return_existing_http_login_info_if_new_is_not_in_params(self):
@@ -308,13 +308,29 @@ class TestYouTubeUtils(BaseTestCase.BaseTestCase):
 	def test_httpLogin_should_call_fetchPage_with_proper_redirect_url(self):
 		assert(False)
 
-	def test_httpLogin_should
+	def test_httpLogin_should_use_parseDOM_to_chceck_for_2factor_login(self):
 		assert(False)
 
-	def test_httpLogin_should
+	def test_httpLogin_should_call_fillUserPin_if_2factor_login_needs_smsUserPin(self):
 		assert(False)
-'''
+		
+	def test_httpLogin_should_call_fetchPage_with_correct_fetch_options_if_fillUserPin_succeded(self):
+		assert(False)
+
+	def test_httpLogin_should_use_parseDOM_to_find_smsToken(self):
+		assert(False)
 	
-	
+	def test_httpLogin_should_call_fetchPage_with_correct_fetch_options_if_smsToken_is_found(self):
+		assert(False)
+		
+	def test_httpLogin_should_look_for_user_name_to_indicate_login_success(self):
+		assert(False)
+		
+	def test_httpLogin_should_call_findErrors_on_login_failure(self):
+		assert(False)
+		
+	def test_httpLogin_should_call_getLoginInfo_on_login_success(self):
+		assert(False)
+		'''
 if __name__ == '__main__':
 	nose.run()
