@@ -29,3 +29,6 @@ class BaseTestCase(unittest2.TestCase):
 		if should_eval:
 			inputdata = eval(inputdata)
 		return inputdata
+	
+	def raiseError(self, exception):
+		raise exception
