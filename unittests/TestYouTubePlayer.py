@@ -91,15 +91,15 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		player = YouTubePlayer()
 		sys.modules[ "__main__"].core._fetchPage = Mock()
 		sys.modules[ "__main__"].core._fetchPage.return_value = {"status":200, "content":"nothingness"}
-	
 		subtitlesettings = ["false","0","true"]
-		
 		sys.modules[ "__main__"].settings.getSetting = Mock()
 		sys.modules[ "__main__"].settings.getSetting.side_effect = lambda x: subtitlesettings.pop()
 		player.transformAnnotationToSSA = Mock()
 		player.transformAnnotationToSSA.return_value = ("something", "style")
 		player.saveSubtitle = Mock()
+		
 		result = player.downloadSubtitle()
+		
 		assert (result == True)
 		assert (player.saveSubtitle.called)
 		
