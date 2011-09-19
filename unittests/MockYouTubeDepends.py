@@ -48,6 +48,23 @@ class MockYouTubeDepends:
 		sys.modules[ "__main__" ].playlist = Mock(spec=YouTubePlaylistControl.YouTubePlaylistControl())
 		import YouTubeNavigation
 		sys.modules[ "__main__" ].navigation = YouTubeNavigation.YouTubeNavigation()
+	
+	def mockXBMC(self):
+		import sys
+		from mock import Mock
+
+		# Shield us from XBMC
+		sys.modules["xbmc"] = __import__("mock")
+		sys.modules["xbmc"].getSkinDir = Mock()
+		sys.modules["xbmc"].getSkinDir.return_value = "testSkinPath"
+		sys.modules["xbmcgui"] = __import__("mock")
+		sys.modules["xbmcgui"].WindowXMLDialog = Mock()
+		sys.modules["xbmcgui"].WindowXMLDialog.return_value = "testWindowXML"
+		sys.modules["xbmcvfs"] = __import__("mock")
+		sys.modules["xbmcvfs"].rename = Mock()
+		sys.modules["xbmcplugin"] = __import__("mock")
+		sys.modules["xbmc"].translatePath = Mock()
+		sys.modules["xbmc"].translatePath.return_value = "testing"
 
 	def log(self, description, level = 0):
 		import inspect
