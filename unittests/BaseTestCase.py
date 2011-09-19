@@ -22,6 +22,7 @@ class BaseTestCase(unittest2.TestCase):
 		
 	def setUp(self):
 		MockYouTubeDepends.MockYouTubeDepends().mock()
+		MockYouTubeDepends.MockYouTubeDepends().mockXBMC()
 	
 	def readTestInput(self, filename, should_eval = True):
 		testinput = io.open("resources/" + filename)
