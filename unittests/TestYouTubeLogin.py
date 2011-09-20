@@ -277,38 +277,109 @@ class TestYouTubeUtils(BaseTestCase.BaseTestCase):
 		
 		sys.modules["__main__"].language.assert_called_with(30609)
 		assert(result[1] == 303)	
-	'''
+	
 	def test_httpLogin_should_check_if_new_is_in_params_collection_before_resetting_login_info(self):
-		assert(False)
-
-	def test_httpLogin_should_return_existing_http_login_info_if_new_is_not_in_params(self):
-		assert(False)
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"","status":200}
+		sys.modules["__main__"].settings.getSetting.return_value = "smokey" 
+		sys.modules["__main__"].common.parseDOM.return_value = ""
+		login = YouTubeLogin()
 		
+		result = login._httpLogin({"new":"false"})
+		
+		assert(sys.modules["__main__"].settings.setSetting.call_count == 0)
+		assert(sys.modules["__main__"].core._fetchPage.call_count == 0)
+		
+	def test_httpLogin_should_return_existing_http_login_info_if_new_is_not_in_params(self):
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"","status":200}
+		sys.modules["__main__"].settings.getSetting.return_value = "smokey" 
+		sys.modules["__main__"].common.parseDOM.return_value = ""
+		login = YouTubeLogin()
+		
+		result = login._httpLogin()
+		
+		sys.modules["__main__"].settings.getSetting.assert_called_with("login_info")
+		assert(sys.modules["__main__"].core._fetchPage.call_count == 0)
+		assert(result[1] == 200)
+		assert(result[0] == "smokey")
+
 	def test_httpLogin_should_call_fetchPage_with_proper_fetch_options_on_first_run(self):
-		assert(False)
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"","status":200}
+		sys.modules["__main__"].settings.getSetting.return_value = "smokey" 
+		sys.modules["__main__"].common.parseDOM.return_value = ""
+		login = YouTubeLogin()
+		
+		result = login._httpLogin({"new":"true"})
+		
+		args = sys.modules["__main__"].core._fetchPage.call_args
+		assert(sys.modules["__main__"].core._fetchPage.call_count == 1)
+		assert(args[0][0] == {"link":"http://www.youtube.com/"})
 
 	def test_httpLogin_should_use_parseDOM_to_check_for_login_button_link(self):
-		assert(False)
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"","status":200}
+		sys.modules["__main__"].settings.getSetting.return_value = "smokey" 
+		sys.modules["__main__"].common.parseDOM.return_value = ""
+		login = YouTubeLogin()
+		
+		result = login._httpLogin({"new":"true"})
 
-	def test_httpLogin_should_call_fetchPage_with_proper_redirect_url_if_login_link_is_found(self):
-		assert(False)
+		args = sys.modules["__main__"].common.parseDOM.call_args_list
+		assert(sys.modules["__main__"].core._fetchPage.call_count == 1)
+		assert(args[0][0] == ("","a"))
+		assert(args[0][1] == {'attrs': {'class': 'end'}, 'ret': 'href'})
 
+#	def test_httpLogin_should_call_fetchPage_with_proper_redirect_url_if_login_link_is_found(self):
+#		assert(False)
+	
 	def test_httpLogin_should_use_parseDOM_to_check_for_login_form(self):
-		assert(False)
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"","status":200}
+		sys.modules["__main__"].settings.getSetting.return_value = "smokey" 
+		sys.modules["__main__"].common.parseDOM.return_value = ""
+		login = YouTubeLogin()
+		
+		result = login._httpLogin({"new":"true"})
 
-	def test_httpLogin_should_call_fillLoginInfo_if_login_form_present(self):
-		assert(False)
+		args = sys.modules["__main__"].common.parseDOM.call_args_list
+		assert(sys.modules["__main__"].core._fetchPage.call_count == 1)
+		assert(args[1][0] == ("","form"))
+		assert(args[1][1] == {'attrs': {'id': 'gaia_loginform'}, 'ret': 'action'})
 
-	def test_httpLogin_should_call_fetchPage_with_proper_fetch_options_if_fillLoginInfo_succeded(self):
-		assert(False)
+#	def test_httpLogin_should_call_fillLoginInfo_if_login_form_present(self):
+#		assert(False)
 
+#	def test_httpLogin_should_call_fetchPage_with_proper_fetch_options_if_fillLoginInfo_succeded(self):
+#		assert(False)
+	
 	def test_httpLogin_should_use_parseDOM_to_check_for_new_url_redirects(self):
-		assert(False)
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"","status":200}
+		sys.modules["__main__"].settings.getSetting.return_value = "smokey" 
+		sys.modules["__main__"].common.parseDOM.return_value = ""
+		login = YouTubeLogin()
+		
+		result = login._httpLogin({"new":"true"})
 
-	def test_httpLogin_should_call_fetchPage_with_proper_redirect_url(self):
-		assert(False)
+		args = sys.modules["__main__"].common.parseDOM.call_args_list
+		assert(sys.modules["__main__"].core._fetchPage.call_count == 1)
+		assert(args[2][0] == ('', 'meta'))
+		assert(args[2][1] == {'attrs': {'http-equiv': 'refresh'}, 'ret': 'content'})
 
+
+#	def test_httpLogin_should_call_fetchPage_with_proper_redirect_url(self):
+#		assert(False)
+
+'''
 	def test_httpLogin_should_use_parseDOM_to_chceck_for_2factor_login(self):
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"","status":200}
+		sys.modules["__main__"].settings.getSetting.return_value = "smokey" 
+		sys.modules["__main__"].common.parseDOM.return_value = ""
+		login = YouTubeLogin()
+		
+		result = login._httpLogin({"new":"true"})
+
+		args = sys.modules["__main__"].common.parseDOM.call_args_list
+		print repr(args[3])
+		assert(sys.modules["__main__"].core._fetchPage.call_count == 1)
+		assert(args[2][0] == ('', 'meta'))
+		assert(args[2][1] == {'attrs': {'http-equiv': 'refresh'}, 'ret': 'content'})
 		assert(False)
 
 	def test_httpLogin_should_call_fillUserPin_if_2factor_login_needs_smsUserPin(self):
