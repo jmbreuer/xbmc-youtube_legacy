@@ -226,8 +226,8 @@ class YouTubeLogin():
 					self.common.log("Logged in. Parsing data.")
 					break;
 				# Look for errors and return error.
-				return ( self._findErrors(ret), 303)
-
+				return ( self.core._findErrors(ret), 303)
+		
 		if logged_in:
 			status = self._getLoginInfo(ret["content"])
 			if status == 200:
