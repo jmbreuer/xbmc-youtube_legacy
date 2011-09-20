@@ -343,13 +343,16 @@ class TestYouTubeUtils(BaseTestCase.BaseTestCase):
 		assert(args[1][0] == ("","form"))
 		assert(args[1][1] == {'attrs': {'id': 'gaia_loginform'}, 'ret': 'action'})
 
-#	def test_httpLogin_should_call_fillLoginInfo_if_login_form_present(self):
-#		assert(False)
+	def ttest_httpLogin_should_call_fillLoginInfo_if_login_form_present(self):
+		assert(False)
 
-#	def test_httpLogin_should_call_fetchPage_with_proper_fetch_options_if_fillLoginInfo_succeded(self):
-#		assert(False)
+	def ttest_httpLogin_should_call_fetchPage_with_proper_fetch_options_if_fillLoginInfo_succeded(self):
+		assert(False)
 	
-	def test_httpLogin_should_use_parseDOM_to_check_for_new_url_redirects(self):
+	def ttest_httpLogin_should_use_parseDOM_to_check_for_new_url_redirects(self):
+		assert(False)
+
+	def test_httpLogin_should_call_fetchPage_with_proper_redirect_url(self):
 		sys.modules["__main__"].core._fetchPage.return_value = {"content":"","status":200}
 		sys.modules["__main__"].settings.getSetting.return_value = "smokey" 
 		sys.modules["__main__"].common.parseDOM.return_value = ""
@@ -358,16 +361,21 @@ class TestYouTubeUtils(BaseTestCase.BaseTestCase):
 		result = login._httpLogin({"new":"true"})
 
 		args = sys.modules["__main__"].common.parseDOM.call_args_list
+		print repr(args)
 		assert(sys.modules["__main__"].core._fetchPage.call_count == 1)
 		assert(args[2][0] == ('', 'meta'))
 		assert(args[2][1] == {'attrs': {'http-equiv': 'refresh'}, 'ret': 'content'})
 
+	def ttest_httpLogin_should_search_fetchPage_result_to_chceck_for_2factor_login(self):
+		assert(False)
 
-#	def test_httpLogin_should_call_fetchPage_with_proper_redirect_url(self):
-#		assert(False)
-
-'''
-	def test_httpLogin_should_use_parseDOM_to_chceck_for_2factor_login(self):
+	def ttest_httpLogin_should_call_fillUserPin_if_2factor_login_needs_smsUserPin(self):
+		assert(False)
+		
+	def ttest_httpLogin_should_call_fetchPage_with_correct_fetch_options_if_fillUserPin_succeded(self):
+		assert(False)
+		
+	def test_httpLogin_should_use_parseDOM_to_find_smsToken(self):
 		sys.modules["__main__"].core._fetchPage.return_value = {"content":"","status":200}
 		sys.modules["__main__"].settings.getSetting.return_value = "smokey" 
 		sys.modules["__main__"].common.parseDOM.return_value = ""
@@ -378,30 +386,28 @@ class TestYouTubeUtils(BaseTestCase.BaseTestCase):
 		args = sys.modules["__main__"].common.parseDOM.call_args_list
 		print repr(args[3])
 		assert(sys.modules["__main__"].core._fetchPage.call_count == 1)
-		assert(args[2][0] == ('', 'meta'))
-		assert(args[2][1] == {'attrs': {'http-equiv': 'refresh'}, 'ret': 'content'})
-		assert(False)
+		assert(args[3][0] == ('', 'input'))
+		assert(args[3][1] == {'attrs': {'name': 'smsToken'}, 'ret': 'value'})
 
-	def test_httpLogin_should_call_fillUserPin_if_2factor_login_needs_smsUserPin(self):
+	def ttest_httpLogin_should_call_fetchPage_with_correct_fetch_options_if_smsToken_is_found(self):
 		assert(False)
 		
-	def test_httpLogin_should_call_fetchPage_with_correct_fetch_options_if_fillUserPin_succeded(self):
-		assert(False)
-
-	def test_httpLogin_should_use_parseDOM_to_find_smsToken(self):
-		assert(False)
-	
-	def test_httpLogin_should_call_fetchPage_with_correct_fetch_options_if_smsToken_is_found(self):
-		assert(False)
-		
-	def test_httpLogin_should_look_for_user_name_to_indicate_login_success(self):
+	def ttest_httpLogin_should_look_for_user_name_to_indicate_login_success(self):
 		assert(False)
 		
 	def test_httpLogin_should_call_findErrors_on_login_failure(self):
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"","status":200}
+		sys.modules["__main__"].settings.getSetting.return_value = "smokey" 
+		sys.modules["__main__"].common.parseDOM.return_value = ""
+		login = YouTubeLogin()
+		login._getLoginInfo = Mock()
+		
+		result = login._httpLogin({"new":"true"})
+
+		sys.modules["__main__"].core._findErrors.assert_called_with({'content': '', 'status': 200})
+		
+	def ttest_httpLogin_should_call_getLoginInfo_on_login_success(self):
 		assert(False)
 		
-	def test_httpLogin_should_call_getLoginInfo_on_login_success(self):
-		assert(False)
-		'''
 if __name__ == '__main__':
 	nose.run()
