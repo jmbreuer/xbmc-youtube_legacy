@@ -301,7 +301,7 @@ class YouTubeLogin():
 		if content.find("USERNAME', ") > 0:
 			nick = content[content.find("USERNAME', ") + 12:]
 			nick = nick[:nick.find('")')]
-				
+		
 		if nick:
 			self.settings.setSetting("nick", nick)
 		else:
