@@ -26,6 +26,7 @@ class YouTubePlaylistControl():
 		self.plugin = sys.modules[ "__main__"].plugin
 		self.dbg = sys.modules[ "__main__" ].dbg
 
+		self.common = sys.modules["__main__"].common
 		self.utils =  sys.modules[ "__main__" ].utils
 		self.core = sys.modules["__main__" ].core		
 			
@@ -57,12 +58,6 @@ class YouTubePlaylistControl():
 			result = self.getRecommended(params)
 		elif get("user_feed") == "newsubscriptions":
 			result = self.getNewSubscriptions(params)
-		elif get("video_list", False) :
-			result = []
-			video_list = get("video_list", "").split(",")
-			for videoid in video_list:
-				(video, status) = self.player.getVideoObject({ "videoid": videoid})
-				result.append(video)
 		else:
 			return
 		
@@ -119,7 +114,7 @@ class YouTubePlaylistControl():
 		if status != 200:
 			self.common.log("construct video url failed contents of video item " + repr(video))
 				
-			self.showErrorMessage(self.language(30603), video["apierror"], status)
+			self.utils.showErrorMessage(self.language(30603), video["apierror"], status)
 			return False
 
 		listitem=xbmcgui.ListItem(label=video['Title'], iconImage=video['thumbnail'], thumbnailImage=video['thumbnail'], path=video['video_url']);
@@ -256,7 +251,7 @@ class YouTubePlaylistControl():
 		get = params.get
 		
 		if get("playlist") and get("playlist_entry_id"):
-			(message, status) = self.remove_from_playlist(params)
+			(message, status) = self.core.remove_from_playlist(params)
 			
 			if (status != 200):
 				self.showErrorMessage(self.language(30600), message, status)
@@ -267,7 +262,7 @@ class YouTubePlaylistControl():
 	def deletePlaylist(self, params):
 		get = params.get
 		if get("playlist"):
-			(message, status) = self.del_playlist(params)
+			(message, status) = self.core.del_playlist(params)
 			
 			if status != 200:
 				self.showErrorMessage(self.language(30600), message, status)
