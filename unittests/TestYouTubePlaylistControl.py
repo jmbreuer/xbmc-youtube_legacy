@@ -238,14 +238,31 @@ class TestYouTubePlaylistControl(BaseTestCase.BaseTestCase):
 		
 		assert(sys.modules["__main__"].feeds.listAll.call_count == 0)
 
-	def ttest_getWatchLater_should_call_scraper_getWatchLater(self):
-		assert(False)
+	def test_getWatchLater_should_call_scraper_scrapeWatchLater(self):
+		control = YouTubePlaylistControl()
+		sys.modules["__main__"].scraper.scrapeWatchLater.return_value = ("",303)
+		
+		control.getWatchLater({})
+		
+		sys.modules["__main__"].scraper.scrapeWatchLater.assert_called_with({})
 
-	def ttest_getDiscoSearch_should_call_scraper_getDiscoSearch(self):
-		assert(False)
+	def test_getDiscoSearch_should_call_scraper_searchDisco(self):
+		control = YouTubePlaylistControl()
+		sys.modules["__main__"].scraper.searchDisco.return_value = ("",303)
+		
+		control.getDiscoSearch({})
+		
+		sys.modules["__main__"].scraper.searchDisco.assert_called_with({})
 
-	def ttest_getDiscoSearch_should_call_call_getBatchDetailsDisco_if_scraper_succeded(self):
-		assert(False)
+	def test_getDiscoSearch_should_call_call_getBatchDetailsDisco_if_scraper_succeded(self):
+		control = YouTubePlaylistControl()
+		sys.modules["__main__"].scraper.searchDisco.return_value = ("",200)
+		sys.modules["__main__"].core.getBatchDetails.return_value = ("",200)
+		
+		control.getDiscoSearch({})
+		
+		sys.modules["__main__"].scraper.searchDisco.assert_called_with({})
+		sys.modules["__main__"].core.getBatchDetails.assert_called_with("", {})
 		
 	def ttest_getFavorites_should_exit_cleanly_if_contact_is_missing(self):
 		assert(False)
