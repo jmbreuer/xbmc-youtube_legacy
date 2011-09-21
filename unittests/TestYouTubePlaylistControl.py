@@ -224,11 +224,19 @@ class TestYouTubePlaylistControl(BaseTestCase.BaseTestCase):
 		
 		assert(playlist_value.add.call_count == 3)
 
-	def ttest_getPlayList_should_call_feeds_list_all(self):
-		assert(False)
+	def test_getPlayList_should_call_feeds_list_all(self):
+		control = YouTubePlaylistControl()
+		
+		control.getPlayList({"playlist":"some_playlist"})
+		
+		sys.modules["__main__"].feeds.listAll.assert_called_with({'user_feed': 'playlist', 'playlist': 'some_playlist'})
 
-	def ttest_getPlayList_should_exit_cleanly_if_playlist_id_is_missing_from_params(self):
-		assert(False)
+	def test_getPlayList_should_exit_cleanly_if_playlist_id_is_missing_from_params(self):
+		control = YouTubePlaylistControl()
+		
+		control.getPlayList({})
+		
+		assert(sys.modules["__main__"].feeds.listAll.call_count == 0)
 
 	def ttest_getWatchLater_should_call_scraper_getWatchLater(self):
 		assert(False)
