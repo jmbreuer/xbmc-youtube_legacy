@@ -141,7 +141,7 @@ class YouTubePlaylistControl():
 		(result, status) = self.scraper.searchDisco(params)
 		
 		if status == 200:
-			(result, status) = self.getBatchDetails(result, params)
+			(result, status) = self.core.getBatchDetails(result, params)
 		
 		return result
 	
