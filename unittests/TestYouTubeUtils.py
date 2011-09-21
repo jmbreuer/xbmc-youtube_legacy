@@ -3,7 +3,6 @@ import nose
 import BaseTestCase
 from mock import Mock, patch
 import sys, io
-import MockYouTubeDepends
 from  YouTubeUtils import YouTubeUtils 
 
 class TestYouTubeUtils(BaseTestCase.BaseTestCase):
