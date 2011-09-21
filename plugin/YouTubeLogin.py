@@ -187,7 +187,7 @@ class YouTubeLogin():
 					fetch_options = { "link": newurl[0], "no-language-cookie": "true", "url_data": url_data }
 					self.common.log("Part B:" + repr(fetch_options)) ## WARNING, SHOWS LOGIN INFO
 					continue
-
+			
 			newurl = self.common.parseDOM(ret["content"], "meta", attrs = { "http-equiv": "refresh"}, ret = "content")
 			if len(newurl) > 0 :
 				newurl = newurl[0].replace("&amp;", "&")
