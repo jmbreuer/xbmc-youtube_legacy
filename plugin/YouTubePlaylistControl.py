@@ -109,22 +109,21 @@ class YouTubePlaylistControl():
 		else:
 			items.append(videoids)
 		
-		(video, status) = self.core.getBatchDetails(items, params);
+		(videos, status) = self.core.getBatchDetails(items, params);
 
 		if status != 200:
-			self.common.log("construct video url failed contents of video item " + repr(video))
+			self.common.log("construct video url failed contents of video item " + repr(videos))
 				
-			self.utils.showErrorMessage(self.language(30603), video["apierror"], status)
+			self.utils.showErrorMessage(self.language(30603), "apierror", status)
 			return False
 
-		listitem=xbmcgui.ListItem(label=video['Title'], iconImage=video['thumbnail'], thumbnailImage=video['thumbnail'], path=video['video_url']);
-		listitem.setProperty('IsPlayable', 'true')
-		listitem.setInfo(type='Video', infoLabels=video)
-
-		self.common.log("Queuing video: " + self.makeAscii(video['Title']) + " - " + get('videoid') + " - " + video['video_url'])
-
 		playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
-		playlist.add("%s?path=/root&action=play_video&videoid=%s" % (sys.argv[0], video["videoid"] ), listitem)
+		for video in videos:
+			listitem=xbmcgui.ListItem(label=video['Title'], iconImage=video['thumbnail'], thumbnailImage=video['thumbnail'], path=video['video_url']);
+			listitem.setProperty('IsPlayable', 'true')
+			listitem.setInfo(type='Video', infoLabels=video)
+			playlist.add("%s?path=/root&action=play_video&videoid=%s" % (sys.argv[0], video["videoid"] ), listitem)
+			self.common.log("Queuing video: " + self.utils.makeAscii(video['Title']) + " - " + get('videoid') + " - " + video['video_url'])
 
 	def getPlayList(self, params = {}):
 		get = params.get
