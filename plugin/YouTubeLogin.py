@@ -282,7 +282,7 @@ class YouTubeLogin():
 	def _fillUserPin(self, content):
 		smsToken = self.common.parseDOM(content, "input", attrs = { "name": "smsToken" }, ret = "value")
 		email = self.common.parseDOM(content, "input", attrs = { "name": "email" }, ret = "value")
-		userpin = self.getUserInput(self.language(30627))
+		userpin = self.utils.getUserInput(self.language(30627))
 		if len(smsToken) > 0 and len(email) > 0 and len(userpin) > 0:
 			url_data = { "smsToken": smsToken[0],
 				     "PersistentCookie": "yes",
