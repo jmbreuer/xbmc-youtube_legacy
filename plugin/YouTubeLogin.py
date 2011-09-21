@@ -218,7 +218,7 @@ class YouTubeLogin():
 				continue
 
 			## 2-factor login finish
-
+			
 			if not fetch_options:
 				# Check if we are logged in.
 				if ret["content"].find("USERNAME', ") > 0:
