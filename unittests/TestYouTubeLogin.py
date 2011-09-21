@@ -327,8 +327,17 @@ class TestYouTubeUtils(BaseTestCase.BaseTestCase):
 		assert(args[0][0] == ("","a"))
 		assert(args[0][1] == {'attrs': {'class': 'end'}, 'ret': 'href'})
 
-#	def test_httpLogin_should_call_fetchPage_with_proper_redirect_url_if_login_link_is_found(self):
-#		assert(False)
+	def test_httpLogin_should_call_fetchPage_with_proper_redirect_url_if_login_link_is_found(self):
+		dom_values = ["","","","","","","","","",["someURL"]]
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"","status":200}
+		sys.modules["__main__"].settings.getSetting.return_value = "smokey" 
+		sys.modules["__main__"].common.parseDOM.side_effect = lambda x = "",y = "",attrs = {},ret = "": dom_values.pop()
+		login = YouTubeLogin()
+		
+		result = login._httpLogin({"new":"true"})
+		
+		sys.modules["__main__"].core._fetchPage.assert_called_with({"link":"someURL"})
+		assert(sys.modules["__main__"].core._fetchPage.call_count == 2)
 	
 	def test_httpLogin_should_use_parseDOM_to_check_for_login_form(self):
 		sys.modules["__main__"].core._fetchPage.return_value = {"content":"","status":200}
@@ -343,16 +352,35 @@ class TestYouTubeUtils(BaseTestCase.BaseTestCase):
 		assert(args[1][0] == ("","form"))
 		assert(args[1][1] == {'attrs': {'id': 'gaia_loginform'}, 'ret': 'action'})
 
-	def ttest_httpLogin_should_call_fillLoginInfo_if_login_form_present(self):
-		assert(False)
+	def test_httpLogin_should_call_fillLoginInfo_if_login_form_present(self):
+		dom_values = ["","","","","","","","",["someURL"],""]
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"somePage","status":200}
+		sys.modules["__main__"].settings.getSetting.return_value = "smokey" 
+		sys.modules["__main__"].common.parseDOM.side_effect = lambda x = "",y = "",attrs = {},ret = "": dom_values.pop()
+		login = YouTubeLogin()
+		login._fillLoginInfo = Mock()
+		login._fillLoginInfo.return_value = ("",{})
+		
+		result = login._httpLogin({"new":"true"})
+		
+		login._fillLoginInfo.assert_called_with("somePage")
 
-	def ttest_httpLogin_should_call_fetchPage_with_proper_fetch_options_if_fillLoginInfo_succeded(self):
-		assert(False)
+	def test_httpLogin_should_call_fetchPage_with_proper_fetch_options_if_fillLoginInfo_succeded(self):
+		dom_values = ["","","","","","","","",["someURL"],""]
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"somePage","status":200}
+		sys.modules["__main__"].settings.getSetting.return_value = "smokey" 
+		sys.modules["__main__"].common.parseDOM.side_effect = lambda x = "",y = "",attrs = {},ret = "": dom_values.pop()
+		login = YouTubeLogin()
+		login._fillLoginInfo = Mock()
+		login._fillLoginInfo.return_value = ("some_galx_value",{"some_key":"some_value"})
+		
+		result = login._httpLogin({"new":"true"})
+		
+		login._fillLoginInfo.assert_called_with("somePage")
+		assert(sys.modules["__main__"].core._fetchPage.call_count == 2)
+		sys.modules["__main__"].core._fetchPage.assert_called_with({'link': 'someURL', 'no-language-cookie': 'true', 'url_data': {'some_key': 'some_value'}})
 	
-	def ttest_httpLogin_should_use_parseDOM_to_check_for_new_url_redirects(self):
-		assert(False)
-
-	def test_httpLogin_should_call_fetchPage_with_proper_redirect_url(self):
+	def test_httpLogin_should_use_parseDOM_to_check_for_new_url_redirects(self):
 		sys.modules["__main__"].core._fetchPage.return_value = {"content":"","status":200}
 		sys.modules["__main__"].settings.getSetting.return_value = "smokey" 
 		sys.modules["__main__"].common.parseDOM.return_value = ""
@@ -361,11 +389,25 @@ class TestYouTubeUtils(BaseTestCase.BaseTestCase):
 		result = login._httpLogin({"new":"true"})
 
 		args = sys.modules["__main__"].common.parseDOM.call_args_list
-		print repr(args)
+		print repr(args[2])
 		assert(sys.modules["__main__"].core._fetchPage.call_count == 1)
 		assert(args[2][0] == ('', 'meta'))
 		assert(args[2][1] == {'attrs': {'http-equiv': 'refresh'}, 'ret': 'content'})
 
+	def test_httpLogin_should_call_fetchPage_with_proper_redirect_url(self):
+		dom_values = ["","","","","","","",["&#39;someURL&#39;"],"",""]
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"somePage","status":200}
+		sys.modules["__main__"].settings.getSetting.return_value = "smokey" 
+		sys.modules["__main__"].common.parseDOM.side_effect = lambda x = "",y = "",attrs = {},ret = "": dom_values.pop()
+		login = YouTubeLogin()
+		login._fillLoginInfo = Mock()
+		login._fillLoginInfo.return_value = ("some_galx_value",{"some_key":"some_value"})
+		
+		result = login._httpLogin({"new":"true"})
+		
+		assert(sys.modules["__main__"].core._fetchPage.call_count == 2)
+		sys.modules["__main__"].core._fetchPage.assert_called_with({'link': 'someURL', 'no-language-cookie': 'true'})
+		
 	def ttest_httpLogin_should_search_fetchPage_result_to_chceck_for_2factor_login(self):
 		assert(False)
 
@@ -384,10 +426,22 @@ class TestYouTubeUtils(BaseTestCase.BaseTestCase):
 		result = login._httpLogin({"new":"true"})
 
 		args = sys.modules["__main__"].common.parseDOM.call_args_list
-		print repr(args[3])
 		assert(sys.modules["__main__"].core._fetchPage.call_count == 1)
 		assert(args[3][0] == ('', 'input'))
 		assert(args[3][1] == {'attrs': {'name': 'smsToken'}, 'ret': 'value'})
+
+	def test_httpLogin_should_use_parseDOM_to_find_cont_value_for_smsToken(self):
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"","status":200}
+		sys.modules["__main__"].settings.getSetting.return_value = "smokey" 
+		sys.modules["__main__"].common.parseDOM.return_value = ""
+		login = YouTubeLogin()
+		
+		result = login._httpLogin({"new":"true"})
+
+		args = sys.modules["__main__"].common.parseDOM.call_args_list
+		assert(sys.modules["__main__"].core._fetchPage.call_count == 1)
+		assert(args[4][0] == ('', 'input'))
+		assert(args[4][1] == {'attrs': {'name': 'continue'}, 'ret': 'value'})
 
 	def ttest_httpLogin_should_call_fetchPage_with_correct_fetch_options_if_smsToken_is_found(self):
 		assert(False)
