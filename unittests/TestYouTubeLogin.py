@@ -695,23 +695,74 @@ class TestYouTubeUtils(BaseTestCase.BaseTestCase):
 
 		assert(result == {})
 		
-	def ttest_getLoginInfo_should_search_input_for_username(self):
-		assert(False)
+	def test_getLoginInfo_should_search_input_for_username(self):
+		dummy_content = Mock()
+		dummy_content.find.return_value = -1
+		sys.modules["__main__"].settings.getSetting.return_value = "" 
+		sys.modules["__main__"].common.parseDOM.return_value = ""
+		login = YouTubeLogin()
 		
-	def ttest_getLoginInfo_should_call_setSetting_to_save_nick(self):
-		assert(False)
+		result = login._getLoginInfo(dummy_content)
 		
-	def ttest_getLoginInfo_should_search_cookie_jar_for_login_info(self):
-		assert(False)
+		dummy_content.find.assert_called_with("USERNAME', ")
 		
-	def ttest_getLoginInfo_should_call_setSetting_to_save_login_info(self):
-		assert(False)
+	def test_getLoginInfo_should_call_setSetting_to_save_nick(self):
+		sys.modules["__main__"].settings.getSetting.return_value = "" 
+		sys.modules["__main__"].common.parseDOM.return_value = ""
+		login = YouTubeLogin()
 		
-	def ttest_getLoginInfo_should_return_error_status_on_failure(self):
-		assert(False)
+		result = login._getLoginInfo("   USERNAME', 'some_value" + '")')
 		
-	def ttest_getLoginInfo_should_return_proper_status_on_success(self):
-		assert(False)
+		sys.modules["__main__"].settings.setSetting.assert_called_with("nick","some_value")
+		
+	def test_getLoginInfo_should_search_cookie_jar_for_login_info(self):
+		dummy_content = Mock()
+		dummy_content.find.return_value = -1
+		sys.modules["__main__"].settings.getSetting.return_value = "" 
+		sys.modules["__main__"].common.parseDOM.return_value = ""
+		login = YouTubeLogin()
+		login.cookiejar = "   name='LOGIN_INFO', value='honk honk', port=None  "
+		
+		result = login._getLoginInfo("   USERNAME', 'some_value" + '")')
+		
+		sys.modules["__main__"].settings.setSetting.assert_called_with("login_info","honk honk")
+		
+	def test_getLoginInfo_should_call_setSetting_to_save_login_info(self):
+		dummy_content = Mock()
+		dummy_content.find.return_value = -1
+		sys.modules["__main__"].settings.getSetting.return_value = "" 
+		sys.modules["__main__"].common.parseDOM.return_value = ""
+		login = YouTubeLogin()
+		login.cookiejar = "   name='LOGIN_INFO', value='honk honk', port=None  "
+		
+		result = login._getLoginInfo("")
+		
+		assert(sys.modules["__main__"].settings.setSetting.call_count == 1)
+		sys.modules["__main__"].settings.setSetting.assert_called_with("login_info","honk honk")
+		
+	def test_getLoginInfo_should_return_error_status_on_failure(self):
+		dummy_content = Mock()
+		dummy_content.find.return_value = -1
+		sys.modules["__main__"].settings.getSetting.return_value = "" 
+		sys.modules["__main__"].common.parseDOM.return_value = ""
+		login = YouTubeLogin()
+		login.cookiejar = ""
+		
+		result = login._getLoginInfo("")
+		
+		assert(result == 303)
+		
+	def test_getLoginInfo_should_return_proper_status_on_success(self):
+		dummy_content = Mock()
+		dummy_content.find.return_value = -1
+		sys.modules["__main__"].settings.getSetting.return_value = "" 
+		sys.modules["__main__"].common.parseDOM.return_value = ""
+		login = YouTubeLogin()
+		login.cookiejar = "   name='LOGIN_INFO', value='honk honk', port=None  "
+		
+		result = login._getLoginInfo("")
+		
+		assert(result == 200)
 				
 if __name__ == '__main__':
 	nose.run()
