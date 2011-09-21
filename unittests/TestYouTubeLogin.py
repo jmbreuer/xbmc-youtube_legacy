@@ -644,21 +644,56 @@ class TestYouTubeUtils(BaseTestCase.BaseTestCase):
 		result = login._fillUserPin("new")
 
 		args = sys.modules["__main__"].common.parseDOM.call_args_list
-		print repr(args)
-		assert(args[0] == "")
-		assert(False)
+		assert(args[0][0] == ("new","input"))
+		assert(args[0][1] == {'attrs': {'name': 'smsToken'}, 'ret': 'value'})
 		
-	def ttest_fillUserPin_should_call_parseDOM_for_email(self):
-		assert(False)
+	def test_fillUserPin_should_call_parseDOM_for_email(self):
+		sys.modules["__main__"].settings.getSetting.return_value = "" 
+		sys.modules["__main__"].common.parseDOM.return_value = ""
+		sys.modules["__main__"].language.return_value = ""
+		sys.modules["__main__"].utils.getUserInput.return_value = ""
+		login = YouTubeLogin()
 		
-	def ttest_fillUserPin_should_ask_user_for_user_pin(self):
-		assert(False)
+		result = login._fillUserPin("new")
+
+		args = sys.modules["__main__"].common.parseDOM.call_args_list
+		assert(args[1][0] == ("new","input"))
+		assert(args[1][1] == {'attrs': {'name': 'email'}, 'ret': 'value'})
 		
-	def ttest_fillUserPin_should_return_url_data_structure_if_all_values_are_found(self):
-		assert(False)
+	def test_fillUserPin_should_ask_user_for_user_pin(self):
+		sys.modules["__main__"].settings.getSetting.return_value = "" 
+		sys.modules["__main__"].common.parseDOM.return_value = ""
+		sys.modules["__main__"].language.return_value = "someTitle"
+		sys.modules["__main__"].utils.getUserInput.return_value = ""
+		login = YouTubeLogin()
 		
-	def ttest_fillUserPin_should_not_return_url_data_structure_if_values_are_missing(self):
-		assert(False)
+		result = login._fillUserPin("new")
+		
+		sys.modules["__main__"].utils.getUserInput.assert_called_with('someTitle')
+		
+	def test_fillUserPin_should_return_url_data_structure_if_all_values_are_found(self):
+		sys.modules["__main__"].settings.getSetting.return_value = "value1" 
+		sys.modules["__main__"].common.parseDOM.return_value = ["value2"]
+		sys.modules["__main__"].language.return_value = "someTitle"
+		sys.modules["__main__"].utils.getUserInput.return_value = "value3"
+		login = YouTubeLogin()
+		
+		result = login._fillUserPin("new")
+		
+		assert(result["smsUserPin"] == "value3")
+		assert(result["smsToken"] == "value2")
+		assert(result["email"] == "value2")
+		
+	def test_fillUserPin_should_not_return_url_data_structure_if_values_are_missing(self):
+		sys.modules["__main__"].settings.getSetting.return_value = "" 
+		sys.modules["__main__"].common.parseDOM.return_value = ""
+		sys.modules["__main__"].language.return_value = ""
+		sys.modules["__main__"].utils.getUserInput.return_value = ""
+		login = YouTubeLogin()
+		
+		result = login._fillUserPin("new")
+
+		assert(result == {})
 		
 	def ttest_getLoginInfo_should_search_input_for_username(self):
 		assert(False)
