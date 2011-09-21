@@ -534,6 +534,149 @@ class TestYouTubeUtils(BaseTestCase.BaseTestCase):
 		login._getLoginInfo.assert_called_with( "something USERNAME', ")
 		assert(result == ("smokey",200))
 		sys.modules["__main__"].settings.getSetting.assert_called_with("login_info")
+
+	def test_fillLoginInfo_should_call_parseDOM_to_find_rmShow(self):
+		sys.modules["__main__"].settings.getSetting.return_value = "smokey" 
+		sys.modules["__main__"].common.parseDOM.return_value = ""
+		login = YouTubeLogin()
 		
+		result = login._fillLoginInfo("new")
+
+		args = sys.modules["__main__"].common.parseDOM.call_args_list
+		assert(args[0][0] == ("new","input"))
+		assert(args[0][1] == {'attrs': {'name': 'rmShown'}, 'ret': 'value'})
+
+	def test_fillLoginInfo_should_call_parseDOM_twice_to_find_uilel(self):
+		sys.modules["__main__"].settings.getSetting.return_value = "smokey" 
+		sys.modules["__main__"].common.parseDOM.return_value = ""
+		login = YouTubeLogin()
+		
+		result = login._fillLoginInfo("new")
+
+		args = sys.modules["__main__"].common.parseDOM.call_args_list
+		assert(args[1][0] == ("new","input"))
+		assert(args[1][1] == {'attrs': {'name': 'uilel'}, 'ret': 'value'})
+		assert(args[2][0] == ("new","input"))
+		assert(args[2][1] == {'attrs': {'id': 'uilel'}, 'ret': 'value'})
+
+	def test_fillLoginInfo_should_call_parseDOM_twice_to_find_dsh(self):
+		sys.modules["__main__"].settings.getSetting.return_value = "smokey" 
+		sys.modules["__main__"].common.parseDOM.return_value = ""
+		login = YouTubeLogin()
+		
+		result = login._fillLoginInfo("new")
+
+		args = sys.modules["__main__"].common.parseDOM.call_args_list
+		assert(args[3][0] == ("new","input"))
+		assert(args[3][1] == {'attrs': {'name': 'dsh'}, 'ret': 'value'})
+		assert(args[4][0] == ("new","input"))
+		assert(args[4][1] == {'attrs': {'id': 'dsh'}, 'ret': 'value'})
+
+	def test_fillLoginInfo_should_call_parseDOM_to_get_galx(self):
+		sys.modules["__main__"].settings.getSetting.return_value = "smokey" 
+		sys.modules["__main__"].common.parseDOM.return_value = ""
+		login = YouTubeLogin()
+		
+		result = login._fillLoginInfo("new")
+
+		args = sys.modules["__main__"].common.parseDOM.call_args_list
+		assert(args[5][0] == ("new","input"))
+		assert(args[5][1] == {'attrs': {'name': 'GALX'}, 'ret': 'value'})
+
+	def test_fillLoginInfo_should_get_username_and_passwords_from_settings(self):
+		sys.modules["__main__"].settings.getSetting.return_value = "smokey" 
+		sys.modules["__main__"].common.parseDOM.return_value = ""
+		login = YouTubeLogin()
+		
+		result = login._fillLoginInfo("new")
+
+		args = sys.modules["__main__"].settings.getSetting.call_args_list
+		assert(args[1][0] == ("username",))
+		assert(args[2][0] == ("user_password",))
+
+	def test_fillLoginInfo_should_ask_user_for_password_if_not_set(self):
+		sys.modules["__main__"].settings.getSetting.return_value = "" 
+		sys.modules["__main__"].common.parseDOM.return_value = ""
+		sys.modules["__main__"].language.return_value = "someTitle"
+		sys.modules["__main__"].utils.getUserInput.return_value = "somePword"
+		login = YouTubeLogin()
+		
+		result = login._fillLoginInfo("new")
+
+		sys.modules["__main__"].utils.getUserInput.assert_called_with('someTitle', hidden=True)
+
+	def test_fillLoginInfo_should_return_login_info_if_all_values_are_found(self):
+		sys.modules["__main__"].settings.getSetting.return_value = "value1" 
+		sys.modules["__main__"].common.parseDOM.return_value = ["value2"]
+		sys.modules["__main__"].language.return_value = "someTitle"
+		sys.modules["__main__"].utils.getUserInput.return_value = "somePword"
+		login = YouTubeLogin()
+		
+		(galx, url_data) = login._fillLoginInfo("new")
+		
+		assert(galx == "value2")
+		assert(url_data["uilel"] == "value2")
+		assert(url_data["dsh"] == "value2")
+		assert(url_data["rmShown"] == "value2")
+		assert(url_data["GALX"] == "value2")
+		assert(url_data["Passwd"] == "value1")
+		assert(url_data["Email"] == "value1")
+
+	def test_fillLoginInfo_should_not_return_login_info_if_values_are_missing(self):
+		sys.modules["__main__"].settings.getSetting.return_value = "" 
+		sys.modules["__main__"].common.parseDOM.return_value = ""
+		sys.modules["__main__"].language.return_value = "someTitle"
+		sys.modules["__main__"].utils.getUserInput.return_value = "somePword"
+		login = YouTubeLogin()
+		
+		(galx, url_data) = login._fillLoginInfo("new")
+
+		assert(galx == "")		
+		assert(url_data == {})
+		
+	def test_fillUserPin_should_call_parseDOM_for_smsToken(self):
+		sys.modules["__main__"].settings.getSetting.return_value = "" 
+		sys.modules["__main__"].common.parseDOM.return_value = ""
+		sys.modules["__main__"].language.return_value = ""
+		sys.modules["__main__"].utils.getUserInput.return_value = ""
+		login = YouTubeLogin()
+		
+		result = login._fillUserPin("new")
+
+		args = sys.modules["__main__"].common.parseDOM.call_args_list
+		print repr(args)
+		assert(args[0] == "")
+		assert(False)
+		
+	def ttest_fillUserPin_should_call_parseDOM_for_email(self):
+		assert(False)
+		
+	def ttest_fillUserPin_should_ask_user_for_user_pin(self):
+		assert(False)
+		
+	def ttest_fillUserPin_should_return_url_data_structure_if_all_values_are_found(self):
+		assert(False)
+		
+	def ttest_fillUserPin_should_not_return_url_data_structure_if_values_are_missing(self):
+		assert(False)
+		
+	def ttest_getLoginInfo_should_search_input_for_username(self):
+		assert(False)
+		
+	def ttest_getLoginInfo_should_call_setSetting_to_save_nick(self):
+		assert(False)
+		
+	def ttest_getLoginInfo_should_search_cookie_jar_for_login_info(self):
+		assert(False)
+		
+	def ttest_getLoginInfo_should_call_setSetting_to_save_login_info(self):
+		assert(False)
+		
+	def ttest_getLoginInfo_should_return_error_status_on_failure(self):
+		assert(False)
+		
+	def ttest_getLoginInfo_should_return_proper_status_on_success(self):
+		assert(False)
+				
 if __name__ == '__main__':
 	nose.run()
