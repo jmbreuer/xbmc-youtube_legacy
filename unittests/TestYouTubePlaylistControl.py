@@ -176,14 +176,53 @@ class TestYouTubePlaylistControl(BaseTestCase.BaseTestCase):
 		
 		sys.modules["__main__"].core.getBatchDetails.assert_called_with(['someid1', 'someid2', 'someid3'], {'videoid': 'someid1,someid2,someid3'})		
 
-	def ttest_queueVideo_should_call_get_batch_details_for_the_video_list(self):
-		assert(False)
+	def test_queueVideo_should_call_get_batch_details_for_the_video_list(self):
+		playlist_value = Mock()
+		sys.modules["xbmc"].Player = Mock()
+		sys.modules["xbmc"].PlayList = Mock()
+		sys.modules["xbmc"].PlayList.return_value = playlist_value
+		sys.modules["xbmc"].PLAYLIST_VIDEO = Mock()
+		sys.modules["__main__"].core.getBatchDetails.return_value = ({"apierror":""},303)
+		control = YouTubePlaylistControl()
+		control.getPlayList = Mock()
+		control.getPlayList.return_value = [{"Title":"someTitle1", "videoid":"some_id1","thumbnail":"some_thumbnail1"},{"Title":"someTitle2", "videoid":"some_id2","thumbnail":"some_thumbnail2"}]
+		
+		control.queueVideo({"videoid":"someid1,someid2,someid3"})
+		
+		sys.modules["__main__"].core.getBatchDetails.assert_called_with(['someid1', 'someid2', 'someid3'], {'videoid': 'someid1,someid2,someid3'})		
 
-	def ttest_queueVideo_should_show_error_message_if_get_batch_details_fails(self):
-		assert(False)
+	def test_queueVideo_should_show_error_message_if_get_batch_details_fails(self):
+		playlist_value = Mock()
+		sys.modules["xbmc"].Player = Mock()
+		sys.modules["xbmc"].PlayList = Mock()
+		sys.modules["xbmc"].PlayList.return_value = playlist_value
+		sys.modules["xbmc"].PLAYLIST_VIDEO = Mock()
+		sys.modules["__main__"].language.return_value = ""
+		sys.modules["__main__"].core.getBatchDetails.return_value = ([],303)
+		control = YouTubePlaylistControl()
+		control.getPlayList = Mock()
+		control.getPlayList.return_value = [{"Title":"someTitle1", "videoid":"some_id1","thumbnail":"some_thumbnail1"},{"Title":"someTitle2", "videoid":"some_id2","thumbnail":"some_thumbnail2"}]
+		
+		control.queueVideo({"videoid":"someid1,someid2,someid3"})
+		
+		sys.modules["__main__"].utils.showErrorMessage.assert_called_with("","apierror",303)
 
-	def ttest_queueVideo_should_correctly_queue_all_items_in_result_list(self):
-		assert(False)
+	def test_queueVideo_should_correctly_queue_all_items_in_result_list(self):
+		playlist_value = Mock()
+		sys.modules["xbmc"].Player = Mock()
+		sys.modules["xbmc"].PlayList = Mock()
+		sys.modules["xbmc"].PlayList.return_value = playlist_value
+		sys.modules["xbmc"].PLAYLIST_VIDEO = Mock()
+		sys.modules["__main__"].language.return_value = ""
+		sys.modules["__main__"].core.getBatchDetails.return_value = ([{"Title":"someTitle1","videoid":"some_id1", "thumbnail":"thumbnail1","video_url":"some_url1"}, {"Title":"someTitle1","videoid":"some_id1", "thumbnail":"thumbnail1","video_url":"some_url1"}, {"Title":"someTitle1","videoid":"some_id1", "thumbnail":"thumbnail1","video_url":"some_url1"}], 200)
+		sys.modules["__main__"].utils.makeAscii.return_value = ""
+		control = YouTubePlaylistControl()
+		control.getPlayList = Mock()
+		control.getPlayList.return_value = [{"Title":"someTitle1", "videoid":"some_id1","thumbnail":"some_thumbnail1"},{"Title":"someTitle2", "videoid":"some_id2","thumbnail":"some_thumbnail2"}]
+		
+		control.queueVideo({"videoid":"someid1,someid2,someid3"})
+		
+		assert(playlist_value.add.call_count == 3)
 
 	def ttest_getPlayList_should_call_feeds_list_all(self):
 		assert(False)
