@@ -252,12 +252,12 @@ class YouTubeLogin():
 		pword = self.settings.getSetting( "user_password" )
 
 		if pword == "":
-			pword = self.getUserInput(self.language(30628), hidden = True)
+			pword = self.utils.getUserInput(self.language(30628), hidden = True)
 
 		if len(galx) == 0 or len(cont) == 0 or len(uilel) == 0 or len(dsh) == 0 or len(rmShown) == 0 or uname == "" or pword == "":
 			self.common.log("missing values for login form " + repr(galx) + repr(cont) + repr(uilel) + repr(dsh) + repr(rmShown) + repr(uname) + str(len(pword)))
 			return ( "", {} )
-		else:	
+		else:
 			galx = galx[0]
 			url_data = { "pstMsg": "0",
 				     "ltmpl": "sso",
