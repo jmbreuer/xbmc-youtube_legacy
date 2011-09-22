@@ -212,6 +212,7 @@ class YouTubePlaylistControl():
 		
 		selected = -1
 		if result:
+			
 			list = []
 			list.append(self.language(30529))
 			for item in result:
@@ -231,7 +232,7 @@ class YouTubePlaylistControl():
 			params["playlist"] = result[selected - 1].get("playlist")
 		
 		if get("playlist"):
-			self.add_to_playlist(params)
+			self.core.add_to_playlist(params)
 			return True
 		
 		return False
