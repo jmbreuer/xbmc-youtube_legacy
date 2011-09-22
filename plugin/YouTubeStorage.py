@@ -137,7 +137,6 @@ class YouTubeStorage():
 	def deleteStoredSearch(self, params = {}):
 		get = params.get
 		self.common.log("")
-
 		
 		query = urllib.unquote_plus(get("delete"))		
 		searches = self.retrieve(params)
@@ -196,8 +195,10 @@ class YouTubeStorage():
 			params["search"] = urllib.quote_plus(new_query)
 			del params["old_search"]
 		
-		del params["action"]
-		del params["store"]
+		if get("action"):
+			del params["action"]
+		if get("store"):
+			del params["store"]
 		
 	def getUserOptionFolder(self, params = {}):
 		get = params.get
@@ -237,7 +238,7 @@ class YouTubeStorage():
 			
 			self.store(params, value, "value")
 		
-		xbmc.executebuiltin( "Container.Refresh" )
+			xbmc.executebuiltin( "Container.Refresh" )
 		
 	def getReversePlaylistOrder(self, params = {}):
 		get = params.get 
