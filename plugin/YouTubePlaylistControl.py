@@ -171,7 +171,7 @@ class YouTubePlaylistControl():
 		(result, status) = self.scraper.scrapeRecommended(params)
 		
 		if status == 200:
-			(result, status) = self.getBatchDetails(result, params)
+			(result, status) = self.core.getBatchDetails(result, params)
 		
 		return result
 	
@@ -184,7 +184,7 @@ class YouTubePlaylistControl():
 		(result, status) = self.scraper.scrapeArtist(params)
 		
 		if status == 200:
-			(result, status) = self.getBatchDetails(result, params)
+			(result, status) = self.core.getBatchDetails(result, params)
 		
 		return result
 	
@@ -196,7 +196,7 @@ class YouTubePlaylistControl():
 		(result, status) = self.scraper.scrapeLikedVideos(params)
 		self.common.log("Liked videos "  + repr(result))
 		if status == 200:
-			(result, status) = self.getBatchDetails(result, params)
+			(result, status) = self.core.getBatchDetails(result, params)
 			
 		return result
 		
@@ -239,10 +239,10 @@ class YouTubePlaylistControl():
 	def createPlayList(self, params = {}):
 		get = params.get
 		
-		input = self.getUserInput(self.language(30529))
+		input = self.utils.getUserInput(self.language(30529))
 		if input:
 			params["title"] = input
-			self.add_playlist(params)
+			self.core.add_playlist(params)
 			return True
 		return False
 				
@@ -264,7 +264,7 @@ class YouTubePlaylistControl():
 			(message, status) = self.core.del_playlist(params)
 			
 			if status != 200:
-				self.showErrorMessage(self.language(30600), message, status)
+				self.utils.showErrorMessage(self.language(30600), message, status)
 				return False
 			xbmc.executebuiltin( "Container.Refresh" )
 		return True
