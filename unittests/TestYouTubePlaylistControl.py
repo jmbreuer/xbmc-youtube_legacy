@@ -264,49 +264,137 @@ class TestYouTubePlaylistControl(BaseTestCase.BaseTestCase):
 		sys.modules["__main__"].scraper.searchDisco.assert_called_with({})
 		sys.modules["__main__"].core.getBatchDetails.assert_called_with("", {})
 		
-	def ttest_getFavorites_should_exit_cleanly_if_contact_is_missing(self):
-		assert(False)
-
-	def ttest_getFavorites_should_call_core_list_all_with_correct_params(self):
-		assert(False)
-
-	def ttest_getNewSubscriptions_should_exit_cleanly_if_contact_is_missing(self):
-		assert(False)
-
-	def ttest_getNewSubscriptions_should_call_core_list_all_with_correct_params(self):
-		assert(False)
+	def test_getFavorites_should_exit_cleanly_if_contact_is_missing(self):
+		control = YouTubePlaylistControl()
+		sys.modules["__main__"].feeds.listAll.return_value = ("",200)
 		
-	def ttest_getRecommended_should_exit_cleanly_if_login_or_scraper_is_not_in_params(self):
-		assert(False)
-
-	def ttest_getRecommended_should_call_scraper_getRecommended(self):
-		assert(False)
-
-	def ttest_getRecommended_should_call_core_getBatchDetails_if_scraper_succeded(self):
-		assert(False)
-
-	def ttest_getArtist_should_exit_cleanly_if_artist_is_not_in_params(self):
-		assert(False)
-
-	def ttest_getArtist_should_call_scraper_scrapeArtist(self):
-		assert(False)
-
-	def ttest_getArtist_should_call_core_getBatchDetails_if_scraper_succeded(self):
-		assert(False)
+		control.getFavorites({})
 		
-	def ttest_getLikedVideos_should_exit_cleanly_if_scraper_or_login_is_not_in_params(self):
-		assert(False)
+		assert(sys.modules["__main__"].feeds.listAll.call_count == 0)
+
+	def test_getFavorites_should_call_core_list_all_with_correct_params(self):
+		control = YouTubePlaylistControl()
+		sys.modules["__main__"].feeds.listAll.return_value = ("",200)
+		
+		control.getFavorites({"contact":"some_contact"})
+		
+		assert(sys.modules["__main__"].feeds.listAll.call_count == 1)
+		sys.modules["__main__"].feeds.listAll.assert_called_with({"user_feed":"favorites","contact":"some_contact"})
+
+	def test_getNewSubscriptions_should_exit_cleanly_if_contact_is_missing(self):
+		control = YouTubePlaylistControl()
+		sys.modules["__main__"].feeds.listAll.return_value = ("",200)
+		
+		control.getNewSubscriptions({})
+		
+		assert(sys.modules["__main__"].feeds.listAll.call_count == 0)
+
+	def test_getNewSubscriptions_should_call_core_list_all_with_correct_params(self):
+		control = YouTubePlaylistControl()
+		sys.modules["__main__"].feeds.listAll.return_value = ("",200)
+		
+		control.getNewSubscriptions({"contact":"some_contact"})
+		
+		assert(sys.modules["__main__"].feeds.listAll.call_count == 1)
+		sys.modules["__main__"].feeds.listAll.assert_called_with({"user_feed":"newsubscriptions","contact":"some_contact"})
+		
+	def test_getRecommended_should_exit_cleanly_if_login_or_scraper_is_not_in_params(self):
+		control = YouTubePlaylistControl()
+		
+		control.getRecommended({})
+		
+		assert(sys.modules["__main__"].scraper.scrapeRecommended.call_count == 0)
+
+	def test_getRecommended_should_call_scraper_getRecommended(self):
+		control = YouTubePlaylistControl()
+		sys.modules["__main__"].scraper.scrapeRecommended.return_value = ("",200)
+		sys.modules["__main__"].core.getBatchDetails.return_value = ("",200)
+		
+		control.getRecommended({"login":"true","scraper":"recommended"})
+		
+		sys.modules["__main__"].scraper.scrapeRecommended.assert_called_with({"login":"true","scraper":"recommended"})
+
+	def test_getRecommended_should_call_core_getBatchDetails_if_scraper_succeded(self):
+		control = YouTubePlaylistControl()
+		sys.modules["__main__"].scraper.scrapeRecommended.return_value = ("",200)
+		sys.modules["__main__"].core.getBatchDetails.return_value = ("",200)
+		
+		control.getRecommended({"login":"true","scraper":"recommended"})
+		
+		sys.modules["__main__"].scraper.scrapeRecommended.assert_called_with({"login":"true","scraper":"recommended"})
+		sys.modules["__main__"].core.getBatchDetails.assert_called_with("", {"login":"true","scraper":"recommended"})
+
+	def test_getArtist_should_exit_cleanly_if_artist_is_not_in_params(self):
+		control = YouTubePlaylistControl()
+		
+		control.getArtist({})
+		
+		assert(sys.modules["__main__"].scraper.scrapeArtist.call_count == 0)
+
+	def test_getArtist_should_call_scraper_scrapeArtist(self):
+		control = YouTubePlaylistControl()
+		sys.modules["__main__"].scraper.scrapeArtist.return_value = ("",200)
+		sys.modules["__main__"].core.getBatchDetails.return_value = ("",200)
+		
+		control.getArtist({"artist":"some_artist"})
+		
+		sys.modules["__main__"].scraper.scrapeArtist.assert_called_with({"artist":"some_artist"})
+
+	def test_getArtist_should_call_core_getBatchDetails_if_scraper_succeded(self):
+		control = YouTubePlaylistControl()
+		sys.modules["__main__"].scraper.scrapeArtist.return_value = ("",200)
+		sys.modules["__main__"].core.getBatchDetails.return_value = ("",200)
+		
+		control.getArtist({"artist":"some_artist"})
+		
+		sys.modules["__main__"].scraper.scrapeArtist.assert_called_with({"artist":"some_artist"})
+		sys.modules["__main__"].core.getBatchDetails.assert_called_with("", {"artist":"some_artist"})
+		
+	def test_getLikedVideos_should_exit_cleanly_if_scraper_or_login_is_not_in_params(self):
+		control = YouTubePlaylistControl()
+		
+		control.getLikedVideos({})
+		
+		assert(sys.modules["__main__"].scraper.scrapeLikedVideos.call_count == 0)
 	
-	def ttest_getLikedVideos_should_call_scraper_scrapeLikedVideos(self):
-		assert(False)
+	def test_getLikedVideos_should_call_scraper_scrapeLikedVideos(self):
+		control = YouTubePlaylistControl()
+		sys.modules["__main__"].scraper.scrapeLikedVideos.return_value = ("",200)
+		sys.modules["__main__"].core.getBatchDetails.return_value = ("",200)
 		
-	def ttest_getLikedVideos_should_call_core_getBatchDetails_if_scraper_succeded(self):
-		assert(False)
+		control.getLikedVideos({"login":"true","scraper":"liked_videos"})
 		
-	def ttest_addToPlaylist_should_call_list_all_if_playlist_is_not_in_params(self):
-		assert(False)
+		sys.modules["__main__"].scraper.scrapeLikedVideos.assert_called_with({"login":"true","scraper":"liked_videos"})
+		
+	def test_getLikedVideos_should_call_core_getBatchDetails_if_scraper_succeded(self):
+		control = YouTubePlaylistControl()
+		sys.modules["__main__"].scraper.scrapeLikedVideos.return_value = ("",200)
+		sys.modules["__main__"].core.getBatchDetails.return_value = ("",200)
+		
+		control.getLikedVideos({"login":"true","scraper":"liked_videos"})
+		
+		sys.modules["__main__"].scraper.scrapeLikedVideos.assert_called_with({"login":"true","scraper":"liked_videos"})
+		sys.modules["__main__"].core.getBatchDetails.assert_called_with("", {"login":"true","scraper":"liked_videos"})
+		
+	def test_addToPlaylist_should_call_list_all_if_playlist_is_not_in_params(self):
+		control = YouTubePlaylistControl()
+		sys.modules["__main__"].feeds.listAll.return_value = ([])
+		
+		control.addToPlaylist({})
+		
+		sys.modules["__main__"].feeds.listAll.assert_called_with({'user_feed': 'playlists', 'login': 'true', 'folder': 'true'})
+		assert(sys.modules["__main__"].feeds.listAll.call_count == 1)
 
 	def ttest_addToPlaylist_should_ask_user_for_playlist_if_playlist_is_not_in_params(self):
+		control = YouTubePlaylistControl()
+		sys.modules["__main__"].feeds.listAll.return_value = ([{"Title":"PlayList1"},{"Title":"PlayList2"}])
+		control.createPlayList = Mock()
+
+		control.addToPlaylist({})
+		
+		sys.modules["xbmcgui"].Dialog = Mock()
+		assert(sys.modules["xbmcgui"].Dialog().call_count == 1)
+		assert(sys.modules["xbmcgui"].Dialog.select.call_count == 1)
 		assert(False)
 
 	def ttest_addToPlaylist_should_call_createPlaylist_if_user_selects_create_option(self):
