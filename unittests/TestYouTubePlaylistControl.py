@@ -462,29 +462,68 @@ class TestYouTubePlaylistControl(BaseTestCase.BaseTestCase):
 		assert(sys.modules["__main__"].core.add_playlist.call_count == 0)
 
 		
-	def ttest_removeFromPlaylist_should_exit_cleanly_if_playlist_or_editid_is_missing(self):
-		assert(False)
+	def test_removeFromPlaylist_should_exit_cleanly_if_playlist_or_playlist_entry_id_is_missing(self):
+		control = YouTubePlaylistControl()
+		
+		control.removeFromPlaylist({})
+		
+		assert(sys.modules["__main__"].core.remove_from_playlist.call_count == 0)
 
-	def ttest_removeFromPlaylist_should_call_core_remove_from_playlist(self):
-		assert(False)
+	def test_removeFromPlaylist_should_call_core_remove_from_playlist(self):
+		control = YouTubePlaylistControl()
+		sys.modules["__main__"].core.remove_from_playlist.return_value = ("",200)
+		control.removeFromPlaylist({"playlist_entry_id":"some_playlist_entry_id", "playlist":"some_playlist"})
+		
+		sys.modules["__main__"].core.remove_from_playlist.assert_called_with({"playlist_entry_id":"some_playlist_entry_id", "playlist":"some_playlist"})
 
-	def ttest_removeFromPlaylist_should_show_error_message_if_remove_call_failed(self):
-		assert(False)
+	def test_removeFromPlaylist_should_show_error_message_if_remove_call_failed(self):
+		control = YouTubePlaylistControl()
+		sys.modules["__main__"].core.remove_from_playlist.return_value = ("fail",303)
+		sys.modules["__main__"].language.return_value = "my_string"
+		
+		control.removeFromPlaylist({"playlist_entry_id":"some_playlist_entry_id", "playlist":"some_playlist"})
+		
+		sys.modules["__main__"].utils.showErrorMessage.assert_called_with("my_string","fail",303)
 	
-	def ttest_removeFromPlaylist_should_call_xbmc_execute_builtin_on_success(self):
-		assert(False)
+	def test_removeFromPlaylist_should_call_xbmc_execute_builtin_on_success(self):
+		control = YouTubePlaylistControl()
+		sys.modules["__main__"].core.remove_from_playlist.return_value = ("",200)
+		
+		control.removeFromPlaylist({"playlist_entry_id":"some_playlist_entry_id", "playlist":"some_playlist"})
+		
+		sys.modules["xbmc"].executebuiltin.assert_called_with("Container.Refresh")
 	
-	def ttest_deletePlaylist_should_exit_cleanly_if_playlist_is_missing(self):
-		assert(False)
+	def test_deletePlaylist_should_exit_cleanly_if_playlist_is_missing(self):
+		control = YouTubePlaylistControl()
+		sys.modules["__main__"].core.remove_from_playlist.return_value = ("",200)
+		
+		control.deletePlaylist({})
+		
+		assert(sys.modules["__main__"].core.del_playlist.call_count == 0)
 	
-	def ttest_deletePlaylist_should_call_core_delete_playlist(self):
-		assert(False)
+	def test_deletePlaylist_should_call_core_delete_playlist(self):
+		control = YouTubePlaylistControl()
+		sys.modules["__main__"].core.del_playlist.return_value = ("",200)
+		
+		control.deletePlaylist({"playlist":"some_playlist"})
+		
+		sys.modules["__main__"].core.del_playlist.assert_called_with({"playlist":"some_playlist"})
 	
-	def ttest_deletePlaylist_should_show_error_message_if_delete_call_failed(self):
-		assert(False)
+	def test_deletePlaylist_should_show_error_message_if_delete_call_failed(self):
+		control = YouTubePlaylistControl()
+		sys.modules["__main__"].core.del_playlist.return_value = ("fail",303)
+		sys.modules["__main__"].language.return_value = "my_string"
+		
+		control.deletePlaylist({"playlist":"some_playlist"})
+		
+		sys.modules["__main__"].utils.showErrorMessage.assert_called_with("my_string","fail",303)
 	
-	def ttest_deletePlaylist_should_call_xbmc_execute_builtin_on_success(self):
-		assert(False)	
+	def test_deletePlaylist_should_call_xbmc_execute_builtin_on_success(self):
+		control = YouTubePlaylistControl()
+		sys.modules["__main__"].core.remove_from_playlist.return_value = ("",200)
+		
+		control.deletePlaylist({})
+		sys.modules["xbmc"].executebuiltin.assert_called_with("Container.Refresh")	
 
 if __name__ == '__main__':
 	nose.run()
