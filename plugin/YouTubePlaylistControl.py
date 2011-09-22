@@ -254,7 +254,7 @@ class YouTubePlaylistControl():
 			(message, status) = self.core.remove_from_playlist(params)
 			
 			if (status != 200):
-				self.showErrorMessage(self.language(30600), message, status)
+				self.utils.showErrorMessage(self.language(30600), message, status)
 				return False
 			xbmc.executebuiltin( "Container.Refresh" )
 		return True
