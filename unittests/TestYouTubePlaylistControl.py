@@ -385,33 +385,83 @@ class TestYouTubePlaylistControl(BaseTestCase.BaseTestCase):
 		sys.modules["__main__"].feeds.listAll.assert_called_with({'user_feed': 'playlists', 'login': 'true', 'folder': 'true'})
 		assert(sys.modules["__main__"].feeds.listAll.call_count == 1)
 
-	def ttest_addToPlaylist_should_ask_user_for_playlist_if_playlist_is_not_in_params(self):
+	def test_addToPlaylist_should_ask_user_for_playlist_if_playlist_is_not_in_params(self):
 		control = YouTubePlaylistControl()
 		sys.modules["__main__"].feeds.listAll.return_value = ([{"Title":"PlayList1"},{"Title":"PlayList2"}])
 		control.createPlayList = Mock()
-
+		sys.modules["xbmcgui"].Dialog = Mock()
+		sys.modules["xbmcgui"].Dialog().select.return_value = 0
+		
 		control.addToPlaylist({})
 		
+		assert(sys.modules["xbmcgui"].Dialog.call_count == 2)
+		assert(sys.modules["xbmcgui"].Dialog().select.call_count == 1)
+
+	def test_addToPlaylist_should_call_createPlaylist_if_user_selects_create_option(self):
+		control = YouTubePlaylistControl()
+		sys.modules["__main__"].feeds.listAll.return_value = ([{"Title":"PlayList1"},{"Title":"PlayList2"}])
+		control.createPlayList = Mock()
 		sys.modules["xbmcgui"].Dialog = Mock()
-		assert(sys.modules["xbmcgui"].Dialog().call_count == 1)
-		assert(sys.modules["xbmcgui"].Dialog.select.call_count == 1)
-		assert(False)
+		sys.modules["xbmcgui"].Dialog().select.return_value = 0
+		
+		control.addToPlaylist({})
+		
+		control.createPlayList.assert_called_with({'user_feed': 'playlists', 'login': 'true', 'folder': 'true'})
 
-	def ttest_addToPlaylist_should_call_createPlaylist_if_user_selects_create_option(self):
-		assert(False)
+	def test_addToPlaylist_should_call_core_add_to_playlist_if_playlist_is_in_params(self):
+		control = YouTubePlaylistControl()
+		control.createPlayList = Mock()
+		
+		control.addToPlaylist({"playlist":"playlist1"})
+		
+		sys.modules["__main__"].core.add_to_playlist.assert_called_with({'playlist': 'playlist1'})
 
-	def ttest_addToPlaylist_should_call_core_add_to_playlist_if_playlist_is_in_params(self):
-		assert(False)
+	def test_addToPlaylist_should_call_core_add_to_playlist_if_user_has_selected_playlist(self):
+		control = YouTubePlaylistControl()
+		sys.modules["__main__"].feeds.listAll.return_value = ([{"Title":"PlayList1","playlist":"playlist1"},{"Title":"PlayList2","playlist":"playlist2"}])
+		control.createPlayList = Mock()
+		sys.modules["xbmcgui"].Dialog = Mock()
+		sys.modules["xbmcgui"].Dialog().select.return_value = 1
+		
+		control.addToPlaylist({})
+		
+		sys.modules["__main__"].core.add_to_playlist.assert_called_with({'user_feed': 'playlists', 'login': 'true', 'playlist': 'playlist1', 'folder': 'true'})
 
-	def ttest_addToPlaylist_should_call_core_add_to_plaulist_if_user_has_selected_playlist(self):
-		assert(False)
+	def test_createPlayList_should_ask_user_for_input(self):
+		control = YouTubePlaylistControl()
+		sys.modules["__main__"].utils.getUserInput.return_value = ""
+		sys.modules["xbmcgui"].Dialog = Mock()
+		sys.modules["xbmcgui"].Dialog().select.return_value = 1
+		sys.modules["__main__"].language.return_value = "my_string"
+		
+		control.createPlayList({})
+		
+		sys.modules["__main__"].utils.getUserInput.assert_called_with("my_string")
+		sys.modules["__main__"].language.assert_called_with(30529)
 
-	def ttest_createPlayList_should_ask_user_for_input(self):
-		assert(False)
+	def test_createPlayList_should_call_addPlaylist_if_user_provided_playlist_name(self):
+		control = YouTubePlaylistControl()
+		sys.modules["__main__"].utils.getUserInput.return_value = "my_playlist_name"
+		sys.modules["xbmcgui"].Dialog = Mock()
+		sys.modules["xbmcgui"].Dialog().select.return_value = 1
+		sys.modules["__main__"].language.return_value = "my_string"
+		
+		control.createPlayList({})
+		
+		sys.modules["__main__"].core.add_playlist.assert_called_with({"title":"my_playlist_name"})
+		
+	def test_createPlayList_should_not_call_addPlaylist_if_user_cancels(self):
+		control = YouTubePlaylistControl()
+		sys.modules["__main__"].utils.getUserInput.return_value = ""
+		sys.modules["xbmcgui"].Dialog = Mock()
+		sys.modules["xbmcgui"].Dialog().select.return_value = 1
+		sys.modules["__main__"].language.return_value = "my_string"
+		
+		control.createPlayList({})
+		
+		assert(sys.modules["__main__"].core.add_playlist.call_count == 0)
 
-	def ttest_createPlayList_should_call_addPlaylist_if_user_provided_playlist_name(self):
-		assert(False)
-
+		
 	def ttest_removeFromPlaylist_should_exit_cleanly_if_playlist_or_editid_is_missing(self):
 		assert(False)
 
