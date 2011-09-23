@@ -7,7 +7,6 @@ from YouTubePlayer import YouTubePlayer
 class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 	
 	def test_saveSubtitle_should_call_xbmcvfs_translatePath(self):
-		sys.modules["xbmcvfs"].translatePath = Mock()
 		sys.modules["xbmcvfs"].translatePath.return_value = "tempFilePath"
 		player = YouTubePlayer()
 		
@@ -16,7 +15,6 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		sys.modules["xbmcvfs"].translatePath.assert_called_with("special://temp")
 	
 	def test_saveSubtitle_should_call_xbmcvfs_rename(self):
-		sys.modules["xbmcvfs"].translatePath = Mock()
 		sys.modules["xbmcvfs"].translatePath.return_value = "tempFilePath"				
 		player = YouTubePlayer()
 		
@@ -277,7 +275,6 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		
 		sys.modules["__main__"].settings.getSetting = Mock()
 		sys.modules["__main__"].settings.getSetting.return_value = "testDownloadPath"
-		sys.modules["xbmcvfs"].exists = Mock()
 		sys.modules["xbmcvfs"].exists.return_value = False
 		player.downloadSubtitle = Mock()
 		player.downloadSubtitle.return_value = False
@@ -290,9 +287,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		player = YouTubePlayer()
 		
 		settings =[False, True]
-		sys.modules["__main__"].settings.getSetting = Mock()
 		sys.modules["__main__"].settings.getSetting.return_value = "testDownloadPath"
-		sys.modules["xbmcvfs"].exists = Mock()
 		sys.modules["xbmcvfs"].exists.side_effect = lambda x: settings.pop()
 		player.downloadSubtitle = Mock()
 		player.downloadSubtitle.return_value = False
@@ -303,13 +298,9 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		assert(player.downloadSubtitle.call_count == 0)
 	
 	def test_addSubtitles_should_call_xbmcs_setSubtitles(self):
-		player = YouTubePlayer()
-		sys.modules["__main__"].settings.getSetting = Mock()
 		sys.modules["__main__"].settings.getSetting.return_value = "testDownloadPath"
-		sys.modules["xbmcvfs"].exists = Mock()
 		sys.modules["xbmcvfs"].exists.return_value = True
-		sys.modules["xbmc"].Player = Mock()
-		sys.modules["xbmc"].Player().setSubtitles = Mock()
+		player = YouTubePlayer()
 		player.downloadSubtitle = Mock()
 		player.downloadSubtitle.return_value = True
 		
@@ -320,14 +311,10 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 	
 	def test_addSubtitles_should_check_if_subtitle_exists_locally_before_calling_xbmcs_setSubtitles(self):
 		player = YouTubePlayer()
-		sys.modules["__main__"].settings.getSetting = Mock()
 		sys.modules["__main__"].settings.getSetting.return_value = "testDownloadPath"
-		sys.modules["xbmcvfs"].exists = Mock()
 		sys.modules["xbmcvfs"].exists.return_value = True
 		player.downloadSubtitle = Mock()
 		player.downloadSubtitle.return_value = False
-		sys.modules["xbmc"].Player = Mock()
-		sys.modules["xbmc"].Player().setSubtitles = Mock()
 		
 		player.addSubtitles({"videoid":"testid","Title":"testTitle"})
 		
@@ -337,12 +324,8 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		
 	def test_addSubtitles_should_wait_for_playback_to_start_before_adding_subtitle(self):
 		player = YouTubePlayer()
-		sys.modules["__main__"].settings.getSetting = Mock()
 		sys.modules["__main__"].settings.getSetting.return_value = "testDownloadPath"
-		sys.modules["xbmcvfs"].exists = Mock()
 		sys.modules["xbmcvfs"].exists.return_value = True
-		sys.modules["xbmc"].Player = Mock()
-		sys.modules["xbmc"].Player().setSubtitles = Mock()
 		player.addSubtitles({"videoid":"testid","Title":"testTitle"})
 		
 		sys.modules["xbmc"].Player().isPlaying.assert_called_with()
@@ -367,15 +350,12 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		sys.modules[ "__main__" ].common.log.assert_called_with("construct video url failed contents of video item {'apierror': 'some error'}")
 
 	def test_playVideo_should_call_xbmc_setResolvedUrl(self):
+		sys.modules["__main__"].settings.getSetting.return_value = "0"
 		player = YouTubePlayer()
+		player.addSubtitles = Mock()
 		player.getVideoObject = Mock()
 		player.getVideoObject.return_value = ({"Title":"someTitle","videoid":"some_id", "thumbnail":"someThumbnail", "video_url":"someUrl"}, 200)
-		sys.modules["__main__"].settings.getSetting = Mock()
-		sys.modules["__main__"].settings.getSetting.return_value = "0"
-		sys.modules["xbmcplugin"].setResolvedUrl = Mock()
-		sys.modules["xbmc"].ListItem = Mock()
 		sys.argv = ["test1","1","test2"]
-		player.addSubtitles = Mock()
 		
 		player.playVideo({"videoid":"some_id"})
 		
@@ -383,16 +363,13 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		
 		
 	def test_playVideo_should_call_addSubtitles(self):
-		player = YouTubePlayer()
-		player.getVideoObject = Mock()
 		video = {"Title":"someTitle","videoid":"some_id", "thumbnail":"someThumbnail", "video_url":"someUrl"}
-		player.getVideoObject.return_value = (video, 200)
-		sys.modules["__main__"].settings.getSetting = Mock()
 		sys.modules["__main__"].settings.getSetting.return_value = "1"
-		sys.modules["xbmcplugin"].setResolvedUrl = Mock()
-		sys.modules["xbmc"].ListItem = Mock()
 		sys.argv = ["test1","1","test2"]
+		player = YouTubePlayer()
 		player.addSubtitles = Mock()
+		player.getVideoObject = Mock()
+		player.getVideoObject.return_value = (video, 200)
 		
 		player.playVideo({"videoid":"some_id"})
 		
@@ -400,10 +377,9 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 	
 	def test_playVideo_should_call_remove_from_playlist_if_viewing_video_from_watch_later_queue(self):
 		player = YouTubePlayer()
+		sys.modules["__main__"].settings.getSetting.return_value = "0"
 		player.getVideoObject = Mock()
 		player.getVideoObject.return_value = ({"Title":"someTitle","videoid":"some_id", "thumbnail":"someThumbnail", "video_url":"someUrl"}, 200)
-		sys.modules["__main__"].settings.getSetting = Mock()
-		sys.modules["__main__"].settings.getSetting.return_value = "0"
 		sys.modules["xbmcplugin"].setResolvedUrl = Mock()
 		sys.modules["xbmc"].ListItem = Mock()
 		sys.modules["__main__"].core.remove_from_playlist = Mock() 
