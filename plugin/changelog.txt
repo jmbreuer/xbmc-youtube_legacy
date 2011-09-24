@@ -1,5 +1,8 @@
 [B]TODO:[/B]
-- Unit test [2.8]
+- Fix RTMP'e seems refactor broke it, and make a unittest + integrations test that parsing works (playpath seems wrong)
+- Integration Test
+- Unit test YouTubePlaylistControl
+- Unit test YouTubeStorage
 - Integration tests of scraper module (i.e. hit YouTube and ensure that the scraper gets the correct information)
 - Scrape Education.
 - Caching the right places. And only the right places.
