@@ -263,7 +263,7 @@ class Mock(object):
         if spec_set is not None:
             spec = spec_set
             spec_set = True
-
+                
         if spec is not None and type(spec) is not list:
             if isinstance(spec, class_types):
                 _spec_class = spec
@@ -730,7 +730,6 @@ class _patch_dict(object):
     mapping then it must at least support getting, setting and deleting items
     plus iterating over keys.
 
-    `in_dict` can also be a string specifying the name of the dictionary, which
     will then be fetched by importing it.
 
     `values` can be a dictionary of values to set in the dictionary. `values`

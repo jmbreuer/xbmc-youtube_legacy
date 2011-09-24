@@ -6,12 +6,13 @@ import MockYouTubeDepends
 MockYouTubeDepends.MockYouTubeDepends().mockXBMC()
 
 sys.path.append('../plugin/')
+sys.path.append('../xbmc-mocks/')
 
-class BaseTestCase(unittest2.TestCase):		
-		
+class BaseTestCase(unittest2.TestCase):
+	
 	def setUp(self):
-		MockYouTubeDepends.MockYouTubeDepends().mock()
 		MockYouTubeDepends.MockYouTubeDepends().mockXBMC()
+		MockYouTubeDepends.MockYouTubeDepends().mock()
 	
 	def readTestInput(self, filename, should_eval = True):
 		testinput = io.open("resources/" + filename)
@@ -22,3 +23,6 @@ class BaseTestCase(unittest2.TestCase):
 	
 	def raiseError(self, exception):
 		raise exception
+	
+	def TearDown(self):
+		self.xbmc.stop()

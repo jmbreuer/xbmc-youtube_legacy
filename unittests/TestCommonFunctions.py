@@ -1,25 +1,22 @@
 import nose
 import BaseTestCase
 from mock import Mock, patch
-import sys, io
-import MockYouTubeDepends
+import sys
 from CommonFunctions import CommonFunctions
 
 class TestCommonFunctions(BaseTestCase.BaseTestCase):
 	link_html = "<a href='bla.html'>Link Test</a>"
 	img_html = "<img src='bla.png' alt='Thumbnail' />"
-	sys.modules["xbmc"].log = Mock()
-	sys.modules["xbmc"].LOGNOTICE = 0
 		
 	def test_log_should_call_xbmc_with_properly_formated_message(self):
 		description = "Logging"
+		sys.modules["__main__"].xbmc.LOGNOTICE = 0
 		common  = CommonFunctions()
 		common.log(description)
-
-		sys.modules["xbmc"].log.assert_called_with("[%s] %s : '%s'" % ( sys.modules[ "__main__" ].plugin, 
+		sys.modules["__main__"].xbmc.log.assert_called_with("[%s] %s : '%s'" % ( sys.modules[ "__main__" ].plugin, 
 										"run", 
 										description), 
-							   sys.modules["xbmc"].LOGNOTICE)
+							   sys.modules["__main__"].xbmc.LOGNOTICE)
 
 	def test_fetchPage_should_return_content_and_success_return_code_on_valid_link(self):
 		patcher = patch("urllib2.urlopen")

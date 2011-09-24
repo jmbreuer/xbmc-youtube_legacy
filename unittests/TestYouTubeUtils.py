@@ -9,23 +9,21 @@ class TestYouTubeUtils(BaseTestCase.BaseTestCase):
 	
 	def test_getUserInput_should_xbmc_keyboard_to_recieve_text_input(self):
 		utils = YouTubeUtils()
-		sys.modules["xbmc"].Keyboard = Mock()
 		
 		utils.getUserInput()
 		
-		sys.modules["xbmc"].Keyboard.assert_called_with("","Input")
+		sys.modules["__main__"].xbmc.Keyboard.assert_called_with("","Input")
 		
 	def test_getUserInput_should_set_title_and_default_text_if_set(self):
 		utils = YouTubeUtils()
-		sys.modules["xbmc"].Keyboard = Mock()
-		sys.modules["xbmc"].Keyboard().getText.return_value = "user_result"
+		sys.modules["__main__"].xbmc.Keyboard().getText.return_value = "user_result"
 		
 		result = utils.getUserInput("SomeTitle","SomeDefault")
 		
-		sys.modules["xbmc"].Keyboard.assert_called_with("SomeDefault","SomeTitle")
-		sys.modules["xbmc"].Keyboard().setHiddenInput.assert_called_with(False)
-		sys.modules["xbmc"].Keyboard().doModal.assert_called_with()
-		sys.modules["xbmc"].Keyboard().isConfirmed.assert_called_with()
+		sys.modules["__main__"].xbmc.Keyboard.assert_called_with("SomeDefault","SomeTitle")
+		sys.modules["__main__"].xbmc.Keyboard().setHiddenInput.assert_called_with(False)
+		sys.modules["__main__"].xbmc.Keyboard().doModal.assert_called_with()
+		sys.modules["__main__"].xbmc.Keyboard().isConfirmed.assert_called_with()
 		assert(result == "user_result")
 		
 	def test_getParameters_should_parse_param_string(self):
@@ -120,40 +118,37 @@ class TestYouTubeUtils(BaseTestCase.BaseTestCase):
 		
 	def test_showMessage_should_call_xbmc_execute_builtin_correctly(self):
 		sys.modules["__main__"].settings.getSetting.return_value = "3"
-		sys.modules["xbmc"].executebuiltin = Mock()
 		utils = YouTubeUtils()
 		
 		utils.showMessage("someHeading","someMessage")
 
-		sys.modules["xbmc"].executebuiltin.assert_called_with('XBMC.Notification("someHeading", "someMessage", 4000)')
+		sys.modules["__main__"].xbmc.executebuiltin.assert_called_with('XBMC.Notification("someHeading", "someMessage", 4000)')
 		
 	def test_getThumbnail_should_call_xbmc_skinHasImage(self):
+		sys.modules["__main__"].xbmc.skinHasImage = Mock()
 		utils = YouTubeUtils()
-		sys.modules["xbmc"].skinHasImage = Mock()
 		
 		result = utils.getThumbnail("someTeading")
 
-		sys.modules["xbmc"].skinHasImage.assert_called_with('unittest/someTeading.png')
+		sys.modules["__main__"].xbmc.skinHasImage.assert_called_with('YouTube - Unittest/someTeading.png')
 		
 	def test_getThumbnail_should_user_default_folder_image_if_no_title_is_given(self):
+		sys.modules["__main__"].xbmc.skinHasImage.return_value = False
 		utils = YouTubeUtils()
-		sys.modules["xbmc"].skinHasImage = Mock()
-		sys.modules["xbmc"].skinHasImage.return_value = False
 		
 		result = utils.getThumbnail("")
 		
-		sys.modules["xbmc"].skinHasImage.assert_called_with('unittest/DefaultFolder.png')
+		sys.modules["__main__"].xbmc.skinHasImage.assert_called_with('YouTube - Unittest/DefaultFolder.png')
 		assert(result == "DefaultFolder.png")
 		
 	
 	def test_getThumbnail_should_user_thumbnail_path_to_resolve_file_paths(self):
 		sys.modules["__main__"].settings.getAddonInfo.return_value = "testingPath/"
+		sys.modules["__main__"].xbmc.skinHasImage.return_value = False		
 		patcher = patch("os.path")
 		patcher.start()
 		import os
 		utils = YouTubeUtils()
-		sys.modules["xbmc"].skinHasImage = Mock()
-		sys.modules["xbmc"].skinHasImage.return_value = False		
 		
 		result = utils.getThumbnail("")
 		call = os.path.join.call_args_list[0]
@@ -162,9 +157,9 @@ class TestYouTubeUtils(BaseTestCase.BaseTestCase):
 		assert(call == (('testingPath/', 'thumbnails'), {}))
 		
 	def test_showErrorMessage_should_call_showMessage(self):
-		utils = YouTubeUtils()
-		utils.showMessage = Mock()		
 		sys.modules["__main__"].language.return_value = "ERROR"
+		utils = YouTubeUtils()
+		utils.showMessage = Mock()	
 		
 		result = utils.showErrorMessage("someTitle","someResult")
 		

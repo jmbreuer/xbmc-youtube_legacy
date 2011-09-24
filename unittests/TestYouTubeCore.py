@@ -1,17 +1,10 @@
 import nose
 import BaseTestCase
 from mock import Mock, patch
-import sys, io
-import MockYouTubeDepends
+import sys
 from YouTubeCore import YouTubeCore
-import inspect
-class TestYouTubeCore(BaseTestCase.BaseTestCase):
-	def popSetting(self, *args, **kwargs):
-		#print repr(self) + " - " + repr(args) + " - " + repr(kwargs)
-		#print repr(inspect.stack()) 
 
-		val = self.settings.pop()
-		return val
+class TestYouTubeCore(BaseTestCase.BaseTestCase):
 
 	def test_delete_favorite_should_call_fetchPage_with_correct_fetch_options(self):
 		settings = ["4","3" ]
@@ -92,8 +85,8 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 
 
 	def test_fetchPage_should_return_content_of_link_and_proper_status_code(self):
-		self.settings = ["4","3" ]
-		sys.modules[ "__main__" ].settings.getSetting.side_effect = self.popSetting
+		settings = ["4","3" ]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		patcher = patch("urllib2.urlopen")
 		patcher.start()
 		import urllib2
@@ -110,9 +103,9 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(ret['status'] == 200 and ret['content'] == "Nothing here\n")
 		
 	def test_findErrors_should_use_parseDOM_to_look_for_errormsg_tag(self):
-		self.settings = [ "3"]
+		settings = [ "3"]
 		input = { "content": "<div class='errormsg'>Mock Error</div>"}
-		sys.modules[ "__main__" ].settings.getSetting.side_effect = self.popSetting
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		parsedom = [ ["Mock error [" ] ] # This should probably be updated to something real.
 		sys.modules[ "__main__" ].common.parseDOM.side_effect = lambda x,y,attrs: parsedom.pop()
 		core = YouTubeCore()
