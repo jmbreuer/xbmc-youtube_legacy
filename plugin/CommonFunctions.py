@@ -17,11 +17,11 @@
 '''
 
 import sys, urllib2, re, os, socket, inspect
-import xbmc
 
 class CommonFunctions():
 	
 	def __init__(self):
+		self.xbmc = sys.modules["__main__"].xbmc
 		self.settings = sys.modules[ "__main__"].settings 
 		self.plugin = sys.modules[ "__main__"].plugin
 		self.language = sys.modules[ "__main__" ].language
@@ -29,11 +29,11 @@ class CommonFunctions():
 		self.dbg = sys.modules[ "__main__" ].dbg
 		self.USERAGENT = "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-GB; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8"
 	
-	if sys.platform == "win32":
-		port = 59994
-		__socket__ = (socket.gethostname(), port)
-	else:
-		__socket__ = os.path.join( xbmc.translatePath( "special://temp" ), 'commoncache.socket')
+		if sys.platform == "win32":
+			port = 59994
+			__socket__ = (socket.gethostname(), port)
+		else:
+			__socket__ = os.path.join( self.xbmc.translatePath( "special://temp" ), 'commoncache.socket')
 
 	def stripTags(self, html):
 		sub_start = html.find("<")
@@ -198,5 +198,5 @@ class CommonFunctions():
 	
 	def log(self, description, level = 0):
 		if self.dbg and self.dbglevel > level:
-			xbmc.log("[%s] %s : '%s'" % (self.plugin, inspect.stack()[2][3], description), xbmc.LOGNOTICE)
+			self.xbmc.log("[%s] %s : '%s'" % (self.plugin, inspect.stack()[2][3], description), self.xbmc.LOGNOTICE)
 			
