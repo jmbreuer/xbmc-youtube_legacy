@@ -18,15 +18,15 @@
 
 import sys, urllib2, os
 from DialogDownloadProgress import DownloadProgress
-import xbmc
-try: import xbmcvfs
-except ImportError: import xbmcvfsdummy as xbmcvfs
 
 class YouTubeDownloader():
 	
 	dialog = ""
 	
 	def __init__(self):
+		self.xbmc = sys.modules["__main__"].xbmc
+		self.xbmcvfs = sys.modules["__main__"].xbmcvfs
+
 		self.settings = sys.modules[ "__main__" ].settings
 		self.language = sys.modules[ "__main__" ].language
 		self.plugin = sys.modules[ "__main__"].plugin
@@ -36,13 +36,13 @@ class YouTubeDownloader():
 		self.storage = sys.modules[ "__main__" ].storage
 		self.common = sys.modules[ "__main__" ].common
 		self.cache = sys.modules[ "__main__" ].cache
-
+	
 	def downloadVideo(self, params = {}):
 		get = params.get
 		
 		path = self.settings.getSetting( "downloadPath" )
 		if (not path):
-			self.showMessage(self.language(30600), self.language(30611))
+			self.utils.showMessage(self.language(30600), self.language(30611))
 			self.settings.openSettings()
 			self.dbg = self.settings.getSetting("debug") == "true"
 			path = self.settings.getSetting( "downloadPath" )
@@ -70,13 +70,13 @@ class YouTubeDownloader():
 				params["videoid"] = videoid
 				( video, status ) = self.player.getVideoObject(params)
 				if status != 200:
-					self.showMessage(self.language(30625), video["apierror"])
+					self.utils.showMessage(self.language(30625), video["apierror"])
 					self.storage.removeVideoFromDownloadQueue(videoid)
 					videoid = self.storage.getNextVideoFromDownloadQueue()
 					continue
 				item = video.get
 				if item("stream_map"):
-					self.showMessage(self.language(30607), self.language(30619))
+					self.utils.showMessage(self.language(30607), self.language(30619))
 					self.storage.removeVideoFromDownloadQueue(videoid)
 					videoid = self.storage.getNextVideoFromDownloadQueue()
 					continue
@@ -93,7 +93,7 @@ class YouTubeDownloader():
 		self.common.log(video['Title'])
 		
 		if video["video_url"].find("swfurl") > 0:
-			self.showMessage(self.language( 30625 ), self.language(30619))
+			self.utils.showMessage(self.language( 30625 ), self.language(30619))
 			return ([], 303)
 		
 		video["downloadPath"] = self.settings.getSetting( "downloadPath" )
@@ -101,11 +101,11 @@ class YouTubeDownloader():
 		url = urllib2.Request(video['video_url'])
 		url.add_header('User-Agent', self.USERAGENT);
 		filename = "%s-[%s].mp4" % ( ''.join(c for c in video['Title'] if c in self.VALID_CHARS), video["videoid"] )
-		filename_incomplete = os.path.join(xbmc.translatePath( "special://temp" ), filename )
+		filename_incomplete = os.path.join(self.xbmc.translatePath( "special://temp" ), filename )
 		filename_complete = os.path.join(self.settings.getSetting( "downloadPath" ), filename )
 
-		if xbmcvfs.exists(filename_complete):
-			xbmcvfs.delete(filename_complete)
+		if self.xbmcvfs.exists(filename_complete):
+			self.xbmcvfs.delete(filename_complete)
 
 		file = open(filename_incomplete, "wb")
 		con = urllib2.urlopen(url);
@@ -151,7 +151,7 @@ class YouTubeDownloader():
 			except:
 				self.common.log("Failed to close download stream and file handle")
 		
-		xbmcvfs.rename(filename_incomplete, filename_complete)
+		self.xbmcvfs.rename(filename_incomplete, filename_complete)
 		self.dialog.update(heading = self.language(30604), label=video["Title"])
 		self.storage.storeValue( "vidstatus-" + video['videoid'], "1" )
 		return ( video, 200 )
