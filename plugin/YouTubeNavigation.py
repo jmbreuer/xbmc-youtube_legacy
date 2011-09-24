@@ -17,11 +17,14 @@
 '''
 
 import sys, urllib
-import xbmc, xbmcgui, xbmcplugin
 
 class YouTubeNavigation():
 
 	def __init__(self):
+		self.xbmc = sys.modules["__main__"].xbmc
+		self.xbmcgui = sys.modules["__main__"].xbmcgui
+		self.xbmcplugin = sys.modules["__main__"].xbmcplugin
+		
 		self.settings = sys.modules[ "__main__" ].settings
 		self.language = sys.modules[ "__main__" ].language
 		self.plugin = sys.modules[ "__main__"].plugin
@@ -123,9 +126,9 @@ class YouTubeNavigation():
 			video_view = self.settings.getSetting("list_view") == "0"
 			
 		if (video_view):
-			xbmc.executebuiltin("Container.SetViewMode(500)")
+			self.xbmc.executebuiltin("Container.SetViewMode(500)")
 		
-		xbmcplugin.endOfDirectory( handle=int( sys.argv[ 1 ] ), succeeded=True, cacheToDisc=cache )
+		self.xbmcplugin.endOfDirectory( handle=int( sys.argv[ 1 ] ), succeeded=True, cacheToDisc=cache )
 
 	def executeAction(self, params = {}):
 		get = params.get
@@ -176,7 +179,7 @@ class YouTubeNavigation():
 		results = []
 		if (get("feed") == "search" or get("scraper") == "search_disco"):
 			if not get("search"):
-				query = self.getUserInput(self.language(30006), '')
+				query = self.utils.getUserInput(self.language(30006), '')
 				if not query:
 					return False
 				params["search"] = query
@@ -243,7 +246,7 @@ class YouTubeNavigation():
 			if status != 200:
 				self.showErrorMessage(self.language(30020), message, status)
 				return False
-			xbmc.executebuiltin( "Container.Refresh" )
+			self.xbmc.executebuiltin( "Container.Refresh" )
 		
 		return True
 	
@@ -251,7 +254,7 @@ class YouTubeNavigation():
 		get = params.get
 
 		if not get("contact"):
-			contact = self.getUserInput(self.language(30519), '')
+			contact = self.utils.getUserInput(self.language(30519), '')
 			params["contact"] = contact
 			
 		if (get("contact")):
@@ -260,7 +263,7 @@ class YouTubeNavigation():
 				self.showErrorMessage(self.language(30029), result, status)
 				return False
 			self.utils.showMessage(self.language(30613), contact)
-			xbmc.executebuiltin( "Container.Refresh" )
+			self.xbmc.executebuiltin( "Container.Refresh" )
 
 		return True
 	
@@ -274,7 +277,7 @@ class YouTubeNavigation():
 				return False
 			
 			self.utils.showMessage(self.language(30614), get("contact"))
-			xbmc.executebuiltin( "Container.Refresh" )
+			self.xbmc.executebuiltin( "Container.Refresh" )
 		return True
 	
 	def addSubscription(self, params = {}):
@@ -295,7 +298,7 @@ class YouTubeNavigation():
 				self.showErrorMessage(self.language(30021), message, status)
 				return False
 												
-			xbmc.executebuiltin( "Container.Refresh" )
+			self.xbmc.executebuiltin( "Container.Refresh" )
 		return True
 		
 	#================================== List Item manipulation =========================================	
@@ -339,7 +342,7 @@ class YouTubeNavigation():
 		if (item("thumbnail", "DefaultFolder.png").find("http://") == -1):	
 			thumbnail = self.utils.getThumbnail(item("thumbnail"))
 			
-		listitem=xbmcgui.ListItem( item("Title"), iconImage=icon, thumbnailImage=thumbnail )
+		listitem=self.xbmcgui.ListItem( item("Title"), iconImage=icon, thumbnailImage=thumbnail )
 		url = '%s?path=%s&' % ( sys.argv[0], item("path") )
 		url = self.utils.buildItemUrl(item_params, url)
 		
@@ -349,7 +352,7 @@ class YouTubeNavigation():
 		listitem.setProperty( "Folder", "true" )
 		if (item("feed") == "downloads"):
 			url = self.settings.getSetting("downloadPath")
-		xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url, listitem=listitem, isFolder=True, totalItems=size)
+		self.xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url, listitem=listitem, isFolder=True, totalItems=size)
 	
 	# common function for adding action items
 	def addActionListItem(self, params = {}, item_params = {}, size = 0):
@@ -358,7 +361,7 @@ class YouTubeNavigation():
 		folder = True
 		icon = "DefaultFolder.png"
 		thumbnail = self.utils.getThumbnail(item("thumbnail"))
-		listitem=xbmcgui.ListItem( item("Title"), iconImage=icon, thumbnailImage=thumbnail )
+		listitem=self.xbmcgui.ListItem( item("Title"), iconImage=icon, thumbnailImage=thumbnail )
 		
 		if (item("action") == "playbyid"):
 			folder = False
@@ -367,7 +370,7 @@ class YouTubeNavigation():
 		url = '%s?path=%s&' % ( sys.argv[0], item("path") )
 		url += 'action=' + item("action") + '&'
 			
-		xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url, listitem=listitem, isFolder=folder, totalItems=size)
+		self.xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url, listitem=listitem, isFolder=folder, totalItems=size)
 	
 	# common function for adding video items
 	def addVideoListItem(self, params = {}, item_params = {}, listSize = 0): 
@@ -386,7 +389,7 @@ class YouTubeNavigation():
 		
 		icon = self.utils.getThumbnail(icon)
 		
-		listitem=xbmcgui.ListItem(item("Title"), iconImage=icon, thumbnailImage=item("thumbnail") )
+		listitem=self.xbmcgui.ListItem(item("Title"), iconImage=icon, thumbnailImage=item("thumbnail") )
 
 		url = '%s?path=%s&action=play_video&videoid=%s' % ( sys.argv[0], item("path"), item("videoid"));
 		
@@ -400,7 +403,7 @@ class YouTubeNavigation():
 		listitem.setProperty( "Video", "true" )
 		listitem.setProperty( "IsPlayable", "true")
 		listitem.setInfo(type='Video', infoLabels=item_params)
-		xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url, listitem=listitem, isFolder=False, totalItems=listSize + 1)
+		self.xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url, listitem=listitem, isFolder=False, totalItems=listSize + 1)
 	
 	#==================================== Core Output Parsing Functions ===========================================
 
@@ -417,7 +420,7 @@ class YouTubeNavigation():
 			result_params["path"] = get("path")
 			self.addFolderListItem( params, result_params, listSize + 1)
 		
-		xbmcplugin.endOfDirectory( handle=int( sys.argv[ 1 ] ), succeeded=True, cacheToDisc=cache )
+		self.xbmcplugin.endOfDirectory( handle=int( sys.argv[ 1 ] ), succeeded=True, cacheToDisc=cache )
 	
 	#parses a video list consisting of a tuple of dictionaries 
 	def parseVideoList(self, params, results):
@@ -441,17 +444,17 @@ class YouTubeNavigation():
 				
 		video_view = int(self.settings.getSetting("list_view")) <= 1
 		if (video_view):
-			xbmc.executebuiltin("Container.SetViewMode(500)")
+			self.xbmc.executebuiltin("Container.SetViewMode(500)")
 		
-		xbmcplugin.addSortMethod( handle=int( sys.argv[ 1 ] ), sortMethod=xbmcplugin.SORT_METHOD_UNSORTED )
-		xbmcplugin.addSortMethod( handle=int( sys.argv[ 1 ] ), sortMethod=xbmcplugin.SORT_METHOD_LABEL )
-		xbmcplugin.addSortMethod( handle=int( sys.argv[ 1 ] ), sortMethod=xbmcplugin.SORT_METHOD_VIDEO_RATING )
-		xbmcplugin.addSortMethod( handle=int( sys.argv[ 1 ] ), sortMethod=xbmcplugin.SORT_METHOD_DATE )
-		xbmcplugin.addSortMethod( handle=int( sys.argv[ 1 ] ), sortMethod=xbmcplugin.SORT_METHOD_PROGRAM_COUNT )
-		xbmcplugin.addSortMethod( handle=int( sys.argv[ 1 ] ), sortMethod=xbmcplugin.SORT_METHOD_VIDEO_RUNTIME )
-		xbmcplugin.addSortMethod( handle=int( sys.argv[ 1 ] ), sortMethod=xbmcplugin.SORT_METHOD_GENRE )	   
+		self.xbmcplugin.addSortMethod( handle=int( sys.argv[ 1 ] ), sortMethod=self.xbmcplugin.SORT_METHOD_UNSORTED )
+		self.xbmcplugin.addSortMethod( handle=int( sys.argv[ 1 ] ), sortMethod=self.xbmcplugin.SORT_METHOD_LABEL )
+		self.xbmcplugin.addSortMethod( handle=int( sys.argv[ 1 ] ), sortMethod=self.xbmcplugin.SORT_METHOD_VIDEO_RATING )
+		self.xbmcplugin.addSortMethod( handle=int( sys.argv[ 1 ] ), sortMethod=self.xbmcplugin.SORT_METHOD_DATE )
+		self.xbmcplugin.addSortMethod( handle=int( sys.argv[ 1 ] ), sortMethod=self.xbmcplugin.SORT_METHOD_PROGRAM_COUNT )
+		self.xbmcplugin.addSortMethod( handle=int( sys.argv[ 1 ] ), sortMethod=self.xbmcplugin.SORT_METHOD_VIDEO_RUNTIME )
+		self.xbmcplugin.addSortMethod( handle=int( sys.argv[ 1 ] ), sortMethod=self.xbmcplugin.SORT_METHOD_GENRE )	   
 		
-		xbmcplugin.endOfDirectory( handle=int( sys.argv[ 1 ] ), succeeded=True, cacheToDisc=True )
+		self.xbmcplugin.endOfDirectory( handle=int( sys.argv[ 1 ] ), succeeded=True, cacheToDisc=True )
 
 	def addVideoContextMenuItems(self, params = {}, item_params = {}):
 		cm = []

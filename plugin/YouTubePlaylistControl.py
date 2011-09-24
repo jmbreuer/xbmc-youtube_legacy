@@ -16,11 +16,14 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, xbmcgui, xbmc
+import sys
 
 class YouTubePlaylistControl():
 	
 	def __init__(self):
+		self.xbmc = sys.modules["__main__"].xbmc
+		self.xbmcgui = sys.modules["__main__"].xbmcgui
+		
 		self.settings = sys.modules[ "__main__" ].settings
 		self.language = sys.modules[ "__main__" ].language
 		self.plugin = sys.modules[ "__main__"].plugin
@@ -75,18 +78,18 @@ class YouTubePlaylistControl():
 			if video_index >= 0:
 				result = result[video_index:]
 		
-		player = xbmc.Player()
+		player = self.xbmc.Player()
 		if (player.isPlaying()):
 			player.stop()
 		
-		playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
+		playlist = self.xbmc.PlayList(self.xbmc.PLAYLIST_VIDEO)
 		playlist.clear()
 		
 		video_url = "%s?path=/root&action=play_video&videoid=%s"  
 		# queue all entries
 		for entry in result:
 			video = entry.get
-			listitem=xbmcgui.ListItem(label=video("Title"), iconImage=video("thumbnail"), thumbnailImage=video("thumbnail"))
+			listitem=self.xbmcgui.ListItem(label=video("Title"), iconImage=video("thumbnail"), thumbnailImage=video("thumbnail"))
 			listitem.setProperty('IsPlayable', 'true')
 			listitem.setProperty( "Video", "true" )
 			listitem.setInfo(type='Video', infoLabels=entry)
@@ -95,7 +98,7 @@ class YouTubePlaylistControl():
 		if (get("shuffle")):
 			playlist.shuffle()
 
-		xbmc.executebuiltin('playlist.playoffset(video , 0)')
+		self.xbmc.executebuiltin('playlist.playoffset(video , 0)')
 		
 	def queueVideo(self, params = {}):
 		get = params.get
@@ -117,9 +120,9 @@ class YouTubePlaylistControl():
 			self.utils.showErrorMessage(self.language(30603), "apierror", status)
 			return False
 
-		playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
+		playlist = self.xbmc.PlayList(self.xbmc.PLAYLIST_VIDEO)
 		for video in videos:
-			listitem=xbmcgui.ListItem(label=video['Title'], iconImage=video['thumbnail'], thumbnailImage=video['thumbnail'], path=video['video_url']);
+			listitem=self.xbmcgui.ListItem(label=video['Title'], iconImage=video['thumbnail'], thumbnailImage=video['thumbnail'], path=video['video_url']);
 			listitem.setProperty('IsPlayable', 'true')
 			listitem.setInfo(type='Video', infoLabels=video)
 			playlist.add("%s?path=/root&action=play_video&videoid=%s" % (sys.argv[0], video["videoid"] ), listitem)
@@ -217,7 +220,7 @@ class YouTubePlaylistControl():
 			list.append(self.language(30529))
 			for item in result:
 				list.append(item["Title"])
-			dialog = xbmcgui.Dialog()
+			dialog = self.xbmcgui.Dialog()
 			selected = dialog.select(self.language(30528), list)
 			
 		if selected == 0:
@@ -256,16 +259,17 @@ class YouTubePlaylistControl():
 			if (status != 200):
 				self.utils.showErrorMessage(self.language(30600), message, status)
 				return False
-			xbmc.executebuiltin( "Container.Refresh" )
+			
+			self.xbmc.executebuiltin( "Container.Refresh" )
 		return True
 	
 	def deletePlaylist(self, params):
 		get = params.get
 		if get("playlist"):
 			(message, status) = self.core.del_playlist(params)
-			
+			print "called " + repr(status)
 			if status != 200:
 				self.utils.showErrorMessage(self.language(30600), message, status)
 				return False
-			xbmc.executebuiltin( "Container.Refresh" )
+			self.xbmc.executebuiltin( "Container.Refresh" )
 		return True

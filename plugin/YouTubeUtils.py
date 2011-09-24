@@ -17,11 +17,11 @@
 '''
 
 import sys, os, string
-import xbmc
 
 class YouTubeUtils:
 	
 	def __init__(self):
+		self.xbmc = sys.modules["__main__"].xbmc
 		self.settings = sys.modules[ "__main__" ].settings
 		self.language = sys.modules[ "__main__" ].language
 		self.plugin = sys.modules[ "__main__"].plugin
@@ -38,7 +38,7 @@ class YouTubeUtils:
 		if not default:
 			default = ""
 		
-		keyboard = xbmc.Keyboard(default, title)
+		keyboard = self.xbmc.Keyboard(default, title)
 		keyboard.setHiddenInput(hidden)
 		keyboard.doModal()
 		
@@ -94,7 +94,7 @@ class YouTubeUtils:
 	# Shows a more user-friendly notification
 	def showMessage(self, heading, message):
 		duration = ([1, 2, 3, 4, 5, 6, 7, 8, 9, 10][int(self.settings.getSetting( 'notification_length' ))]) * 1000
-		xbmc.executebuiltin('XBMC.Notification("%s", "%s", %s)' % ( heading, message, duration) )
+		self.xbmc.executebuiltin('XBMC.Notification("%s", "%s", %s)' % ( heading, message, duration) )
 	
 	# Resolves the full thumbnail path for the plugins skins directory
 	def getThumbnail( self, title ):
@@ -103,7 +103,7 @@ class YouTubeUtils:
 		
 		thumbnail = os.path.join( sys.modules[ "__main__" ].plugin, title + ".png" )
 		
-		if ( not xbmc.skinHasImage( thumbnail ) ):
+		if ( not self.xbmc.skinHasImage( thumbnail ) ):
 			thumbnail = os.path.join( self.THUMBNAIL_PATH, title + ".png" )
 			if ( not os.path.isfile( thumbnail ) ):
 				thumbnail = "DefaultFolder.png"	

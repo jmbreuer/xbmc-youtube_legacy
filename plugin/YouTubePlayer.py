@@ -17,11 +17,8 @@
 '''
 
 import sys, urllib, re, os.path, datetime, time
-import xbmc, xbmcgui, xbmcplugin
 try: import simplejson as json
 except ImportError: import json
-try: import xbmcvfs
-except ImportError: import xbmcvfsdummy as xbmcvfs
 
 from xml.dom.minidom import parseString
 
@@ -57,6 +54,11 @@ class YouTubePlayer():
 	urls['remove_watch_later'] = "http://www.youtube.com/addto_ajax?action_delete_from_playlist=1"
 	
 	def __init__(self):
+		self.xbmc = sys.modules["__main__"].xbmc
+		self.xbmcgui = sys.modules["__main__"].xbmcgui
+		self.xbmcplugin = sys.modules["__main__"].xbmcplugin
+		self.xbmcvfs = sys.modules["__main__"].xbmcvfs
+
 		
 		self.settings = sys.modules[ "__main__" ].settings
 		self.language = sys.modules[ "__main__" ].language
@@ -149,14 +151,14 @@ class YouTubePlayer():
 		get = video.get
 		
 		filename = ''.join(c for c in video['Title'] if c in self.utils.VALID_CHARS) + "-[" + get('videoid') + "]" + ".ssa"
-		path = os.path.join( xbmc.translatePath( "special://temp" ), filename )
+		path = os.path.join( self.xbmc.translatePath( "special://temp" ), filename )
 		
 		w = self.storage.openFile(path)
 		w.write(result.encode('utf-8'))
 		w.close()
 		
 		if video.has_key("downloadPath"):
-			xbmcvfs.rename(path, os.path.join( video["downloadPath"], filename ))
+			self.xbmcvfs.rename(path, os.path.join( video["downloadPath"], filename ))
 	
 	def getTranscriptionUrl(self, video = {}):
 		get = video.get
@@ -288,25 +290,25 @@ class YouTubePlayer():
 		filename = ''.join(c for c in video['Title'] if c in self.utils.VALID_CHARS) + "-[" + get('videoid') + "]" + ".ssa"
 
 		download_path = os.path.join( self.settings.getSetting( "downloadPath" ), filename )
-		path = os.path.join( xbmc.translatePath( "special://temp" ), filename )
+		path = os.path.join( self.xbmc.translatePath( "special://temp" ), filename )
 		
 		set_subtitle = False
-		if xbmcvfs.exists(download_path):
+		if self.xbmcvfs.exists(download_path):
 			path = download_path
 			set_subtitle = True
-		elif xbmcvfs.exists(path):
+		elif self.xbmcvfs.exists(path):
 			set_subtitle = True
 		elif self.downloadSubtitle(video):
 			set_subtitle = True
 		
-		if xbmcvfs.exists(path) and not video.has_key("downloadPath") and set_subtitle:
-			player = xbmc.Player()
+		if self.xbmcvfs.exists(path) and not video.has_key("downloadPath") and set_subtitle:
+			player = self.xbmc.Player()
 			
 			while not player.isPlaying():
 				self.common.log("Waiting for playback to start ")
 				time.sleep(1)
 			
-			xbmc.Player().setSubtitles(path);
+			self.xbmc.Player().setSubtitles(path);
 			self.common.log("added subtitle %s to playback" % path)
 	
 	# ================================ Video Playback ====================================
@@ -321,12 +323,12 @@ class YouTubePlayer():
 			self.utils.showErrorMessage(self.language(30603), video["apierror"], status)
 			return False
 		
-		listitem = xbmcgui.ListItem(label=video['Title'], iconImage=video['thumbnail'], thumbnailImage=video['thumbnail'], path=video['video_url']);		
+		listitem = self.xbmcgui.ListItem(label=video['Title'], iconImage=video['thumbnail'], thumbnailImage=video['thumbnail'], path=video['video_url']);		
 		listitem.setInfo(type='Video', infoLabels=video)
 		
 		self.common.log("Playing video: " + repr(video['Title']) + " - " + repr(get('videoid')) + " - " + repr(video['video_url']))
 		
-		xbmcplugin.setResolvedUrl(handle=int(sys.argv[1]), succeeded=True, listitem=listitem)
+		self.xbmcplugin.setResolvedUrl(handle=int(sys.argv[1]), succeeded=True, listitem=listitem)
 		
 		if self.settings.getSetting("lang_code") != "0" or self.settings.getSetting("annotations") == "true":
 			self.addSubtitles(video)
@@ -585,7 +587,7 @@ class YouTubePlayer():
 		for (quality, message) in list:
 			choices.append(message)
 		
-		dialog = xbmcgui.Dialog()
+		dialog = self.xbmcgui.Dialog()
 		selected = dialog.select(self.language(30518), choices)
 		
 		if selected > -1:
@@ -606,7 +608,7 @@ class YouTubePlayer():
 			path = self.settings.getSetting( "downloadPath" )
 			path = "%s%s-[%s].mp4" % (path, ''.join(c for c in video['Title'] if c in self.utils.VALID_CHARS), video["videoid"])
 			try:
-				if xbmcvfs.exists(path):
+				if self.xbmcvfs.exists(path):
 					video['video_url'] = path
 					return (video, 200)
 			except:

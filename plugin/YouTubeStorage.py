@@ -17,11 +17,11 @@
 '''
 
 import sys, urllib, io
-import xbmc
 
 class YouTubeStorage():
 
 	def __init__(self):
+		self.xbmc = sys.modules["__main__"].xbmc
 		self.settings = sys.modules[ "__main__" ].settings
 		self.language = sys.modules[ "__main__" ].language
 		self.plugin = sys.modules[ "__main__"].plugin
@@ -90,7 +90,7 @@ class YouTubeStorage():
 		
 		self.store(params, artists)
 		
-		xbmc.executebuiltin( "Container.Refresh" )
+		self.xbmc.executebuiltin( "Container.Refresh" )
 		
 	def saveStoredArtist(self, params = {}):
 		get = params.get
@@ -148,7 +148,7 @@ class YouTubeStorage():
 		
 		self.store(params, searches)
 		
-		xbmc.executebuiltin( "Container.Refresh" )
+		self.xbmc.executebuiltin( "Container.Refresh" )
 	
 	def saveStoredSearch(self, params = {}):
 		get = params.get
@@ -238,7 +238,7 @@ class YouTubeStorage():
 			
 			self.store(params, value, "value")
 		
-			xbmc.executebuiltin( "Container.Refresh" )
+			self.xbmc.executebuiltin( "Container.Refresh" )
 		
 	def getReversePlaylistOrder(self, params = {}):
 		get = params.get 
