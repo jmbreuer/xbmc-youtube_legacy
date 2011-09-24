@@ -20,8 +20,6 @@ import sys, urllib2, cookielib, time
 try: import simplejson as json
 except ImportError: import json
 
-import xbmc
-
 # ERRORCODES:
 # 0 = Ignore
 # 200 = OK
@@ -38,6 +36,8 @@ class YouTubeLogin():
 	urls['gdata_login'] = "https://www.google.com/accounts/ClientLogin"
 	
 	def __init__(self):
+		self.xbmc = sys.modules["__main__"].xbmc
+
 		self.settings = sys.modules[ "__main__" ].settings
 		self.language = sys.modules[ "__main__" ].language
 		self.plugin = sys.modules[ "__main__"].plugin
@@ -83,7 +83,7 @@ class YouTubeLogin():
 				else:
 					self.utils.showErrorMessage(self.language(30609), result, status)
 		
-		xbmc.executebuiltin( "Container.Refresh" )
+		self.xbmc.executebuiltin( "Container.Refresh" )
 
 	def _apiLogin(self, error = 0):
 		self.common.log("errors: " + str(error))
