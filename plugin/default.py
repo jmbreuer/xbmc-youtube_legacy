@@ -16,7 +16,12 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, xbmcaddon
+import sys, xbmc, xbmcplugin, xbmcaddon, xbmcgui
+try: 
+	import xbmcvfs
+except ImportError: 
+	import xbmcvfsdummy as xbmcvfs
+
 
 # plugin constants
 version = "2.7.0"
