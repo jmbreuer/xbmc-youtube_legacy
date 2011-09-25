@@ -95,12 +95,11 @@ class YouTubeStorage():
 	def saveStoredArtist(self, params = {}):
 		get = params.get
 		self.common.log("")
-
 		
 		if get("artist") and get("artist_name"):
 			params["store"] = "artists"
 			artists = self.retrieve(params)
-			searchCount = ( 10, 20, 30, 40, )[ int( self.settings.getSetting( "saved_searches" ) ) ]
+			searchCount = ( 10, 20, 30, 40, )[ int( self.settings.getSetting( "saved_searches" ) ) ] - 1
 			artists = [(get("artist_name"), get("artist"))] + artists[:searchCount]
 			self.store(params, artists)
 			del params["store"]
@@ -168,7 +167,7 @@ class YouTubeStorage():
 					del(searches[count])
 					break
 			
-			searchCount = ( 10, 20, 30, 40, )[ int( self.settings.getSetting( "saved_searches" ) ) ]
+			searchCount = ( 10, 20, 30, 40, )[ int( self.settings.getSetting( "saved_searches" ) ) ] - 1
 			searches = [new_query] + searches[:searchCount]
 			self.store(params, searches)
 	
