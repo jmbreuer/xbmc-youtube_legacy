@@ -398,65 +398,214 @@ class TestYouTubeStorage(BaseTestCase.BaseTestCase):
 		
 		assert(storage.store.call_count > 0)
 
-	def ttest_editStoredSearch_should_exit_cleanly_if_search_param_is_missing(self):
+	def test_editStoredSearch_should_exit_cleanly_if_search_param_is_missing(self):
 		sys.modules["__main__"].settings.getSetting.return_value = "0"
+		sys.modules["__main__"].utils.getUserInput.return_value = "some_search3"
 		storage = YouTubeStorage()
 		storage.retrieve = Mock()
 		storage.retrieve.return_value =  ["some_search2"]
 		storage.store = Mock()
 		
-		storage.saveStoredSearch({})
+		storage.editStoredSearch({})
 		
-		assert(storage.store.call_count > 0)
-		assert(False)
+		assert(storage.store.call_count == 0)
+		assert(storage.retrieve.call_count == 0)
 
-	def ttest_editStoredSearch_should_ask_user_for_new_search_phrase(self):
-		assert(False)
+	def test_editStoredSearch_should_ask_user_for_new_search_phrase(self):
+		sys.modules["__main__"].settings.getSetting.return_value = "0"
+		sys.modules["__main__"].language.return_value = "some_title"
+		sys.modules["__main__"].utils.getUserInput.return_value = "some_search3"
+		storage = YouTubeStorage()
+		storage.retrieve = Mock()
+		storage.retrieve.return_value =  ["some_search2"]
+		storage.store = Mock()
+		
+		storage.editStoredSearch({"search":"some_search1"})
+		
+		sys.modules["__main__"].utils.getUserInput.assert_called_with('some_title', 'some_search1')
 
-	def ttest_editStoredSearch_should_set_params_base_on_action(self):
-		assert(False)
+	def test_editStoredSearch_should_set_store_to_searches_if_editing_searches(self):
+		sys.modules["__main__"].settings.getSetting.return_value = "0"
+		sys.modules["__main__"].language.return_value = "some_title"
+		sys.modules["__main__"].utils.getUserInput.return_value = "some_search3"
+		storage = YouTubeStorage()
+		storage.retrieve = Mock()
+		storage.retrieve.return_value =  ["some_search2"]
+		storage.store = Mock()
+		
+		storage.editStoredSearch({"search":"some_search1"})
+		
+		assert(storage.store.call_args[0][0].has_key("feed"))
+		
+	def test_editStoredSearch_should_set_store_to_disco_if_editing_disco_searches(self):
+		sys.modules["__main__"].settings.getSetting.return_value = "0"
+		sys.modules["__main__"].language.return_value = "some_title"
+		sys.modules["__main__"].utils.getUserInput.return_value = "some_search3"
+		storage = YouTubeStorage()
+		storage.retrieve = Mock()
+		storage.retrieve.return_value =  ["some_search2"]
+		storage.store = Mock()
+		
+		storage.editStoredSearch({"search":"some_search1", "action":"edit_disco"})
+		
+		assert(storage.store.call_args[0][0].has_key("scraper"))
 
-	def ttest_editStoredSearch_should_call_saveStoredSearch(self):
-		assert(False)
+	def test_editStoredSearch_should_call_saveStoredSearch(self):
+		sys.modules["__main__"].settings.getSetting.return_value = "0"
+		sys.modules["__main__"].language.return_value = "some_title"
+		sys.modules["__main__"].utils.getUserInput.return_value = "some_search3"
+		storage = YouTubeStorage()
+		storage.retrieve = Mock()
+		storage.retrieve.return_value =  ["some_search2"]
+		storage.store = Mock()
+		storage.saveStoredSearch = Mock()
+		
+		storage.editStoredSearch({"search":"some_search1", "action":"edit_disco"})
+		
+		storage.saveStoredSearch.assert_called_with({'search': 'some_search3', 'scraper': 'search_disco'})
 
-	def ttest_editStoredSearch_should_remove_old_search_param_before_exiting(self):
-		assert(False)
-
-	def ttest_editStoredSearch_should_set_search_params_before_exiting(self):
-		assert(False)
+	def test_editStoredSearch_should_remove_old_search_param_before_exiting(self):
+		sys.modules["__main__"].settings.getSetting.return_value = "0"
+		sys.modules["__main__"].language.return_value = "some_title"
+		sys.modules["__main__"].utils.getUserInput.return_value = "some_search3"
+		storage = YouTubeStorage()
+		storage.retrieve = Mock()
+		storage.retrieve.return_value =  ["some_search2"]
+		storage.store = Mock()
+		storage.saveStoredSearch = Mock()
+		params = {"search":"some_search1", "action":"edit_disco", "old_search":"some_search4"}
+		
+		storage.editStoredSearch(params)
+		
+		assert(params.has_key("old_search") == False)
 	
-	def ttest_getUserOptionFolder_should_return_modified_version_of_items_in_user_options(self):
-		assert(False)
+	def test_editStoredSearch_should_set_search_params_before_exiting(self):
+		sys.modules["__main__"].settings.getSetting.return_value = "0"
+		sys.modules["__main__"].language.return_value = "some_title"
+		sys.modules["__main__"].utils.getUserInput.return_value = "some_search3"
+		storage = YouTubeStorage()
+		storage.retrieve = Mock()
+		storage.retrieve.return_value =  ["some_search2"]
+		storage.store = Mock()
+		storage.saveStoredSearch = Mock()
+		params = {"search":"some_search1", "action":"edit_disco", "old_search":"some_search4"}
 		
-	def ttest_changeSubscriptionView_should_exit_cleanly_if_view_mode_is_not_in_params(self):
-		assert(False)
+		storage.editStoredSearch(params)
+		
+		assert(params.has_key("search"))
+		assert(params["search"] == "some_search3")
+	
+	def test_getUserOptionFolder_should_return_modified_version_of_items_in_user_options(self):
+		sys.modules["__main__"].language.return_value = "some_title"
+		storage = YouTubeStorage()
+		
+		(result, status) = storage.getUserOptionFolder({})
+		
+		assert(len(result) == 4)
+		assert(result[0]["user_feed"] == "favorites")
+		assert(result[1]["user_feed"] == "playlists")
+		assert(result[2]["user_feed"] == "subscriptions")
+		assert(result[3]["user_feed"] == "uploads")
+		
+	def test_changeSubscriptionView_should_exit_cleanly_if_view_mode_is_not_in_params(self):
+		storage = YouTubeStorage()
+		storage.getStorageKey = Mock()
+		storage.storeValue = Mock()
+		
+		storage.changeSubscriptionView({})
+		
+		assert(storage.getStorageKey.call_count == 0)
+		assert(storage.storeValue.call_count == 0)
 
-	def ttest_changeSubscriptionView_should_call_getStorageKey(self):
-		assert(False)
+	def test_changeSubscriptionView_should_call_getStorageKey(self):
+		storage = YouTubeStorage()
+		storage.getStorageKey = Mock()
+		storage.storeValue = Mock()
+		
+		storage.changeSubscriptionView({"view_mode":"my_view_mode"})
+		
+		storage.getStorageKey.assert_called_with({"user_feed":"my_view_mode","view_mode":"my_view_mode"}, "viewmode")
 
-	def ttest_changeSubscriptionView_should_call_storeValue(self):
-		assert(False)
+	def test_changeSubscriptionView_should_call_storeValue(self):
+		storage = YouTubeStorage()
+		storage.getStorageKey = Mock()
+		storage.getStorageKey.return_value = "my_key"
+		storage.storeValue = Mock()
+		
+		storage.changeSubscriptionView({"view_mode":"my_view_mode"})
+		
+		storage.storeValue.assert_called_with("my_key","my_view_mode")
 
-	def ttest_changeSubscriptionView_should_fill_params_collection_before_exiting(self):
-		assert(False)
+	def test_changeSubscriptionView_should_fill_params_collection_before_exiting(self):
+		storage = YouTubeStorage()
+		storage.getStorageKey = Mock()
+		storage.getStorageKey.return_value = "my_key"
+		storage.storeValue = Mock()
+		
+		params = {"view_mode":"my_view_mode"}
+		storage.changeSubscriptionView(params)
+		
+		assert(params.has_key("user_feed"))
 
-	def ttest_reversePlaylistOrder_should_exit_cleanly_if_playlist_params_is_missing(self):
-		assert(False)
+	def test_reversePlaylistOrder_should_exit_cleanly_if_playlist_params_is_missing(self):
+		storage = YouTubeStorage()
+		storage.retrieve = Mock()
+		storage.retrieve.return_value =  "false"
+		storage.store = Mock()
+		
+		storage.reversePlaylistOrder({})
+		
+		assert(storage.retrieve.call_count == 0)
+		assert(storage.store.call_count == 0)
 				
-	def ttest_reversePlaylistOrder_should_call_retrieve_to_fetch_reverse_value(self):
-		assert(False)
+	def test_reversePlaylistOrder_should_call_retrieve_to_fetch_reverse_value(self):
+		storage = YouTubeStorage()
+		storage.retrieve = Mock()
+		storage.retrieve.return_value =  "false"
+		storage.store = Mock()
 		
-	def ttest_reversePlaylistOrder_should_call_store_to_save_reverse_value(self):
-		assert(False)
+		storage.reversePlaylistOrder({"playlist":"some_playlists"})
+		
+		storage.retrieve.assert_called_with({'playlist': 'some_playlists'}, 'value')
+		
+	def test_reversePlaylistOrder_should_call_store_to_save_reverse_value(self):
+		storage = YouTubeStorage()
+		storage.retrieve = Mock()
+		storage.retrieve.return_value =  "false"
+		storage.store = Mock()
+		
+		storage.reversePlaylistOrder({"playlist":"some_playlists"})
+		
+		storage.store.assert_called_with({'playlist': 'some_playlists'}, 'true', 'value')
 	
-	def ttest_reversePlaylistOrder_should_executebuiltin_on_succes(self):
-		assert(False)
+	def test_reversePlaylistOrder_should_executebuiltin_on_succes(self):
+		storage = YouTubeStorage()
+		storage.retrieve = Mock()
+		storage.retrieve.return_value =  "false"
+		storage.store = Mock()
 		
-	def ttest_getReversePlaylistOrder_should_return_false_if_playlist_is_not_in_params(self):
-		assert(False)
+		storage.reversePlaylistOrder({"playlist":"some_playlists"})
 		
-	def ttest_getReversePlaylistOrder_should_call_retrieve_to_fetch_reverse_value(self):
-		assert(False)
+		sys.modules["__main__"].xbmc.executebuiltin.assert_called_with('Container.Refresh')
+		
+	def test_getReversePlaylistOrder_should_return_false_if_playlist_is_not_in_params(self):
+		storage = YouTubeStorage()
+		storage.retrieve = Mock()
+		storage.retrieve.return_value =  "true"
+		storage.store = Mock()
+		
+		result = storage.getReversePlaylistOrder()
+		
+		assert(result == False)
+		
+	def test_getReversePlaylistOrder_should_call_retrieve_to_fetch_reverse_value(self):
+		storage = YouTubeStorage()
+		storage.retrieve = Mock()
+		storage.retrieve.return_value =  "true"
+		
+		result = storage.getReversePlaylistOrder({"playlist":"some_playlists"})
+		
+		assert(result == True)
 	
 if __name__ == '__main__':
 	nose.run()
