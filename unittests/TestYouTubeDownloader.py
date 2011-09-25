@@ -16,17 +16,66 @@ class TestYouTubeDownloader(BaseTestCase.BaseTestCase):
 		
 		sys.modules["__main__"].settings.getSetting.assert_called_with("downloadPath")
 		
-	def ttest_downloadVideo_should_call_cache_get_lock_to_ensure_no_other_downloaders_are_running(self):
-		assert(False)
+	def test_downloadVideo_should_lock_cache_to_ensure_no_other_downloaders_are_running(self):
+		sys.modules["__main__"].player.getVideoObject.return_value = ({"apierror":"some_error"},303)
+		sys.modules["__main__"].settings.getSetting.return_value = "mypath"
+		sys.modules["__main__"].cache.lock.return_value = False
+		downloader = YouTubeDownloader()
+		downloader.processQueue = Mock()
 		
-	def ttest_downloadVideo_should_ask_user_for_downloadPath_if_its_missing(self):
-		assert(False)
+		downloader.downloadVideo({})
 		
-	def ttest_downloadVideo_should_only_call_addVideoToDownloadQeueu_if_a_downloader_is_already_running(self):
-		assert(False)
+		sys.modules["__main__"].cache.lock.assert_called_with("YouTubeDownloadLock")
 		
-	def ttest_downloadVideo_should_call_processQueue_if_no_other_downloads_are_running(self):
-		assert(False)
+	def test_downloadVideo_should_ask_user_for_downloadPath_if_its_missing(self):
+		sys.modules["__main__"].player.getVideoObject.return_value = ({"apierror":"some_error"},303)
+		sys.modules["__main__"].settings.getSetting.return_value = ""
+		sys.modules["__main__"].language.return_value = "my_message" 
+		sys.modules["__main__"].cache.lock.return_value = False
+		downloader = YouTubeDownloader()
+		downloader.processQueue = Mock()
+		
+		downloader.downloadVideo({})
+		
+		sys.modules["__main__"].utils.showMessage.assert_called_with("my_message","my_message")
+		sys.modules["__main__"].settings.openSettings.assert_called_with()
+		
+	def test_downloadVideo_should_just_call_addVideoToDownloadQeueu_if_a_downloader_is_already_running(self):
+		sys.modules["__main__"].player.getVideoObject.return_value = ({"apierror":"some_error"},303)
+		sys.modules["__main__"].settings.getSetting.return_value = ""
+		sys.modules["__main__"].language.return_value = "my_message" 
+		sys.modules["__main__"].cache.lock.return_value = False
+		downloader = YouTubeDownloader()
+		downloader.processQueue = Mock()
+		
+		downloader.downloadVideo({})
+		
+		sys.modules["__main__"].storage.addVideoToDownloadQeueu.assert_called_with({})
+		assert(downloader.processQueue.call_count == 0)
+		
+	def test_downloadVideo_should_call_processQueue_if_no_other_downloads_are_running(self):
+		sys.modules["__main__"].player.getVideoObject.return_value = ({"apierror":"some_error"},303)
+		sys.modules["__main__"].settings.getSetting.return_value = ""
+		sys.modules["__main__"].language.return_value = "my_message" 
+		sys.modules["__main__"].cache.lock.return_value = True
+		downloader = YouTubeDownloader()
+		downloader.processQueue = Mock()
+		
+		downloader.downloadVideo({})
+		
+		sys.modules["__main__"].storage.addVideoToDownloadQeueu.assert_called_with({'silent': 'true'})
+		downloader.processQueue.assert_called_once_with({'silent': 'true'})
+		
+	def test_downloadVideo_should_unlock_cache_when_done(self):
+		sys.modules["__main__"].player.getVideoObject.return_value = ({"apierror":"some_error"},303)
+		sys.modules["__main__"].settings.getSetting.return_value = "mypath"
+		sys.modules["__main__"].cache.lock.return_value = True
+		downloader = YouTubeDownloader()
+		downloader.processQueue = Mock()
+		
+		downloader.downloadVideo({})
+		
+		sys.modules["__main__"].cache.unlock.assert_called_with("YouTubeDownloadLock")
 		
 	def ttest_processQueue_should_call_storage_getNextVideoFromDownloadQueue(self):
 		assert(False)
