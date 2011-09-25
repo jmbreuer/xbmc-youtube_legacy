@@ -16,8 +16,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, urllib2, os
-from DialogDownloadProgress import DownloadProgress
+import sys, urllib2, os, io
+import DialogDownloadProgress
 
 class YouTubeDownloader():
 	
@@ -63,8 +63,7 @@ class YouTubeDownloader():
 		
 		if videoid:
 			if not self.dialog:
-				self.dialog = DownloadProgress()
-			#self.dialog.create( heading = self.language( 30605 ), label = "")
+				self.dialog = DialogDownloadProgress.DownloadProgress()
 	
 			while videoid:
 				params["videoid"] = videoid
@@ -99,15 +98,15 @@ class YouTubeDownloader():
 		video["downloadPath"] = self.settings.getSetting( "downloadPath" )
 		self.player.downloadSubtitle(video) 
 		url = urllib2.Request(video['video_url'])
-		url.add_header('User-Agent', self.USERAGENT);
-		filename = "%s-[%s].mp4" % ( ''.join(c for c in video['Title'] if c in self.VALID_CHARS), video["videoid"] )
+		url.add_header('User-Agent', self.common.USERAGENT);
+		filename = "%s-[%s].mp4" % ( ''.join(c for c in video['Title'] if c in self.utils.VALID_CHARS), video["videoid"] )
 		filename_incomplete = os.path.join(self.xbmc.translatePath( "special://temp" ), filename )
 		filename_complete = os.path.join(self.settings.getSetting( "downloadPath" ), filename )
 
 		if self.xbmcvfs.exists(filename_complete):
 			self.xbmcvfs.delete(filename_complete)
 
-		file = open(filename_incomplete, "wb")
+		file = self.storage.openFile(filename_incomplete, "wb")
 		con = urllib2.urlopen(url);
 
 		total_size = 8192 * 25
@@ -126,7 +125,7 @@ class YouTubeDownloader():
 				percent = int(float(bytes_so_far) / float(total_size) * 100)
 				file.write(chunk)
 				
-				queue = self.storage.sqlGet("YouTubeDownloadQueue")
+				queue = self.cache.sqlGet("YouTubeDownloadQueue")
 
 				if queue:
 					try:
@@ -135,7 +134,7 @@ class YouTubeDownloader():
 						videos = []
 				else:
 					videos = []
-
+				
 				heading = "[%s] %s - %s%%" % ( str(len(videos)), self.language(30624), str(percent))
 				self.dialog.update(percent=percent, heading = heading, label=video["Title"])
 
