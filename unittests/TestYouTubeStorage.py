@@ -667,41 +667,89 @@ class TestYouTubeStorage(BaseTestCase.BaseTestCase):
 	
 		assert(result == "disco_search_some_search_thumb")
 	
-	def ttest_getThumbnailStorageKey_should_return_correct_key_for_artist_path(self):
-		assert(False)
-	
-	def ttest_getThumbnailStorageKey_should_return_correct_key_for_artist_item(self):
-		assert(False)
-	
-	def ttest_getThumbnailStorageKey_should_return_correct_key_for_user_feed_path(self):
-		assert(False)
-	
-	def ttest_getThumbnailStorageKey_should_return_correct_key_for_channel_path(self):
-		assert(False)
-	
-	def ttest_getThumbnailStorageKey_should_return_correct_key_for_channel_item(self):
-		assert(False)
+	def test_getThumbnailStorageKey_should_return_correct_key_for_artist_path(self):
+		storage = YouTubeStorage()
 		
-	def ttest_getThumbnailStorageKey_should_return_correct_key_for_playlist_path(self):
-		assert(False)
-
-	def ttest_getThumbnailStorageKey_should_return_correct_key_for_playlist_item(self):
-		assert(False)
+		result = storage._getThumbnailStorageKey({"artist":"some_artist"})
 	
-	def ttest_getThumbnailStorageKey_should_appen_thumb_to_key(self):
-		assert(False)
+		assert(result == "artist_some_artist_thumb")
+	
+	def test_getThumbnailStorageKey_should_return_correct_key_for_artist_item(self):
+		storage = YouTubeStorage()
 		
-	def ttest_getValueStorageKey_should_return_correct_key_for_reverse_playlist_action(self):
-		assert(False)
+		result = storage._getThumbnailStorageKey({}, {"artist":"some_artist"})
+	
+		assert(result == "artist_some_artist_thumb")
+	
+	def test_getThumbnailStorageKey_should_return_correct_key_for_user_feed_path(self):
+		storage = YouTubeStorage()
+		
+		result = storage._getThumbnailStorageKey({"user_feed":"something"})
+	
+		assert(result == "something_thumb")
+	
+	def test_getThumbnailStorageKey_should_return_correct_key_for_channel_path(self):
+		storage = YouTubeStorage()
+		
+		result = storage._getThumbnailStorageKey({"user_feed":"some_feed","channel":"some_channel"})
+	
+		assert(result == "subscriptions_some_channel_thumb")
+	
+	def test_getThumbnailStorageKey_should_return_correct_key_for_channel_item(self):
+		storage = YouTubeStorage()
+		
+		result = storage._getThumbnailStorageKey({"user_feed":"something"},{"channel":"some_channel"})
+	
+		assert(result == "subscriptions_some_channel_thumb")
+		
+	def test_getThumbnailStorageKey_should_return_correct_key_for_playlist_path(self):
+		storage = YouTubeStorage()
+		
+		result = storage._getThumbnailStorageKey({"user_feed":"some_feed","playlist":"some_playlist"})
+	
+		assert(result == "playlist_some_playlist_thumb")
 
-	def ttest_getValueStorageKey_should_return_correct_key_for_reverse_playlist_path(self):
-		assert(False)
+	def test_getThumbnailStorageKey_should_return_correct_key_for_playlist_item(self):
+		storage = YouTubeStorage()
+		
+		result = storage._getThumbnailStorageKey({"user_feed":"something"},{"playlist":"some_playlist"})
+	
+		assert(result == "playlist_some_playlist_thumb")
+	
+	def test_getThumbnailStorageKey_should_appen_thumb_to_key(self):
+		storage = YouTubeStorage()
+		
+		result = storage._getThumbnailStorageKey({"some_param":"something"}, {"search":"some_search"})
+	
+		assert(result[result.rfind("_"):] == "_thumb")
+		
+	def test_getValueStorageKey_should_return_correct_key_for_reverse_playlist_action(self):
+		storage = YouTubeStorage()
+		
+		result = storage._getValueStorageKey({"action":"reverse_order", "playlist":"some_playlist"})
+	
+		assert(result == "reverse_playlist_some_playlist")
 
-	def ttest_getValueStorageKey_should_return_correct_key_for_reverse_playlist_item(self):
-		assert(False)
+	def test_getValueStorageKey_should_return_correct_key_for_reverse_playlist_path(self):
+		storage = YouTubeStorage()
+		
+		result = storage._getValueStorageKey({"user_feed":"playlist","playlist":"some_playlist"})
+	
+		assert(result == "reverse_playlist_some_playlist")
 
-	def ttest_getValueStorageKey_should_handle_external_marker(self):
-		assert(False)
+	def test_getValueStorageKey_should_return_correct_key_for_reverse_playlist_item(self):
+		storage = YouTubeStorage()
+		
+		result = storage._getValueStorageKey({"user_feed":"playlist"}, {"playlist":"some_playlist"})
+	
+		assert(result == "reverse_playlist_some_playlist")
+
+	def test_getValueStorageKey_should_handle_external_marker(self):
+		storage = YouTubeStorage()
+		
+		result = storage._getValueStorageKey({"user_feed":"playlist", "external":"true", "contact":"some_contact"}, {"playlist":"some_playlist"})
+	
+		assert(result == "reverse_playlist_some_playlist_external_some_contact")
 
 	def ttest_getViewModeStorageKey_should_handle_external_marker(self):
 		assert(False)
