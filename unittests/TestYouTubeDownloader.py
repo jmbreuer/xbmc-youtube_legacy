@@ -40,7 +40,7 @@ class TestYouTubeDownloader(BaseTestCase.BaseTestCase):
 		sys.modules["__main__"].utils.showMessage.assert_called_with("my_message","my_message")
 		sys.modules["__main__"].settings.openSettings.assert_called_with()
 		
-	def test_downloadVideo_should_just_call_addVideoToDownloadQeueu_if_a_downloader_is_already_running(self):
+	def test_downloadVideo_should_just_call_addVideoToDownloadQueue_if_a_downloader_is_already_running(self):
 		sys.modules["__main__"].player.getVideoObject.return_value = ({"apierror":"some_error"},303)
 		sys.modules["__main__"].settings.getSetting.return_value = ""
 		sys.modules["__main__"].language.return_value = "my_message" 
@@ -50,7 +50,7 @@ class TestYouTubeDownloader(BaseTestCase.BaseTestCase):
 		
 		downloader.downloadVideo({})
 		
-		sys.modules["__main__"].storage.addVideoToDownloadQeueu.assert_called_with({})
+		sys.modules["__main__"].storage.addVideoToDownloadQueue.assert_called_with({})
 		assert(downloader.processQueue.call_count == 0)
 		
 	def test_downloadVideo_should_call_processQueue_if_no_other_downloads_are_running(self):
@@ -63,7 +63,7 @@ class TestYouTubeDownloader(BaseTestCase.BaseTestCase):
 		
 		downloader.downloadVideo({})
 		
-		sys.modules["__main__"].storage.addVideoToDownloadQeueu.assert_called_with({'silent': 'true'})
+		sys.modules["__main__"].storage.addVideoToDownloadQueue.assert_called_with({'silent': 'true'})
 		downloader.processQueue.assert_called_once_with({'silent': 'true'})
 		
 	def test_downloadVideo_should_unlock_cache_when_done(self):
