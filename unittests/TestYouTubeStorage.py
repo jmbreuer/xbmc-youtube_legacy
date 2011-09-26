@@ -606,6 +606,249 @@ class TestYouTubeStorage(BaseTestCase.BaseTestCase):
 		result = storage.getReversePlaylistOrder({"playlist":"some_playlists"})
 		
 		assert(result == True)
+		
+	def test_getStorageKey_should_call_getValueStorageKey_if_type_is_value(self):
+		storage = YouTubeStorage()
+		storage._getValueStorageKey = Mock()
+		
+		result = storage.getStorageKey({"some_param":"param_value"},"value")
+		
+		storage._getValueStorageKey.assert_called_with({"some_param":"param_value"},{})
+	
+	def test_getStorageKey_should_call_getViewModeStorageKey_if_type_is_viewmode(self):
+		storage = YouTubeStorage()
+		storage._getViewModeStorageKey = Mock()
+		
+		result = storage.getStorageKey({"some_param":"param_value"}, "viewmode")
+		
+		storage._getViewModeStorageKey.assert_called_with({"some_param":"param_value"},{})
+		
+	def test_getStorageKey_should_call_getThumbnailStorageKey_if_type_is_thumbnail(self):
+		storage = YouTubeStorage()
+		storage._getThumbnailStorageKey = Mock()
+		
+		result = storage.getStorageKey({"some_param":"param_value"}, "thumbnail")
+		
+		storage._getThumbnailStorageKey.assert_called_with({"some_param":"param_value"},{})		
+		
+	def test_getStorageKey_should_call_getResultSetStorageKey_if_type_is_not_set(self):
+		storage = YouTubeStorage()
+		storage._getResultSetStorageKey = Mock()
+		
+		result = storage.getStorageKey({"some_param":"param_value"})
+		
+		storage._getResultSetStorageKey.assert_called_with({"some_param":"param_value"})
+		
+	def test_getThumbnailStorageKey_should_return_correct_key_for_search_path(self):
+		storage = YouTubeStorage()
+		
+		result = storage._getThumbnailStorageKey({"search":"some_search","feed":"search"})
+		
+		assert(result == "search_some_search_thumb")
+
+	def test_getThumbnailStorageKey_should_return_correct_key_for_disco_search_path(self):
+		storage = YouTubeStorage()
+		
+		result = storage._getThumbnailStorageKey({"search":"some_search"})
+		
+		assert(result == "disco_search_some_search_thumb")
+	
+	def test_getThumbnailStorageKey_should_return_correct_key_for_search_item(self):
+		storage = YouTubeStorage()
+		
+		result = storage._getThumbnailStorageKey({"some_param":"something"}, {"search":"some_search", "feed":"search"})
+		
+		assert(result == "search_some_search_thumb")
+	
+	def test_getThumbnailStorageKey_should_return_correct_key_for_disco_search_item(self):
+		storage = YouTubeStorage()
+		
+		result = storage._getThumbnailStorageKey({"some_param":"something"}, {"search":"some_search"})
+	
+		assert(result == "disco_search_some_search_thumb")
+	
+	def ttest_getThumbnailStorageKey_should_return_correct_key_for_artist_path(self):
+		assert(False)
+	
+	def ttest_getThumbnailStorageKey_should_return_correct_key_for_artist_item(self):
+		assert(False)
+	
+	def ttest_getThumbnailStorageKey_should_return_correct_key_for_user_feed_path(self):
+		assert(False)
+	
+	def ttest_getThumbnailStorageKey_should_return_correct_key_for_channel_path(self):
+		assert(False)
+	
+	def ttest_getThumbnailStorageKey_should_return_correct_key_for_channel_item(self):
+		assert(False)
+		
+	def ttest_getThumbnailStorageKey_should_return_correct_key_for_playlist_path(self):
+		assert(False)
+
+	def ttest_getThumbnailStorageKey_should_return_correct_key_for_playlist_item(self):
+		assert(False)
+	
+	def ttest_getThumbnailStorageKey_should_appen_thumb_to_key(self):
+		assert(False)
+		
+	def ttest_getValueStorageKey_should_return_correct_key_for_reverse_playlist_action(self):
+		assert(False)
+
+	def ttest_getValueStorageKey_should_return_correct_key_for_reverse_playlist_path(self):
+		assert(False)
+
+	def ttest_getValueStorageKey_should_return_correct_key_for_reverse_playlist_item(self):
+		assert(False)
+
+	def ttest_getValueStorageKey_should_handle_external_marker(self):
+		assert(False)
+
+	def ttest_getViewModeStorageKey_should_handle_external_marker(self):
+		assert(False)
+
+	def ttest_getViewModeStorageKey_should_return_correct_key_for_channel_item(self):
+		assert(False)
+
+	def ttest_getViewModeStorageKey_should_return_correct_key_for_channel_path(self):
+		assert(False)
+
+	def ttest_getResultSetStorageKey_should_return_correct_key_for_music_category_path(self):
+		assert(False)
+
+	def ttest_getResultSetStorageKey_should_return_correct_key_for_music_artist_path(self):
+		assert(False)
+
+	def ttest_getResultSetStorageKey_should_return_correct_key_for_disco_search_path(self):
+		assert(False)
+
+	def ttest_getResultSetStorageKey_should_return_correct_key_for_category_path(self):
+		assert(False)
+
+	def ttest_getResultSetStorageKey_should_return_correct_key_for_for_show_scraper(self):
+		assert(False)
+
+	def ttest_getResultSetStorageKey_should_return_correct_key_for_playlist_path(self):
+		assert(False)
+
+	def ttest_getResultSetStorageKey_should_return_correct_key_for_subscription_path(self):
+		assert(False)
+
+	def ttest_getResultSetStorageKey_should_handle_external_correctly(self):
+		assert(False)
+
+	def ttest_getResultSetStorageKey_should_return_correct_key_for_stored_searches(self):
+		assert(False)
+
+	def ttest_getResultSetStorageKey_should_return_correct_key_for_generic_stores(self):
+		assert(False)
+
+	def ttest_store_should_call_getStorageKey_to_fetch_correct_storage_key(self):
+		assert(False)
+
+	def ttest_store_should_call_storeValue_if_type_is_set(self):
+		assert(False)
+	
+	def ttest_store_should_call_storeResultSet_if_type_is_not_set(self):
+		assert(False)
+		
+	def ttest_storeValue_should_call_cache_sqlSet_with_correct_params(self):
+		assert(False)
+
+	def ttest_storeResultSet_should_call_cache_sqlSet_with_correct_params_by_default(self):
+		assert(False)
+	
+	def ttest_storeResultSet_should_call_retrieveResultSet_if_prepend_is_in_params(self):
+		assert(False)
+
+	def ttest_storeResultSet_should_call_settings_getSetting_to_get_stored_searches_limit_if_prepend_is_params(self):
+		assert(False)
+		
+	def ttest_storeResultSet_should_call_retrieveResultSet_if_append_is_in_params(self):
+		assert(False)
+				
+	def ttest_storeResultSet_should_call_cache_sqlSet_if_prepend_is_in_params(self):
+		assert(False)
+		
+	def ttest_storeResultSet_should_call_cache_sqlSet_correctly_if_append_is_in_params(self):
+		assert(False)
+		
+	def ttest_storeResultSet_should_append_item_to_collection_if_append_is_in_params(self):
+		assert(False)
+		
+	def ttest_storeResultSet_should_prepend_item_to_collection_if_prepend_is_in_params(self):
+		assert(False)
+		
+	def ttest_retrieve_should_call_getStorageKey_to_fetch_correct_storage_key(self):
+		assert(False)
+
+	def ttest_retrieve_should_call_retrieveValue_if_type_is_set(self):
+		assert(False)
+	
+	def ttest_retrieve_should_call_retrieveResultSet_if_type_is_not_set(self):
+		assert(False)
+	
+	def ttest_retrieveValue_should_call_cache_sqlGet_with_correct_params(self):
+		assert(False)
+		
+	def ttest_retrieveResultSet_should_call_sqlGet_with_correct_params(self):
+		assert(False)
+
+	def ttest_retrieveResultSet_should_evaluate_content_from_sql_get(self):
+		assert(False)
+	
+	def ttest_getNextVideoFromDownloadQueue_should_call_cache_lock_with_correct_params_to_prevent_race_conditions(self):
+		assert(False)
+		
+	def ttest_getNextVideoFromDownloadQueue_should_call_cache_sqlGet_with_correct_param_to_get_queue(self):
+		assert(False)
+
+	def ttest_getNextVideoFromDownloadQueue_should_evaluate_content_from_cache(self):
+		assert(False)
+	
+	def ttest_getNextVideoFromDownloadQueue_should_handle_corrupted_content_from_cache(self):
+		assert(False)
+
+	def ttest_getNextVideoFromDownloadQueue_should_call_cache_unlock_with_correct_params_when_done_to_prevent_deadlock(self):
+		assert(False)
+
+	def ttest_addVideoToDownloadQueue_should_call_cache_lock_with_correct_params_to_prevent_race_conditions(self):
+		assert(False)
+
+	def ttest_addVideoToDownloadQueue_should_call_cache_sqlGet_with_correct_param_to_get_queue(self):
+		assert(False)
+
+	def ttest_addVideoToDownloadQueue_should_evaluate_content_from_cache(self):
+		assert(False)
+	
+	def ttest_addVideoToDownloadQueue_should_handle_corrupted_content_from_cache(self):
+		assert(False)
+
+	def ttest_addVideoToDownloadQueue_should_call_cache_unlock_with_correct_params_when_done_to_prevent_deadlock(self):
+		assert(False)
+
+	def ttest_addVideoToDownloadQueue_should_call_cache_sqlSet_with_correct_param_to_save_queue(self):
+		assert(False)
+
+	def ttest_addVideoToDownloadQueue_should_append_video_to_queue_before_calling_sqlSet(self):
+		assert(False)
+
+	def ttest_removeVideoFromDownloadQueue_should_call_cache_lock_with_correct_params_to_prevent_race_conditions(self):
+		assert(False)
+
+	def ttest_removeVideoFromDownloadQueue_should_call_cache_sqlGet_with_correct_param_to_get_queue(self):
+		assert(False)
+
+	def ttest_removeVideoFromDownloadQueue_should_evaluate_content_from_cache(self):
+		assert(False)
+	
+	def ttest_removeVideoFromDownloadQueue_should_handle_corrupted_content_from_cache(self):
+		assert(False)
+
+	def ttest_removeVideoFromDownloadQueue_should_call_cache_unlock_with_correct_params_when_done_to_prevent_deadlock(self):
+		assert(False)
+
+	def ttest_removeVideoFromDownloadQueue_should_remove_video_from_queue_before_caliing_sqlSet(self):
+		assert(False)
 	
 if __name__ == '__main__':
 	nose.run()
