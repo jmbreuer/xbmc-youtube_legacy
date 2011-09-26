@@ -51,12 +51,12 @@ class YouTubeDownloader():
 			params["silent"] = "true"
 			self.common.log("Downloader not active, initializing downloader.")
 			
-			self.storage.addVideoToDownloadQeueu(params)
+			self.storage.addVideoToDownloadQueue(params)
 			self.processQueue(params)
 			self.cache.unlock("YouTubeDownloadLock")
 		else:
 			self.common.log("Downloader is active, Queueing video.")
-			self.storage.addVideoToDownloadQeueu(params)
+			self.storage.addVideoToDownloadQueue(params)
 
 	def processQueue(self, params = {}):
 		videoid = self.storage.getNextVideoFromDownloadQueue()
