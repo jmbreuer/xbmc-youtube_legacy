@@ -751,73 +751,151 @@ class TestYouTubeStorage(BaseTestCase.BaseTestCase):
 	
 		assert(result == "reverse_playlist_some_playlist_external_some_contact")
 
-	def ttest_getViewModeStorageKey_should_handle_external_marker(self):
-		assert(False)
+	def test_getViewModeStorageKey_should_handle_external_marker(self):
+		storage = YouTubeStorage()
+		
+		result = storage._getViewModeStorageKey({"channel":"some_channel", "external":"true", "contact":"some_contact"})
+		
+		assert(result[:result.find("_")] == "external" )
 
-	def ttest_getViewModeStorageKey_should_return_correct_key_for_channel_item(self):
-		assert(False)
+	def test_getViewModeStorageKey_should_return_correct_key_for_channel_item(self):
+		storage = YouTubeStorage()
+		
+		result = storage._getViewModeStorageKey({},{"channel":"some_channel"})
+		
+		assert(result == "view_mode_some_channel")
 
-	def ttest_getViewModeStorageKey_should_return_correct_key_for_channel_path(self):
-		assert(False)
+	def test_getViewModeStorageKey_should_return_correct_key_for_channel_path(self):
+		storage = YouTubeStorage()
+		
+		result = storage._getViewModeStorageKey({"channel":"some_channel"})
+		
+		assert(result == "view_mode_some_channel")
 
-	def ttest_getResultSetStorageKey_should_return_correct_key_for_music_category_path(self):
-		assert(False)
+	def test_getResultSetStorageKey_should_return_correct_key_for_music_category_path(self):
+		storage = YouTubeStorage()
+		
+		result = storage._getResultSetStorageKey({"scraper":"music", "category":"some_category"})
+		
+		assert(result == "s_music_category_some_category")
 
-	def ttest_getResultSetStorageKey_should_return_correct_key_for_music_artist_path(self):
-		assert(False)
+	def test_getResultSetStorageKey_should_return_correct_key_for_music_artist_path(self):
+		storage = YouTubeStorage()
+		
+		result = storage._getResultSetStorageKey({"scraper":"music_artist", "artist":"some_artist"})
+		
+		assert(result == "s_music_artist_some_artist")
 
-	def ttest_getResultSetStorageKey_should_return_correct_key_for_disco_search_path(self):
-		assert(False)
+	def test_getResultSetStorageKey_should_return_correct_key_for_disco_search_path(self):
+		storage = YouTubeStorage()
+		
+		result = storage._getResultSetStorageKey({"scraper":"disco_search", "search":"some_search"})
+		
+		assert(result == "store_disco_searches")
 
-	def ttest_getResultSetStorageKey_should_return_correct_key_for_category_path(self):
-		assert(False)
+	def test_getResultSetStorageKey_should_return_correct_key_for_category_path(self):
+		storage = YouTubeStorage()
+		
+		result = storage._getResultSetStorageKey({"scraper":"categories", "category":"some_category"})
+		
+		assert(result == "s_categories_category_some_category")
 
-	def ttest_getResultSetStorageKey_should_return_correct_key_for_for_show_scraper(self):
-		assert(False)
+	def test_getResultSetStorageKey_should_return_correct_key_for_for_show_scraper(self):
+		storage = YouTubeStorage()
+		
+		result = storage._getResultSetStorageKey({"scraper":"show", "show":"some_show"})
+		
+		assert(result == "s_show_some_show_season_0")
 
-	def ttest_getResultSetStorageKey_should_return_correct_key_for_playlist_path(self):
-		assert(False)
+	def test_getResultSetStorageKey_should_return_correct_key_for_playlist_path(self):
+		storage = YouTubeStorage()
+		
+		result = storage._getResultSetStorageKey({"user_feed":"playlist", "playlist":"some_playlist"})
+		
+		assert(result == "result_playlist_some_playlist")
 
-	def ttest_getResultSetStorageKey_should_return_correct_key_for_subscription_path(self):
-		assert(False)
+	def test_getResultSetStorageKey_should_return_correct_key_for_subscription_path(self):
+		storage = YouTubeStorage()
+		
+		result = storage._getResultSetStorageKey({"user_feed":"subscriptions", "channel":"some_channel"})
+		
+		assert(result == "result_subscriptions_some_channel")
 
-	def ttest_getResultSetStorageKey_should_handle_external_correctly(self):
-		assert(False)
+	def test_getResultSetStorageKey_should_handle_external_correctly(self):
+		storage = YouTubeStorage()
+		
+		result = storage._getResultSetStorageKey({"user_feed":"playlist", "playlist":"some_playlist","external":"true","contact":"some_contact"})
+		
+		assert(result.find("external") > 0)
 
-	def ttest_getResultSetStorageKey_should_return_correct_key_for_stored_searches(self):
-		assert(False)
+	def test_getResultSetStorageKey_should_return_correct_key_for_stored_searches(self):
+		storage = YouTubeStorage()
+		
+		result = storage._getResultSetStorageKey({"feed":"search"})
+		
+		assert(result == "store_searches")
 
-	def ttest_getResultSetStorageKey_should_return_correct_key_for_generic_stores(self):
-		assert(False)
+	def test_getResultSetStorageKey_should_return_correct_key_for_generic_stores(self):
+		storage = YouTubeStorage()
+		
+		result = storage._getResultSetStorageKey({"store":"pokeystore"})
+		
+		assert(result == "store_pokeystore")
 
-	def ttest_store_should_call_getStorageKey_to_fetch_correct_storage_key(self):
-		assert(False)
+	def test_store_should_call_getStorageKey_to_fetch_correct_storage_key(self):
+		storage = YouTubeStorage()
+		storage.getStorageKey = Mock()
+		
+		result = storage.store({"store":"pokeystore"})
+		
+		storage.getStorageKey.assert_called_with({'store': 'pokeystore'}, '', {})
 
-	def ttest_store_should_call_storeValue_if_type_is_set(self):
+	def test_store_should_call_storeValue_if_type_is_set(self):
+		storage = YouTubeStorage()
+		storage.storeValue = Mock()
+		storage.getStorageKey = Mock()
+		storage.getStorageKey.return_value = "key"
+		
+		result = storage.store({}, {"store":"pokeystore"},  "value")
+		
+		storage.storeValue.assert_called_with("key", {"store":"pokeystore"})
+	
+	def test_store_should_call_storeResultSet_if_type_is_not_set(self):
+		storage = YouTubeStorage()
+		storage.storeResultSet = Mock()
+		storage.getStorageKey = Mock()
+		storage.getStorageKey.return_value = "key"
+		
+		result = storage.store({}, {"store":"pokeystore"})
+		
+		storage.storeResultSet.assert_called_with("key", {"store":"pokeystore"})
+		
+	def test_storeValue_should_call_cache_sqlSet_with_correct_params(self):
+		storage = YouTubeStorage()
+		storage.storeResultSet = Mock()
+		storage.getStorageKey = Mock()
+		storage.getStorageKey.return_value = "key"
+		
+		result = storage.storeValue("some_key", "some_value")
+		
+		sys.modules["__main__"].cache.sqlSet.assert_called_with("some_key","some_value")
+
+	def test_storeResultSet_should_call_cache_sqlSet_with_correct_params_by_default(self):
 		assert(False)
 	
-	def ttest_store_should_call_storeResultSet_if_type_is_not_set(self):
-		assert(False)
-		
-	def ttest_storeValue_should_call_cache_sqlSet_with_correct_params(self):
+	def test_storeResultSet_should_call_retrieveResultSet_if_prepend_is_in_params(self):
 		assert(False)
 
-	def ttest_storeResultSet_should_call_cache_sqlSet_with_correct_params_by_default(self):
-		assert(False)
-	
-	def ttest_storeResultSet_should_call_retrieveResultSet_if_prepend_is_in_params(self):
-		assert(False)
-
-	def ttest_storeResultSet_should_call_settings_getSetting_to_get_stored_searches_limit_if_prepend_is_params(self):
+	def test_storeResultSet_should_call_settings_getSetting_to_get_stored_searches_limit_if_prepend_is_params(self):
 		assert(False)
 		
-	def ttest_storeResultSet_should_call_retrieveResultSet_if_append_is_in_params(self):
+	def test_storeResultSet_should_call_retrieveResultSet_if_append_is_in_params(self):
 		assert(False)
 				
-	def ttest_storeResultSet_should_call_cache_sqlSet_if_prepend_is_in_params(self):
+	def test_storeResultSet_should_call_cache_sqlSet_if_prepend_is_in_params(self):
 		assert(False)
 		
-	def ttest_storeResultSet_should_call_cache_sqlSet_correctly_if_append_is_in_params(self):
+	def test_storeResultSet_should_call_cache_sqlSet_correctly_if_append_is_in_params(self):
 		assert(False)
 		
 	def ttest_storeResultSet_should_append_item_to_collection_if_append_is_in_params(self):
