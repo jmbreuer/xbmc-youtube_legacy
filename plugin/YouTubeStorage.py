@@ -366,6 +366,7 @@ class YouTubeStorage():
 				key += "_category_" + get("category")
 			
 			if get("show"):
+				key += "_" + get("show")
 				key += "_season_" + get("season","0")
 		
 		if get("user_feed"):
@@ -398,7 +399,7 @@ class YouTubeStorage():
 			self.storeValue(key, results)
 		else:
 			self.storeResultSet(key, results)
-
+	
 	def storeValue(self, key, value):
 		if value:
 			self.cache.sqlSet(key, value)
