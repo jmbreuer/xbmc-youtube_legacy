@@ -410,12 +410,12 @@ class YouTubeStorage():
 		if results:
 			if get("prepend"):
 				searchCount = ( 10, 20, 30, 40, )[ int( self.settings.getSetting( "saved_searches" ) ) ]
-				existing = self.retrieveResultSet(key)  
+				existing = self.retrieveResultSet(key)
 				existing = [results] + existing[:searchCount]
 				self.cache.sqlSet(key, repr(existing))
 			elif get("append"):
 				existing = self.retrieveResultSet(key)  
-				existing = existing.append(results)
+				existing.append(results)
 				self.cache.sqlSet(key, repr(existing))
 			else:
 				value = repr(results)
@@ -475,7 +475,7 @@ class YouTubeStorage():
 		else:
 			self.common.log("getNextVideoFromDownloadQueue Exception")
 
-	def addVideoToDownloadQeueu(self, params = {}):
+	def addVideoToDownloadQueue(self, params = {}):
 		if self.cache.lock("YouTubeQueueLock"):
 			get = params.get
 
@@ -497,9 +497,9 @@ class YouTubeStorage():
 					self.common.log("Added: " + get("videoid") + " to: " + repr(videos))
 
 			self.cache.unlock("YouTubeQueueLock")
-			self.common.log("addVideoToDownloadQeueu released")
+			self.common.log("addVideoToDownloadQueue released")
 		else:
-			self.common.log("addVideoToDownloadQeueu Exception")
+			self.common.log("addVideoToDownloadQueue Exception")
 		
 	def removeVideoFromDownloadQueue(self, videoid):
 		if self.cache.lock("YouTubeQueueLock"):
