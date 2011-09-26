@@ -271,7 +271,7 @@ class YouTubeStorage():
 		
 		if get("search") or iget("search"):
 			key = "disco_search_"
-			if get("feed"):
+			if get("feed") or iget("feed"):
 				key = "search_"
 			
 			if get("store") == "searches":
@@ -355,10 +355,7 @@ class YouTubeStorage():
 		
 		if get("scraper"):
 			key = "s_" + get("scraper")
-			
-			if get("scraper") == "music_hits" and get("category"):
-				key += "_" + get("category")
-			
+						
 			if get("scraper") == "music_artist" and get("artist"):
 				key += "_" + get("artist")
 			
@@ -460,7 +457,7 @@ class YouTubeStorage():
 			
 			queue = self.cache.sqlGet("YouTubeDownloadQueue")
 			self.common.log("queue loaded : " + repr(queue))
-
+			
 			if queue:
 				try:
 					videos = eval(queue)
