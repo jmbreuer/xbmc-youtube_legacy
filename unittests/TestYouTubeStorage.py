@@ -1058,41 +1058,93 @@ class TestYouTubeStorage(BaseTestCase.BaseTestCase):
 		
 		sys.modules["__main__"].cache.lock.assert_called_with("YouTubeQueueLock")
 
-	def ttest_addVideoToDownloadQueue_should_call_cache_sqlGet_with_correct_param_to_get_queue(self):
-		assert(False)
+	def test_addVideoToDownloadQueue_should_call_cache_sqlGet_with_correct_param_to_get_queue(self):
+		storage = YouTubeStorage()
+		sys.modules["__main__"].cache.sqlGet.return_value = "[]"
+		
+		result = storage.addVideoToDownloadQueue({"videoid":"some_id"})
+		
+		sys.modules["__main__"].cache.sqlGet.assert_called_with("YouTubeDownloadQueue")
 
-	def ttest_addVideoToDownloadQueue_should_evaluate_content_from_cache(self):
-		assert(False)
+	def test_addVideoToDownloadQueue_should_evaluate_content_from_cache(self):
+		storage = YouTubeStorage()
+		sys.modules["__main__"].cache.sqlGet.return_value = "['kom','som']"
+		
+		result = storage.addVideoToDownloadQueue({"videoid":"some_id"})
+		
+		sys.modules["__main__"].cache.sqlSet.assert_called_with("YouTubeDownloadQueue","['kom', 'som', 'some_id']")
 	
-	def ttest_addVideoToDownloadQueue_should_handle_corrupted_content_from_cache(self):
-		assert(False)
+	def test_addVideoToDownloadQueue_should_handle_corrupted_content_from_cache(self):
+		storage = YouTubeStorage()
+		sys.modules["__main__"].cache.sqlGet.return_value = "}3ierouowöö¬ƒ∂·‚µß[{]"
+		
+		storage.addVideoToDownloadQueue({"videoid":"some_id"})
+		
+		sys.modules["__main__"].cache.sqlSet.assert_called_with("YouTubeDownloadQueue","['some_id']")
 
-	def ttest_addVideoToDownloadQueue_should_call_cache_unlock_with_correct_params_when_done_to_prevent_deadlock(self):
-		assert(False)
+	def test_addVideoToDownloadQueue_should_call_cache_unlock_with_correct_params_when_done_to_prevent_deadlock(self):
+		storage = YouTubeStorage()
+		sys.modules["__main__"].cache.sqlGet.return_value = "[]"
+		
+		result = storage.addVideoToDownloadQueue()
+		
+		sys.modules["__main__"].cache.unlock.assert_called_with("YouTubeQueueLock")
 
-	def ttest_addVideoToDownloadQueue_should_call_cache_sqlSet_with_correct_param_to_save_queue(self):
-		assert(False)
+	def test_addVideoToDownloadQueue_should_call_cache_sqlSet_with_correct_param_to_save_queue(self):
+		storage = YouTubeStorage()
+		sys.modules["__main__"].cache.sqlGet.return_value = "[]"
+		
+		storage.addVideoToDownloadQueue({"videoid":"some_id"})
+		
+		sys.modules["__main__"].cache.sqlSet.assert_called_with("YouTubeDownloadQueue","['some_id']")
 
-	def ttest_addVideoToDownloadQueue_should_append_video_to_queue_before_calling_sqlSet(self):
-		assert(False)
+	def test_addVideoToDownloadQueue_should_append_video_to_queue_before_calling_sqlSet(self):
+		storage = YouTubeStorage()
+		sys.modules["__main__"].cache.sqlGet.return_value = "['some_other_id']"
+		
+		storage.addVideoToDownloadQueue({"videoid":"some_id"})
+		
+		sys.modules["__main__"].cache.sqlSet.assert_called_with("YouTubeDownloadQueue","['some_other_id', 'some_id']")
 
-	def ttest_removeVideoFromDownloadQueue_should_call_cache_lock_with_correct_params_to_prevent_race_conditions(self):
-		assert(False)
+	def test_removeVideoFromDownloadQueue_should_call_cache_lock_with_correct_params_to_prevent_race_conditions(self):
+		storage = YouTubeStorage()
+		sys.modules["__main__"].cache.sqlGet.return_value = "['some_other_id']"
+		
+		storage.removeVideoFromDownloadQueue("some_id")
+		
+		sys.modules["__main__"].cache.lock.assert_called_with("YouTubeQueueLock")
 
-	def ttest_removeVideoFromDownloadQueue_should_call_cache_sqlGet_with_correct_param_to_get_queue(self):
-		assert(False)
-
-	def ttest_removeVideoFromDownloadQueue_should_evaluate_content_from_cache(self):
-		assert(False)
+	def test_removeVideoFromDownloadQueue_should_call_cache_sqlGet_with_correct_param_to_get_queue(self):
+		storage = YouTubeStorage()
+		sys.modules["__main__"].cache.sqlGet.return_value = "['some_other_id', 'some_id']"
+		
+		storage.removeVideoFromDownloadQueue("some_id")
+		
+		sys.modules["__main__"].cache.sqlSet.assert_called_with("YouTubeDownloadQueue","['some_other_id']")
 	
-	def ttest_removeVideoFromDownloadQueue_should_handle_corrupted_content_from_cache(self):
-		assert(False)
+	def test_removeVideoFromDownloadQueue_should_handle_corrupted_content_from_cache(self):
+		storage = YouTubeStorage()
+		sys.modules["__main__"].cache.sqlGet.return_value = "{[™¶}[]'[]≠±some_other_id', 'some_id'{≈\˜‰¢‰˜\{]"
+		
+		storage.removeVideoFromDownloadQueue("some_id")
+		
+		assert(sys.modules["__main__"].common.log.call_args_list[1][0][0] == "Didn't remove: some_id from: []")
 
-	def ttest_removeVideoFromDownloadQueue_should_call_cache_unlock_with_correct_params_when_done_to_prevent_deadlock(self):
-		assert(False)
+	def test_removeVideoFromDownloadQueue_should_call_cache_unlock_with_correct_params_when_done_to_prevent_deadlock(self):
+		storage = YouTubeStorage()
+		sys.modules["__main__"].cache.sqlGet.return_value = "['some_other_id']"
+		
+		storage.removeVideoFromDownloadQueue("some_id")
+		
+		sys.modules["__main__"].cache.unlock.assert_called_with("YouTubeQueueLock")
 
-	def ttest_removeVideoFromDownloadQueue_should_remove_video_from_queue_before_caliing_sqlSet(self):
-		assert(False)
+	def test_removeVideoFromDownloadQueue_should_remove_video_from_queue_before_caliing_sqlSet(self):
+		storage = YouTubeStorage()
+		sys.modules["__main__"].cache.sqlGet.return_value = "['some_id']"
+		
+		storage.removeVideoFromDownloadQueue("some_id")
+		
+		sys.modules["__main__"].cache.sqlSet.assert_called_with("YouTubeDownloadQueue","[]")
 	
 if __name__ == '__main__':
 	nose.run()
