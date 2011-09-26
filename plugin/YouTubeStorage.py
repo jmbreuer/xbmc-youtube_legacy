@@ -299,10 +299,10 @@ class YouTubeStorage():
 				key = "subscriptions_" + get("channel")
 
 			if iget("channel"):
-				key += "_" + iget("channel")
+				key = "subscriptions_" + iget("channel")
 		
 			if get("playlist"):
-				key += "_" + get("playlist")
+				key = "playlist_" + get("playlist")
 			
 			if iget("playlist"):
 				key = "playlist_" + iget("playlist")
