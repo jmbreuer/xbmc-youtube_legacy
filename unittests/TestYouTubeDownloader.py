@@ -472,6 +472,29 @@ class TestYouTubeDownloader(BaseTestCase.BaseTestCase):
 		downloader.downloadVideoURL(input)
 		
 		url_patcher.stop()
+		print repr(dummy_connection.call_count)
+		dummy_connection.read.assert_called_with(5)
+	
+	def test_downloadVideoURL_should_call_read_until_stream_is_empty(self):
+		url_patcher = patch("urllib2.urlopen")
+		url_patcher.start()		
+		import urllib2
+		dummy_connection = Mock()
+		chunks = ["","1","2","3","4","5"]
+		dummy_connection.read.side_effect = lambda x: chunks.pop()
+		dummy_connection.geturl.return_value = ""
+		dummy_connection.info().getheader.return_value = "1000"
+		url_patcher(urllib2.urlopen).return_value = dummy_connection
+		sys.modules["__main__"].settings.getSetting.return_value = "mypath"
+		sys.modules["__main__"].language.return_value = "some_message"
+		downloader = YouTubeDownloader()
+		downloader.dialog = Mock()
+		input = {"videoid":"someid", "video_url":"some_url", "Title":"some_title"}
+		
+		downloader.downloadVideoURL(input)
+		
+		url_patcher.stop()
+		assert(dummy_connection.read.call_count == 6)
 		dummy_connection.read.assert_called_with(5)
 		
 	def test_downloadVideoURL_should_call_sqlGet_to_fetch_download_queue_while_downloading(self):
@@ -495,8 +518,8 @@ class TestYouTubeDownloader(BaseTestCase.BaseTestCase):
 		url_patcher.stop()
 		
 		sys.modules["__main__"].cache.sqlGet.assert_called_with("YouTubeDownloadQueue")
-		
-	def test_downloadVideoURL_should_update_download_dialog_with_progress(self):
+	
+	def test_downloadVideoURL_should_calculate_progress_correctly(self):
 		url_patcher = patch("urllib2.urlopen")
 		url_patcher.start()		
 		import urllib2
@@ -516,7 +539,35 @@ class TestYouTubeDownloader(BaseTestCase.BaseTestCase):
 		
 		url_patcher.stop()
 		
-		downloader.dialog.update.assert_called_with( heading='some_message', label='some_title')
+		sys.modules["__main__"].cache.sqlGet.assert_called_with("YouTubeDownloadQueue")
+		
+	def test_downloadVideoURL_should_update_download_dialog_with_progress(self):
+		url_patcher = patch("urllib2.urlopen")
+		url_patcher.start()
+		chunk = "12345"
+		chunks = ["", chunk, chunk, chunk, chunk]		
+		import urllib2
+		dummy_connection = Mock()
+		dummy_connection.read.side_effect = lambda x: chunks.pop()
+		dummy_connection.geturl.return_value = ""
+		dummy_connection.info().getheader.return_value = "1000"
+		sys.modules["__main__"].cache.sqlGet.return_value = ""
+		url_patcher(urllib2.urlopen).return_value = dummy_connection
+		sys.modules["__main__"].settings.getSetting.return_value = "mypath"
+		sys.modules["__main__"].language.return_value = "some_message"
+		downloader = YouTubeDownloader()
+		downloader.dialog = Mock()
+		input = {"videoid":"someid", "video_url":"some_url", "Title":"some_title"}
+		
+		downloader.downloadVideoURL(input)
+		
+		url_patcher.stop()
+		
+		assert(downloader.dialog.update.call_args_list[0][1]["percent"] == 0)
+		assert(downloader.dialog.update.call_args_list[1][1]["percent"] == 1)
+		assert(downloader.dialog.update.call_args_list[2][1]["percent"] == 1)
+		assert(downloader.dialog.update.call_args_list[3][1]["percent"] == 2)
+		assert(downloader.dialog.update.call_args_list[4][1]["percent"] == 2)
 		
 	def test_downloadVideoURL_should_close_connection_and_filehandle_when_done(self):
 		url_patcher = patch("urllib2.urlopen")
