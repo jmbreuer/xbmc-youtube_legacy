@@ -12,31 +12,69 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		core = YouTubeCore()
 		core._fetchPage = Mock()
 		core._fetchPage.return_value = {"content":"success", "status":200}
+		delete_url = "http://gdata.youtube.com/feeds/api/users/default/favorites/test"
 
 		core.delete_favorite({ "editid": "test" })
-		
-		delete_url = "http://gdata.youtube.com/feeds/api/users/default/favorites/test" 
+				
+		assert(core._fetchPage.called)
+		assert(core._fetchPage.call_count == 1)
 		core._fetchPage.assert_called_with({"link": delete_url, "api": "true", "login": "true", "auth": "true", "method": "DELETE"})
 
-	def remove_contact(self):
+	def test_remove_contact_should_call_fetchPage_with_correct_fetch_options(self):
+		settings = ["4","3" ]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		core = YouTubeCore()
-		result = core.remove_contact({})
-		assert(result == [])
+		core._fetchPage = Mock()
+		core._fetchPage.return_value = {"content":"success", "status":200}
+		delete_url = "http://gdata.youtube.com/feeds/api/users/default/contacts/come_contact"		
 
-	def remove_subscription(self):
-		core = YouTubeCore()
-		result = core.remove_subscription({})
-		assert(result == [])
+		core.remove_contact({ "contact": "come_contact" })
+		
+		assert(core._fetchPage.called)
+		assert(core._fetchPage.call_count == 1)
+		core._fetchPage.assert_called_with({"link": delete_url, "api": "true", "login": "true", "auth": "true", "method": "DELETE"})
 
-	def add_contact(self):
+	def test_remove_subscription_should_call_fetchPage_with_correct_fetch_options(self):
+		settings = ["4","3" ]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		core = YouTubeCore()
-		result = core.add_contact({})
-		assert(result == [])
+		core._fetchPage = Mock()
+		core._fetchPage.return_value = {"content":"success", "status":200}
+		delete_url = "http://gdata.youtube.com/feeds/api/users/default/subscriptions/edit_id"		
 
-	def add_favorite(self):
+		core.remove_subscription({ "editid": "edit_id" })
+		
+		assert(core._fetchPage.called)
+		assert(core._fetchPage.call_count == 1)
+		core._fetchPage.assert_called_with({"link": delete_url, "api": "true", "login": "true", "auth": "true", "method": "DELETE"})
+
+	def test_add_contact_should_call_fetchPage_with_correct_fetch_options(self):
+		settings = ["4","3" ]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		core = YouTubeCore()
-		result = core.add_favorite({})
-		assert(result == [])
+		core._fetchPage = Mock()
+		core._fetchPage.return_value = {"content":"success", "status":200}
+		delete_url = "http://gdata.youtube.com/feeds/api/users/default/contacts"		
+		request = '<?xml version="1.0" encoding="UTF-8"?> <entry xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://gdata.youtube.com/schemas/2007"><yt:username>some_contact</yt:username></entry>'
+		core.add_contact({ "editid": "edit_id", "contact":"some_contact" })
+		
+		assert(core._fetchPage.called)
+		assert(core._fetchPage.call_count == 1)
+		core._fetchPage.assert_called_with({"request":request,"link": delete_url, "api": "true", "login": "true", "auth": "true"})
+
+	def test_add_favorite_shouldcall_fetchPage_with_correct_fetch_options(self):
+		settings = ["4","3" ]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
+		core = YouTubeCore()
+		core._fetchPage = Mock()
+		core._fetchPage.return_value = {"content":"success", "status":200}
+		url = "http://gdata.youtube.com/feeds/api/users/default/favorites"		
+		request = '<?xml version="1.0" encoding="UTF-8"?><entry xmlns="http://www.w3.org/2005/Atom"><id>some_id</id></entry>'
+		core.add_favorite({ "editid": "edit_id", "videoid":"some_id" })
+		
+		assert(core._fetchPage.called)
+		assert(core._fetchPage.call_count == 1)
+		core._fetchPage.assert_called_with({"request":request,"link": url, "api": "true", "login": "true", "auth": "true"})
 
 	def add_subscription(self):
 		core = YouTubeCore()
