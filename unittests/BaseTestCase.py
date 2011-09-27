@@ -23,6 +23,3 @@ class BaseTestCase(unittest2.TestCase):
 	
 	def raiseError(self, exception):
 		raise exception
-	
-	def TearDown(self):
-		self.xbmc.stop()
