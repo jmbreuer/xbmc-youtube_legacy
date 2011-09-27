@@ -31,7 +31,9 @@ class TestCommonFunctions(BaseTestCase.BaseTestCase):
 		ret = common._fetchPage({ "link": "http://tobiasussing.dk"})
 		patcher.stop()
 		
-		assert(ret['status'] == 200 and ret['content'] == "Nothing here\n")
+		print repr(ret)
+		assert(ret['status'] == 200)
+		assert(ret['content'] == "Nothing here\n")
 
 	def test_fetchPage__should_return_failing_error_code_on_broken_link(self):
 		patcher = patch("urllib2.urlopen")
@@ -47,7 +49,8 @@ class TestCommonFunctions(BaseTestCase.BaseTestCase):
 		patcher.stop()
 		
 		print repr(ret)
-		assert(ret['status'] == 500 and ret['content'] == "")
+		assert(ret['status'] == 500)
+		assert(ret['content'] == "")
 	
 	def test_stripTags_should_correctly_extract_the_text_content_of_a_link_tag(self):
 		common = CommonFunctions()
@@ -66,6 +69,8 @@ class TestCommonFunctions(BaseTestCase.BaseTestCase):
 		ret = common.parseDOM(self.link_html, "a", ret = "href")
 		
 		print repr(ret)
+
+		assert(len(ret) == 1 )	
 		assert(ret[0] == "bla.html")
 	
 	def test_parseDOM_should_call_getDOMContent_when_extracting_content_of_a_link_tag(self):
@@ -86,6 +91,8 @@ class TestCommonFunctions(BaseTestCase.BaseTestCase):
 		ret = common.parseDOM(self.link_html, "a", attrs = { "href": "bla.html" })
 		
 		print repr(ret)
+
+		assert(len(ret) == 1 )	
 		assert(ret[0] == "Link Test")
 
 	def test_parseDOM_should_correctly_extract_the_src_attribute_of_an_img_tag(self):
@@ -95,7 +102,20 @@ class TestCommonFunctions(BaseTestCase.BaseTestCase):
 		ret = common.parseDOM(self.img_html, "img", attrs = { "alt": "Thumbnail" }, ret = "src" )
 		
 		print repr(ret)
+
+		assert(len(ret) == 1 )	
 		assert(ret[0] == "bla.png")
+
+	def test_parseDOM_should_not_extract_the_src_attribute_of_an_img_tag_with_wrong_alt(self):
+		common  = CommonFunctions()
+		common.log = sys.modules[ "__main__" ].log_override.log
+		
+		ret = common.parseDOM(self.img_html, "img", attrs = { "alt": "Thumb broken" }, ret = "src" )
+		
+		print repr(ret)
+
+		assert(len(ret) == 0 )	
+		assert(ret == [])
 
 	def test_parseDOM_should_correctly_extract_the_alt_attribute_of_an_img_tag(self):
 		common  = CommonFunctions()
@@ -104,6 +124,8 @@ class TestCommonFunctions(BaseTestCase.BaseTestCase):
 		ret = common.parseDOM(self.img_html, "img", ret = "alt")
 		
 		print repr(ret)
+
+		assert(len(ret) == 1 )	
 		assert(ret[0] == "Thumbnail")
 
 	def test_parseDOM_should_be_able_to_extract_flashvars_content_from_a_youtube_video_page(self):
@@ -113,6 +135,8 @@ class TestCommonFunctions(BaseTestCase.BaseTestCase):
 		ret = common.parseDOM(self.readTestInput("watch-gyzlwNvf8ss-standard.html", False), "embed", attrs = {"id": "movie_player" }, ret = "flashvars")
 		
 		print repr(ret)
+
+		assert(len(ret) == 1 )	
 		assert(ret[0].strip() == self.readTestInput("watch-gyzlwNvf8ss-flashvars.txt", False).strip())
 
 	def test_parseDOM_should_be_able_to_extract_the_src_attribute_of_a_flashvars_element_from_a_youtube_video_page(self):
@@ -122,6 +146,8 @@ class TestCommonFunctions(BaseTestCase.BaseTestCase):
 		ret = common.parseDOM(self.readTestInput("watch-gyzlwNvf8ss-standard.html", False), "embed", attrs = {"id": "movie_player"}, ret = "src")
 		
 		print repr(ret)
+
+		assert(len(ret) == 1 )	
 		assert(ret[0] == "http://s.ytimg.com/yt/swfbin/watch_as3-vflCwc_mi.swf")
 
 	def test_getDOMContent_should_correctly_extract_the_text_content_of_a_link_tag(self):
@@ -132,6 +158,7 @@ class TestCommonFunctions(BaseTestCase.BaseTestCase):
 		ret = common.getDOMContent(inp, "a", "<a href='bla.html'>")
 		
 		print repr(ret)
+
 		assert(ret == "Link Test")
 
 	def test_getDOMContent_should_not_extract_the_content_of_a_link_tag_that_doesnt_match_the_search_string(self):
