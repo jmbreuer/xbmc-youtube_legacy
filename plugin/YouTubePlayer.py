@@ -154,7 +154,7 @@ class YouTubePlayer():
 		path = os.path.join( self.xbmc.translatePath( "special://temp" ), filename )
 		
 		w = self.storage.openFile(path)
-		w.write(result.encode('utf-8'))
+		w.write(result)
 		w.close()
 		
 		if video.has_key("downloadPath"):

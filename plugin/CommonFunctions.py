@@ -45,7 +45,7 @@ class CommonFunctions():
 
 		return html
 
-	def getDOMContent(self, html, name, match): # convert to log.
+	def getDOMContent(self, html, name, match):
 		self.log("match: " + match, 2)
 		start = html.find(match)
 		if name == "img":
@@ -177,7 +177,6 @@ class CommonFunctions():
 			ret_obj["header"] = str(con.info())
 			con.close()
 
-			# Return result if it isn't age restricted
 			self.log("Done")
 			ret_obj["status"] = 200
 			return ret_obj
@@ -189,11 +188,12 @@ class CommonFunctions():
 			
 			params["error"] = str(int(get("error", "0")) + 1)
 			ret = self._fetchPage(params)
+
 			if not ret.has_key("content") and e.fp:
 				ret["content"] = e.fp.read()
-			return ret
+				return ret
 
-			ret_obj["status"] = 505
+			ret_obj["status"] = 500
 			return ret_obj
 	
 	def log(self, description, level = 0):

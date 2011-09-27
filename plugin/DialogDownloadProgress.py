@@ -161,7 +161,7 @@ class Window:
 		if xbmc.getInfoLabel( "Window.Property(DialogDownloadProgress.IsAlive)" ) == "true":
 			raise xbmcguiWindowError( "DialogDownloadProgress IsAlive: Not possible to overscan!" )
 		
-		windowXml = DialogDownloadProgressXML( "DialogDownloadProgress.xml", __addonDir__, ADDON_SKIN )
+		windowXml = DialogDownloadProgressXML( "DialogDownloadProgress.xml", addonDir, ADDON_SKIN )
 		self.controls = windowXml.controls
 		del windowXml
 
