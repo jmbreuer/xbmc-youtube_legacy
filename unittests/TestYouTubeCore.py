@@ -222,7 +222,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		result = core.getBatchDetailsOverride(items, params={})
 		assert(result == [])
 
-	def ttest_getBatchDetailsThumbnails_should_call_getBatchDetails_with_list_of_video_ids(self):(self):
+	def ttest_getBatchDetailsThumbnails_should_call_getBatchDetails_with_list_of_video_ids(self):
 		core = YouTubeCore()
 		result = core.getBatchDetailsThumbnails(items, params={})
 		assert(result == [])
