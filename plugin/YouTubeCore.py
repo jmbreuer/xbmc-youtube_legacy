@@ -130,7 +130,7 @@ class YouTubeCore():
 		
 	def del_playlist(self, params={}):
 		get = params.get
-		url = "http://gdata.youtube.com/feeds/api/users/%s/playlists/%s" % (self.settings.getSetting("nick"), get("playlist"))
+		url = "http://gdata.youtube.com/feeds/api/users/default/playlists/%s" % (get("playlist"))
 		result = self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true", "method": "DELETE"})
 		return (result["content"], result["status"])
 
@@ -144,7 +144,7 @@ class YouTubeCore():
 	def remove_from_playlist(self, params={}):
 		get = params.get
 		url = "http://gdata.youtube.com/feeds/api/playlists/%s/%s" % (get("playlist"), get("playlist_entry_id"))
-		result = self._fetchPage({"link": url, "api": "true", "auth": "true", "method": "DELETE"})
+		result = self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true", "method": "DELETE"})
 		return (result["content"], result["status"])
 	
 	def getFolderInfo(self, xml, params={}):
