@@ -162,7 +162,6 @@ class YouTubeCore():
 			for link in links:
 				lget = link.attributes.get
 				if (lget("rel").value == "next"):
-					print "smokey " + repr(link.attributes)
 					next = True
 					break
 		
