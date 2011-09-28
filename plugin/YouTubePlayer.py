@@ -245,7 +245,8 @@ class YouTubePlayer():
 							ns_bcolor = snode.item(0).getAttribute("bgColor").replace("0x0000000000", "")
 							ns_bcolor = ns_bcolor[4:6] + ns_bcolor[2:4] + ns_bcolor[0:2]
 							ns_alpha = snode.item(0).getAttribute("bgAlpha")
-							if ns_alpha == "0":
+							
+							if not ns_alpha or ns_alpha == "0":
 								ns_alpha = "-1"
 							else:
 								ns_alpha = int(265 - (float(ns_alpha) * 100))
