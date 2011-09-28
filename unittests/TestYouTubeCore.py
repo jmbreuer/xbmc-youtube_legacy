@@ -286,35 +286,86 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		patcher.stop("")
 		sys.modules["__main__"].utils.addNextFolder.assert_called_with([], {})
 		
-	def ttest_getBatchDetailsOverride_should_call_getBatchDetails_with_list_of_video_ids(self):
+	def test_getBatchDetailsOverride_should_call_getBatchDetails_with_list_of_video_ids(self):
+		settings = ["4","3" ]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()		
 		core = YouTubeCore()
-		result = core.getBatchDetailsOverride(items, params={})
-		assert(result == [])
-
-	def ttest_getBatchDetailsOverride_should_override_specified_properties_in_output_from_getBatchDetails(self):
-		core = YouTubeCore()
-		result = core.getBatchDetailsOverride(items, params={})
-		assert(result == [])
-
-	def ttest_getBatchDetailsThumbnails_should_call_getBatchDetails_with_list_of_video_ids(self):
-		core = YouTubeCore()
-		result = core.getBatchDetailsThumbnails(items, params={})
-		assert(result == [])
-
-	def ttest_getBatchDetailsThumbnails_should_override_thumbnails_in_output_from_getBatchDetails(self):
-		core = YouTubeCore()
-		result = core.getBatchDetailsThumbnails(items, params={})
-		assert(result == [])
+		core.getBatchDetails = Mock()
+		core.getBatchDetails.return_value = ([{"videoid":"some_id3"},{"videoid":"some_id2"},{"videoid":"some_id1"}], 200)
+		items = [{"videoid":"some_id1","some_key1":"value1"},{"videoid":"some_id2","some_key2":"value2"}, {"videoid":"some_id3","some_key3":"value3"}]
 		
-	def ttest_getBatchDetailsThumbnails_should_fill_out_missing_videos_in_collection_from_getBatchDetails_to_maintain_collection_size(self):
-		core = YouTubeCore()
-		result = core.getBatchDetailsThumbnails(items, params={})
-		assert(result == [])
+		(result, status) = core.getBatchDetailsOverride(items, params={})
+		
+		core.getBatchDetails.assert_called_with(['some_id1', 'some_id2', 'some_id3'], {})
 
-	def ttest_getBatchDetailsOverride_should_fill_out_missing_videos_in_collection_from_getBatchDetails_to_maintain_collection_size(self):
+	def test_getBatchDetailsOverride_should_override_specified_properties_in_output_from_getBatchDetails(self):
+		settings = ["4","3" ]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()		
 		core = YouTubeCore()
-		result = core.getBatchDetailsOverride(items, params={})
-		assert(result == [])
+		core.getBatchDetails = Mock()
+		core.getBatchDetails.return_value = ([{"videoid":"some_id3","some_key3":"blabla"},{"videoid":"some_id2","some_key2":"blabla"},{"videoid":"some_id1","some_key1":"blabla"}], 200)
+		items = [{"videoid":"some_id1","some_key1":"value1"},{"videoid":"some_id2","some_key2":"value2"}, {"videoid":"some_id3","some_key3":"value3"}]
+		
+		(result, status) = core.getBatchDetailsOverride(items, params={})
+		
+		assert(result[0]["some_key3"] == "value3")
+		assert(result[1]["some_key2"] == "value2")
+		assert(result[2]["some_key1"] == "value1")
+
+	def test_getBatchDetailsThumbnails_should_call_getBatchDetails_with_list_of_video_ids(self):
+		settings = ["4","3" ]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()		
+		core = YouTubeCore()
+		core.getBatchDetails = Mock()
+		core.getBatchDetails.return_value = ([{"videoid":"some_id3","some_key3":"blabla"},{"videoid":"some_id2","some_key2":"blabla"},{"videoid":"some_id1","some_key1":"blabla"}], 200)
+		items = [("some_id3","some_thumb3"),("some_id2","some_thumb2"),("some_id1","some_thumb1")]
+		
+		(result, status) = core.getBatchDetailsThumbnails(items, params={})
+		
+		core.getBatchDetails.assert_called_with(['some_id3', 'some_id2', 'some_id1'], {})
+		
+	def test_getBatchDetailsThumbnails_should_override_thumbnails_in_output_from_getBatchDetails(self):
+		settings = ["4","3" ]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()		
+		core = YouTubeCore()
+		core.getBatchDetails = Mock()
+		core.getBatchDetails.return_value = ([{"videoid":"some_id3","some_key3":"blabla"},{"videoid":"some_id2","some_key2":"blabla"},{"videoid":"some_id1","some_key1":"blabla"}], 200)
+		items = [("some_id3","some_thumb3"),("some_id2","some_thumb2"),("some_id1","some_thumb1")]
+		
+		(result, status) = core.getBatchDetailsThumbnails(items, params={})
+		
+		assert(result[0]["thumbnail"] == "some_thumb3")
+		assert(result[1]["thumbnail"] == "some_thumb2")
+		assert(result[2]["thumbnail"] == "some_thumb1")
+		
+	def test_getBatchDetailsThumbnails_should_fill_out_missing_videos_in_collection_from_getBatchDetails_to_maintain_collection_size(self):
+		settings = ["4","3" ]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()		
+		core = YouTubeCore()
+		core.getBatchDetails = Mock()
+		core.getBatchDetails.return_value = ([{"videoid":"some_id3","some_key3":"blabla"},{"videoid":"some_id2","some_key2":"blabla"}], 200)
+		items = [("some_id3","some_thumb3"),("some_id2","some_thumb2"),("some_id1","some_thumb1")]
+		
+		(result, status) = core.getBatchDetailsThumbnails(items, params={})
+		
+		print repr(result)
+		assert(result[0]["thumbnail"] == "some_thumb3")
+		assert(result[1]["thumbnail"] == "some_thumb2")
+		assert(result[2]["videoid"] == "false")
+
+	def test_getBatchDetailsOverride_should_fill_out_missing_videos_in_collection_from_getBatchDetails_to_maintain_collection_size(self):
+		settings = ["4","3" ]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()		
+		core = YouTubeCore()
+		core.getBatchDetails = Mock()
+		core.getBatchDetails.return_value = ([{"videoid":"some_id3","some_key3":"blabla"},{"videoid":"some_id2","some_key2":"blabla"}], 200)
+		items = [{"videoid":"some_id1","some_key1":"value1"},{"videoid":"some_id2","some_key2":"value2"}, {"videoid":"some_id3","some_key3":"value3"}]
+		
+		(result, status) = core.getBatchDetailsOverride(items, params={})
+		
+		assert(result[0]["some_key3"] == "value3")
+		assert(result[1]["some_key2"] == "value2")
+		assert(result[2]["videoid"] == "false")
 		
 	def getBatchDetails(self):
 		core = YouTubeCore()
