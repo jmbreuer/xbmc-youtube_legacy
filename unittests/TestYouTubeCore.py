@@ -256,15 +256,36 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(result[0]["user_feed"] == "playlist")
 		assert(result[0]["Title"] == "Stand back I'm going to try Science!")
 
-	def ttest_getFolderInfo_should_call_storage_retrieve_to_find_thumbnail(self):
+	def test_getFolderInfo_should_call_storage_retrieve_to_find_thumbnail(self):
+		settings = ["4","3" ]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
+		input = self.readTestInput("getFolderInfoPlaylistTest.xml", False)
 		core = YouTubeCore()
-		xml = ""
-		core._getFolderInfo(xml, {})
+		
+		result = core.getFolderInfo(input, {})
 
-		assert(False)
+		assert(sys.modules["__main__"].storage.retrieve.call_count == 1)
 	
-	def ttest_getFolderInfo_should_call_utils_addNextFolder_to_set_default_next_folder_on_feed(self):
-		assert(False)
+	def test_getFolderInfo_should_call_utils_addNextFolder_to_set_default_next_folder_on_feed(self):
+		settings = ["4","3" ]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
+		patcher = patch("xml.dom.minidom.parseString")
+		patcher.start()
+		import xml.dom.minidom
+		link = Mock()
+		rel = Mock()
+		rel.value = "next"
+		link.attributes = {"rel":rel}
+		tags = ["", [link]]
+		xml.dom.minidom.parseString = Mock()
+		xml.dom.minidom.parseString().getElementsByTagName.side_effect = lambda x: tags.pop() 
+		core = YouTubeCore()
+		
+		core.getFolderInfo(xml, {})
+
+		patcher.stop("")
+		sys.modules["__main__"].utils.addNextFolder.assert_called_with([], {})
+		
 	def ttest_getBatchDetailsOverride_should_call_getBatchDetails_with_list_of_video_ids(self):
 		core = YouTubeCore()
 		result = core.getBatchDetailsOverride(items, params={})
