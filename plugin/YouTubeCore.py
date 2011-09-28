@@ -220,7 +220,7 @@ class YouTubeCore():
 				if k == "videoid":
 					videoids.append(v)
 		
-		(ytobjects, status) = self.getBatchDetails(videoids, params={})
+		(ytobjects, status) = self.getBatchDetails(videoids, params)
 		
 		for video in items:
 			videoid = video["videoid"]
@@ -241,7 +241,7 @@ class YouTubeCore():
 		for (videoid, thumb) in items:
 			videoids.append(videoid)
 		
-		(tempobjects, status) = self.getBatchDetails(videoids, params={})
+		(tempobjects, status) = self.getBatchDetails(videoids, params)
 		
 		for i in range(0, len(items)):
 			(videoid, thumbnail) = items[i]
