@@ -177,27 +177,31 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		patcher.start()
 		import xml.dom.minidom
 		link = Mock()
-		link.attributes.return_value = {"rel":"true"}
+		rel = Mock()
+		rel.value = "next"
+		link.attributes = {"rel":rel}
 		tags = ["", [link]]
 		xml.dom.minidom.parseString = Mock()
 		xml.dom.minidom.parseString().getElementsByTagName.side_effect = lambda x: tags.pop() 
-		
 		core = YouTubeCore()
 		
 		core.getFolderInfo(xml, {})
 
 		patcher.stop("")
-		
-		link.attributes.assert_called_with()
-		
-	def ttest_getFolderInfo_should_find_edit_id_in_xml_structure_if_id_tag_is_present(self):
+		sys.modules["__main__"].utils.addNextFolder.assert_called_with([], {})
+	
+	def test_getFolderInfo_should_find_edit_id_in_xml_structure_if_id_tag_is_present(self):
+		settings = ["4","3" ]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
+		input = self.readTestInput("GetFolderInfoPlaylistTest.xml", False)
 		core = YouTubeCore()
-		xml = ""
-		core._getFolderInfo(xml, {})
+		
+		result = core.getFolderInfo(input, {})
 
-		assert(False)
+		assert(result[0]["editid"] == "some_playlist_id")
 
-	def ttest_getFolderInfo_should_find_edit_id_in_xml_structure_if_link_tag_is_present(self):
+
+	def test_getFolderInfo_should_find_edit_id_in_xml_structure_if_link_tag_is_present(self):
 		core = YouTubeCore()
 		xml = ""
 		core._getFolderInfo(xml, {})
