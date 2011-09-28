@@ -188,7 +188,7 @@ class TestLoader(unittest.TestLoader):
         # pop paths
         if self.config.addPaths:
             for p in paths_added:
-              remove_path(p)
+                remove_path(p)
         plugins.afterDirectory(path)
 
     def loadTestsFromFile(self, filename):
@@ -529,8 +529,8 @@ class TestLoader(unittest.TestLoader):
             return Failure(exc[0], exc[1], exc[2], address=addr)
         
         if isfunction(obj) and parent and not isinstance(parent, types.ModuleType):
-	    # This is a Python 3.x 'unbound method'.  Wrap it with its
-	    # associated class..
+        # This is a Python 3.x 'unbound method'.  Wrap it with its
+        # associated class..
             obj = unbound_method(parent, obj)
 
         if isinstance(obj, unittest.TestCase):
