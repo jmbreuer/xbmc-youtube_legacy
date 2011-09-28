@@ -193,7 +193,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 	def test_getFolderInfo_should_find_edit_id_in_xml_structure_if_id_tag_is_present(self):
 		settings = ["4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
-		input = self.readTestInput("GetFolderInfoPlaylistTest.xml", False)
+		input = self.readTestInput("getFolderInfoPlaylistTest.xml", False)
 		core = YouTubeCore()
 		
 		result = core.getFolderInfo(input, {})
@@ -201,33 +201,60 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(result[0]["editid"] == "some_playlist_id")
 
 
-	def test_getFolderInfo_should_find_edit_id_in_xml_structure_if_link_tag_is_present(self):
+	def ttest_getFolderInfo_should_find_edit_id_in_xml_structure_if_link_tag_is_present(self):
 		core = YouTubeCore()
 		xml = ""
 		core._getFolderInfo(xml, {})
 
 		assert(False)
 
-	def ttest_getFolderInfo_should_set_item_params_correctly_for_contacts_feed(self):
+	def test_getFolderInfo_should_set_item_params_correctly_for_contacts_feed(self):
+		settings = ["4","3" ]
+		sys.modules["__main__"].storage.retrieve.return_value = "some_thumbnail"
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
+		input = self.readTestInput("getFolderInfoContactTest.xml", False)
 		core = YouTubeCore()
-		xml = ""
-		core._getFolderInfo(xml, {})
+		
+		result = core.getFolderInfo(input, {"user_feed":"contacts"})
+		
+		assert(result[0]["editid"] == "some_other_user")
+		assert(result[0]["thumbnail"] == "some_thumbnail")
+		assert(result[0]["login"] == "true")
+		assert(result[0]["contact"] == "some_other_user")
+		assert(result[0]["store"] == "contact_options")
+		assert(result[0]["Title"] == "some_other_user")
+		assert(result[0]["folder"] == "true")
 
-		assert(False)
-
-	def ttest_getFolderInfo_should_set_item_params_correctly_for_subscriptions_feed(self):
+	def test_getFolderInfo_should_set_item_params_correctly_for_subscriptions_feed(self):
+		settings = ["4","3" ]
+		sys.modules["__main__"].storage.retrieve.return_value = "some_thumbnail"
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
+		input = self.readTestInput("getFolderInfoSubscriptionsTest.xml", False)
 		core = YouTubeCore()
-		xml = ""
-		core._getFolderInfo(xml, {})
-
-		assert(False)
-
-	def ttest_getFolderInfo_should_set_item_params_correctly_for_playlist_feed(self):
+		
+		result = core.getFolderInfo(input, {"user_feed":"subscriptions"})
+		
+		assert(result[0]["editid"] == "some_edit_id")
+		assert(result[0]["thumbnail"] == "some_thumbnail")
+		assert(result[0]["login"] == "true")
+		assert(result[0]["channel"] == "GoogleTechTalks")
+		assert(result[0]["Title"] == "GoogleTechTalks")
+		
+	def test_getFolderInfo_should_set_item_params_correctly_for_playlist_feed(self):
+		settings = ["4","3" ]
+		sys.modules["__main__"].storage.retrieve.return_value = "some_thumbnail"
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
+		input = self.readTestInput("GetFolderInfoPlaylistTest.xml", False)
 		core = YouTubeCore()
-		xml = ""
-		core._getFolderInfo(xml, {})
-
-		assert(False)
+		
+		result = core.getFolderInfo(input, {"user_feed":"playlists"})
+		
+		assert(result[0]["editid"] == "some_playlist_id")
+		assert(result[0]["thumbnail"] == "some_thumbnail")
+		assert(result[0]["login"] == "true")
+		assert(result[0]["playlist"] == "some_playlist_id")
+		assert(result[0]["user_feed"] == "playlist")
+		assert(result[0]["Title"] == "Stand back I'm going to try Science!")
 
 	def ttest_getFolderInfo_should_call_storage_retrieve_to_find_thumbnail(self):
 		core = YouTubeCore()
