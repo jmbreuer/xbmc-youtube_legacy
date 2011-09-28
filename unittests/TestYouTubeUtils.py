@@ -215,4 +215,4 @@ class TestYouTubeUtils(BaseTestCase.BaseTestCase):
 		assert(result[0]["page"] == "46")
 		
 if __name__ == '__main__':
-	nose.run()
+	nose.runmodule()

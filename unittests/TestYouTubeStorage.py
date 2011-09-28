@@ -1147,4 +1147,4 @@ class TestYouTubeStorage(BaseTestCase.BaseTestCase):
 		sys.modules["__main__"].cache.sqlSet.assert_called_with("YouTubeDownloadQueue","[]")
 	
 if __name__ == '__main__':
-	nose.run()
+	nose.runmodule()

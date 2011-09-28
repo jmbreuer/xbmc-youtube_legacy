@@ -756,4 +756,4 @@ class TestYouTubeUtils(BaseTestCase.BaseTestCase):
 		assert(result == 200)
 				
 if __name__ == '__main__':
-	nose.run()
+	nose.runmodule()

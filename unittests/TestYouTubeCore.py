@@ -150,18 +150,45 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(core._fetchPage.call_count == 1)
 		core._fetchPage.assert_called_with({"link": url, "api": "true", "login": "true", "auth": "true","method":"DELETE"})
 
-	def ttest_getFolderInfo_should_use_getElementsByTagName_to_look_for_link_and_entries(self):
+	def test_getFolderInfo_should_use_getElementsByTagName_to_look_for_link_and_entries(self):
+		settings = ["4","3" ]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
+		patcher = patch("xml.dom.minidom.parseString")
+		patcher.start()
+		import xml.dom.minidom
+		xml.dom.minidom.parseString = Mock()
+		xml.dom.minidom.parseString().getElementsByTagName.return_value = ""
+		
 		core = YouTubeCore()
-		xml = ""
-		core._getFolderInfo(xml, {})
-		assert(False)
+		
+		core.getFolderInfo(xml, {})
+		calls = xml.dom.minidom.parseString().getElementsByTagName.call_args_list
 
-	def ttest_getFolderInfo_should_search_links_relation_attribute_for_multiple_pages(self):
+		patcher.stop("")
+		
+		print repr(calls[1][0][0])
+		assert(calls[0][0][0] == "link")
+		assert(calls[1][0][0] == "entry")
+
+	def test_getFolderInfo_should_search_links_relation_attribute_for_multiple_pages(self):
+		settings = ["4","3" ]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
+		patcher = patch("xml.dom.minidom.parseString")
+		patcher.start()
+		import xml.dom.minidom
+		link = Mock()
+		link.attributes.return_value = {"rel":"true"}
+		tags = ["", [link]]
+		xml.dom.minidom.parseString = Mock()
+		xml.dom.minidom.parseString().getElementsByTagName.side_effect = lambda x: tags.pop() 
+		
 		core = YouTubeCore()
-		xml = ""
-		core._getFolderInfo(xml, {})
+		
+		core.getFolderInfo(xml, {})
 
-		assert(False)
+		patcher.stop("")
+		
+		link.attributes.assert_called_with()
 		
 	def ttest_getFolderInfo_should_find_edit_id_in_xml_structure_if_id_tag_is_present(self):
 		core = YouTubeCore()
@@ -206,12 +233,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(False)
 	
 	def ttest_getFolderInfo_should_call_utils_addNextFolder_to_set_default_next_folder_on_feed(self):
-		core = YouTubeCore()
-		xml = ""
-		core._getFolderInfo(xml, {})
-
 		assert(False)
-	
 	def ttest_getBatchDetailsOverride_should_call_getBatchDetails_with_list_of_video_ids(self):
 		core = YouTubeCore()
 		result = core.getBatchDetailsOverride(items, params={})
@@ -312,4 +334,4 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(result == [])
 
 if __name__ == "__main__":
-	nose.run()
+	nose.runmodule()

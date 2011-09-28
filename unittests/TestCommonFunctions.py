@@ -172,4 +172,4 @@ class TestCommonFunctions(BaseTestCase.BaseTestCase):
 		assert(ret == "")
 
 if __name__ == "__main__":
-	nose.run()
+	nose.runmodule()

@@ -494,4 +494,4 @@ class TestYouTubePlaylistControl(BaseTestCase.BaseTestCase):
 		sys.modules["__main__"].xbmc.executebuiltin.assert_called_with("Container.Refresh")	
 
 if __name__ == '__main__':
-	nose.run()
+	nose.runmodule()

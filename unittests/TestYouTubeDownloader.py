@@ -637,4 +637,4 @@ class TestYouTubeDownloader(BaseTestCase.BaseTestCase):
 		sys.modules["__main__"].storage.storeValue.assert_called_with('vidstatus-someid', '1')
 
 if __name__ == '__main__':
-	nose.run()
+	nose.runmodule()
