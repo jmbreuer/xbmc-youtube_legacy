@@ -17,9 +17,10 @@
 '''
 
 import sys, urllib, urllib2, re, time, socket, cookielib
+import xml.dom.minidom as minidom
 try: import simplejson as json
 except ImportError: import json
-from xml.dom.minidom import parseString
+#from xml.dom.minidom import parseString
 
 # ERRORCODES:
 # 200 = OK
@@ -151,7 +152,7 @@ class YouTubeCore():
 		get = params.get
 		result = ""
 		
-		dom = parseString(xml);
+		dom = minidom.parseString(xml);
 		links = dom.getElementsByTagName("link");
 		entries = dom.getElementsByTagName("entry");
 		next = False
@@ -161,6 +162,7 @@ class YouTubeCore():
 			for link in links:
 				lget = link.attributes.get
 				if (lget("rel").value == "next"):
+					print "smokey " + repr(link.attributes)
 					next = True
 					break
 		
@@ -605,7 +607,7 @@ class YouTubeCore():
 	
 	def getVideoInfo(self, xml, params={}):
 		get = params.get
-		dom = parseString(xml);
+		dom = minidom.parseString(xml);
 		self.common.log(str(len(xml)))
 		links = dom.getElementsByTagName("link");
 		entries = dom.getElementsByTagName("entry");
