@@ -196,14 +196,7 @@ class YouTubeCore():
 			thumb = self.storage.retrieve(params, "thumbnail", folder)
 			if thumb:
 				folder["thumbnail"] = thumb 
-			
-			if node.getElementsByTagName("link"):
-				link = node.getElementsByTagName("link")
-				for i in range(len(link)):
-					if link.item(i).getAttribute('rel') == 'edit':
-						obj = link.item(i).getAttribute('href')
-						folder['editid'] = obj[obj.rfind('/') + 1:]
-			
+						
 			folders.append(folder);
 		
 		if next:
