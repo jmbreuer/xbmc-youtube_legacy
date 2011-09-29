@@ -201,13 +201,6 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(result[0]["editid"] == "some_playlist_id")
 
 
-	def ttest_getFolderInfo_should_find_edit_id_in_xml_structure_if_link_tag_is_present(self):
-		core = YouTubeCore()
-		xml = ""
-		core._getFolderInfo(xml, {})
-
-		assert(False)
-
 	def test_getFolderInfo_should_set_item_params_correctly_for_contacts_feed(self):
 		settings = ["4","3" ]
 		sys.modules["__main__"].storage.retrieve.return_value = "some_thumbnail"
