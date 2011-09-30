@@ -452,7 +452,7 @@ class YouTubeCore():
 		## Couldn't find 2 factor or normal login
 		error = self.common.parseDOM(ret['content'], "div", attrs={ "class": "errormsg" })
 		if len(error) == 0:   
-			# An error in 2-factor
+		# An error in 2-factor
 			error = self.common.parseDOM(ret['content'], "div", attrs={ "class": "error smaller"})
 		if len(error) == 0:
 			error = self.common.parseDOM(ret['content'], "div", attrs={ "id": "unavailable-message"})
@@ -555,7 +555,6 @@ class YouTubeCore():
 				self.settings.setSetting("oauth2_access_token", oauth["access_token"])
 				return True
 
-
 			return False
 
 		self.common.log("didn't even try")
@@ -573,7 +572,7 @@ class YouTubeCore():
 		if (auth):
 			self.common.log("returning stored auth")
 			return auth
-		else:   
+		else:
 			(result, status) = self.login()
 			if status == 200:
 				self.common.log("returning new auth")
