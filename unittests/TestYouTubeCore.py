@@ -360,12 +360,172 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(result[1]["some_key2"] == "value2")
 		assert(result[2]["videoid"] == "false")
 		
-	def getBatchDetails(self):
+	def test_getBatchDetails_should_call_cache_sqlGetMulti_before_hitting_youtube(self):
+		settings = ["4","3" ]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()		
 		core = YouTubeCore()
-		result = core._fetchPage(params={})
-		assert(result == [])
+		core._fetchPage = Mock()
+		core.getBatchDetails([],{})
+		
+		sys.modules["__main__"].cache.sqlGetMulti.assert_called_with('videoidcache', [])
 
+	def test_getBatchDetails_should_not_request_video_information_for_cached_videos(self):
+		settings = ["4","3" ]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()		
+		core = YouTubeCore()
+		core._fetchPage = Mock()
+		core.getVideoInfo = Mock()
+		core.getVideoInfo.return_value = []
+		core._fetchPage.return_value = {"content":"","status":303}
+		sys.modules["__main__"].cache.sqlGetMulti.return_value = ['{"videoid":"some_id_1"}',"","","",'{"videoid":"some_id_5"}']
+		
+		core.getBatchDetails(["some_id_1","some_id_2","some_id_3","some_id_4","some_id_5"],{})
+		
+		request = core._fetchPage.call_args_list[0][0][0]["request"]
+		print repr(request)
+		assert(request.find("some_id_1") < 0)
+		assert(request.find("some_id_5") < 0)
+	
+	def test_getBatchDetails_should_at_most_request_50_videos_in_one_call(self):
+		settings = ["4","3" ]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()		
+		core = YouTubeCore()
+		core._fetchPage = Mock()
+		core.getVideoInfo = Mock()
+		core.getVideoInfo.return_value = []
+		core._fetchPage.return_value = {"content":"","status":303}
+		sys.modules["__main__"].cache.sqlGetMulti.return_value = []
+		sys.modules["__main__"].common.parseDOM.return_value = ""
+		ids = []
+		i= 1
+		while i < 52:
+			ids.append("some_id_"  + str(i))
+			i += 1
+		
+		core.getBatchDetails(ids,{})
+		
+		request = core._fetchPage.call_args_list[0][0][0]["request"]
+		assert(request.find("some_id_52") < 0)
+		assert(request.find("some_id_1") > 0)
+		assert(request.find("some_id_50") > 0)
 
+	def test_getBatchDetails_should_search_result_for_response_status_code(self):
+		settings = ["4","3" ]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()		
+		core = YouTubeCore()
+		core._fetchPage = Mock()
+		core.getVideoInfo = Mock()
+		core.getVideoInfo.return_value = []
+		core._fetchPage.return_value = {"content":"","status":303}
+		sys.modules["__main__"].cache.sqlGetMulti.return_value = []
+		sys.modules["__main__"].common.parseDOM.return_value = ""
+		ids = []
+		i= 1
+		while i < 52:
+			ids.append("some_id_"  + str(i))
+			i += 1
+		
+		core.getBatchDetails(ids,{})
+		
+		sys.modules["__main__"].common.parseDOM.assert_called_with("","batch:status",ret="code")
+
+	def test_getBatchDetails_should_sleep_for_5_seconds_if_youtube_returns_error(self):
+		settings = ["4","3" ]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
+		patcher = patch("time.sleep")
+		import time
+		time.sleep = Mock() 		
+		core = YouTubeCore()
+		core._fetchPage = Mock()
+		core.getVideoInfo = Mock()
+		core.getVideoInfo.return_value = []
+		core._fetchPage.return_value = {"content":"","status":303}
+		sys.modules["__main__"].cache.sqlGetMulti.return_value = []
+		status = [[],["","403"]]
+		sys.modules["__main__"].common.parseDOM.side_effect = lambda x = "", y ="",attrs = {},ret = {}: status.pop()  
+		ids = []
+		i= 1
+		while i < 52:
+			ids.append("some_id_"  + str(i))
+			i += 1
+		
+		core.getBatchDetails(ids,{})
+		
+		time.sleep.assert_called_with(5)
+
+	def test_getBatchDetails_should_call_get_video_info_on_result(self):
+		settings = ["4","3" ]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()		
+		core = YouTubeCore()
+		core._fetchPage = Mock()
+		core.getVideoInfo = Mock()
+		core.getVideoInfo.return_value = []
+		core._fetchPage.return_value = {"content":"some_content","status":303}
+		sys.modules["__main__"].cache.sqlGetMulti.return_value = ['{"videoid":"some_id_1"}',"","","",'{"videoid":"some_id_5"}']
+		
+		core.getBatchDetails(["some_id_1","some_id_2","some_id_3","some_id_4","some_id_5"],{"param":"some_params"})
+		
+		core.getVideoInfo.assert_called_with("some_content",{"param":"some_params"})
+		
+	def test_getBatchDetails_should_handle_collection_sizes_above_50(self):
+		settings = ["4","3" ]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()		
+		core = YouTubeCore()
+		core._fetchPage = Mock()
+		core.getVideoInfo = Mock()
+		core.getVideoInfo.return_value = []
+		core._fetchPage.return_value = {"content":"","status":303}
+		sys.modules["__main__"].cache.sqlGetMulti.return_value = []
+		sys.modules["__main__"].common.parseDOM.return_value = ""
+		ids = []
+		i= 1
+		while i < 75:
+			ids.append("some_id_"  + str(i))
+			i += 1
+		
+		core.getBatchDetails(ids,{})
+		
+		assert(core._fetchPage.call_count == 2)
+			
+	def ttest_fetchPage_should_return_error_status_and_empty_content_if_no_params_are_provided(self):
+		assert(False)
+	
+	def ttest_fetchPage_should_call_getAuth_to_fetch_oauth_token_if_auth_is_in_params_collection(self):
+		assert(False)
+
+	def ttest_fetchPage_should_call_getSettings_if_to_fetch_oauth_token_if_auth_is_in_params_collection(self):
+		assert(False)
+	
+	def ttest_fetchPage_should_give_up_after_4_tries(self):
+		assert(False)
+	
+	def ttest_fetchPage_should_call_urllib_add_header_id_url_data_is_in_params_collection(self):
+		assert(False)
+	
+	def ttest_fetchPage_should_set_request_method_to_get_if_request_is_not_in_params_collection(self):
+		assert(False)
+	
+	def ttest_fetchPage_should_append_GdataApi_headers_if_request_is_set(self):
+		assert(False)
+	
+	def ttest_fetchPage_should_append_api_key_to_headers_if_api_is_in_params(self):
+		assert(False)
+	
+	def ttest_fetchPage_should_append_user_agent_and_no_language_cookie_to_headers_if_api_is_not_in_params(self):
+		assert(False)
+	
+	def ttest_fetchPage_should_return_error_message_if_login_is_in_params_collection_and_plugin_is_missing_login_info(self):
+		assert(False)
+	
+	def ttest_fetchPage_should_call_http_login_to_fetch_existing_token_if_login_is_in_params(self):
+		assert(False)
+	
+	def ttest_fetchPage_should_append_login_token_to_request_headers_if_login_is_in_params(self):
+		assert(False)
+
+	def ttest_fetchPage_should_call_http_login_to_fetch_new_login_token_if_login_is_in_params_and_login_info_is_invalid(self):
+		assert(False)
+		
 	def test_fetchPage_should_return_content_of_link_and_proper_status_code(self):
 		settings = ["4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
@@ -397,37 +557,115 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		sys.modules[ "__main__" ].common.parseDOM.assert_called_with(input["content"], 'div', attrs={ "class": "errormsg" })
 		assert(result == "Mock error")
 
-	def _verifyAge(self):
+	def ttest_findErrors_should_use_parseDOM_to_look_for_error_smaller(self):
+		assert(False)
+		
+	def ttest_findErrors_should_use_parseDOM_to_look_for_unavailable_message(self):
+		assert(False)
+		
+	def ttest_findErrors_should_use_parseDOM_to_look_for_error_if_content_contains_yt_quota(self):
+		assert(False)
+		
+	def ttest_findErrors_should_use_parseDOM_to_look_for_yt_alert_content(self):
+		assert(False)
+
+	def ttest_findErrors_should_return_if_error_find(self):
+		assert(False)
+	
+	def ttest_verifyAge_should_work_at_some_point(self):
 		core = YouTubeCore()
 		result = core._verifyAge(result, new_url, params={})
 		assert(result == [])
 
-	def _oRefreshToken(self):
-		core = YouTubeCore()
-		result = core._oRefreshToken()
-		assert(result == True)
+	def ttest_oRefreshToken_should_reset_access_token_before_calling_fetch_page(self):
+		assert(False)
 
-	def _getAuth(self):
-		core = YouTubeCore()
-		result = core.getAuth()
-		assert(result != False)
+	def ttest_oRefreshToken_should_fetch_refresh_token_form_settings(self):
+		assert(False)
 
-	def _getNodeAttribute(self):
-		core = YouTubeCore()
-		result = core._getNodeAttribute(node, tag, default="")
-		assert(result == [])
-		print "test"
+	def ttest_oRefreshToken_should_fetchPage_with_correct_params(self):
+		assert(False)
 
-	def _getNodeValue(self):
-		core = YouTubeCore()
-		result = core._getNodeValue(node, tag, default="")
-		assert(result == [])
-		print "test"
+	def ttest_oRefreshToken_should_pars_token_json_structure_correctly(self):
+		assert(False)
 
-	def _getVideoInfo(self):
-		core = YouTubeCore()
-		result = core.delete_favorite( xml, {})
-		assert(result == [])
+	def ttest_oRefreshToken_should_log_error_if_invalid_json_structure_is_returned(self):
+		assert(False)
+
+	def ttest_oRefreshToken_should_set_access_token_if_found(self):
+		assert(False)
+			
+	def ttest_getAuth_should_check_token_expiration_before_calling_refresh_token(self):
+		assert(False)
+	
+	def ttest_getAuth_should_fetch_token_from_settings(self):
+		assert(False)
+
+	def ttest_getAuth_should_call_login_if_token_isnt_found(self):
+		assert(False)
+
+	def ttest_getNodeAttribute_should_parse_node_structure_correctly(self):
+		assert(False)
+		
+	def ttest_getNodeValue_should_parse_node_structure_correctly(self):
+		assert(False)
+
+	def ttest_getVideoInfo_should_set_call_parseDOM_to_find_links(self):
+		assert(False)
+
+	def ttest_getVideoInfo_should_set_call_parseDOM_to_find_entries(self):
+		assert(False)
+
+	def ttest_getVideoInfo_should_search_links_for_next_page_indicator(self):
+		assert(False)
+
+	def ttest_getVideoInfo_should_call_getNodeValue_to_get_video_id(self):
+		assert(False)
+
+	def ttest_getVideoInfo_should_call_getNodeValue_to_get_Title(self):
+		assert(False)
+
+	def ttest_getVideoInfo_should_call_getNodeValue_to_get_Plot(self):
+		assert(False)
+
+	def ttest_getVideoInfo_should_call_getNodeValue_to_get_Date(self):
+		assert(False)
+
+	def ttest_getVideoInfo_should_call_getNodeValue_to_get_user(self):
+		assert(False)
+
+	def ttest_getVideoInfo_should_call_getNodeValue_to_get_Studio(self):
+		assert(False)
+		
+	def ttest_getVideoInfo_should_call_getNodeValue_to_get_Duration(self):
+		assert(False)
+
+	def ttest_getVideoInfo_should_call_getNodeValue_to_get_Rating(self):
+		assert(False)
+
+	def ttest_getVideoInfo_should_call_getNodeValue_to_get_view_Count(self):
+		assert(False)
+
+	def ttest_getVideoInfo_should_call_getNodeValue_to_get_view_Plot(self):
+		assert(False)
+
+	def ttest_getVideoInfo_should_call_getNodeValue_to_get_view_Genre(self):
+		assert(False)
+
+	def ttest_getVideoInfo_should_add_date_to_plot(self):
+		assert(False)
+
+	def ttest_getVideoInfo_should_add_view_count_to_plot(self):
+		assert(False)
+
+	def ttest_getVideoInfo_should_call_getNodeValue_to_search_for_edit_id(self):
+		assert(False)
+		
+	def ttest_getVideoInfo_should_call_storage_retrieveValue_to_get_watch_status(self):
+		assert(False)
+		
+	def ttest_getVideoInfo_should_parse_youtube_xml(self):
+		assert(False)
 
 if __name__ == "__main__":
 	nose.runmodule()
