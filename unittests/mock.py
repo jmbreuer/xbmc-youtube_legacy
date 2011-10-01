@@ -426,12 +426,12 @@ class Mock(object):
         return object.__delattr__(self, name)
 
 
-    def assert_called_with(self, *args, **kwargs):
+    def assert_called_last_with(self, *args, **kwargs):
         """
         assert that the mock was called with the specified arguments.
 
         Raises an AssertionError if the args and keyword args passed in are
-        different to the last call to the mock.
+        different to the *last* call to the mock.
         """
         if self.call_args is None:
             raise AssertionError('Expected: %s\nNot called' % ((args, kwargs),))
@@ -439,11 +439,25 @@ class Mock(object):
             raise AssertionError(
                 'Expected: %s\nCalled with: %s' % ((args, kwargs), self.call_args)
             )
+    
+    def assert_called_with(self, *args, **kwargs):
+        """
+		assert that the mock was called with the specified arguments.
 
+		Raises an AssertionError if the args and keyword args passed in are
+		different from *any* calls to the mock.
+		"""
+        found = False
+        for call_args in self.call_args_list:
+            if call_args == (args, kwargs):
+                found = True
+        
+        if not found:
+            raise AssertionError('Expected: %s\nCalled with: %s' % ((args, kwargs), self.call_args_list))
 
     def assert_called_once_with(self, *args, **kwargs):
         """
-        assert that the mock was called exactly once and with the specified
+        assert that the mock was called *exactly* once and with the specified
         arguments.
         """
         if not self.call_count == 1:
