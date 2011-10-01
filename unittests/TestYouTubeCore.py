@@ -1287,9 +1287,6 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(result[0]["user"] == "some_user")
 		assert(result[0]["Date"] == "29-09-2011")
 		assert(result[0]["thumbnail"] == "http://i.ytimg.com/vi/ogtKe7N05F0/0.jpg")
-				
-		
-		
-
+	
 if __name__ == "__main__":
 	nose.runmodule()
