@@ -834,7 +834,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		
 	def test_findErrors_should_use_parseDOM_to_look_for_errormsg_tag(self):
 		settings = [ "3"]
-		input = { "content": "<div class='errormsg'>Mock Error</div>"}
+		input = { "content": "some_content"}
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		parsedom = [ ["Mock error [" ] ] # This should probably be updated to something real.
 		sys.modules[ "__main__" ].common.parseDOM.side_effect = lambda x,y,attrs: parsedom.pop()
@@ -845,25 +845,61 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		sys.modules[ "__main__" ].common.parseDOM.assert_called_with(input["content"], 'div', attrs={ "class": "errormsg" })
 		assert(result == "Mock error")
 
-	def ttest_findErrors_should_use_parseDOM_to_look_for_error_smaller(self):
-		assert(False)
+	def test_findErrors_should_use_parseDOM_to_look_for_error_smaller(self):
+		settings = [ "3"]
+		input = { "content": "some_content"}
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
+		parsedom = [ ["Mock error ["],[] ] # This should probably be updated to something real.
+		sys.modules[ "__main__" ].common.parseDOM.side_effect = lambda x,y,attrs: parsedom.pop()
+		core = YouTubeCore()
 		
-	def ttest_findErrors_should_use_parseDOM_to_look_for_unavailable_message(self):
-		assert(False)
+		result = core._findErrors({"content":"some_content"})
 		
-	def ttest_findErrors_should_use_parseDOM_to_look_for_error_if_content_contains_yt_quota(self):
-		assert(False)
+		sys.modules[ "__main__" ].common.parseDOM.assert_called_with(input["content"], 'div', attrs={ "class": "error smaller" })
+		assert(result == "Mock error")
 		
-	def ttest_findErrors_should_use_parseDOM_to_look_for_yt_alert_content(self):
-		assert(False)
+	def test_findErrors_should_use_parseDOM_to_look_for_unavailable_message(self):
+		settings = [ "3"]
+		input = { "content": "some_content"}
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
+		parsedom = [ ["Mock error ["],[],[] ] # This should probably be updated to something real.
+		sys.modules[ "__main__" ].common.parseDOM.side_effect = lambda x,y,attrs: parsedom.pop()
+		core = YouTubeCore()
+		
+		result = core._findErrors({"content":"some_content"})
+		
+		sys.modules[ "__main__" ].common.parseDOM.assert_called_with(input["content"], 'div', attrs={ "id": "unavailable-message" })
+		assert(result == "Mock error")
+		
+	def test_findErrors_should_use_parseDOM_to_look_for_error_if_content_contains_yt_quota(self):
+		settings = [ "3"]
+		input = { "content": "some_content yt:quota"}
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
+		parsedom = [ ["Mock error ["],[],[],[],[] ] # This should probably be updated to something real.
+		sys.modules[ "__main__" ].common.parseDOM.side_effect = lambda x = "",y ="",attrs = {}: parsedom.pop()
+		core = YouTubeCore()
+		
+		result = core._findErrors(input)
+		
+		assert(sys.modules[ "__main__" ].common.parseDOM.call_args_list[3][0][0] == input["content"])
+		assert(sys.modules[ "__main__" ].common.parseDOM.call_args_list[3][0][1] == 'error')
+		sys.modules[ "__main__" ].common.parseDOM.assert_called_with([], 'code')
+		assert(result == "Mock error")
 
-	def ttest_findErrors_should_return_if_error_find(self):
-		assert(False)
+	def test_findErrors_should_return_if_error_found(self):
+		settings = [ "3"]
+		input = { "content": "some_content"}
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
+		parsedom = [ ["Mock error [" ] ] # This should probably be updated to something real.
+		sys.modules[ "__main__" ].common.parseDOM.side_effect = lambda x,y,attrs: parsedom.pop()
+		core = YouTubeCore()
+		
+		result = core._findErrors( input )
+		
+		assert(result == "Mock error")
 	
 	def ttest_verifyAge_should_work_at_some_point(self):
-		core = YouTubeCore()
-		result = core._verifyAge(result, new_url, params={})
-		assert(result == [])
+		assert(False)
 
 	def ttest_oRefreshToken_should_reset_access_token_before_calling_fetch_page(self):
 		assert(False)
