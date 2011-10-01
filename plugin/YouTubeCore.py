@@ -460,9 +460,6 @@ class YouTubeCore():
 			# Api quota
 			html = self.common.parseDOM(ret['content'], "error")
 			error = self.common.parseDOM(html, "code")
-		if len(error) == 0 and False: # This hits flash quite often.
-			# Playback
-			error = self.common.parseDOM(ret['content'], "div", attrs={ "class": "yt-alert-content"})
 		if len(error) > 0:
 			error = error[0]
 			error = urllib.unquote(error[0:error.find("[")]).replace("&#39;", "'")
