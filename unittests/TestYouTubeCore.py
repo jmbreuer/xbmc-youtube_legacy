@@ -901,23 +901,72 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 	def ttest_verifyAge_should_work_at_some_point(self):
 		assert(False)
 
-	def ttest_oRefreshToken_should_reset_access_token_before_calling_fetch_page(self):
-		assert(False)
+	def test_oRefreshToken_should_reset_access_token_before_calling_fetch_page(self):
+		settings = [ "","some_token","3"]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
+		core = YouTubeCore()
+		core._fetchPage = Mock()
+		core._fetchPage.return_value = {"status":303,"content":"fail"}
+		
+		result = core._oRefreshToken()
+		
+		sys.modules[ "__main__" ].settings.setSetting.assert_called_with("oauth2_access_token","")
 
-	def ttest_oRefreshToken_should_fetch_refresh_token_form_settings(self):
-		assert(False)
+	def test_oRefreshToken_should_fetch_refresh_token_from_settings(self):
+		settings = [ "","3"]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
+		core = YouTubeCore()
+		core._fetchPage = Mock()
+		
+		result = core._oRefreshToken()
+		
+		sys.modules[ "__main__" ].settings.getSetting.assert_called_with("oauth2_refresh_token")
 
-	def ttest_oRefreshToken_should_fetchPage_with_correct_params(self):
-		assert(False)
+	def test_oRefreshToken_should_fetchPage_with_correct_params(self):
+		settings = [ "","some_token","3"]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
+		core = YouTubeCore()
+		core._fetchPage = Mock()
+		core._fetchPage.return_value = {"status":303,"content":"fail"}
+		
+		result = core._oRefreshToken()
+		
+		assert(core._fetchPage.call_args[0][0]["link"] == "https://accounts.google.com/o/oauth2/token")
+		assert(core._fetchPage.call_args[0][0].has_key("url_data"))
 
-	def ttest_oRefreshToken_should_pars_token_json_structure_correctly(self):
-		assert(False)
+	def test_oRefreshToken_should_pars_token_json_structure_correctly(self):
+		settings = [ "","some_token","3"]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
+		core = YouTubeCore()
+		core._fetchPage = Mock()
+		core._fetchPage.return_value = {"status":200,"content":'{"access_token":""}'}
+		
+		result = core._oRefreshToken()
+		
+		sys.modules[ "__main__" ].settings.setSetting.assert_called_with("oauth2_access_token","")
 
-	def ttest_oRefreshToken_should_log_error_if_invalid_json_structure_is_returned(self):
-		assert(False)
+	def test_oRefreshToken_should_log_error_if_invalid_json_structure_is_returned(self):
+		settings = [ "","some_token","3"]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
+		core = YouTubeCore()
+		core._fetchPage = Mock()
+		output = {"status":200,"content":'{"access_token"][sdlkfjfksldf"super_secrect_token"[}]'}
+		core._fetchPage.return_value = output
+		
+		result = core._oRefreshToken()
+		
+		sys.modules[ "__main__" ].common.log.assert_called_with(repr(output))
 
-	def ttest_oRefreshToken_should_set_access_token_if_found(self):
-		assert(False)
+	def test_oRefreshToken_should_set_access_token_if_found(self):
+		settings = [ "","some_token","3"]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
+		core = YouTubeCore()
+		core._fetchPage = Mock()
+		core._fetchPage.return_value = {"status":200,"content":'{"access_token":"super_secrect_token"}'}
+		
+		result = core._oRefreshToken()
+		
+		sys.modules[ "__main__" ].settings.setSetting.assert_called_with("oauth2_access_token","super_secrect_token")
 			
 	def ttest_getAuth_should_check_token_expiration_before_calling_refresh_token(self):
 		assert(False)
