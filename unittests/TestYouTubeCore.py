@@ -1091,81 +1091,205 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		
 		link.attributes.get.assert_called_with("rel")
 	
-	#def setup_getVideoInfo_full_run(self):
-		
-	def test_getVideoInfo_should_call_getNodeValue_to_get_video_id(self):
+	def mock_setup_getVideoInfo_full_run(self):
+		self.my_core = ""
 		settings = ["4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
-		patcher = patch("xml.dom.minidom.parseString")
-		patcher.start()
+		self.dompatcher = patch("xml.dom.minidom.parseString")
+		self.dompatcher.start()
 		import xml.dom.minidom
-		dom = Mock()
+		sys.modules["__main__"].storage.retrieveValue.return_value = "1"
+		self.testing_dom = Mock()
 		xml.dom.minidom.parseString = Mock()
-		xml.dom.minidom.parseString.return_value = dom
-		entry = Mock()
-		entry_elements = ["","","","","","","","","","","","",Mock(),""]
-		entry.getElementsByTagName.side_effect = lambda x ="",y = "",z = "": entry_elements.pop()
-		elements = [[entry],[]]
-		dom.getElementsByTagName.side_effect = lambda x ="",y = "",z = "": elements.pop() 
+		xml.dom.minidom.parseString.return_value = self.testing_dom
+		self.entry = Mock()
+		self.edit_link = Mock()
+		link_attributes = ["","some_link/some_id","edit"]
+		self.edit_link.getAttribute.side_effect = lambda x: link_attributes.pop()
+		entry_elements = ["","","","","","","","","",[self.edit_link],Mock(),Mock(),""]
+		self.entry.getElementsByTagName.side_effect = lambda x ="",y = "",z = "": entry_elements.pop()
+		elements = [[self.entry],[]]
+		self.testing_dom.getElementsByTagName.side_effect = lambda x ="",y = "",z = "": elements.pop() 
+		self.my_core = YouTubeCore()
+		self.my_core._getNodeValue = Mock()
+		nodes = ["","","","","","","","","","","","","2011-09-11T12:00:00","","","","false"]
+		self.my_core._getNodeValue.side_effect = lambda x ="",y = "",z = "": nodes.pop()
+		self.my_core._getNodeAttribute = Mock() 
+		attributes = ["","","","","","","","","","","","","","1","2.0","1","","","/some_video_id"] 
+		self.my_core._getNodeAttribute.side_effect = lambda x ="",y = "",z = "", v = "": attributes.pop() 
+		
+	def test_getVideoInfo_should_call_getNodeValue_to_get_video_id(self):
+		self.mock_setup_getVideoInfo_full_run()
+		
+		result = self.my_core.getVideoInfo("xml", {})
+		
+		self.dompatcher.stop()
+		args = self.my_core._getNodeValue.call_args_list
+		assert(args[0][0][1] == "yt:videoid")
+		assert(args[0][0][2] == "false")
+
+	def test_getVideoInfo_should_call_getNodeValue_to_get_Title(self):
+		self.mock_setup_getVideoInfo_full_run()
+		
+		result = self.my_core.getVideoInfo("xml", {})
+		
+		self.dompatcher.stop()
+		args = self.my_core._getNodeValue.call_args_list
+		assert(args[2][0][1] == "media:title")
+		assert(args[2][0][2] == "Unknown Title")
+
+	def test_getVideoInfo_should_call_getNodeValue_to_get_Plot(self):
+		self.mock_setup_getVideoInfo_full_run()
+		
+		result = self.my_core.getVideoInfo("xml", {})
+		
+		self.dompatcher.stop()
+		args = self.my_core._getNodeValue.call_args_list
+		assert(args[3][0][1] == 'media:description')
+		assert(args[3][0][2] == "Unknown Plot")
+
+	def test_getVideoInfo_should_call_getNodeValue_to_get_Date(self):
+		self.mock_setup_getVideoInfo_full_run()
+		
+		result = self.my_core.getVideoInfo("xml", {})
+		
+		self.dompatcher.stop()
+		args = self.my_core._getNodeValue.call_args_list
+		assert(args[4][0][1] == 'published')
+		assert(args[4][0][2] == "Unknown Date")
+
+	def test_getVideoInfo_should_call_getNodeValue_to_get_user(self):
+		self.mock_setup_getVideoInfo_full_run()
+		
+		result = self.my_core.getVideoInfo("xml", {})
+		
+		self.dompatcher.stop()
+		args = self.my_core._getNodeValue.call_args_list
+		assert(args[5][0][1] == 'name')
+		assert(args[5][0][2] == "Unknown Name")
+
+	def test_getVideoInfo_should_call_getNodeValue_to_get_Studio(self):
+		self.mock_setup_getVideoInfo_full_run()
+		
+		result = self.my_core.getVideoInfo("xml", {})
+		
+		self.dompatcher.stop()
+		args = self.my_core._getNodeValue.call_args_list
+		assert(args[6][0][1] == 'media:credit')
+		assert(args[6][0][2] == "")
+		assert(args[7][0][1] == 'name')
+		assert(args[7][0][2] == "Unknown Uploader")
+		
+	def test_getVideoInfo_should_call_getNodeAttribute_to_get_Duration(self):
+		self.mock_setup_getVideoInfo_full_run()
+		
+		result = self.my_core.getVideoInfo("xml", {})
+		
+		self.dompatcher.stop()
+		args = self.my_core._getNodeAttribute.call_args_list
+		assert(args[3][0][1] == 'yt:duration')
+		assert(args[3][0][2] == "seconds")
+		assert(args[3][0][3] == "0")
+
+	def test_getVideoInfo_should_call_getNodeAttribute_to_get_Rating(self):
+		self.mock_setup_getVideoInfo_full_run()
+		
+		result = self.my_core.getVideoInfo("xml", {})
+		
+		self.dompatcher.stop()
+		args = self.my_core._getNodeAttribute.call_args_list
+		assert(args[4][0][1] == 'gd:rating')
+		assert(args[4][0][2] == "average")
+		assert(args[4][0][3] == "0.0")
+
+	def test_getVideoInfo_should_call_getNodeAttribute_to_get_view_Count(self):
+		self.mock_setup_getVideoInfo_full_run()
+		
+		result = self.my_core.getVideoInfo("xml", {})
+		
+		self.dompatcher.stop()
+		args = self.my_core._getNodeAttribute.call_args_list
+		assert(args[5][0][1] == 'yt:statistics')
+		assert(args[5][0][2] == "viewCount")
+		assert(args[5][0][3] == "0")
+
+	def test_getVideoInfo_should_call_getNodeValue_to_get_Genre(self):
+		self.mock_setup_getVideoInfo_full_run()
+		
+		result = self.my_core.getVideoInfo("xml", {})
+		
+		self.dompatcher.stop()
+		args = self.my_core._getNodeAttribute.call_args_list
+		assert(args[6][0][1] == 'media:category')
+		assert(args[6][0][2] == "label")
+		assert(args[6][0][3] == "Unknown Genre")
+
+	def test_getVideoInfo_should_add_date_to_plot(self):
+		self.mock_setup_getVideoInfo_full_run()
+		
+		result = self.my_core.getVideoInfo("xml", {})
+		
+		self.dompatcher.stop()
+		args = self.my_core._getNodeAttribute.call_args_list
+		assert(result[0]["Plot"].find("2011-09-11 12:00:00") > 0)
+		
+
+	def test_getVideoInfo_should_add_view_count_to_plot(self):
+		self.mock_setup_getVideoInfo_full_run()
+		
+		result = self.my_core.getVideoInfo("xml", {})
+		
+		self.dompatcher.stop()
+		args = self.my_core._getNodeAttribute.call_args_list
+		assert(result[0]["Plot"].find("View count: 1") > 0)
+
+	def test_getVideoInfo_should_call_getNodeValue_to_search_for_edit_id(self):
+		self.mock_setup_getVideoInfo_full_run()
+		
+		result = self.my_core.getVideoInfo("xml", {})
+		
+		self.dompatcher.stop()
+		args = self.entry.getElementsByTagName.call_args_list
+		assert(args[3][0][0] == "link")
+		assert(result[0]["Plot"].find("View count: 1") > 0)
+		args = self.edit_link.getAttribute.call_args_list
+		assert(args[0][0][0] == "rel")
+		assert(args[1][0][0] == "href")
+		assert(result[0]["editid"] == "some_id")
+		
+	def test_getVideoInfo_should_call_storage_retrieveValue_to_get_watch_status(self):
+		self.mock_setup_getVideoInfo_full_run()
+		
+		result = self.my_core.getVideoInfo("xml", {})
+		
+		self.dompatcher.stop()
+
+		sys.modules["__main__"].storage.retrieveValue.assert_called_with("vidstatus-false")
+		
+	def test_getVideoInfo_should_parse_youtube_xml(self):
+		settings = ["4","3" ]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
+		sys.modules[ "__main__" ].storage.retrieveValue.return_value = "7"
 		core = YouTubeCore()
-		core._getNodeValue = Mock()
-		nodes = ["","","","","","","","","","","","","2011-09-11T12:00:00","","","","","false"]
-		core._getNodeValue.side_effect = lambda x ="",y = "",z = "": nodes.pop()
-		core._getNodeAttribute = Mock() 
-		attributes = ["","","","","","","","","","","","","","1","2.0","1","1","/some_video_id"] 
-		core._getNodeAttribute.side_effect = lambda x ="",y = "",z = "", v = "": attributes.pop() 
 		
-		result = core.getVideoInfo("xml", {})
-		patcher.stop()
+		result = core.getVideoInfo(self.readTestInput("youtubeFavoritesFeed.xml", False))
 		
-		args = dom.getElementsByTagName.call_args_list
-		assert(args[0][0][0] == "link")
-		assert(False)
-
-	def ttest_getVideoInfo_should_call_getNodeValue_to_get_Title(self):
-		assert(False)
-
-	def ttest_getVideoInfo_should_call_getNodeValue_to_get_Plot(self):
-		assert(False)
-
-	def ttest_getVideoInfo_should_call_getNodeValue_to_get_Date(self):
-		assert(False)
-
-	def ttest_getVideoInfo_should_call_getNodeValue_to_get_user(self):
-		assert(False)
-
-	def ttest_getVideoInfo_should_call_getNodeValue_to_get_Studio(self):
-		assert(False)
+		print repr(result[0])
+		assert(result[0]["Overlay"] == 7)
+		assert(result[0]["editid"] == 'some_edit_id')
+		assert(result[0]["Title"] == "Aurora seen from the ISS in Orbit")
+		assert(result[0]["playlist_entry_id"] == 'some_edit_id')
+		assert(result[0]["Rating"] > 4.9)
+		assert(result[0]["videoid"] == 'ogtKe7N05F0')
+		assert(result[0]["Duration"] == "00:35")
+		assert(result[0]["Genre"] == "Science & Technology")
+		assert(result[0]["Studio"] == "isoeph")
+		assert(result[0]["user"] == "some_user")
+		assert(result[0]["Date"] == "29-09-2011")
+		assert(result[0]["thumbnail"] == "http://i.ytimg.com/vi/ogtKe7N05F0/0.jpg")
+				
 		
-	def ttest_getVideoInfo_should_call_getNodeValue_to_get_Duration(self):
-		assert(False)
-
-	def ttest_getVideoInfo_should_call_getNodeValue_to_get_Rating(self):
-		assert(False)
-
-	def ttest_getVideoInfo_should_call_getNodeValue_to_get_view_Count(self):
-		assert(False)
-
-	def ttest_getVideoInfo_should_call_getNodeValue_to_get_view_Plot(self):
-		assert(False)
-
-	def ttest_getVideoInfo_should_call_getNodeValue_to_get_view_Genre(self):
-		assert(False)
-
-	def ttest_getVideoInfo_should_add_date_to_plot(self):
-		assert(False)
-
-	def ttest_getVideoInfo_should_add_view_count_to_plot(self):
-		assert(False)
-
-	def ttest_getVideoInfo_should_call_getNodeValue_to_search_for_edit_id(self):
-		assert(False)
 		
-	def ttest_getVideoInfo_should_call_storage_retrieveValue_to_get_watch_status(self):
-		assert(False)
-		
-	def ttest_getVideoInfo_should_parse_youtube_xml(self):
-		assert(False)
 
 if __name__ == "__main__":
 	nose.runmodule()
