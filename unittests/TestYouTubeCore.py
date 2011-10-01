@@ -1109,10 +1109,10 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		dom.getElementsByTagName.side_effect = lambda x ="",y = "",z = "": elements.pop() 
 		core = YouTubeCore()
 		core._getNodeValue = Mock()
-		nodes = ["","","","","","","","","","","","","2011-09-11T12:00:00","","","","",":some_entry_id"]
+		nodes = ["","","","","","","","","","","","","2011-09-11T12:00:00","","","","","false"]
 		core._getNodeValue.side_effect = lambda x ="",y = "",z = "": nodes.pop()
 		core._getNodeAttribute = Mock() 
-		attributes = ["","","","","","","","","","","","","","1","2.0","1","1",""] 
+		attributes = ["","","","","","","","","","","","","","1","2.0","1","1","/some_video_id"] 
 		core._getNodeAttribute.side_effect = lambda x ="",y = "",z = "", v = "": attributes.pop() 
 		
 		result = core.getVideoInfo("xml", {})
