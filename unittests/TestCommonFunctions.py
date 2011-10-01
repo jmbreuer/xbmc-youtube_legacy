@@ -13,10 +13,7 @@ class TestCommonFunctions(BaseTestCase.BaseTestCase):
 		sys.modules["__main__"].xbmc.LOGNOTICE = 0
 		common  = CommonFunctions()
 		common.log(description)
-		sys.modules["__main__"].xbmc.log.assert_called_with("[%s] %s : '%s'" % ( sys.modules[ "__main__" ].plugin, 
-										"run", 
-										description), 
-							   sys.modules["__main__"].xbmc.LOGNOTICE)
+		sys.modules["__main__"].xbmc.log.assert_called_with("[%s] %s : '%s'" % ( sys.modules[ "__main__" ].plugin, "run", description), sys.modules["__main__"].xbmc.LOGNOTICE)
 
 	def test_fetchPage_should_return_content_and_success_return_code_on_valid_link(self):
 		patcher = patch("urllib2.urlopen")
@@ -31,7 +28,6 @@ class TestCommonFunctions(BaseTestCase.BaseTestCase):
 		ret = common._fetchPage({ "link": "http://tobiasussing.dk"})
 		patcher.stop()
 		
-		print repr(ret)
 		assert(ret['status'] == 200)
 		assert(ret['content'] == "Nothing here\n")
 
@@ -48,7 +44,6 @@ class TestCommonFunctions(BaseTestCase.BaseTestCase):
 		ret = common._fetchPage({ "link": "http://tobiasussing.dk/DoesNotExist.html"})
 		patcher.stop()
 		
-		print repr(ret)
 		assert(ret['status'] == 500)
 		assert(ret['content'] == "")
 	
@@ -59,7 +54,6 @@ class TestCommonFunctions(BaseTestCase.BaseTestCase):
 		
 		ret = common.stripTags(inp)
 		
-		print repr(ret)
 		assert(ret == "Link Test")
 
 	def test_parseDOM_should_correctly_extract_the_href_attribute_of_a_link_tag(self):
@@ -68,8 +62,6 @@ class TestCommonFunctions(BaseTestCase.BaseTestCase):
 		
 		ret = common.parseDOM(self.link_html, "a", ret = "href")
 		
-		print repr(ret)
-
 		assert(len(ret) == 1 )	
 		assert(ret[0] == "bla.html")
 	
@@ -81,7 +73,6 @@ class TestCommonFunctions(BaseTestCase.BaseTestCase):
 		
 		ret = common.parseDOM(self.link_html, "a", attrs = { "href": "bla.html" })
 		
-		print repr(ret)
 		common.getDOMContent.assert_called_with("<a href='bla.html'>Link Test</a>", 'a', "<a href='bla.html'>",)
 	
 	def test_parseDOM_should_correctly_extract_the_text_conten_of_a_link_tag(self):
@@ -90,8 +81,6 @@ class TestCommonFunctions(BaseTestCase.BaseTestCase):
 		
 		ret = common.parseDOM(self.link_html, "a", attrs = { "href": "bla.html" })
 		
-		print repr(ret)
-
 		assert(len(ret) == 1 )	
 		assert(ret[0] == "Link Test")
 
@@ -101,8 +90,6 @@ class TestCommonFunctions(BaseTestCase.BaseTestCase):
 		
 		ret = common.parseDOM(self.img_html, "img", attrs = { "alt": "Thumbnail" }, ret = "src" )
 		
-		print repr(ret)
-
 		assert(len(ret) == 1 )	
 		assert(ret[0] == "bla.png")
 
@@ -112,8 +99,6 @@ class TestCommonFunctions(BaseTestCase.BaseTestCase):
 		
 		ret = common.parseDOM(self.img_html, "img", attrs = { "alt": "Thumb broken" }, ret = "src" )
 		
-		print repr(ret)
-
 		assert(len(ret) == 0 )	
 		assert(ret == [])
 
@@ -123,8 +108,6 @@ class TestCommonFunctions(BaseTestCase.BaseTestCase):
 		
 		ret = common.parseDOM(self.img_html, "img", ret = "alt")
 		
-		print repr(ret)
-
 		assert(len(ret) == 1 )	
 		assert(ret[0] == "Thumbnail")
 
@@ -134,8 +117,6 @@ class TestCommonFunctions(BaseTestCase.BaseTestCase):
 		
 		ret = common.parseDOM(self.readTestInput("watch-gyzlwNvf8ss-standard.html", False), "embed", attrs = {"id": "movie_player" }, ret = "flashvars")
 		
-		print repr(ret)
-
 		assert(len(ret) == 1 )	
 		assert(ret[0].strip() == self.readTestInput("watch-gyzlwNvf8ss-flashvars.txt", False).strip())
 
@@ -145,8 +126,6 @@ class TestCommonFunctions(BaseTestCase.BaseTestCase):
 		
 		ret = common.parseDOM(self.readTestInput("watch-gyzlwNvf8ss-standard.html", False), "embed", attrs = {"id": "movie_player"}, ret = "src")
 		
-		print repr(ret)
-
 		assert(len(ret) == 1 )	
 		assert(ret[0] == "http://s.ytimg.com/yt/swfbin/watch_as3-vflCwc_mi.swf")
 
@@ -157,8 +136,6 @@ class TestCommonFunctions(BaseTestCase.BaseTestCase):
 		
 		ret = common.getDOMContent(inp, "a", "<a href='bla.html'>")
 		
-		print repr(ret)
-
 		assert(ret == "Link Test")
 
 	def test_getDOMContent_should_not_extract_the_content_of_a_link_tag_that_doesnt_match_the_search_string(self):
@@ -168,7 +145,6 @@ class TestCommonFunctions(BaseTestCase.BaseTestCase):
 		
 		ret = common.getDOMContent(inp, "a", "<a href='bla.html'>")
 		
-		print repr(ret)
 		assert(ret == "")
 
 if __name__ == "__main__":
