@@ -561,7 +561,7 @@ class YouTubeCore():
 	def _getAuth(self):
 		self.common.log("")
 		
-		if self.settings.getSetting("oauth2_expires_at") < time.time():
+		if int(self.settings.getSetting("oauth2_expires_at")) < time.time():
 			self._oRefreshToken()
 
 		auth = self.settings.getSetting("oauth2_access_token")
@@ -570,7 +570,7 @@ class YouTubeCore():
 			self.common.log("returning stored auth")
 			return auth
 		else:
-			(result, status) = self.login()
+			(result, status) = self.login.login()
 			if status == 200:
 				self.common.log("returning new auth")
 				return self.settings.getSetting("oauth2_access_token")
