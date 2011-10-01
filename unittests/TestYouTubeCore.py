@@ -56,6 +56,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		core._fetchPage.return_value = {"content":"success", "status":200}
 		delete_url = "http://gdata.youtube.com/feeds/api/users/default/contacts"		
 		request = '<?xml version="1.0" encoding="UTF-8"?> <entry xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://gdata.youtube.com/schemas/2007"><yt:username>some_contact</yt:username></entry>'
+		
 		core.add_contact({ "editid": "edit_id", "contact":"some_contact" })
 		
 		assert(core._fetchPage.called)
@@ -158,15 +159,12 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		import xml.dom.minidom
 		xml.dom.minidom.parseString = Mock()
 		xml.dom.minidom.parseString().getElementsByTagName.return_value = ""
-		
 		core = YouTubeCore()
-		
-		core.getFolderInfo(xml, {})
-		calls = xml.dom.minidom.parseString().getElementsByTagName.call_args_list
 
-		patcher.stop("")
+		core.getFolderInfo("xml", {})
 		
-		print repr(calls[1][0][0])
+		calls = xml.dom.minidom.parseString().getElementsByTagName.call_args_list
+		patcher.stop("")
 		assert(calls[0][0][0] == "link")
 		assert(calls[1][0][0] == "entry")
 
@@ -185,7 +183,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		xml.dom.minidom.parseString().getElementsByTagName.side_effect = lambda x: tags.pop() 
 		core = YouTubeCore()
 		
-		core.getFolderInfo(xml, {})
+		core.getFolderInfo("xml", {})
 
 		patcher.stop("")
 		sys.modules["__main__"].utils.addNextFolder.assert_called_with([], {})
@@ -274,7 +272,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		xml.dom.minidom.parseString().getElementsByTagName.side_effect = lambda x: tags.pop() 
 		core = YouTubeCore()
 		
-		core.getFolderInfo(xml, {})
+		core.getFolderInfo("xml", {})
 
 		patcher.stop("")
 		sys.modules["__main__"].utils.addNextFolder.assert_called_with([], {})
@@ -341,7 +339,6 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		
 		(result, status) = core.getBatchDetailsThumbnails(items, params={})
 		
-		print repr(result)
 		assert(result[0]["thumbnail"] == "some_thumb3")
 		assert(result[1]["thumbnail"] == "some_thumb2")
 		assert(result[2]["videoid"] == "false")
@@ -365,6 +362,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()		
 		core = YouTubeCore()
 		core._fetchPage = Mock()
+		
 		core.getBatchDetails([],{})
 		
 		sys.modules["__main__"].cache.sqlGetMulti.assert_called_with('videoidcache', [])
@@ -382,7 +380,6 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		core.getBatchDetails(["some_id_1","some_id_2","some_id_3","some_id_4","some_id_5"],{})
 		
 		request = core._fetchPage.call_args_list[0][0][0]["request"]
-		print repr(request)
 		assert(request.find("some_id_1") < 0)
 		assert(request.find("some_id_5") < 0)
 	
@@ -721,8 +718,6 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		core._getAuth = Mock()
 		
 		ret = core._fetchPage({"login":"true","link":"www.somelink.dk"})
-		
-		print repr(ret)
 		patcher1.stop()
 		patcher2.stop()
 		
@@ -1011,22 +1006,120 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		sys.modules[ "__main__" ].login.login.assert_called_with()
 		sys.modules[ "__main__" ].settings.getSetting.assert_called_with("oauth2_access_token")
 
-	def ttest_getNodeAttribute_should_parse_node_structure_correctly(self):
-		assert(False)
+	def test_getNodeAttribute_should_parse_node_structure_correctly(self):
+		settings = ["3"]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
+		core = YouTubeCore()
+		node = Mock()
 		
-	def ttest_getNodeValue_should_parse_node_structure_correctly(self):
-		assert(False)
+		node.getElementsByTagName
+		result = core._getNodeAttribute(node, "tag","attribute","default")
+		
+		node.getElementsByTagName.assert_called_with("tag")
+		node.getElementsByTagName().item.assert_called_with(0)
+		node.getElementsByTagName().item().hasAttribute.assert_called_with("attribute")
+		node.getElementsByTagName().item().getAttribute.assert_called_with("attribute")
+		
+	def test_getNodeValue_should_parse_node_structure_correctly(self):
+		settings = ["3"]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
+		core = YouTubeCore()
+		node = Mock()
+		node.getElementsByTagName().item().firstChild.nodeValue = 5
+		
+		node.getElementsByTagName
+		result = core._getNodeValue(node, "tag","default")
+		
+		node.getElementsByTagName.assert_called_with("tag")
+		node.getElementsByTagName().item.assert_called_with(0)
+		assert(result == 5)
+		
+	def test_getVideoInfo_should_call_minidom_getElementsByTagName_to_find_links(self):
+		settings = ["4","3" ]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
+		patcher = patch("xml.dom.minidom.parseString")
+		patcher.start()
+		import xml.dom.minidom
+		dom = Mock()
+		xml.dom.minidom.parseString = Mock()
+		xml.dom.minidom.parseString.return_value = dom
+		dom.getElementsByTagName.return_value = ""
+		core = YouTubeCore()
+		
+		result = core.getVideoInfo("xml", {})
+		patcher.stop()
+		
+		args = dom.getElementsByTagName.call_args_list
+		assert(args[0][0][0] == "link")
 
-	def ttest_getVideoInfo_should_set_call_parseDOM_to_find_links(self):
-		assert(False)
+	def test_getVideoInfo_should_call_minidom_getElementsByTagName_to_find_entries(self):
+		settings = ["4","3" ]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
+		patcher = patch("xml.dom.minidom.parseString")
+		patcher.start()
+		import xml.dom.minidom
+		dom = Mock()
+		xml.dom.minidom.parseString = Mock()
+		xml.dom.minidom.parseString.return_value = dom
+		dom.getElementsByTagName.return_value = ""
+		core = YouTubeCore()
+		
+		result = core.getVideoInfo("xml", {})
+		patcher.stop()
+		
+		args = dom.getElementsByTagName.call_args_list
+		assert(args[1][0][0] == "entry")
+		assert(args[2][0][0] == "atom:entry")
 
-	def ttest_getVideoInfo_should_set_call_parseDOM_to_find_entries(self):
-		assert(False)
-
-	def ttest_getVideoInfo_should_search_links_for_next_page_indicator(self):
-		assert(False)
-
-	def ttest_getVideoInfo_should_call_getNodeValue_to_get_video_id(self):
+	def test_getVideoInfo_should_search_links_for_next_page_indicator(self):
+		settings = ["4","3" ]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
+		patcher = patch("xml.dom.minidom.parseString")
+		patcher.start()
+		import xml.dom.minidom
+		dom = Mock()
+		link = Mock()
+		tags = ["","", [link]]
+		xml.dom.minidom.parseString = Mock()
+		xml.dom.minidom.parseString.return_value = dom
+		dom.getElementsByTagName.side_effect = lambda x: tags.pop()
+		core = YouTubeCore()
+		link.attributes.get.value.return_value = "next"
+		
+		result = core.getVideoInfo("xml", {})
+		patcher.stop()
+		
+		link.attributes.get.assert_called_with("rel")
+	
+	#def setup_getVideoInfo_full_run(self):
+		
+	def test_getVideoInfo_should_call_getNodeValue_to_get_video_id(self):
+		settings = ["4","3" ]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
+		patcher = patch("xml.dom.minidom.parseString")
+		patcher.start()
+		import xml.dom.minidom
+		dom = Mock()
+		xml.dom.minidom.parseString = Mock()
+		xml.dom.minidom.parseString.return_value = dom
+		entry = Mock()
+		entry_elements = ["","","","","","","","","","","","",Mock(),""]
+		entry.getElementsByTagName.side_effect = lambda x ="",y = "",z = "": entry_elements.pop()
+		elements = [[entry],[]]
+		dom.getElementsByTagName.side_effect = lambda x ="",y = "",z = "": elements.pop() 
+		core = YouTubeCore()
+		core._getNodeValue = Mock()
+		nodes = ["","","","","","","","","","","","","2011-09-11T12:00:00","","","","",":some_entry_id"]
+		core._getNodeValue.side_effect = lambda x ="",y = "",z = "": nodes.pop()
+		core._getNodeAttribute = Mock() 
+		attributes = ["","","","","","","","","","","","","","1","2.0","1","1",""] 
+		core._getNodeAttribute.side_effect = lambda x ="",y = "",z = "", v = "": attributes.pop() 
+		
+		result = core.getVideoInfo("xml", {})
+		patcher.stop()
+		
+		args = dom.getElementsByTagName.call_args_list
+		assert(args[0][0][0] == "link")
 		assert(False)
 
 	def ttest_getVideoInfo_should_call_getNodeValue_to_get_Title(self):
