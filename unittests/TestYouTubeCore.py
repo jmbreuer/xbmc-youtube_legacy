@@ -968,14 +968,48 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		
 		sys.modules[ "__main__" ].settings.setSetting.assert_called_with("oauth2_access_token","super_secrect_token")
 			
-	def ttest_getAuth_should_check_token_expiration_before_calling_refresh_token(self):
-		assert(False)
+	def test_getAuth_should_check_token_expiration_before_calling_refresh_token(self):
+		settings = [ "","some_token","3249320480292","3"]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
+		core = YouTubeCore()
+		core._oRefreshToken = Mock()
+		
+		result = core._getAuth()
+		
+		assert(sys.modules[ "__main__" ].settings.getSetting.call_args_list[2][0][0] == "oauth2_expires_at")
 	
-	def ttest_getAuth_should_fetch_token_from_settings(self):
-		assert(False)
-
+	def test_getAuth_should_call_oRefreshToken_to_refresh_token(self):
+		settings = [ "","some_token","2","3"]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
+		core = YouTubeCore()
+		core._oRefreshToken = Mock()
+		
+		result = core._getAuth()
+		
+		core._oRefreshToken.assert_called_with()
+	
+	def test_getAuth_should_fetch_token_from_settings(self):
+		settings = [ "","","32342498270492","3"]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
+		core = YouTubeCore()
+		core._oRefreshToken = Mock()
+		sys.modules[ "__main__" ].login.login.return_value = ("",200)
+		
+		result = core._getAuth()
+		
+		sys.modules[ "__main__" ].settings.getSetting.assert_called_with("oauth2_access_token")
+	
 	def ttest_getAuth_should_call_login_if_token_isnt_found(self):
-		assert(False)
+		settings = [ "","","","3"]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
+		sys.modules[ "__main__" ].login.login.return_value = ("",200)
+		core = YouTubeCore()
+		core._oRefreshToken = Mock()
+		
+		result = core._getAuth()
+		
+		sys.modules[ "__main__" ].login.login.assert_called_with()
+		sys.modules[ "__main__" ].settings.getSetting.assert_called_with("oauth2_access_token")
 
 	def ttest_getNodeAttribute_should_parse_node_structure_correctly(self):
 		assert(False)
