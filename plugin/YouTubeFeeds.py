@@ -75,6 +75,7 @@ class YouTubeFeeds():
 			url = self.urls[get("user_feed")]
 		
 		if get("search"):
+			url = self.urls["search"]
 			query = urllib.unquote_plus(get("search"))
 			safe_search = ("none", "moderate", "strict" ) [int( self.settings.getSetting( "safe_search" ) ) ]	
 			url = url % (query, safe_search)  
@@ -86,7 +87,7 @@ class YouTubeFeeds():
 						url += "&" + urllib.urlencode({'author': authors[query]})
 				except:
 					self.common.log("Search - eval failed")
-			
+		
 		if (url.find("%s") > 0):
 			if ( get("contact") and not (get("external") and get("channel"))):
 				url = url % get("contact")
