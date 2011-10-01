@@ -433,6 +433,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		settings = ["4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		patcher = patch("time.sleep")
+		patcher.start()
 		import time
 		time.sleep = Mock() 		
 		core = YouTubeCore()
@@ -452,6 +453,8 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		core.getBatchDetails(ids,{})
 		
 		time.sleep.assert_called_with(5)
+		patcher.stop()
+
 
 	def test_getBatchDetails_should_call_get_video_info_on_result(self):
 		settings = ["4","3" ]
@@ -487,44 +490,329 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		
 		assert(core._fetchPage.call_count == 2)
 			
-	def ttest_fetchPage_should_return_error_status_and_empty_content_if_no_params_are_provided(self):
-		assert(False)
+	def test_fetchPage_should_return_error_status_and_empty_content_if_no_params_are_provided(self):
+		settings = ["4","3" ]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
+		patcher = patch("urllib2.urlopen")
+		patcher.start()
+		import urllib2
+		dummy_connection = Mock()
+		dummy_connection.read.return_value = "Nothing here\n"
+		dummy_connection.geturl.return_value = ""
+		dummy_connection.info.return_value = "Mock header"
+		patcher(urllib2.urlopen).return_value = dummy_connection
+		core = YouTubeCore()
+				
+		ret = core._fetchPage({})
+		patcher.stop()
+		
+		assert(ret['status'] == 500 and ret['content'] == "")
 	
-	def ttest_fetchPage_should_call_getAuth_to_fetch_oauth_token_if_auth_is_in_params_collection(self):
-		assert(False)
+	def test_fetchPage_should_call_getAuth_to_fetch_oauth_token_if_auth_is_in_params_collection(self):
+		settings = ["my_auth","4","3" ]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
+		patcher = patch("urllib2.urlopen")
+		patcher.start()
+		import urllib2
+		dummy_connection = Mock()
+		dummy_connection.read.return_value = "Nothing here\n"
+		dummy_connection.geturl.return_value = ""
+		dummy_connection.info.return_value = "Mock header"
+		patcher(urllib2.urlopen).return_value = dummy_connection
+		core = YouTubeCore()
+		core._getAuth = Mock()
+		
+		ret = core._fetchPage({"auth":"true", "link":"www.somelink.dk"})
+		
+		patcher.stop()
+		core._getAuth.assert_called_with()
 
-	def ttest_fetchPage_should_call_getSettings_if_to_fetch_oauth_token_if_auth_is_in_params_collection(self):
-		assert(False)
+	def test_fetchPage_should_call_getSettings_if_to_fetch_oauth_token_if_auth_is_in_params_collection(self):
+		settings = ["my_auth","4","3" ]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
+		patcher = patch("urllib2.urlopen")
+		patcher.start()
+		import urllib2
+		dummy_connection = Mock()
+		dummy_connection.read.return_value = "Nothing here\n"
+		dummy_connection.geturl.return_value = ""
+		dummy_connection.info.return_value = "Mock header"
+		patcher(urllib2.urlopen).return_value = dummy_connection
+		core = YouTubeCore()
+		core._getAuth = Mock()
+		
+		ret = core._fetchPage({"auth":"true", "link":"www.somelink.dk"})
+		
+		patcher.stop()
+		assert(sys.modules[ "__main__" ].settings.getSetting.call_args_list[2][0][0] == "oauth2_access_token")
 	
-	def ttest_fetchPage_should_give_up_after_4_tries(self):
-		assert(False)
+	def test_fetchPage_should_give_up_after_3_tries(self):
+		settings = ["my_auth","4","3" ]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
+		core = YouTubeCore()
+		core._getAuth = Mock()
+		
+		ret = core._fetchPage({"auth":"true", "link":"www.somelink.dk", "error":"3"})
+		
+		sys.modules[ "__main__" ].common.log.assert_called_with("giving up ")
 	
-	def ttest_fetchPage_should_call_urllib_add_header_id_url_data_is_in_params_collection(self):
-		assert(False)
+	def test_fetchPage_should_call_urllib_add_header_id_url_data_is_in_params_collection(self):
+		settings = ["my_auth","4","3" ]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
+		patcher1 = patch("urllib2.urlopen")
+		
+		patcher2 = patch("urllib2.Request")
+		patcher1.start()
+		patcher2.start()
+		import urllib2
+		dummy_connection = Mock()
+		dummy_connection.read.return_value = "Nothing here\n"
+		dummy_connection.geturl.return_value = ""
+		dummy_connection.info.return_value = "Mock header"
+		patcher1(urllib2.urlopen).return_value = dummy_connection
+		dummy_request = Mock()
+		urllib2.Request = Mock()
+		patcher2(urllib2.Request).return_value = dummy_request
+		core = YouTubeCore()
+		core._getAuth = Mock()
+		ret = core._fetchPage({"auth":"true", "link":"www.somelink.dk", "url_data":{"data":"some_data"}})
+		
+		args = urllib2.Request.call_args
+		patcher1.stop()
+		patcher2.stop()
+		assert(args[0][0] == 'www.somelink.dk?oauth_token=4')
+		assert(args[0][1]== 'data=some_data')
+		assert(dummy_request.add_header.call_args[0][1] == 'GoogleLogin auth=my_auth')
+		assert(dummy_request.add_header.call_args[0][0] == 'Authorization')
 	
-	def ttest_fetchPage_should_set_request_method_to_get_if_request_is_not_in_params_collection(self):
-		assert(False)
+	def test_fetchPage_should_set_request_method_to_get_if_request_is_not_in_params_collection(self):
+		settings = ["my_auth","4","3" ]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
+		patcher1 = patch("urllib2.urlopen")
+		patcher2 = patch("YouTubeCore.url2request")
+		patcher1.start()
+		patcher2.start()
+		import YouTubeCore
+		import urllib2
+		YouTubeCore.url2request = Mock()
+		dummy_connection = Mock()
+		dummy_connection.read.return_value = "Nothing here\n"
+		dummy_connection.geturl.return_value = ""
+		dummy_connection.info.return_value = "Mock header"
+		patcher1(urllib2.urlopen).return_value = dummy_connection
+		core = YouTubeCore.YouTubeCore()
+		core._getAuth = Mock()
+		
+		ret = core._fetchPage({"auth":"true", "link":"www.somelink.dk"})
+		
+		patcher1.stop()
+		args = YouTubeCore.url2request.call_args
+		patcher2.stop()
+		assert(args[0][1] == "GET")
 	
-	def ttest_fetchPage_should_append_GdataApi_headers_if_request_is_set(self):
-		assert(False)
-	
-	def ttest_fetchPage_should_append_api_key_to_headers_if_api_is_in_params(self):
-		assert(False)
-	
-	def ttest_fetchPage_should_append_user_agent_and_no_language_cookie_to_headers_if_api_is_not_in_params(self):
-		assert(False)
-	
-	def ttest_fetchPage_should_return_error_message_if_login_is_in_params_collection_and_plugin_is_missing_login_info(self):
-		assert(False)
-	
-	def ttest_fetchPage_should_call_http_login_to_fetch_existing_token_if_login_is_in_params(self):
-		assert(False)
-	
-	def ttest_fetchPage_should_append_login_token_to_request_headers_if_login_is_in_params(self):
-		assert(False)
+	def test_fetchPage_should_append_GdataApi_headers_if_request_is_set(self):
+		settings = ["my_auth","4","3" ]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
+		patcher1 = patch("urllib2.urlopen")
+		
+		patcher2 = patch("urllib2.Request")
+		patcher1.start()
+		patcher2.start()
+		import urllib2
+		dummy_connection = Mock()
+		dummy_connection.read.return_value = "Nothing here\n"
+		dummy_connection.geturl.return_value = ""
+		dummy_connection.info.return_value = "Mock header"
+		patcher1(urllib2.urlopen).return_value = dummy_connection
+		dummy_request = Mock()
+		urllib2.Request = Mock()
+		patcher2(urllib2.Request).return_value = dummy_request
+		core = YouTubeCore()
+		core._getAuth = Mock()
+		
+		ret = core._fetchPage({"auth":"true", "link":"www.somelink.dk", "request":"some_request"})
+		
+		patcher1.stop()
+		patcher2.stop()
+		assert(dummy_request.add_header.call_args_list[0][0][0] == 'X-GData-Client')
+		assert(dummy_request.add_header.call_args_list[1][0][0] == 'Content-Type')
+		assert(dummy_request.add_header.call_args_list[1][0][1] == 'application/atom+xml')
+		assert(dummy_request.add_header.call_args_list[2][0][0] == 'Content-Length')
+		assert(dummy_request.add_header.call_args_list[2][0][1] == '12')
+		assert(dummy_request.add_header.call_args[0][1] == 'GoogleLogin auth=my_auth')
+		assert(dummy_request.add_header.call_args[0][0] == 'Authorization')
+			
+	def test_fetchPage_should_append_api_key_to_headers_if_api_is_in_params(self):
+		settings = ["my_auth","4","3" ]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
+		patcher1 = patch("urllib2.urlopen")
+		patcher2 = patch("YouTubeCore.url2request")
+		patcher1.start()
+		patcher2.start()
+		import YouTubeCore
+		import urllib2
+		YouTubeCore.url2request = Mock()
+		dummy_connection = Mock()
+		dummy_connection.read.return_value = "Nothing here\n"
+		dummy_connection.geturl.return_value = ""
+		dummy_connection.info.return_value = "Mock header"
+		patcher1(urllib2.urlopen).return_value = dummy_connection
+		core = YouTubeCore.YouTubeCore()
+		core._getAuth = Mock()
+		core.APIKEY = "MYKEY"
+		
+		ret = core._fetchPage({"api":"true", "link":"www.somelink.dk"})
+		
+		patcher1.stop()
+		args = YouTubeCore.url2request().add_header.call_args_list
+		patcher2.stop()
+		
+		assert(args[0][0][0] == 'GData-Version')
+		assert(args[0][0][1] == '2')
+		assert(args[1][0][0] == "X-GData-Key")
+		assert(args[1][0][1] == "key=MYKEY")
 
-	def ttest_fetchPage_should_call_http_login_to_fetch_new_login_token_if_login_is_in_params_and_login_info_is_invalid(self):
-		assert(False)
+	def test_fetchPage_should_append_user_agent_and_no_language_cookie_to_headers_if_api_is_not_in_params(self):
+		settings = ["my_auth","4","3" ]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
+		patcher1 = patch("urllib2.urlopen")
+		patcher2 = patch("YouTubeCore.url2request")
+		patcher1.start()
+		patcher2.start()
+		import YouTubeCore
+		import urllib2
+		YouTubeCore.url2request = Mock()
+		dummy_connection = Mock()
+		dummy_connection.read.return_value = "Nothing here\n"
+		dummy_connection.geturl.return_value = ""
+		dummy_connection.info.return_value = "Mock header"
+		patcher1(urllib2.urlopen).return_value = dummy_connection
+		core = YouTubeCore.YouTubeCore()
+		core._getAuth = Mock()
+		
+		ret = core._fetchPage({"link":"www.somelink.dk"})
+		
+		patcher1.stop()
+		args = YouTubeCore.url2request().add_header.call_args_list
+		patcher2.stop()
+		
+		assert(args[0][0][0] == 'User-Agent')
+		assert(args[0][0][1] == 'Mozilla/5.0 (MOCK)')
+		assert(args[1][0][0] == 'Cookie')
+		assert(args[1][0][1] == 'PREF=f1=50000000&hl=en')
+	
+	def test_fetchPage_should_return_error_message_if_login_is_in_params_collection_and_plugin_is_missing_login_info(self):
+		settings = ["","","4","3" ]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
+		sys.modules[ "__main__" ].language.return_value = "error_message"
+		patcher1 = patch("urllib2.urlopen")
+		patcher2 = patch("YouTubeCore.url2request")
+		patcher1.start()
+		patcher2.start()
+		import YouTubeCore
+		import urllib2
+		YouTubeCore.url2request = Mock()
+		dummy_connection = Mock()
+		dummy_connection.read.return_value = "Nothing here\n"
+		dummy_connection.geturl.return_value = ""
+		dummy_connection.info.return_value = "Mock header"
+		patcher1(urllib2.urlopen).return_value = dummy_connection
+		core = YouTubeCore.YouTubeCore()
+		core._getAuth = Mock()
+		
+		ret = core._fetchPage({"login":"true","link":"www.somelink.dk"})
+		
+		print repr(ret)
+		patcher1.stop()
+		patcher2.stop()
+		
+		assert(ret["status"] == 303)
+		assert(ret["content"] == "error_message")
+		sys.modules[ "__main__" ].language.assert_called_with(30622)
+	
+	def test_fetchPage_should_fetch_token_from_settings_if_login_is_in_params(self):
+		settings = ["my_token","my_token","my_token","my_token","my_token","user","pass","4","3" ]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
+		sys.modules[ "__main__" ].language.return_value = "error_message"
+		patcher1 = patch("urllib2.urlopen")
+		patcher2 = patch("YouTubeCore.url2request")
+		patcher1.start()
+		patcher2.start()
+		import YouTubeCore
+		import urllib2
+		YouTubeCore.url2request = Mock()
+		dummy_connection = Mock()
+		dummy_connection.read.return_value = "Nothing here\n"
+		dummy_connection.geturl.return_value = ""
+		dummy_connection.info.return_value = "Mock header"
+		patcher1(urllib2.urlopen).return_value = dummy_connection
+		core = YouTubeCore.YouTubeCore()
+		core._getAuth = Mock()
+		
+		ret = core._fetchPage({"login":"true","link":"www.somelink.dk"})
+		
+		patcher1.stop()
+		patcher2.stop()
+		
+		sys.modules[ "__main__" ].settings.getSetting.assert_called_with("login_info")
+		
+	
+	def test_fetchPage_should_append_login_token_to_request_headers_if_login_is_in_params(self):
+		settings = ["my_token","my_token","my_token","my_token","my_token","user","pass","4","3" ]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
+		sys.modules[ "__main__" ].language.return_value = "error_message"
+		patcher1 = patch("urllib2.urlopen")
+		patcher2 = patch("YouTubeCore.url2request")
+		patcher1.start()
+		patcher2.start()
+		import YouTubeCore
+		import urllib2
+		YouTubeCore.url2request = Mock()
+		dummy_connection = Mock()
+		dummy_connection.read.return_value = "Nothing here\n"
+		dummy_connection.geturl.return_value = ""
+		dummy_connection.info.return_value = "Mock header"
+		patcher1(urllib2.urlopen).return_value = dummy_connection
+		core = YouTubeCore.YouTubeCore()
+		core._getAuth = Mock()
+		
+		ret = core._fetchPage({"login":"true","link":"www.somelink.dk"})
+		
+		patcher1.stop()
+		args = YouTubeCore.url2request().add_header.call_args_list
+		patcher2.stop()
+		
+		assert(args[2][0][0] == "Cookie")
+		assert(args[2][0][1] == 'LOGIN_INFO=my_token')
+
+	def test_fetchPage_should_call_retry_if_youtube_ask_user_to_verify_age(self):
+		settings = ["my_token","my_token","my_token","my_token","my_token","user","pass","4","3" ]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
+		sys.modules[ "__main__" ].language.return_value = "error_message"
+		patcher1 = patch("urllib2.urlopen")
+		patcher2 = patch("YouTubeCore.url2request")
+		patcher1.start()
+		patcher2.start()
+		import YouTubeCore
+		import urllib2
+		YouTubeCore.url2request = Mock()
+		dummy_connection = Mock()
+		read_values = ["Nothing here\n","something verify-age-actions"]
+		dummy_connection.read.side_effect = lambda: read_values.pop()
+		dummy_connection.geturl.return_value = ""
+		dummy_connection.info.return_value = "Mock header"
+		patcher1(urllib2.urlopen).return_value = dummy_connection
+		core = YouTubeCore.YouTubeCore()
+		core._getAuth = Mock()
+		
+		params = {"login":"","link":"www.somelink.dk"}
+		ret = core._fetchPage(params)
+		
+		patcher1.stop()
+		args = YouTubeCore.url2request().add_header.call_args_list
+		patcher2.stop()
+		
+		assert(dummy_connection.read.call_count == 2)
 		
 	def test_fetchPage_should_return_content_of_link_and_proper_status_code(self):
 		settings = ["4","3" ]
