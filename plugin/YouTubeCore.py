@@ -561,7 +561,7 @@ class YouTubeCore():
 	def _getAuth(self):
 		self.common.log("")
 		
-		if int(self.settings.getSetting("oauth2_expires_at")) < time.time():
+		if float(self.settings.getSetting("oauth2_expires_at")) < time.time():
 			self._oRefreshToken()
 
 		auth = self.settings.getSetting("oauth2_access_token")
@@ -650,7 +650,7 @@ class YouTubeCore():
 						self.common.log("removing video, reason: %s value: %s" % (reason, value))
 						video['videoid'] = "false";
 									
-			video['Title'] = self._getNodeValue(node, "media:title", "Unknown Title2").encode('utf-8') # Convert from utf-16 to combat breakage
+			video['Title'] = self._getNodeValue(node, "media:title", "Unknown Title").encode('utf-8') # Convert from utf-16 to combat breakage
 			video['Plot'] = self._getNodeValue(node, "media:description", "Unknown Plot").encode("utf-8")
 			video['Date'] = self._getNodeValue(node, "published", "Unknown Date").encode("utf-8")
 			video['user'] = self._getNodeValue(node, "name", "Unknown Name").encode("utf-8")
@@ -673,11 +673,11 @@ class YouTubeCore():
 			video['Plot'] = infoString + "\n" + video['Plot']
 			video['Genre'] = self._getNodeAttribute(node, "media:category", "label", "Unknown Genre").encode("utf-8")
 
-			if node.getElementsByTagName("link"):
-				link = node.getElementsByTagName("link")
-				for i in range(len(link)):
-					if link.item(i).getAttribute('rel') == 'edit':
-						obj = link.item(i).getAttribute('href')
+			edit_links = node.getElementsByTagName("link")
+			if edit_links:
+				for edit_link in edit_links:
+					if edit_link.getAttribute('rel') == 'edit':
+						obj = edit_link.getAttribute('href')
 						video['editid'] = obj[obj.rfind('/') + 1:]
 
 			video['thumbnail'] = self.urls["thumbnail"] % video['videoid']
