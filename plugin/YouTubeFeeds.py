@@ -54,6 +54,7 @@ class YouTubeFeeds():
 		self.language = sys.modules[ "__main__" ].language
 		self.plugin = sys.modules[ "__main__" ].plugin
 		self.dbg = sys.modules[ "__main__" ].dbg
+		self.utils = sys.modules["__main__"].utils
 		self.storage = sys.modules[ "__main__" ].storage
 		self.core = sys.modules[ "__main__" ].core
 		self.common = sys.modules ["__main__"].common
@@ -165,7 +166,7 @@ class YouTubeFeeds():
 				next = 'true'
 			
 			videos = videos[(per_page * page):(per_page * (page + 1))]
-			
+			print repr(videos)
 			(result, status) = self.core.getBatchDetailsOverride(videos, params)
 		else:
 			result = self.listAll(params)
@@ -223,10 +224,10 @@ class YouTubeFeeds():
 			self.storage.store(params, result)
 		
 		next = 'false'
+		
 		if (len(result) > 0):
 			if ( per_page * ( page + 1 ) < len(result) ):
 				next = 'true'
-		
 		result = result[(per_page * page):(per_page * (page + 1))]
 		
 		if get("user_feed") == "subscriptions":
@@ -251,7 +252,7 @@ class YouTubeFeeds():
 		if next == "true":
 			self.utils.addNextFolder(result, params)
 		
-		return (result,200)
+		return (result, 200)
 	
 	def listAll(self, params ={}):
 		get = params.get
