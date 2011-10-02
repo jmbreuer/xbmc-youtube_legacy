@@ -570,36 +570,141 @@ class TestYouTubeFeeds(BaseTestCase.BaseTestCase):
 		
 		assert(videos[0]["user_feed"] == "favorites")
 	
-'''		
 	def test_listAll_should_call_getAuth_if_login_is_in_params(self):
-		assert(False)
+		sys.modules[ "__main__" ].settings.getSetting.return_value = "1"
+		sys.modules["__main__"].storage.retrieve.return_value = "favorites"
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_fail","status":200}
+		sys.modules["__main__"].core.getVideoInfo.return_value = []
+		feeds = YouTubeFeeds()
+		feeds.createUrl = Mock()
+		feeds.createUrl.return_value = "some_url"
+		
+		feeds.listAll({"login":"true"})
+		
+		sys.modules[ "__main__" ].core._getAuth.assert_called_with()
 		
 	def test_listAll_should_call_createUrl_to_get_url(self):
-		assert(False)
+		sys.modules[ "__main__" ].settings.getSetting.return_value = "1"
+		sys.modules["__main__"].storage.retrieve.return_value = "favorites"
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_fail","status":200}
+		sys.modules["__main__"].core.getVideoInfo.return_value = []
+		feeds = YouTubeFeeds()
+		feeds.createUrl = Mock()
+		feeds.createUrl.return_value = "some_url"
 		
+		feeds.listAll({"login":"true"})
+		
+		feeds.createUrl.assert_called_with({"login":"true"})
+	
 	def test_listAll_should_call_fetchPage_correctly(self):
-		assert(False)
+		sys.modules[ "__main__" ].settings.getSetting.return_value = "1"
+		sys.modules["__main__"].storage.retrieve.return_value = "favorites"
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_fail","status":200}
+		sys.modules["__main__"].core.getVideoInfo.return_value = []
+		feeds = YouTubeFeeds()
+		feeds.createUrl = Mock()
+		feeds.createUrl.return_value = "some_url"
+		
+		feeds.listAll({"login":"true"})
+		
+		sys.modules["__main__"].core._fetchPage.assert_called_with({"link":"some_urlv=2&start-index=1&max-results=50","auth":"true"})
 		
 	def test_listAll_should_call_core_getFolderInfo_if_folder_is_in_params(self):
-		assert(False)
+		sys.modules[ "__main__" ].settings.getSetting.return_value = "1"
+		sys.modules["__main__"].storage.retrieve.return_value = "favorites"
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_fail","status":200}
+		sys.modules["__main__"].core.getFolderInfo.return_value = []
+		feeds = YouTubeFeeds()
+		feeds.createUrl = Mock()
+		feeds.createUrl.return_value = "some_url"
+		
+		feeds.listAll({"login":"true","folder":"true"})
+		
+		sys.modules["__main__"].core.getFolderInfo.assert_called_with("some_fail",{"login":"true","folder":"true"})
 		
 	def test_listAll_should_call_core_getVideoInfo_if_folder_is_not_in_params(self):
-		assert(False)
+		sys.modules[ "__main__" ].settings.getSetting.return_value = "1"
+		sys.modules["__main__"].storage.retrieve.return_value = "favorites"
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_fail","status":200}
+		sys.modules["__main__"].core.getVideoInfo.return_value = []
+		feeds = YouTubeFeeds()
+		feeds.createUrl = Mock()
+		feeds.createUrl.return_value = "some_url"
+		
+		feeds.listAll({"login":"true"})
+		
+		sys.modules["__main__"].core.getVideoInfo.assert_called_with("some_fail",{"login":"true"})
 		
 	def test_listAll_should_call_fetchPage_multiple_times_if_feed_requires_it(self):
-		assert(False)
+		sys.modules[ "__main__" ].settings.getSetting.return_value = "1"
+		sys.modules["__main__"].storage.retrieve.return_value = "favorites"
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_fail","status":200}
+		list = [[{"next":"false"}],[{"next":"true"}]]
+		sys.modules["__main__"].core.getVideoInfo.side_effect = lambda x,y: list.pop() 
+		feeds = YouTubeFeeds()
+		feeds.createUrl = Mock()
+		feeds.createUrl.return_value = "some_url"
+		
+		feeds.listAll({"login":"true"})
+		
+		assert(sys.modules["__main__"].core._fetchPage.call_count == 2)
 		
 	def test_listAll_should_call_core_getFolderInfo_multiple_times_if_feed_requires_it(self):
-		assert(False)
+		sys.modules[ "__main__" ].settings.getSetting.return_value = "1"
+		sys.modules["__main__"].storage.retrieve.return_value = "favorites"
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_fail","status":200}
+		list = [[{"next":"false"}],[{"next":"true"}]]
+		sys.modules["__main__"].core.getFolderInfo.side_effect = lambda x,y: list.pop() 
+		feeds = YouTubeFeeds()
+		feeds.createUrl = Mock()
+		feeds.createUrl.return_value = "some_url"
+		
+		feeds.listAll({"folder":"true"})
+		
+		assert(sys.modules["__main__"].core.getFolderInfo.call_count == 2)
 		
 	def test_listAll_should_call_core_getVideoInfo_multiple_times_if_feed_requires_it(self):
-		assert(False)
+		sys.modules[ "__main__" ].settings.getSetting.return_value = "1"
+		sys.modules["__main__"].storage.retrieve.return_value = "favorites"
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_fail","status":200}
+		list = [[{"next":"false"},{"next":"false"}],[{"next":"false"},{"next":"true"}]]
+		sys.modules["__main__"].core.getVideoInfo.side_effect = lambda x,y: list.pop() 
+		feeds = YouTubeFeeds()
+		feeds.createUrl = Mock()
+		feeds.createUrl.return_value = "some_url"
+		
+		video = feeds.listAll()
+		
+
+		assert(sys.modules["__main__"].core.getVideoInfo.call_count == 2)
 		
 	def test_listAll_should_append_additional_items_to_list(self):
-		assert(False)
+		sys.modules[ "__main__" ].settings.getSetting.return_value = "1"
+		sys.modules["__main__"].storage.retrieve.return_value = "favorites"
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_fail","status":200}
+		list = [[{"next":"false"},{"next":"false"}],[{"next":"false"},{"next":"true"}]]
+		sys.modules["__main__"].core.getVideoInfo.side_effect = lambda x,y: list.pop() 
+		feeds = YouTubeFeeds()
+		feeds.createUrl = Mock()
+		feeds.createUrl.return_value = "some_url"
+		
+		video = feeds.listAll()
+				
+		assert(video == [{'next': 'false'}, {'next': 'false'}, {'next': 'false'}])		
 
 	def test_listAll_should_call_storage_getReversePlaylistOrder_to_reverse_list_if_not_play_all(self):
-		assert(False)
-'''	
+		sys.modules[ "__main__" ].settings.getSetting.return_value = "1"
+		sys.modules["__main__"].storage.retrieve.return_value = "favorites"
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_fail","status":200}
+		list = [[{"next":"false"}],[{"next":"true"}]]
+		sys.modules["__main__"].core.getVideoInfo.side_effect = lambda x,y: list.pop() 
+		feeds = YouTubeFeeds()
+		feeds.createUrl = Mock()
+		feeds.createUrl.return_value = "some_url"
+		
+		feeds.listAll({"user_feed":"playlist"})
+		
+		sys.modules["__main__"].storage.getReversePlaylistOrder.assert_called_with({"user_feed":"playlist"})
+
 if __name__ == "__main__":
 	nose.runmodule()
