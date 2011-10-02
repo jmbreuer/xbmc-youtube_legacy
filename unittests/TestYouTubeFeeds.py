@@ -200,6 +200,43 @@ class TestYouTubeFeeds(BaseTestCase.BaseTestCase):
 		assert(False)
 		
 	def test_listFolder_should_starts_list_position_from_page_count_and_perpage_count(self):
-		assert(False)	
+		assert(False)
+		
+	def test_listFolder_should_call_retrieve_to_get_view_mode_if_feed_is_subscriptions(self):
+		assert(False)
+	
+	def test_listFolder_should_set_correct_view_mode_if_feed_is_subscriptions(self):
+		assert(False)
+	
+	def test_listAll_should_call_getAuth_if_login_is_in_params(self):
+		assert(False)
+		
+	def test_listAll_should_call_createUrl_to_get_url(self):
+		assert(False)
+		
+	def test_listAll_should_call_fetchPage_correctly(self):
+		assert(False)
+		
+	def test_listAll_should_call_core_getFolderInfo_if_folder_is_in_params(self):
+		assert(False)
+		
+	def test_listAll_should_call_core_getVideoInfo_if_folder_is_not_in_params(self):
+		assert(False)
+		
+	def test_listAll_should_call_fetchPage_multiple_times_if_feed_requires_it(self):
+		assert(False)
+		
+	def test_listAll_should_call_core_getFolderInfo_multiple_times_if_feed_requires_it(self):
+		assert(False)
+		
+	def test_listAll_should_call_core_getVideoInfo_multiple_times_if_feed_requires_it(self):
+		assert(False)
+		
+	def test_listAll_should_append_additional_items_to_list(self):
+		assert(False)
+
+	def test_listAll_should_call_storage_getReversePlaylistOrder_to_reverse_list_if_not_play_all(self):
+		assert(False)
+	
 if __name__ == "__main__":
 	nose.runmodule()
