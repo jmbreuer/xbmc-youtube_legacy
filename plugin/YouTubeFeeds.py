@@ -207,7 +207,7 @@ class YouTubeFeeds():
 				return self.storage.getUserOptionFolder(params)
 			else:
 				return self.storage.getStoredSearches(params)
-
+		
 		page = int(get("page", "0"))
 		per_page = ( 10, 15, 20, 25, 30, 40, 50 )[ int( self.settings.getSetting( "perpage" ) ) ]
 		
