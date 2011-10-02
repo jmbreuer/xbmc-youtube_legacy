@@ -675,7 +675,6 @@ class TestYouTubeFeeds(BaseTestCase.BaseTestCase):
 		
 		video = feeds.listAll()
 		
-
 		assert(sys.modules["__main__"].core.getVideoInfo.call_count == 2)
 		
 	def test_listAll_should_append_additional_items_to_list(self):
