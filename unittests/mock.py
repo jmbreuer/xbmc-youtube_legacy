@@ -453,7 +453,7 @@ class Mock(object):
                 found = True
         
         if not found:
-            raise AssertionError('Expected: %s\nCalled with: %s' % ((args, kwargs), self.call_args_list))
+            raise AssertionError('Expected: %s\nRecieved calls: %s' % ((args, kwargs), self.call_args_list))
 
     def assert_called_once_with(self, *args, **kwargs):
         """
