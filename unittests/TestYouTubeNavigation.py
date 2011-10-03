@@ -153,44 +153,183 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		
 		sys.modules["__main__"].xbmcplugin.endOfDirectory.assert_called_with(cacheToDisc = True, handle = -1, succeeded = True)	
 
-	def ttest_executeAction_should_call_login_login_if_action_is_settings(self):
-		assert(False)
+	def test_executeAction_should_call_login_login_if_action_is_settings(self):
+		navigation = YouTubeNavigation()
+		
+		navigation.executeAction({"action":"settings"})
+		
+		sys.modules["__main__"].login.login.assert_called_with({"action":"settings"})
 
-	def ttest_executeAction_should_call_storage_deleteStoredSearch_if_action_is_delete_search(self):
-		assert(False)
+	def test_executeAction_should_call_storage_deleteStoredSearch_if_action_is_delete_search(self):
+		navigation = YouTubeNavigation()
+		
+		navigation.executeAction({"action":"delete_search"})
+		
+		sys.modules["__main__"].storage.deleteStoredSearch.assert_called_with({"action":"delete_search"})
 
-	def ttest_executeAction_should_call_storage_deleteStoredSearch_if_action_is_delete_disco(self):
-		assert(False)
+	def test_executeAction_should_call_storage_deleteStoredSearch_if_action_is_delete_disco(self):
+		navigation = YouTubeNavigation()
+		
+		navigation.executeAction({"action":"delete_disco"})
+		
+		sys.modules["__main__"].storage.deleteStoredSearch.assert_called_with({"action":"delete_disco"})
 
-	def ttest_executeAction_should_(self):
-		assert(False)
+	def test_executeAction_should_call_storage_editStoredSearch_if_action_is_edit_search(self):
+		navigation = YouTubeNavigation()
+		navigation.listMenu = Mock()
+		
+		navigation.executeAction({"action":"edit_search"})
+		
+		sys.modules["__main__"].storage.editStoredSearch.assert_called_with({"action":"edit_search"})
 
-	def ttest_executeAction_should_(self):
-		assert(False)
+	def test_executeAction_should_call_storage_editStoredSearch_if_action_is_edit_disco(self):
+		navigation = YouTubeNavigation()
+		navigation.listMenu = Mock()
+		
+		navigation.executeAction({"action":"edit_disco"})
+		
+		sys.modules["__main__"].storage.editStoredSearch.assert_called_with({"action":"edit_disco"})
 
-	def ttest_executeAction_should_(self):
-		assert(False)
+	def test_executeAction_should_call_listMenu_if_action_is_edit_search(self):
+		navigation = YouTubeNavigation()
+		navigation.listMenu = Mock()
+		
+		navigation.executeAction({"action":"edit_search"})
+		
+		navigation.listMenu.assert_called_with({"action":"edit_search"})
 
-	def ttest_executeAction_should_(self):
-		assert(False)
+	def test_executeAction_should_call_listMenu_if_action_is_edit_disco(self):
+		navigation = YouTubeNavigation()
+		navigation.listMenu = Mock()
+		
+		navigation.executeAction({"action":"edit_disco"})
+		
+		navigation.listMenu.assert_called_with({"action":"edit_disco"})
 
-	def ttest_executeAction_should_(self):
-		assert(False)
+	def test_executeAction_should_call_storage_deleteStoredArtist_if_action_is_delete_artist(self):
+		navigation = YouTubeNavigation()
+		
+		navigation.executeAction({"action":"delete_artist"})
+		
+		sys.modules["__main__"].storage.deleteStoredArtist.assert_called_with({"action":"delete_artist"})		
 
-	def ttest_executeAction_should_(self):
-		assert(False)
+	def test_executeAction_should_call_removeFromFavorites_if_action_is_remove_favorite(self):
+		navigation = YouTubeNavigation()
+		navigation.removeFromFavorites = Mock()
+		
+		navigation.executeAction({"action":"remove_favorite"})
+		
+		navigation.removeFromFavorites.assert_called_with({"action":"remove_favorite"})		
 
-	def ttest_executeAction_should_(self):
-		assert(False)
+	def test_executeAction_should_call_addToFavorites_if_action_is_add_favorite(self):
+		navigation = YouTubeNavigation()
+		navigation.addToFavorites = Mock()
+		
+		navigation.executeAction({"action":"add_favorite"})
+		
+		navigation.addToFavorites.assert_called_with({"action":"add_favorite"})		
 
-	def ttest_executeAction_should_(self):
-		assert(False)
+	def test_executeAction_should_call_removeContact_if_action_is_remove_contact(self):
+		navigation = YouTubeNavigation()
+		navigation.removeContact = Mock()
+		
+		navigation.executeAction({"action":"remove_contact"})
+		
+		navigation.removeContact.assert_called_with({"action":"remove_contact"})
 
-	def ttest_executeAction_should_(self):
-		assert(False)
+	def test_executeAction_should_call_addContact_if_action_is_add_contact(self):
+		navigation = YouTubeNavigation()
+		navigation.addContact = Mock()
+		
+		navigation.executeAction({"action":"add_contact"})
+		
+		navigation.addContact.assert_called_with({"action":"add_contact"})
 
-	def ttest_executeAction_should_(self):
-		assert(False)
+	def test_executeAction_should_call_removeSubscription_if_action_is_remove_subscription(self):
+		navigation = YouTubeNavigation()
+		navigation.removeSubscription = Mock()
+		
+		navigation.executeAction({"action":"remove_subscription"})
+		
+		navigation.removeSubscription.assert_called_with({"action":"remove_subscription"})
+
+	def test_executeAction_should_call_addSubscription_if_action_is_add_subscription(self):
+		navigation = YouTubeNavigation()
+		navigation.addSubscription = Mock()
+		
+		navigation.executeAction({"action":"add_subscription"})
+		
+		navigation.addSubscription.assert_called_with({"action":"add_subscription"})
+
+	def test_executeAction_should_call_downloader_downloadVideo_if_action_is_download(self):
+		navigation = YouTubeNavigation()
+		
+		navigation.executeAction({"action":"download"})
+		
+		sys.modules["__main__"].downloader.downloadVideo.assert_called_with({"action":"download"})
+	
+	def test_executeAction_should_call_player_playVideo_if_action_is_play_video(self):
+		navigation = YouTubeNavigation()
+		
+		navigation.executeAction({"action":"play_video"})
+		
+		sys.modules["__main__"].player.playVideo.assert_called_with({"action":"play_video"})
+
+	def test_executeAction_should_call_playlist_queueVideo_if_action_is_queue_video(self):
+		navigation = YouTubeNavigation()
+		
+		navigation.executeAction({"action":"queue_video"})
+		
+		sys.modules["__main__"].playlist.queueVideo.assert_called_with({"action":"queue_video"})
+
+	def test_executeAction_should_call_storage_changeSubscriptionView_if_action_is_change_subscription_view(self):
+		navigation = YouTubeNavigation()
+		navigation.list = Mock()
+		navigation.executeAction({"action":"change_subscription_view"})
+		
+		sys.modules["__main__"].storage.changeSubscriptionView.assert_called_with({"action":"change_subscription_view"})
+
+	def test_executeAction_should_call_list_if_action_is_change_subscription_view(self):
+		navigation = YouTubeNavigation()
+		navigation.list = Mock()
+		navigation.executeAction({"action":"change_subscription_view"})
+		
+		navigation.list.assert_called_with({"action":"change_subscription_view"})
+
+	def test_executeAction_should_call_playlist_playAll_if_action_is_play_all(self):
+		navigation = YouTubeNavigation()
+		
+		navigation.executeAction({"action":"play_all"})
+		
+		sys.modules["__main__"].playlist.playAll.assert_called_with({"action":"play_all"})
+
+	def test_executeAction_should_call_playlist_addToPlaylist_if_action_is_add_to_playlist(self):
+		navigation = YouTubeNavigation()
+		
+		navigation.executeAction({"action":"add_to_playlist"})
+		
+		sys.modules["__main__"].playlist.addToPlaylist.assert_called_with({"action":"add_to_playlist"})
+
+	def test_executeAction_should_call_playlist_removeFromPlaylist_if_action_is_remove_from_playlist(self):
+		navigation = YouTubeNavigation()
+		
+		navigation.executeAction({"action":"remove_from_playlist"})
+		
+		sys.modules["__main__"].playlist.removeFromPlaylist.assert_called_with({"action":"remove_from_playlist"})
+
+	def test_executeAction_should_call_playlist_deletePlaylist_if_action_is_delete_playlist(self):
+		navigation = YouTubeNavigation()
+		
+		navigation.executeAction({"action":"delete_playlist"})
+		
+		sys.modules["__main__"].playlist.deletePlaylist.assert_called_with({"action":"delete_playlist"})
+
+	def test_executeAction_should_call_storage_reversePlaylistOrder_if_action_is_reverse_order(self):
+		navigation = YouTubeNavigation()
+		
+		navigation.executeAction({"action":"reverse_order"})
+		
+		sys.modules["__main__"].storage.reversePlaylistOrder.assert_called_with({"action":"reverse_order"})
 
 if __name__ == '__main__':
 	nose.runmodule()
