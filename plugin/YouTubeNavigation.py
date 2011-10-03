@@ -103,7 +103,7 @@ class YouTubeNavigation():
 		cache = True
 		
 		path = get("path", "/root")
-		if not get("feed") == "search" and not get("feed") == "related" and not get("channel") and not get("contact") and not get("playlist") and get("page","0") == "0" and not get("scraper") == "search_disco" and not get("scraper") == "music_artist":
+		if get("feed") not in ["search", "related"] and not get("channel") and not get("contact") and not get("playlist") and get("page","0") == "0" and get("scraper") not in ["search_disco", "music_artist"]:
 			for category in self.categories:
 				cat_get = category.get 
 				if (cat_get("path").find(path +"/") > -1 ):
@@ -111,12 +111,12 @@ class YouTubeNavigation():
 						setting = self.settings.getSetting( cat_get("path").replace("/root/explore/","").replace("/root/", "") )
 						
 						if not setting or setting == "true":
-							if (get("feed") == "downloads"):
+							if (cat_get("feed") == "downloads"):
 								if (self.settings.getSetting("downloadPath")):
 									self.addListItem(params, category)
 							else:
 								self.addListItem(params, category)
-				
+		
 		if (get("feed") or get("user_feed") or get("options") or get("store") or get("scraper")):
 			return self.list(params)
 		
