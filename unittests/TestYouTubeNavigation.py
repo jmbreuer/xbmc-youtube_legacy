@@ -337,7 +337,7 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		navigation = YouTubeNavigation()
 		navigation.parseVideoList = Mock()
 		navigation.parseFolderList = Mock()
-		navigation.showListError = Mock()
+		navigation.showListingError = Mock()
 		
 		navigation.list({"feed":"search"})
 		
@@ -349,7 +349,7 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		navigation = YouTubeNavigation()
 		navigation.parseVideoList = Mock()
 		navigation.parseFolderList = Mock()
-		navigation.showListError = Mock()
+		navigation.showListingError = Mock()
 		
 		navigation.list({"scraper":"search_disco"})
 		
@@ -362,7 +362,7 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		navigation = YouTubeNavigation()
 		navigation.parseVideoList = Mock()
 		navigation.parseFolderList = Mock()
-		navigation.showListError = Mock()
+		navigation.showListingError = Mock()
 		
 		navigation.list({"feed":"search"})
 		
@@ -375,7 +375,7 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		navigation = YouTubeNavigation()
 		navigation.parseVideoList = Mock()
 		navigation.parseFolderList = Mock()
-		navigation.showListError = Mock()
+		navigation.showListingError = Mock()
 		
 		navigation.list({"scraper":"search_disco"})
 		
@@ -386,7 +386,7 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		navigation = YouTubeNavigation()
 		navigation.parseVideoList = Mock()
 		navigation.parseFolderList = Mock()
-		navigation.showListError = Mock()
+		navigation.showListingError = Mock()
 		
 		navigation.list({"scraper":"some_scraper"})
 		
@@ -397,7 +397,7 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		navigation = YouTubeNavigation()
 		navigation.parseVideoList = Mock()
 		navigation.parseFolderList = Mock()
-		navigation.showListError = Mock()
+		navigation.showListingError = Mock()
 		
 		navigation.list({"store":"some_store"})
 		
@@ -408,7 +408,7 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		navigation = YouTubeNavigation()
 		navigation.parseVideoList = Mock()
 		navigation.parseFolderList = Mock()
-		navigation.showListError = Mock()
+		navigation.showListingError = Mock()
 		
 		navigation.list({})
 		
@@ -419,7 +419,7 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		navigation = YouTubeNavigation()
 		navigation.parseVideoList = Mock()
 		navigation.parseFolderList = Mock()
-		navigation.showListError = Mock()
+		navigation.showListingError = Mock()
 		
 		navigation.list({"folder":"true"})
 		
@@ -430,7 +430,7 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		navigation = YouTubeNavigation()
 		navigation.parseVideoList = Mock()
 		navigation.parseFolderList = Mock()
-		navigation.showListError = Mock()
+		navigation.showListingError = Mock()
 		
 		navigation.list({})
 		
@@ -441,23 +441,49 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		navigation = YouTubeNavigation()
 		navigation.parseVideoList = Mock()
 		navigation.parseFolderList = Mock()
-		navigation.showListError = Mock()
+		navigation.showListingError = Mock()
 		
 		navigation.list({})
 		
-		navigation.showListError.assert_called_with({})		
+		navigation.showListingError.assert_called_with({})		
 	
-	def ttest_showListingError_should_search_categories_for_folder_name_if_external_is_not_in_params(self):
-		assert(False)
-			
-	def ttest_showListingError_should_search_storage_user_options_if_external_is_in_params(self):
-		assert(False)
-				
-	def ttest_showListingError_should_use_channel_title_if_channel_is_in_params(self):
-		assert(False)
+	def test_showListingError_should_search_categories_for_folder_name_if_external_is_not_in_params(self):
+		sys.modules["__main__"].language.return_value = "some_string"
+		navigation = YouTubeNavigation()
+		navigation.categories = ({"feed":"my_feed","Title":"my_category_title"},{"feed":"not_my_feed","Title":"not_my_category_title"})
 		
-	def ttest_showListingError_should_use_language_string_if_playlist_is_in_params(self):
-		assert(False)
+		navigation.showListingError({"feed":"my_feed"})
+		
+		sys.modules["__main__"].utils.showMessage("my_category_title","some_string")
+			
+	def test_showListingError_should_search_storage_user_options_if_external_is_in_params(self):
+		sys.modules["__main__"].language.return_value = "some_string"
+		sys.modules["__main__"].storage.user_options = ({"feed":"my_feed","Title":"my_options_title"},{"feed":"not_my_feed","Title":"not_my_options_title"})
+		navigation = YouTubeNavigation()
+		
+		navigation.showListingError({"feed":"my_feed", "external":"true"})
+		
+		sys.modules["__main__"].utils.showMessage("my_options_title","some_string")
+				
+	def test_showListingError_should_use_channel_title_if_channel_is_in_params(self):
+		sys.modules["__main__"].language.return_value = "some_string"
+		navigation = YouTubeNavigation()
+		navigation.categories = ({"feed":"my_feed","Title":"my_category_title"},{"feed":"not_my_feed","Title":"not_my_category_title"})
+		
+		navigation.showListingError({"feed":"my_feed","channel":"some_channel_title"})
+		
+		sys.modules["__main__"].utils.showMessage("some_channel_title","some_string")
+		
+	def test_showListingError_should_use_language_string_if_playlist_is_in_params(self):
+		sys.modules["__main__"].language.return_value = "some_string"
+		navigation = YouTubeNavigation()
+		navigation.categories = ({"feed":"my_feed","Title":"my_category_title"},{"feed":"not_my_feed","Title":"not_my_category_title"})
+		
+		navigation.showListingError({"feed":"my_feed","playlist":"some_playlist"})
+		
+		sys.modules["__main__"].utils.showMessage("some_string","some_string")
+		sys.modules["__main__"].language.assert_called_with(30615)
+		sys.modules["__main__"].language.assert_called_with(30601)
 		
 	def ttest_showListingError_should_call_utils_showMessage_correctly(self):
 		assert(False)
