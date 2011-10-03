@@ -124,7 +124,7 @@ class YouTubeNavigation():
 		
 		if (get("scraper") == "shows" and get("category") and not video_view):
 			video_view = self.settings.getSetting("list_view") == "0"
-			
+		
 		if (video_view):
 			self.xbmc.executebuiltin("Container.SetViewMode(500)")
 		
