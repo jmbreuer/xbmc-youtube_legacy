@@ -204,28 +204,32 @@ class YouTubeNavigation():
 				self.parseVideoList(params, results)
 			return True
 		else:
-			label = ""
-			if get("external"):
-				categories = self.storage.user_options
-			else:
-				categories = self.categories
-				
-			for category in categories:
-				cat_get = category.get
-				if (
-					(get("feed") and cat_get("feed") == get("feed")) or 
-					(get("user_feed") and cat_get("user_feed") == get("user_feed")) or
-					(get("scraper") and cat_get("scraper") == get("scraper")) 
-					):
-					label = cat_get("Title")
-			
-			if get("channel"):
-				label = get("channel")
-			if get("playlist"):
-				label = self.language(30615)
-			if label:
-				self.utils.showMessage(label, self.language(30601))
+			self.showListError(params)
 		return False
+
+	def showListError(self, params = {}):
+		get = params.get
+		label = ""
+		if get("external"):
+			categories = self.storage.user_options
+		else:
+			categories = self.categories
+			
+		for category in categories:
+			cat_get = category.get
+			if (
+				(get("feed") and cat_get("feed") == get("feed")) or 
+				(get("user_feed") and cat_get("user_feed") == get("user_feed")) or
+				(get("scraper") and cat_get("scraper") == get("scraper")) 
+				):
+				label = cat_get("Title")
+		
+		if get("channel"):
+			label = get("channel")
+		if get("playlist"):
+			label = self.language(30615)
+		if label:
+			self.utils.showMessage(label, self.language(30601))
 	
 	#================================== Plugin Actions =========================================
 	
