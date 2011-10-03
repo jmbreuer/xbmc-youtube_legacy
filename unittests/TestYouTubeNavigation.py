@@ -331,5 +331,137 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		
 		sys.modules["__main__"].storage.reversePlaylistOrder.assert_called_with({"action":"reverse_order"})
 
+	def test_list_should_ask_user_for_input_if_feed_is_search_and_search_is_missing_from_params(self):
+		sys.modules["__main__"].feeds.list.return_value = ([],200)
+		sys.modules["__main__"].language.return_value = "some_string"
+		navigation = YouTubeNavigation()
+		navigation.parseVideoList = Mock()
+		navigation.parseFolderList = Mock()
+		navigation.showListError = Mock()
+		
+		navigation.list({"feed":"search"})
+		
+		sys.modules["__main__"].utils.getUserInput.assert_called_with("some_string","")
+
+	def test_list_should_ask_user_for_input_if_scraper_is_search_disco_and_search_is_missing_from_params(self):
+		sys.modules["__main__"].scraper.scrape.return_value = ([],200)
+		sys.modules["__main__"].language.return_value = "some_string"
+		navigation = YouTubeNavigation()
+		navigation.parseVideoList = Mock()
+		navigation.parseFolderList = Mock()
+		navigation.showListError = Mock()
+		
+		navigation.list({"scraper":"search_disco"})
+		
+		sys.modules["__main__"].utils.getUserInput.assert_called_with("some_string","")
+
+	def test_list_should_call_storage_saveStoredSearch_if_feed_is_search(self):
+		sys.modules["__main__"].feeds.list.return_value = ([],200)
+		sys.modules["__main__"].language.return_value = "some_string"
+		sys.modules["__main__"].utils.getUserInput.return_value = "some_user_string"
+		navigation = YouTubeNavigation()
+		navigation.parseVideoList = Mock()
+		navigation.parseFolderList = Mock()
+		navigation.showListError = Mock()
+		
+		navigation.list({"feed":"search"})
+		
+		sys.modules["__main__"].storage.saveStoredSearch.assert_called_with({"feed":"search","search":"some_user_string"})
+
+	def test_list_should_call_storage_saveStoredSearch_if_scraper_is_search_disco(self):
+		sys.modules["__main__"].scraper.scrape.return_value = ([],200)
+		sys.modules["__main__"].language.return_value = "some_string"
+		sys.modules["__main__"].utils.getUserInput.return_value = "some_user_string"
+		navigation = YouTubeNavigation()
+		navigation.parseVideoList = Mock()
+		navigation.parseFolderList = Mock()
+		navigation.showListError = Mock()
+		
+		navigation.list({"scraper":"search_disco"})
+		
+		sys.modules["__main__"].storage.saveStoredSearch.assert_called_with({"scraper":"search_disco","search":"some_user_string"})
+
+	def test_list_should_call_scraper_scrape_if_scraper_is_in_params(self):
+		sys.modules["__main__"].scraper.scrape.return_value = ([],200)
+		navigation = YouTubeNavigation()
+		navigation.parseVideoList = Mock()
+		navigation.parseFolderList = Mock()
+		navigation.showListError = Mock()
+		
+		navigation.list({"scraper":"some_scraper"})
+		
+		sys.modules["__main__"].scraper.scrape.assert_called_with({"scraper":"some_scraper"})
+
+	def test_list_should_call_storage_list_if_store_is_in_params(self):
+		sys.modules["__main__"].storage.list.return_value = ([],200)
+		navigation = YouTubeNavigation()
+		navigation.parseVideoList = Mock()
+		navigation.parseFolderList = Mock()
+		navigation.showListError = Mock()
+		
+		navigation.list({"store":"some_store"})
+		
+		sys.modules["__main__"].storage.list.assert_called_with({"store":"some_store"})
+		
+	def test_list_should_call_feeds_list_if_neither_store_or_scraper_is_in_params(self):
+		sys.modules["__main__"].feeds.list.return_value = ([],200)
+		navigation = YouTubeNavigation()
+		navigation.parseVideoList = Mock()
+		navigation.parseFolderList = Mock()
+		navigation.showListError = Mock()
+		
+		navigation.list({})
+		
+		sys.modules["__main__"].feeds.list.assert_called_with({})
+		
+	def test_list_should_call_parseFolderList_if_list_was_successfull_and_folder_is_in_params(self):
+		sys.modules["__main__"].feeds.list.return_value = ([],200)
+		navigation = YouTubeNavigation()
+		navigation.parseVideoList = Mock()
+		navigation.parseFolderList = Mock()
+		navigation.showListError = Mock()
+		
+		navigation.list({"folder":"true"})
+		
+		navigation.parseFolderList.assert_called_with({"folder":"true"},[])
+		
+	def test_list_should_call_parseVideoList_if_list_was_successfull_and_folder_is_not_in_params(self):
+		sys.modules["__main__"].feeds.list.return_value = ([],200)
+		navigation = YouTubeNavigation()
+		navigation.parseVideoList = Mock()
+		navigation.parseFolderList = Mock()
+		navigation.showListError = Mock()
+		
+		navigation.list({})
+		
+		navigation.parseVideoList.assert_called_with({},[])		
+	
+	def test_list_should_call_showListingError_if_list_was_unsuccessfull(self):
+		sys.modules["__main__"].feeds.list.return_value = ([],303)
+		navigation = YouTubeNavigation()
+		navigation.parseVideoList = Mock()
+		navigation.parseFolderList = Mock()
+		navigation.showListError = Mock()
+		
+		navigation.list({})
+		
+		navigation.showListError.assert_called_with({})		
+	
+	def ttest_showListingError_should_search_categories_for_folder_name_if_external_is_not_in_params(self):
+		assert(False)
+			
+	def ttest_showListingError_should_search_storage_user_options_if_external_is_in_params(self):
+		assert(False)
+				
+	def ttest_showListingError_should_use_channel_title_if_channel_is_in_params(self):
+		assert(False)
+		
+	def ttest_showListingError_should_use_language_string_if_playlist_is_in_params(self):
+		assert(False)
+		
+	def ttest_showListingError_should_call_utils_showMessage_correctly(self):
+		assert(False)
+				
+		
 if __name__ == '__main__':
 	nose.runmodule()
