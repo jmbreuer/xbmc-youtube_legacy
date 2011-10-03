@@ -2,7 +2,7 @@
 import nose
 import BaseTestCase
 from mock import Mock, patch
-import sys, io
+import sys
 from  YouTubeUtils import YouTubeUtils 
 
 class TestYouTubeUtils(BaseTestCase.BaseTestCase):
