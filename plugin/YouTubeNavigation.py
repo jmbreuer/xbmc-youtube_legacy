@@ -204,10 +204,10 @@ class YouTubeNavigation():
 				self.parseVideoList(params, results)
 			return True
 		else:
-			self.showListError(params)
+			self.showListingError(params)
 		return False
 
-	def showListError(self, params = {}):
+	def showListingError(self, params = {}):
 		get = params.get
 		label = ""
 		if get("external"):
