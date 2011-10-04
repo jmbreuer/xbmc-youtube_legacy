@@ -709,6 +709,347 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		
 		sys.modules["__main__"].utils.showErrorMessage.assert_called_with("some_message","",303)
 		sys.modules["__main__"].language.assert_called_with(30021)
+		
+	def test_addListItem_should_call_addFolderListItem_if_item_is_not_an_action_and_doesnt_require_login(self):
+		sys.modules["__main__"].settings.getSetting.return_value = ""
+		navigation = YouTubeNavigation()
+		navigation.addFolderListItem = Mock()
+		
+		navigation.addListItem({},{"feed":"some_feed","login":"false"})
+		
+		navigation.addFolderListItem.assert_called_with({},{"feed":"some_feed","login":"false"})
+	
+	def test_addListItem_should_call_addFolderListItem_if_item_is_not_an_action__requires_login_and_user_is_logged_in(self):
+		sys.modules["__main__"].settings.getSetting.return_value = "some_token"
+		navigation = YouTubeNavigation()
+		navigation.addFolderListItem = Mock()
+		
+		navigation.addListItem({},{"feed":"some_feed","login":"true"})
+		
+		navigation.addFolderListItem.assert_called_with({},{"feed":"some_feed","login":"true"})
+	
+	def test_addListItem_should_call_addActionListItem_if_item_action_is_settings_user_is_logged_in_and_item_requires_login(self):
+		sys.modules["__main__"].settings.getSetting.return_value = "some_token"
+		navigation = YouTubeNavigation()
+		navigation.addActionListItem = Mock()
+		
+		navigation.addListItem({},{"action":"settings","login":"true"})
+		
+		navigation.addActionListItem.assert_called_with({},{"action":"settings","login":"true"})
+	
+	def test_addListItem_should_call_addActionListItem_if_item_action_is_settings_user_is_not_logged_in_and_item_doesnt_require_login(self):
+		sys.modules["__main__"].settings.getSetting.return_value = ""
+		navigation = YouTubeNavigation()
+		navigation.addActionListItem = Mock()
+		
+		navigation.addListItem({},{"action":"settings","login":"false"})
+		
+		navigation.addActionListItem.assert_called_with({},{"action":"settings","login":"false"})
+		
+	def test_addListItem_should_call_addVideoListItem_if_item_action_is_play_video(self):
+		navigation = YouTubeNavigation()
+		navigation.addVideoListItem = Mock()
+		
+		navigation.addListItem({},{"action":"play_video"})
+		
+		navigation.addVideoListItem.assert_called_with({},{"action":"play_video"}, 0)
+	
+	def test_addListItem_should_call_addActionListItem_if_item_has_action(self):
+		navigation = YouTubeNavigation()
+		navigation.addActionListItem = Mock()
+		
+		navigation.addListItem({},{"action":"some_action"})
+		
+		navigation.addActionListItem.assert_called_with({},{"action":"some_action"})
+	
+	def test_addFolderListItem_should_call_utils_get_thumbnail_to_get_icon_path(self):
+		sys.argv = ["some_path",-1,"some_params"]
+		navigation = YouTubeNavigation()
+		navigation.addFolderContextMenuItems = Mock()
+		navigation.addFolderContextMenuItems.return_value = []
+		
+		navigation.addFolderListItem({},{"action":"some_action", "icon":"some_icon"})
+		
+		sys.modules["__main__"].utils.getThumbnail("some_icon")
+	
+	def test_addFolderListItem_should_call_addFolderContextMenuItems_to_get_context_menu_items(self):
+		sys.argv = ["some_path",-1,"some_params"]
+		navigation = YouTubeNavigation()
+		navigation.addFolderContextMenuItems = Mock()
+		navigation.addFolderContextMenuItems.return_value = []
+		
+		navigation.addFolderListItem({},{"action":"some_action", "icon":"some_icon"})
+		
+		navigation.addFolderContextMenuItems.assert_called_with({},{"action":"some_action", "icon":"some_icon"})
+	
+	def test_addFolderListItem_should_call_utils_get_thumbnail_to_get_thumbnail_path(self):
+		sys.argv = ["some_path",-1,"some_params"]
+		navigation = YouTubeNavigation()
+		navigation.addFolderContextMenuItems = Mock()
+		navigation.addFolderContextMenuItems.return_value = []
+		
+		navigation.addFolderListItem({},{"action":"some_action", "icon":"some_icon","thumbnail":"some_thumbnail"})
+		
+		sys.modules["__main__"].utils.getThumbnail.assert_called_with("some_thumbnail")
+	
+	def test_addFolderListItem_should_call_xbmcgui_ListItem_to_fetch_xbmc_listitem_object(self):
+		sys.argv = ["some_path",-1,"some_params"]
+		sys.modules["__main__"].utils.getThumbnail.return_value = "some_image_path"
+		navigation = YouTubeNavigation()
+		navigation.addFolderContextMenuItems = Mock()
+		navigation.addFolderContextMenuItems.return_value = []
+		
+		navigation.addFolderListItem({},{"action":"some_action", "Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"})
+		
+		sys.modules["__main__"].xbmcgui.ListItem.assert_called_with("some_title",iconImage='some_image_path', thumbnailImage='some_image_path')
+	
+	def test_addFolderListItem_should_call_utils_buildItemUrl_to_get_proper_item_url(self):
+		sys.argv = ["some_path",-1,"some_params"]
+		sys.modules["__main__"].utils.getThumbnail.return_value = "some_image_path"
+		navigation = YouTubeNavigation()
+		navigation.addFolderContextMenuItems = Mock()
+		navigation.addFolderContextMenuItems.return_value = []
+		
+		navigation.addFolderListItem({},{"action":"some_action", "Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"})
+		
+		sys.modules["__main__"].utils.buildItemUrl({"action":"some_action", "Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"})
+	
+	def test_addFolderListItem_should_call_listitem_addContextMenuItems_to_add_context_menu(self):
+		sys.argv = ["some_path",-1,"some_params"]
+		sys.modules["__main__"].utils.getThumbnail.return_value = "some_image_path"
+		navigation = YouTubeNavigation()
+		navigation.addFolderContextMenuItems = Mock()
+		navigation.addFolderContextMenuItems.return_value = [1,2]
+		
+		navigation.addFolderListItem({},{"action":"some_action", "Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"})
+		
+		sys.modules["__main__"].xbmcgui.ListItem().addContextMenuItems.assert_called_with([1,2],replaceItems=False)
+	
+	def test_addFolderListItem_should_call_listitem_setProperty_to_inidicate_item_is_a_folder(self):
+		sys.argv = ["some_path",-1,"some_params"]
+		navigation = YouTubeNavigation()
+		navigation.addFolderContextMenuItems = Mock()
+		navigation.addFolderContextMenuItems.return_value = []
+		
+		navigation.addFolderListItem({},{"action":"some_action", "Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"})
+		
+		sys.modules["__main__"].xbmcgui.ListItem().setProperty.assert_called_with('Folder','true')
+	
+	def test_addFolderListItem_should_call_settings_getSetting_to_fetch_downloadPath_if_item_feed_is_downloads(self):
+		sys.argv = ["some_path",-1,"some_params"]
+		navigation = YouTubeNavigation()
+		navigation.addFolderContextMenuItems = Mock()
+		navigation.addFolderContextMenuItems.return_value = []
+		
+		navigation.addFolderListItem({},{"feed":"downloads", "Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"})
+		
+		sys.modules["__main__"].settings.getSetting.assert_called_with("downloadPath")
+	
+	def test_addFolderListItem_should_call_xbmcplugin_addDirectoryItem_correctly(self):
+		sys.argv = ["some_path",-1,"some_params"]
+		navigation = YouTubeNavigation()
+		navigation.addFolderContextMenuItems = Mock()
+		navigation.addFolderContextMenuItems.return_value = []
+		
+		navigation.addFolderListItem({},{"feed":"downloads", "Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"})
+		
+		sys.modules["__main__"].settings.getSetting.assert_called_with("downloadPath")
+		
+	def test_addActionListItem_should_call_utils_get_thumbnail_to_get_thumbnail_path(self):
+		sys.argv = ["some_path",-1,"some_params"]
+		navigation = YouTubeNavigation()
+		
+		navigation.addActionListItem({},{"action":"some_action", "Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"})
+		
+		sys.modules["__main__"].utils.getThumbnail.assert_called_with("some_thumbnail")
+
+	def test_addActionListItem_should_call_xbmcgui_ListItem_to_fetch_xbmc_listitem_object(self):
+		sys.argv = ["some_path",-1,"some_params"]
+		sys.modules["__main__"].utils.getThumbnail.return_value = "some_image_path"
+		navigation = YouTubeNavigation()
+		
+		navigation.addActionListItem({},{"action":"some_action", "Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"})
+		
+		sys.modules["__main__"].xbmcgui.ListItem.assert_called_with("some_title",iconImage='DefaultFolder.png', thumbnailImage='some_image_path')
+
+	def test_addActionListItem_should_call_listitem_setProperty_to_inidicate_item_is_playable_if_item_action_is_playbyid(self):
+		sys.argv = ["some_path",-1,"some_params"]
+		sys.modules["__main__"].utils.getThumbnail.return_value = "some_image_path"
+		navigation = YouTubeNavigation()
+		
+		navigation.addActionListItem({},{"action":"playbyid", "Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"})
+		
+		sys.modules["__main__"].xbmcgui.ListItem().setProperty.assert_called_with("IsPlayable","true")
+
+	def test_addActionListItem_should_call_xbmcplugin_addDirectoryItem_correctly(self):
+		sys.argv = ["some_path",-1,"some_params"]
+		sys.modules["__main__"].xbmcgui.ListItem.return_value = []
+		sys.modules["__main__"].utils.getThumbnail.return_value = "some_image_path"
+		navigation = YouTubeNavigation()
+		
+		navigation.addActionListItem({},{"action":"some_action", "Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"})
+		
+		sys.modules["__main__"].xbmcplugin.addDirectoryItem.assert_called_with(totalItems = 0, url="some_path?path=None&action=some_action&", isFolder=True, listitem = [], handle=-1)
+
+	def test_addVideoListItem_should_set_default_icon_for_trailers(self):
+		sys.argv = ["some_path",-1,"some_params"]
+		sys.modules["__main__"].utils.getThumbnail.return_value = "some_image_path"
+		navigation = YouTubeNavigation()
+		navigation.addVideoContextMenuItems = Mock()
+		
+		navigation.addVideoListItem({"scraper":"movie_trailers"},{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"})
+		
+		sys.modules["__main__"].utils.getThumbnail.assert_called_with("trailers")
+
+	def test_addVideoListItem_should_set_default_icon_for_disco(self):
+		sys.argv = ["some_path",-1,"some_params"]
+		sys.modules["__main__"].utils.getThumbnail.return_value = "some_image_path"
+		navigation = YouTubeNavigation()
+		navigation.addVideoContextMenuItems = Mock()
+		
+		navigation.addVideoListItem({"scraper":"search_disco"},{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"})
+		
+		sys.modules["__main__"].utils.getThumbnail.assert_called_with("discoball")
+
+	def test_addVideoListItem_should_set_default_icon_for_movies(self):
+		sys.argv = ["some_path",-1,"some_params"]
+		sys.modules["__main__"].utils.getThumbnail.return_value = "some_image_path"
+		navigation = YouTubeNavigation()
+		navigation.addVideoContextMenuItems = Mock()
+		
+		navigation.addVideoListItem({"scraper":"search_disco"},{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"})
+		
+		sys.modules["__main__"].utils.getThumbnail.assert_called_with("discoball")
+
+	def test_addVideoListItem_should_set_default_icon_for_live(self):
+		sys.argv = ["some_path",-1,"some_params"]
+		sys.modules["__main__"].utils.getThumbnail.return_value = "some_image_path"
+		navigation = YouTubeNavigation()
+		navigation.addVideoContextMenuItems = Mock()
+		
+		navigation.addVideoListItem({"feed":"some_live"},{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"})
+		
+		sys.modules["__main__"].utils.getThumbnail.assert_called_with("live")
+
+	def test_addVideoListItem_should_set_default_icon_for_music(self):
+		sys.argv = ["some_path",-1,"some_params"]
+		sys.modules["__main__"].utils.getThumbnail.return_value = "some_image_path"
+		navigation = YouTubeNavigation()
+		navigation.addVideoContextMenuItems = Mock()
+		
+		navigation.addVideoListItem({"scraper":"scraper_music"},{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"})
+		
+		sys.modules["__main__"].utils.getThumbnail.assert_called_with("music")
+
+	def ttest_addVideoListItem_should_call_utils_get_thumbnail_to_get_icon_path(self):
+		sys.argv = ["some_path",-1,"some_params"]
+		sys.modules["__main__"].utils.getThumbnail.return_value = "some_image_path"
+		navigation = YouTubeNavigation()
+		navigation.addVideoContextMenuItems = Mock()
+		
+		navigation.addVideoListItem({},{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"})
+		
+		sys.modules["__main__"].utils.getThumbnail.assert_called_with("some_icon")
+
+	def test_addVideoListItem_should_call_xbmcgui_ListItem_to_fetch_xbmc_listitem_object(self):
+		sys.argv = ["some_path",-1,"some_params"]
+		sys.modules["__main__"].utils.getThumbnail.return_value = "some_image_path"
+		navigation = YouTubeNavigation()
+		navigation.addVideoContextMenuItems = Mock()
+		
+		navigation.addVideoListItem({},{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"})
+		
+		sys.modules["__main__"].xbmcgui.ListItem.assert_called_with("some_title",iconImage="some_image_path",thumbnailImage="some_thumbnail")
+
+	def test_addVideoListItem_should_call_addVideoContextMenuItems_to_get_context_menu_items(self):
+		sys.argv = ["some_path",-1,"some_params"]
+		sys.modules["__main__"].utils.getThumbnail.return_value = "some_image_path"
+		navigation = YouTubeNavigation()
+		navigation.addVideoContextMenuItems = Mock()
+		
+		navigation.addVideoListItem({},{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"})
+		
+		navigation.addVideoContextMenuItems.assert_called_with({},{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"})
+
+	def test_addVideoListItem_should_call_listitem_addContextMenuItems_to_add_context_menu(self):
+		sys.argv = ["some_path",-1,"some_params"]
+		sys.modules["__main__"].utils.getThumbnail.return_value = "some_image_path"
+		navigation = YouTubeNavigation()
+		navigation.addVideoContextMenuItems = Mock()
+		navigation.addVideoContextMenuItems.return_value = []
+		
+		navigation.addVideoListItem({},{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"})
+		
+		sys.modules["__main__"].xbmcgui.ListItem().addContextMenuItems.assert_called_with([],replaceItems=True)
+
+	def test_addVideoListItem_should_call_listitem_setProperty_to_indicate_listitem_is_video(self):
+		sys.argv = ["some_path",-1,"some_params"]
+		sys.modules["__main__"].utils.getThumbnail.return_value = "some_image_path"
+		navigation = YouTubeNavigation()
+		navigation.addVideoContextMenuItems = Mock()
+		navigation.addVideoContextMenuItems.return_value = []
+		
+		navigation.addVideoListItem({},{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"})
+		
+		sys.modules["__main__"].xbmcgui.ListItem().setProperty.assert_called_with("Video","true")
+		sys.modules["__main__"].xbmcgui.ListItem().setProperty.assert_called_with("IsPlayable","true")
+
+	def test_addVideoListItem_should_call_listitem_setInfo_to_allow_xbmc_to_sort_and_display_video_info(self):
+		sys.argv = ["some_path",-1,"some_params"]
+		sys.modules["__main__"].utils.getThumbnail.return_value = "some_image_path"
+		navigation = YouTubeNavigation()
+		navigation.addVideoContextMenuItems = Mock()
+		navigation.addVideoContextMenuItems.return_value = []
+		
+		navigation.addVideoListItem({},{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"})
+		
+		sys.modules["__main__"].xbmcgui.ListItem().setInfo.assert_called_with(infoLabels= {'icon': 'some_icon', 'thumbnail': 'some_thumbnail', 'Title': 'some_title'}, type = 'Video')
+
+	def test_addVideoListItem_should_call_xbmcplugin_addDirectoryItem_correctly(self):
+		sys.argv = ["some_path",-1,"some_params"]
+		sys.modules["__main__"].utils.getThumbnail.return_value = "some_image_path"
+		list_item = Mock()
+		sys.modules["__main__"].xbmcgui.ListItem.return_value = list_item 
+		navigation = YouTubeNavigation()
+		navigation.addVideoContextMenuItems = Mock()
+		navigation.addVideoContextMenuItems.return_value = []
+		
+		navigation.addVideoListItem({},{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"})
+		
+		sys.modules["__main__"].xbmcplugin.addDirectoryItem.assert_called_with(handle=-1, url = "some_path?path=None&action=play_video&videoid=None", listitem=list_item, isFolder=False, totalItems=1)
+
+	def test_parseFolderList_should_set_cache_false_if_item_is_store_og_user_feed(self):
+		assert(False)
+
+	def ttest_parseFolderList_should_call_addFolderListItem_for_each_item(self):
+		assert(False)
+
+	def ttest_parseFolderList_should_call_xbmcplugin_endOfDirectory_correctly(self):
+		assert(False)
+
+	def ttest_parseVideoList_should_skip_items_where_videoid_is_false(self):
+		assert(False)
+
+	def ttest_parseVideoList_should_add_index_to_items_from_watch_later_feed(self):
+		assert(False)
+
+	def ttest_parseVideoList_should_call_addFolderListItem_to_next_item(self):
+		assert(False)
+
+	def ttest_parseVideoList_should_call_addVideoListItem_if_item_is_not_next_item(self):
+		assert(False)
+
+	def ttest_parseVideoList_should_call_settings_getSetting_to_get_list_view(self):
+		assert(False)
+
+	def ttest_parseVideoList_should_call_xbmc_executebuiltin_if_list_view_is_set(self):
+		assert(False)
+		
+	def ttest_parseVideoList_should_call_xbmcplugin_addSortMethod_for_valid_sort_methods(self):
+		assert(False)
+		
+	def ttest_parseVideoList_should_call_xbmcplugin_endOfDirectory_correctly(self):	
+		assert(False)
 	
 if __name__ == '__main__':
 	nose.runmodule()
