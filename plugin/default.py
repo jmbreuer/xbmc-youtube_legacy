@@ -48,7 +48,7 @@ player = ""
 if (__name__ == "__main__" ):
 	import StorageServer
 	cache = StorageServer.StorageServer()
-	cache.__table_name__ = "YouTube"
+	cache.table_name = "YouTube"
 	import CommonFunctions
 	common = CommonFunctions.CommonFunctions() 
 	import YouTubeUtils
