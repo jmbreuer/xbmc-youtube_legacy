@@ -1083,6 +1083,7 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		navigation.addVideoContextMenuItems = Mock()
 		navigation.addVideoListItem = Mock()
 		navigation.addFolderListItem = Mock()
+		
 		navigation.parseVideoList({"scraper":"watch_later", "path":"some_path"},[{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"},{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail","videoid":"false"},{"next":"true","Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"}])
 		
 		navigation.addFolderListItem.assert_called_with({"scraper":"watch_later", "path":"some_path"},{"next":"true",'path': 'some_path', 'icon': 'some_icon', 'index': '3', 'thumbnail': 'some_thumbnail', 'Title': 'some_title'},3)
@@ -1095,6 +1096,7 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		navigation.addVideoContextMenuItems = Mock()
 		navigation.addVideoListItem = Mock()
 		navigation.addFolderListItem = Mock()
+		
 		navigation.parseVideoList({"scraper":"watch_later", "path":"some_path"},[{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"},{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail","videoid":"false"},{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail","next":"true"}])
 		
 		navigation.addVideoListItem.assert_called_once_with({'path': 'some_path', 'scraper': 'watch_later'},{'path': 'some_path', 'icon': 'some_icon', 'index': '1', 'thumbnail': 'some_thumbnail', 'Title': 'some_title'},3)
@@ -1107,6 +1109,7 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		navigation.addVideoContextMenuItems = Mock()
 		navigation.addVideoListItem = Mock()
 		navigation.addFolderListItem = Mock()
+		
 		navigation.parseVideoList({"scraper":"watch_later", "path":"some_path"},[{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"},{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail","videoid":"false"},{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail","next":"true"}])
 		
 		sys.modules["__main__"].settings.getSetting.assert_called_with("list_view")
@@ -1119,6 +1122,7 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		navigation.addVideoContextMenuItems = Mock()
 		navigation.addVideoListItem = Mock()
 		navigation.addFolderListItem = Mock()
+		
 		navigation.parseVideoList({"scraper":"watch_later", "path":"some_path"},[{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"},{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail","videoid":"false"},{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail","next":"true"}])
 		
 		sys.modules["__main__"].xbmc.executebuiltin.assert_called_with('Container.SetViewMode(500)')
@@ -1131,21 +1135,146 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		navigation.addVideoContextMenuItems = Mock()
 		navigation.addVideoListItem = Mock()
 		navigation.addFolderListItem = Mock()
+		
 		navigation.parseVideoList({"scraper":"watch_later", "path":"some_path"},[{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"},{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail","videoid":"false"},{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail","next":"true"}])
 		
 		sys.modules["__main__"].xbmcplugin.addSortMethod.assert_called_with(handle=-1,sortMethod=sys.modules["__main__"].xbmcplugin.SORT_METHOD_UNSORTED)
-		sys.modules["__main__"].xbmcplugin.addSortMethod.assert_called_with(handle=-1,sortMethod=sys.modules["__main__"].xbmcplugin.SORT_METHOD_UNSORTED)
-		sys.modules["__main__"].xbmcplugin.addSortMethod.assert_called_with(handle=-1,sortMethod=sys.modules["__main__"].xbmcplugin.SORT_METHOD_UNSORTED)
-		sys.modules["__main__"].xbmcplugin.addSortMethod.assert_called_with(handle=-1,sortMethod=sys.modules["__main__"].xbmcplugin.SORT_METHOD_UNSORTED)
-		sys.modules["__main__"].xbmcplugin.addSortMethod.assert_called_with(handle=-1,sortMethod=sys.modules["__main__"].xbmcplugin.SORT_METHOD_UNSORTED)
-		sys.modules["__main__"].xbmcplugin.addSortMethod.assert_called_with(handle=-1,sortMethod=sys.modules["__main__"].xbmcplugin.SORT_METHOD_UNSORTED)
-		sys.modules["__main__"].xbmcplugin.addSortMethod.assert_called_with(handle=-1,sortMethod=sys.modules["__main__"].xbmcplugin.SORT_METHOD_UNSORTED)
-		sys.modules["__main__"].xbmcplugin.addSortMethod.assert_called_with(handle=-1,sortMethod=sys.modules["__main__"].xbmcplugin.SORT_METHOD_UNSORTED)
+		sys.modules["__main__"].xbmcplugin.addSortMethod.assert_called_with(handle=-1,sortMethod=sys.modules["__main__"].xbmcplugin.SORT_METHOD_LABEL)
+		sys.modules["__main__"].xbmcplugin.addSortMethod.assert_called_with(handle=-1,sortMethod=sys.modules["__main__"].xbmcplugin.SORT_METHOD_VIDEO_RATING)
+		sys.modules["__main__"].xbmcplugin.addSortMethod.assert_called_with(handle=-1,sortMethod=sys.modules["__main__"].xbmcplugin.SORT_METHOD_DATE)
+		sys.modules["__main__"].xbmcplugin.addSortMethod.assert_called_with(handle=-1,sortMethod=sys.modules["__main__"].xbmcplugin.SORT_METHOD_PROGRAM_COUNT)
+		sys.modules["__main__"].xbmcplugin.addSortMethod.assert_called_with(handle=-1,sortMethod=sys.modules["__main__"].xbmcplugin.SORT_METHOD_VIDEO_RUNTIME)
+		sys.modules["__main__"].xbmcplugin.addSortMethod.assert_called_with(handle=-1,sortMethod=sys.modules["__main__"].xbmcplugin.SORT_METHOD_GENRE)
 		
+	def test_parseVideoList_should_call_xbmcplugin_endOfDirectory_correctly(self):	
+		sys.argv = ["some_path",-1,"some_params"]
+		sys.modules["__main__"].utils.getThumbnail.return_value = "some_image_path"
+		sys.modules["__main__"].settings.getSetting.return_value = 1
+		navigation = YouTubeNavigation()
+		navigation.addVideoContextMenuItems = Mock()
+		navigation.addVideoListItem = Mock()
+		navigation.addFolderListItem = Mock()
+		
+		navigation.parseVideoList({"scraper":"watch_later", "path":"some_path"},[{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"},{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail","videoid":"false"},{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail","next":"true"}])
+		
+		sys.modules["__main__"].xbmcplugin.endOfDirectory.assert_called_with(cacheToDisc=True,handle=-1,succeeded=True)
+	
+	def ttest_addVideoContextMenuItems_should_add_play_all_from_video_id_to_items_in_playlists(self):
+		assert(False)
+
+	def ttest_addVideoContextMenuItems_should_add_play_all_from_video_id_to_items_in_new_subscriptions_feed(self):
+		assert(False)
+
+	def ttest_addVideoContextMenuItems_should_add_download_video_to_all_video_items(self):
+		assert(False)
+
+	def ttest_addVideoContextMenuItems_should_add_add_favorite_option_if_user_is_logged_in_and_item_is_not_in_favorites_feed(self):
+		assert(False)
+
+	def ttest_addVideoContextMenuItems_should_add_add_favorite_option_if_user_is_logged_in_and_item_is_in_external_users_favorites_feed(self):
+		assert(False)
+
+	def ttest_addVideoContextMenuItems_should_add_remove_favorite_option_if_user_is_logged_in_and_item_is_in_favorites_feed(self):
+		assert(False)
+
+	def ttest_addVideoContextMenuItems_should_add_add_subscription_option_to_channels_not_in_subscriptions_feed(self):
+		assert(False)
+
+	def ttest_addVideoContextMenuItems_should_add_add_subscriptions_option_to_external_users_subscriptions_feed(self):
+		assert(False)
+
+	def ttest_addVideoContextMenuItems_should_not_add_add_subscrition_option_to_users_uploads_feed(self):
+		assert(False)
+
+	def ttest_addVideoContextMenuItems_should_not_add_add_subscription_option_to_subscription_favorites_feed(self):
+		assert(False)
+
+	def ttest_addVideoContextMenuItems_should_not_add_add_subscription_option_to_subscription_playlists_feed(self):
+		assert(False)
+
+	def ttest_addVideoContextMenuItems_should_not_add_add_subscription_option_to_subscription_uploads_feed(self):
+		assert(False)
+
+	def ttest_addVideoContextMenuItems_should_add_remove_from_playlist_option_to_items_in_playlists(self):
+		assert(False)
+
+	def ttest_addVideoContextMenuItems_should_add_add_to_playlist_option_to_video_items_if_user_is_logged_in(self):
+		assert(False)
+
+	def ttest_addVideoContextMenuItems_should_add_more_videos_by_user_if_item_is_not_in_uploads_feed(self):
+		assert(False)
+
+	def ttest_addVideoContextMenuItems_should_add_related_videos_option_to_video_items(self):
+		assert(False)
+
+	def ttest_addVideoContextMenuItems_should_add_find_similar_option_to_video_items(self):
+		assert(False)
+
+	def ttest_addVideoContextMenuItems_should_add_now_playing_option_to_video_items(self):
+		assert(False)
+
+	def ttest_addVideoContextMenuItems_should_add_video_info_option_to_video_items(self):
+		assert(False)
+
+	def ttest_addFolderContextMenuItems_should_not_add_any_options_to_next_folders(self):
+		assert(False)
+
+	def ttest_addFolderContextMenuItems_should_add_artist_scraper_options_to_artist_items(self):
+		assert(False)
+
+	def ttest_addFolderContextMenuItems_should_add_play_all_option_to_newsubsctiptions_feed(self):
+		assert(False)
+
+	def ttest_addFolderContextMenuItems_should_add_play_all_option_to_favorites_feed(self):
+		assert(False)
+
+	def ttest_addFolderContextMenuItems_should_add_playlist_options_to_playlist_items(self):
 		assert(False)
 		
-	def ttest_parseVideoList_should_call_xbmcplugin_endOfDirectory_correctly(self):	
+	def ttest_addFolderContextMenuItems_should_add_play_all_option_to_watch_later_feed(self):
+		assert(False)
+		
+	def ttest_addFolderContextMenuItems_should_add_play_all_option_to_recommended_feed(self):
+		assert(False)
+
+	def ttest_addFolderContextMenuItems_should_add_play_all_option_to_liked_videos_feed(self):
+		assert(False)
+		
+	def ttest_addFolderContextMenuItems_should_add_play_all_option_to_disco_search(self):
+		assert(False)
+		
+	def ttest_addFolderContextMenuItems_should_add_edit_and_delete_options_to_disco_searches(self):
+		assert(False)
+		
+	def ttest_addFolderContextMenuItems_should_not_add_edit_and_delete_options_to_dissco_searches_in_the_top_artist_feed(self):
 		assert(False)
 	
+	def ttest_addFolderContextMenuItems_should_add_edit_and_delete_options_to_searches(self):
+		assert(False)
+	
+	def ttest_addFolderContextMenuItems_should_add_correct_view_mode_options_to_subscriptions_favorites_feeds(self):
+		assert(False)
+	
+	def ttest_addFolderContextMenuItems_should_add_correct_view_mode_options_to_subscriptions_uploads_feeds(self):
+		assert(False)
+	
+	def ttest_addFolderContextMenuItems_should_add_correct_view_mode_options_to_subscriptions_playlists_feeds(self):
+		assert(False)
+		
+	def ttest_addFolderContextMenuItems_should_add_add_subscription_option_to_subscriptions_not_in_users_subscription_feed(self):
+		assert(False)
+		
+	def ttest_addFolderContextMenuItems_should_add_remove_subscription_option_to_subscriptions_in_users_subscriptions_feed(self):
+		assert(False)
+	
+	def ttest_addFolderContextMenuItems_should_add_add_contact_option_to_external_contacts_if_user_is_logged_in(self):
+		assert(False)
+	
+	def ttest_addFolderContextMenuItems_should_add_remove_contact_options_to_items_in_contact_feed_if_user_is_logged_in(self):
+		assert(False)
+	
+	def ttest_addFolderContextMenuItems_should_add_now_playing_option_to_folder_items(self):
+		assert(False)
+		
 if __name__ == '__main__':
 	nose.runmodule()
