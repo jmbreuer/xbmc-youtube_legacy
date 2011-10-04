@@ -238,7 +238,7 @@ class YouTubeNavigation():
 		if (get("videoid")):
 			(message, status) = self.core.add_favorite(params)
 			if status != 200:
-				self.showErrorMessage(self.language(30020), message, status)
+				self.utils.showErrorMessage(self.language(30020), message, status)
 				return False	
 		return True
 			
@@ -248,7 +248,7 @@ class YouTubeNavigation():
 		if (get("editid")):
 			(message, status ) = self.core.delete_favorite(params)
 			if status != 200:
-				self.showErrorMessage(self.language(30020), message, status)
+				self.utils.showErrorMessage(self.language(30020), message, status)
 				return False
 			self.xbmc.executebuiltin( "Container.Refresh" )
 		
@@ -264,7 +264,7 @@ class YouTubeNavigation():
 		if (get("contact")):
 			(result, status) = self.core.add_contact(params)
 			if status != 200:
-				self.showErrorMessage(self.language(30029), result, status)
+				self.utils.showErrorMessage(self.language(30029), result, status)
 				return False
 			self.utils.showMessage(self.language(30613), contact)
 			self.xbmc.executebuiltin( "Container.Refresh" )
@@ -277,7 +277,7 @@ class YouTubeNavigation():
 		if (get("contact")):
 			(result, status) = self.core.remove_contact(params)
 			if status != 200:
-				self.showErrorMessage(self.language(30029), result, status)
+				self.utils.showErrorMessage(self.language(30029), result, status)
 				return False
 			
 			self.utils.showMessage(self.language(30614), get("contact"))
@@ -289,7 +289,7 @@ class YouTubeNavigation():
 		if (get("channel")):
 			(message, status) = self.core.add_subscription(params)
 			if status != 200:
-				self.showErrorMessage(self.language(30021), message, status)
+				self.utils.showErrorMessage(self.language(30021), message, status)
 				return False
 		
 		return True
@@ -299,7 +299,7 @@ class YouTubeNavigation():
 		if (get("editid")):
 			(message, status) = self.core.remove_subscription(params)
 			if status != 200:
-				self.showErrorMessage(self.language(30021), message, status)
+				self.utils.showErrorMessage(self.language(30021), message, status)
 				return False
 												
 			self.xbmc.executebuiltin( "Container.Refresh" )
