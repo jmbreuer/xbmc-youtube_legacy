@@ -454,7 +454,7 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		
 		navigation.showListingError({"feed":"my_feed"})
 		
-		sys.modules["__main__"].utils.showMessage("my_category_title","some_string")
+		sys.modules["__main__"].utils.showMessage.assert_called_with("my_category_title","some_string")
 			
 	def test_showListingError_should_search_storage_user_options_if_external_is_in_params(self):
 		sys.modules["__main__"].language.return_value = "some_string"
@@ -463,7 +463,7 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		
 		navigation.showListingError({"feed":"my_feed", "external":"true"})
 		
-		sys.modules["__main__"].utils.showMessage("my_options_title","some_string")
+		sys.modules["__main__"].utils.showMessage.assert_called_with("my_options_title","some_string")
 				
 	def test_showListingError_should_use_channel_title_if_channel_is_in_params(self):
 		sys.modules["__main__"].language.return_value = "some_string"
@@ -472,7 +472,7 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		
 		navigation.showListingError({"feed":"my_feed","channel":"some_channel_title"})
 		
-		sys.modules["__main__"].utils.showMessage("some_channel_title","some_string")
+		sys.modules["__main__"].utils.showMessage.assert_called_with("some_channel_title","some_string")
 		
 	def test_showListingError_should_use_language_string_if_playlist_is_in_params(self):
 		sys.modules["__main__"].language.return_value = "some_string"
@@ -481,13 +481,123 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		
 		navigation.showListingError({"feed":"my_feed","playlist":"some_playlist"})
 		
-		sys.modules["__main__"].utils.showMessage("some_string","some_string")
+		sys.modules["__main__"].utils.showMessage.assert_called_with("some_string","some_string")
 		sys.modules["__main__"].language.assert_called_with(30615)
 		sys.modules["__main__"].language.assert_called_with(30601)
 		
-	def ttest_showListingError_should_call_utils_showMessage_correctly(self):
-		assert(False)
-				
+	def test_showListingError_should_call_utils_showMessage_correctly(self):
+		sys.modules["__main__"].language.return_value = "some_string"
+		navigation = YouTubeNavigation()
+		navigation.categories = ({"feed":"my_feed","Title":"my_category_title"},{"feed":"not_my_feed","Title":"not_my_category_title"})
 		
+		navigation.showListingError({"feed":"my_feed"})
+		
+		sys.modules["__main__"].utils.showMessage.assert_called_with("my_category_title","some_string")
+				
+	def test_addToFavorites_should_exit_cleanly_if_video_id_is_missing(self):
+		navigation = YouTubeNavigation()
+		
+		navigation.addToFavorites()
+		
+		assert(sys.modules["__main__"].core.add_favorite.call_count == 0)
+		assert(sys.modules["__main__"].utils.showErrorMessage.call_count == 0)
+		
+	def ttest_addToFavorites_should_call_core_add_favorite(self):
+		assert(False)
+		
+	def ttest_addToFavorites_should_show_error_message_on_failure(self):
+		assert(False)
+		
+	def test_removeFromFavorites_should_exit_cleanly_if_video_id_is_missing(self):
+		navigation = YouTubeNavigation()
+		
+		navigation.removeFromFavorites()
+		
+		assert(sys.modules["__main__"].core.delete_favorite.call_count == 0)
+		assert(sys.modules["__main__"].utils.showErrorMessage.call_count == 0)		
+	
+	def ttest_removeFromFavorites_should_call_core_delete_favorite(self):
+		assert(False)
+		
+	def ttest_removeFromFavorites_should_show_error_message_on_failure(self):
+		assert(False)
+			
+	def ttest_addContact_should_ask_user_for_contact_name_if_missing(self):
+		assert(False)
+		
+	def ttest_addContact_should_call_core_add_contact(self):
+		assert(False)
+		
+	def test_addContact_should_exit_cleanly_if_contact_is_missing_and_no_contact_is_given(self):
+		navigation = YouTubeNavigation()
+		sys.modules["__main__"].language.return_value = "some_title"
+		sys.modules["__main__"].utils.getUserInput.return_value = ""
+		
+		navigation.addContact()
+		
+		assert(sys.modules["__main__"].core.add_contact.call_count == 0)
+		assert(sys.modules["__main__"].utils.showErrorMessage.call_count == 0)	
+		sys.modules["__main__"].utils.getUserInput.assert_called_with("some_title","")
+		
+	def ttest_addContact__should_show_error_message_on_failure(self):
+		assert(False)
+		
+	def ttest_addContact_should_show_success_message_on_success(self):
+		assert(False)
+	
+	def ttest_addContact_should_call_xbmc_executebuiltin_on_success(self):
+		assert(False)
+		
+	def test_removeContact_should_exit_cleanly_if_contact_is_missing(self):
+		navigation = YouTubeNavigation()
+		
+		navigation.removeContact()
+		
+		assert(sys.modules["__main__"].core.remove_contact.call_count == 0)
+		assert(sys.modules["__main__"].utils.showErrorMessage.call_count == 0)	
+	
+	def ttest_removeContact_should_call_core_remove_contact(self):
+		assert(False)
+	
+	def ttest_removeContact_should_show_error_message_on_failure(self):
+		assert(False)
+	
+	def ttest_removeContact_should_show_success_message_on_success(self):
+		assert(False)
+	
+	def ttest_removeContact_should_call_xbmc_execute_builtin_on_success(self):
+		assert(False)
+	
+	def test_removeSubscription_should_exit_cleanly_if_channel_is_missing(self):
+		navigation = YouTubeNavigation()
+		
+		navigation.removeSubscription()
+		
+		assert(sys.modules["__main__"].core.remove_subscription.call_count == 0)
+		assert(sys.modules["__main__"].utils.showErrorMessage.call_count == 0)	
+	
+	def ttest_removeSubscription_should_call_core_remove_subscription(self):
+		assert(False)
+	
+	def ttest_removeSubscription_should_show_error_message_on_failure(self):
+		assert(False)
+	
+	def ttest_removeSubscription_should_call_xbmc_execute_builtin_on_success(self):
+		assert(False)
+	
+	def test_addSubscription_should_exit_cleanly_if_channel_is_missing(self):
+		navigation = YouTubeNavigation()
+		
+		navigation.addSubscription()
+		
+		assert(sys.modules["__main__"].core.add_subscription.call_count == 0)
+		assert(sys.modules["__main__"].utils.showErrorMessage.call_count == 0)
+	
+	def ttest_addSubscription_should_call_core_add_subscription(self):
+		assert(False)
+	
+	def ttest_addSubscription_should_show_error_message_on_failure(self):
+		assert(False)
+	
 if __name__ == '__main__':
 	nose.runmodule()
