@@ -266,7 +266,7 @@ class YouTubeNavigation():
 			if status != 200:
 				self.utils.showErrorMessage(self.language(30029), result, status)
 				return False
-			self.utils.showMessage(self.language(30613), contact)
+			self.utils.showMessage(self.language(30613), get("contact"))
 			self.xbmc.executebuiltin( "Container.Refresh" )
 
 		return True
