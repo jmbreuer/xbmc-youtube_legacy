@@ -1019,33 +1019,129 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		sys.modules["__main__"].xbmcplugin.addDirectoryItem.assert_called_with(handle=-1, url = "some_path?path=None&action=play_video&videoid=None", listitem=list_item, isFolder=False, totalItems=1)
 
 	def test_parseFolderList_should_set_cache_false_if_item_is_store_og_user_feed(self):
-		assert(False)
-
-	def ttest_parseFolderList_should_call_addFolderListItem_for_each_item(self):
-		assert(False)
-
-	def ttest_parseFolderList_should_call_xbmcplugin_endOfDirectory_correctly(self):
-		assert(False)
-
-	def ttest_parseVideoList_should_skip_items_where_videoid_is_false(self):
-		assert(False)
-
-	def ttest_parseVideoList_should_add_index_to_items_from_watch_later_feed(self):
-		assert(False)
-
-	def ttest_parseVideoList_should_call_addFolderListItem_to_next_item(self):
-		assert(False)
-
-	def ttest_parseVideoList_should_call_addVideoListItem_if_item_is_not_next_item(self):
-		assert(False)
-
-	def ttest_parseVideoList_should_call_settings_getSetting_to_get_list_view(self):
-		assert(False)
-
-	def ttest_parseVideoList_should_call_xbmc_executebuiltin_if_list_view_is_set(self):
-		assert(False)
+		sys.argv = ["some_path",-1,"some_params"]
+		sys.modules["__main__"].utils.getThumbnail.return_value = "some_image_path"
+		navigation = YouTubeNavigation()
+		navigation.addVideoContextMenuItems = Mock()
+		navigation.addFolderListItem = Mock()
 		
-	def ttest_parseVideoList_should_call_xbmcplugin_addSortMethod_for_valid_sort_methods(self):
+		navigation.parseFolderList({"user_feed":"some_feed", "path":"some_path"},[{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"}])
+		
+		sys.modules["__main__"].xbmcplugin.endOfDirectory.assert_called_with(handle=-1,succeeded=True,cacheToDisc=False)
+
+	def test_parseFolderList_should_call_addFolderListItem_for_each_item(self):
+		sys.argv = ["some_path",-1,"some_params"]
+		sys.modules["__main__"].utils.getThumbnail.return_value = "some_image_path"
+		navigation = YouTubeNavigation()
+		navigation.addVideoContextMenuItems = Mock()
+		navigation.addFolderListItem = Mock()
+		
+		navigation.parseFolderList({"user_feed":"some_feed", "path":"some_path"},[{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"},{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"},{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"}])
+		
+		assert(navigation.addFolderListItem.call_count == 3)
+
+	def test_parseFolderList_should_call_xbmcplugin_endOfDirectory_correctly(self):
+		sys.argv = ["some_path",-1,"some_params"]
+		sys.modules["__main__"].utils.getThumbnail.return_value = "some_image_path"
+		navigation = YouTubeNavigation()
+		navigation.addVideoContextMenuItems = Mock()
+		navigation.addFolderListItem = Mock()
+		
+		navigation.parseFolderList({"user_feed":"some_feed", "path":"some_path"},[{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"},{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"},{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"}])
+		
+		sys.modules["__main__"].xbmcplugin.endOfDirectory.assert_called_with(handle=-1,succeeded=True,cacheToDisc=False)
+
+	def test_parseVideoList_should_skip_items_where_videoid_is_false(self):
+		sys.argv = ["some_path",-1,"some_params"]
+		sys.modules["__main__"].utils.getThumbnail.return_value = "some_image_path"
+		sys.modules["__main__"].settings.getSetting.return_value = 0
+		navigation = YouTubeNavigation()
+		navigation.addVideoContextMenuItems = Mock()
+		navigation.addVideoListItem = Mock()
+		
+		navigation.parseVideoList({"user_feed":"some_feed", "path":"some_path"},[{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"},{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail","videoid":"false"},{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"}])
+		
+		assert(navigation.addVideoListItem.call_count == 2)
+
+	def test_parseVideoList_should_add_index_to_items_from_watch_later_feed(self):
+		sys.argv = ["some_path",-1,"some_params"]
+		sys.modules["__main__"].utils.getThumbnail.return_value = "some_image_path"
+		sys.modules["__main__"].settings.getSetting.return_value = 0
+		navigation = YouTubeNavigation()
+		navigation.addVideoContextMenuItems = Mock()
+		navigation.addVideoListItem = Mock()
+		
+		navigation.parseVideoList({"scraper":"watch_later", "path":"some_path"},[{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"},{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail","videoid":"false"},{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"}])
+		
+		navigation.addVideoListItem.assert_called_with({'path': 'some_path', 'scraper': 'watch_later'},{'path': 'some_path', 'icon': 'some_icon', 'index': '3', 'thumbnail': 'some_thumbnail', 'Title': 'some_title'},3)
+
+	def test_parseVideoList_should_call_addFolderListItem_to_next_item(self):
+		sys.argv = ["some_path",-1,"some_params"]
+		sys.modules["__main__"].utils.getThumbnail.return_value = "some_image_path"
+		sys.modules["__main__"].settings.getSetting.return_value = 0
+		navigation = YouTubeNavigation()
+		navigation.addVideoContextMenuItems = Mock()
+		navigation.addVideoListItem = Mock()
+		navigation.addFolderListItem = Mock()
+		navigation.parseVideoList({"scraper":"watch_later", "path":"some_path"},[{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"},{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail","videoid":"false"},{"next":"true","Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"}])
+		
+		navigation.addFolderListItem.assert_called_with({"scraper":"watch_later", "path":"some_path"},{"next":"true",'path': 'some_path', 'icon': 'some_icon', 'index': '3', 'thumbnail': 'some_thumbnail', 'Title': 'some_title'},3)
+
+	def test_parseVideoList_should_call_addVideoListItem_if_item_is_not_next_item(self):
+		sys.argv = ["some_path",-1,"some_params"]
+		sys.modules["__main__"].utils.getThumbnail.return_value = "some_image_path"
+		sys.modules["__main__"].settings.getSetting.return_value = 0
+		navigation = YouTubeNavigation()
+		navigation.addVideoContextMenuItems = Mock()
+		navigation.addVideoListItem = Mock()
+		navigation.addFolderListItem = Mock()
+		navigation.parseVideoList({"scraper":"watch_later", "path":"some_path"},[{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"},{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail","videoid":"false"},{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail","next":"true"}])
+		
+		navigation.addVideoListItem.assert_called_once_with({'path': 'some_path', 'scraper': 'watch_later'},{'path': 'some_path', 'icon': 'some_icon', 'index': '1', 'thumbnail': 'some_thumbnail', 'Title': 'some_title'},3)
+
+	def test_parseVideoList_should_call_settings_getSetting_to_get_list_view(self):
+		sys.argv = ["some_path",-1,"some_params"]
+		sys.modules["__main__"].utils.getThumbnail.return_value = "some_image_path"
+		sys.modules["__main__"].settings.getSetting.return_value = 0
+		navigation = YouTubeNavigation()
+		navigation.addVideoContextMenuItems = Mock()
+		navigation.addVideoListItem = Mock()
+		navigation.addFolderListItem = Mock()
+		navigation.parseVideoList({"scraper":"watch_later", "path":"some_path"},[{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"},{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail","videoid":"false"},{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail","next":"true"}])
+		
+		sys.modules["__main__"].settings.getSetting.assert_called_with("list_view")
+
+	def test_parseVideoList_should_call_xbmc_executebuiltin_if_list_view_is_set(self):
+		sys.argv = ["some_path",-1,"some_params"]
+		sys.modules["__main__"].utils.getThumbnail.return_value = "some_image_path"
+		sys.modules["__main__"].settings.getSetting.return_value = 1
+		navigation = YouTubeNavigation()
+		navigation.addVideoContextMenuItems = Mock()
+		navigation.addVideoListItem = Mock()
+		navigation.addFolderListItem = Mock()
+		navigation.parseVideoList({"scraper":"watch_later", "path":"some_path"},[{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"},{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail","videoid":"false"},{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail","next":"true"}])
+		
+		sys.modules["__main__"].xbmc.executebuiltin.assert_called_with('Container.SetViewMode(500)')
+		
+	def test_parseVideoList_should_call_xbmcplugin_addSortMethod_for_valid_sort_methods(self):
+		sys.argv = ["some_path",-1,"some_params"]
+		sys.modules["__main__"].utils.getThumbnail.return_value = "some_image_path"
+		sys.modules["__main__"].settings.getSetting.return_value = 1
+		navigation = YouTubeNavigation()
+		navigation.addVideoContextMenuItems = Mock()
+		navigation.addVideoListItem = Mock()
+		navigation.addFolderListItem = Mock()
+		navigation.parseVideoList({"scraper":"watch_later", "path":"some_path"},[{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"},{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail","videoid":"false"},{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail","next":"true"}])
+		
+		sys.modules["__main__"].xbmcplugin.addSortMethod.assert_called_with(handle=-1,sortMethod=sys.modules["__main__"].xbmcplugin.SORT_METHOD_UNSORTED)
+		sys.modules["__main__"].xbmcplugin.addSortMethod.assert_called_with(handle=-1,sortMethod=sys.modules["__main__"].xbmcplugin.SORT_METHOD_UNSORTED)
+		sys.modules["__main__"].xbmcplugin.addSortMethod.assert_called_with(handle=-1,sortMethod=sys.modules["__main__"].xbmcplugin.SORT_METHOD_UNSORTED)
+		sys.modules["__main__"].xbmcplugin.addSortMethod.assert_called_with(handle=-1,sortMethod=sys.modules["__main__"].xbmcplugin.SORT_METHOD_UNSORTED)
+		sys.modules["__main__"].xbmcplugin.addSortMethod.assert_called_with(handle=-1,sortMethod=sys.modules["__main__"].xbmcplugin.SORT_METHOD_UNSORTED)
+		sys.modules["__main__"].xbmcplugin.addSortMethod.assert_called_with(handle=-1,sortMethod=sys.modules["__main__"].xbmcplugin.SORT_METHOD_UNSORTED)
+		sys.modules["__main__"].xbmcplugin.addSortMethod.assert_called_with(handle=-1,sortMethod=sys.modules["__main__"].xbmcplugin.SORT_METHOD_UNSORTED)
+		sys.modules["__main__"].xbmcplugin.addSortMethod.assert_called_with(handle=-1,sortMethod=sys.modules["__main__"].xbmcplugin.SORT_METHOD_UNSORTED)
+		
 		assert(False)
 		
 	def ttest_parseVideoList_should_call_xbmcplugin_endOfDirectory_correctly(self):	
