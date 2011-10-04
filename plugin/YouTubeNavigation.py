@@ -490,7 +490,8 @@ class YouTubeNavigation():
 				cm.append( ( self.language( 30506 ), 'XBMC.RunPlugin(%s?path=%s&action=remove_favorite&editid=%s&)' % ( sys.argv[0], item("path"), item("editid") ) ) )
 			else:
 				cm.append( ( self.language( 30503 ), 'XBMC.RunPlugin(%s?path=%s&action=add_favorite&videoid=%s&)' % ( sys.argv[0],  item("path"), item("videoid") ) ) )
-			if (get("external") == "true" or (get("feed") != "subscriptions_favorites" and get("feed") != "subscriptions_uploads" and get("feed") != "subscriptions_playlists" and (get("user_feed") != "uploads" and not get("external")))):
+			
+			if (get("external") == "true" or (get("feed") not in ["subscriptions_favorites", "subscriptions_uploads", "subscriptions_playlists"] and (get("user_feed") != "uploads" and not get("external")))):
 				cm.append( ( self.language( 30512 ) % item("Studio"), 'XBMC.RunPlugin(%s?path=%s&channel=%s&action=add_subscription)' % ( sys.argv[0], item("path"), item("Studio") ) ) )
 				
 			if (get("playlist") and item("playlist_entry_id")):
