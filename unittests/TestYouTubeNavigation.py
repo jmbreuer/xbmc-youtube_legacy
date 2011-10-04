@@ -502,13 +502,26 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		assert(sys.modules["__main__"].core.add_favorite.call_count == 0)
 		assert(sys.modules["__main__"].utils.showErrorMessage.call_count == 0)
 		
-	def ttest_addToFavorites_should_call_core_add_favorite(self):
-		assert(False)
+	def test_addToFavorites_should_call_core_add_favorite(self):
+		sys.modules["__main__"].core.add_favorite.return_value = ("",303)
+		sys.modules["__main__"].language.return_value = "some_title"
+		navigation = YouTubeNavigation()
 		
-	def ttest_addToFavorites_should_show_error_message_on_failure(self):
-		assert(False)
+		navigation.addToFavorites({"videoid":"some_id"})
 		
-	def test_removeFromFavorites_should_exit_cleanly_if_video_id_is_missing(self):
+		sys.modules["__main__"].core.add_favorite.assert_called_with({"videoid":"some_id"})
+		
+	def test_addToFavorites_should_show_error_message_on_failure(self):
+		sys.modules["__main__"].core.add_favorite.return_value = ("",303)
+		sys.modules["__main__"].language.return_value = "some_title"
+		navigation = YouTubeNavigation()
+		
+		navigation.addToFavorites({"videoid":"some_id"})
+		
+		sys.modules["__main__"].utils.showErrorMessage.assert_called_with("some_title","",303)
+		sys.modules["__main__"].language.assert_called_with(30020)
+		
+	def test_removeFromFavorites_should_exit_cleanly_if_editid_is_missing(self):
 		navigation = YouTubeNavigation()
 		
 		navigation.removeFromFavorites()
@@ -516,17 +529,41 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		assert(sys.modules["__main__"].core.delete_favorite.call_count == 0)
 		assert(sys.modules["__main__"].utils.showErrorMessage.call_count == 0)		
 	
-	def ttest_removeFromFavorites_should_call_core_delete_favorite(self):
-		assert(False)
+	def test_removeFromFavorites_should_call_core_delete_favorite(self):
+		sys.modules["__main__"].core.delete_favorite.return_value = ("",200)
+		navigation = YouTubeNavigation()
 		
-	def ttest_removeFromFavorites_should_show_error_message_on_failure(self):
-		assert(False)
+		navigation.removeFromFavorites({"editid":"some_id"})
+		
+		sys.modules["__main__"].core.delete_favorite.assert_called_with({"editid":"some_id"})
+		
+	def test_removeFromFavorites_should_show_error_message_on_failure(self):
+		sys.modules["__main__"].core.delete_favorite.return_value = ("",303)
+		sys.modules["__main__"].language.return_value = "some_title"
+		navigation = YouTubeNavigation()
+		
+		navigation.removeFromFavorites({"editid":"some_id"})
+		
+		sys.modules["__main__"].utils.showErrorMessage.assert_called_with("some_title","",303)
+		sys.modules["__main__"].language.assert_called_with(30020)
 			
-	def ttest_addContact_should_ask_user_for_contact_name_if_missing(self):
-		assert(False)
+	def test_addContact_should_ask_user_for_contact_name_if_missing(self):
+		navigation = YouTubeNavigation()
+		sys.modules["__main__"].language.return_value = "some_title"
+		sys.modules["__main__"].utils.getUserInput.return_value = ""
 		
-	def ttest_addContact_should_call_core_add_contact(self):
-		assert(False)
+		navigation.addContact()
+		
+		sys.modules["__main__"].utils.getUserInput.assert_called_with("some_title","")
+		
+	def test_addContact_should_call_core_add_contact(self):
+		navigation = YouTubeNavigation()
+		sys.modules["__main__"].core.add_contact.return_value = ("", 200)
+		sys.modules["__main__"].language.return_value = "some_title"
+		
+		navigation.addContact({"contact":"some_contact"})
+		
+		sys.modules["__main__"].core.add_contact.assert_called_with({"contact":"some_contact"})
 		
 	def test_addContact_should_exit_cleanly_if_contact_is_missing_and_no_contact_is_given(self):
 		navigation = YouTubeNavigation()
@@ -539,15 +576,35 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		assert(sys.modules["__main__"].utils.showErrorMessage.call_count == 0)	
 		sys.modules["__main__"].utils.getUserInput.assert_called_with("some_title","")
 		
-	def ttest_addContact__should_show_error_message_on_failure(self):
-		assert(False)
+	def test_addContact_should_show_error_message_on_failure(self):
+		sys.modules["__main__"].core.add_contact.return_value = ("", 303)
+		sys.modules["__main__"].language.return_value = "some_title"
+		navigation = YouTubeNavigation()
 		
-	def ttest_addContact_should_show_success_message_on_success(self):
-		assert(False)
+		navigation.addContact({"contact":"some_contact"})
+		
+		sys.modules["__main__"].utils.showErrorMessage.assert_called_with("some_title","",303)
+		sys.modules["__main__"].language.assert_called_with(30029)
+		
+	def test_addContact_should_show_success_message_on_success(self):
+		sys.modules["__main__"].core.add_contact.return_value = ("", 200)
+		sys.modules["__main__"].language.return_value = "some_title"
+		navigation = YouTubeNavigation()
+		
+		navigation.addContact({"contact":"some_contact"})
+		
+		sys.modules["__main__"].utils.showMessage.assert_called_with("some_title","some_contact")
+		sys.modules["__main__"].language.assert_called_with(30013)
 	
-	def ttest_addContact_should_call_xbmc_executebuiltin_on_success(self):
-		assert(False)
+	def test_addContact_should_call_xbmc_executebuiltin_on_success(self):
+		sys.modules["__main__"].core.add_contact.return_value = ("", 200)
+		sys.modules["__main__"].language.return_value = "some_title"
+		navigation = YouTubeNavigation()
 		
+		navigation.addContact({"contact":"some_contact"})
+		
+		sys.modules["__main__"].xbmc.executebuiltin.assert_called_with('Container.Refresh')
+				
 	def test_removeContact_should_exit_cleanly_if_contact_is_missing(self):
 		navigation = YouTubeNavigation()
 		
@@ -556,17 +613,42 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		assert(sys.modules["__main__"].core.remove_contact.call_count == 0)
 		assert(sys.modules["__main__"].utils.showErrorMessage.call_count == 0)	
 	
-	def ttest_removeContact_should_call_core_remove_contact(self):
-		assert(False)
+	def test_removeContact_should_call_core_remove_contact(self):
+		sys.modules["__main__"].core.remove_contact.return_value = ("", 200)
+		navigation = YouTubeNavigation()
+		
+		navigation.removeContact({"contact":"some_contact"})
+		
+		sys.modules["__main__"].core.remove_contact.assert_called_with({"contact":"some_contact"})
 	
-	def ttest_removeContact_should_show_error_message_on_failure(self):
-		assert(False)
+	def test_removeContact_should_show_error_message_on_failure(self):
+		sys.modules["__main__"].core.remove_contact.return_value = ("", 303)
+		sys.modules["__main__"].language.return_value = "some_title"
+		navigation = YouTubeNavigation()
+		
+		navigation.removeContact({"contact":"some_contact"})
+		
+		sys.modules["__main__"].utils.showErrorMessage.assert_called_with("some_title","",303)
+		sys.modules["__main__"].language.assert_called_with(30029)
 	
-	def ttest_removeContact_should_show_success_message_on_success(self):
-		assert(False)
+	def test_removeContact_should_show_success_message_on_success(self):
+		sys.modules["__main__"].core.remove_contact.return_value = ("", 200)
+		sys.modules["__main__"].language.return_value = "some_title"
+		navigation = YouTubeNavigation()
+		
+		navigation.removeContact({"contact":"some_contact"})
+		
+		sys.modules["__main__"].utils.showMessage.assert_called_with("some_title","some_contact")
+		sys.modules["__main__"].language.assert_called_with(30013)
 	
-	def ttest_removeContact_should_call_xbmc_execute_builtin_on_success(self):
-		assert(False)
+	def test_removeContact_should_call_xbmc_execute_builtin_on_success(self):
+		sys.modules["__main__"].core.remove_contact.return_value = ("", 200)
+		sys.modules["__main__"].language.return_value = "some_title"
+		navigation = YouTubeNavigation()
+		
+		navigation.removeContact({"contact":"some_contact"})
+
+		sys.modules["__main__"].xbmc.executebuiltin.assert_called_with('Container.Refresh')	
 	
 	def test_removeSubscription_should_exit_cleanly_if_editid_is_missing(self):
 		navigation = YouTubeNavigation()
