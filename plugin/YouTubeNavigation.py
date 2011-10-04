@@ -386,6 +386,8 @@ class YouTubeNavigation():
 			icon = "trailers"
 		elif(get("scraper","").find("movies") > 0):
 			icon = "movies"
+		elif(get("scraper","").find("music") > 0):
+			icon = "music"
 		elif(get("scraper","").find("disco") > 0):
 			icon = "discoball"
 		elif(get("feed","").find("live") > 0):
