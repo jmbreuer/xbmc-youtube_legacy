@@ -568,7 +568,7 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 	def ttest_removeContact_should_call_xbmc_execute_builtin_on_success(self):
 		assert(False)
 	
-	def test_removeSubscription_should_exit_cleanly_if_channel_is_missing(self):
+	def test_removeSubscription_should_exit_cleanly_if_editid_is_missing(self):
 		navigation = YouTubeNavigation()
 		
 		navigation.removeSubscription()
@@ -576,14 +576,31 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		assert(sys.modules["__main__"].core.remove_subscription.call_count == 0)
 		assert(sys.modules["__main__"].utils.showErrorMessage.call_count == 0)	
 	
-	def ttest_removeSubscription_should_call_core_remove_subscription(self):
-		assert(False)
+	def test_removeSubscription_should_call_core_remove_subscription(self):
+		navigation = YouTubeNavigation()
+		sys.modules["__main__"].core.remove_subscription.return_value = ("",200)
+		
+		navigation.removeSubscription({"editid":"some_editid"})
+		
+		sys.modules["__main__"].core.remove_subscription.assert_called_with({"editid":"some_editid"})
 	
-	def ttest_removeSubscription_should_show_error_message_on_failure(self):
-		assert(False)
+	def test_removeSubscription_should_show_error_message_on_failure(self):
+		navigation = YouTubeNavigation()
+		sys.modules["__main__"].language.return_value = "some_message"
+		sys.modules["__main__"].core.remove_subscription.return_value = ("",303)
+		
+		navigation.removeSubscription({"editid":"some_editid"})
+		
+		sys.modules["__main__"].utils.showErrorMessage.assert_called_with("some_message","",303)
+		sys.modules["__main__"].language.assert_called_with(30021)
 	
-	def ttest_removeSubscription_should_call_xbmc_execute_builtin_on_success(self):
-		assert(False)
+	def test_removeSubscription_should_call_xbmc_execute_builtin_on_success(self):
+		navigation = YouTubeNavigation()
+		sys.modules["__main__"].core.remove_subscription.return_value = ("",200)
+		
+		navigation.removeSubscription({"editid":"some_editid"})
+		
+		sys.modules["__main__"].xbmc.executebuiltin.assert_called_with('Container.Refresh')
 	
 	def test_addSubscription_should_exit_cleanly_if_channel_is_missing(self):
 		navigation = YouTubeNavigation()
@@ -593,11 +610,23 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		assert(sys.modules["__main__"].core.add_subscription.call_count == 0)
 		assert(sys.modules["__main__"].utils.showErrorMessage.call_count == 0)
 	
-	def ttest_addSubscription_should_call_core_add_subscription(self):
-		assert(False)
+	def test_addSubscription_should_call_core_add_subscription(self):
+		navigation = YouTubeNavigation()
+		sys.modules["__main__"].core.add_subscription.return_value = ("",200)
+		
+		navigation.addSubscription({"channel":"some_channel"})
+		
+		sys.modules["__main__"].core.add_subscription.assert_called_with({"channel":"some_channel"})
 	
-	def ttest_addSubscription_should_show_error_message_on_failure(self):
-		assert(False)
+	def test_addSubscription_should_show_error_message_on_failure(self):
+		navigation = YouTubeNavigation()
+		sys.modules["__main__"].language.return_value = "some_message"
+		sys.modules["__main__"].core.add_subscription.return_value = ("",303)
+		
+		navigation.addSubscription({"channel":"some_channel"})
+		
+		sys.modules["__main__"].utils.showErrorMessage.assert_called_with("some_message","",303)
+		sys.modules["__main__"].language.assert_called_with(30021)
 	
 if __name__ == '__main__':
 	nose.runmodule()
