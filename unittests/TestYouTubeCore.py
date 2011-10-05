@@ -235,7 +235,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		settings = ["4","3" ]
 		sys.modules["__main__"].storage.retrieve.return_value = "some_thumbnail"
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
-		input = self.readTestInput("GetFolderInfoPlaylistTest.xml", False)
+		input = self.readTestInput("getFolderInfoPlaylistTest.xml", False)
 		core = YouTubeCore()
 		
 		result = core.getFolderInfo(input, {"user_feed":"playlists"})
