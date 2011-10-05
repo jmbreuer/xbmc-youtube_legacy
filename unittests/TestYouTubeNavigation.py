@@ -1147,7 +1147,6 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		sys.modules["__main__"].xbmcplugin.addSortMethod.assert_called_with(handle=-1,sortMethod=sys.modules["__main__"].xbmcplugin.SORT_METHOD_GENRE)
 		
 	def test_parseVideoList_should_call_xbmcplugin_endOfDirectory_correctly(self):	
-		sys.argv = ["some_path",-1,"some_params"]
 		sys.modules["__main__"].utils.getThumbnail.return_value = "some_image_path"
 		sys.modules["__main__"].settings.getSetting.return_value = 1
 		navigation = YouTubeNavigation()
@@ -1159,122 +1158,574 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		
 		sys.modules["__main__"].xbmcplugin.endOfDirectory.assert_called_with(cacheToDisc=True,handle=-1,succeeded=True)
 	
-	def ttest_addVideoContextMenuItems_should_add_play_all_from_video_id_to_items_in_playlists(self):
-		assert(False)
-
-	def ttest_addVideoContextMenuItems_should_add_play_all_from_video_id_to_items_in_new_subscriptions_feed(self):
-		assert(False)
-
-	def ttest_addVideoContextMenuItems_should_add_download_video_to_all_video_items(self):
-		assert(False)
-
-	def ttest_addVideoContextMenuItems_should_add_add_favorite_option_if_user_is_logged_in_and_item_is_not_in_favorites_feed(self):
-		assert(False)
-
-	def ttest_addVideoContextMenuItems_should_add_add_favorite_option_if_user_is_logged_in_and_item_is_in_external_users_favorites_feed(self):
-		assert(False)
-
-	def ttest_addVideoContextMenuItems_should_add_remove_favorite_option_if_user_is_logged_in_and_item_is_in_favorites_feed(self):
-		assert(False)
-
-	def ttest_addVideoContextMenuItems_should_add_add_subscription_option_to_channels_not_in_subscriptions_feed(self):
-		assert(False)
-
-	def ttest_addVideoContextMenuItems_should_add_add_subscriptions_option_to_external_users_subscriptions_feed(self):
-		assert(False)
-
-	def ttest_addVideoContextMenuItems_should_not_add_add_subscrition_option_to_users_uploads_feed(self):
-		assert(False)
-
-	def ttest_addVideoContextMenuItems_should_not_add_add_subscription_option_to_subscription_favorites_feed(self):
-		assert(False)
-
-	def ttest_addVideoContextMenuItems_should_not_add_add_subscription_option_to_subscription_playlists_feed(self):
-		assert(False)
-
-	def ttest_addVideoContextMenuItems_should_not_add_add_subscription_option_to_subscription_uploads_feed(self):
-		assert(False)
-
-	def ttest_addVideoContextMenuItems_should_add_remove_from_playlist_option_to_items_in_playlists(self):
-		assert(False)
-
-	def ttest_addVideoContextMenuItems_should_add_add_to_playlist_option_to_video_items_if_user_is_logged_in(self):
-		assert(False)
-
-	def ttest_addVideoContextMenuItems_should_add_more_videos_by_user_if_item_is_not_in_uploads_feed(self):
-		assert(False)
-
-	def ttest_addVideoContextMenuItems_should_add_related_videos_option_to_video_items(self):
-		assert(False)
-
-	def ttest_addVideoContextMenuItems_should_add_find_similar_option_to_video_items(self):
-		assert(False)
-
-	def ttest_addVideoContextMenuItems_should_add_now_playing_option_to_video_items(self):
-		assert(False)
-
-	def ttest_addVideoContextMenuItems_should_add_video_info_option_to_video_items(self):
-		assert(False)
-
-	def ttest_addFolderContextMenuItems_should_not_add_any_options_to_next_folders(self):
-		assert(False)
-
-	def ttest_addFolderContextMenuItems_should_add_artist_scraper_options_to_artist_items(self):
-		assert(False)
-
-	def ttest_addFolderContextMenuItems_should_add_play_all_option_to_newsubsctiptions_feed(self):
-		assert(False)
-
-	def ttest_addFolderContextMenuItems_should_add_play_all_option_to_favorites_feed(self):
-		assert(False)
-
-	def ttest_addFolderContextMenuItems_should_add_playlist_options_to_playlist_items(self):
-		assert(False)
+	def test_addVideoContextMenuItems_should_call_utils_makeAscii_on_Title(self):
+		sys.argv = ["some_plugin",-1,"some_path"]
+		sys.modules["__main__"].language.return_value = "some_button_string %s"
+		sys.modules["__main__"].utils.makeAscii.side_effect = lambda x: x
+		navigation = YouTubeNavigation()
+		path_params = {}
+		item_params = {"Title":"some_title","path":"some_path","icon":"some_icon","thumbnail":"some_thumbnail"}
 		
-	def ttest_addFolderContextMenuItems_should_add_play_all_option_to_watch_later_feed(self):
-		assert(False)
+		cm = navigation.addVideoContextMenuItems(path_params,item_params)
 		
-	def ttest_addFolderContextMenuItems_should_add_play_all_option_to_recommended_feed(self):
-		assert(False)
+		sys.modules["__main__"].utils.makeAscii.assert_called_with("some_title")
+		
+	def test_addVideoContextMenuItems_should_call_utils_makeAscii_on_Studio(self):
+		sys.argv = ["some_plugin",-1,"some_path"]
+		sys.modules["__main__"].language.return_value = "some_button_string %s"
+		sys.modules["__main__"].utils.makeAscii.side_effect = lambda x: x
+		navigation = YouTubeNavigation()
+		path_params = {}
+		item_params = {"Title":"some_title","path":"some_path","icon":"some_icon","thumbnail":"some_thumbnail"}
+		
+		cm = navigation.addVideoContextMenuItems(path_params,item_params)
+		
+		sys.modules["__main__"].utils.makeAscii.assert_called_with("Unknown Author")
+		
+	def prepareContestMenu(self):
+		sys.argv = ["some_plugin",-1,"some_path"]
+		sys.modules["__main__"].language.return_value = "some_button_string %s"
+		sys.modules["__main__"].utils.makeAscii.side_effect = lambda x: x
+		
+	def assert_context_menu_contains(self, cm, title, path):
+		found = False
+		for (ititle, ipath) in cm:
+			if ititle == title and ipath == path :
+					found = True
 
-	def ttest_addFolderContextMenuItems_should_add_play_all_option_to_liked_videos_feed(self):
-		assert(False)
+		if found == False:
+			print "Failed to find item in context menu: " + title + " - " + path + "\r\n"
+			
+			for (title, path) in cm:
+				print "item " + str(cm.index((title, path))) +": " + title + " - " + path
+					
+		assert(found)
+
+	def assert_context_menu_doesnt_contain(self, cm, title, path):
+		found = False
+		for (ititle, ipath) in cm:
+			if ititle == title and ipath == path :
+					found = True
+
+		if found == True:
+			print "Failed to find item in context menu: " + title + " - " + path + "\r\n"
+			
+			for (title, path) in cm:
+				print "item " + str(cm.index((title, path))) +": " + title + " - " + path
+					
+		assert(found == False)
 		
-	def ttest_addFolderContextMenuItems_should_add_play_all_option_to_disco_search(self):
-		assert(False)
+	def test_addVideoContextMenuItems_should_add_play_all_from_video_id_to_items_in_playlists(self):
+		self.prepareContestMenu()
+		navigation = YouTubeNavigation()
+		path_params = {"playlist":"some_playlist"}
+		item_params = {"Title":"some_title","path":"some_path","icon":"some_icon","thumbnail":"some_thumbnail","videoid":"some_id"}
 		
-	def ttest_addFolderContextMenuItems_should_add_edit_and_delete_options_to_disco_searches(self):
-		assert(False)
+		cm = navigation.addVideoContextMenuItems(path_params,item_params)
 		
-	def ttest_addFolderContextMenuItems_should_not_add_edit_and_delete_options_to_dissco_searches_in_the_top_artist_feed(self):
-		assert(False)
-	
-	def ttest_addFolderContextMenuItems_should_add_edit_and_delete_options_to_searches(self):
-		assert(False)
-	
-	def ttest_addFolderContextMenuItems_should_add_correct_view_mode_options_to_subscriptions_favorites_feeds(self):
-		assert(False)
-	
-	def ttest_addFolderContextMenuItems_should_add_correct_view_mode_options_to_subscriptions_uploads_feeds(self):
-		assert(False)
-	
-	def ttest_addFolderContextMenuItems_should_add_correct_view_mode_options_to_subscriptions_playlists_feeds(self):
-		assert(False)
+		sys.modules["__main__"].language.assert_called_with(30512)
+		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=play_all&playlist=some_playlist&videoid=some_id&)')
+			
+
+	def test_addVideoContextMenuItems_should_add_play_all_from_video_id_to_items_in_new_subscriptions_feed(self):
+		self.prepareContestMenu()
+		navigation = YouTubeNavigation()
+		path_params = {"user_feed":"newsubscriptions"}
+		item_params = {"Title":"some_title","path":"some_path","icon":"some_icon","thumbnail":"some_thumbnail","videoid":"some_id"}
 		
-	def ttest_addFolderContextMenuItems_should_add_add_subscription_option_to_subscriptions_not_in_users_subscription_feed(self):
-		assert(False)
+		cm = navigation.addVideoContextMenuItems(path_params,item_params)
 		
-	def ttest_addFolderContextMenuItems_should_add_remove_subscription_option_to_subscriptions_in_users_subscriptions_feed(self):
-		assert(False)
+		sys.modules["__main__"].language.assert_called_with(30521)
+		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=play_all&user_feed=newsubscriptions&contact=default&videoid=some_id&)')
+
+	def test_addVideoContextMenuItems_should_add_download_video_to_all_video_items(self):
+		self.prepareContestMenu()
+		navigation = YouTubeNavigation()
+		path_params = {}
+		item_params = {"Title":"some_title","path":"some_path","icon":"some_icon","thumbnail":"some_thumbnail","videoid":"some_id"}
+		
+		cm = navigation.addVideoContextMenuItems(path_params,item_params)
+		
+		sys.modules["__main__"].language.assert_called_with(30501)
+		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=download&videoid=some_id)')
+
+	def test_addVideoContextMenuItems_should_add_add_favorite_option_if_user_is_logged_in_and_item_is_not_in_favorites_feed(self):
+		self.prepareContestMenu()
+		sys.modules["__main__"].settings.getSetting.return_value = "something"
+		navigation = YouTubeNavigation()
+		path_params = {}
+		item_params = {"Title":"some_title","path":"some_path","icon":"some_icon","thumbnail":"some_thumbnail","videoid":"some_id"}
+		
+		cm = navigation.addVideoContextMenuItems(path_params,item_params)
+		
+		sys.modules["__main__"].language.assert_called_with(30503)
+		sys.modules["__main__"].settings.getSetting.assert_called_with("username")
+		sys.modules["__main__"].settings.getSetting.assert_called_with("oauth2_access_token")
+		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=add_favorite&videoid=some_id&)')
+
+	def test_addVideoContextMenuItems_should_add_add_favorite_option_if_user_is_logged_in_and_item_is_in_external_users_favorites_feed(self):
+		self.prepareContestMenu()
+		sys.modules["__main__"].settings.getSetting.return_value = "something"
+		navigation = YouTubeNavigation()
+		path_params = {"user_feed":"favorites","contact":"some_contact"}
+		item_params = {"Title":"some_title","path":"some_path","icon":"some_icon","thumbnail":"some_thumbnail","videoid":"some_id"}
+		
+		cm = navigation.addVideoContextMenuItems(path_params,item_params)
+		
+		sys.modules["__main__"].language.assert_called_with(30501)
+		sys.modules["__main__"].settings.getSetting.assert_called_with("username")
+		sys.modules["__main__"].settings.getSetting.assert_called_with("oauth2_access_token")
+		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=add_favorite&videoid=some_id&)')
 	
-	def ttest_addFolderContextMenuItems_should_add_add_contact_option_to_external_contacts_if_user_is_logged_in(self):
-		assert(False)
+	def test_addVideoContextMenuItems_should_add_remove_favorite_option_if_user_is_logged_in_and_item_is_in_favorites_feed(self):
+		self.prepareContestMenu()
+		sys.modules["__main__"].settings.getSetting.return_value = "something"
+		navigation = YouTubeNavigation()
+		path_params = {"user_feed":"favorites"}
+		item_params = {"Title":"some_title","path":"some_path","icon":"some_icon","thumbnail":"some_thumbnail","editid":"some_id"}
+		
+		cm = navigation.addVideoContextMenuItems(path_params,item_params)
+		
+		sys.modules["__main__"].language.assert_called_with(30506)
+		sys.modules["__main__"].settings.getSetting.assert_called_with("username")
+		sys.modules["__main__"].settings.getSetting.assert_called_with("oauth2_access_token")
+		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=remove_favorite&editid=some_id&)')
+
+	def test_addVideoContextMenuItems_should_add_add_subscription_option_to_channels_not_in_subscriptions_feed(self):
+		self.prepareContestMenu()
+		sys.modules["__main__"].settings.getSetting.return_value = "something"
+		navigation = YouTubeNavigation()
+		path_params = {"user_feed":"favorites"}
+		item_params = {"Title":"some_title","path":"some_path","icon":"some_icon","thumbnail":"some_thumbnail","editid":"some_id"}
+		
+		cm = navigation.addVideoContextMenuItems(path_params,item_params)
+		
+		sys.modules["__main__"].language.assert_called_with(30512)
+		self.assert_context_menu_contains(cm, "some_button_string Unknown Author", 'XBMC.RunPlugin(some_plugin?path=some_path&channel=Unknown+Author&action=add_subscription)')	
+
+	def test_addVideoContextMenuItems_should_add_add_subscriptions_option_to_external_users_subscriptions_feed(self):
+		self.prepareContestMenu()
+		sys.modules["__main__"].settings.getSetting.return_value = "something"
+		navigation = YouTubeNavigation()
+		path_params = {"feed":"subscriptions_favorites","external":"true"}
+		item_params = {"Title":"some_title","path":"some_path","icon":"some_icon","thumbnail":"some_thumbnail","editid":"some_id"}
+		
+		cm = navigation.addVideoContextMenuItems(path_params,item_params)
+		
+		sys.modules["__main__"].language.assert_called_with(30512)
+		self.assert_context_menu_contains(cm, "some_button_string Unknown Author", 'XBMC.RunPlugin(some_plugin?path=some_path&channel=Unknown+Author&action=add_subscription)')	
+
+	def test_addVideoContextMenuItems_should_not_add_add_subscrition_option_to_users_uploads_feed(self):
+		self.prepareContestMenu()
+		sys.modules["__main__"].settings.getSetting.return_value = "something"
+		navigation = YouTubeNavigation()
+		path_params = {"user_feed":"uploads"}
+		item_params = {"Title":"some_title","path":"some_path","icon":"some_icon","thumbnail":"some_thumbnail","editid":"some_id"}
+		
+		cm = navigation.addVideoContextMenuItems(path_params,item_params)
+		
+		self.assert_context_menu_doesnt_contain(cm, "some_button_string Unknown Author", 'XBMC.RunPlugin(some_plugin?path=some_path&channel=Unknown+Author&action=add_subscription)')	
+
+	def test_addVideoContextMenuItems_should_not_add_add_subscription_option_to_subscription_favorites_feed(self):
+		self.prepareContestMenu()
+		sys.modules["__main__"].settings.getSetting.return_value = "something"
+		navigation = YouTubeNavigation()
+		path_params = {"feed":"subscriptions_favorites"}
+		item_params = {"Title":"some_title","path":"some_path","icon":"some_icon","thumbnail":"some_thumbnail","editid":"some_id"}
+		
+		cm = navigation.addVideoContextMenuItems(path_params,item_params)
+		
+		self.assert_context_menu_doesnt_contain(cm, "some_button_string Unknown Author", 'XBMC.RunPlugin(some_plugin?path=some_path&channel=Unknown+Author&action=add_subscription)')	
+
+	def test_addVideoContextMenuItems_should_not_add_add_subscription_option_to_subscription_playlists_feed(self):
+		self.prepareContestMenu()
+		sys.modules["__main__"].settings.getSetting.return_value = "something"
+		navigation = YouTubeNavigation()
+		path_params = {"feed":"subscriptions_playlists"}
+		item_params = {"Title":"some_title","path":"some_path","icon":"some_icon","thumbnail":"some_thumbnail","editid":"some_id"}
+		
+		cm = navigation.addVideoContextMenuItems(path_params,item_params)
+		
+		self.assert_context_menu_doesnt_contain(cm, "some_button_string Unknown Author", 'XBMC.RunPlugin(some_plugin?path=some_path&channel=Unknown+Author&action=add_subscription)')	
+
+	def test_addVideoContextMenuItems_should_not_add_add_subscription_option_to_subscription_uploads_feed(self):
+		self.prepareContestMenu()
+		sys.modules["__main__"].settings.getSetting.return_value = "something"
+		navigation = YouTubeNavigation()
+		path_params = {"feed":"subscriptions_uploads"}
+		item_params = {"Title":"some_title","path":"some_path","icon":"some_icon","thumbnail":"some_thumbnail","editid":"some_id"}
+		
+		cm = navigation.addVideoContextMenuItems(path_params,item_params)
+		
+		self.assert_context_menu_doesnt_contain(cm, "some_button_string Unknown Author", 'XBMC.RunPlugin(some_plugin?path=some_path&channel=Unknown+Author&action=add_subscription)')
+
+	def test_addVideoContextMenuItems_should_add_remove_from_playlist_option_to_items_in_playlists(self):
+		self.prepareContestMenu()
+		sys.modules["__main__"].settings.getSetting.return_value = "something"
+		navigation = YouTubeNavigation()
+		path_params = {"playlist":"some_playlist"}
+		item_params = {"Title":"some_title","path":"some_path","icon":"some_icon","thumbnail":"some_thumbnail","playlist_entry_id":"some_id"}
+		
+		cm = navigation.addVideoContextMenuItems(path_params,item_params)
+		
+		sys.modules["__main__"].language.assert_called_with(30530)
+		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=remove_from_playlist&playlist=some_playlist&playlist_entry_id=some_id&)')	
+
+	def test_addVideoContextMenuItems_should_add_add_to_playlist_option_to_video_items_if_user_is_logged_in(self):
+		self.prepareContestMenu()
+		sys.modules["__main__"].settings.getSetting.return_value = "something"
+		navigation = YouTubeNavigation()
+		path_params = {}
+		item_params = {"Title":"some_title","path":"some_path","icon":"some_icon","thumbnail":"some_thumbnail","videoid":"someid"}
+		
+		cm = navigation.addVideoContextMenuItems(path_params,item_params)
+		
+		sys.modules["__main__"].language.assert_called_with(30528)
+		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.Container.Update(some_plugin?path=None&feed=related&videoid=someid)')	
+
+	def test_addVideoContextMenuItems_should_add_more_videos_by_user_if_item_is_not_in_uploads_feed(self):
+		self.prepareContestMenu()
+		sys.modules["__main__"].settings.getSetting.return_value = "something"
+		navigation = YouTubeNavigation()
+		path_params = {}
+		item_params = {"Title":"some_title","path":"some_path","icon":"some_icon","thumbnail":"some_thumbnail","videoid":"someid"}
+		
+		cm = navigation.addVideoContextMenuItems(path_params,item_params)
+		
+		sys.modules["__main__"].language.assert_called_with(30516)
+		self.assert_context_menu_contains(cm, "some_button_string Unknown Author", 'XBMC.Container.Update(some_plugin?path=None&feed=uploads&channel=Unknown+Author)')	
+
+	def test_addVideoContextMenuItems_should_not_add_more_videos_by_user_if_item_is_in_uploads_feed(self):
+		self.prepareContestMenu()
+		sys.modules["__main__"].settings.getSetting.return_value = "something"
+		navigation = YouTubeNavigation()
+		path_params = {"user_feed":"uploads"}
+		item_params = {"Title":"some_title","path":"some_path","icon":"some_icon","thumbnail":"some_thumbnail"}
+		
+		cm = navigation.addVideoContextMenuItems(path_params,item_params)
+		
+		self.assert_context_menu_doesnt_contain(cm, "some_button_string Unknown Author", 'XBMC.Container.Update(some_plugin?path=None&feed=uploads&channel=Unknown+Author)')
+		
+	def test_addVideoContextMenuItems_should_add_related_videos_option_to_video_items(self):
+		self.prepareContestMenu()
+		sys.modules["__main__"].settings.getSetting.return_value = "something"
+		navigation = YouTubeNavigation()
+		path_params = {}
+		item_params = {"Title":"some_title","path":"some_path","icon":"some_icon","thumbnail":"some_thumbnail","videoid":"someid"}
+		
+		cm = navigation.addVideoContextMenuItems(path_params,item_params)
+		
+		sys.modules["__main__"].language.assert_called_with(30527)
+		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.Container.Update(some_plugin?path=None&feed=related&videoid=someid)')	
+
+	def test_addVideoContextMenuItems_should_add_find_similar_option_to_video_items(self):
+		self.prepareContestMenu()
+		sys.modules["__main__"].settings.getSetting.return_value = "something"
+		navigation = YouTubeNavigation()
+		path_params = {}
+		item_params = {"Title":"some_title","path":"some_path","icon":"some_icon","thumbnail":"some_thumbnail","videoid":"someid"}
+		
+		cm = navigation.addVideoContextMenuItems(path_params,item_params)
+		
+		sys.modules["__main__"].language.assert_called_with(30514)
+		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.Container.Update(some_plugin?path=None&feed=search&search=some_title)')	
+
+	def test_addVideoContextMenuItems_should_add_now_playing_option_to_video_items(self):
+		self.prepareContestMenu()
+		sys.modules["__main__"].settings.getSetting.return_value = "something"
+		navigation = YouTubeNavigation()
+		path_params = {}
+		item_params = {"Title":"some_title","path":"some_path","icon":"some_icon","thumbnail":"some_thumbnail","videoid":"someid"}
+		
+		cm = navigation.addVideoContextMenuItems(path_params,item_params)
+		
+		sys.modules["__main__"].language.assert_called_with(30523)
+		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.ActivateWindow(VideoPlaylist)')
+
+	def test_addVideoContextMenuItems_should_add_video_info_option_to_video_items(self):
+		self.prepareContestMenu()
+		sys.modules["__main__"].settings.getSetting.return_value = "something"
+		navigation = YouTubeNavigation()
+		path_params = {}
+		item_params = {"Title":"some_title","path":"some_path","icon":"some_icon","thumbnail":"some_thumbnail","videoid":"someid"}
+		
+		cm = navigation.addVideoContextMenuItems(path_params,item_params)
+		
+		sys.modules["__main__"].language.assert_called_with(30523)
+		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.Action(Info)')
+
+	def test_addFolderContextMenuItems_should_not_add_any_options_to_next_folders(self):
+		self.prepareContestMenu()
+		sys.modules["__main__"].settings.getSetting.return_value = "something"
+		navigation = YouTubeNavigation()
+		path_params = {}
+		item_params = {"Title":"some_title","path":"some_path","icon":"some_icon","thumbnail":"some_thumbnail","next":"true"}
+		
+		cm = navigation.addFolderContextMenuItems(path_params,item_params)
+		
+		assert(cm == [])
+
+	def test_addFolderContextMenuItems_should_add_artist_scraper_options_to_artist_items(self):
+		self.prepareContestMenu()
+		sys.modules["__main__"].settings.getSetting.return_value = "something"
+		navigation = YouTubeNavigation()
+		path_params = {}
+		item_params = {"Title":"some_title","path":"some_path","icon":"some_icon","thumbnail":"some_thumbnail","videoid":"someid", "artist":"some_artist"}
+		
+		cm = navigation.addFolderContextMenuItems(path_params,item_params)
+		
+		sys.modules["__main__"].language.assert_called_with(30507)
+		sys.modules["__main__"].language.assert_called_with(30520)
+		sys.modules["__main__"].language.assert_called_with(30540)
+		sys.modules["__main__"].language.assert_called_with(30522)
+		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.Container.Update(some_plugin?path=some_path&scraper=similar_artist&artist=some_artist&folder=true&)')
+		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=delete_artist&store=artists&artist=some_artist&)')
+		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=play_all&scraper=music_artists&artist=some_artist&)')
+		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=play_all&shuffle=true&scraper=music_artists&artist=some_artist&)')
+
+	def test_addFolderContextMenuItems_should_add_play_all_option_to_newsubsctiptions_feed(self):
+		self.prepareContestMenu()
+		sys.modules["__main__"].settings.getSetting.return_value = "something"
+		navigation = YouTubeNavigation()
+		path_params = {}
+		item_params = {"Title":"some_title","path":"some_path","icon":"some_icon","thumbnail":"some_thumbnail","videoid":"someid", "user_feed":"newsubscriptions"}
+		
+		cm = navigation.addFolderContextMenuItems(path_params,item_params)
+		
+		sys.modules["__main__"].language.assert_called_with(30520)
+		sys.modules["__main__"].language.assert_called_with(30522)
+		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=play_all&user_feed=newsubscriptions&contact=default&)')		
+		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=play_all&shuffle=true&user_feed=newsubscriptions&contact=default&)')
+		
+	def test_addFolderContextMenuItems_should_add_play_all_option_to_favorites_feed(self):
+		self.prepareContestMenu()
+		sys.modules["__main__"].settings.getSetting.return_value = "something"
+		navigation = YouTubeNavigation()
+		path_params = {}
+		item_params = {"Title":"some_title","path":"some_path","icon":"some_icon","thumbnail":"some_thumbnail","videoid":"someid", "user_feed":"favorites"}
+		
+		cm = navigation.addFolderContextMenuItems(path_params,item_params)
+		
+		sys.modules["__main__"].language.assert_called_with(30520)
+		sys.modules["__main__"].language.assert_called_with(30522)
+		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=play_all&user_feed=favorites&contact=default&)')		
+		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=play_all&shuffle=true&user_feed=favorites&contact=default&)')
+
+	def test_addFolderContextMenuItems_should_add_playlist_options_to_playlist_items(self):
+		self.prepareContestMenu()
+		sys.modules["__main__"].settings.getSetting.return_value = "something"
+		navigation = YouTubeNavigation()
+		path_params = {}
+		item_params = {"Title":"some_title","path":"some_path","icon":"some_icon","thumbnail":"some_thumbnail","videoid":"someid", "playlist":"some_playlist"}
+		
+		cm = navigation.addFolderContextMenuItems(path_params,item_params)
+		
+		sys.modules["__main__"].language.assert_called_with(30531)
+		sys.modules["__main__"].language.assert_called_with(30539)
+		sys.modules["__main__"].language.assert_called_with(30520)
+		sys.modules["__main__"].language.assert_called_with(30522)
+		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=reverse_order&playlist=some_playlist&)')		
+		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=play_all&playlist=some_playlist&)')
+		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=play_all&shuffle=true&playlist=some_playlist&)')		
+		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=delete_playlist&playlist=some_playlist&)')
+				
+	def test_addFolderContextMenuItems_should_add_play_all_option_to_watch_later_feed(self):
+		self.prepareContestMenu()
+		sys.modules["__main__"].settings.getSetting.return_value = "something"
+		navigation = YouTubeNavigation()
+		path_params = {}
+		item_params = {"Title":"some_title","path":"some_path","icon":"some_icon","thumbnail":"some_thumbnail","videoid":"someid", "scraper":"watch_later"}
+		
+		cm = navigation.addFolderContextMenuItems(path_params,item_params)
+		
+		sys.modules["__main__"].language.assert_called_with(30520)
+		sys.modules["__main__"].language.assert_called_with(30522)
+		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=play_all&scraper=watch_later&login=true&)')		
+		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=play_all&shuffle=true&scraper=watch_later&login=true&)')
+				
+	def test_addFolderContextMenuItems_should_add_play_all_option_to_recommended_feed(self):
+		self.prepareContestMenu()
+		sys.modules["__main__"].settings.getSetting.return_value = "something"
+		navigation = YouTubeNavigation()
+		path_params = {}
+		item_params = {"Title":"some_title","path":"some_path","icon":"some_icon","thumbnail":"some_thumbnail","videoid":"someid", "scraper":"recommended"}
+		
+		cm = navigation.addFolderContextMenuItems(path_params,item_params)
+		
+		sys.modules["__main__"].language.assert_called_with(30520)
+		sys.modules["__main__"].language.assert_called_with(30522)
+		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=play_all&scraper=recommended&login=true&)')		
+		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=play_all&shuffle=true&scraper=recommended&login=true&)')
+
+	def test_addFolderContextMenuItems_should_add_play_all_option_to_liked_videos_feed(self):
+		self.prepareContestMenu()
+		sys.modules["__main__"].settings.getSetting.return_value = "something"
+		navigation = YouTubeNavigation()
+		path_params = {}
+		item_params = {"Title":"some_title","path":"some_path","icon":"some_icon","thumbnail":"some_thumbnail","videoid":"someid", "scraper":"liked_videos"}
+		
+		cm = navigation.addFolderContextMenuItems(path_params,item_params)
+		
+		sys.modules["__main__"].language.assert_called_with(30520)
+		sys.modules["__main__"].language.assert_called_with(30522)
+		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=play_all&scraper=liked_videos&login=true&)')		
+		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=play_all&shuffle=true&scraper=liked_videos&login=true&)')
+		
+	def test_addFolderContextMenuItems_should_add_play_all_option_to_disco_search(self):
+		self.prepareContestMenu()
+		sys.modules["__main__"].settings.getSetting.return_value = "something"
+		navigation = YouTubeNavigation()
+		path_params = {}
+		item_params = {"Title":"some_title","path":"some_path","icon":"some_icon","thumbnail":"some_thumbnail","videoid":"someid", "scraper":"search_disco","search":"some_search"}
+		
+		cm = navigation.addFolderContextMenuItems(path_params,item_params)
+		
+		sys.modules["__main__"].language.assert_called_with(30520)
+		sys.modules["__main__"].language.assert_called_with(30522)
+		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=play_all&search_disco=some_search&)')		
+		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=play_all&shuffle=true&search_disco=some_search&)')
+		
+	def test_addFolderContextMenuItems_should_add_edit_and_delete_options_to_disco_searches(self):
+		self.prepareContestMenu()
+		sys.modules["__main__"].settings.getSetting.return_value = "something"
+		navigation = YouTubeNavigation()
+		path_params = {}
+		item_params = {"Title":"some_title","path":"some_path","icon":"some_icon","thumbnail":"some_thumbnail","videoid":"someid", "scraper":"search_disco","search":"some_search"}
+		
+		cm = navigation.addFolderContextMenuItems(path_params,item_params)
+		
+		sys.modules["__main__"].language.assert_called_with(30524)
+		sys.modules["__main__"].language.assert_called_with(30525)
+		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.Container.Update(some_plugin?path=some_path&action=edit_disco&store=disco_searches&search=some_search&)')		
+		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=delete_disco&store=disco_searches&delete=some_search&)')
+		
+	def test_addFolderContextMenuItems_should_not_add_edit_and_delete_options_to_dissco_searches_in_the_top_artist_feed(self):
+		self.prepareContestMenu()
+		sys.modules["__main__"].settings.getSetting.return_value = "something"
+		navigation = YouTubeNavigation()
+		path_params = {"scraper":"disco_top_artist"}
+		item_params = {"Title":"some_title","path":"some_path","icon":"some_icon","thumbnail":"some_thumbnail","videoid":"someid", "scraper":"search_disco","search":"some_search"}
+		
+		cm = navigation.addFolderContextMenuItems(path_params,item_params)
+		
+		self.assert_context_menu_doesnt_contain(cm, "some_button_string %s", 'XBMC.Container.Update(some_plugin?path=some_path&action=edit_disco&store=disco_searches&search=some_search&)')		
+		self.assert_context_menu_doesnt_contain(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=delete_disco&store=disco_searches&delete=some_search&)')
 	
-	def ttest_addFolderContextMenuItems_should_add_remove_contact_options_to_items_in_contact_feed_if_user_is_logged_in(self):
-		assert(False)
+	def test_addFolderContextMenuItems_should_add_edit_and_delete_options_to_searches(self):
+		self.prepareContestMenu()
+		sys.modules["__main__"].settings.getSetting.return_value = "something"
+		navigation = YouTubeNavigation()
+		path_params = {}
+		item_params = {"Title":"some_title","path":"some_path","icon":"some_icon","thumbnail":"some_thumbnail","videoid":"someid", "feed":"search","search":"some_search"}
+		
+		cm = navigation.addFolderContextMenuItems(path_params,item_params)
+		
+		sys.modules["__main__"].language.assert_called_with(30515)
+		sys.modules["__main__"].language.assert_called_with(30508)
+		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.Container.Update(some_plugin?path=some_path&action=edit_search&store=searches&search=some_search&)')		
+		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=delete_search&store=searches&delete=some_search&)')
 	
-	def ttest_addFolderContextMenuItems_should_add_now_playing_option_to_folder_items(self):
-		assert(False)
+	def test_addFolderContextMenuItems_should_add_correct_view_mode_options_to_subscriptions_favorites_feeds(self):
+		self.prepareContestMenu()
+		sys.modules["__main__"].settings.getSetting.return_value = "something"
+		navigation = YouTubeNavigation()
+		path_params = {}
+		item_params = {"Title":"some_title","path":"some_path","icon":"some_icon","thumbnail":"some_thumbnail","videoid":"someid", "view_mode":"some_view_mode","user_feed":"favorites"}
+		
+		cm = navigation.addFolderContextMenuItems(path_params,item_params)
+		
+		sys.modules["__main__"].language.assert_called_with(30511)
+		sys.modules["__main__"].language.assert_called_with(30526)
+		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.Container.Update(some_plugin?path=some_path&channel=None&action=change_subscription_view&view_mode=uploads&)')		
+		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.Container.Update(some_plugin?path=some_path&channel=None&action=change_subscription_view&view_mode=playlists&folder=true&)')
+	
+	def test_addFolderContextMenuItems_should_add_correct_view_mode_options_to_subscriptions_uploads_feeds(self):
+		self.prepareContestMenu()
+		sys.modules["__main__"].settings.getSetting.return_value = "something"
+		navigation = YouTubeNavigation()
+		path_params = {}
+		item_params = {"Title":"some_title","path":"some_path","icon":"some_icon","thumbnail":"some_thumbnail","videoid":"someid", "view_mode":"some_view_mode","user_feed":"uploads"}
+		
+		cm = navigation.addFolderContextMenuItems(path_params,item_params)
+		
+		sys.modules["__main__"].language.assert_called_with(30510)
+		sys.modules["__main__"].language.assert_called_with(30526)
+		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.Container.Update(some_plugin?path=some_path&channel=None&action=change_subscription_view&view_mode=favorites&)')		
+		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.Container.Update(some_plugin?path=some_path&channel=None&action=change_subscription_view&view_mode=playlists&folder=true&)')
+	
+	def test_addFolderContextMenuItems_should_add_correct_view_mode_options_to_subscriptions_playlists_feeds(self):
+		self.prepareContestMenu()
+		sys.modules["__main__"].settings.getSetting.return_value = "something"
+		navigation = YouTubeNavigation()
+		path_params = {}
+		item_params = {"Title":"some_title","path":"some_path","icon":"some_icon","thumbnail":"some_thumbnail","videoid":"someid", "view_mode":"some_view_mode","user_feed":"playlists"}
+		
+		cm = navigation.addFolderContextMenuItems(path_params,item_params)
+		
+		sys.modules["__main__"].language.assert_called_with(30511)
+		sys.modules["__main__"].language.assert_called_with(30510)
+		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.Container.Update(some_plugin?path=some_path&channel=None&action=change_subscription_view&view_mode=favorites&)')		
+		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.Container.Update(some_plugin?path=some_path&channel=None&action=change_subscription_view&view_mode=uploads&)')	
+		
+	def test_addFolderContextMenuItems_should_add_add_subscription_option_to_subscriptions_not_in_users_subscription_feed(self):
+		self.prepareContestMenu()
+		sys.modules["__main__"].settings.getSetting.return_value = "something"
+		navigation = YouTubeNavigation()
+		path_params = {"external":"true"}
+		item_params = {"Title":"some_title","path":"some_path","icon":"some_icon","thumbnail":"some_thumbnail","videoid":"someid", "channel":"some_channel"}
+		
+		cm = navigation.addFolderContextMenuItems(path_params,item_params)
+		
+		sys.modules["__main__"].language.assert_called_with(30512)		
+		self.assert_context_menu_contains(cm, "some_button_string some_channel", 'XBMC.RunPlugin(some_plugin?path=some_path&channel=None&action=add_subscription)')	
+		
+	def test_addFolderContextMenuItems_should_add_remove_subscription_option_to_subscriptions_in_users_subscriptions_feed(self):
+		self.prepareContestMenu()
+		sys.modules["__main__"].settings.getSetting.return_value = "something"
+		navigation = YouTubeNavigation()
+		path_params = {}
+		item_params = {"Title":"some_title","path":"some_path","icon":"some_icon","thumbnail":"some_thumbnail","videoid":"someid", "channel":"some_channel","editid":"some_editid"}
+		
+		cm = navigation.addFolderContextMenuItems(path_params,item_params)
+		
+		sys.modules["__main__"].language.assert_called_with(30513)
+		self.assert_context_menu_contains(cm, "some_button_string some_channel", 'XBMC.RunPlugin(some_plugin?path=some_path&editid=some_editid&action=remove_subscription)')	
+	
+	def test_addFolderContextMenuItems_should_add_add_contact_option_to_external_contacts_if_user_is_logged_in(self):
+		self.prepareContestMenu()
+		sys.modules["__main__"].settings.getSetting.return_value = "something"
+		navigation = YouTubeNavigation()
+		path_params = {}
+		item_params = {"Title":"some_title","path":"some_path","icon":"some_icon","thumbnail":"some_thumbnail","videoid":"someid", "contact":"some_contact","external":"true"}
+		
+		cm = navigation.addFolderContextMenuItems(path_params,item_params)
+		
+		sys.modules["__main__"].language.assert_called_with(30026)
+		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=add_contact&contact=some_title&)')	
+	
+	def test_addFolderContextMenuItems_should_add_remove_contact_options_to_items_in_contact_feed_if_user_is_logged_in(self):
+		self.prepareContestMenu()
+		sys.modules["__main__"].settings.getSetting.return_value = "something"
+		navigation = YouTubeNavigation()
+		path_params = {}
+		item_params = {"Title":"some_title","path":"some_path","icon":"some_icon","thumbnail":"some_thumbnail","videoid":"someid", "contact":"some_contact"}
+		
+		cm = navigation.addFolderContextMenuItems(path_params,item_params)
+		
+		sys.modules["__main__"].language.assert_called_with(30025)
+		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=remove_contact&contact=some_title&)')			
+	
+	def test_addFolderContextMenuItems_should_add_now_playing_option_to_folder_items(self):
+		self.prepareContestMenu()
+		sys.modules["__main__"].settings.getSetting.return_value = "something"
+		navigation = YouTubeNavigation()
+		path_params = {}
+		item_params = {"Title":"some_title","path":"some_path","icon":"some_icon","thumbnail":"some_thumbnail"}
+		
+		cm = navigation.addFolderContextMenuItems(path_params,item_params)
+		
+		sys.modules["__main__"].language.assert_called_with(30523)
+		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.ActivateWindow(VideoPlaylist)')
 		
 if __name__ == '__main__':
 	nose.runmodule()
