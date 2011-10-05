@@ -165,7 +165,6 @@ class YouTubeLogin():
 				return ( self.core._findErrors(ret), 303)
 
 			ret = self.core._fetchPage(fetch_options)
-			print "Step : " + str(step) + repr(ret)
 			if ret["content"].find("captcha") > -1:
 				self.common.log("Captcha needs to be filled")
 				break;
@@ -185,7 +184,7 @@ class YouTubeLogin():
 				( galx, url_data ) = self._fillLoginInfo(ret["content"])
 				if len(galx) > 0 and len(url_data) > 0:
 					fetch_options = { "link": newurl[0], "no-language-cookie": "true", "url_data": url_data }
-					self.common.log("Part B:" + repr(fetch_options)) ## WARNING, SHOWS LOGIN INFO
+					self.common.log("Part B:" + repr(fetch_options), 10) ## WARNING, SHOWS LOGIN INFO/PASSWORD
 					continue
 			
 			newurl = self.common.parseDOM(ret["content"], "meta", attrs = { "http-equiv": "refresh"}, ret = "content")
@@ -223,7 +222,6 @@ class YouTubeLogin():
 					     "GALX": galx}
 
 				target_url = self.common.parseDOM(ret["content"], "form", attrs = { "name": "hiddenpost"}, ret = "action")
-				print "BLA :  " + repr(target_url)
 				fetch_options = { "link": target_url[0], "url_data": url_data, "no-language-cookie": "true" }
 				self.common.log("Part E: " + repr(fetch_options))
 				continue
