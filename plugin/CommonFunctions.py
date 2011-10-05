@@ -85,7 +85,7 @@ class CommonFunctions():
 		# attrs <- { "id": "my-div", "class": "oneclass.*anotherclass", "attribute": "a random tag" }
 		# ret <- Return content of element
 		# Default return <- Returns a list with the content
-		self.log(repr(name) + " - " + repr(attrs) + " - " + repr(ret) + " - " + str(type(html)), 1)
+		self.log("start: " + repr(name) + " - " + repr(attrs) + " - " + repr(ret) + " - " + str(type(html)), 1)
 
 		if type(html) != type([]):
 			html = [html]
@@ -143,7 +143,9 @@ class CommonFunctions():
 				self.log("Getting element content for %s matches " % len(lst), 2)
 				lst2 = []
 				for match in lst:
-					lst2.append(self.getDOMContent(item, name, match))
+					temp = self.getDOMContent(item, name, match).strip()
+					item = item[item.find(temp) + len(temp):]
+					lst2.append(temp)
 					self.log(lst, 3)
 					self.log(match, 3)
 					self.log(lst2, 3)
