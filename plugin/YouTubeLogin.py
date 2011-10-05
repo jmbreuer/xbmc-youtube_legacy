@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, urllib2, cookielib, time
+import sys, urllib2, time
 try: import simplejson as json
 except ImportError: import json
 
@@ -29,12 +29,7 @@ except ImportError: import json
 class YouTubeLogin():
 
 	APIKEY = "AI39si6hWF7uOkKh4B9OEAX-gK337xbwR9Vax-cdeF9CF9iNAcQftT8NVhEXaORRLHAmHxj6GjM-Prw04odK4FxACFfKkiH9lg";
-			
-	urls = {};
-	urls['http_login'] = "https://www.google.com/accounts/ServiceLogin?service=youtube"
-	urls['http_login_confirmation'] = "http://www.youtube.com/signin?action_handle_signin=true&nomobiletemp=1&hl=en_US&next=/index&hl=en_US&ltmpl=sso"
-	urls['gdata_login'] = "https://www.google.com/accounts/ClientLogin"
-	
+
 	def __init__(self):
 		self.xbmc = sys.modules["__main__"].xbmc
 
@@ -48,9 +43,7 @@ class YouTubeLogin():
 		self.common = sys.modules[ "__main__" ].common
 		self.cache = sys.modules[ "__main__" ].cache
 		
-		self.cookiejar = cookielib.LWPCookieJar()
-		self.opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar))
-		urllib2.install_opener(self.opener)
+		#urllib2.install_opener(sys.modules[ "__main__" ].opener)
 		
 	def login(self, params = {}):
 		self.common.log("")
@@ -168,7 +161,14 @@ class YouTubeLogin():
 			self.common.log("Step : " + str(step))
 			step += 1
 
+			if step == 17:
+				return ( self.core._findErrors(ret), 303)
+
 			ret = self.core._fetchPage(fetch_options)
+			print "Step : " + str(step) + repr(ret)
+			if ret["content"].find("captcha") > -1:
+				self.common.log("Captcha needs to be filled")
+				break;
 			fetch_options = False
 
 			# Click login link on youtube.com
@@ -176,7 +176,7 @@ class YouTubeLogin():
 			if len(newurl) > 0:
 				# Start login procedure
 				if newurl[0] != "#":
-					fetch_options = { "link": newurl[0] }
+					fetch_options = { "link": newurl[0].replace("&amp;", "&") }
 					self.common.log("Part A : " + repr(fetch_options) )
 
 			# Fill out login information and send.
@@ -199,21 +199,32 @@ class YouTubeLogin():
 			## 2-factor login start
 			if ret["content"].find("smsUserPin") > -1:
 				url_data = self._fillUserPin(ret["content"])
-				fetch_options = { "link": "https://www.google.com/accounts/SmsAuth?persistent=yes", "url_data": url_data, "no-language-cookie": "true" }
+
+				target_url = ret["new_url"]
+				if target_url.rfind("/") > 10:
+					target_url = target_url[:target_url.find("/", 10)]
+				else:
+					target_url += "/"
+
+				new_part = self.common.parseDOM(ret["content"], "form", attrs = { "name": "verifyForm"}, ret = "action")
+				fetch_options = { "link": target_url + new_part[0], "url_data": url_data, "no-language-cookie": "true" }
+
 				self.common.log("Part D: " + repr(fetch_options))
 				continue
 
-			smsToken = self.common.parseDOM(ret["content"], "input", attrs= { "name": "smsToken" }, ret= "value")
+			smsToken = self.common.parseDOM(ret["content"].replace("\n", ""), "input", attrs= { "name": "smsToken" }, ret= "value")
 			cont = self.common.parseDOM(ret["content"], "input", attrs= { "name": "continue"}, ret="value" )
-			if len(cont) > 0 and smsToken > 0 and galx != "" :
+
+			if len(cont) > 0 and len(smsToken) > 0 and galx != "":
 				url_data = { "smsToken": smsToken[0],
 					     "continue": cont[0],
 					     "PersistentCookie": "yes",
 					     "service": "youtube",
 					     "GALX": galx}
 
-				# I so want to extract this link.
-				fetch_options = { "link": "https://www.google.com/accounts/ServiceLoginAuth?service=youtube", "url_data": url_data, "no-language-cookie": "true"}
+				target_url = self.common.parseDOM(ret["content"], "form", attrs = { "name": "hiddenpost"}, ret = "action")
+				print "BLA :  " + repr(target_url)
+				fetch_options = { "link": target_url[0], "url_data": url_data, "no-language-cookie": "true" }
 				self.common.log("Part E: " + repr(fetch_options))
 				continue
 
@@ -238,7 +249,7 @@ class YouTubeLogin():
 
 	def _fillLoginInfo(self, content):
 		rmShown = self.common.parseDOM(content, "input", attrs = { "name": "rmShown"}, ret = "value" )
-		cont = ["http://www.youtube.com/signin?action_handle_signin=true&amp;nomobiletemp=1&amp;hl=en_US&amp;next=%2F"]
+		cont = self.common.parseDOM(content, "input", attrs = { "name": "continue"}, ret = "value")
 		uilel = self.common.parseDOM(content, "input", attrs = { "name": "uilel" }, ret= "value")
 		if len(uilel) == 0:
 			uilel = self.common.parseDOM(content, "input", attrs= { "id": "uilel" }, ret= "value")
@@ -255,7 +266,7 @@ class YouTubeLogin():
 			pword = self.utils.getUserInput(self.language(30628), hidden = True)
 
 		if len(galx) == 0 or len(cont) == 0 or len(uilel) == 0 or len(dsh) == 0 or len(rmShown) == 0 or uname == "" or pword == "":
-			self.common.log("missing values for login form " + repr(galx) + repr(cont) + repr(uilel) + repr(dsh) + repr(rmShown) + repr(uname) + str(len(pword)))
+			self.common.log("_fillLoginInfo missing values for login form " + repr(galx) + repr(cont) + repr(uilel) + repr(dsh) + repr(rmShown) + repr(uname) + str(len(pword)))
 			return ( "", {} )
 		else:
 			galx = galx[0]
@@ -281,12 +292,13 @@ class YouTubeLogin():
 
 	def _fillUserPin(self, content):
 		smsToken = self.common.parseDOM(content, "input", attrs = { "name": "smsToken" }, ret = "value")
+		self.smsToken = smsToken
 		email = self.common.parseDOM(content, "input", attrs = { "name": "email" }, ret = "value")
 		userpin = self.utils.getUserInput(self.language(30627))
+
 		if len(smsToken) > 0 and len(email) > 0 and len(userpin) > 0:
 			url_data = { "smsToken": smsToken[0],
 				     "PersistentCookie": "yes",
-				     "service": "youtube",
 				     "smsUserPin" : userpin,
 				     "smsVerifyPin" : "Verify",
 				     "timeStmp" : "",
@@ -311,7 +323,7 @@ class YouTubeLogin():
 		self.common.log("Scanning cookies for login info")
 		
 		login_info = ""
-		cookies = repr(self.cookiejar)
+		cookies = repr(sys.modules[ "__main__" ].cookiejar)
 			
 		if cookies.find("name='LOGIN_INFO', value='") > 0:
 			start = cookies.find("name='LOGIN_INFO', value='") + len("name='LOGIN_INFO', value='")

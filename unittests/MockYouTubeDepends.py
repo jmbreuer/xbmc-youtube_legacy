@@ -72,5 +72,6 @@ class MockYouTubeDepends:
 		sys.modules["DialogDownloadProgress"].DownloadProgress = Mock()
 
 	def log(self, description, level = 0):
+		print "LOG"
 		import inspect
 		print "[%s] %s : '%s'" % ("YouTube", inspect.stack()[2][3], description)
