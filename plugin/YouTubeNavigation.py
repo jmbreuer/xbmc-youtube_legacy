@@ -471,7 +471,7 @@ class YouTubeNavigation():
 		url_title = urllib.quote_plus(title)
 		studio = self.utils.makeAscii(item("Studio","Unknown Author"))
 		url_studio = urllib.quote_plus(studio)
-		
+				
 		cm.append( ( self.language( 30504 ), "XBMC.Action(Queue)", ) )
 		
 		if (get("playlist")):
@@ -484,7 +484,7 @@ class YouTubeNavigation():
 			cm.append( (self.language(30521), "XBMC.RunPlugin(%s?path=%s&action=play_all&user_feed=%s&contact=%s&videoid=%s&)" % ( sys.argv[0], item("path"), get("user_feed"), contact, item("videoid") ) ) )
 				
 		cm.append( ( self.language(30501), "XBMC.RunPlugin(%s?path=%s&action=download&videoid=%s)" % ( sys.argv[0],  item("path"), item("videoid") ) ) )
-
+		
 		if ( self.settings.getSetting( "username" ) != "" and self.settings.getSetting( "oauth2_access_token" ) ):
 			if ( get("user_feed") == "favorites" and not get("contact") ):
 				cm.append( ( self.language( 30506 ), 'XBMC.RunPlugin(%s?path=%s&action=remove_favorite&editid=%s&)' % ( sys.argv[0], item("path"), item("editid") ) ) )
@@ -492,8 +492,8 @@ class YouTubeNavigation():
 				cm.append( ( self.language( 30503 ), 'XBMC.RunPlugin(%s?path=%s&action=add_favorite&videoid=%s&)' % ( sys.argv[0],  item("path"), item("videoid") ) ) )
 			
 			if (get("external") == "true" or (get("feed") not in ["subscriptions_favorites", "subscriptions_uploads", "subscriptions_playlists"] and (get("user_feed") != "uploads" and not get("external")))):
-				cm.append( ( self.language( 30512 ) % item("Studio"), 'XBMC.RunPlugin(%s?path=%s&channel=%s&action=add_subscription)' % ( sys.argv[0], item("path"), item("Studio") ) ) )
-				
+				cm.append( ( self.language( 30512 ) % studio, 'XBMC.RunPlugin(%s?path=%s&channel=%s&action=add_subscription)' % ( sys.argv[0], item("path"), url_studio ) ) )
+			
 			if (get("playlist") and item("playlist_entry_id")):
 				cm.append( (self.language(30530), "XBMC.RunPlugin(%s?path=%s&action=remove_from_playlist&playlist=%s&playlist_entry_id=%s&)" % ( sys.argv[0], item("path"), get("playlist"), item("playlist_entry_id") ) ) )
 			cm.append( (self.language(30528), "XBMC.RunPlugin(%s?path=%s&action=add_to_playlist&videoid=%s&)" % ( sys.argv[0], item("path"), item("videoid") ) ) )
@@ -533,18 +533,10 @@ class YouTubeNavigation():
 			if not get("external"):
 				cm.append ( (self.language(30539), "XBMC.RunPlugin(%s?path=%s&action=delete_playlist&playlist=%s&)" % ( sys.argv[0], item("path"), item("playlist") ) ) )
 			
-		if item("scraper") == "watch_later":
-			cm.append( (self.language( 30520 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&scraper=watch_later&login=true&)" % ( sys.argv[0], item("path") ) ) )
-			cm.append( (self.language( 30522 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&shuffle=true&scraper=watch_later&login=true&)" % ( sys.argv[0], item("path") ) ) )
-		
-		if item("scraper") == "recommended":
-			cm.append( (self.language( 30520 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&scraper=recommended&login=true&)" % ( sys.argv[0], item("path") ) ) )
-			cm.append( (self.language( 30522 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&shuffle=true&scraper=recommended&login=true&)" % ( sys.argv[0], item("path") ) ) )
+		if item("scraper") in ["watch_later","liked_videos","recommended"]:
+			cm.append( (self.language( 30520 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&scraper=%s&login=true&)" % ( sys.argv[0], item("path"), item("scraper") ) ) )
+			cm.append( (self.language( 30522 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&shuffle=true&scraper=%s&login=true&)" % ( sys.argv[0], item("path"), item("scraper") ) ) )
 				
-		if (item("scraper") == "liked_videos"):
-			cm.append( (self.language( 30520 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&scraper=liked_videos&login=true&)" % ( sys.argv[0], item("path") ) ) )
-			cm.append( (self.language( 30522 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&shuffle=true&scraper=liked_videos&login=true&)" % ( sys.argv[0], item("path") ) ) )
-		
 		if (item("scraper") == "search_disco"):
 			cm.append( (self.language( 30520 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&search_disco=%s&)" % ( sys.argv[0], item("path"), item("search") ) ) )
 			cm.append( (self.language( 30522 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&shuffle=true&search_disco=%s&)" % ( sys.argv[0], item("path"), item("search") ) ) )
@@ -586,7 +578,7 @@ class YouTubeNavigation():
 		if (item("contact") and not get("store")):
 			if ( self.settings.getSetting( "username" ) != "" and self.settings.getSetting( "oauth2_access_token" ) ):
 				if (item("external")):
-					cm.append( (self.language(30026), 'XBMC.RunPlugin(%s?path=%s&action=add_contact&)' % ( sys.argv[0], item("path") ) ) )
+					cm.append( (self.language(30026), 'XBMC.RunPlugin(%s?path=%s&action=add_contact&contact=%s&)' % ( sys.argv[0], item("path"), item("Title") ) ) )
 				else:
 					cm.append( (self.language(30025), 'XBMC.RunPlugin(%s?path=%s&action=remove_contact&contact=%s&)' % ( sys.argv[0], item("path"), item("Title") ) ) )
 				
