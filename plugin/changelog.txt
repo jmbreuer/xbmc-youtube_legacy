@@ -1,5 +1,6 @@
 [B]TODO:[/B]
 - Fix RTMP'e seems refactor broke it, and make a unittest + integrations test that parsing works (playpath seems wrong)
+  - Make rtmp suck setup once Handshake 10 is supported.
 - Integration Test
 - Allow users to change sort on searches
 - Unit test YouTubePlaylistControl

@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, urllib, urllib2, re, time, socket, cookielib
+import sys, urllib, urllib2, re, time, socket
 import xml.dom.minidom as minidom
 try: import simplejson as json
 except ImportError: import json
@@ -69,10 +69,8 @@ class YouTubeCore():
 		self.utils = sys.modules[ "__main__" ].utils
 		self.common = sys.modules[ "__main__" ].common
 		
-		self.cookiejar = cookielib.LWPCookieJar()
-		self.opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar))
-		urllib2.install_opener(self.opener)
-		
+		#urllib2.install_opener(sys.modules[ "__main__" ].opener)
+
 		timeout = [5, 10, 15, 20, 25][int(self.settings.getSetting("timeout"))]
 		if not timeout:
 			timeout = "15"
@@ -466,7 +464,7 @@ class YouTubeCore():
 			self.common.log("returning error :" + error.strip())
 			return error.strip()
 
-		self.common.log("couldn't find anything: " + repr(ret))
+		self.common.log("couldn't find any errors: " + repr(ret))
 		return False
 
 	def _verifyAge(self, result, new_url, params={}):

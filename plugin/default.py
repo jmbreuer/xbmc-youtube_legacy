@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, xbmc, xbmcplugin, xbmcaddon, xbmcgui
+import sys, xbmc, xbmcplugin, xbmcaddon, xbmcgui, urllib2, cookielib
 try: 
 	import xbmcvfs
 except ImportError: 
@@ -44,6 +44,10 @@ downloader = ""
 storage = ""
 login = ""
 player = ""
+
+cookiejar = cookielib.LWPCookieJar()
+opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookiejar))
+urllib2.install_opener(opener)
 
 if (__name__ == "__main__" ):
 	import StorageServer
