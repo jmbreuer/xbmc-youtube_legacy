@@ -11,7 +11,7 @@ class TestYouTubeFeeds(BaseTestCase.BaseTestCase):
 		
 		feeds.createUrl()
 		
-		sys.modules[ "__main__" ].settings.getSetting.assert_called_with("perpage")
+		sys.modules[ "__main__" ].settings.getSetting.assert_any_call("perpage")
 
 	def test_createUrl_should_call_getSetting_to_get_region_id(self):
 		sys.modules[ "__main__" ].settings.getSetting.return_value = "1"
@@ -19,7 +19,7 @@ class TestYouTubeFeeds(BaseTestCase.BaseTestCase):
 		
 		feeds.createUrl()
 		
-		sys.modules[ "__main__" ].settings.getSetting.assert_called_with("region_id")
+		sys.modules[ "__main__" ].settings.getSetting.assert_any_call("region_id")
 
 	def test_createUrl_should_get_correct_feed_url_if_feed_is_in_params(self):
 		sys.modules[ "__main__" ].settings.getSetting.return_value = "1"
@@ -28,7 +28,7 @@ class TestYouTubeFeeds(BaseTestCase.BaseTestCase):
 		result = feeds.createUrl({"feed":"favorites"})
 		result = result[:result.find("?")]
 		url = feeds.urls["favorites"] % ("default")
-		sys.modules[ "__main__" ].settings.getSetting.assert_called_with("region_id")
+		sys.modules[ "__main__" ].settings.getSetting.assert_any_call("region_id")
 		assert( result == url)
 
 	def test_createUrl_should_get_correct_user_feed_url_if_user_feed_is_in_params(self):
@@ -344,7 +344,7 @@ class TestYouTubeFeeds(BaseTestCase.BaseTestCase):
 	
 		result = feeds.listPlaylist()
 
-		sys.modules["__main__"].storage.store.assert_called_with({},[{"videoid":"some_id","playlist_entry_id":"some_id"}],)
+		sys.modules["__main__"].storage.store.assert_any_call({},[{"videoid":"some_id","playlist_entry_id":"some_id"}],)
 				
 	def test_listPlaylist_should_call_storage_store_with_first_thumbnail_of_list(self):
 		sys.modules[ "__main__" ].settings.getSetting.return_value = "1"
