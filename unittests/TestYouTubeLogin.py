@@ -6,7 +6,7 @@ import sys
 
 from  YouTubeLogin import YouTubeLogin 
 
-class TestYouTubeUtils(BaseTestCase.BaseTestCase):
+class TestYouTubeLogin(BaseTestCase.BaseTestCase):
 	
 	def test_login_should_call_xbmc_open_settings(self):
 		login = YouTubeLogin()
@@ -422,8 +422,8 @@ class TestYouTubeUtils(BaseTestCase.BaseTestCase):
 		page_values = [ {"content":"captcha","status":200}, { "new_url": "http://www.mock.com/", "content":"something,smsUserPin,somethingElse","status":200}]
 		sys.modules["__main__"].core._fetchPage.side_effect = lambda x: page_values.pop() 
 		sys.modules["__main__"].settings.getSetting.return_value = "smokey" 
-                dom_values = [["Login"], [], [], []]
-                sys.modules["__main__"].common.parseDOM.side_effect = lambda x = "",y = "",attrs = {},ret = "": dom_values.pop()
+		dom_values = [["Login"], [], [], []]
+		sys.modules["__main__"].common.parseDOM.side_effect = lambda x = "",y = "",attrs = {},ret = "": dom_values.pop()
 
 		login = YouTubeLogin()
 		login._fillUserPin = Mock()
@@ -437,8 +437,8 @@ class TestYouTubeUtils(BaseTestCase.BaseTestCase):
 		page_values = [ {"content":"captcha","status":200}, { "new_url": "http://www.mock.com", "content":"something,smsUserPin,somethingElse","status":200}]
 		sys.modules["__main__"].core._fetchPage.side_effect = lambda x: page_values.pop() 
 		sys.modules["__main__"].settings.getSetting.return_value = "smokey" 
-                dom_values = [["Login"], [], [], []]
-                sys.modules["__main__"].common.parseDOM.side_effect = lambda x = "",y = "",attrs = {},ret = "": dom_values.pop()
+		dom_values = [["Login"], [], [], []]
+		sys.modules["__main__"].common.parseDOM.side_effect = lambda x = "",y = "",attrs = {},ret = "": dom_values.pop()
 		login = YouTubeLogin()
 		login._fillUserPin = Mock()
 		login._fillUserPin.return_value = "some_url_data"
@@ -503,10 +503,10 @@ class TestYouTubeUtils(BaseTestCase.BaseTestCase):
 		result = login._httpLogin({"new":"true"})
 		
 		assert(sys.modules["__main__"].core._fetchPage.call_count == 1)
-                args = dummy_content.find.call_args_list
+		args = dummy_content.find.call_args_list
 		#dummy_content.find.assert_called_with("USERNAME', ")
 		print repr(args[2][0][0])
-                assert(args[2][0][0] == "USERNAME', ")
+		assert(args[2][0][0] == "USERNAME', ")
 
 	def test_httpLogin_should_call_findErrors_on_login_failure(self):
 		sys.modules["__main__"].core._fetchPage.return_value = {"content":"","status":200}
@@ -597,8 +597,8 @@ class TestYouTubeUtils(BaseTestCase.BaseTestCase):
 		
 		result = login._fillLoginInfo("new")
 
-		sys.modules["__main__"].settings.getSetting.assert_called_with("username")
-		sys.modules["__main__"].settings.getSetting.assert_called_with("user_password")
+		sys.modules["__main__"].settings.getSetting.assert_any_call("username")
+		sys.modules["__main__"].settings.getSetting.assert_any_call("user_password")
 
 
 	def test_fillLoginInfo_should_ask_user_for_password_if_not_set(self):
@@ -610,7 +610,7 @@ class TestYouTubeUtils(BaseTestCase.BaseTestCase):
 		
 		result = login._fillLoginInfo("new")
 
-		sys.modules["__main__"].utils.getUserInput.assert_called_with('someTitle', hidden=True)
+		sys.modules["__main__"].utils.getUserInput.assert_any_call('someTitle', hidden=True)
 
 	def test_fillLoginInfo_should_return_login_info_if_all_values_are_found(self):
 		sys.modules["__main__"].settings.getSetting.return_value = "value1" 
@@ -721,7 +721,7 @@ class TestYouTubeUtils(BaseTestCase.BaseTestCase):
 		
 		result = login._getLoginInfo("   USERNAME', 'some_value" + '")')
 		
-		sys.modules["__main__"].settings.setSetting.assert_called_with("nick","some_value")
+		sys.modules["__main__"].settings.setSetting.assert_any_call("nick","some_value")
 		
 	def test_getLoginInfo_should_search_cookie_jar_for_login_info(self):
 		dummy_content = Mock()
