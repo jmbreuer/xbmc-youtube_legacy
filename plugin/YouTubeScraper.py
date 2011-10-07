@@ -71,14 +71,14 @@ class YouTubeScraper():
 		yobjects = []
 		
 		url = self.createUrl(params)
-		result = self.common._fetchPage({"link":url})
+		result = self.core._fetchPage({"link":url})
 		
 		#list = SoupStrainer(id="recent-trailers-container", name="div")
 		#trailers = BeautifulSoup(result["content"], parseOnlyThese=list)
 		trailers = self.common.parseDOM(result["content"], "div", attrs = { "id": "recent-trailers-container"})
 		
+		items = []
 		if (len(trailers) > 0):
-			items = []
 			ahref = self.common.parseDOM(trailers, "a", attrs = {"class": " yt-uix-hovercard-target", "id": ".*?" }, ret = "href")
 			athumb = self.common.parseDOM(trailers, "img", attrs = { "alt": "Thumbnail" }, ret = "src")
 			if len(ahref) == len(athumb):
@@ -92,7 +92,7 @@ class YouTubeScraper():
 		
 		if (items):
 			(yobjects, status) = self.core.getBatchDetailsThumbnails(items)
-			
+		
 		if (not yobjects):
 			return (yobjects, 500)
 		
