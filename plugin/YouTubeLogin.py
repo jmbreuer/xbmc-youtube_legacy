@@ -88,7 +88,6 @@ class YouTubeLogin():
 		logged_in = False
 		fetch_options = { "link": url , "no-language-cookie": "true" }
 		step = 0
-
 		self.common.log("Part A")
 		while not logged_in and fetch_options and step < 6:
 			self.common.log("Step : " + str(step))
