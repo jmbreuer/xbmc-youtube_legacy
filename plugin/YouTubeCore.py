@@ -568,7 +568,13 @@ class YouTubeCore():
 			self.common.log("returning stored auth")
 			return auth
 		else:
-			(result, status) = self.login.login()
+			if isinstance(self.login, str):
+				import YouTubeLogin as temp_YTLogin
+				temp_login = temp_YTLogin.YouTubeLogin()
+				(result, status) = temp_login._httpLogin()
+			else:
+				(result, status) = self.login.login()
+
 			if status == 200:
 				self.common.log("returning new auth")
 				return self.settings.getSetting("oauth2_access_token")

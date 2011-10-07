@@ -129,6 +129,16 @@ class TestCommonFunctions(BaseTestCase.BaseTestCase):
 		assert(len(ret) == 1 )	
 		assert(ret[0] == "http://s.ytimg.com/yt/swfbin/watch_as3-vflCwc_mi.swf")
 
+
+	def test_parseDOM_should_correctly_extract_double_quotation_marks(self):
+		common  = CommonFunctions()
+		common.log = sys.modules[ "__main__" ].log_override.log
+		
+		ret = common.parseDOM(self.readTestInput("parse-title-with-quotation-marks.html", False), "span", attrs = { "class":"Title"}, ret = "title")
+		print repr(ret)
+		assert(len(ret) == 1 )	
+		assert(ret[0] == '"3 Minutes In Hell" - Gary Anthony Williams')
+
 	def test_parseDOM_should_be_able_to_handle_line_breaks(self):
 		common  = CommonFunctions()
 		common.log = sys.modules[ "__main__" ].log_override.log
