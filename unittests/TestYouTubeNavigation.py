@@ -43,8 +43,8 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		navigation.addListItem = Mock()
 		navigation.listMenu({"path":"/root/my_first_level"})
 		
-		navigation.addListItem.assert_called_with({"path":"/root/my_first_level"},{"path":"/root/my_first_level/my_second_level1"})
-		navigation.addListItem.assert_called_with({"path":"/root/my_first_level"},{"path":"/root/my_first_level/my_second_level3"})
+		navigation.addListItem.assert_any_call({"path":"/root/my_first_level"},{"path":"/root/my_first_level/my_second_level1"})
+		navigation.addListItem.assert_any_call({"path":"/root/my_first_level"},{"path":"/root/my_first_level/my_second_level3"})
 	
 	def test_listMenu_should_check_if_download_path_is_set_to_decide_if_download_folder_is_visible(self):
 		sys.argv = ["something",-1,"something_else"]
@@ -482,8 +482,8 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		navigation.showListingError({"feed":"my_feed","playlist":"some_playlist"})
 		
 		sys.modules["__main__"].utils.showMessage.assert_called_with("some_string","some_string")
-		sys.modules["__main__"].language.assert_called_with(30615)
-		sys.modules["__main__"].language.assert_called_with(30601)
+		sys.modules["__main__"].language.assert_any_call(30615)
+		sys.modules["__main__"].language.assert_any_call(30601)
 		
 	def test_showListingError_should_call_utils_showMessage_correctly(self):
 		sys.modules["__main__"].language.return_value = "some_string"
@@ -584,7 +584,7 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		navigation.addContact({"contact":"some_contact"})
 		
 		sys.modules["__main__"].utils.showErrorMessage.assert_called_with("some_title","",303)
-		sys.modules["__main__"].language.assert_called_with(30029)
+		sys.modules["__main__"].language.assert_any_call(30029)
 		
 	def test_addContact_should_show_success_message_on_success(self):
 		sys.modules["__main__"].core.add_contact.return_value = ("", 200)
@@ -594,7 +594,7 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		navigation.addContact({"contact":"some_contact"})
 		
 		sys.modules["__main__"].utils.showMessage.assert_called_with("some_title","some_contact")
-		sys.modules["__main__"].language.assert_called_with(30013)
+		sys.modules["__main__"].language.assert_any_call(30013)
 	
 	def test_addContact_should_call_xbmc_executebuiltin_on_success(self):
 		sys.modules["__main__"].core.add_contact.return_value = ("", 200)
@@ -629,7 +629,7 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		navigation.removeContact({"contact":"some_contact"})
 		
 		sys.modules["__main__"].utils.showErrorMessage.assert_called_with("some_title","",303)
-		sys.modules["__main__"].language.assert_called_with(30029)
+		sys.modules["__main__"].language.assert_any_call(30029)
 	
 	def test_removeContact_should_show_success_message_on_success(self):
 		sys.modules["__main__"].core.remove_contact.return_value = ("", 200)
@@ -639,7 +639,7 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		navigation.removeContact({"contact":"some_contact"})
 		
 		sys.modules["__main__"].utils.showMessage.assert_called_with("some_title","some_contact")
-		sys.modules["__main__"].language.assert_called_with(30013)
+		sys.modules["__main__"].language.assert_any_call(30013)
 	
 	def test_removeContact_should_call_xbmc_execute_builtin_on_success(self):
 		sys.modules["__main__"].core.remove_contact.return_value = ("", 200)
@@ -991,8 +991,8 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		
 		navigation.addVideoListItem({},{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"})
 		
-		sys.modules["__main__"].xbmcgui.ListItem().setProperty.assert_called_with("Video","true")
-		sys.modules["__main__"].xbmcgui.ListItem().setProperty.assert_called_with("IsPlayable","true")
+		sys.modules["__main__"].xbmcgui.ListItem().setProperty.assert_any_call("Video","true")
+		sys.modules["__main__"].xbmcgui.ListItem().setProperty.assert_any_call("IsPlayable","true")
 
 	def test_addVideoListItem_should_call_listitem_setInfo_to_allow_xbmc_to_sort_and_display_video_info(self):
 		sys.argv = ["some_path",-1,"some_params"]
@@ -1138,13 +1138,13 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		
 		navigation.parseVideoList({"scraper":"watch_later", "path":"some_path"},[{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"},{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail","videoid":"false"},{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail","next":"true"}])
 		
-		sys.modules["__main__"].xbmcplugin.addSortMethod.assert_called_with(handle=-1,sortMethod=sys.modules["__main__"].xbmcplugin.SORT_METHOD_UNSORTED)
-		sys.modules["__main__"].xbmcplugin.addSortMethod.assert_called_with(handle=-1,sortMethod=sys.modules["__main__"].xbmcplugin.SORT_METHOD_LABEL)
-		sys.modules["__main__"].xbmcplugin.addSortMethod.assert_called_with(handle=-1,sortMethod=sys.modules["__main__"].xbmcplugin.SORT_METHOD_VIDEO_RATING)
-		sys.modules["__main__"].xbmcplugin.addSortMethod.assert_called_with(handle=-1,sortMethod=sys.modules["__main__"].xbmcplugin.SORT_METHOD_DATE)
-		sys.modules["__main__"].xbmcplugin.addSortMethod.assert_called_with(handle=-1,sortMethod=sys.modules["__main__"].xbmcplugin.SORT_METHOD_PROGRAM_COUNT)
-		sys.modules["__main__"].xbmcplugin.addSortMethod.assert_called_with(handle=-1,sortMethod=sys.modules["__main__"].xbmcplugin.SORT_METHOD_VIDEO_RUNTIME)
-		sys.modules["__main__"].xbmcplugin.addSortMethod.assert_called_with(handle=-1,sortMethod=sys.modules["__main__"].xbmcplugin.SORT_METHOD_GENRE)
+		sys.modules["__main__"].xbmcplugin.addSortMethod.assert_any_call(handle=-1,sortMethod=sys.modules["__main__"].xbmcplugin.SORT_METHOD_UNSORTED)
+		sys.modules["__main__"].xbmcplugin.addSortMethod.assert_any_call(handle=-1,sortMethod=sys.modules["__main__"].xbmcplugin.SORT_METHOD_LABEL)
+		sys.modules["__main__"].xbmcplugin.addSortMethod.assert_any_call(handle=-1,sortMethod=sys.modules["__main__"].xbmcplugin.SORT_METHOD_VIDEO_RATING)
+		sys.modules["__main__"].xbmcplugin.addSortMethod.assert_any_call(handle=-1,sortMethod=sys.modules["__main__"].xbmcplugin.SORT_METHOD_DATE)
+		sys.modules["__main__"].xbmcplugin.addSortMethod.assert_any_call(handle=-1,sortMethod=sys.modules["__main__"].xbmcplugin.SORT_METHOD_PROGRAM_COUNT)
+		sys.modules["__main__"].xbmcplugin.addSortMethod.assert_any_call(handle=-1,sortMethod=sys.modules["__main__"].xbmcplugin.SORT_METHOD_VIDEO_RUNTIME)
+		sys.modules["__main__"].xbmcplugin.addSortMethod.assert_any_call(handle=-1,sortMethod=sys.modules["__main__"].xbmcplugin.SORT_METHOD_GENRE)
 		
 	def test_parseVideoList_should_call_xbmcplugin_endOfDirectory_correctly(self):	
 		sys.modules["__main__"].utils.getThumbnail.return_value = "some_image_path"
@@ -1168,7 +1168,7 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		
 		cm = navigation.addVideoContextMenuItems(path_params,item_params)
 		
-		sys.modules["__main__"].utils.makeAscii.assert_called_with("some_title")
+		sys.modules["__main__"].utils.makeAscii.assert_any_call("some_title")
 		
 	def test_addVideoContextMenuItems_should_call_utils_makeAscii_on_Studio(self):
 		sys.argv = ["some_plugin",-1,"some_path"]
@@ -1223,7 +1223,7 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		
 		cm = navigation.addVideoContextMenuItems(path_params,item_params)
 		
-		sys.modules["__main__"].language.assert_called_with(30512)
+		sys.modules["__main__"].language.assert_any_call(30512)
 		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=play_all&playlist=some_playlist&videoid=some_id&)')
 			
 
@@ -1235,7 +1235,7 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		
 		cm = navigation.addVideoContextMenuItems(path_params,item_params)
 		
-		sys.modules["__main__"].language.assert_called_with(30521)
+		sys.modules["__main__"].language.assert_any_call(30521)
 		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=play_all&user_feed=newsubscriptions&contact=default&videoid=some_id&)')
 
 	def test_addVideoContextMenuItems_should_add_download_video_to_all_video_items(self):
@@ -1246,7 +1246,7 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		
 		cm = navigation.addVideoContextMenuItems(path_params,item_params)
 		
-		sys.modules["__main__"].language.assert_called_with(30501)
+		sys.modules["__main__"].language.assert_any_call(30501)
 		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=download&videoid=some_id)')
 
 	def test_addVideoContextMenuItems_should_add_add_favorite_option_if_user_is_logged_in_and_item_is_not_in_favorites_feed(self):
@@ -1258,9 +1258,9 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		
 		cm = navigation.addVideoContextMenuItems(path_params,item_params)
 		
-		sys.modules["__main__"].language.assert_called_with(30503)
-		sys.modules["__main__"].settings.getSetting.assert_called_with("username")
-		sys.modules["__main__"].settings.getSetting.assert_called_with("oauth2_access_token")
+		sys.modules["__main__"].language.assert_any_call(30503)
+		sys.modules["__main__"].settings.getSetting.assert_any_call("username")
+		sys.modules["__main__"].settings.getSetting.assert_any_call("oauth2_access_token")
 		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=add_favorite&videoid=some_id&)')
 
 	def test_addVideoContextMenuItems_should_add_add_favorite_option_if_user_is_logged_in_and_item_is_in_external_users_favorites_feed(self):
@@ -1272,9 +1272,9 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		
 		cm = navigation.addVideoContextMenuItems(path_params,item_params)
 		
-		sys.modules["__main__"].language.assert_called_with(30501)
-		sys.modules["__main__"].settings.getSetting.assert_called_with("username")
-		sys.modules["__main__"].settings.getSetting.assert_called_with("oauth2_access_token")
+		sys.modules["__main__"].language.assert_any_call(30501)
+		sys.modules["__main__"].settings.getSetting.assert_any_call("username")
+		sys.modules["__main__"].settings.getSetting.assert_any_call("oauth2_access_token")
 		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=add_favorite&videoid=some_id&)')
 	
 	def test_addVideoContextMenuItems_should_add_remove_favorite_option_if_user_is_logged_in_and_item_is_in_favorites_feed(self):
@@ -1286,9 +1286,9 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		
 		cm = navigation.addVideoContextMenuItems(path_params,item_params)
 		
-		sys.modules["__main__"].language.assert_called_with(30506)
-		sys.modules["__main__"].settings.getSetting.assert_called_with("username")
-		sys.modules["__main__"].settings.getSetting.assert_called_with("oauth2_access_token")
+		sys.modules["__main__"].language.assert_any_call(30506)
+		sys.modules["__main__"].settings.getSetting.assert_any_call("username")
+		sys.modules["__main__"].settings.getSetting.assert_any_call("oauth2_access_token")
 		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=remove_favorite&editid=some_id&)')
 
 	def test_addVideoContextMenuItems_should_add_add_subscription_option_to_channels_not_in_subscriptions_feed(self):
@@ -1300,7 +1300,7 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		
 		cm = navigation.addVideoContextMenuItems(path_params,item_params)
 		
-		sys.modules["__main__"].language.assert_called_with(30512)
+		sys.modules["__main__"].language.assert_any_call(30512)
 		self.assert_context_menu_contains(cm, "some_button_string Unknown Author", 'XBMC.RunPlugin(some_plugin?path=some_path&channel=Unknown+Author&action=add_subscription)')	
 
 	def test_addVideoContextMenuItems_should_add_add_subscriptions_option_to_external_users_subscriptions_feed(self):
@@ -1312,7 +1312,7 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		
 		cm = navigation.addVideoContextMenuItems(path_params,item_params)
 		
-		sys.modules["__main__"].language.assert_called_with(30512)
+		sys.modules["__main__"].language.assert_any_call(30512)
 		self.assert_context_menu_contains(cm, "some_button_string Unknown Author", 'XBMC.RunPlugin(some_plugin?path=some_path&channel=Unknown+Author&action=add_subscription)')	
 
 	def test_addVideoContextMenuItems_should_not_add_add_subscrition_option_to_users_uploads_feed(self):
@@ -1368,7 +1368,7 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		
 		cm = navigation.addVideoContextMenuItems(path_params,item_params)
 		
-		sys.modules["__main__"].language.assert_called_with(30530)
+		sys.modules["__main__"].language.assert_any_call(30530)
 		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=remove_from_playlist&playlist=some_playlist&playlist_entry_id=some_id&)')	
 
 	def test_addVideoContextMenuItems_should_add_add_to_playlist_option_to_video_items_if_user_is_logged_in(self):
@@ -1380,7 +1380,7 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		
 		cm = navigation.addVideoContextMenuItems(path_params,item_params)
 		
-		sys.modules["__main__"].language.assert_called_with(30528)
+		sys.modules["__main__"].language.assert_any_call(30528)
 		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.Container.Update(some_plugin?path=None&feed=related&videoid=someid)')	
 
 	def test_addVideoContextMenuItems_should_add_more_videos_by_user_if_item_is_not_in_uploads_feed(self):
@@ -1392,7 +1392,7 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		
 		cm = navigation.addVideoContextMenuItems(path_params,item_params)
 		
-		sys.modules["__main__"].language.assert_called_with(30516)
+		sys.modules["__main__"].language.assert_any_call(30516)
 		self.assert_context_menu_contains(cm, "some_button_string Unknown Author", 'XBMC.Container.Update(some_plugin?path=None&feed=uploads&channel=Unknown+Author)')	
 
 	def test_addVideoContextMenuItems_should_not_add_more_videos_by_user_if_item_is_in_uploads_feed(self):
@@ -1415,7 +1415,7 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		
 		cm = navigation.addVideoContextMenuItems(path_params,item_params)
 		
-		sys.modules["__main__"].language.assert_called_with(30527)
+		sys.modules["__main__"].language.assert_any_call(30527)
 		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.Container.Update(some_plugin?path=None&feed=related&videoid=someid)')	
 
 	def test_addVideoContextMenuItems_should_add_find_similar_option_to_video_items(self):
@@ -1427,7 +1427,7 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		
 		cm = navigation.addVideoContextMenuItems(path_params,item_params)
 		
-		sys.modules["__main__"].language.assert_called_with(30514)
+		sys.modules["__main__"].language.assert_any_call(30514)
 		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.Container.Update(some_plugin?path=None&feed=search&search=some_title)')	
 
 	def test_addVideoContextMenuItems_should_add_now_playing_option_to_video_items(self):
@@ -1439,7 +1439,7 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		
 		cm = navigation.addVideoContextMenuItems(path_params,item_params)
 		
-		sys.modules["__main__"].language.assert_called_with(30523)
+		sys.modules["__main__"].language.assert_any_call(30523)
 		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.ActivateWindow(VideoPlaylist)')
 
 	def test_addVideoContextMenuItems_should_add_video_info_option_to_video_items(self):
@@ -1451,7 +1451,7 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		
 		cm = navigation.addVideoContextMenuItems(path_params,item_params)
 		
-		sys.modules["__main__"].language.assert_called_with(30523)
+		sys.modules["__main__"].language.assert_any_call(30523)
 		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.Action(Info)')
 
 	def test_addFolderContextMenuItems_should_not_add_any_options_to_next_folders(self):
@@ -1474,10 +1474,10 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		
 		cm = navigation.addFolderContextMenuItems(path_params,item_params)
 		
-		sys.modules["__main__"].language.assert_called_with(30507)
-		sys.modules["__main__"].language.assert_called_with(30520)
-		sys.modules["__main__"].language.assert_called_with(30540)
-		sys.modules["__main__"].language.assert_called_with(30522)
+		sys.modules["__main__"].language.assert_any_call(30507)
+		sys.modules["__main__"].language.assert_any_call(30520)
+		sys.modules["__main__"].language.assert_any_call(30540)
+		sys.modules["__main__"].language.assert_any_call(30522)
 		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.Container.Update(some_plugin?path=some_path&scraper=similar_artist&artist=some_artist&folder=true&)')
 		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=delete_artist&store=artists&artist=some_artist&)')
 		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=play_all&scraper=music_artists&artist=some_artist&)')
@@ -1492,8 +1492,8 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		
 		cm = navigation.addFolderContextMenuItems(path_params,item_params)
 		
-		sys.modules["__main__"].language.assert_called_with(30520)
-		sys.modules["__main__"].language.assert_called_with(30522)
+		sys.modules["__main__"].language.assert_any_call(30520)
+		sys.modules["__main__"].language.assert_any_call(30522)
 		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=play_all&user_feed=newsubscriptions&contact=default&)')		
 		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=play_all&shuffle=true&user_feed=newsubscriptions&contact=default&)')
 		
@@ -1506,8 +1506,8 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		
 		cm = navigation.addFolderContextMenuItems(path_params,item_params)
 		
-		sys.modules["__main__"].language.assert_called_with(30520)
-		sys.modules["__main__"].language.assert_called_with(30522)
+		sys.modules["__main__"].language.assert_any_call(30520)
+		sys.modules["__main__"].language.assert_any_call(30522)
 		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=play_all&user_feed=favorites&contact=default&)')		
 		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=play_all&shuffle=true&user_feed=favorites&contact=default&)')
 
@@ -1520,10 +1520,10 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		
 		cm = navigation.addFolderContextMenuItems(path_params,item_params)
 		
-		sys.modules["__main__"].language.assert_called_with(30531)
-		sys.modules["__main__"].language.assert_called_with(30539)
-		sys.modules["__main__"].language.assert_called_with(30520)
-		sys.modules["__main__"].language.assert_called_with(30522)
+		sys.modules["__main__"].language.assert_any_call(30531)
+		sys.modules["__main__"].language.assert_any_call(30539)
+		sys.modules["__main__"].language.assert_any_call(30520)
+		sys.modules["__main__"].language.assert_any_call(30522)
 		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=reverse_order&playlist=some_playlist&)')		
 		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=play_all&playlist=some_playlist&)')
 		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=play_all&shuffle=true&playlist=some_playlist&)')		
@@ -1538,8 +1538,8 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		
 		cm = navigation.addFolderContextMenuItems(path_params,item_params)
 		
-		sys.modules["__main__"].language.assert_called_with(30520)
-		sys.modules["__main__"].language.assert_called_with(30522)
+		sys.modules["__main__"].language.assert_any_call(30520)
+		sys.modules["__main__"].language.assert_any_call(30522)
 		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=play_all&scraper=watch_later&login=true&)')		
 		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=play_all&shuffle=true&scraper=watch_later&login=true&)')
 				
@@ -1552,8 +1552,8 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		
 		cm = navigation.addFolderContextMenuItems(path_params,item_params)
 		
-		sys.modules["__main__"].language.assert_called_with(30520)
-		sys.modules["__main__"].language.assert_called_with(30522)
+		sys.modules["__main__"].language.assert_any_call(30520)
+		sys.modules["__main__"].language.assert_any_call(30522)
 		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=play_all&scraper=recommended&login=true&)')		
 		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=play_all&shuffle=true&scraper=recommended&login=true&)')
 
@@ -1566,8 +1566,8 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		
 		cm = navigation.addFolderContextMenuItems(path_params,item_params)
 		
-		sys.modules["__main__"].language.assert_called_with(30520)
-		sys.modules["__main__"].language.assert_called_with(30522)
+		sys.modules["__main__"].language.assert_any_call(30520)
+		sys.modules["__main__"].language.assert_any_call(30522)
 		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=play_all&scraper=liked_videos&login=true&)')		
 		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=play_all&shuffle=true&scraper=liked_videos&login=true&)')
 		
@@ -1580,8 +1580,8 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		
 		cm = navigation.addFolderContextMenuItems(path_params,item_params)
 		
-		sys.modules["__main__"].language.assert_called_with(30520)
-		sys.modules["__main__"].language.assert_called_with(30522)
+		sys.modules["__main__"].language.assert_any_call(30520)
+		sys.modules["__main__"].language.assert_any_call(30522)
 		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=play_all&search_disco=some_search&)')		
 		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=play_all&shuffle=true&search_disco=some_search&)')
 		
@@ -1594,8 +1594,8 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		
 		cm = navigation.addFolderContextMenuItems(path_params,item_params)
 		
-		sys.modules["__main__"].language.assert_called_with(30524)
-		sys.modules["__main__"].language.assert_called_with(30525)
+		sys.modules["__main__"].language.assert_any_call(30524)
+		sys.modules["__main__"].language.assert_any_call(30525)
 		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.Container.Update(some_plugin?path=some_path&action=edit_disco&store=disco_searches&search=some_search&)')		
 		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=delete_disco&store=disco_searches&delete=some_search&)')
 		
@@ -1620,8 +1620,8 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		
 		cm = navigation.addFolderContextMenuItems(path_params,item_params)
 		
-		sys.modules["__main__"].language.assert_called_with(30515)
-		sys.modules["__main__"].language.assert_called_with(30508)
+		sys.modules["__main__"].language.assert_any_call(30515)
+		sys.modules["__main__"].language.assert_any_call(30508)
 		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.Container.Update(some_plugin?path=some_path&action=edit_search&store=searches&search=some_search&)')		
 		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=delete_search&store=searches&delete=some_search&)')
 	
@@ -1634,8 +1634,8 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		
 		cm = navigation.addFolderContextMenuItems(path_params,item_params)
 		
-		sys.modules["__main__"].language.assert_called_with(30511)
-		sys.modules["__main__"].language.assert_called_with(30526)
+		sys.modules["__main__"].language.assert_any_call(30511)
+		sys.modules["__main__"].language.assert_any_call(30526)
 		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.Container.Update(some_plugin?path=some_path&channel=None&action=change_subscription_view&view_mode=uploads&)')		
 		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.Container.Update(some_plugin?path=some_path&channel=None&action=change_subscription_view&view_mode=playlists&folder=true&)')
 	
@@ -1648,8 +1648,8 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		
 		cm = navigation.addFolderContextMenuItems(path_params,item_params)
 		
-		sys.modules["__main__"].language.assert_called_with(30510)
-		sys.modules["__main__"].language.assert_called_with(30526)
+		sys.modules["__main__"].language.assert_any_call(30510)
+		sys.modules["__main__"].language.assert_any_call(30526)
 		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.Container.Update(some_plugin?path=some_path&channel=None&action=change_subscription_view&view_mode=favorites&)')		
 		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.Container.Update(some_plugin?path=some_path&channel=None&action=change_subscription_view&view_mode=playlists&folder=true&)')
 	
@@ -1662,8 +1662,8 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		
 		cm = navigation.addFolderContextMenuItems(path_params,item_params)
 		
-		sys.modules["__main__"].language.assert_called_with(30511)
-		sys.modules["__main__"].language.assert_called_with(30510)
+		sys.modules["__main__"].language.assert_any_call(30511)
+		sys.modules["__main__"].language.assert_any_call(30510)
 		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.Container.Update(some_plugin?path=some_path&channel=None&action=change_subscription_view&view_mode=favorites&)')		
 		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.Container.Update(some_plugin?path=some_path&channel=None&action=change_subscription_view&view_mode=uploads&)')	
 		
@@ -1676,7 +1676,7 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		
 		cm = navigation.addFolderContextMenuItems(path_params,item_params)
 		
-		sys.modules["__main__"].language.assert_called_with(30512)		
+		sys.modules["__main__"].language.assert_any_call(30512)		
 		self.assert_context_menu_contains(cm, "some_button_string some_channel", 'XBMC.RunPlugin(some_plugin?path=some_path&channel=None&action=add_subscription)')	
 		
 	def test_addFolderContextMenuItems_should_add_remove_subscription_option_to_subscriptions_in_users_subscriptions_feed(self):
@@ -1688,7 +1688,7 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		
 		cm = navigation.addFolderContextMenuItems(path_params,item_params)
 		
-		sys.modules["__main__"].language.assert_called_with(30513)
+		sys.modules["__main__"].language.assert_any_call(30513)
 		self.assert_context_menu_contains(cm, "some_button_string some_channel", 'XBMC.RunPlugin(some_plugin?path=some_path&editid=some_editid&action=remove_subscription)')	
 	
 	def test_addFolderContextMenuItems_should_add_add_contact_option_to_external_contacts_if_user_is_logged_in(self):
@@ -1700,7 +1700,7 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		
 		cm = navigation.addFolderContextMenuItems(path_params,item_params)
 		
-		sys.modules["__main__"].language.assert_called_with(30026)
+		sys.modules["__main__"].language.assert_any_call(30026)
 		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=add_contact&contact=some_title&)')	
 	
 	def test_addFolderContextMenuItems_should_add_remove_contact_options_to_items_in_contact_feed_if_user_is_logged_in(self):
@@ -1712,7 +1712,7 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		
 		cm = navigation.addFolderContextMenuItems(path_params,item_params)
 		
-		sys.modules["__main__"].language.assert_called_with(30025)
+		sys.modules["__main__"].language.assert_any_call(30025)
 		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=remove_contact&contact=some_title&)')			
 	
 	def test_addFolderContextMenuItems_should_add_now_playing_option_to_folder_items(self):
@@ -1724,7 +1724,7 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		
 		cm = navigation.addFolderContextMenuItems(path_params,item_params)
 		
-		sys.modules["__main__"].language.assert_called_with(30523)
+		sys.modules["__main__"].language.assert_any_call(30523)
 		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.ActivateWindow(VideoPlaylist)')
 		
 if __name__ == '__main__':
