@@ -597,9 +597,9 @@ class TestYouTubeUtils(BaseTestCase.BaseTestCase):
 		
 		result = login._fillLoginInfo("new")
 
-		args = sys.modules["__main__"].settings.getSetting.call_args_list
-		assert(args[1][0] == ("username",))
-		assert(args[2][0] == ("user_password",))
+		sys.modules["__main__"].settings.getSetting.assert_called_with("username")
+		sys.modules["__main__"].settings.getSetting.assert_called_with("user_password")
+
 
 	def test_fillLoginInfo_should_ask_user_for_password_if_not_set(self):
 		sys.modules["__main__"].settings.getSetting.return_value = "" 
