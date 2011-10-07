@@ -541,7 +541,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		ret = core._fetchPage({"auth":"true", "link":"www.somelink.dk"})
 		
 		patcher.stop()
-		assert(sys.modules[ "__main__" ].settings.getSetting.call_args_list[2][0][0] == "oauth2_access_token")
+		sys.modules[ "__main__" ].settings.getSetting.assert_called_with("oauth2_access_token")
 	
 	def test_fetchPage_should_give_up_after_3_tries(self):
 		settings = ["my_auth","4","3" ]
@@ -971,7 +971,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		
 		result = core._getAuth()
 		
-		assert(sys.modules[ "__main__" ].settings.getSetting.call_args_list[2][0][0] == "oauth2_expires_at")
+		sys.modules[ "__main__" ].settings.getSetting.assert_called_with("oauth2_expires_at")
 	
 	def test_getAuth_should_call_oRefreshToken_to_refresh_token(self):
 		settings = [ "","some_token","2","3"]
@@ -992,7 +992,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		
 		result = core._getAuth()
 		
-		sys.modules[ "__main__" ].settings.getSetting.assert_called_with("oauth2_access_token")
+		sys.modules["__main__" ].settings.getSetting.assert_called_with("oauth2_access_token")
 	
 	def ttest_getAuth_should_call_login_if_token_isnt_found(self):
 		settings = [ "","","","3"]
