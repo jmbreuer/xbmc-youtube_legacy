@@ -711,7 +711,7 @@ class YouTubeScraper():
 			params["page"] = str(page)
 			
 			url = self.createUrl(params)
-			result = self.common._fetchPage({"link":url})
+			result = self.core._fetchPage({"link":url})
 			
 			showcont = self.common.parseDOM(result["content"], "ul", { "class": "browse-item-list"})
 
@@ -733,7 +733,7 @@ class YouTubeScraper():
 					for i in range(0, len(ahref)):
 						item = {}
 
-						count = self.stripTags(acount[i].replace("\n", "").replace(",", ", "))
+						count = self.common.stripTags(acount[i].replace("\n", "").replace(",", ", "))
 						title = acont[i] + " (" + count + ")"
 						title = self.utils.replaceHtmlCodes(title)
 						item['Title'] = title
@@ -785,7 +785,7 @@ class YouTubeScraper():
 		self.common.log("scrapeMovieSubCategory : " + repr(params))
 		
 		url = self.createUrl(params)
-		result = self.common._fetchPage({"link":url})
+		result = self.core._fetchPage({"link":url})
 		
 		ytobjects = []
 
@@ -798,10 +798,8 @@ class YouTubeScraper():
 				item = {}
 				cat = ahref[0]
 				title = acont[0].replace("&raquo;", "").strip()
-				item['Title'] = title
-				#self.common.log("scrapeMovieSubCategory : " + cat)
+				item['Title'] = self.utils.replaceHtmlCodes(title)
 				cat = urllib.quote_plus(cat)
-				#self.common.log("scrapeMovieSubCategory : " + cat)
 				item['category'] = cat
 				item['scraper'] = "movies"
 				item["thumbnail"] = "movies"
@@ -825,7 +823,7 @@ class YouTubeScraper():
 			params["page"] = str(page)
 			
 			url = self.createUrl(params)
-			result = self.common._fetchPage({"link":url})
+			result = self.core._fetchPage({"link":url})
 			
 			dom_pages = self.common.parseDOM(result["content"], "div", attrs = {"class": "yt-uix-pager"})
 			links = self.common.parseDOM("".join(dom_pages), "a", attrs = {"class": "yt-uix-pager-link" }, ret = "data-page")
