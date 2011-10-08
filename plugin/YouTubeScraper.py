@@ -311,8 +311,6 @@ class YouTubeScraper():
 										
 			result = self.common._fetchPage({"link": url})
 			
-			#list = SoupStrainer(name="div", id ="playlist-bar")
-			#mix_list = BeautifulSoup(result["content"], parseOnlyThese=list)
 			mix_list = self.common.parseDOM(result["content"], "div", { "id": "playlist-bar" }, ret = "data-video-ids")
 
 			if (len(mix_list) > 0):
@@ -321,36 +319,12 @@ class YouTubeScraper():
 		self.common.log("Done")
 		return ( items, result["status"])
 	
-	def scrapeDiscoTop50(self, params = {}):
-		get = params.get		
-		self.common.log("")
-			
-		url = self.urls["disco_main"]
-		result = self.common._fetchPage({"link": url})
-		
-		popular = self.common.parseDOM(result["content"], "a", { "id": "popular-tracks"})
-
-		items = []		
-		if (len(popular) > 0):
-			videos = self.urls["main"] + popular[0]
-			videos = videos.replace("&quot;",'"').strip()
-			#self.common.log("scrapeDiscoTop50 def : " + repr(videos))
-			if (videos.find('"') > 0):# This never hits as far as i can see.
-				#self.common.log("scrapeDiscoTop50 def : " + repr(videos))
-				videos = videos[videos.find('["')+2:videos.rfind("])")]
-				videos = videos.replace('"',"")
-				videos = videos.replace(" ","")
-				items = videos.split(",")
-		
-		self.common.log("Done : " + repr(items))
-		return ( items, result["status"])
-	
 	def scrapeDiscoTopArtist(self, params = {}):
 		get = params.get
 		self.common.log("")
 		
 		url = self.urls["disco_main"]
-		result = self.common._fetchPage({"link":url})
+		result = self.core._fetchPage({"link":url})
 		
 		popular = self.common.parseDOM(result["content"], "div", { "class": "ytg-fl popular-artists"})
 		yobjects = []
@@ -375,48 +349,6 @@ class YouTubeScraper():
 				
 		self.common.log("Done : " + repr(yobjects))
 		return (yobjects, result["status"])
-
-#=================================== Live ============================================
-	def scrapeLiveNow(self, params = {}):
-		get = params.get
-		self.common.log("")
-
-		url = self.urls[get("scraper")]
-		
-		result = self.common._fetchPage({"link": url})
-		
-		live = self.common.parseDOM(result["content"], "div", { "id": "live-main"})
-		live = self.common.parseDOM(live, "div", { "class": "browse-item ytg-box"})
-		videos = []
-
-		if len(live) > 0:
-			live = "".join(live)
-			ahref = self.common.parseDOM(live, "a", attrs = {"class": "live-video-title"}, ret = "href" )
-			atitle = self.common.parseDOM(live, "a", attrs = {"class": "live-video-title"})
-			athumb = self.common.parseDOM(live, "img", attrs = { "alt": "Thumbnail" }, ret = "src")
-			astudio = self.common.parseDOM(live, "a", ret = "title")
-
-			#self.common.log("BLA BLA BTEST2 " + str(len(ahref)) +  " - " + str(len(atitle))  + " - " + str(len(athumb)) + " - " + str(len(astudio)) #+  " - " + str(len(result["content"])) + " - " + str(len(live)))
-			if len(ahref) == len(atitle) and len(ahref) == len(astudio) and len(ahref) == len(athumb):
-				for i in range(0 , len(ahref)):
-					item = {}
-					videoid = ahref[i]
-					videoid = videoid[videoid.rfind("/")+1:]
-					item["videoid"] = videoid
-					item["icon"] = "live"
-					#thumbnail = self.urls["thumbnail"] % videoid
-					thumbnail = athumb[i]
-					thumbnail = thumbnail.replace("default","0")
-					item["thumbnail"] = thumbnail
-					title = "Unknown Title"
-
-					title = atitle[i]
-					item["Studio"] = astudio[i]
-					item ["Title"] = title
-					videos.append(item)
-		
-		self.common.log("Done")
-		return (videos, result["status"])
 				
 #=================================== Eduction ============================================
 	def scrapeEducationCategories(self, params = {}):
@@ -424,7 +356,7 @@ class YouTubeScraper():
 		self.common.log("")
 
 		url = self.createUrl(params)
-		result = self.common._fetchPage({"link": url})
+		result = self.core._fetchPage({"link": url})
 		
 		categories = self.common.parseDOM(result["content"], "div", { "id": "browse-filter-menu-0"})
 		items = []
@@ -454,7 +386,7 @@ class YouTubeScraper():
 		self.common.log("")
 
 		url = self.createUrl(params)
-		result = self.common._fetchPage({"link": url})
+		result = self.core._fetchPage({"link": url})
 		
 		categories = self.common.parseDOM(result["content"], "div", { "id": "browse-filter-menu-1"})
 		items = []
@@ -590,8 +522,6 @@ class YouTubeScraper():
 		items = []
 
 		if len(categories) > 0:
-			#ahref = self.common.parseDOM(categories, "a", attrs = { "title": ".*?" }, ret = "href" )
-			#ahref = self.common.parseDOM(categories, "a", ret = "href" )
 			ahref = self.common.parseDOM(categories, "a", attrs = { "class": "ux-thumb-wrap contains-addto"}, ret = "href")
 			if len(ahref) == 0:
 				ahref = self.common.parseDOM(categories, "a", attrs = { "class": "tile-link-block video-tile.*?"}, ret = "href")
