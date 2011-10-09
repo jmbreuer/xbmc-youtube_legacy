@@ -73,8 +73,6 @@ class YouTubeScraper():
 		url = self.createUrl(params)
 		result = self.core._fetchPage({"link":url})
 		
-		#list = SoupStrainer(id="recent-trailers-container", name="div")
-		#trailers = BeautifulSoup(result["content"], parseOnlyThese=list)
 		trailers = self.common.parseDOM(result["content"], "div", attrs = { "id": "recent-trailers-container"})
 		
 		items = []
@@ -105,7 +103,7 @@ class YouTubeScraper():
 		self.common.log("")
 		
 		url = self.createUrl(params)
-		result = self.common._fetchPage({"link":url})
+		result = self.core._fetchPage({"link":url})
 
 		next = "false"
 		pagination = self.common.parseDOM(result["content"], "div", attrs = { "class": "yt-uix-pager"})
@@ -144,9 +142,9 @@ class YouTubeScraper():
 		self.common.log("")
 		
 		items = []
-		url = self.urls["music"]
-
-		result = self.common._fetchPage({"link": url})
+		
+		url = self.createUrl(params)
+		result = self.core._fetchPage({"link": url})
 		
 		if result["status"] == 200:
 			categories = self.common.parseDOM(result["content"], "div", attrs = { "id": "browse-filter-menu"})
@@ -176,23 +174,26 @@ class YouTubeScraper():
 	def scrapeArtist(self, params = {}):
 		get = params.get
 		self.common.log("")
-
+		
+		result = {"status":303}
+		
 		items = []
-		videos = []
 		
 		if get("artist") and get("artist_name"):
 			self.storage.saveStoredArtist(params)
 		
 		if get("artist"):
-			url = self.urls["artist"] % get("artist")
-			result = self.common._fetchPage({"link": url})
+			url = self.createUrl(params)
+			result = self.core._fetchPage({"link": url})
 			
 			if result["status"] == 200:
-				videos = re.compile('<a href="/watch\?v=(.*)&amp;feature=artist" title="').findall(result["content"]);
-			
-		for v in videos:
-			if v not in items:
-				items.append(v)
+				
+				videos = self.common.parseDOM(result["content"], "a", { "href": "*feature=artists*"})
+				#videos = re.compile('<a href="/watch\?v=(.*)&amp;feature=artist" title="').findall(result["content"]);
+		
+			for v in videos:
+				if v not in items:
+					items.append(v)
 		
 		self.common.log("Done")
 		return ( items, result["status"] )
@@ -203,8 +204,8 @@ class YouTubeScraper():
 		
 		items = []
 		if get("artist"):
-			url = self.urls["artist"] % get("artist")
-			result = self.common._fetchPage({"link": url})
+			url = self.createUrl(params)
+			result = self.core._fetchPage({"link": url})
 			
 			if result["status"] == 200:
 				artists = self.common.parseDOM(result["content"], "div", { "id": "similar-artists"});
@@ -237,10 +238,9 @@ class YouTubeScraper():
 		
 		if get("category"):
 			category = urllib.unquote_plus(get("category"))
-			url = self.urls["music"] + category
-			result = self.common._fetchPage({"link":url})
-
-			#artists = self.common.parseDOM(result["content"], "div",  { "id": "artist-recs-container"})
+			url = self.createUrl(params) 
+			result = self.core._fetchPage({"link":url})
+			
 			artists = self.common.parseDOM(result["content"], "div",  { "class": "browse-item collection-item browse-item-inline"})
 			for artist in artists:
 				ahref = self.common.parseDOM(artist, "a", attrs = { "title": ".*?" }, ret = "href")
@@ -274,8 +274,9 @@ class YouTubeScraper():
 		
 		if get("category"):
 			category = urllib.unquote_plus(get("category"))
-			url = self.urls["music"] + category
-			result = self.common._fetchPage({"link":url})
+			url = self.createUrl(params)
+			
+			result = self.core._fetchPage({"link":url})
 			
 			content = self.common.parseDOM(result["content"], "li", { "class": "yt-uix-slider-slide-item "})
 			for video in content:
@@ -294,7 +295,7 @@ class YouTubeScraper():
 		items = []
 		
 		url = self.urls["disco_search"] % urllib.quote_plus(get("search"))
-		result = self.common._fetchPage({"link": url})
+		result = self.core._fetchPage({"link": url})
 		
 		if (result["content"].find("list=") != -1):
 			result["content"] = result["content"].replace("\u0026", "&")
@@ -309,7 +310,7 @@ class YouTubeScraper():
 			
 			url = self.urls["disco_mix_list"] % (video_id, mix_list_id)
 										
-			result = self.common._fetchPage({"link": url})
+			result = self.core._fetchPage({"link": url})
 			
 			mix_list = self.common.parseDOM(result["content"], "div", { "id": "playlist-bar" }, ret = "data-video-ids")
 
@@ -447,7 +448,7 @@ class YouTubeScraper():
 		self.common.log("")
 		
 		url = self.createUrl(params)
-		result = self.common._fetchPage({"link":url})
+		result = self.core._fetchPage({"link":url})
 
 		next = "false"
 		pagination = self.common.parseDOM(result["content"], "div", attrs = { "class": "yt-uix-pager"})
@@ -502,7 +503,7 @@ class YouTubeScraper():
 		self.common.log("")
 		
 		url = self.createUrl(params)
-		result = self.common._fetchPage({"link":url})
+		result = self.core._fetchPage({"link":url})
 
 		next = "false"
 		pagination = self.common.parseDOM(result["content"], "div", attrs = { "class": "yt-uix-pager"})
@@ -525,8 +526,7 @@ class YouTubeScraper():
 			ahref = self.common.parseDOM(categories, "a", attrs = { "class": "ux-thumb-wrap contains-addto"}, ret = "href")
 			if len(ahref) == 0:
 				ahref = self.common.parseDOM(categories, "a", attrs = { "class": "tile-link-block video-tile.*?"}, ret = "href")
-			
-
+		
 			for i in range(0 , len(ahref)):
 				link = ahref[i]
 				if (link.find("/watch?v=") != -1):
@@ -545,7 +545,7 @@ class YouTubeScraper():
 		self.common.log("")
 		
 		url = self.urls[get("scraper")]
-		result = self.common._fetchPage({"link": url, "login": "true"})
+		result = self.core._fetchPage({"link": url, "login": "true"})
 		
 		videos = re.compile('<a href="/watch\?v=(.*)&amp;feature=grec_browse" class=').findall(result["content"]);
 		
@@ -561,7 +561,7 @@ class YouTubeScraper():
 		
 		url = self.urls[get("scraper")]
 		
-		result = self.common._fetchPage({"link": url, "get_redirect":"true", "login": "true"})
+		result = self.core._fetchPage({"link": url, "get_redirect":"true", "login": "true"})
 		
 		if result["status"] == 200:
 			if result["content"].find("p=") > 0:
@@ -582,7 +582,7 @@ class YouTubeScraper():
 		
 		url = self.urls[get("scraper")]
 		
-		result = self.common._fetchPage({"link": url, "login": "true"})
+		result = self.core._fetchPage({"link": url, "login": "true"})
 		liked = self.common.parseDOM(result["content"], "div", { "id": "vm-video-list-container"})
 
 		items = []
@@ -602,7 +602,7 @@ class YouTubeScraper():
 		self.common.log(repr(params))
 		
 		url = self.createUrl(params)
-		result = self.common._fetchPage({"link":url})
+		result = self.core._fetchPage({"link":url})
 			
 		videos = re.compile('<a href="/watch\?v=(.*)&amp;feature=sh_e_sl&amp;list=SL"').findall(result["content"])
 		if len(videos) == 0:
@@ -610,7 +610,7 @@ class YouTubeScraper():
 			temp_videos = self.common.parseDOM(temp_videos, "a", ret = "href")
 			for vid in temp_videos:
 				videos.append(vid[vid.find("v=") + 2 : vid.find("&", vid.find("v="))])
-
+		
 		nexturl = self.common.parseDOM(result["content"], "button", { "class": " yt-uix-button" }, ret = "data-next-url")
 		print "smoker "+ repr(nexturl)
 		if (len(nexturl) > 0):
@@ -624,7 +624,7 @@ class YouTubeScraper():
 			nexturl = nexturl.replace("start=20", "start=%s")
 			while fetch:
 				url = self.urls["main"] + nexturl % start
-				result = self.common._fetchPage({"link":url})
+				result = self.core._fetchPage({"link":url})
 				
 				if result["status"] == 200:
 					result["content"] = result["content"].replace("\\u0026","&")
@@ -651,7 +651,7 @@ class YouTubeScraper():
 		self.common.log("")
 		
 		url = self.createUrl(params)
-		result = self.common._fetchPage({"link":url})
+		result = self.core._fetchPage({"link":url})
 		
 		if ((result["content"].find('class="seasons"') == -1) or get("season")):
 			self.common.log("scrapeShow parsing videolist for single season")
@@ -769,7 +769,7 @@ class YouTubeScraper():
 		self.common.log("")
 		
 		url = self.createUrl(params)
-		result = self.common._fetchPage({"link": url})
+		result = self.core._fetchPage({"link": url})
 		
 		items = []
 		if result["status"] == 200:
@@ -913,7 +913,6 @@ class YouTubeScraper():
 			params["folder"] = "true"
 			function = self.scrapeEducationCategories
 			if ( get("category")):
-				print "hit subcategory"
 				function = self.scrapeEducationSubCategories
 			if ( get("courses") ):
 				function = self.scrapeEducationCourses
@@ -1019,8 +1018,14 @@ class YouTubeScraper():
 
 			else:
 				url = self.urls["movies"] + "?hl=en"
+		if get("scraper") in ["music_artists","music_artist","similar_artist"]: 
+			if get("category"):
+				url = self.urls["music"] + category
+			
+			if get("artist"):
+				url = self.urls["artist"] % get("artist")
 		
-		if(get("scraper") == "music_top100"):
+		if(get("scraper") in ["music_top100", "music"]):
 			url = self.urls["music"]
 		
 		return url
@@ -1032,7 +1037,7 @@ class YouTubeScraper():
 		next = "false"
 		
 		url = self.createUrl(params)
-		result = self.common._fetchPage({"link":url})
+		result = self.core._fetchPage({"link":url})
 		
 		if result["status"] == 200:
 			pagination = self.common.parseDOM(result["content"], "div", { "class": "yt-uix-pager"})
@@ -1080,7 +1085,7 @@ class YouTubeScraper():
 			thumbnail = get("scraper")
 		
 		url = self.createUrl(params)
-		result = self.common._fetchPage({"link":url})
+		result = self.core._fetchPage({"link":url})
 		
 		if result["status"] == 200:
 			categories = self.common.parseDOM(result["content"], "div", attrs = {"class": "yt-uix-expander-body.*?"})
