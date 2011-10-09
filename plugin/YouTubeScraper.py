@@ -187,9 +187,8 @@ class YouTubeScraper():
 			result = self.core._fetchPage({"link": url})
 			
 			if result["status"] == 200:
-				videos = self.common.parseDOM(results["content"], "a", attrs = { "href": ".*feature=artist" }, ret = "href")
+				videos = self.common.parseDOM(result["content"], "a", attrs = { "href": ".*feature=artist" }, ret = "href")
 				videos = self.utils.extractVID(videos)
-
 		
 			for v in videos:
 				if v not in items:
@@ -546,11 +545,11 @@ class YouTubeScraper():
 		url = self.urls[get("scraper")]
 		result = self.core._fetchPage({"link": url, "login": "true"})
 		
-		videos = self.common.parseDOM(results["content"], "a", attrs = { "href": ".*feature=grec_browse" }, ret = "href")
+		videos = self.common.parseDOM(result["content"], "a", attrs = { "href": ".*feature=grec_browse" }, ret = "href")
 		videos = self.utils.extractVID(videos)
 		
 		if len(videos) == 0:
-			videos = self.common.parseDOM(results["content"], "div", attrs = { "id": "reco-.*"}, ret = "id")
+			videos = self.common.parseDOM(result["content"], "div", attrs = { "id": "reco-.*"}, ret = "id")
 			for video in videos:
 				video = video.replace("reco-", "")
 		
@@ -773,9 +772,10 @@ class YouTubeScraper():
 		url = self.createUrl(params)
 		result = self.core._fetchPage({"link": url})
 		
+		
 		items = []
 		if result["status"] == 200:
-			items = self.common.parseDOM(results["content"], "a", attrs = { "href": ".*feature=musicchart" }, ret = "href")
+			videos = self.common.parseDOM(result["content"], "a", attrs = { "href": ".*feature=musicchart" }, ret = "href")
 			items = self.utils.extractVID(videos)
 		
 		self.common.log("Done")
