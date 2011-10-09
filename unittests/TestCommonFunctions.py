@@ -6,6 +6,7 @@ from CommonFunctions import CommonFunctions
 
 class TestCommonFunctions(BaseTestCase.BaseTestCase):
 	link_html = "<a href='bla.html'>Link Test</a>"
+	link_artist_html = '<a href="/watch?v=bla-id&amp;feature=artist">Link Test</a>'
 	img_html = "<img src='bla.png' alt='Thumbnail' />"
 		
 	def test_log_should_call_xbmc_with_properly_formated_message(self):
@@ -13,7 +14,7 @@ class TestCommonFunctions(BaseTestCase.BaseTestCase):
 		sys.modules["__main__"].xbmc.LOGNOTICE = 0
 		common  = CommonFunctions()
 		common.log(description)
-		sys.modules["__main__"].xbmc.log.assert_called_with("[%s] %s : '%s'" % ( sys.modules[ "__main__" ].plugin, "run", description), sys.modules["__main__"].xbmc.LOGNOTICE)
+		sys.modules["__main__"].xbmc.log.assert_called_with("[%s] %s : '%s'" % ( sys.modules[ "__main__" ].plugin, "test_log_should_call_xbmc_with_properly_formated_message", description), sys.modules["__main__"].xbmc.LOGNOTICE)
 
 	def test_fetchPage_should_return_content_and_success_return_code_on_valid_link(self):
 		patcher = patch("urllib2.urlopen")
@@ -64,6 +65,15 @@ class TestCommonFunctions(BaseTestCase.BaseTestCase):
 		
 		assert(len(ret) == 1 )	
 		assert(ret[0] == "bla.html")
+
+	def test_parseDOM_should_correctly_extract_the_href_attribute_of_a_link_tag_with_wildcard_search(self):
+		common  = CommonFunctions()
+		common.log = sys.modules[ "__main__" ].log_override.log
+		
+		ret = common.parseDOM(self.link_artist_html, "a", attrs = { "href": ".*feature=artist" }, ret = "href")
+		
+		assert(len(ret) == 1 )	
+		assert(ret[0] == "/watch?v=bla-id&amp;feature=artist")
 	
 	def test_parseDOM_should_call_getDOMContent_when_extracting_content_of_a_link_tag(self):
 		common  = CommonFunctions()
@@ -74,7 +84,26 @@ class TestCommonFunctions(BaseTestCase.BaseTestCase):
 		ret = common.parseDOM(self.link_html, "a", attrs = { "href": "bla.html" })
 		
 		common.getDOMContent.assert_called_with("<a href='bla.html'>Link Test</a>", 'a', "<a href='bla.html'>",)
+
+	def test_parseDOM_should_call_getDOMAttribute_when_extracting_attributes(self):
+		common  = CommonFunctions()
+		common.getDOMAttributes = Mock()
+		common.getDOMAttributes.return_value = "bla.html"
+		common.log = sys.modules[ "__main__" ].log_override.log
+		
+		ret = common.parseDOM(self.link_html, "a", attrs = { "href": "bla.html" }, ret = "href")
+		
+		common.getDOMAttributes.assert_called_with(["'bla.html'"])
 	
+	def test_getDOMAttributes_should_handle_double_quotation_marks(self):
+		common  = CommonFunctions()
+		common.log = sys.modules[ "__main__" ].log_override.log
+		
+		ret = common.getDOMAttributes(['"                                 "3 Minutes In Hell" - Gary Anthony Williams                     "'])
+		print repr(ret)
+		assert(len(ret) == 1 )	
+		assert(ret[0] == '"3 Minutes In Hell" - Gary Anthony Williams')
+
 	def test_parseDOM_should_correctly_extract_the_text_conten_of_a_link_tag(self):
 		common  = CommonFunctions()
 		common.log = sys.modules[ "__main__" ].log_override.log

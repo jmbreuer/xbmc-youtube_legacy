@@ -138,6 +138,19 @@ class YouTubeUtils:
 			if (k != "thumbnail" and k != "Title" and k != "page" and k != "new_results_function"):
 				item[k] = v
 		items.append(item)
-	
+
+
+	def extractVID(self, items):
+		if isinstance(items, str):
+			items = [items]
+
+		ret_list = []
+		for item in items:
+			item = item[item.find("v=") + 2:]
+			if item.find("&") > -1:
+				item = item[:item.find("&")]
+			ret_list.append(item)
+		return ret_list
+
 if __name__ == '__main__':	
 	sys.exit(0)

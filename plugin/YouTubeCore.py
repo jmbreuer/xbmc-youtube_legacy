@@ -542,12 +542,13 @@ class YouTubeCore():
 				try:
 					oauth = json.loads(ret["content"])
 				except:
-					self.common.log(repr(ret))
+					self.common.log("Except: " + repr(ret))
 					return False
 			
 				self.common.log("- returning, got result a: " + repr(oauth))
-			
+				
 				self.settings.setSetting("oauth2_access_token", oauth["access_token"])
+				self.settings.setSetting("oauth2_expires_at", str(int(oauth["expires_in"]) + time.time()) )
 				return True
 
 			return False
@@ -557,8 +558,7 @@ class YouTubeCore():
 		return False
 
 	def _getAuth(self):
-		self.common.log("")
-		
+		self.common.log("Oauth expires in %s seconds"  % int( float(self.settings.getSetting("oauth2_expires_at")) - time.time() ) )
 		if float(self.settings.getSetting("oauth2_expires_at")) < time.time():
 			self._oRefreshToken()
 
