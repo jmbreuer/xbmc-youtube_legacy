@@ -75,89 +75,358 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 		assert(result == [])
 		assert(status == 500)
 		
-	def ttest_scrapeCategoriesGrid_should_call_parseDOM_to_find_paginator(self):
-		assert(False)
+	def test_scrapeCategoriesGrid_should_call_parseDOM_to_find_paginator(self):
+		sys.modules["__main__"].common.parseDOM.return_value = []
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content","status":200}
+		scraper = YouTubeScraper()
+		scraper.createUrl = Mock()
+		scraper.createUrl.return_value = "some_url"
+		
+		result, status = scraper.scrapeCategoriesGrid()
+		
+		sys.modules["__main__"].common.parseDOM.assert_any_call('some_content', 'div', attrs={'class': 'yt-uix-pager'})
 	
-	def ttest_scrapeCategoriesGrid_should_call_createUrl_to_get_correct_url(self):
-		assert(False)
+	def test_scrapeCategoriesGrid_should_call_createUrl_to_get_correct_url(self):
+		sys.modules["__main__"].common.parseDOM.return_value = []
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content","status":200}
+		scraper = YouTubeScraper()
+		scraper.createUrl = Mock()
+		scraper.createUrl.return_value = "some_url"
 		
-	def ttest_scrapeCategoriesGrid_should_call_core_fetchPage_to_get_html_content(self):
-		assert(False)
+		result, status = scraper.scrapeCategoriesGrid()
 		
-	def ttest_scrapeCategoriesGrid_should_call_parseDOM_to_get_videos_container(self):
-		assert(False)
+		scraper.createUrl.assert_any_call({})
 		
-	def ttest_scrapeCategoriesGrid_should_call_parseDOM_on_videos_to_find_links(self):
-		assert(False)
+	def test_scrapeCategoriesGrid_should_call_core_fetchPage_to_get_html_content(self):
+		sys.modules["__main__"].common.parseDOM.return_value = []
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content","status":200}
+		scraper = YouTubeScraper()
+		scraper.createUrl = Mock()
+		scraper.createUrl.return_value = "some_url"
 		
-	def ttest_scrapeMusicCategories_should_call_createUrl_to_get_proper_url(self):
-		assert(False)
+		result, status = scraper.scrapeCategoriesGrid()
+		
+		sys.modules["__main__"].core._fetchPage.assert_any_call({"link":"some_url"})
+		
+	def test_scrapeCategoriesGrid_should_call_parseDOM_to_get_videos_container(self):
+		sys.modules["__main__"].common.parseDOM.return_value = []
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content","status":200}
+		scraper = YouTubeScraper()
+		scraper.createUrl = Mock()
+		scraper.createUrl.return_value = "some_url"
+		
+		result, status = scraper.scrapeCategoriesGrid()
+		
+		assert(sys.modules["__main__"].common.parseDOM.call_count > 1)
+				
+	def test_scrapeMusicCategories_should_call_createUrl_to_get_proper_url(self):
+		sys.modules["__main__"].common.parseDOM.return_value = []
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content","status":200}
+		scraper = YouTubeScraper()
+		scraper.createUrl = Mock()
+		scraper.createUrl.return_value = "some_url"
+		
+		result, status = scraper.scrapeMusicCategories()
+		
+		scraper.createUrl.assert_any_call({})
+			
+	def test_scrapeMusicCategories_should_call_core_fetchPage_to_get_html_conten(self):
+		sys.modules["__main__"].common.parseDOM.return_value = []
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content","status":200}
+		scraper = YouTubeScraper()
+		scraper.createUrl = Mock()
+		scraper.createUrl.return_value = "some_url"
+		
+		result, status = scraper.scrapeMusicCategories()
+		
+		sys.modules["__main__"].core._fetchPage.assert_any_call({"link":"some_url"})
+		
+	def test_scrapeMusicCategories_should_call_utils_makeAscii_to_encode_title(self):
+		sys.modules["__main__"].common.parseDOM.return_value = ["some_string"]
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content","status":200}
+		scraper = YouTubeScraper()
+		scraper.createUrl = Mock()
+		scraper.createUrl.return_value = "some_url"
+		
+		result, status = scraper.scrapeMusicCategories()
+		
+		sys.modules["__main__"].utils.makeAscii.assert_any_call("some_string")
+		
+	def test_scrapeMusicCategories_should_call_replaceHtmlCodes_to_remove_html_formating(self):
+		sys.modules["__main__"].common.parseDOM.return_value = ["some_string"]
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content","status":200}
+		sys.modules["__main__"].utils.makeAscii.return_value = "some_ascii_string"
+		scraper = YouTubeScraper()
+		scraper.createUrl = Mock()
+		scraper.createUrl.return_value = "some_url"
+		
+		result, status = scraper.scrapeMusicCategories()
+		
+		sys.modules["__main__"].utils.replaceHtmlCodes.assert_any_call("some_ascii_string")
+		
+	def test_scrapeMusicCategories_should_retur_properly_formated_structure(self):
+		sys.modules["__main__"].common.parseDOM.return_value = ["some_string"]
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content","status":200}
+		sys.modules["__main__"].utils.makeAscii.return_value = "some_ascii_string"
+		scraper = YouTubeScraper()
+		scraper.createUrl = Mock()
+		scraper.createUrl.return_value = "some_url"
+		
+		result, status = scraper.scrapeMusicCategories()		
+		
+		assert(result[0].has_key("category"))
+		assert(result[0].has_key("icon"))
+		assert(result[0].has_key("scraper"))
+		assert(result[0].has_key("thumbnail"))
+		assert(result[0].has_key("Title"))
+		
+	def test_scrapeArtist_should_call_saveStoredArtist_if_artist_name_is_present(self):
+		sys.modules["__main__"].common.parseDOM.return_value = ["some_string"]
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content","status":200}
+		sys.modules["__main__"].utils.makeAscii.return_value = "some_ascii_string"
+		scraper = YouTubeScraper()
+		scraper.createUrl = Mock()
+		scraper.createUrl.return_value = "some_url"
+		
+		result, status = scraper.scrapeArtist({"artist":"some_artist","artist_name":"some_artist_name"})		
+		
+		sys.modules["__main__"].storage.saveStoredArtist.assert_any_call({"artist":"some_artist","artist_name":"some_artist_name"})
 	
-	def ttest_scrapeMusicCategories_should_call_core_fetchPage_to_get_html_conten(self):
-		assert(False)
+	def test_scrapeArtist_should_call_createUrl_to_get_correct_url(self):
+		sys.modules["__main__"].common.parseDOM.return_value = ["some_string"]
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content","status":200}
+		sys.modules["__main__"].utils.makeAscii.return_value = "some_ascii_string"
+		scraper = YouTubeScraper()
+		scraper.createUrl = Mock()
+		scraper.createUrl.return_value = "some_url"
 		
-	def ttest_scrapeMusicCategories_should_call_utils_makeAscii_to_encode_title(self):
-		assert(False)
+		result, status = scraper.scrapeArtist({"artist":"some_artist"})		
 		
-	def ttest_scrapeMusicCategories_should_call_replaceHtmlCodes_to_remove_html_formating(self):
-		assert(False)
+		scraper.createUrl.assert_any_call({"artist":"some_artist"})
 		
-	def ttest_scrapeMusicCategories_should_retur_properly_formated_structure(self):
-		assert(False)
+	def test_scrapeArtist_should_call_fetchPage_to_get_html_contents(self):
+		sys.modules["__main__"].common.parseDOM.return_value = ["some_string"]
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content","status":200}
+		sys.modules["__main__"].utils.makeAscii.return_value = "some_ascii_string"
+		scraper = YouTubeScraper()
+		scraper.createUrl = Mock()
+		scraper.createUrl.return_value = "some_url"
 		
-	def ttest_scrapeArtist_should_call_saveStoredArtist_if_artist_name_is_present(self):
-		assert(False)
+		result, status = scraper.scrapeArtist({"artist":"some_artist","artist_name":"some_artist_name"})		
+		
+		sys.modules["__main__"].core._fetchPage.assert_any_call({"link":"some_url"})
+		
+		
+	def test_scrapeArtist_should_call_parseDOM_to_get_vidoes(self):
+		sys.modules["__main__"].common.parseDOM.return_value = ["some_string"]
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content","status":200}
+		sys.modules["__main__"].utils.makeAscii.return_value = "some_ascii_string"
+		scraper = YouTubeScraper()
+		scraper.createUrl = Mock()
+		scraper.createUrl.return_value = "some_url"
+		
+		result, status = scraper.scrapeArtist({"artist":"some_artist"})		
+		
+		assert(sys.modules["__main__"].common.parseDOM.call_count > 0)
+		
+	def test_scrapeArtist_should_return_list_of_video_ids(self):
+		sys.modules["__main__"].common.parseDOM.return_value = ["some_id_1","some_id_2","some_id_3"]
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content","status":200}
+		sys.modules["__main__"].utils.makeAscii.return_value = "some_ascii_string"
+		scraper = YouTubeScraper()
+		scraper.createUrl = Mock()
+		scraper.createUrl.return_value = "some_url"
+		
+		result, status = scraper.scrapeArtist({"artist":"some_artist"})
+		
+		assert(result[0] == "some_id_1")
+		assert(result[1] == "some_id_2")
+		assert(result[2] == "some_id_3")
+		
+	def test_scrapeArtist_should_remove_duplicate_video_entries(self):
+		sys.modules["__main__"].common.parseDOM.return_value = ["some_id_1","some_id_3","some_id_2","some_id_3"]
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content","status":200}
+		sys.modules["__main__"].utils.makeAscii.return_value = "some_ascii_string"
+		scraper = YouTubeScraper()
+		scraper.createUrl = Mock()
+		scraper.createUrl.return_value = "some_url"
+		
+		result, status = scraper.scrapeArtist({"artist":"some_artist"})
+		
+		assert(len(result) == 3)
+		assert(result[0] == "some_id_1")
+		assert(result[1] == "some_id_3")
+		assert(result[2] == "some_id_2")
 	
-	def ttest_scrapeArtist_should_call_createUrl_to_get_correct_url(self):
-		assert(False)
+	def test_scrapeSimilarArtists_should_call_createUrl_to_get_proper_url(self):
+		sys.modules["__main__"].common.parseDOM.return_value = ["some_string"]
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content","status":200}
+		sys.modules["__main__"].utils.replaceHtmlCodes.return_value = "some_ascii_string"
+		scraper = YouTubeScraper()
+		scraper.createUrl = Mock()
+		scraper.createUrl.return_value = "some_url"
 		
-	def ttest_scrapeArtist_should_call_fetchPage_to_get_html_contents(self):
-		assert(False)
+		result, status = scraper.scrapeSimilarArtists({"artist":"some_artist"})		
 		
-	def ttest_scrapeArtist_should_call_parseDOM_to_get_vidoes(self):
-		assert(False)
+		scraper.createUrl.assert_any_call({"artist":"some_artist"})
 		
-	def ttest_scrapeArtist_should_return_list_of_video_ids(self):
-		assert(False)
-	
-	def ttest_scrapeSimilarArtists_should_call_createUrl_to_get_proper_url(self):
-		assert(False)
+	def test_scrapeSimilarArtists_should_call_core_fetchPage_to_get_html_content(self):
+		sys.modules["__main__"].common.parseDOM.return_value = ["some_string"]
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content","status":200}
+		sys.modules["__main__"].utils.replaceHtmlCodes.return_value = "some_ascii_string"
+		scraper = YouTubeScraper()
+		scraper.createUrl = Mock()
+		scraper.createUrl.return_value = "some_url"
 		
-	def ttest_scrapeSimilarArtists_should_call_core_fetchPage_to_get_html_content(self):
-		assert(False)
+		result, status = scraper.scrapeSimilarArtists({"artist":"some_artist"})		
 		
-	def ttest_scrapeSimilarArtists_should_call_parseDOM_to_get_artists(self):
-		assert(False)
+		sys.modules["__main__"].core._fetchPage.assert_any_call({"link":"some_url"})
 		
-	def ttest_scrapeSimilarArtists_should_call_utils_makeAscii_to_encode_title(self):
-		assert(False)
+	def test_scrapeSimilarArtists_should_call_parseDOM_to_get_artists(self):
+		sys.modules["__main__"].common.parseDOM.return_value = ["some_string"]
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content","status":200}
+		sys.modules["__main__"].utils.replaceHtmlCodes.return_value = "some_ascii_string"
+		scraper = YouTubeScraper()
+		scraper.createUrl = Mock()
+		scraper.createUrl.return_value = "some_url"
 		
-	def ttest_scrapeSimilarArtists_should_call_replaceHtmlCodes_to_remove_html_formating(self):
-		assert(False)
+		result, status = scraper.scrapeSimilarArtists({"artist":"some_artist"})		
+		
+		assert(sys.modules["__main__"].common.parseDOM.call_count > 0)
+		
+	def test_scrapeSimilarArtists_should_call_utils_makeAscii_to_encode_title(self):
+		sys.modules["__main__"].common.parseDOM.return_value = ["some_string"]
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content","status":200}
+		sys.modules["__main__"].utils.replaceHtmlCodes.return_value = "some_ascii_string"
+		scraper = YouTubeScraper()
+		scraper.createUrl = Mock()
+		scraper.createUrl.return_value = "some_url"
+		
+		result, status = scraper.scrapeSimilarArtists({"artist":"some_artist"})		
+		
+		sys.modules["__main__"].utils.makeAscii.assert_any_call("some_string")
+		
+	def test_scrapeSimilarArtists_should_call_replaceHtmlCodes_to_remove_html_formating(self):
+		sys.modules["__main__"].common.parseDOM.return_value = ["some_string"]
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content","status":200}
+		sys.modules["__main__"].utils.makeAscii.return_value = "some_ascii_string"
+		sys.modules["__main__"].utils.replaceHtmlCodes.return_value = "some_html_free_string"
+		scraper = YouTubeScraper()
+		scraper.createUrl = Mock()
+		scraper.createUrl.return_value = "some_url"
+		
+		result, status = scraper.scrapeSimilarArtists({"artist":"some_artist"})		
+		
+		sys.modules["__main__"].utils.replaceHtmlCodes.assert_any_call("some_ascii_string")
 
-	def ttest_scrapeMusicCategoryArtists_should_call_createUrl_to_get_proper_url(self):
-		assert(False)
+	def test_scrapeMusicCategoryArtists_should_call_createUrl_to_get_proper_url(self):
+		sys.modules["__main__"].common.parseDOM.return_value = ["some_string"]
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content","status":200}
+		sys.modules["__main__"].utils.makeAscii.return_value = "some_ascii_string"
+		sys.modules["__main__"].utils.replaceHtmlCodes.return_value = "some_html_free_string"
+		scraper = YouTubeScraper()
+		scraper.createUrl = Mock()
+		scraper.createUrl.return_value = "some_url"
 		
-	def ttest_scrapeMusicCategoryArtists_should_call_core_fetchPage_to_get_html_content(self):
-		assert(False)
+		result, status = scraper.scrapeMusicCategoryArtists({"category":"some_category"})		
 		
-	def ttest_scrapeMusicCategoryArtists_should_call_parseDOM_to_get_categories(self):
-		assert(False)
+		scraper.createUrl.assert_any_call({"category":"some_category"})
 		
-	def ttest_scrapeMusicCategoryArtists_should_call_utils_makeAscii_to_encode_title(self):
-		assert(False)
+	def test_scrapeMusicCategoryArtists_should_call_core_fetchPage_to_get_html_content(self):
+		sys.modules["__main__"].common.parseDOM.return_value = ["some_string"]
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content","status":200}
+		sys.modules["__main__"].utils.makeAscii.return_value = "some_ascii_string"
+		sys.modules["__main__"].utils.replaceHtmlCodes.return_value = "some_html_free_string"
+		scraper = YouTubeScraper()
+		scraper.createUrl = Mock()
+		scraper.createUrl.return_value = "some_url"
 		
-	def ttest_scrapeMusicCategoryArtists_should_call_replaceHtmlCodes_to_remove_html_formating(self):
-		assert(False)
+		result, status = scraper.scrapeMusicCategoryArtists({"category":"some_category"})		
 		
-	def ttest_scrapeMusicCategoryArtists_should_return_proper_structure(self):
-		assert(False)
+		sys.modules["__main__"].core._fetchPage({"link":"some_url"})
+		
+	def test_scrapeMusicCategoryArtists_should_call_parseDOM_to_get_categories(self):
+		sys.modules["__main__"].common.parseDOM.return_value = ["some_string"]
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content","status":200}
+		sys.modules["__main__"].utils.makeAscii.return_value = "some_ascii_string"
+		sys.modules["__main__"].utils.replaceHtmlCodes.return_value = "some_html_free_string"
+		scraper = YouTubeScraper()
+		scraper.createUrl = Mock()
+		scraper.createUrl.return_value = "some_url"
+		
+		result, status = scraper.scrapeMusicCategoryArtists({"category":"some_category"})		
+		
+		assert(sys.modules["__main__"].common.parseDOM.call_count > 0)
+		
+	def test_scrapeMusicCategoryArtists_should_call_utils_makeAscii_to_encode_title(self):
+		sys.modules["__main__"].common.parseDOM.return_value = ["some_string"]
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content","status":200}
+		sys.modules["__main__"].utils.makeAscii.return_value = "some_ascii_string"
+		sys.modules["__main__"].utils.replaceHtmlCodes.return_value = "some_html_free_string"
+		scraper = YouTubeScraper()
+		scraper.createUrl = Mock()
+		scraper.createUrl.return_value = "some_url"
+		
+		result, status = scraper.scrapeMusicCategoryArtists({"category":"some_category"})		
+		
+		sys.modules["__main__"].utils.makeAscii.assert_any_call("some_string")
+		
+	def test_scrapeMusicCategoryArtists_should_call_replaceHtmlCodes_to_remove_html_formating(self):
+		sys.modules["__main__"].common.parseDOM.return_value = ["some_string"]
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content","status":200}
+		sys.modules["__main__"].utils.makeAscii.return_value = "some_ascii_string"
+		sys.modules["__main__"].utils.replaceHtmlCodes.return_value = "some_html_free_string"
+		scraper = YouTubeScraper()
+		scraper.createUrl = Mock()
+		scraper.createUrl.return_value = "some_url"
+		
+		result, status = scraper.scrapeMusicCategoryArtists({"category":"some_category"})		
+		
+		sys.modules["__main__"].utils.replaceHtmlCodes.assert_any_call("some_ascii_string")
+		
+	def test_scrapeMusicCategoryArtists_should_return_proper_structure(self):
+		sys.modules["__main__"].common.parseDOM.return_value = ["some_string"]
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content","status":200}
+		sys.modules["__main__"].utils.makeAscii.return_value = "some_ascii_string"
+		sys.modules["__main__"].utils.replaceHtmlCodes.return_value = "some_html_free_string"
+		scraper = YouTubeScraper()
+		scraper.createUrl = Mock()
+		scraper.createUrl.return_value = "some_url"
+		
+		result, status = scraper.scrapeMusicCategoryArtists({"category":"some_category"})		
+		
+		assert(result[0].has_key("artist"))
+		assert(result[0].has_key("Title"))
+		assert(result[0].has_key("scraper"))
+		assert(result[0].has_key("artist_name"))
+		assert(result[0].has_key("thumbnail"))
+		assert(result[0].has_key("icon"))
 
-	def ttest_scrapeMusicCategoryHits_should_call_createUrl_to_get_proper_url(self):
-		assert(False)
+	def test_scrapeMusicCategoryHits_should_call_createUrl_to_get_proper_url(self):
+		sys.modules["__main__"].common.parseDOM.return_value = ["some_string"]
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content","status":200}
+		sys.modules["__main__"].utils.makeAscii.return_value = "some_ascii_string"
+		sys.modules["__main__"].utils.replaceHtmlCodes.return_value = "some_html_free_string"
+		scraper = YouTubeScraper()
+		scraper.createUrl = Mock()
+		scraper.createUrl.return_value = "some_url"
 		
-	def ttest_scrapeMusicCategoryHits_should_call_core_fetchPage_to_get_html_content(self):
-		assert(False)
+		result, status = scraper.scrapeMusicCategoryHits({"category":"some_category"})		
+		
+		scraper.createUrl.assert_any_call({"category":"some_category","batch":"true"})
+		
+	def test_scrapeMusicCategoryHits_should_call_core_fetchPage_to_get_html_content(self):
+		sys.modules["__main__"].common.parseDOM.return_value = ["some_string"]
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content","status":200}
+		sys.modules["__main__"].utils.makeAscii.return_value = "some_ascii_string"
+		sys.modules["__main__"].utils.replaceHtmlCodes.return_value = "some_html_free_string"
+		scraper = YouTubeScraper()
+		scraper.createUrl = Mock()
+		scraper.createUrl.return_value = "some_url"
+		
+		result, status = scraper.scrapeMusicCategoryHits({"category":"some_category"})		
+		
+		sys.modules["__main__"].core._fetchPage.assert_any_call({"link":"some_url"})
 		
 	def ttest_scrapeMusicCategoryHits_should_call_parseDOM_to_get_videos(self):
 		assert(False)
@@ -305,7 +574,7 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 		
 	def ttest_scrapeShowEpisodes_should_fetch_entire_list(self):
 		assert(False)
-		
+		'''
 	def ttest_scrapeShow_should_call_createUrl_to_get_proper_url(self):
 	def ttest_scrapeShow_should_call_fetchPage_to_get_page_content(self):
 	def ttest_scrapeShow_should_parseDOM_to_find_videoids(self):
@@ -359,6 +628,24 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 	def ttest_getNewResultsFunction_should_set_proper_params_for_scrapeCategoryList_if_scraper_is_shows_and_category_is_not_in_params(self):
 	def ttest_getNewResultsFunction_should_set_proper_params_for_scrapeShowsGrid_if_scraper_is_shows_and_category_is_in_params(self):
 	def ttest_getNewResultsFunction_should_set_proper_params_for_scrapeShow_if_scraper_is_shows_and_show_is_in_params(self):
-		
+	def ttest_getNewResultsFunction_should_set_proper_params_for_scrapeMoviesGrid_if_scraper_is_movies_and_category_is_in_params(self):
+	def ttest_getNewResultsFunction_should_set_proper_params_for_scrapeMovieSubCategory_if_scraper_is_movies_and_subcategory_is_in_params(self):
+	def ttest_getNewResultsFunction_should_set_proper_params_for_scrapeEducationCategories_if_scraper_is_education(self):
+	def ttest_getNewResultsFunction_should_set_proper_params_for_scrapeEducationSubCategories_if_scraper_is_education_and_category_is_in_params(self):
+	def ttest_getNewResultsFunction_should_set_proper_params_for_scrapeEducationCourses_if_scraper_is_education_and_course_is_in_params(self):
+	def ttest_getNewResultsFunction_should_set_proper_params_for_scrapeEducationVideos_if_scraper_is_education_and_playlist_is_in_params(self):
+	def ttest_getNewResultsFunction_should_set_proper_params_for_scrapeCategoriesGrid_if_scraper_is_categories_and_category_is_in_params(self):
+	def ttest_getNewResultsFunction_should_set_proper_params_for_scrapeGridFormat_if_trailer_is_in_params(self):
+	
+	def ttest_createUrl_should_return_proper_url_for_scraper_param(self):
+	def ttest_createUrl_should_return_proper_url_for_categories_scraper(self):
+	def ttest_createUrl_should_return_proper_url_for_shows_scraper(self):
+	def ttest_createUrl_should_return_proper_url_for_shows_scraper_with_show(self):
+	def ttest_createUrl_should_return_proper_url_for_shows_scraper_with_season(self):
+	def ttest_createUrl_should_return_proper_url_for_education_scraper(self):
+	def ttest_createUrl_should_return_proper_url_for_movies_scraper(self):
+	def ttest_createUrl_should_return_proper_url_for_movies_scraper_with_category(self):
+	def ttest_createUrl_should_return_proper_url_for_music_top_100_scraper(self):
+'''	
 if __name__ == '__main__':
 	nose.runmodule()
