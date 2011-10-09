@@ -200,5 +200,6 @@ class CommonFunctions():
 	
 	def log(self, description, level = 0):
 		if self.dbg and self.dbglevel > level:
-			self.xbmc.log("[%s] %s : '%s'" % (self.plugin, inspect.stack()[2][3], description), self.xbmc.LOGNOTICE)
-			
+			# Funny stuff..
+			# [1][3] needed for calls from scrapeShow
+			self.xbmc.log("[%s] %s : '%s'" % (self.plugin, inspect.stack()[1][3], description), self.xbmc.LOGNOTICE)

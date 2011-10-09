@@ -16,7 +16,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, urllib, re
+import sys, urllib, json
 
 class YouTubeScraper():	
 	
@@ -188,7 +188,8 @@ class YouTubeScraper():
 			result = self.common._fetchPage({"link": url})
 			
 			if result["status"] == 200:
-				videos = re.compile('<a href="/watch\?v=(.*)&amp;feature=artist" title="').findall(result["content"]);
+				videos = self.common.parseDOM(results["content"], "a", attrs = { "href": ".*feature=artist" }, ret = "href")
+				videos = self.utils.extractVID(videos)
 			
 		for v in videos:
 			if v not in items:
@@ -617,10 +618,13 @@ class YouTubeScraper():
 		url = self.urls[get("scraper")]
 		result = self.common._fetchPage({"link": url, "login": "true"})
 		
-		videos = re.compile('<a href="/watch\?v=(.*)&amp;feature=grec_browse" class=').findall(result["content"]);
+		videos = self.common.parseDOM(results["content"], "a", attrs = { "href": ".*feature=grec_browse" }, ret = "href")
+		videos = self.utils.extractVID(videos)
 		
 		if len(videos) == 0:
-			videos = re.compile('<div id="reco-(.*)" class=').findall(result["content"]);
+			videos = self.common.parseDOM(results["content"], "div", attrs = { "id": "reco-.*"}, ret = "id")
+			for video in videos:
+				video = video.replace("reco-", "")
 		
 		self.common.log("Done")
 		return ( videos, result["status"] )
@@ -674,12 +678,12 @@ class YouTubeScraper():
 		url = self.createUrl(params)
 		result = self.common._fetchPage({"link":url})
 			
-		videos = re.compile('<a href="/watch\?v=(.*)&amp;feature=sh_e_sl&amp;list=SL"').findall(result["content"])
+		videos = self.common.parseDOM(result["content"], "a", attrs = { "href": ".*feature=sh_e_sl&amp;list=SL" }, ret = "href")
+		videos = self.utils.extractVID(videos)
 		if len(videos) == 0:
-			temp_videos = self.common.parseDOM(result["content"], "div", attrs = { "class": "entity-video-item-content" } ) 
-			temp_videos = self.common.parseDOM(temp_videos, "a", ret = "href")
-			for vid in temp_videos:
-				videos.append(vid[vid.find("v=") + 2 : vid.find("&", vid.find("v="))])
+			videos = self.common.parseDOM(result["content"], "div", attrs = { "class": "entity-video-item-content" } ) 
+			videos = self.common.parseDOM(videos, "a", ret = "href")
+			videos = self.utils.extractVID(videos)
 
 		nexturl = self.common.parseDOM(result["content"], "button", { "class": " yt-uix-button" }, ret = "data-next-url")
 		print "smoker "+ repr(nexturl)
@@ -702,7 +706,7 @@ class YouTubeScraper():
 					result["content"] = result["content"].replace('\\"','"')
 					result["content"] = result["content"].replace("\\u003c","<")
 					result["content"] = result["content"].replace("\\u003e",">")
-					more_videos = re.compile('data-video-ids="([^"]*)"').findall(result["content"])
+					more_videos = self.common.parseDOM(result["content"], "button", ret = "data-video-ids")
 					
 					if not more_videos:
 						fetch = False
@@ -803,7 +807,7 @@ class YouTubeScraper():
 					for i in range(0, len(ahref)):
 						item = {}
 
-						count = self.stripTags(acount[i].replace("\n", "").replace(",", ", "))
+						count = self.common.stripTags(acount[i].replace("\n", "").replace(",", ", "))
 						title = acont[i] + " (" + count + ")"
 						title = self.utils.replaceHtmlCodes(title)
 						item['Title'] = title
@@ -843,7 +847,8 @@ class YouTubeScraper():
 		
 		items = []
 		if result["status"] == 200:
-			items = re.compile('<a href="/watch\?v=(.*)&amp;feature=musicchart" class=').findall(result["content"]);
+			items = self.common.parseDOM(results["content"], "a", attrs = { "href": ".*feature=musicchart" }, ret = "href")
+			items = self.utils.extractVID(videos)
 		
 		self.common.log("Done")
 		return (items, result["status"])

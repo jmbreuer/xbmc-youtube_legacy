@@ -213,6 +213,21 @@ class TestYouTubeUtils(BaseTestCase.BaseTestCase):
 		utils.addNextFolder(result, input)
 		
 		assert(result[0]["page"] == "46")
+
+	def test_extractVID_should_return_id_from_string(self):
+		utils = YouTubeUtils()
+		result = utils.extractVID("/watch?v=bla-id&amp;feature=artist")
+		
+		assert(len(result) == 1)
+		assert(result[0] == "bla-id")
+
+	def test_extractVID_should_return_ids_from_list(self):
+		utils = YouTubeUtils()
+		result = utils.extractVID(["&v=bla2", "&v=bla3&w="])
+		
+		assert(len(result) == 2)
+		assert(result[0] == "bla2")
+		assert(result[1] == "bla3")
 		
 if __name__ == '__main__':
 	nose.runmodule()
