@@ -463,7 +463,6 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 		assert(result[0] == "some_id_1")
 		assert(result[1] == "some_id_2")
 		assert(result[2] == "some_id_3")
-		assert(sys.modules["__main__"].common.parseDOM.call_count > 0)
 		
 	def test_searchDisco_should_call_createUrl_to_get_seach_url(self):
 		sys.modules["__main__"].common.parseDOM.return_value = ["some_string"]
@@ -478,11 +477,30 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 		
 		scraper.createUrl.assert_any_call({"search":"some_search"})
 		
-	def ttest_searchDisco_should_call_createUrl_to_get_mixlist_url(self):
-		assert(False)
+	def test_searchDisco_should_call_createUrl_to_get_mixlist_url(self):
+		sys.modules["__main__"].common.parseDOM.return_value = ["some_string"]
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content&v=some_video_id&list=some_mix_list&blablabla","status":200}
+		sys.modules["__main__"].utils.makeAscii.return_value = "some_ascii_string"
+		sys.modules["__main__"].utils.replaceHtmlCodes.return_value = "some_html_free_string"
+		scraper = YouTubeScraper()
+		scraper.createUrl = Mock()
+		scraper.createUrl.return_value = "some_url"
 		
-	def ttest_searchDisco_should_call_fetchPage_to_get_search_result(self):
-		assert(False)
+		result, status = scraper.searchDisco({"search":"some_search"})		
+		
+		scraper.createUrl.assert_any_call({'mix_list_id': 'some_mix_list', 'search': 'some_search', 'videoid': 'some_video_id'})
+		
+	def test_searchDisco_should_call_fetchPage_to_get_search_result(self):
+		sys.modules["__main__"].common.parseDOM.return_value = ["some_string"]
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content","status":200}
+		sys.modules["__main__"].utils.makeAscii.return_value = "some_ascii_string"
+		sys.modules["__main__"].utils.replaceHtmlCodes.return_value = "some_html_free_string"
+		scraper = YouTubeScraper()
+		scraper.createUrl = Mock()
+		scraper.createUrl.return_value = "some_url"
+		
+		result, status = scraper.searchDisco({"search":"some_search"})		
+		sys.modules["__main__"].core._fetchPage.assert_any_call({"link":"some_url"})
 		
 	def ttest_searchDisco_should_call_fetchPage_to_get_mix_list_content(self):
 		assert(False)
