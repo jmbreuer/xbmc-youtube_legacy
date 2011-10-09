@@ -292,7 +292,7 @@ class YouTubeScraper():
 		
 		items = []
 		
-		url = self.urls["disco_search"] % urllib.quote_plus(get("search"))
+		url = self.createUrl(params)
 		result = self.core._fetchPage({"link": url})
 		
 		if (result["content"].find("list=") != -1):
@@ -302,12 +302,12 @@ class YouTubeScraper():
 				mix_list_id = mix_list_id[:mix_list_id.find("&")]
 			elif (mix_list_id.find('"') != -1):
 				mix_list_id = mix_list_id[:mix_list_id.find('"')]
+			params["mix_list_id"] = mix_list_id
 			
 			video_id = result["content"][result["content"].find("v=") + 2:]
-			video_id = video_id[:video_id.find("&")]
+			params["videoid"] = video_id[:video_id.find("&")]
 			
-			url = self.urls["disco_mix_list"] % (video_id, mix_list_id)
-										
+			url = self.createUrl(params)
 			result = self.core._fetchPage({"link": url})
 			
 			mix_list = self.common.parseDOM(result["content"], "div", { "id": "playlist-bar" }, ret = "data-video-ids")
@@ -1030,6 +1030,11 @@ class YouTubeScraper():
 		
 		if(get("scraper") in ["music_top100", "music"]):
 			url = self.urls["music"]
+		
+		if (get("scraper") in "search_disco"):
+			url = self.urls["disco_search"] % urllib.quote_plus(get("search"))
+			if get("mix_list_id") and get("videoid"):
+				url = self.urls["disco_mix_list"] % (get("videoid"), get("mix_list_id"))
 		
 		return url
 	
