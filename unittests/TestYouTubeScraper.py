@@ -448,7 +448,7 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 		assert(sys.modules["__main__"].common.parseDOM.call_count > 0)
 		
 	def test_scrapeMusicCategoryHits_should_return_list_of_video_ids(self):
-		sys.modules["__main__"].utils.extractVID.return_value = ["some_id_1","some_id_3","some_id_2","some_id_3"]
+		sys.modules["__main__"].utils.extractVID.return_value = ["some_id_1","some_id_2","some_id_3"]
 		sys.modules["__main__"].common.parseDOM.return_value = ["some_string"]
 		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content","status":200}
 		sys.modules["__main__"].utils.makeAscii.return_value = "some_ascii_string"
@@ -457,12 +457,12 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 		scraper.createUrl = Mock()
 		scraper.createUrl.return_value = "some_url"
 		
-		result, status = scraper.scrapeMusicCategoryHits({"category":"some_category"})		
-				
+		result, status = scraper.scrapeMusicCategoryHits({"category":"some_category"})
+		
 		assert(len(result) == 3)
 		assert(result[0] == "some_id_1")
-		assert(result[1] == "some_id_3")
-		assert(result[2] == "some_id_2")
+		assert(result[1] == "some_id_2")
+		assert(result[2] == "some_id_3")
 		assert(sys.modules["__main__"].common.parseDOM.call_count > 0)
 		
 	def test_searchDisco_should_call_createUrl_to_get_seach_url(self):
@@ -476,7 +476,7 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 		
 		result, status = scraper.searchDisco({"search":"some_search"})		
 		
-		scraper.createUrl.assert_any_call({"search":"some_search","batch":"true"})
+		scraper.createUrl.assert_any_call({"search":"some_search"})
 		
 	def ttest_searchDisco_should_call_createUrl_to_get_mixlist_url(self):
 		assert(False)

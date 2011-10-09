@@ -277,11 +277,8 @@ class YouTubeScraper():
 			result = self.core._fetchPage({"link":url})
 			
 			content = self.common.parseDOM(result["content"], "li", { "class": "yt-uix-slider-slide-item "})
-			for video in content:
-				videoid = self.common.parseDOM(video, "a", attrs = {"class": "ux-thumb-wrap " }, ret = "href")
-				videoid = videoid[0]
-				videoid = videoid[videoid.find("?v=") + 3:videoid.find("&")]
-				items.append(videoid)
+			content = self.common.parseDOM(content, "a", attrs = {"class": "ux-thumb-wrap " }, ret = "href")
+			items = self.utils.extractVID(content)
 
 		self.common.log("Done")
 		return (items, status)
