@@ -867,9 +867,9 @@ class NonCallableMock(Base):
         if not kall in self.call_args_list:
             expected_string = self._format_mock_call_signature(args, kwargs)
             raise AssertionError(
-                '%s call not found' % expected_string
+                '%s call not found, possible calls are: \r\n\r\n %s' % (expected_string, repr(self.call_args_list)) 
             )
-
+    
     def _get_child_mock(self, **kw):
         """Create the child mocks for attributes and return value.
         By default child mocks will be the same type as the parent.
