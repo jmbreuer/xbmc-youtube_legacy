@@ -465,8 +465,18 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 		assert(result[2] == "some_id_2")
 		assert(sys.modules["__main__"].common.parseDOM.call_count > 0)
 		
-	def ttest_searchDisco_should_call_createUrl_to_get_seach_url(self):
-		assert(False)
+	def test_searchDisco_should_call_createUrl_to_get_seach_url(self):
+		sys.modules["__main__"].common.parseDOM.return_value = ["some_string"]
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content","status":200}
+		sys.modules["__main__"].utils.makeAscii.return_value = "some_ascii_string"
+		sys.modules["__main__"].utils.replaceHtmlCodes.return_value = "some_html_free_string"
+		scraper = YouTubeScraper()
+		scraper.createUrl = Mock()
+		scraper.createUrl.return_value = "some_url"
+		
+		result, status = scraper.searchDisco({"search":"some_search"})		
+		
+		scraper.createUrl.assert_any_call({"search":"some_search","batch":"true"})
 		
 	def ttest_searchDisco_should_call_createUrl_to_get_mixlist_url(self):
 		assert(False)
