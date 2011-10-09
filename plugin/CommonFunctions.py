@@ -79,6 +79,26 @@ class CommonFunctions():
 		self.log("done html length: " + str(len(html)) + ", content: " + html, 2)
 		return html
 
+	def getDOMAttributes(self, lst):
+		self.log("", 2)
+		ret = []
+		for tmp in lst:
+			if tmp.find('="') > -1:
+				tmp = tmp[:tmp.find('="')]
+
+			if tmp.find('=\'') > -1:
+				tmp = tmp[:tmp.find('=\'')]
+
+			cont_char = tmp[0]
+			tmp = tmp[1:]
+			if tmp.rfind(cont_char) > -1:
+				tmp = tmp[:tmp.rfind(cont_char)]
+			tmp = tmp.strip()
+			ret.append(tmp)
+
+		self.log("Done: " + repr(ret), 2)
+		return ret
+
 	def parseDOM(self, html, name = "", attrs = {}, ret = False):
 		# html <- text to scan.
 		# name <- Element name
@@ -134,7 +154,8 @@ class CommonFunctions():
 				self.log("Getting attribute %s content for %s matches " % ( ret, len(lst) ), 2)
 				lst2 = []
 				for match in lst:
-					lst2 += re.compile('<' + name + '.*?' + ret + '=[\'"]([^>]*?)[\'"].*>').findall(match)
+					tmp_list = re.compile('<' + name + '.*?' + ret + '=([\'"][^>]*?)>').findall(match)
+					lst2 += self.getDOMAttributes(tmp_list)
 					self.log(lst, 3)
 					self.log(match, 3)
 					self.log(lst2, 3)

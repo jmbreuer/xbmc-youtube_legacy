@@ -84,7 +84,26 @@ class TestCommonFunctions(BaseTestCase.BaseTestCase):
 		ret = common.parseDOM(self.link_html, "a", attrs = { "href": "bla.html" })
 		
 		common.getDOMContent.assert_called_with("<a href='bla.html'>Link Test</a>", 'a', "<a href='bla.html'>",)
+
+	def test_parseDOM_should_call_getDOMAttribute_when_extracting_attributes(self):
+		common  = CommonFunctions()
+		common.getDOMAttributes = Mock()
+		common.getDOMAttributes.return_value = "bla.html"
+		common.log = sys.modules[ "__main__" ].log_override.log
+		
+		ret = common.parseDOM(self.link_html, "a", attrs = { "href": "bla.html" }, ret = "href")
+		
+		common.getDOMAttributes.assert_called_with(["'bla.html'"])
 	
+	def test_getDOMAttributes_should_handle_double_quotation_marks(self):
+		common  = CommonFunctions()
+		common.log = sys.modules[ "__main__" ].log_override.log
+		
+		ret = common.getDOMAttributes(['"                                 "3 Minutes In Hell" - Gary Anthony Williams                     "'])
+		print repr(ret)
+		assert(len(ret) == 1 )	
+		assert(ret[0] == '"3 Minutes In Hell" - Gary Anthony Williams')
+
 	def test_parseDOM_should_correctly_extract_the_text_conten_of_a_link_tag(self):
 		common  = CommonFunctions()
 		common.log = sys.modules[ "__main__" ].log_override.log
