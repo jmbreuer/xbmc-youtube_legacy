@@ -458,7 +458,7 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 		scraper.createUrl.return_value = "some_url"
 		
 		result, status = scraper.scrapeMusicCategoryHits({"category":"some_category"})		
-				
+		print repr(result)
 		assert(len(result) == 3)
 		assert(result[0] == "some_id_1")
 		assert(result[1] == "some_id_3")
