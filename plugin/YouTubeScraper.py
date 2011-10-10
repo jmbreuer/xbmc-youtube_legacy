@@ -539,7 +539,7 @@ class YouTubeScraper():
 		get = params.get
 		self.common.log("")
 		
-		url = self.urls[get("scraper")]
+		url = self.createUrl(params)
 		result = self.core._fetchPage({"link": url, "login": "true"})
 		
 		videos = self.common.parseDOM(result["content"], "a", attrs = { "href": ".*feature=grec_browse" }, ret = "href")
@@ -557,8 +557,7 @@ class YouTubeScraper():
 		get = params.get
 		self.common.log("")
 		
-		url = self.urls[get("scraper")]
-		
+		url = self.createUrl(params)
 		result = self.core._fetchPage({"link": url, "get_redirect":"true", "login": "true"})
 		
 		if result["status"] == 200:
