@@ -530,7 +530,7 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 		assert(sys.modules["__main__"].common.parseDOM.call_count > 0)
 		
 	def test_searchDisco_should_return_list_of_videoids(self):
-		sys.modules["__main__"].common.parseDOM.return_value = ["some_id_1,some_id_2,some_id_3,some_id_4"]
+		sys.modules["__main__"].common.parseDOM.return_value = ["some_id_1,some_id_2,some_id_3"]
 		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content&v=some_video_id&list=some_mix_list&blablabla","status":200}
 		sys.modules["__main__"].utils.makeAscii.return_value = "some_ascii_string"
 		sys.modules["__main__"].utils.replaceHtmlCodes.return_value = "some_html_free_string"
@@ -544,26 +544,105 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 		assert(result[1] == "some_id_2")
 		assert(result[2] == "some_id_3")
 		
-	def ttest_scrapeDiscoTopArtist_should_call_createUrl_to_get_proper_url(self):
-		assert(False)
+	def test_scrapeDiscoTopArtist_should_call_createUrl_to_get_proper_url(self):
+		sys.modules["__main__"].common.parseDOM.return_value = ["some_id_1"]
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content","status":200}
+		sys.modules["__main__"].utils.makeAscii.return_value = "some_ascii_string"
+		sys.modules["__main__"].utils.replaceHtmlCodes.return_value = "some_html_free_string"
+		scraper = YouTubeScraper()
+		scraper.createUrl = Mock()
+		scraper.createUrl.return_value = "some_url"
 		
-	def ttest_scrapeDiscoTopArtist_should_call_fetchPage_to_get_page_content(self):
-		assert(False)
+		result, status = scraper.scrapeDiscoTopArtist({})		
+		
+		scraper.createUrl.assert_any_call({"thumb":"true"})
+		
+	def test_scrapeDiscoTopArtist_should_call_fetchPage_to_get_page_content(self):
+		sys.modules["__main__"].common.parseDOM.return_value = ["some_id_1"]
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content","status":200}
+		sys.modules["__main__"].utils.makeAscii.return_value = "some_ascii_string"
+		sys.modules["__main__"].utils.replaceHtmlCodes.return_value = "some_html_free_string"
+		scraper = YouTubeScraper()
+		scraper.createUrl = Mock()
+		scraper.createUrl.return_value = "some_url"
+		
+		result, status = scraper.scrapeDiscoTopArtist({})		
+		
+		sys.modules["__main__"].core._fetchPage.assert_any_call({"link":"some_url"})
 
-	def ttest_scrapeDiscoTopArtist_should_call_parseDOM_to_find_artist_list(self):
-		assert(False)
+	def test_scrapeDiscoTopArtist_should_call_parseDOM_to_find_artist_list(self):
+		sys.modules["__main__"].common.parseDOM.return_value = ["some_id_1,some_id_2,some_id_3,some_id_4"]
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content","status":200}
+		sys.modules["__main__"].utils.makeAscii.return_value = "some_ascii_string"
+		sys.modules["__main__"].utils.replaceHtmlCodes.return_value = "some_html_free_string"
+		scraper = YouTubeScraper()
+		scraper.createUrl = Mock()
+		scraper.createUrl.return_value = "some_url"
 		
-	def ttest_scrapeDiscoTopArtist_should_call_utils_makeAscii_to_encode_title(self):
-		assert(False)
+		result, status = scraper.scrapeDiscoTopArtist({})		
 		
-	def ttest_scrapeDiscoTopArtist_should_call_storage_retrieve_to_get_thumbnail(self):
-		assert(False)
+		assert(sys.modules["__main__"].common.parseDOM.call_count > 0)
 		
-	def ttest_scrapeDiscoTopArtist_should_return_proper_structure(self):
-		assert(False)
+	def test_scrapeDiscoTopArtist_should_call_utils_makeAscii_to_encode_title(self):
+		sys.modules["__main__"].common.parseDOM.return_value = ["some_artist"]
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content","status":200}
+		sys.modules["__main__"].utils.makeAscii.return_value = "some_ascii_string"
+		sys.modules["__main__"].utils.replaceHtmlCodes.return_value = "some_html_free_string"
+		scraper = YouTubeScraper()
+		scraper.createUrl = Mock()
+		scraper.createUrl.return_value = "some_url"
 		
-	def ttest_scrapeEducationCategories_should_call_createUrl_to_get_proper_url(self):
-		assert(False)
+		result, status = scraper.scrapeDiscoTopArtist({})		
+		
+		sys.modules["__main__"].utils.makeAscii.assert_any_call("some_artist")
+		
+	def test_scrapeDiscoTopArtist_should_call_storage_retrieve_to_get_thumbnail(self):
+		sys.modules["__main__"].common.parseDOM.return_value = ["some_artist"]
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content","status":200}
+		sys.modules["__main__"].utils.makeAscii.return_value = "some_ascii_string"
+		sys.modules["__main__"].utils.replaceHtmlCodes.return_value = "some_html_free_string"
+		scraper = YouTubeScraper()
+		scraper.createUrl = Mock()
+		scraper.createUrl.return_value = "some_url"
+		
+		result, status = scraper.scrapeDiscoTopArtist({})		
+		
+		assert(sys.modules["__main__"].storage.retrieve.call_count > 0)
+		
+	def test_scrapeDiscoTopArtist_should_return_proper_structure(self):
+		sys.modules["__main__"].common.parseDOM.return_value = ["some_artist"]
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content","status":200}
+		sys.modules["__main__"].utils.makeAscii.return_value = "some_ascii_string"
+		sys.modules["__main__"].utils.replaceHtmlCodes.return_value = "some_html_free_string"
+		scraper = YouTubeScraper()
+		scraper.createUrl = Mock()
+		scraper.createUrl.return_value = "some_url"
+		
+		result, status = scraper.scrapeDiscoTopArtist({})		
+		
+		print repr(result)
+		assert(result[0].has_key("Title"))
+		assert(result[0]["scraper"] == "search_disco")
+		assert(result[0].has_key("path"))
+		assert(result[0].has_key("search"))
+		assert(result[0].has_key("thumbnail"))
+		
+	def test_scrapeEducationCategories_should_call_createUrl_to_get_proper_url(self):
+		sys.modules["__main__"].common.parseDOM.return_value = ["some_artist"]
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content","status":200}
+		sys.modules["__main__"].utils.makeAscii.return_value = "some_ascii_string"
+		sys.modules["__main__"].utils.replaceHtmlCodes.return_value = "some_html_free_string"
+		scraper = YouTubeScraper()
+		scraper.createUrl = Mock()
+		scraper.createUrl.return_value = "some_url"
+		
+		result, status = scraper.scrapeDiscoTopArtist({})		
+		
+		assert(result[0].has_key("Title"))
+		assert(result[0]["scraper"] == "search_disco")
+		assert(result[0].has_key("path"))
+		assert(result[0].has_key("search"))
+		assert(result[0].has_key("thumbnail"))
 		
 	def ttest_scrapeEducationCategories_should_call_fetchPage_to_get_page_content(self):
 		assert(False)
