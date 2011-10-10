@@ -308,7 +308,7 @@ class YouTubeScraper():
 			result = self.core._fetchPage({"link": url})
 			
 			mix_list = self.common.parseDOM(result["content"], "div", { "id": "playlist-bar" }, ret = "data-video-ids")
-
+			
 			if (len(mix_list) > 0):
 				items = mix_list[0].split(",")
 		
@@ -319,7 +319,7 @@ class YouTubeScraper():
 		get = params.get
 		self.common.log("")
 		
-		url = self.urls["disco_main"]
+		url = self.createUrl(params)
 		result = self.core._fetchPage({"link":url})
 		
 		popular = self.common.parseDOM(result["content"], "div", { "class": "ytg-fl popular-artists"})
@@ -1032,6 +1032,8 @@ class YouTubeScraper():
 			url = self.urls["disco_search"] % urllib.quote_plus(get("search"))
 			if get("mix_list_id") and get("videoid"):
 				url = self.urls["disco_mix_list"] % (get("videoid"), get("mix_list_id"))
+		if (get("scraper") == "disco_top_artist"):
+			url = self.urls["disco_main"]
 		
 		return url
 	
