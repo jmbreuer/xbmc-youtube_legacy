@@ -469,7 +469,7 @@ class YouTubeScraper():
 			item['videos'] = get("courses")
 			item['icon'] = "feeds"
 			item['scraper'] = "education"
-				
+			
 			items.append(item)
 
 			for i in range(1 , len(ahref)):
@@ -678,7 +678,7 @@ class YouTubeScraper():
 			if len(season_list) == len(atitle) and len(atitle) > 0:
 				for i in range(0, len(atitle)):
 					item = {}
-				
+					
 					season_id = season_list[i]
 					title = self.language(30058) % season_id.encode("utf-8")
 					title += " - " + atitle[i].encode("utf-8")
@@ -718,9 +718,9 @@ class YouTubeScraper():
 				page += 1
 				next = "true"
 			showcont = "".join(showcont)
-
+			
 			shows = self.common.parseDOM(showcont, "div", { "class": "browse-item show-item yt-uix-hovercard " })
-
+			
 			for show in shows:
 				ahref = self.common.parseDOM(show, "a", attrs = { "title": ".*?" }, ret = "href" )
 				acont = self.common.parseDOM(show, "a", ret = "title" )
