@@ -28,6 +28,7 @@ class YouTubeUtils:
 		self.dbg = sys.modules[ "__main__" ].dbg
 		self.PR_VIDEO_QUALITY = self.settings.getSetting("pr_video_quality") == "true"
 		self.VALID_CHARS = "-_.() %s%s" % (string.ascii_letters, string.digits)
+		self.INVALID_CHARS = "\\/:*?\"<>|"
 		self.THUMBNAIL_PATH = os.path.join( self.settings.getAddonInfo('path'), "thumbnails" )
 				
 	# This function raises a keyboard for user input

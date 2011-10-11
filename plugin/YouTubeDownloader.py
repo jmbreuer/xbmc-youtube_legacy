@@ -99,9 +99,9 @@ class YouTubeDownloader():
 		self.player.downloadSubtitle(video) 
 		url = urllib2.Request(video['video_url'])
 		url.add_header('User-Agent', self.common.USERAGENT);
-		filename = "%s-[%s].mp4" % ( ''.join(c for c in video['Title'] if c in self.utils.VALID_CHARS), video["videoid"] )
-		filename_incomplete = os.path.join(self.xbmc.translatePath( "special://temp" ), filename )
-		filename_complete = os.path.join(self.settings.getSetting( "downloadPath" ), filename )
+		filename = "%s-[%s].mp4" % ( ''.join(c for c in video['Title'].decode("utf-8") if c not in self.utils.INVALID_CHARS), video["videoid"] )
+		filename_incomplete = os.path.join(self.xbmc.translatePath( "special://temp" ).decode("utf-8"), filename )
+		filename_complete = os.path.join(self.settings.getSetting("downloadPath").decode("utf-8"), filename)
 
 		if self.xbmcvfs.exists(filename_complete):
 			self.xbmcvfs.delete(filename_complete)
