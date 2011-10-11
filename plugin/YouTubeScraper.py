@@ -521,14 +521,16 @@ class YouTubeScraper():
 			ahref = self.common.parseDOM(categories, "a", attrs = { "class": "ux-thumb-wrap contains-addto"}, ret = "href")
 			if len(ahref) == 0:
 				ahref = self.common.parseDOM(categories, "a", attrs = { "class": "tile-link-block video-tile.*?"}, ret = "href")
-		
-			for i in range(0 , len(ahref)):
-				link = ahref[i]
-				if (link.find("/watch?v=") != -1):
-					link = link[link.find("=") + 1:]
-				if (link.find("&") > 0):
-					link = link[:link.find("&")]
-				items.append(link)
+			
+			links = self.utils.extractVID(ahref)
+			items.extend(links)
+#			for i in range(0 , len(ahref)):
+#				link = ahref[i]
+#				if (link.find("/watch?v=") != -1):
+#					link = link[link.find("=") + 1:]
+#				if (link.find("&") > 0):
+#					link = link[:link.find("&")]
+#				items.append(link)
 
 		self.common.log("Done")
 		return (items, result["status"])
