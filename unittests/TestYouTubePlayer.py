@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import nose
 import BaseTestCase
 from mock import Mock
@@ -627,6 +628,21 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		sys.modules["__main__"].xbmcvfs.exists.assert_called_with("somePath/someTitle-[some_id].mp4")
 		player.selectVideoQuality.assert_called_with({22:"720p"},params)
 		assert(player._getVideoLinks.call_count > 0)
+	
+	def test_getVideoObject_should_handle_accents_and_utf8(self):
+		params = {"videoid":"some_id"}
+		sys.modules["__main__"].settings.getSetting.return_value = u"somePathé/".encode("utf-8")
+		sys.modules["__main__"].xbmcvfs.exists.return_value = False
+		player = YouTubePlayer()
+		player.getInfo = Mock()
+		player.getInfo.return_value = ({"videoid":"some_id","Title": u"נלה מהיפה והחנון בסטריפ צ'אט בקליפ של חובבי ציון".encode("utf-8")},200)
+		player._getVideoLinks = Mock()
+		player._getVideoLinks.return_value = ([],{})
+		player.selectVideoQuality = Mock()
+		
+		(video, status) = player.getVideoObject(params)
+		
+		sys.modules["__main__"].xbmcvfs.exists.assert_called_with(u"somePath\xe9/\u05e0\u05dc\u05d4 \u05de\u05d4\u05d9\u05e4\u05d4 \u05d5\u05d4\u05d7\u05e0\u05d5\u05df \u05d1\u05e1\u05d8\u05e8\u05d9\u05e4 \u05e6'\u05d0\u05d8 \u05d1\u05e7\u05dc\u05d9\u05e4 \u05e9\u05dc \u05d7\u05d5\u05d1\u05d1\u05d9 \u05e6\u05d9\u05d5\u05df-[some_id].mp4")
 	
 	def test_getVideoObject_should_use_pre_defined_error_messages_on_missing_url(self):
 		player = YouTubePlayer()
