@@ -611,7 +611,7 @@ class YouTubeScraper():
 			videos = self.utils.extractVID(videos)
 
 		nexturl = self.common.parseDOM(result["content"], "button", { "class": " yt-uix-button" }, ret = "data-next-url")
-		print "smoker "+ repr(nexturl)
+		
 		if (len(nexturl) > 0):
 			nexturl = nexturl[0]
 		else:
@@ -860,9 +860,6 @@ class YouTubeScraper():
 			params["batch"] = "true"
 		if (get("scraper") == "liked_videos"):
 			function = self.scrapeLikedVideos
-			params["batch"] = "true"
-		if (get("scraper") == "disco_top_50"):
-			function = self.scrapeDiscoTop50
 			params["batch"] = "true"
 		if (get("scraper") == "recommended"):
 			function = self.scrapeRecommended
