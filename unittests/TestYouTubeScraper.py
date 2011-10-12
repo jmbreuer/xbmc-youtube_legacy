@@ -561,8 +561,12 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 		
 		assert(sys.modules["__main__"].common.parseDOM.call_count > 1)
 		
-	def ttest_scrapeShowEpisodes_should_fetch_entire_list(self):
-		assert(False)
+	def test_scrapeShowEpisodes_should_fetch_entire_list(self):
+		sys.modules["__main__"].common.parseDOM.side_effect = [["some_string"],["some_string start=20"],["some_string"],["some_string"],["some_string"],["some_string"],[],[]]
+		
+		self.scraper.scrapeShowEpisodes({})		
+		
+		assert(sys.modules["__main__"].core._fetchPage.call_count > 1)
 		
 	def test_scrapeShow_should_call_createUrl_to_get_proper_url(self):
 
@@ -735,59 +739,239 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 		assert(result[0][0] == "some_video_id")
 		assert(result[0][1] == "some_thumb")
 	
-'''
-	def ttest_getNewResultsFunction_should_set_proper_params_for_searchDisco_if_search_diso_is_in_params(self):
-		assert(False)
 
-	def ttest_getNewResultsFunction_should_set_proper_params_for_scrapeLikedVideos_if_liked_videos_is_in_params(self):
-		assert(False)
-	def ttest_getNewResultsFunction_should_set_proper_params_for_scrapeDiscoTop50_if_disco_top_50_is_in_params(self):
-		assert(False)
-	def ttest_getNewResultsFunction_should_set_proper_params_for_scrapeRecommended_if_recommended_is_in_params(self):
-		assert(False)
-	def ttest_getNewResultsFunction_should_set_proper_params_for_scrapeYouTubeTop100_if_search_diso_is_in_params(self):
-		assert(False)
-	def ttest_getNewResultsFunction_should_set_proper_params_for_scrapeDiscoTopArtist_if_disco_top_artist_is_in_params(self):
-		assert(False)
-	def ttest_getNewResultsFunction_should_set_proper_params_for_scrapeArtist_if_music_artist_is_in_params(self):
-		assert(False)
-	def ttest_getNewResultsFunction_should_set_proper_params_for_scrapeTrailersListFormat_if_trailers_scraper_is_in_params(self):
-		assert(False)
-	def ttest_getNewResultsFunction_should_set_proper_params_for_scrapeSimilarArtists_if_similar_artist_is_in_params(self):
-		assert(False)
-	def ttest_getNewResultsFunction_should_set_proper_params_for_scrapeMusicCategoryHits_if_music_hits_and_category_is_in_params(self):
-		assert(False)
-	def ttest_getNewResultsFunction_should_set_proper_params_for_scrapeMusicCategoryArtists_if_music_artist_and_category_is_in_params(self):
-		assert(False)
-	def ttest_getNewResultsFunction_should_set_proper_params_for_scrapeMusicCategories_if_music_hits_or_music_artist_is_in_params_and_category_is_not(self):
-		assert(False)							
+	def test_getNewResultsFunction_should_set_proper_params_for_searchDisco_if_scraper_is_search_diso(self):
+		params = {"scraper":"search_disco"}
+		
+		self.scraper.getNewResultsFunction(params)
+		
+		assert(params["batch"] == "true")
+		assert(params["new_results_function"] == self.scraper.searchDisco)
+
+	def test_getNewResultsFunction_should_set_proper_params_for_scrapeLikedVideos_if_scraper_is_liked_videos(self):
+		params = {"scraper":"liked_videos"}
+		
+		self.scraper.getNewResultsFunction(params)
+		
+		assert(params["batch"] == "true")
+		assert(params["new_results_function"] == self.scraper.scrapeLikedVideos)
+		
+	def test_getNewResultsFunction_should_set_proper_params_for_scrapeRecommended_if_scraper_is_recommended(self):
+		params = {"scraper":"recommended"}
+		
+		self.scraper.getNewResultsFunction(params)
+		
+		assert(params["batch"] == "true")
+		assert(params["new_results_function"] == self.scraper.scrapeRecommended)
+
+	def test_getNewResultsFunction_should_set_proper_params_for_scrapeYouTubeTop100_if_scraper_is_music_top100(self):
+		params = {"scraper":"music_top100"}
+		
+		self.scraper.getNewResultsFunction(params)
+		
+		assert(params["batch"] == "true")
+		assert(params["new_results_function"] == self.scraper.scrapeYouTubeTop100)
+		
+	def test_getNewResultsFunction_should_set_proper_params_for_scrapeDiscoTopArtist_if_scraper_is_disco_top_artist(self):
+		params = {"scraper":"disco_top_artist"}
+		
+		self.scraper.getNewResultsFunction(params)
+		
+		assert(params["folder"] == "true")
+		assert(params["new_results_function"] == self.scraper.scrapeDiscoTopArtist)
+		
+	def test_getNewResultsFunction_should_set_proper_params_for_scrapeArtist_if_scraper_is_music_artist(self):
+		params = {"scraper":"music_artist"}
+		
+		self.scraper.getNewResultsFunction(params)
+		
+		assert(params["batch"] == "true")
+		assert(params["new_results_function"] == self.scraper.scrapeArtist)
+		
+	def test_getNewResultsFunction_should_set_proper_params_for_scrapeTrailersListFormat_if_scraper_is_latest_trailers(self):
+		params = {"scraper":"latest_trailers"}
+		
+		self.scraper.getNewResultsFunction(params)
+		
+		assert(params["new_results_function"] == self.scraper.scrapeTrailersListFormat)
+		
+	def test_getNewResultsFunction_should_set_proper_params_for_scrapeTrailersListFormat_if_scraper_is_latest_game_trailers(self):
+		params = {"scraper":"latest_game_trailers"}
+		
+		self.scraper.getNewResultsFunction(params)
+		
+		assert(params["new_results_function"] == self.scraper.scrapeTrailersListFormat)
+
+	def test_getNewResultsFunction_should_set_proper_params_for_scrapeSimilarArtists_if_scraper_is_similar_artist(self):
+		params = {"scraper":"similar_artist"}
+		
+		self.scraper.getNewResultsFunction(params)
+		
+		assert(params["folder"] == "true")
+		assert(params["new_results_function"] == self.scraper.scrapeSimilarArtists)
+		
+	def test_getNewResultsFunction_should_set_proper_params_for_scrapeMusicCategoryHits_if_scraper_is_music_hits_and_category_is_in_params(self):
+		params = {"scraper":"music_hits","category":"some_category"}
+		
+		self.scraper.getNewResultsFunction(params)
+		
+		assert(params["new_results_function"] == self.scraper.scrapeMusicCategoryHits)
+		
+	def test_getNewResultsFunction_should_set_proper_params_for_scrapeMusicCategoryArtists_if_scraper_is_music_artists_and_category_is_in_params(self):
+		params = {"scraper":"music_artists","category":"some_category"}
+		
+		self.scraper.getNewResultsFunction(params)
+		
+		assert(params["new_results_function"] == self.scraper.scrapeMusicCategoryArtists)
+		
+	def test_getNewResultsFunction_should_set_proper_params_for_scrapeMusicCategories_if_scraper_is_music_artist_and_category_is_not_in_params(self):
+		params = {"scraper":"music_artists"}
+		
+		self.scraper.getNewResultsFunction(params)
+		
+		assert(params["new_results_function"] == self.scraper.scrapeMusicCategories)
 	
-	def ttest_getNewResultsFunction_should_set_proper_params_for_scrapeCategoryList_if_scraper_is_categories_and_category_is_not_in_params(self):
-		assert(False)
-	def ttest_getNewResultsFunction_should_set_proper_params_for_scrapeCategoryList_if_scraper_is_movies_and_category_is_not_in_params(self):
-		assert(False)
-	def ttest_getNewResultsFunction_should_set_proper_params_for_scrapeCategoryList_if_scraper_is_shows_and_category_is_not_in_params(self):
-		assert(False)
-	def ttest_getNewResultsFunction_should_set_proper_params_for_scrapeShowsGrid_if_scraper_is_shows_and_category_is_in_params(self):
-		assert(False)
-	def ttest_getNewResultsFunction_should_set_proper_params_for_scrapeShow_if_scraper_is_shows_and_show_is_in_params(self):
-		assert(False)
-	def ttest_getNewResultsFunction_should_set_proper_params_for_scrapeMoviesGrid_if_scraper_is_movies_and_category_is_in_params(self):
-		assert(False)
-	def ttest_getNewResultsFunction_should_set_proper_params_for_scrapeMovieSubCategory_if_scraper_is_movies_and_subcategory_is_in_params(self):
-		assert(False)
-	def ttest_getNewResultsFunction_should_set_proper_params_for_scrapeEducationCategories_if_scraper_is_education(self):
-		assert(False)
-	def ttest_getNewResultsFunction_should_set_proper_params_for_scrapeEducationSubCategories_if_scraper_is_education_and_category_is_in_params(self):
-		assert(False)
-	def ttest_getNewResultsFunction_should_set_proper_params_for_scrapeEducationCourses_if_scraper_is_education_and_course_is_in_params(self):
-		assert(False)
-	def ttest_getNewResultsFunction_should_set_proper_params_for_scrapeEducationVideos_if_scraper_is_education_and_playlist_is_in_params(self):
-		assert(False)
-	def ttest_getNewResultsFunction_should_set_proper_params_for_scrapeCategoriesGrid_if_scraper_is_categories_and_category_is_in_params(self):
-		assert(False)
-	def ttest_getNewResultsFunction_should_set_proper_params_for_scrapeGridFormat_if_trailer_is_in_params(self):
-		assert(False)
+	def test_getNewResultsFunction_should_set_proper_params_for_scrapeMusicCategories_if_scraper_is_music_hits_and_category_is_not_in_params(self):
+		params = {"scraper":"music_hits"}
+		
+		self.scraper.getNewResultsFunction(params)
+		
+		assert(params["new_results_function"] == self.scraper.scrapeMusicCategories)
+		
+	def test_getNewResultsFunction_should_set_proper_params_for_scrapeCategoryList_if_scraper_is_categories_and_category_is_not_in_params(self):
+		params = {"scraper":"categories"}
+		
+		self.scraper.getNewResultsFunction(params)
+		
+		assert(params["new_results_function"] == self.scraper.scrapeCategoryList)
+		
+	def test_getNewResultsFunction_should_set_proper_params_for_scrapeCategoryList_if_scraper_is_movies_and_category_is_not_in_params(self):
+		params = {"scraper":"movies"}
+		
+		self.scraper.getNewResultsFunction(params)
+		
+		assert(params["new_results_function"] == self.scraper.scrapeCategoryList)
+	
+	def test_getNewResultsFunction_should_set_proper_params_for_scrapeCategoryList_if_scraper_is_shows_and_category_is_not_in_params(self):
+		params = {"scraper":"shows"}
+		
+		self.scraper.getNewResultsFunction(params)
+		
+		assert(params["new_results_function"] == self.scraper.scrapeCategoryList)
+		
+	def test_getNewResultsFunction_should_set_proper_params_for_scrapeShowsGrid_if_scraper_is_shows_and_category_is_in_params(self):
+		params = {"scraper":"shows","category":"some_category"}
+		
+		self.scraper.getNewResultsFunction(params)
+		
+		assert(params["new_results_function"] == self.scraper.scrapeShowsGrid)
+		
+	def test_getNewResultsFunction_should_set_proper_params_for_scrapeShow_if_scraper_is_shows_and_show_is_in_params(self):
+		params = {"scraper":"shows","show":"some_show"}
+		
+		self.scraper.getNewResultsFunction(params)
+		
+		assert(params["new_results_function"] == self.scraper.scrapeShow)
+		
+	def test_getNewResultsFunction_should_set_proper_params_for_scrapeMoviesGrid_if_scraper_is_movies_and_category_is_in_params(self):
+		params = {"scraper":"movies", "category":"some_category"}
+		
+		self.scraper.getNewResultsFunction(params)
+		
+		assert(params["new_results_function"] == self.scraper.scrapeMoviesGrid)
+		
+	def test_getNewResultsFunction_should_set_proper_params_for_scrapeMovieSubCategory_if_scraper_is_movies_and_subcategory_is_in_params(self):
+		params = {"scraper":"movies","subcategory":"some_subcategory","category":"some_category"}
+		
+		self.scraper.getNewResultsFunction(params)
+		
+		assert(params["new_results_function"] == self.scraper.scrapeMovieSubCategory)
+		
+	def test_getNewResultsFunction_should_set_proper_params_for_scrapeEducationCategories_if_scraper_is_education(self):
+		params = {"scraper":"education"}
+		
+		self.scraper.getNewResultsFunction(params)
+		
+		assert(params["new_results_function"] == self.scraper.scrapeEducationCategories)
+		
+	def test_getNewResultsFunction_should_set_proper_params_for_scrapeEducationSubCategories_if_scraper_is_education_and_category_is_in_params(self):
+		params = {"scraper":"education","category":"some_category"}
+		
+		self.scraper.getNewResultsFunction(params)
+		
+		assert(params["new_results_function"] == self.scraper.scrapeEducationSubCategories)
+		
+	def test_getNewResultsFunction_should_set_proper_params_for_scrapeEducationCourses_if_scraper_is_education_and_course_is_in_params(self):
+		params = {"scraper":"education","courses":"some_course"}
+		
+		self.scraper.getNewResultsFunction(params)
+		
+		assert(params["new_results_function"] == self.scraper.scrapeEducationCourses)
+		
+	def test_getNewResultsFunction_should_set_proper_params_for_scrapeEducationVideos_if_scraper_is_education_and_playlist_is_in_params(self):
+		params = {"scraper":"education","playlist":"some_playlist"}
+		
+		self.scraper.getNewResultsFunction(params)
+		
+		assert(params["new_results_function"] == self.scraper.scrapeEducationVideos)
+		
+	def test_getNewResultsFunction_should_set_proper_params_for_scrapeCategoriesGrid_if_scraper_is_categories_and_category_is_in_params(self):
+		params = {"scraper":"categories","category":"some_category"}
+		
+		self.scraper.getNewResultsFunction(params)
+		
+		assert(params["new_results_function"] == self.scraper.scrapeCategoriesGrid)
+		
+	def test_getNewResultsFunction_should_set_proper_params_for_scrapeGridFormat_if_scraper_is_current_trailers(self):
+		params = {"scraper":"current_trailers"}
+		
+		self.scraper.getNewResultsFunction(params)
+		
+		assert(params["new_results_function"] == self.scraper.scrapeGridFormat)
+		
+	def test_getNewResultsFunction_should_set_proper_params_for_scrapeGridFormat_if_scraper_is_game_trailers(self):
+		params = {"scraper":"game_trailers"}
+		
+		self.scraper.getNewResultsFunction(params)
+		
+		assert(params["new_results_function"] == self.scraper.scrapeGridFormat)
+
+	def test_getNewResultsFunction_should_set_proper_params_for_scrapeGridFormat_if_scraper_is_popular_game_trailers(self):
+		params = {"scraper":"popular_game_trailers"}
+		
+		self.scraper.getNewResultsFunction(params)
+		
+		assert(params["new_results_function"] == self.scraper.scrapeGridFormat)
+
+	def test_getNewResultsFunction_should_set_proper_params_for_scrapeGridFormat_if_scraper_is_popular_trailers(self):
+		params = {"scraper":"popular_trailers"}
+		
+		self.scraper.getNewResultsFunction(params)
+		
+		assert(params["new_results_function"] == self.scraper.scrapeGridFormat)
+
+	def test_getNewResultsFunction_should_set_proper_params_for_scrapeGridFormat_if_scraper_is_trailers(self):
+		params = {"scraper":"trailers"}
+		
+		self.scraper.getNewResultsFunction(params)
+		
+		assert(params["new_results_function"] == self.scraper.scrapeGridFormat)
+
+	def test_getNewResultsFunction_should_set_proper_params_for_scrapeGridFormat_if_scraper_is_upcoming_game_trailers(self):
+		params = {"scraper":"upcoming_game_trailers"}
+		
+		self.scraper.getNewResultsFunction(params)
+		
+		assert(params["new_results_function"] == self.scraper.scrapeGridFormat)
+
+	def test_getNewResultsFunction_should_set_proper_params_for_scrapeGridFormat_if_scraper_is_upcoming_trailers(self):
+		params = {"scraper":"upcoming_trailers"}
+		
+		self.scraper.getNewResultsFunction(params)
+		
+		assert(params["new_results_function"] == self.scraper.scrapeGridFormat)
+		
+	'''
 	def ttest_createUrl_should_return_proper_url_for_scraper_param(self):
 		assert(False)
 	def ttest_createUrl_should_return_proper_url_for_categories_scraper(self):
