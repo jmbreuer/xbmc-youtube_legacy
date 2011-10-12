@@ -14,7 +14,7 @@ class MockYouTubeDepends:
 		
 		import YouTubeUtils
 		sys.modules[ "__main__" ].utils = Mock(spec=YouTubeUtils.YouTubeUtils)
-		sys.modules[ "__main__" ].utils.VALID_CHARS = "-_.() %s%s" % (string.ascii_letters, string.digits)
+		sys.modules[ "__main__" ].utils.INVALID_CHARS = "\\/:*?\"<>|"
 
 		import CommonFunctions
 		sys.modules[ "__main__" ].common = Mock(spec = CommonFunctions.CommonFunctions) 

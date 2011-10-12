@@ -150,8 +150,8 @@ class YouTubePlayer():
 	def saveSubtitle(self, result, video = {}):
 		get = video.get
 		
-		filename = ''.join(c for c in video['Title'] if c in self.utils.VALID_CHARS) + "-[" + get('videoid') + "]" + ".ssa"
-		path = os.path.join( self.xbmc.translatePath( "special://temp" ), filename )
+		filename = ''.join(c for c in video['Title'].decode("utf-8") if c not in self.utils.INVALID_CHARS) + "-[" + get('videoid') + "]" + ".ssa"
+		path = os.path.join( self.xbmc.translatePath( "special://temp" ).decode("utf-8"), filename )
 		
 		w = self.storage.openFile(path)
 		w.write(result)
@@ -288,10 +288,10 @@ class YouTubePlayer():
 		get = video.get
 		self.common.log("fetching subtitle if available")
 		
-		filename = ''.join(c for c in video['Title'] if c in self.utils.VALID_CHARS) + "-[" + get('videoid') + "]" + ".ssa"
-
-		download_path = os.path.join( self.settings.getSetting( "downloadPath" ), filename )
-		path = os.path.join( self.xbmc.translatePath( "special://temp" ), filename )
+		filename = ''.join(c for c in video['Title'].decode("utf-8") if c not in self.utils.INVALID_CHARS) + "-[" + get('videoid') + "]" + ".ssa"
+		download_path = os.path.join(self.settings.getSetting( "downloadPath" ).decode("utf-8"), filename )
+		#download_path = os.path.join( self.settings.getSetting( "downloadPath" ), filename )
+		path = os.path.join( self.xbmc.translatePath( "special://temp" ).decode("utf-8"), filename )
 		
 		set_subtitle = False
 		if self.xbmcvfs.exists(download_path):
@@ -607,7 +607,8 @@ class YouTubePlayer():
 		#Check if file has been downloaded locally and use that as a source instead
 		if (status == 200 and get("action","") != "download"):
 			path = self.settings.getSetting( "downloadPath" )
-			path = "%s%s-[%s].mp4" % (path, ''.join(c for c in video['Title'] if c in self.utils.VALID_CHARS), video["videoid"])
+			filename = ''.join(c for c in video['Title'].decode("utf-8") if c not in self.utils.INVALID_CHARS) + "-[" + get('videoid') + "]" + ".mp4"
+			path = os.path.join(path.decode("utf-8"), filename)
 			try:
 				if self.xbmcvfs.exists(path):
 					video['video_url'] = path
