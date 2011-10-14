@@ -16,7 +16,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, urllib, json
+import sys, urllib
 
 class YouTubeScraper():	
 	
@@ -97,6 +97,48 @@ class YouTubeScraper():
 		self.common.log("Done")
 		return (yobjects, status)
 		
+	def scrapeTrailersGridFormat(self, params = {}):
+		get = params.get
+		self.common.log("")
+		items = []
+		next = "false"
+		
+		url = self.createUrl(params)
+		result = self.core._fetchPage({"link":url})
+		
+		if result["status"] == 200:
+			pagination = self.common.parseDOM(result["content"], "div", { "class": "yt-uix-pager"})
+	
+			if (len(pagination) > 0):
+				tmp = str(pagination)
+				if (tmp.find("Next") > 0):
+					next = "true"
+			
+			
+			trailers = self.common.parseDOM(result["content"], "div", attrs = { "id": "popular-column" })
+			
+			if len(trailers) > 0:
+				ahref = self.common.parseDOM(result["content"], "a", attrs = { "class": "ux-thumb-wrap " }, ret = "href")
+				if len(ahref) == 0:
+					ahref = self.common.parseDOM(trailers, "a", attrs = { "class": "ux-thumb-wrap contains-addto" }, ret = "href")
+				
+				athumbs = self.common.parseDOM(trailers, "a", attrs = { "class": "ux-thumb-wrap "})
+				if len(athumbs) == 0:
+					athumbs = self.common.parseDOM(trailers, "a", attrs = { "class": "ux-thumb-wrap contains-addto"})
+				
+				videos = self.utils.extractVID(ahref)
+				
+				for index, videoid in enumerate(videos):
+					
+					thumb = self.common.parseDOM(athumbs[index], "img", attrs = { "alt": "Thumbnail"}, ret = "src")
+					if len(thumb) > 0:
+						thumb = thumb[0]
+					
+					items.append((videoid, thumb))
+		
+		self.common.log("Done")
+		return (items, result["status"]) 
+	
 #=================================== Categories  ============================================
 	def scrapeCategoriesGrid(self, params = {}):
 		get = params.get
@@ -925,7 +967,7 @@ class YouTubeScraper():
 		
 		if (get("scraper") in ['current_trailers','game_trailers','popular_game_trailers','popular_trailers','trailers','upcoming_game_trailers','upcoming_trailers']):
 			params["batch"] = "thumbnails"
-			function = self.scrapeGridFormat
+			function = self.scrapeTrailersGridFormat
 		
 		if function:
 			params["new_results_function"] = function
@@ -999,7 +1041,7 @@ class YouTubeScraper():
 				url = self.urls["education_category"] % get("courses")
 			if get("playlist"):
 				url = self.urls["playlist"] % get("playlist")
-				
+			
 		if (get("scraper") == "movies"):
 			if (get("category")):
 				category = get("category")
@@ -1018,12 +1060,12 @@ class YouTubeScraper():
 				url = self.urls["movies"] + "?hl=en"
 		if get("scraper") in ["music_artists","music_artist","similar_artist"]: 
 			if get("category"):
-				url = self.urls["music"] + category
+				url = self.urls["music"] + get("category")
 			
 			if get("artist"):
 				url = self.urls["artist"] % get("artist")
 		
-		if(get("scraper") in ["music_top100", "music"]):
+		if(get("scraper") in ["music_top100"]):
 			url = self.urls["music"]
 		
 		if (get("scraper") in "search_disco"):
@@ -1035,48 +1077,6 @@ class YouTubeScraper():
 		
 		return url
 	
-	def scrapeGridFormat(self, params = {}):
-		get = params.get
-		self.common.log("")
-		items = []
-		next = "false"
-		
-		url = self.createUrl(params)
-		result = self.core._fetchPage({"link":url})
-		
-		if result["status"] == 200:
-			pagination = self.common.parseDOM(result["content"], "div", { "class": "yt-uix-pager"})
-	
-			if (len(pagination) > 0):
-				tmp = str(pagination)
-				if (tmp.find("Next") > 0):
-					next = "true"
-			
-			
-			trailers = self.common.parseDOM(result["content"], "div", attrs = { "id": "popular-column" })
-			
-			if len(trailers) > 0:
-				ahref = self.common.parseDOM(result["content"], "a", attrs = { "class": "ux-thumb-wrap " }, ret = "href")
-				if len(ahref) == 0:
-					ahref = self.common.parseDOM(trailers, "a", attrs = { "class": "ux-thumb-wrap contains-addto" }, ret = "href")
-				
-				athumbs = self.common.parseDOM(trailers, "a", attrs = { "class": "ux-thumb-wrap "})
-				if len(athumbs) == 0:
-					athumbs = self.common.parseDOM(trailers, "a", attrs = { "class": "ux-thumb-wrap contains-addto"})
-				for i in range(0 , len(ahref)):
-					videoid = ahref[i] 
-						
-					if (videoid):
-						if (videoid.find("=") > -1):
-							videoid = videoid[videoid.find("=")+1:]
-					thumb = self.common.parseDOM(athumbs[i], "img", attrs = { "alt": "Thumbnail"}, ret = "src")
-					if len(thumb) > 0:
-						thumb = thumb[0]
-					items.append((videoid, thumb))
-		
-		self.common.log("Done")
-		return (items, result["status"]) 
-	
 	def scrapeCategoryList(self, params = {}):
 		get = params.get
 		self.common.log("")
@@ -1085,7 +1085,7 @@ class YouTubeScraper():
 		thumbnail = "explore"
 		yobjects = []
 		
-		if (get("scraper") != "categories"):
+		if (get("scraper") and get("scraper") != "categories"):
 			scraper = get("scraper")
 			thumbnail = get("scraper")
 		
@@ -1111,7 +1111,7 @@ class YouTubeScraper():
 					if title == "All Categories" or title == "Education" or title == "":
 						continue
 					item['Title'] = title
-
+					
 					cat = ahref[i].replace("/" + scraper + "/", "")
 
 					if get("scraper") == "categories":
@@ -1153,7 +1153,7 @@ class YouTubeScraper():
 		page = int(get("page", "0"))
 		per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.settings.getSetting( "perpage" ) ) ]
 				
-		if not get("page"):
+		if page == 0:
 			if get("scraper") == "shows" and get("show"):
 				(result, status) = params["new_results_function"](params)
 			else:
@@ -1165,6 +1165,8 @@ class YouTubeScraper():
 				if get("scraper") not in ["music_top100"]:
 					return (result, 303)
 				result = self.storage.retrieve(params)
+				if len(result) > 0:
+					status = 200
 			else:
 				self.storage.store(params, result)
 		else:
@@ -1177,14 +1179,13 @@ class YouTubeScraper():
 				next = 'true'
 			
 			if (get("fetch_all") != "true"):
+				print get("fetch_all")
 				result = result[(per_page * page):(per_page * (page + 1))]
 			if len(result) == 0:
 				return (result, status)
-		
 		if get("batch") == "thumbnails":
 			(result, status) = self.core.getBatchDetailsThumbnails(result, params)
 		elif get("batch"):
-			#(result, status) = self.cache.cacheFunction(self.core.getBatchDetails, result, params)
 			(result, status) = self.core.getBatchDetails(result, params)
 		
 		if get("batch"):
