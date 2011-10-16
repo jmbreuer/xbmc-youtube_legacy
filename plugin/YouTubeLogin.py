@@ -50,7 +50,7 @@ class YouTubeLogin():
 		self.settings.openSettings()
 		uname = self.settings.getSetting("username")
 		self.dbg = self.settings.getSetting("debug") == "true"
-
+		
 		if uname != "":
 			refreshed = False
 			if self.settings.getSetting( "oauth2_refresh_token" ) and ouname == uname and opass == self.settings.getSetting( "user_password" ):
