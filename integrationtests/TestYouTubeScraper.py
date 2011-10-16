@@ -6,13 +6,16 @@ from mock import Mock, patch
 
 class YouTubeScraperTests(BaseTestCase.BaseTestCase):
 	
-	def ttest_scrapeTrailersListFormat_should_scraper_latest_trailers_correctly(self):
+	def test_scrapeTrailersListFormat_should_scraper_latest_trailers_correctly(self):
 		self.navigation.listMenu({"scraper":"latest_trailers","path":"/root/explore/trailers/latest"})
 		
 		self.assert_directory_count_greater_than_or_equals(10)
 		self.assert_directory_count_less_than_or_equals(51)
 		self.assert_directory_is_a_video_list()
 		self.assert_directory_contains_only_unique_video_items()
+		self.assert_directory_items_should_have_thumbnails()
+		self.assert_directory_items_should_have_poster_thumbnails()
+
 		
 	def test_scrapeTrailersListFormat_should_scraper_current_trailers_correctly(self):
 		self.navigation.listMenu({"scraper":"current_trailers","path":"/root/explore/trailers/current"})
@@ -21,7 +24,8 @@ class YouTubeScraperTests(BaseTestCase.BaseTestCase):
 		self.assert_directory_count_less_than_or_equals(51)
 		self.assert_directory_is_a_video_list()
 		self.assert_directory_contains_only_unique_video_items()
-		assert(False)
+		self.assert_directory_items_should_have_thumbnails()
+		self.assert_directory_items_should_have_poster_thumbnails()
 
 if __name__ == "__main__":
 	nose.run()
