@@ -1,12 +1,13 @@
 import xml.dom.minidom as minidom
 import io
 
-class xbmcSettings:
+class xbmcSettings():
 	
-	settingsString = {}
+	def __init__(self):
+		self.settingsString = {}
 	
 	def load_strings(self, path = "./resources/settings.xml"):
-		print " *** *** loading settings strings  *** ***"
+		print " *** *** loading settings strings *** ***"
 		file = io.open(path).read()
 		dom = minidom.parseString(file);
 		strings = dom.getElementsByTagName("setting")
@@ -30,9 +31,10 @@ class xbmcSettings:
 		return self
 
 if __name__ == "__main__":
-	x = xbmcSettings()
-	print x.getSetting("downloads")
-	x.setSetting("downloads", "funkytown" )
+	x1 = xbmcSettings()
+	print "x1: " + x1.getSetting("downloads")
+	print "setting x1 = funkytown"
+	x1.setSetting("downloads", "funkytown" )
 	x2 = xbmcSettings()
-	print x2.getSetting("downloads")
-	print x.getSetting("downloads")		
+	print "x2: " + x2.getSetting("downloads")
+	print "x1: " + x1.getSetting("downloads")
