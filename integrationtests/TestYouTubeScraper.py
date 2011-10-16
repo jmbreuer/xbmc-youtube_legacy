@@ -6,7 +6,7 @@ from mock import Mock, patch
 
 class YouTubeScraperTests(BaseTestCase.BaseTestCase):
 	
-	def test_scrapeTrailersListFormat_should_scraper_latest_trailers_correctly(self):
+	def ttest_scrapeTrailersListFormat_should_scraper_latest_trailers_correctly(self):
 		self.navigation.listMenu({"scraper":"latest_trailers","path":"/root/explore/trailers/latest"})
 		
 		self.assert_directory_count_greater_than_or_equals(10)
@@ -24,4 +24,4 @@ class YouTubeScraperTests(BaseTestCase.BaseTestCase):
 		assert(False)
 
 if __name__ == "__main__":
-	nose.runmodule()
+	nose.run()
