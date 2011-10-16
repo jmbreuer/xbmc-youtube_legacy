@@ -46,6 +46,7 @@ class YouTubeScraperTests(BaseTestCase.BaseTestCase):
 		self.assert_directory_contains_only_unique_video_items()
 		self.assert_directory_items_should_have_thumbnails()
 		self.assert_directory_items_should_have_poster_thumbnails()
+		self.assert_directory_should_have_next_folder()
 
 	def test_scrapeTrailersListFormat_should_scrape_latest_game_trailers_correctly(self):
 		self.navigation.listMenu({"scraper":"latest_game_trailers","path":"/root/explore/trailers/popular"})
@@ -66,6 +67,7 @@ class YouTubeScraperTests(BaseTestCase.BaseTestCase):
 		self.assert_directory_contains_only_unique_video_items()
 		self.assert_directory_items_should_have_thumbnails()
 		self.assert_directory_items_should_have_poster_thumbnails()
+		self.assert_directory_should_have_next_folder()
 	
 if __name__ == "__main__":
 	nose.run()
