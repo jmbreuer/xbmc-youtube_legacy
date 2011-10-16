@@ -116,3 +116,32 @@ class BaseTestCase(unittest2.TestCase):
 			print "Directory list: \r\n" + repr(args)
 			
 		assert(len(non_unique) == 0)
+	
+	def assert_directory_items_should_have_thumbnails(self):
+		args = sys.modules["__main__"].xbmcgui.ListItem.call_args_list
+		
+		missing_thumb_count = 0
+		for call in args:
+			if call[1]["thumbnailImage"].find("http://") == -1: 
+				missing_thumb_count += 1
+		
+		if missing_thumb_count > 1:
+			print "Directory contains more than one item with an invalid thumbnail: " 
+			print "List Items: \r\n" + repr(args)
+		
+		assert(missing_thumb_count <= 1)
+		
+	def assert_directory_items_should_have_poster_thumbnails(self):
+		args = sys.modules["__main__"].xbmcgui.ListItem.call_args_list
+		
+		missing_poster_count = 0
+		for call in args:
+			if call[1]["thumbnailImage"].find("poster") == -1: 
+				missing_poster_count += 1
+		
+		if missing_poster_count > 1:
+			print "Directory contains more than one item with an invalid thumbnail: " 
+			print "List Items: \r\n" + repr(args)
+		
+		assert(missing_poster_count <= 1)
+	
