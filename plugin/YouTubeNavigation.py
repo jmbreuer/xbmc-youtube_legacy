@@ -129,7 +129,7 @@ class YouTubeNavigation():
 			self.xbmc.executebuiltin("Container.SetViewMode(500)")
 		
 		self.xbmcplugin.endOfDirectory( handle=int( sys.argv[ 1 ] ), succeeded=True, cacheToDisc=cache )
-
+	
 	def executeAction(self, params = {}):
 		get = params.get
 		if (get("action") == "settings"):
