@@ -1,4 +1,3 @@
-import MockYouTubeDepends
 import BaseTestCase
 import unittest2
 import nose
@@ -7,7 +6,8 @@ from YouTubeScraper import YouTubeScraper
 
 class YouTubePlayerTests(BaseTestCase.BaseTestCase):
 	
-	def ttest_scrapeTrailersListFormat_should_scraper_recent_trailers_correctly(self):
+	def test_scrapeTrailersListFormat_should_scraper_recent_trailers_correctly(self):
+		print "hello world"
 		assert(False)
 		
 if __name__ == "__main__":
