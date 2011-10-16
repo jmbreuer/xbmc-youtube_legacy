@@ -78,7 +78,9 @@ class YouTubeScraper():
 		items = []
 		if (len(trailers) > 0):
 			ahref = self.common.parseDOM(trailers, "a", attrs = {"class": " yt-uix-hovercard-target", "id": ".*?" }, ret = "href")
-			athumb = self.common.parseDOM(trailers, "img", attrs = { "alt": "Thumbnail" }, ret = "src")
+			print "honk honk " + repr(ahref)
+			athumb = self.common.parseDOM(trailers, "img", attrs = { "alt": "Thumbnail" }, ret = "data-thumb")
+			print "somk somk " + repr(athumb) 
 			if len(ahref) == len(athumb):
 				for i in range(0, len(ahref)):
 					videoid = ahref[i]
@@ -118,26 +120,21 @@ class YouTubeScraper():
 			trailers = self.common.parseDOM(result["content"], "div", attrs = { "id": "popular-column" })
 			
 			if len(trailers) > 0:
-				ahref = self.common.parseDOM(result["content"], "a", attrs = { "class": "ux-thumb-wrap " }, ret = "href")
-				if len(ahref) == 0:
-					ahref = self.common.parseDOM(trailers, "a", attrs = { "class": "ux-thumb-wrap contains-addto" }, ret = "href")
+				ahref = self.common.parseDOM(trailers, "a", attrs = { "class": 'ux-thumb-wrap.*?' }, ret = "href")
 				
-				athumbs = self.common.parseDOM(trailers, "a", attrs = { "class": "ux-thumb-wrap "})
-				if len(athumbs) == 0:
-					athumbs = self.common.parseDOM(trailers, "a", attrs = { "class": "ux-thumb-wrap contains-addto"})
+				athumbs = self.common.parseDOM(trailers, "a", attrs = { "class": "ux-thumb-wrap.*?"})
 				
 				videos = self.utils.extractVID(ahref)
 				
 				for index, videoid in enumerate(videos):
-					
-					thumb = self.common.parseDOM(athumbs[index], "img", attrs = { "alt": "Thumbnail"}, ret = "src")
+					thumb = self.common.parseDOM(athumbs[index], "img", attrs = { "alt": "Thumbnail"}, ret = "data-thumb")
 					if len(thumb) > 0:
 						thumb = thumb[0]
 					
 					items.append((videoid, thumb))
 		
 		self.common.log("Done")
-		return (items, result["status"]) 
+		return (items, result["status"])
 	
 #=================================== Categories  ============================================
 	def scrapeCategoriesGrid(self, params = {}):
