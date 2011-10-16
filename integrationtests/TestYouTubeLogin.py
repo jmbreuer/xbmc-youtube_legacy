@@ -14,6 +14,8 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
 		print "nick: " + sys.modules["__main__"].settings.getSetting("nick")
 		print "username: " + sys.modules["__main__"].settings.getSetting("username")
 		print "pass: " + sys.modules["__main__"].settings.getSetting("user_password")
+		print "auth: " + sys.modules["__main__"].settings.getSetting("auth")
+		print "oauth2_access_token: " + sys.modules["__main__"].settings.getSetting("oauth2_access_token")
 		assert(False)
 	
 if __name__ == "__main__":
