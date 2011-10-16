@@ -1,5 +1,5 @@
 class MockYouTubeDepends:
-	common = ""
+	
 	def mock(self):
 		import sys, string
 		from mock import Mock
@@ -12,6 +12,9 @@ class MockYouTubeDepends:
 		sys.modules[ "__main__" ].login = "" 
 		
 		sys.modules[ "__main__" ].cache = Mock()
+		sys.modules[ "__main__" ].cache.cacheFunction.side_effect = self.execute
+		sys.modules[ "__main__" ].cache.sqlGetMulti.return_value = []
+		sys.modules[ "__main__" ].cache.sqlGet.return_value = ""
 	
 	def mockXBMC(self):
 		import sys
@@ -25,7 +28,7 @@ class MockYouTubeDepends:
 		sys.modules[ "__main__" ].xbmc.translatePath = Mock()
 		sys.modules[ "__main__" ].xbmc.translatePath.return_value = "testing"
 		sys.modules[ "__main__" ].xbmc.log = Mock()
-		#sys.modules[ "__main__" ].xbmc.log.side_effect = self.log
+		sys.modules[ "__main__" ].xbmc.log.side_effect = self.log
 		sys.modules[ "__main__" ].xbmc.getSkinDir = Mock()
 		sys.modules[ "__main__" ].xbmc.getSkinDir.return_value = "testSkinPath"
 		sys.modules[ "__main__" ].xbmc.getInfoLabel = Mock()
@@ -45,3 +48,6 @@ class MockYouTubeDepends:
 	def log(self, description, level = 0):
 		import inspect
 		print "[%s] %s : '%s'" % ("YouTube", inspect.stack()[1][3], description)
+		
+	def execute(self, function, params):
+		return function(params)
