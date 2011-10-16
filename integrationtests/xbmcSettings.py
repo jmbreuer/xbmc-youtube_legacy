@@ -15,7 +15,7 @@ class xbmcSettings():
 		for string in strings:
 			self.settingsString[string.getAttribute("id")] = string.getAttribute("value")		
 
-	def __call__(self, id, value = ""):
+	def __call__(self, id = "", value = ""):
 		
 		if not self.settingsString:
 			self.load_strings()
