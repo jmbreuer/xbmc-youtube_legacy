@@ -44,15 +44,20 @@ downloader = ""
 storage = ""
 login = ""
 player = ""
+cache = ""
 
 cookiejar = cookielib.LWPCookieJar()
 opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookiejar))
 urllib2.install_opener(opener)
 
 if (__name__ == "__main__" ):
-	import StorageServer
+	try:
+		import StorageServer
+	except:
+		import storageserverdummy as StorageServer
 	cache = StorageServer.StorageServer()
 	cache.table_name = "YouTube"
+
 	import CommonFunctions
 	common = CommonFunctions.CommonFunctions() 
 	import YouTubeUtils
