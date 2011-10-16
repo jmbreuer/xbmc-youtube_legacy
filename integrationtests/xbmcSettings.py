@@ -1,5 +1,5 @@
 import xml.dom.minidom as minidom
-import io
+import io, inspect
 
 class xbmcSettings():
 	
@@ -16,6 +16,7 @@ class xbmcSettings():
 			self.settingsString[string.getAttribute("id")] = string.getAttribute("value")		
 
 	def __call__(self, id, value = ""):
+		
 		if not self.settingsString:
 			self.load_strings()
 		
@@ -27,7 +28,7 @@ class xbmcSettings():
 		
 		return ""
 
-	def __getattr__(self, id, value =""):
+	def __getattr__(self, name):
 		return self
 
 if __name__ == "__main__":
