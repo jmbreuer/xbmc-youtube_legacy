@@ -16,6 +16,7 @@ class BaseTestCase(unittest2.TestCase):
 		self.intializePlugin()
 		
 	def intializePlugin(self):
+		sys.argv = ["something",-1,"something_else"]
 		import YouTubeUtils
 		sys.modules[ "__main__" ].utils = YouTubeUtils.YouTubeUtils()
 		import CommonFunctions
@@ -39,4 +40,4 @@ class BaseTestCase(unittest2.TestCase):
 		import YouTubePlaylistControl
 		sys.modules[ "__main__" ].playlist = YouTubePlaylistControl.YouTubePlaylistControl()
 		import YouTubeNavigation
-		sys.modules[ "__main__" ].navigation = YouTubeNavigation.YouTubeNavigation()
+		self.navigation = YouTubeNavigation.YouTubeNavigation()
