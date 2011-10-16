@@ -10,36 +10,8 @@ class MockYouTubeDepends:
 		sys.modules[ "__main__" ].dbg = True
 		sys.modules[ "__main__" ].dbglevel = 10
 		sys.modules[ "__main__" ].login = "" 
-		sys.modules[ "__main__" ].language = Mock() # TODO: We need a better way to specify these 
 		
-		import YouTubeUtils
-		sys.modules[ "__main__" ].utils = YouTubeUtils.YouTubeUtils()
-
-		import CommonFunctions
-		sys.modules[ "__main__" ].common = CommonFunctions.CommonFunctions() 
-		
-		sys.modules[ "__main__" ].cache = Mock()
-
-		import YouTubeStorage
-		sys.modules[ "__main__" ].storage = YouTubeStorage.YouTubeStorage()
-		import YouTubeCore
-		sys.modules[ "__main__" ].core = Mock(spec=YouTubeCore.YouTubeCore)
-		import YouTubeLogin 
-		sys.modules[ "__main__" ].login = Mock(spec=YouTubeLogin.YouTubeLogin)
-		import YouTubeFeeds
-		sys.modules[ "__main__" ].feeds = Mock(spec=YouTubeFeeds.YouTubeFeeds())
-		import YouTubeScraper 
-		sys.modules[ "__main__" ].scraper = Mock(spec=YouTubeScraper.YouTubeScraper())
-		import YouTubePlayer
-		sys.modules[ "__main__" ].player = Mock(spec=YouTubePlayer.YouTubePlayer())
-		import YouTubeDownloader
-		sys.modules[ "__main__" ].downloader = Mock(spec=YouTubeDownloader.YouTubeDownloader())
-		import YouTubeScraper
-		sys.modules[ "__main__" ].scraper = Mock(spec=YouTubeScraper.YouTubeScraper())
-		import YouTubePlaylistControl
-		sys.modules[ "__main__" ].playlist = Mock(spec=YouTubePlaylistControl.YouTubePlaylistControl())
-		import YouTubeNavigation
-		sys.modules[ "__main__" ].navigation = YouTubeNavigation.YouTubeNavigation()
+		sys.modules[ "__main__" ].cache = Mock()		
 	
 	def mockXBMC(self):
 		import sys
@@ -51,6 +23,7 @@ class MockYouTubeDepends:
 		sys.modules[ "__main__" ].xbmc = Mock(spec=xbmc)
 		sys.modules[ "__main__" ].xbmc.translatePath = Mock()
 		sys.modules[ "__main__" ].xbmc.translatePath.return_value = "testing"
+		sys.modules[ "__main__" ].xbmc.log.side_effect = self.log
 		sys.modules[ "__main__" ].xbmc.getSkinDir = Mock()
 		sys.modules[ "__main__" ].xbmc.getSkinDir.return_value = "testSkinPath"
 		sys.modules[ "__main__" ].xbmc.getInfoLabel.return_value = "some_info_label"
@@ -60,12 +33,10 @@ class MockYouTubeDepends:
 		
 		sys.modules[ "__main__" ].xbmcplugin = Mock(spec=xbmcplugin)
 		sys.modules[ "__main__" ].xbmcvfs = Mock(spec=xbmcvfs)
-		sys.modules[ "__main__" ].settings = Mock(spec= xbmcaddon.Addon())
+		sys.modules[ "__main__" ].settings = Mock(spec= xbmcaddon.Addon()) # TODO: We need a better way to specify th
 		sys.modules[ "__main__" ].settings.getAddonInfo.return_value = "somepath"
-
-		sys.modules["DialogDownloadProgress"] = __import__("mock")
-		sys.modules["DialogDownloadProgress"].DownloadProgress = Mock()
-
+		sys.modules[ "__main__" ].language = Mock()  # we need a proper mock for this
+	
 	def log(self, description, level = 0):
 		import inspect
 		print "[%s] %s : '%s'" % ("YouTube", inspect.stack()[1][3], description)
