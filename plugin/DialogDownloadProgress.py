@@ -6,7 +6,7 @@ from traceback import print_exc
 settings = sys.modules[ "__main__" ].settings
 addonDir  = settings.getAddonInfo( "path" )
 
-XBMC_SKIN  = xbmc.getSkinDir()
+XBMC_SKIN  = sys.modules[ "__main__" ].xbmc.getSkinDir()
 SKINS_PATH = os.path.join( addonDir, "resources", "skins" )
 ADDON_SKIN = ( "default", XBMC_SKIN )[ os.path.exists( os.path.join( SKINS_PATH, XBMC_SKIN ) ) ]
 MEDIA_PATH = os.path.join( SKINS_PATH, ADDON_SKIN, "media" )
