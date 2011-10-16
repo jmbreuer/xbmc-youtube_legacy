@@ -41,3 +41,78 @@ class BaseTestCase(unittest2.TestCase):
 		sys.modules[ "__main__" ].playlist = YouTubePlaylistControl.YouTubePlaylistControl()
 		import YouTubeNavigation
 		self.navigation = YouTubeNavigation.YouTubeNavigation()
+		
+	def assert_directory_count_greater_than_or_equals(self, count):
+		args = sys.modules["__main__"].xbmcplugin.addDirectoryItem.call_args_list
+		
+		if len(args) < count:
+			print "Directory list length %s is not greater than or equal to expected list lengt %s" % (repr(len(args)), repr(count))
+		
+		assert(len(args) >= count)
+	
+	def assert_directory_count_less_than_or_equals(self, count):
+		args = sys.modules["__main__"].xbmcplugin.addDirectoryItem.call_args_list
+		
+		if len(args) > count:
+			print "Directory list length %s is not less than or equal to expected list lengt %s" % (repr(len(args)), repr(count))
+		
+		assert(len(args) <= count)
+
+	def assert_directory_count_equals(self, count):
+		args = sys.modules["__main__"].xbmcplugin.addDirectoryItem.call_args_list
+		
+		if len(args) != count:
+			print "Expected directory list length %s does not match actual list lengt %s" % (repr(count), repr(len(args)))
+		
+		assert(len(args) == count)
+	
+	def assert_directory_is_a_video_list(self):
+		folder_count = 0
+		args = sys.modules["__main__"].xbmcplugin.addDirectoryItem.call_args_list
+		
+		for call in args:
+			if call[1]["isFolder"] == True:
+				folder_count += 1
+		
+		if folder_count > 1:
+			print "Directory is not a video list, it contains %s folders (Max 1 allowed)" % folder_count
+			print "Directory list: \r\n" + repr(args)
+
+		assert(folder_count <= 1)
+		
+	def assert_directory_is_a_folder_list(self):
+		video_count = 0
+		args = sys.modules["__main__"].xbmcplugin.addDirectoryItem.call_args_list
+		
+		for call in args:
+			if call[1]["isFolder"] == False:
+				video_count += 1
+		
+		if video_count > 0:
+			print "Directory is not a folder list, it contains %s videos" % video_count
+			print "Directory list: \r\n" + repr(args)
+			
+		assert(video_count == 0)
+		
+	def assert_directory_contains_only_unique_video_items(self):
+		video_ids = []
+		non_unique = []
+		args = sys.modules["__main__"].xbmcplugin.addDirectoryItem.call_args_list
+		
+		for call in args:
+			url = call[1]["url"]
+			if url.find("videoid=") > 0:
+				video = url[url.find("videoid=") + len("videoid="):]
+				if video.find("&"):
+					video = video[:video.find("&")]
+				
+				if video:
+					if video in video_ids:
+						non_unique.append(video)
+					video_ids.append(video)
+		
+		if len(non_unique) > 0:
+			print "Directory contains one or more duplicate videoids.\r\n Duplicates: %s \r\n Full List: %s" % (repr(non_unique), repr(video_ids)) 
+			print "Directory list: \r\n" + repr(args)
+			
+		assert(len(non_unique) == 0)
