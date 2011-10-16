@@ -67,8 +67,6 @@ class YouTubeScraper():
 	def scrapeTrailersListFormat (self, params = {}):
 		get = params.get
 		self.common.log("")
-
-		yobjects = []
 		
 		url = self.createUrl(params)
 		result = self.core._fetchPage({"link":url})
@@ -78,66 +76,58 @@ class YouTubeScraper():
 		items = []
 		if (len(trailers) > 0):
 			ahref = self.common.parseDOM(trailers, "a", attrs = {"class": " yt-uix-hovercard-target", "id": ".*?" }, ret = "href")
-			athumb = self.common.parseDOM(trailers, "img", attrs = { "alt": "Thumbnail" }, ret = "src")
-			if len(ahref) == len(athumb):
-				for i in range(0, len(ahref)):
-					videoid = ahref[i]
+			
+			athumbs = self.common.parseDOM(trailers, "img", attrs = { "alt": "Thumbnail" }, ret = "data-thumb")
+			
+			videos = self.utils.extractVID(ahref)
+			
+			for index, videoid in enumerate(videos):
+				items.append((videoid, athumbs[index]))
 				
-					if (videoid):
-						if (videoid.find("=") > -1):
-							videoid = videoid[videoid.find("=")+1:]  
-							items.append( (videoid, athumb[i]) )
-		
-		if (items):
-			(yobjects, status) = self.core.getBatchDetailsThumbnails(items)
-		
-		if (not yobjects):
-			return (yobjects, 500)
-		
 		self.common.log("Done")
-		return (yobjects, status)
+		return (items, result["status"])
 		
 	def scrapeTrailersGridFormat(self, params = {}):
 		get = params.get
 		self.common.log("")
 		items = []
-		next = "false"
+		next = True
+		page = 0 
 		
-		url = self.createUrl(params)
-		result = self.core._fetchPage({"link":url})
-		
-		if result["status"] == 200:
-			pagination = self.common.parseDOM(result["content"], "div", { "class": "yt-uix-pager"})
-	
-			if (len(pagination) > 0):
-				tmp = str(pagination)
-				if (tmp.find("Next") > 0):
-					next = "true"
+		while next:
+			params["page"] = str(page)
+			url = self.createUrl(params)
+			result = self.core._fetchPage({"link":url})
 			
+			page += 1
 			
-			trailers = self.common.parseDOM(result["content"], "div", attrs = { "id": "popular-column" })
-			
-			if len(trailers) > 0:
-				ahref = self.common.parseDOM(result["content"], "a", attrs = { "class": "ux-thumb-wrap " }, ret = "href")
-				if len(ahref) == 0:
-					ahref = self.common.parseDOM(trailers, "a", attrs = { "class": "ux-thumb-wrap contains-addto" }, ret = "href")
+			next = False
+			if result["status"] == 200:
+				pagination = self.common.parseDOM(result["content"], "div", { "class": "yt-uix-pager"})
+				if (len(pagination) > 0):
+					tmp = str(pagination)
+					if (tmp.find("Next") > 0):
+						next = True
 				
-				athumbs = self.common.parseDOM(trailers, "a", attrs = { "class": "ux-thumb-wrap "})
-				if len(athumbs) == 0:
-					athumbs = self.common.parseDOM(trailers, "a", attrs = { "class": "ux-thumb-wrap contains-addto"})
+				trailers = self.common.parseDOM(result["content"], "div", attrs = { "id": "popular-column" })
 				
-				videos = self.utils.extractVID(ahref)
-				
-				for index, videoid in enumerate(videos):
+				if len(trailers) > 0:
+					ahref = self.common.parseDOM(trailers, "a", attrs = { "class": 'ux-thumb-wrap.*?' }, ret = "href")
 					
-					thumb = self.common.parseDOM(athumbs[index], "img", attrs = { "alt": "Thumbnail"}, ret = "src")
-					if len(thumb) > 0:
-						thumb = thumb[0]
+					athumbs = self.common.parseDOM(trailers, "a", attrs = { "class": "ux-thumb-wrap.*?"})
 					
-					items.append((videoid, thumb))
+					videos = self.utils.extractVID(ahref)
+					
+					for index, videoid in enumerate(videos):
+						thumb = self.common.parseDOM(athumbs[index], "img", attrs = { "alt": "Thumbnail"}, ret = "data-thumb")
+						if len(thumb) > 0:
+							thumb = thumb[0]
+						
+						items.append((videoid, thumb))
 		
+		del params["page"]
 		self.common.log("Done")
-		return (items, result["status"]) 
+		return (items, result["status"])
 	
 #=================================== Categories  ============================================
 	def scrapeCategoriesGrid(self, params = {}):
@@ -915,8 +905,6 @@ class YouTubeScraper():
 		if (get("scraper") == "music_artist"):
 			function = self.scrapeArtist
 			params["batch"] = "true"
-		if (get("scraper") in [ "latest_game_trailers", "latest_trailers"]):
-			function = self.scrapeTrailersListFormat
 		if (get("scraper") == "similar_artist"):
 			function = self.scrapeSimilarArtists
 			params["folder"] = "true"
@@ -968,7 +956,10 @@ class YouTubeScraper():
 		if (get("scraper") in ['current_trailers','game_trailers','popular_game_trailers','popular_trailers','trailers','upcoming_game_trailers','upcoming_trailers']):
 			params["batch"] = "thumbnails"
 			function = self.scrapeTrailersGridFormat
-		
+		if (get("scraper") in [ "latest_game_trailers", "latest_trailers"]):
+			params["batch"] = "thumbnails"
+			function = self.scrapeTrailersListFormat
+				
 		if function:
 			params["new_results_function"] = function
 		
@@ -1183,6 +1174,7 @@ class YouTubeScraper():
 				result = result[(per_page * page):(per_page * (page + 1))]
 			if len(result) == 0:
 				return (result, status)
+		
 		if get("batch") == "thumbnails":
 			(result, status) = self.core.getBatchDetailsThumbnails(result, params)
 		elif get("batch"):
