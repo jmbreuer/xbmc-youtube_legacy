@@ -145,3 +145,13 @@ class BaseTestCase(unittest2.TestCase):
 		
 		assert(missing_poster_count <= 1)
 	
+	def assert_directory_should_have_next_folder(self):
+		args = sys.modules["__main__"].xbmcplugin.addDirectoryItem.call_args_list
+		
+		next_folder_count = 0
+		
+		for call in args:
+			if call[1]["url"].find("page=") > 0:
+				next_folder_count += 1
+		
+		assert(next_folder_count == 1)
