@@ -4,7 +4,7 @@ import nose, sys
 from mock import Mock, patch
 
 
-class YouTubeScraperTests(BaseTestCase.BaseTestCase):
+class TestYouTubeTrailersScraper(BaseTestCase.BaseTestCase):
 	
 	def test_scrapeTrailersListFormat_should_scrape_latest_trailers_correctly(self):
 		self.navigation.listMenu({"scraper":"latest_trailers","path":"/root/explore/trailers/latest"})
@@ -15,7 +15,6 @@ class YouTubeScraperTests(BaseTestCase.BaseTestCase):
 		self.assert_directory_contains_only_unique_video_items()
 		self.assert_directory_items_should_have_thumbnails()
 		self.assert_directory_items_should_have_poster_thumbnails()
-
 		
 	def test_scrapeTrailersListFormat_should_scrape_current_trailers_correctly(self):
 		self.navigation.listMenu({"scraper":"current_trailers","path":"/root/explore/trailers/current"})
@@ -70,4 +69,4 @@ class YouTubeScraperTests(BaseTestCase.BaseTestCase):
 		self.assert_directory_should_have_next_folder()
 	
 if __name__ == "__main__":
-	nose.run()
+	nose.runmodule()
