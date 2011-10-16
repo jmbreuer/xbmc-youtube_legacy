@@ -11,7 +11,7 @@ class MockYouTubeDepends:
 		sys.modules[ "__main__" ].dbglevel = 10
 		sys.modules[ "__main__" ].login = "" 
 		
-		sys.modules[ "__main__" ].cache = Mock()		
+		sys.modules[ "__main__" ].cache = Mock()
 	
 	def mockXBMC(self):
 		import sys
@@ -21,11 +21,14 @@ class MockYouTubeDepends:
 		
 		#Setup basic xbmc dependencies
 		sys.modules[ "__main__" ].xbmc = Mock(spec=xbmc)
+		sys.modules[ "__main__" ].xbmc.getSkinDir = Mock()
 		sys.modules[ "__main__" ].xbmc.translatePath = Mock()
 		sys.modules[ "__main__" ].xbmc.translatePath.return_value = "testing"
-		sys.modules[ "__main__" ].xbmc.log.side_effect = self.log
+		sys.modules[ "__main__" ].xbmc.log = Mock()
+		#sys.modules[ "__main__" ].xbmc.log.side_effect = self.log
 		sys.modules[ "__main__" ].xbmc.getSkinDir = Mock()
 		sys.modules[ "__main__" ].xbmc.getSkinDir.return_value = "testSkinPath"
+		sys.modules[ "__main__" ].xbmc.getInfoLabel = Mock()
 		sys.modules[ "__main__" ].xbmc.getInfoLabel.return_value = "some_info_label"
 		sys.modules[ "__main__" ].xbmcaddon = Mock(spec=xbmcaddon)
 		sys.modules[ "__main__" ].xbmcgui = Mock(spec=xbmcgui)
@@ -33,9 +36,11 @@ class MockYouTubeDepends:
 		
 		sys.modules[ "__main__" ].xbmcplugin = Mock(spec=xbmcplugin)
 		sys.modules[ "__main__" ].xbmcvfs = Mock(spec=xbmcvfs)
-		sys.modules[ "__main__" ].settings = Mock(spec= xbmcaddon.Addon()) # TODO: We need a better way to specify th
-		sys.modules[ "__main__" ].settings.getAddonInfo.return_value = "somepath"
-		sys.modules[ "__main__" ].language = Mock()  # we need a proper mock for this
+		
+		import xbmcSettings
+		sys.modules[ "__main__" ].settings = xbmcSettings.xbmcSettings()
+		import xbmcLanguage
+		sys.modules[ "__main__" ].language = xbmcLanguage.xbmcLanguage()
 	
 	def log(self, description, level = 0):
 		import inspect
