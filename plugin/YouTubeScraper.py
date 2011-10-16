@@ -1152,7 +1152,7 @@ class YouTubeScraper():
 		next = 'false'
 		page = int(get("page", "0"))
 		per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.settings.getSetting( "perpage" ) ) ]
-				
+		
 		if page == 0:
 			if get("scraper") == "shows" and get("show"):
 				(result, status) = params["new_results_function"](params)
