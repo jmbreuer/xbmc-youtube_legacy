@@ -154,4 +154,7 @@ class BaseTestCase(unittest2.TestCase):
 			if call[1]["url"].find("page=") > 0:
 				next_folder_count += 1
 		
+		if next_folder_count != 1:
+			print "Expected Directory Listing to contain a next folder but didn't find any:"
+			print "List Items: \r\n" + repr(args)
 		assert(next_folder_count == 1)
