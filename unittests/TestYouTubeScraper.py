@@ -10,7 +10,7 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 	
 	def setUp(self):
 		super(self.__class__,self).setUp()
-		sys.modules["__main__"].common.parseDOM.return_value = ["some_string"]
+		sys.modules["__main__"].common.parseDOM.return_value = ["some_string","some_string","some_string"]
 		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content","status":200}
 		sys.modules["__main__"].utils.makeAscii.return_value = "some_ascii_string"
 		sys.modules["__main__"].utils.replaceHtmlCodes.return_value = "some_html_free_string"
@@ -43,18 +43,6 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 		
 		assert(sys.modules["__main__"].common.parseDOM.call_count > 0)
 	
-	def test_scrapeTrailersListFormat_should_call_getBatchDetailsThumbnails_with_videoid_list(self):
-		sys.modules["__main__"].core.getBatchDetailsThumbnails.return_value = ([{"videoid":"video_id1"},{"videoid":"video_id2"}],  200)
-		container = ["some_trailers_container"]
-		thumbs = ["thumb_1","thumb_2"]
-		videoids = ["some_thing=video_id1","some_thing=video_id2"]
-		dom = [thumbs, videoids, container]
-		sys.modules[ "__main__" ].common.parseDOM.side_effect = lambda x = "", y = "", attrs = "", ret ="": dom.pop()
-		
-		self.scraper.scrapeTrailersListFormat({"scraper":"trailers"})
-		
-		sys.modules["__main__"].core.getBatchDetailsThumbnails.assert_called_with([("video_id1","thumb_1"),("video_id2","thumb_2")])
-
 	def test_scrapeTrailersGridFormat_should_call_createUrl_to_get_proper_url(self):
 		sys.modules["__main__"].common.parseDOM.side_effect = [["some_string"],["some_string"],["some_string"],["some_string1","some_string2","some_string3"],["some_string"],["some_string"],["some_string"],[],[]]
 		
@@ -101,21 +89,7 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 		assert(result[1][1] == "some_string")
 		assert(result[2][0] == "some_id_3")
 		assert(result[2][1] == "some_string")
-	
-	def test_getBatchDetailsThumbnails_return_error_status_if_no_videos_are_found(self):
-		sys.modules["__main__"].core.getBatchDetailsThumbnails.return_value = ([], 500)
-		container = ["some_trailers_container"]
-		thumbs = ["thumb_1","thumb_2"]
-		videoids = ["some_thing=video_id1","some_thing=video_id2"]
-		sys.modules[ "__main__" ].common.parseDOM.side_effect = [container, videoids, thumbs] 
-		
-		result, status = self.scraper.scrapeTrailersListFormat({"scraper":"trailers"})
-		
-		sys.modules["__main__"].core.getBatchDetailsThumbnails.assert_called_with([("video_id1","thumb_1"),("video_id2","thumb_2")])
-		
-		assert(result == [])
-		assert(status == 500)
-		
+			
 	def test_scrapeCategoriesGrid_should_call_parseDOM_to_find_paginator(self):
 		
 		result, status = self.scraper.scrapeCategoriesGrid()
