@@ -16,6 +16,11 @@ class BaseTestCase(unittest2.TestCase):
 		self.intializePlugin()
 		
 	def intializePlugin(self):
+		import cookielib, urllib2
+		sys.modules[ "__main__" ].cookiejar = cookielib.LWPCookieJar()
+		opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(sys.modules[ "__main__" ].cookiejar))
+		urllib2.install_opener(opener)
+		
 		sys.argv = ["something",-1,"something_else"]
 		import YouTubeUtils
 		sys.modules[ "__main__" ].utils = YouTubeUtils.YouTubeUtils()
