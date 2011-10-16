@@ -1,12 +1,12 @@
 import os, sys, re
-import xbmc
-import xbmcgui
 from traceback import print_exc
 
+xbmc = sys.modules[ "__main__" ].xbmc
 settings = sys.modules[ "__main__" ].settings
+xbmcgui = sys.modules[ "__main__" ].xbmcgui
 addonDir  = settings.getAddonInfo( "path" )
 
-XBMC_SKIN  = sys.modules[ "__main__" ].xbmc.getSkinDir()
+XBMC_SKIN  = xbmc.getSkinDir()
 SKINS_PATH = os.path.join( addonDir, "resources", "skins" )
 ADDON_SKIN = ( "default", XBMC_SKIN )[ os.path.exists( os.path.join( SKINS_PATH, XBMC_SKIN ) ) ]
 MEDIA_PATH = os.path.join( SKINS_PATH, ADDON_SKIN, "media" )
