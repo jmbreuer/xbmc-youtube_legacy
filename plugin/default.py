@@ -51,6 +51,12 @@ opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookiejar))
 urllib2.install_opener(opener)
 
 if (__name__ == "__main__" ):
+	if dbg:
+		print plugin + " ARGV: " + repr(sys.argv)
+	else:
+		print plugin
+	
+
 	try:
 		import StorageServer
 	except:
@@ -81,11 +87,6 @@ if (__name__ == "__main__" ):
 	import YouTubeNavigation
 	navigation = YouTubeNavigation.YouTubeNavigation()
 
-	if dbg:
-		print plugin + " ARGV: " + repr(sys.argv)
-	else:
-		print plugin
-	
 	if ( not settings.getSetting( "firstrun" ) ):
 		login.login()
 		settings.setSetting( "firstrun", '1' )

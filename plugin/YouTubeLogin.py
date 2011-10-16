@@ -43,8 +43,6 @@ class YouTubeLogin():
 		self.common = sys.modules[ "__main__" ].common
 		self.cache = sys.modules[ "__main__" ].cache
 		
-		#urllib2.install_opener(sys.modules[ "__main__" ].opener)
-		
 	def login(self, params = {}):
 		self.common.log("")
 		ouname = self.settings.getSetting("username")
@@ -103,7 +101,7 @@ class YouTubeLogin():
 				url_data = { "state_wrapper": state_wrapper[0],
 					     "submit_access": "true"}
 
-				fetch_options = { "link": newurl[0], "url_data": url_data, "no-language-cookie": "true" }
+				fetch_options = { "link": newurl[0].replace("&amp;", "&"), "url_data": url_data, "no-language-cookie": "true" }
 				self.common.log("Part B")
 				continue;
 
