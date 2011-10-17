@@ -772,9 +772,9 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 	def test_scrapeMoviesGrid_should_call_createUrl_to_get_proper_url(self):
 		sys.modules["__main__"].common.parseDOM.side_effect = [["some_string"],["0"],["some_string"],["some_string","some_title1"],["some_string","some_title2"],[],[]]
 		
-		self.scraper.scrapeMoviesGrid({})		
+		self.scraper.scrapeMoviesGrid({})
 		
-		self.scraper.createUrl.assert_any_call({"batch":"thumbnails"})
+		self.scraper.createUrl.assert_any_call({})
 
 	def test_scrapeMoviesGrid_should_call_fetchPage_to_get_page_content(self):
 		sys.modules["__main__"].common.parseDOM.side_effect = [["some_string"],["0"],["some_string"],["some_string","some_title1"],["some_string","some_title2"],[],[]]
@@ -805,10 +805,10 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 		assert(sys.modules["__main__"].common.parseDOM.call_count > 2)
 		
 	def test_scrapeMoviesGrid_should_return_list_of_videoid_and_thumbnail_tuples(self):
-		sys.modules["__main__"].common.parseDOM.side_effect = [["some_string"],["0"],["some_string"],["some_video_id"],["some_thumb"],[],[]]
+		sys.modules["__main__"].common.parseDOM.side_effect = [["some_string"],["some_video_id"],["some_thumb"],[],[]]
 		
 		result, status = self.scraper.scrapeMoviesGrid({})		
-				
+		
 		assert(result[0][0] == "some_video_id")
 		assert(result[0][1] == "some_thumb")
 	
