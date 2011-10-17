@@ -2,7 +2,7 @@ import BaseTestCase
 import nose
 
 
-class TestYouTubeTrailersScraper(BaseTestCase.BaseTestCase):
+class TestYouTubeMusicScraper(BaseTestCase.BaseTestCase):
 	
 	def test_plugin_should_scrape_music_hits_category_listing_correctly(self):
 		self.navigation.listMenu({"scraper":"music_hits", "category":"dance", "path":"/root/explore/music/hits"})

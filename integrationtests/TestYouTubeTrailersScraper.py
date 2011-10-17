@@ -10,7 +10,7 @@ class TestYouTubeTrailersScraper(BaseTestCase.BaseTestCase):
 		self.assert_directory_count_less_than_or_equals(51)
 		self.assert_directory_is_a_video_list()
 		self.assert_directory_contains_only_unique_video_items()
-		self.assert_directory_items_should_have_thumbnails()
+		self.assert_directory_items_should_have_external_thumbnails()
 		self.assert_directory_items_should_have_poster_thumbnails()
 		
 	def test_plugin_should_scrape_current_trailers_correctly(self):
@@ -20,7 +20,7 @@ class TestYouTubeTrailersScraper(BaseTestCase.BaseTestCase):
 		self.assert_directory_count_less_than_or_equals(51)
 		self.assert_directory_is_a_video_list()
 		self.assert_directory_contains_only_unique_video_items()
-		self.assert_directory_items_should_have_thumbnails()
+		self.assert_directory_items_should_have_external_thumbnails()
 		self.assert_directory_items_should_have_poster_thumbnails()
 
 	def test_plugin_should_scrape_upcoming_trailers_correctly(self):
@@ -30,7 +30,7 @@ class TestYouTubeTrailersScraper(BaseTestCase.BaseTestCase):
 		self.assert_directory_count_less_than_or_equals(51)
 		self.assert_directory_is_a_video_list()
 		self.assert_directory_contains_only_unique_video_items()
-		self.assert_directory_items_should_have_thumbnails()
+		self.assert_directory_items_should_have_external_thumbnails()
 		self.assert_directory_items_should_have_poster_thumbnails()
 
 	def test_plugin_should_scrape_popular_trailers_correctly(self):
@@ -40,7 +40,7 @@ class TestYouTubeTrailersScraper(BaseTestCase.BaseTestCase):
 		self.assert_directory_count_less_than_or_equals(51)
 		self.assert_directory_is_a_video_list()
 		self.assert_directory_contains_only_unique_video_items()
-		self.assert_directory_items_should_have_thumbnails()
+		self.assert_directory_items_should_have_external_thumbnails()
 		self.assert_directory_items_should_have_poster_thumbnails()
 		self.assert_directory_should_have_next_folder()
 
@@ -51,7 +51,7 @@ class TestYouTubeTrailersScraper(BaseTestCase.BaseTestCase):
 		self.assert_directory_count_less_than_or_equals(51)
 		self.assert_directory_is_a_video_list()
 		self.assert_directory_contains_only_unique_video_items()
-		self.assert_directory_items_should_have_thumbnails()
+		self.assert_directory_items_should_have_external_thumbnails()
 		self.assert_directory_items_should_have_poster_thumbnails()
 
 	def test_plugin_should_scrape_popular_game_trailers_correctly(self):
@@ -61,7 +61,7 @@ class TestYouTubeTrailersScraper(BaseTestCase.BaseTestCase):
 		self.assert_directory_count_less_than_or_equals(51)
 		self.assert_directory_is_a_video_list()
 		self.assert_directory_contains_only_unique_video_items()
-		self.assert_directory_items_should_have_thumbnails()
+		self.assert_directory_items_should_have_external_thumbnails()
 		self.assert_directory_items_should_have_poster_thumbnails()
 		self.assert_directory_should_have_next_folder()
 	
