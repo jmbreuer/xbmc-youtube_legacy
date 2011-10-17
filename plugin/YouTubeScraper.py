@@ -846,7 +846,6 @@ class YouTubeScraper():
 		get = params.get
 		self.common.log("")
 		
-		params["batch"] = "thumbnails"
 		next = "true"
 		items = []
 		page = 0
@@ -858,25 +857,23 @@ class YouTubeScraper():
 			url = self.createUrl(params)
 			result = self.core._fetchPage({"link":url})
 			
-			dom_pages = self.common.parseDOM(result["content"], "div", attrs = {"class": "yt-uix-pager"})
-			links = self.common.parseDOM("".join(dom_pages), "a", attrs = {"class": "yt-uix-pager-link" }, ret = "data-page")
-			self.common.log("scrapeMoviesGrid " + str(len(dom_pages)) + " - " + str(len(links)))
-			if len(links) > 0:
-				for link in links:
-					if int(link) > page:
-						self.common.log("scrapeMoviesGrid - next page ? link: " + str(link) + " > page: " + str(page + 1))
-						next = "true"
+			pagination = self.common.parseDOM(result["content"], "div", attrs = { "class": "yt-uix-pager"})
 
-			dom_list = self.common.parseDOM(result["content"], "ul", { "class": "browse-item-list"})
-			vidids = self.common.parseDOM(dom_list, "span", ret = "data-video-ids")
-			thumbs = self.common.parseDOM(dom_list, "img", ret = "data-thumb")
+			if (len(pagination) > 0):
+				tmp = str(pagination)
+				if (tmp.find("Next") > 0):
+					next = "true"
+						
+			videoids = self.common.parseDOM(result["content"], "button", { "class": "addto-button.*?"}, ret = "data-video-ids")
+			thumbs = self.common.parseDOM(result["content"], "img", attrs = { "alt": "Thumbnail" }, ret = "data-thumb")
 			
 			page += 1
-			if len(vidids) == len(thumbs) and len(vidids) > 0:
-				for i in range(0 , len(vidids)):
-					items.append( (vidids[i], thumbs[i]) )
-				
+			if len(videoids) == len(thumbs) and len(videoids) > 0:
+				for i in range(0 , len(videoids)):
+					items.append( (videoids[i], thumbs[i]) )
+		
 		del params["page"]
+		print repr(items)
 		self.common.log("Done : " + str(len(items)))
 		return (items, result["status"])
 
@@ -930,12 +927,12 @@ class YouTubeScraper():
 			function = self.scrapeShow
 			
 		if get("scraper") == "movies" and get("category"):
-			params["batch"] = "thumbnails"
-			function = self.scrapeMoviesGrid		
 			if get("subcategory"):
 				params["folder"] = "true"
-				del params["batch"]
 				function = self.scrapeMovieSubCategory
+			else:
+				params["batch"] = "thumbnails"
+				function = self.scrapeMoviesGrid
 		
 		if get("scraper") == "education":
 			params["folder"] = "true"
