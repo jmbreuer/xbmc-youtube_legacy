@@ -3,8 +3,8 @@ import nose
 
 class TestYouTubeTrailersScraper(BaseTestCase.BaseTestCase):
 	
-	def test_plugin_should_scrape_latest_trailers_correctly(self):
-		self.navigation.listMenu({"scraper":"latest_trailers","path":"/root/explore/trailers/latest"})
+	def test_plugin_should_scrape_shows_category_listing_correctly(self):
+		self.navigation.listMenu({"scraper":"shows","path":"/root/explore/shows", "folder":"true"})
 		
 		self.assert_directory_count_greater_than_or_equals(10)
 		self.assert_directory_count_less_than_or_equals(51)
