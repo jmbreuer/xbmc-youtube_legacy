@@ -23,7 +23,7 @@ config_files = [
 
 # plaforms on which the exe check defaults to off
 # Windows and IronPython
-exe_allowed_platforms = ('win32', 'cli')
+exe_allowed_platforms = ('win32', 'cli', 'freebsd8')
 
 
 class NoSuchOptionError(Exception):
