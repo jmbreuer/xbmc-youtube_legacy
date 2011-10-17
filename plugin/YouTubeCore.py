@@ -569,11 +569,9 @@ class YouTubeCore():
 			return auth
 		else:
 			if isinstance(self.login, str):
-				import YouTubeLogin as temp_YTLogin
-				temp_login = temp_YTLogin.YouTubeLogin()
-				(result, status) = temp_login._httpLogin()
-			else:
-				(result, status) = self.login.login()
+				self.login = sys.modules[ "__main__" ].login
+
+			(result, status) = self.login.login()
 
 			if status == 200:
 				self.common.log("returning new auth")
