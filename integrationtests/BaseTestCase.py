@@ -163,3 +163,24 @@ class BaseTestCase(unittest2.TestCase):
 			print "Expected Directory Listing to contain a next folder but didn't find any:"
 			print "List Items: \r\n" + repr(args)
 		assert(next_folder_count == 1)
+		
+	def assert_directory_items_contain(self, param):
+		args = sys.modules["__main__"].xbmcplugin.addDirectoryItem.call_args_list
+		
+		missing_count = 0
+		
+		for call in args:
+			url = call[1]["url"]
+			if url.find(param + "=") < 0:
+				missing_count += 1
+			else:
+				value = url[url.find(param + "=") + len(param + "="):]
+				if value.find("&") > 0:
+					value = value[:value.find("&")]
+				if len(value) == 0:
+					missing_count += 1
+
+		if missing_count > 1:
+			print 'Expected directory items url\'s to contain the "%s" but more than one item was missing this property'
+			print "Directory list: \r\n" + repr(args)
+		
