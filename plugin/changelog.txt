@@ -1,7 +1,7 @@
 [B]TODO:[/B]
 - Fix RTMP'e seems refactor broke it, and make a unittest + integrations test that parsing works (playpath seems wrong)
   - Make rtmp suck setup once Handshake 10 is supported.
-- Integration Test.
+- Integration Test
 - Integration tests of scraper module (i.e. hit YouTube and ensure that the scraper gets the correct information)
 - Allow users to change sort on searches
 - Scrape Education.
