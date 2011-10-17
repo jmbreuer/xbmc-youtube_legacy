@@ -18,7 +18,7 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
 		print "oauth2_access_token: " + sys.modules["__main__"].settings.getSetting("oauth2_access_token")
 		assert(False)
 
-	def test_login_should_perform_basic_2factor_login_correctly(self):
+	def test_plugin_should_perform_basic_2factor_login_correctly(self):
 		sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'pyotp-src'))
 		import pyotp
 		totp = pyotp.TOTP("fbfkkk27ffmaihzg")
