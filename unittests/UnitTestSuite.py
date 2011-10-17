@@ -1,5 +1,4 @@
-import nose, os
+import nose
 
 if __name__ == "__main__":
-	print os.getcwd()
 	nose.run()
