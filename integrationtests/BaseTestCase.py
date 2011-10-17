@@ -22,10 +22,10 @@ class BaseTestCase(unittest2.TestCase):
 		urllib2.install_opener(opener)
 		
 		sys.argv = ["something",-1,"something_else"]
-		import YouTubeUtils
-		sys.modules[ "__main__" ].utils = YouTubeUtils.YouTubeUtils()
 		import CommonFunctions
 		sys.modules[ "__main__" ].common = CommonFunctions.CommonFunctions() 
+		import YouTubeUtils
+		sys.modules[ "__main__" ].utils = YouTubeUtils.YouTubeUtils()
 		import YouTubeStorage
 		sys.modules[ "__main__" ].storage = YouTubeStorage.YouTubeStorage()
 		import YouTubeCore

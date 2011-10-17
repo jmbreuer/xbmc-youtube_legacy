@@ -24,6 +24,7 @@ class YouTubeUtils:
 		self.xbmc = sys.modules["__main__"].xbmc
 		self.settings = sys.modules[ "__main__" ].settings
 		self.language = sys.modules[ "__main__" ].language
+		self.common = sys.modules[ "__main__" ].common
 		self.plugin = sys.modules[ "__main__"].plugin
 		self.dbg = sys.modules[ "__main__" ].dbg
 		self.PR_VIDEO_QUALITY = self.settings.getSetting("pr_video_quality") == "true"
@@ -144,12 +145,16 @@ class YouTubeUtils:
 		if isinstance(items, str):
 			items = [items]
 
+		self.common.log(repr(items), 4)
+
 		ret_list = []
 		for item in items:
 			item = item[item.find("v=") + 2:]
 			if item.find("&") > -1:
 				item = item[:item.find("&")]
 			ret_list.append(item)
+
+		self.common.log(repr(ret_list), 4)
 		return ret_list
 
 if __name__ == '__main__':	

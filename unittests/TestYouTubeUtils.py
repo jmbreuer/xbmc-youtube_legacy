@@ -229,5 +229,22 @@ class TestYouTubeUtils(BaseTestCase.BaseTestCase):
 		assert(result[0] == "bla2")
 		assert(result[1] == "bla3")
 		
+	def test_extractVID_should_call_log_twice_with_correct_input(self):
+		test = [ "?v=bla2", "&v=bla3&", "&v=bla4&amp;", "&amp;v=bla5&"]
+		utils = YouTubeUtils()
+		result = utils.extractVID(test)
+
+		print repr(result)
+		print repr(sys.modules["__main__"].common.log.call_args_list)
+
+		sys.modules["__main__"].common.log.assert_any_call(repr(test), 4)
+		sys.modules["__main__"].common.log.assert_any_call(repr([ "bla2", "bla3", "bla4", "bla5"]), 4)
+
+		assert(len(result) == 4)
+		assert(result[0] == "bla2")
+		assert(result[1] == "bla3")
+		assert(result[2] == "bla4")
+		assert(result[3] == "bla5")
+
 if __name__ == '__main__':
 	nose.runmodule()
