@@ -6,6 +6,7 @@ from CommonFunctions import CommonFunctions
 
 class TestCommonFunctions(BaseTestCase.BaseTestCase):
 	link_html = "<a href='bla.html'>Link Test</a>"
+	false_positive_link_html = "<a href='fake.html' id='link'>Link Test fake</a><a href='real.html' id='link' class='real'>Link Test real</a><a href='reallyfake.html' id='link' class='really fake'>Link Test really fake</a>"
 	link_artist_html = '<a href="/watch?v=bla-id&amp;feature=artist">Link Test</a>'
 	img_html = "<img src='bla.png' alt='Thumbnail' />"
 		
@@ -65,6 +66,14 @@ class TestCommonFunctions(BaseTestCase.BaseTestCase):
 		
 		assert(len(ret) == 1 )	
 		assert(ret[0] == "bla.html")
+
+	def test_parseDOM_should_correctly_extract_the_href_attribute_of_a_link_tag(self):
+		common  = CommonFunctions()
+		common.log = sys.modules[ "__main__" ].log_override.log
+		
+		ret = common.parseDOM(self.false_positive_link_html, "a", attrs = { "id": "link", "class": "real" }, ret = "href")
+		assert(len(ret) == 1 )	
+		assert(ret[0] == "real.html")
 
 	def test_parseDOM_should_correctly_extract_the_href_attribute_of_a_link_tag_with_wildcard_search(self):
 		common  = CommonFunctions()

@@ -67,7 +67,6 @@ class CommonFunctions():
 			html = html[:end]
 		elif start > -1:
 			html = html[start + len(match):]
-		#html = html[start:end + len(endstr)]
 
 		self.log("done html length: " + str(len(html)) + ", content: " + html, 2)
 		return html
