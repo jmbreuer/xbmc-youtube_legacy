@@ -50,5 +50,5 @@ class MockYouTubeDepends:
 		import inspect
 		print "[%s] %s : '%s'" % ("YouTube", inspect.stack()[1][3], description)
 		
-	def execute(self, function, params):
-		return function(params)
+	def execute(self, function, *args):
+		return function(*args)
