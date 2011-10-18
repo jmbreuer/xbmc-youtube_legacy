@@ -603,16 +603,9 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 		self.scraper.scrapeShowEpisodes({})
 		
 		assert(sys.modules["__main__"].common.parseDOM.call_count > 0)
-		
-	def test_scrapeShowEpisodes_should_call_extractVID_to_find_video_elements(self):
-		sys.modules["__main__"].utils.extractVID.return_value = ["some_id_1","some_id_2","some_id_3"]
-		
-		self.scraper.scrapeShowEpisodes({})
-		
-		assert(sys.modules["__main__"].utils.extractVID.call_count > 0)
 	
 	def test_scrapeShowEpisodes_should_return_list_of_video_ids(self):
-		sys.modules["__main__"].utils.extractVID.return_value = ["some_id_1","some_id_2","some_id_3"]
+		sys.modules["__main__"].common.parseDOM.return_value = ["some_id_1","some_id_2","some_id_3"]
 				
 		result, status = self.scraper.scrapeShowEpisodes({})		
 		
@@ -627,7 +620,7 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 		assert(sys.modules["__main__"].common.parseDOM.call_count > 1)
 		
 	def test_scrapeShowEpisodes_should_fetch_entire_list(self):
-		sys.modules["__main__"].common.parseDOM.side_effect = [["some_string"],["some_string start=20"],["some_string"],["some_string"],["some_string"],["some_string"],[],[]]
+		sys.modules["__main__"].common.parseDOM.side_effect = [["some_string"],["some_string"],["some_string start=20"],["some_string"],["some_string"],["some_string"],["some_string"],[],[]]
 		
 		self.scraper.scrapeShowEpisodes({})		
 		
@@ -645,18 +638,18 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 		
 		sys.modules["__main__"].core._fetchPage.assert_any_call({"link":"some_url"})
 				
-	def test_scrapeShow_should_cacheFunction_with_scrape_show_episodes_pointer_if_season_list_isnt_found(self):
+	def test_scrapeShow_should_call_cacheFunction_with_scrape_show_episodes_pointer_if_season_list_isnt_found(self):
 		
 		self.scraper.scrapeShow({})
 		
 		sys.modules["__main__"].cache.cacheFunction.assert_called_with(self.scraper.scrapeShowEpisodes, {})
 	
-	def test_scrapeShow_should_cacheFunction_with_scrape_show_seasons_pointer_if_season_list_is_found(self):
-		sys.modules["__main__"].core._fetchPage.return_value = {"content":'something class="seasons"',"status":200}
+	def test_scrapeShow_should_call_cacheFunction_with_scrape_show_seasons_pointer_if_season_list_is_found(self):
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":'something class="seasons "',"status":200}
 		
 		self.scraper.scrapeShow({"batch":"something"})
 		
-		sys.modules["__main__"].cache.cacheFunction.assert_called_with(self.scraper.scrapeShowSeasons, 'something class="seasons"', {"folder":"true"})
+		sys.modules["__main__"].cache.cacheFunction.assert_called_with(self.scraper.scrapeShowSeasons, 'something class="seasons "', {"folder":"true"})
 		
 	def test_scrapeShowSeasons_should_call_parseDOM_to_find_seasons(self):
 		
@@ -1289,20 +1282,7 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 		result, status = self.scraper.paginator({"scraper":"music_top100","new_results_function":"some_function_pointer"})
 		
 		assert(sys.modules["__main__"].storage.retrieve.call_count > 0)
-		
-	def test_paginator_should_call_storage_store_if_results_are_found(self):
-		
-		result, status = self.scraper.paginator({"scraper":"music_top100","new_results_function":"some_function_pointer"})
-		
-		assert(sys.modules["__main__"].storage.store.call_count > 0)
-		
-	def test_paginator_should_call_storage_retrieve_if_pages_is_set(self):
-		sys.modules["__main__"].storage.retrieve.return_value = ["some_store_value"]
-		
-		result, status = self.scraper.paginator({"scraper":"some_scraper","new_results_function":"some_function_pointer", "page":"3"})
-		
-		assert(sys.modules["__main__"].storage.retrieve.call_count > 0)
-		
+			
 	def test_paginator_should_call_getBatchDetailsThumbnails_if_batch_is_thumbnails(self):
 		sys.modules["__main__"].core.getBatchDetailsThumbnails.return_value = ([],200)
 		
@@ -1371,7 +1351,7 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 			videos.append("some_cached_string_" + str(i))
 			i += 1
 			
-		sys.modules["__main__"].storage.retrieve.return_value = videos
+		sys.modules["__main__"].cache.cacheFunction.return_value = (videos, 200)
 		
 		result, status = self.scraper.paginator({"scraper":"some_scraper","new_results_function":"some_function_pointer","page":"1"})
 		
