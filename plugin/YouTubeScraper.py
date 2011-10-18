@@ -634,14 +634,10 @@ class YouTubeScraper():
 		
 		url = self.createUrl(params)
 		result = self.core._fetchPage({"link":url})
-			
-		videos = self.common.parseDOM(result["content"], "a", attrs = { "href": ".*feature=sh_e_sl&amp;list=SL" }, ret = "href")
-		videos = self.utils.extractVID(videos)
-		if len(videos) == 0:
-			videos = self.common.parseDOM(result["content"], "div", attrs = { "class": "entity-video-item-content" } ) 
-			videos = self.common.parseDOM(videos, "a", ret = "href")
-			videos = self.utils.extractVID(videos)
-
+		
+		videos = self.common.parseDOM(result["content"], "div", attrs = { "class": "show-season-videos" } )
+		videos = self.common.parseDOM(videos, "button", ret = "data-video-ids")
+		
 		nexturl = self.common.parseDOM(result["content"], "button", { "class": " yt-uix-button" }, ret = "data-next-url")
 		
 		if (len(nexturl) > 0):
@@ -684,7 +680,7 @@ class YouTubeScraper():
 		url = self.createUrl(params)
 		result = self.core._fetchPage({"link":url})
 		
-		if ((result["content"].find('class="seasons"') == -1) or get("season")):
+		if ((result["content"].find('class="seasons "') == -1) or get("season")):
 			self.common.log("scrapeShow parsing videolist for single season")
 			return self.cache.cacheFunction(self.scrapeShowEpisodes, params)
 		
@@ -699,19 +695,21 @@ class YouTubeScraper():
 		self.common.log("scrapeShowSeasons : " + repr(params))
 		
 		yobjects = []
-
-		seasons = self.common.parseDOM(html, "div", attrs = {"class": "seasons"})
+		
+		seasons = self.common.parseDOM(html, "div", attrs = {"class": "seasons "})
 		if (len(seasons) > 0):
 			params["folder"] = "true"
-
-			season_list = self.common.parseDOM(seasons, "span", attrs = {"class": "yt-uix-button-content"})
+			
+			season_list = self.common.parseDOM(seasons, "button", attrs = { "type": "button" }, ret = "data-season-number")
+			
+			print repr(season_list)
 			atitle = self.common.parseDOM(seasons, "button", attrs = { "type": "button" }, ret = "title")
 
 			if len(season_list) == len(atitle) and len(atitle) > 0:
 				for i in range(0, len(atitle)):
 					item = {}
 					
-					season_id = season_list[i]
+					season_id = season_list[i] 
 					title = self.language(30058) % season_id.encode("utf-8")
 					title += " - " + atitle[i].encode("utf-8")
 					item["Title"] = title
@@ -790,6 +788,7 @@ class YouTubeScraper():
 			del params["page"]
 		
 		self.common.log("Done")
+		print "funky : " + repr(items)
 		return (items, result["status"])
 
 
@@ -1141,34 +1140,33 @@ class YouTubeScraper():
 		page = int(get("page", "0"))
 		per_page = ( 10, 15, 20, 25, 30, 40, 50, )[ int( self.settings.getSetting( "perpage" ) ) ]
 		
-		if page == 0:
-			if get("scraper") == "shows" and get("show"):
-				(result, status) = params["new_results_function"](params)
-			else:
-				(result, status) = self.cache.cacheFunction(params["new_results_function"], params)
-			
-			self.common.log("paginator new result " + str(repr(result))[0:50])
-			
-			if len(result) == 0:
-				if get("scraper") not in ["music_top100"]:
-					return (result, 303)
-				result = self.storage.retrieve(params)
-				if len(result) > 0:
-					status = 200
-			else:
-				self.storage.store(params, result)
+		if get("page"):
+			del params["page"]
+		
+		if get("scraper") == "shows" and get("show"):
+			(result, status) = params["new_results_function"](params)
 		else:
+			(result, status) = self.cache.cacheFunction(params["new_results_function"], params)
+		
+		self.common.log("paginator new result " + str(repr(len(result[0:50]))))
+		
+		if len(result) == 0:
+			if get("scraper") not in ["music_top100"]:
+				return (result, 303)
 			result = self.storage.retrieve(params)
 			if len(result) > 0:
 				status = 200
+		elif get("scraper") in ["music_top100"]:
+			self.storage.store(params, result)
 		
 		if not get("folder") or (get("scraper") == "shows" and get("category")):
 			if ( per_page * ( page + 1 ) < len(result) ):
 				next = 'true'
 			
 			if (get("fetch_all") != "true"):
-				print get("fetch_all")
 				result = result[(per_page * page):(per_page * (page + 1))]
+			print " tomomomom " + repr(len(result))
+			print " tomomomom2 " + repr(result)
 			if len(result) == 0:
 				return (result, status)
 		
@@ -1179,6 +1177,8 @@ class YouTubeScraper():
 		
 		if get("batch"):
 			del params["batch"]
+		if page > 0:
+			params["page"] = str(page)
 		
 		if not get("page") and (get("scraper") == "search_disco" or get("scraper") == "music_artist"):
 			thumbnail = result[0].get("thumbnail")
