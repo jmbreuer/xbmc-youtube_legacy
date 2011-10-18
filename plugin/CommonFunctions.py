@@ -42,10 +42,7 @@ class CommonFunctions():
 	def getDOMContent(self, html, name, match):
 		self.log("match: " + match, 2)
 		start = html.find(match)
-		if name == "img":
-			endstr = ">"
-		else:
-			endstr = "</" + name + ">"
+		endstr = "</" + name + ">"
 		end = html.find(endstr, start)
 
 		pos = html.find("<" + name, start + 1 )
@@ -63,10 +60,10 @@ class CommonFunctions():
 			html = ""
 		elif start > -1 and end > -1:
 			html = html[start + len(match):end]
-		elif end > -1:
-			html = html[:end]
-		elif start > -1:
-			html = html[start + len(match):]
+		#elif end > -1:
+		#	html = html[:end]
+		#elif start > -1:
+		#	html = html[start + len(match):]
 
 		self.log("done html length: " + str(len(html)) + ", content: " + html, 2)
 		return html
@@ -152,7 +149,7 @@ class CommonFunctions():
 					self.log(match, 3)
 					self.log(lst2, 3)
 				lst = lst2
-			else:
+			elif name != "img":
 				self.log("Getting element content for %s matches " % len(lst), 2)
 				lst2 = []
 				for match in lst:

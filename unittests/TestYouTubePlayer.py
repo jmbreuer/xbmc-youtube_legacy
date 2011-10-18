@@ -182,6 +182,16 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		player.getSubtitleUrl({"videoid":"some_id"})
 		
 		sys.modules["__main__"].core._fetchPage.assert_called_with({"link":player.urls["timed_text_index"] % ('some_id')}) 
+
+	def test_getTranscriptionUrl_should_call_return_correct_url(self):
+		player = YouTubePlayer()
+		sys.modules["__main__"].core._fetchPage = Mock()
+		sys.modules["__main__"].core._fetchPage.return_value = {"status":303, "content":""}
+                sys.modules["__main__"].settings.getSetting = Mock()
+                sys.modules["__main__"].settings.getSetting.return_value = "1"		
+		ret = player.getTranscriptionUrl({"videoid":"some_id", "ttsurl":"http://some.url/transcript"})
+		print ret;
+		assert(ret == "http://some.url/transcript&type=trackformat=1&lang=en&kind=asr&name=&v=some_id&tlang=en")
 		
 	def test_getSubtitleUrl_should_find_url_with_proper_language_code(self):
 		player = YouTubePlayer()
@@ -222,7 +232,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		result = player.transformSubtitleXMLtoSRT(self.readTestInput("subtitleTest.xml",False).encode("utf-8")) 
 		
 		assert(sys.modules[ "__main__"].utils.replaceHtmlCodes.call_count > 0) 
-	
+
 	def test_transformSubtitleXMLtoSRT_should_correctly_find_start_time_for_text_elements(self):
 		input = '<?xml version="1.0" encoding="utf-8" ?><transcript>\n\
 				<text start="14.017" dur="2.07">first</text>\n\
