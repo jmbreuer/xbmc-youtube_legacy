@@ -34,7 +34,6 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
 		assert(len(oauth2_access_token) > 40)
 
 	def test_plugin_should_perform_basic_2factor_login_correctly(self):
-		sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'pyotp-src'))
 		import pyotp
 		totp = pyotp.TOTP("fbfkkk27ffmaihzg")
 		userpin = totp.now()
