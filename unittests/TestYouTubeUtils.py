@@ -156,7 +156,7 @@ class TestYouTubeUtils(BaseTestCase.BaseTestCase):
 		
 		assert(call == (('testingPath/', 'thumbnails'), {}))
 		
-	def test_showErrorMessage_should_call_showMessage(self):
+	def test_showErrorMessage_should_call_showMessage_with_default(self):
 		sys.modules["__main__"].language.return_value = "ERROR"
 		utils = YouTubeUtils()
 		utils.showMessage = Mock()	
@@ -164,6 +164,32 @@ class TestYouTubeUtils(BaseTestCase.BaseTestCase):
 		result = utils.showErrorMessage("someTitle","someResult")
 		
 		utils.showMessage.assert_called_with("someTitle","ERROR")
+
+	def test_showErrorMessage_should_call_showMessage_with_empty_title(self):
+		sys.modules["__main__"].language.return_value = "ERROR"
+		utils = YouTubeUtils()
+		utils.showMessage = Mock()	
+		
+		result = utils.showErrorMessage("","someResult", 303)
+		
+		utils.showMessage.assert_called_with("ERROR","someResult")
+
+	def test_showErrorMessage_should_call_showMessage_with_empty_result(self):
+		sys.modules["__main__"].language.return_value = "ERROR"
+		utils = YouTubeUtils()
+		utils.showMessage = Mock()	
+		
+		result = utils.showErrorMessage("someTitle","someResult")
+		
+		utils.showMessage.assert_called_with("someTitle","ERROR")
+	
+	def test_showErrorMessage_should_call_showMessage_with_result(self):
+		utils = YouTubeUtils()
+		utils.showMessage = Mock()	
+		
+		result = utils.showErrorMessage("someTitle","someResult", 303)
+		
+		utils.showMessage.assert_called_with("someTitle","someResult")
 	
 	def test_buildItemUrl_should_ignore_items_in_blacklist(self):
 		input = {"path":"FAIL","thumbnail":"FAIL", "Overlay":"FAIL", "icon":"FAIL", "next":"FAIL", "content":"FAIL" , "editid":"FAIL", "summary":"FAIL", "published":"FAIL","count":"FAIL","Rating":"FAIL","Plot":"FAIL","Title":"FAIL","new_results_function":"FAIL","some_other_param":"some_value"}

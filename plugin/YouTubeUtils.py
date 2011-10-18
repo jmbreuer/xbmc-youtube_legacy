@@ -156,6 +156,3 @@ class YouTubeUtils:
 
 		self.common.log(repr(ret_list), 4)
 		return ret_list
-
-if __name__ == '__main__':	
-	sys.exit(0)
