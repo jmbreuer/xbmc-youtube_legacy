@@ -473,7 +473,7 @@ class YouTubeStorage():
 			self.common.log("getNextVideoFromDownloadQueue released. returning : " + videoid)
 			return videoid
 		else:
-			self.common.log("getNextVideoFromDownloadQueue Exception") # Not covered
+			self.common.log("getNextVideoFromDownloadQueue Exception")
 
 	def addVideoToDownloadQueue(self, params = {}):
 		if self.cache.lock("YouTubeQueueLock"):
@@ -499,7 +499,7 @@ class YouTubeStorage():
 			self.cache.unlock("YouTubeQueueLock")
 			self.common.log("addVideoToDownloadQueue released")
 		else:
-			self.common.log("addVideoToDownloadQueue Exception") # Not covered
+			self.common.log("addVideoToDownloadQueue Exception")
 		
 	def removeVideoFromDownloadQueue(self, videoid):
 		if self.cache.lock("YouTubeQueueLock"):
@@ -524,4 +524,4 @@ class YouTubeStorage():
 			self.cache.unlock("YouTubeQueueLock")
 			self.common.log("removeVideoFromDownloadQueue released")
 		else:
-			self.common.log("removeVideoFromDownloadQueue Exception") # Not covered
+			self.common.log("removeVideoFromDownloadQueue Exception")
