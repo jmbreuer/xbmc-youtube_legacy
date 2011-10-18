@@ -489,7 +489,6 @@ class YouTubeCore():
 
                         ret = self._fetchPage(fetch_options)
 			fetch_options = False
-
 			new_url = self.common.parseDOM(ret["content"], "form", attrs = { "id": "confirm-age-form"}, ret ="action")
 			if len(new_url) > 0:
 				self.common.log("Part A")
