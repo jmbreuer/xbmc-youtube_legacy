@@ -20,8 +20,9 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		assert(args[0][1]["succeeded"] == True)
 
 	def test_playVideo_should_handle_over_18_videos(self):
+                sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings.xml")
 		player = sys.modules[ "__main__" ].player
-		player.playVideo({ "videoid": "fOdNOtS8ZIs"})
+		player.playVideo({ "videoid": "fOdNOtS8ZIs", "no_embed": "true"})
 
 		args = sys.modules[ "__main__" ].xbmcplugin.setResolvedUrl.call_args_list
 		print "Args: " + repr(args)

@@ -372,6 +372,11 @@ class YouTubeCore():
 				ret_obj["content"] = self.language(30622)
 				return ret_obj
 			# This should be a call to self.login._httpLogin()
+			if self.settings.getSetting("login_info") == "":
+				if isinstance(self.login, str):
+					self.login = sys.modules[ "__main__" ].login
+				self.login._httpLogin()
+
 			if self.settings.getSetting("login_info") != "":
 				self.common.log("returning existing login info: " + self.settings.getSetting("login_info"))
 				info = self.settings.getSetting("login_info")
@@ -407,11 +412,14 @@ class YouTubeCore():
 					params["error"] = get("error", "0")
 					params["login"] = "true"
 					return self._fetchPage(params)
-				else:
+				elif get("no_verify_age", "false") == "false":
 					ret_obj["status"] = 303
 					ret_obj["content"] = self.language(30606)
+					return self._verifyAge(link, ret_obj["new_url"], params)
+				else:
+					#ret_obj["status"] = 303
+					#ret_obj["content"] = self.language(30606)
 					return ret_obj
-					#return self._verifyAge(ret_obj["content"], ret_obj["new_url"], params)
 		
 		except urllib2.HTTPError, e:
 			cont = False
@@ -467,65 +475,43 @@ class YouTubeCore():
 		self.common.log("couldn't find any errors: " + repr(ret))
 		return False
 
-	def _verifyAge(self, result, new_url, params={}):
-		get = params.get
-		login_info = self.login._httpLogin({ "new": "true" })
-		confirmed = "0"
-		if self.settings.getSetting("safe_search") != "2":
-			confirmed = "1"
-		
-		# Convert to fetchpage
-		request = urllib2.Request(new_url)
-		request.add_header('User-Agent', self.common.USERAGENT)
-		request.add_header('Cookie', 'LOGIN_INFO=' + login_info)
-		con = urllib2.urlopen(request)
-		result = con.read()
-		
-		# Fallback for missing confirm form.
-		if result.find("confirm-age-form") == -1:
-			self.common.log("Failed trying to verify-age could find confirm age form.")
-			self.common.log("html page given: " + repr(result))
-			return (self.language(30606) , 303)
-						
-		# get next_url
-		next_url_start = result.find('"next_url" value="') + len('"next_url" value="')
-		next_url_stop = result.find('">', next_url_start)
-		next_url = result[next_url_start:next_url_stop]
-		
-		self.common.log("next_url=" + next_url)
-		
-		# get session token to get around the cross site scripting prevetion
-		session_token_start = result.find("'XSRF_TOKEN': '") + len("'XSRF_TOKEN': '")
-		session_token_stop = result.find("',", session_token_start) 
-		session_token = result[session_token_start:session_token_stop]
-		
-		self.common.log("session_token=" + session_token)
-		
-		# post collected information to age the verifiaction page
-		request = urllib2.Request(new_url)
-		request.add_header('User-Agent', self.common.USERAGENT)
-		request.add_header('Cookie', 'LOGIN_INFO=' + login_info)
-		request.add_header("Content-Type", "application/x-www-form-urlencoded")
-		values = urllib.urlencode({ "next_url": next_url, "action_confirm": confirmed, "session_token":session_token })
-		
-		self.common.log("post page content: " + values)
-		
-		con = urllib2.urlopen(request, values)
-		new_url = con.geturl()
-		result = con.read()
-		con.close()
-		
-		#If verification is success full new url must look like: 'http://www.youtube.com/index?has_verified=1'
-		if new_url.find("has_verified=1"):
-			params["error"] = str(int(get("error", "0")) + 1)
-			params["login"] = "true"
-			return self._fetchPage(params)
-		
-		# If verification failed we dump a shit load of info to the logs
-		self.common.log("result url: " + repr(new_url))
-		
-		self.common.log("age verification failed with result: " + repr(result))
-		return (self.language(30606), 303)
+	def _verifyAge(self, org_link, new_url, params={}):
+		self.common.log("org_link : " + org_link + " - new_url: " + new_url)
+		fetch_options = { "link": new_url, "no_verify_age": "true", "login": "true" }
+		verified = False
+		step = 0
+		while not verified and fetch_options and step < 6:
+                        self.common.log("Step : " + str(step))
+			step += 1
+
+                        if step == 17:
+                                return ( self.core._findErrors(ret), 303)
+
+                        ret = self._fetchPage(fetch_options)
+			fetch_options = False
+
+			new_url = self.common.parseDOM(ret["content"], "form", attrs = { "id": "confirm-age-form"}, ret ="action")
+			if len(new_url) > 0:
+				self.common.log("Part A")
+				new_url = "http://www.youtube.com/" + new_url[0]
+				next_url = self.common.parseDOM(ret["content"], "input", attrs = { "name": "next_url" }, ret = "value")
+				set_racy = self.common.parseDOM(ret["content"], "input", attrs = { "name": "set_racy" }, ret = "value")
+				session_token_start = ret["content"].find("'XSRF_TOKEN': '") + len("'XSRF_TOKEN': '")
+				session_token_stop = ret["content"].find("',", session_token_start)
+				session_token = ret["content"][session_token_start:session_token_stop]
+
+				fetch_options = { "link": new_url, "no_verify_age": "true", "login": "true", "url_data": { "next_url": next_url[0], "set_racy": set_racy[0], "session_token" : session_token} }
+
+			if ret["content"].find("PLAYER_CONFIG") > -1:
+				self.common.log("Found PLAYER_CONFIG. Verify successful")
+				return ret
+
+			if not fetch_options:
+				self.common.log("Nothign hit, assume we are logged in.")
+				fetch_options = { "link": org_link, "no_verify_age": "true", "login": "true" }
+				return self._fetchPage(fetch_options)
+
+		self.common.log("Done")
 
 	def _oRefreshToken(self):
 		# Refresh token
