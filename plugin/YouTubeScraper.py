@@ -1045,16 +1045,15 @@ class YouTubeScraper():
 
 			else:
 				url = self.urls["movies"] + "?hl=en"
-		if get("scraper") in ["music_artists","music_artist","similar_artist"]: 
+		
+		if get("scraper") in ["music_artists", "music_artist", "similar_artist", "music_hits", "music_top100"]: 
+			url = self.urls["music"]
 			if get("category"):
 				url = self.urls["music"] + get("category")
 			
 			if get("artist"):
 				url = self.urls["artist"] % get("artist")
-		
-		if(get("scraper") in ["music_top100"]):
-			url = self.urls["music"]
-		
+				
 		if (get("scraper") in "search_disco"):
 			url = self.urls["disco_search"] % urllib.quote_plus(get("search"))
 			if get("mix_list_id") and get("videoid"):
