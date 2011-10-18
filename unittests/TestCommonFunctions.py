@@ -58,6 +58,14 @@ class TestCommonFunctions(BaseTestCase.BaseTestCase):
 		
 		assert(ret == "Link Test")
 
+	def test_parseDOM_should_fail_if_name_is_empty(self):
+		common  = CommonFunctions()
+		common.log = sys.modules[ "__main__" ].log_override.log
+		
+		ret = common.parseDOM(self.link_html, "")
+		
+		assert(ret == "" )
+
 	def test_parseDOM_should_correctly_extract_the_href_attribute_of_a_link_tag(self):
 		common  = CommonFunctions()
 		common.log = sys.modules[ "__main__" ].log_override.log
