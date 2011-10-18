@@ -70,6 +70,17 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		for key in keys:
 			assert(key in result)
 
+	def test_getVideoUrlMap_should_parse_url_map_fallback(self):
+		player = YouTubePlayer()
+		
+		result = player.getVideoUrlMap(self.readTestInput("urlMapTest.txt"),{})
+		
+		assert(len(result) == 11)
+		keys = [5, 18, 22, 34, 35, 37, 43, 44, 45, 82, 84]
+		for key in keys:
+			assert(key in result)
+			assert(result[key].find("preferred") > -1)
+
 	def test_getVideoUrlMap_should_mark_live_play(self):
 		player = YouTubePlayer()
 		video = {}
