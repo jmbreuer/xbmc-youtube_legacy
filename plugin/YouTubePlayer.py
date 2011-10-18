@@ -403,7 +403,6 @@ class YouTubePlayer():
 					
 					if final_url.find("&type") > 0:
 						final_url = final_url[:final_url.find("&type")]
-					
 					if self.settings.getSetting("preferred") == "false":
 						pos = final_url.find("://")
 						fpos = final_url.find("fallback_host")
@@ -414,7 +413,7 @@ class YouTubePlayer():
 							fmt_fallback = final_url[fpos + 14:]
 							if fmt_fallback.find("&") > -1:
 								fmt_fallback = fmt_fallback[:fmt_fallback.find("&")]
-							#self.common.log("Swapping cached host [%s] and fallback host [%s] " % ( host, fmt_fallback ))
+							self.common.log("Swapping cached host [%s] and fallback host [%s] " % ( host, fmt_fallback ), 5)
 							final_url = final_url.replace(host, fmt_fallback)
 							final_url = final_url.replace("fallback_host=" + fmt_fallback, "fallback_host=" + host)
 
