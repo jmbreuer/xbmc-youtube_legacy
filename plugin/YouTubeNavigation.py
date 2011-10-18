@@ -241,7 +241,7 @@ class YouTubeNavigation():
 				self.utils.showErrorMessage(self.language(30020), message, status)
 				return False	
 		return True
-			
+		
 	def removeFromFavorites(self, params = {}):
 		get = params.get
 		
