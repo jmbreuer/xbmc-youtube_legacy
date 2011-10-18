@@ -14,7 +14,7 @@ class Teststorageserverdummy(BaseTestCase.BaseTestCase):
 		temp_funct.assert_called_with('mock_args')
 		assert(result == "mock_return")
 
-	def test_sqlSet(self):
+	def test_sqlSet_data(self):
 		cache = StorageServer.StorageServer()
 		result = cache.sqlSet("name", "data")
 		assert(result == "")
