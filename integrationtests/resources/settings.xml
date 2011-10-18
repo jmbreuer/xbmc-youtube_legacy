@@ -1,5 +1,4 @@
 <settings>
-    <setting id="annotations" value="true" />
     <setting id="categories" value="true" />
     <setting id="contacts" value="true" />
     <setting id="debug" value="true" />
@@ -12,9 +11,9 @@
     <setting id="firstrun" value="1" />
     <setting id="hd_videos" value="2" />
     <setting id="hd_videos_download" value="0" />
-    <setting id="lang_code" value="1" />
     <setting id="liked" value="true" />
     <setting id="list_view" value="0" />
+    <setting id="lang_code" value="0" />
     <setting id="live" value="true" />
     <setting id="movies" value="true" />
     <setting id="music" value="true" />

@@ -39,6 +39,7 @@ class MockYouTubeDepends:
 		
 		sys.modules[ "__main__" ].xbmcplugin = Mock(spec=xbmcplugin)
 		sys.modules[ "__main__" ].xbmcvfs = Mock(spec=xbmcvfs)
+		sys.modules[ "__main__" ].xbmcvfs.exists.return_value = False
 		
 		import xbmcSettings
 		sys.modules[ "__main__" ].settings = xbmcSettings.xbmcSettings()

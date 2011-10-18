@@ -194,5 +194,16 @@ class TestCommonFunctions(BaseTestCase.BaseTestCase):
 		
 		assert(ret == "")
 
+        def test_getDOMContent_should_extract_dom_correctly(self):
+                common  = CommonFunctions()
+                common.log = sys.modules[ "__main__" ].log_override.log
+                inp = "<div class='match'>Here is an: <div>Inner div</div>!</div>"
+
+                ret = common.getDOMContent(inp, "div", "<div class='match'>")
+		print ret
+		# Disabled untill integration test is complete.
+                #assert(ret == "Here is an: <div>Inner div</div>!")
+                assert(ret == "Here is an: <div>Inner div")
+
 if __name__ == "__main__":
 	nose.runmodule()

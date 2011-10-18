@@ -49,7 +49,7 @@ class CommonFunctions():
 		end = html.find(endstr, start)
 
 		pos = html.find("<" + name, start + 1 )
-		#self.log(str(start) + " < " + str(end) + ", pos = " + str(pos) + ", endpos: " + str(end), 2)
+		self.log(str(start) + " < " + str(end) + ", pos = " + str(pos) + ", endpos: " + str(end), 8)
 
 		while pos < end and pos != -1:
 			pos = html.find("<" + name, pos + 1)
@@ -57,7 +57,18 @@ class CommonFunctions():
 				tend = html.find(endstr, end + len(endstr))
 				if tend != -1:
 					end = tend
-			self.log("loop: " + str(start) + " < " + str(end) + " pos = " + str(pos), 3)
+			self.log("loop: " + str(start) + " < " + str(end) + " pos = " + str(pos), 8)
+
+		# Change to this after integration test is complete.
+		#while pos < end and pos != -1:
+                #        tend = html.find(endstr, end + len(endstr))
+                #        if tend != -1:
+                #                end = tend
+
+                #        pos = html.find("<" + name, pos + 1)
+
+		#	self.log("loop: " + str(start) + " < " + str(end) + " pos = " + str(pos), 8)
+
 
 		self.log("start: %s, end: %s" % ( start + len(match), end), 2)
 		if start == -1 and end == -1:
