@@ -117,10 +117,10 @@ class YouTubeStorage():
 			item["Title"] = search
 			item["search"] = urllib.quote_plus(search)
 			
-			if (get("store") == "searches"): # Not covered
+			if (get("store") == "searches"):
 				item["feed"] = "search"
 				item["icon"] = "search" 
-			elif get("store") == "disco_searches": # Not covered
+			elif get("store") == "disco_searches":
 				item["scraper"] = "search_disco" 
 				item["icon"] = "discoball"
 			
@@ -128,7 +128,7 @@ class YouTubeStorage():
 			if thumbnail:
 				item["thumbnail"] = thumbnail
 			else: 
-				item["thumbnail"] = item["icon"]  # Not covered
+				item["thumbnail"] = item["icon"] 
 			result.append(item)
 				
 		return (result, 200)
@@ -275,7 +275,7 @@ class YouTubeStorage():
 				key = "search_"
 			
 			if get("store") == "searches":
-				key = "search_" # Not covered
+				key = "search_"
 			
 			if get("search"):
 				key += urllib.unquote_plus(get("search",""))
@@ -339,7 +339,7 @@ class YouTubeStorage():
 		if (get("external")):
 			key = "external_" + get("contact") + "_"
 		elif (iget("external")):
-			key = "external_" + iget("contact") + "_" # Not covered
+			key = "external_" + iget("contact") + "_"
 					
 		if get("channel"):
 			key += "view_mode_" + get("channel")
