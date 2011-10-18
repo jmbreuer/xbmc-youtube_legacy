@@ -721,9 +721,19 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		sys.modules["__main__"].common.parseDOM.return_value = ""
 
 		result = player._getVideoLinks({},{"videoid":"some_id"})
-		print "XXXXXXXXXXXX"
 		print repr(result)
 		assert(result == self.readTestInput("rtmpMapTest.txt"))
+
+	def test_getVideoLinks_should_parse_flashvars(self):
+		player = YouTubePlayer()
+		# watch-8wxOVn99FTE-rtmpe.html
+		sys.modules["__main__"].core._fetchPage.return_value = {"status":200, "content":self.readTestInput("watch-gyzlwNvf8ss-standard-without-player_config.html", False)}
+		sys.modules["__main__"].common.parseDOM.return_value = [ self.readTestInput("watch-gyzlwNvf8ss-flashvars.txt", False) ]
+
+		result = player._getVideoLinks({},{"videoid":"some_id"})
+		print "XXXXXXXXXXXX"
+		print repr(result)
+		assert(result == self.readTestInput("flashvars-gyzlwNvf8ss-map-test.txt"))
 
 if __name__ == '__main__':
 	nose.runmodule()

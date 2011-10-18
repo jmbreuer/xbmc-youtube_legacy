@@ -636,11 +636,13 @@ class YouTubePlayer():
 		return (video, status)
 
 	def _convertFlashVars(self, html):
-		print "_convert " + repr(html)
+		self.common.log(repr(html))
 		obj = { "PLAYER_CONFIG": { "args": {} } }
 		temp = html.split("&")
 		for item in temp:
+			self.common.log(item, 9)
 			it = item.split("=")
+			self.common.log(it, 9)
 			obj["PLAYER_CONFIG"]["args"][it[0]] = urllib.unquote_plus(it[1])
 		return obj
 
@@ -668,6 +670,7 @@ class YouTubePlayer():
 				data = self.common.parseDOM(result["content"], "embed", attrs = {"id": "movie_player" }, ret = "flashvars")
 				src = self.common.parseDOM(result["content"], "embed", attrs = {"id": "movie_player"}, ret = "src")
 				if len(data) > 0 and len(src) > 0:
+					self.common.log("Using flashvars converting", 4)
 					data = data[0].replace("&amp;", "&")
 					player_object = self._convertFlashVars(data)
 					if player_object.has_key("PLAYER_CONFIG"):
