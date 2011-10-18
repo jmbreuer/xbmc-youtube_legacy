@@ -210,9 +210,7 @@ class TestCommonFunctions(BaseTestCase.BaseTestCase):
 
                 ret = common.getDOMContent(inp, "div", "<div class='match'>")
 		print ret
-		# Disabled untill integration test is complete.
-                #assert(ret == "Here is an: <div>Inner div</div>!")
-                assert(ret == "Here is an: <div>Inner div")
+		assert(ret == "Here is an: <div>Inner div</div>!")
 
 if __name__ == "__main__":
 	nose.runmodule()
