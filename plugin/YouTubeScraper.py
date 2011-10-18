@@ -272,11 +272,16 @@ class YouTubeScraper():
 			url = self.createUrl(params) 
 			result = self.core._fetchPage({"link":url})
 			
-			artists = self.common.parseDOM(result["content"], "div",  { "class": "browse-item collection-item browse-item-inline"})
+			artist_container = self.common.parseDOM(result["content"], "div", attrs = { "id": "artist-recs-container"})
+			artists = self.common.parseDOM(artist_container, "li",  { "class": "yt-uix-slider-slide-item.*?"})
+			
 			for artist in artists:
-				ahref = self.common.parseDOM(artist, "a", attrs = { "title": ".*?" }, ret = "href")
-				atitle = self.common.parseDOM(artist, "a", ret = "title")
-				athumb = self.common.parseDOM(artist, "img", attrs = { "alt": "Thumbnail"},  ret = "data-thumb")
+				div = self.common.parseDOM(artist, "div", attrs = { "class": "browse-item collection-item browse-item-inline" })
+				
+				ahref = self.common.parseDOM(div, "a", attrs = {"class":"collection-item-link"}, ret = "href")
+				atitle = self.common.parseDOM(div, "a", ret = "title")
+				athumb = self.common.parseDOM(div, "img", ret = "data-thumb")
+				
 				if len(atitle) == len(ahref) == len(athumb) and len(ahref) > 0:
 					for i in range(0 , len(ahref)):
 						item = {}
@@ -308,8 +313,8 @@ class YouTubeScraper():
 			url = self.createUrl(params)
 			result = self.core._fetchPage({"link":url})
 			
-			content = self.common.parseDOM(result["content"], "li", { "class": "yt-uix-slider-slide-item "})
-			content = self.common.parseDOM(content, "a", attrs = {"class": "ux-thumb-wrap " }, ret = "href")
+			container = self.common.parseDOM(result["content"], "div", { "id": "music-guide-container"})
+			content = self.common.parseDOM(container, "a", attrs = {"class": "ux-thumb-wrap " }, ret = "href")
 			items = self.utils.extractVID(content)
 
 		self.common.log("Done")
@@ -1049,7 +1054,7 @@ class YouTubeScraper():
 		if get("scraper") in ["music_artists", "music_artist", "similar_artist", "music_hits", "music_top100"]: 
 			url = self.urls["music"]
 			if get("category"):
-				url = self.urls["music"] + get("category")
+				url = self.urls["music"] + urllib.unquote_plus(get("category"))
 			
 			if get("artist"):
 				url = self.urls["artist"] % get("artist")
