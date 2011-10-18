@@ -731,9 +731,18 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		sys.modules["__main__"].common.parseDOM.return_value = [ self.readTestInput("watch-gyzlwNvf8ss-flashvars.txt", False) ]
 
 		result = player._getVideoLinks({},{"videoid":"some_id"})
-		print "XXXXXXXXXXXX"
 		print repr(result)
 		assert(result == self.readTestInput("flashvars-gyzlwNvf8ss-map-test.txt"))
+
+	def test_getVideoLinks_should_parse_flashvars_from_embed(self):
+		player = YouTubePlayer()
+		# watch-8wxOVn99FTE-rtmpe.html
+		sys.modules["__main__"].core._fetchPage.side_effect = [ {"status":500, "content": self.readTestInput("get_video_info-gyzlwNvf8ss", False)}, {"status":200, "content": self.readTestInput("get_video_info-gyzlwNvf8ss", False)} ]
+		sys.modules["__main__"].common.parseDOM.return_value = [ self.readTestInput("watch-gyzlwNvf8ss-flashvars.txt", False) ]
+
+		result = player._getVideoLinks({},{"videoid":"some_id"})
+		print repr(result)
+		assert(result == self.readTestInput("flashvars-gyzlwNvf8ss-map-test-embed.txt"))
 
 if __name__ == '__main__':
 	nose.runmodule()
