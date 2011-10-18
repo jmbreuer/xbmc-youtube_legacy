@@ -653,6 +653,7 @@ class YouTubePlayer():
 		self.common.log("trying website")
 
 		result = self.core._fetchPage({"link": self.urls["video_stream"] % get("videoid")})
+		fresult = False
 		
 		if result["status"] == 200:
 			data = result["content"].find("PLAYER_CONFIG")
@@ -673,7 +674,7 @@ class YouTubePlayer():
 						player_object["PLAYER_CONFIG"]["url"] = src[0]
 
 			fresult = False
-		else:
+		elif get("no_embed", "false") == "false":
 			self.common.log("Falling back to embed")
 
 			fresult = self.core._fetchPage({"link": self.urls["embed_stream"] % get("videoid") })
