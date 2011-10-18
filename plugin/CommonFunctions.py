@@ -16,7 +16,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, urllib2, re, os, socket, inspect
+import sys, urllib2, re, inspect
 
 class CommonFunctions():
 	
@@ -28,12 +28,6 @@ class CommonFunctions():
 		self.dbglevel = sys.modules[ "__main__" ].dbglevel
 		self.dbg = sys.modules[ "__main__" ].dbg
 		self.USERAGENT = "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-GB; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8"
-	
-		if sys.platform == "win32":
-			port = 59994
-			__socket__ = (socket.gethostname(), port)
-		else:
-			__socket__ = os.path.join( self.xbmc.translatePath( "special://temp" ), 'commoncache.socket')
 
 	def stripTags(self, html):
 		sub_start = html.find("<")

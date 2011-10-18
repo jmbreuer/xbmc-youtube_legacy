@@ -121,7 +121,7 @@ class YouTubeStorage():
 				item["feed"] = "search"
 				item["icon"] = "search" 
 			elif get("store") == "disco_searches":
-				item["scraper"] = "search_disco"
+				item["scraper"] = "search_disco" 
 				item["icon"] = "discoball"
 			
 			thumbnail = self.retrieve(params, "thumbnail", item)
@@ -223,7 +223,7 @@ class YouTubeStorage():
 			
 			params['user_feed'] = get("view_mode")
 			if get("viewmode") == "playlists":
-				params["folder"] = "true"
+				params["folder"] = "true" # No result
 	
 	def reversePlaylistOrder(self, params = {}):
 		get = params.get
@@ -233,7 +233,7 @@ class YouTubeStorage():
 			value = "true"
 			existing = self.retrieve(params, "value")
 			if existing == "true":
-				value = "false"
+				value = "false" # No result
 			
 			self.store(params, value, "value")
 		
