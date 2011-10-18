@@ -4,7 +4,7 @@
     <setting id="contacts" value="true" />
     <setting id="debug" value="true" />
     <setting id="disco" value="true" />
-    <setting id="downloadPath" value="/Users/SomeUser/SomeFolder/" />
+    <setting id="downloadPath" value="/tmp/jenkins" />
     <setting id="downloads" value="true" />
     <setting id="explore" value="true" />
     <setting id="favorites" value="true" />
@@ -12,9 +12,9 @@
     <setting id="firstrun" value="1" />
     <setting id="hd_videos" value="2" />
     <setting id="hd_videos_download" value="0" />
-    <setting id="lang_code" value="1" />
     <setting id="liked" value="true" />
     <setting id="list_view" value="0" />
+    <setting id="lang_code" value="1" />
     <setting id="live" value="true" />
     <setting id="movies" value="true" />
     <setting id="music" value="true" />
@@ -31,7 +31,7 @@
     <setting id="subscriptions" value="true" />
     <setting id="timeout" value="3" />
     <setting id="trailers" value="true" />
-    <setting id="transcode" value="false" />
+    <setting id="transcode" value="true" />
     <setting id="uploads" value="true" />
     <setting id="user_password" value="SomeUser" />
     <setting id="username" value="SomePass" />

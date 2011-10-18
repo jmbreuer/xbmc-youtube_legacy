@@ -26,7 +26,7 @@ class MockYouTubeDepends:
 		sys.modules[ "__main__" ].xbmc = Mock(spec=xbmc)
 		sys.modules[ "__main__" ].xbmc.getSkinDir = Mock()
 		sys.modules[ "__main__" ].xbmc.translatePath = Mock()
-		sys.modules[ "__main__" ].xbmc.translatePath.return_value = "testing"
+		sys.modules[ "__main__" ].xbmc.translatePath.return_value = "/tmp/jenkins"
 		sys.modules[ "__main__" ].xbmc.log = Mock()
 		sys.modules[ "__main__" ].xbmc.log.side_effect = self.log
 		sys.modules[ "__main__" ].xbmc.getSkinDir = Mock()
@@ -39,6 +39,7 @@ class MockYouTubeDepends:
 		
 		sys.modules[ "__main__" ].xbmcplugin = Mock(spec=xbmcplugin)
 		sys.modules[ "__main__" ].xbmcvfs = Mock(spec=xbmcvfs)
+		sys.modules[ "__main__" ].xbmcvfs.exists.return_value = False
 		
 		import xbmcSettings
 		sys.modules[ "__main__" ].settings = xbmcSettings.xbmcSettings()
