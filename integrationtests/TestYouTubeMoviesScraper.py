@@ -12,14 +12,14 @@ class TestYouTubeTrailersScraper(BaseTestCase.BaseTestCase):
 		self.assert_directory_is_a_folder_list()
 		self.assert_directory_items_should_have_thumbnails()
 		self.assert_directory_items_contain("category")
-		
+	
 	def test_plugin_should_scrape_movie_sub_category_listing_correctly(self):
 		self.navigation.listMenu({"scraper":"movies", "folder":"true", "category":"indian_cinema", "subcategory":"true", "path":"/root/explore/movies"})
 		
 		self.assert_directory_count_greater_than_or_equals(1)
 		self.assert_directory_count_less_than_or_equals(51)
 		self.assert_directory_is_a_folder_list()
-
+	
 	def test_plugin_should_scrape_movie_category_video_list_correctly(self):
 		self.navigation.listMenu({"scraper":"movies", "category":"comedy", "path":"/root/explore/movies"})
 		
