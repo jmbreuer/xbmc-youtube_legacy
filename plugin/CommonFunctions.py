@@ -170,7 +170,7 @@ class CommonFunctions():
 				lst2 = []
 				for match in lst:
 					temp = self.getDOMContent(item, name, match).strip()
-					item = item[item.find(temp) + len(temp):]
+					item = item[item.find(match + temp) + len(match + temp):]
 					lst2.append(temp)
 					self.log(lst, 3)
 					self.log(match, 3)
