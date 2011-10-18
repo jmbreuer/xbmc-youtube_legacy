@@ -117,18 +117,18 @@ class YouTubeStorage():
 			item["Title"] = search
 			item["search"] = urllib.quote_plus(search)
 			
-			if (get("store") == "searches"):
+			if (get("store") == "searches"): # Not covered
 				item["feed"] = "search"
 				item["icon"] = "search" 
-			elif get("store") == "disco_searches":
-				item["scraper"] = "search_disco"
+			elif get("store") == "disco_searches": # Not covered
+				item["scraper"] = "search_disco" 
 				item["icon"] = "discoball"
 			
 			thumbnail = self.retrieve(params, "thumbnail", item)
 			if thumbnail:
 				item["thumbnail"] = thumbnail
 			else: 
-				item["thumbnail"] = item["icon"] 
+				item["thumbnail"] = item["icon"]  # Not covered
 			result.append(item)
 				
 		return (result, 200)
@@ -223,7 +223,7 @@ class YouTubeStorage():
 			
 			params['user_feed'] = get("view_mode")
 			if get("viewmode") == "playlists":
-				params["folder"] = "true"
+				params["folder"] = "true" # No result
 	
 	def reversePlaylistOrder(self, params = {}):
 		get = params.get
@@ -233,7 +233,7 @@ class YouTubeStorage():
 			value = "true"
 			existing = self.retrieve(params, "value")
 			if existing == "true":
-				value = "false"
+				value = "false" # No result
 			
 			self.store(params, value, "value")
 		
@@ -275,7 +275,7 @@ class YouTubeStorage():
 				key = "search_"
 			
 			if get("store") == "searches":
-				key = "search_"
+				key = "search_" # Not covered
 			
 			if get("search"):
 				key += urllib.unquote_plus(get("search",""))
@@ -339,7 +339,7 @@ class YouTubeStorage():
 		if (get("external")):
 			key = "external_" + get("contact") + "_"
 		elif (iget("external")):
-			key = "external_" + iget("contact") + "_"
+			key = "external_" + iget("contact") + "_" # Not covered
 					
 		if get("channel"):
 			key += "view_mode_" + get("channel")
@@ -473,7 +473,7 @@ class YouTubeStorage():
 			self.common.log("getNextVideoFromDownloadQueue released. returning : " + videoid)
 			return videoid
 		else:
-			self.common.log("getNextVideoFromDownloadQueue Exception")
+			self.common.log("getNextVideoFromDownloadQueue Exception") # Not covered
 
 	def addVideoToDownloadQueue(self, params = {}):
 		if self.cache.lock("YouTubeQueueLock"):
@@ -499,7 +499,7 @@ class YouTubeStorage():
 			self.cache.unlock("YouTubeQueueLock")
 			self.common.log("addVideoToDownloadQueue released")
 		else:
-			self.common.log("addVideoToDownloadQueue Exception")
+			self.common.log("addVideoToDownloadQueue Exception") # Not covered
 		
 	def removeVideoFromDownloadQueue(self, videoid):
 		if self.cache.lock("YouTubeQueueLock"):
@@ -524,4 +524,4 @@ class YouTubeStorage():
 			self.cache.unlock("YouTubeQueueLock")
 			self.common.log("removeVideoFromDownloadQueue released")
 		else:
-			self.common.log("removeVideoFromDownloadQueue Exception")
+			self.common.log("removeVideoFromDownloadQueue Exception") # Not covered

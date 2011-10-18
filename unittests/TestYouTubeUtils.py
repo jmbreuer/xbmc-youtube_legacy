@@ -173,15 +173,17 @@ class TestYouTubeUtils(BaseTestCase.BaseTestCase):
 		result = utils.showErrorMessage("","someResult", 303)
 		
 		utils.showMessage.assert_called_with("ERROR","someResult")
+		sys.modules["__main__"].language.assert_called_with(30600)
 
 	def test_showErrorMessage_should_call_showMessage_with_empty_result(self):
 		sys.modules["__main__"].language.return_value = "ERROR"
 		utils = YouTubeUtils()
 		utils.showMessage = Mock()	
 		
-		result = utils.showErrorMessage("someTitle","someResult")
+		result = utils.showErrorMessage("someTitle","")
 		
 		utils.showMessage.assert_called_with("someTitle","ERROR")
+		sys.modules["__main__"].language.assert_called_with(30617)
 	
 	def test_showErrorMessage_should_call_showMessage_with_result(self):
 		utils = YouTubeUtils()
