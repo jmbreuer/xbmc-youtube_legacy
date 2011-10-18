@@ -39,6 +39,16 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		keys = [5, 18, 22, 34, 35, 37, 43, 44, 45, 82, 84]
 		for key in keys:
 			assert(key in result)
+
+
+	def test_getVideoUrlMap_should_parse_rtmpe(self):
+		player = YouTubePlayer()
+		result = player.getVideoUrlMap(self.readTestInput("rtmpMapTest2.txt"),{})
+		print repr(result)
+		assert(len(result) == 1)
+		keys = [78]
+		for key in keys:
+			assert(key in result)
 		
 	def test_getVideoUrlMap_should_parse_url_encoded_stream_map(self):
 		player = YouTubePlayer()
@@ -689,6 +699,17 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		player._getVideoLinks({},{"videoid":"some_id"})
 		
 		sys.modules["__main__"].core._fetchPage.assert_called_with({"link": player.urls["embed_stream"] % ("some_id")})
+
+	def test_getVideoLinks_should_parse_player_config_for_rtmpe(self):
+		player = YouTubePlayer()
+		# watch-8wxOVn99FTE-rtmpe.html
+		sys.modules["__main__"].core._fetchPage.return_value = {"status":200, "content":self.readTestInput("watch-8wxOVn99FTE-rtmpe.html", False)}
+		sys.modules["__main__"].common.parseDOM.return_value = ""
+
+		result = player._getVideoLinks({},{"videoid":"some_id"})
+		print "XXXXXXXXXXXX"
+		print repr(result)
+		assert(result == self.readTestInput("rtmpMapTest.txt"))
 
 if __name__ == '__main__':
 	nose.runmodule()

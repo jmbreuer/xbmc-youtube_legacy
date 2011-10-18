@@ -341,7 +341,7 @@ class YouTubePlayer():
 		self.storage.storeValue( "vidstatus-" + video['videoid'], "7" )
 
 	def getVideoUrlMap(self, pl_obj, video = {}):
-		self.common.log("")
+		self.common.log(repr(pl_obj))
 		links = {}
 		video["url_map"] = "true"
 		
@@ -658,13 +658,14 @@ class YouTubePlayer():
 		if result["status"] == 200:
 			data = result["content"].find("PLAYER_CONFIG")
 			if data > -1:
+				self.common.log("Found player_config", 4)
 				data = result["content"].rfind("yt.setConfig", 0, data)
 				data = re.compile('yt.setConfig\((.*?PLAYER_CONFIG.*?)\);').findall(result["content"][data:].replace("\n", ""))
 				if len(data) > 0:
-					#self.common.log("trying website : " + repr(data))
 					player_object = json.loads(data[0].replace('\'PLAYER_CONFIG\'', '"PLAYER_CONFIG"'))
-					print "player_object " + repr(player_object) 
+					self.common.log("player_object " + repr(player_object), 4)
 			else:
+				self.common.log("Using flashvars", 4)
 				data = self.common.parseDOM(result["content"], "embed", attrs = {"id": "movie_player" }, ret = "flashvars")
 				src = self.common.parseDOM(result["content"], "embed", attrs = {"id": "movie_player"}, ret = "src")
 				if len(data) > 0 and len(src) > 0:
