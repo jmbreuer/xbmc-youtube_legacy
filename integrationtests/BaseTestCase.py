@@ -1,6 +1,5 @@
 import sys
-import unittest2, io
-from mock import Mock
+import unittest2
 import MockYouTubeDepends
 
 MockYouTubeDepends.MockYouTubeDepends().mockXBMC()
