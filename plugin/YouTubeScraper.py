@@ -809,9 +809,8 @@ class YouTubeScraper():
 		
 		items = []
 		if result["status"] == 200:
-			videos = self.common.parseDOM(result["content"], "a", attrs = { "href": ".*feature=musicchart" }, ret = "href")
-			items = self.utils.extractVID(videos)
-		
+			videos = self.common.parseDOM(result["content"], "div", attrs = {"id":'weekly-hits'})
+			items = self.common.parseDOM(videos, "button", attrs = { "type":"button", "class":"addto-button.*?" }, ret = "data-video-ids")
 		self.common.log("Done")
 		return (items, result["status"])
 		
