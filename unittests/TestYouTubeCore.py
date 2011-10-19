@@ -665,7 +665,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		patcher2.stop()
 		
 		assert(args[0][0][0] == 'GData-Version')
-		assert(args[0][0][1] == '2')
+		assert(args[0][0][1] == '2.1')
 		assert(args[1][0][0] == "X-GData-Key")
 		assert(args[1][0][1] == "key=MYKEY")
 
