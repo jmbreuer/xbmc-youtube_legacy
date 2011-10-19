@@ -675,8 +675,6 @@ class YouTubePlayer():
 					player_object = self._convertFlashVars(data)
 					if player_object.has_key("PLAYER_CONFIG"):
 						player_object["PLAYER_CONFIG"]["url"] = src[0]
-
-			fresult = False
 		elif get("no_embed", "false") == "false":
 			self.common.log("Falling back to embed")
 

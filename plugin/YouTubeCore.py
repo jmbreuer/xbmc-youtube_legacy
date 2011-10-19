@@ -458,18 +458,23 @@ class YouTubeCore():
 		## Couldn't find 2 factor or normal login
 		error = self.common.parseDOM(ret['content'], "div", attrs={ "class": "errormsg" })
 		if len(error) == 0:   
-		# An error in 2-factor
+			# An error in 2-factor
+			self.common.log("1")
 			error = self.common.parseDOM(ret['content'], "div", attrs={ "class": "error smaller"})
 		if len(error) == 0:
+			self.common.log("2")
 			error = self.common.parseDOM(ret['content'], "div", attrs={ "id": "unavailable-message"})
 		if len(error) == 0 and ret['content'].find("yt:quota") > -1:
+			self.common.log("3")
 			# Api quota
 			html = self.common.parseDOM(ret['content'], "error")
 			error = self.common.parseDOM(html, "code")
+
 		if len(error) > 0:
+			self.common.log("4")
 			error = error[0]
 			error = urllib.unquote(error[0:error.find("[")]).replace("&#39;", "'")
-			self.common.log("returning error :" + error.strip())
+			self.common.log("returning error : " + error.strip())
 			return error.strip()
 
 		self.common.log("couldn't find any errors: " + repr(ret))
