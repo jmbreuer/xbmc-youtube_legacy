@@ -504,7 +504,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		patcher.stop()
 		
 		assert(ret['status'] == 500 and ret['content'] == "")
-	
+		
 	def test_fetchPage_should_call_getAuth_to_fetch_oauth_token_if_auth_is_in_params_collection(self):
 		settings = ["my_auth","4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
