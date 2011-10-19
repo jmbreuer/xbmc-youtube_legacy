@@ -586,6 +586,28 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 		
 		sys.modules["__main__"].feeds.list.assert_any_call({'user_feed': 'playlist', 'login': 'true', 'playlist': 'some_playlist'})
 		
+		
+	def test_scrapeLikedVideos_should_call_createUrl_to_get_proper_url(self):
+		#sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content_&p=some_playlist&_blabal", "status":200}
+		
+		self.scraper.scrapeLikedVideos({})
+		
+		self.scraper.createUrl.assert_any_call({})
+
+	def test_scrapeLikedVideos_should_call_core_fetchPage_to_get_page_content(self):
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content_&p=some_playlist&_blabal", "status":200}
+		
+		self.scraper.scrapeLikedVideos({})
+		
+		sys.modules["__main__"].core._fetchPage.assert_any_call({"link":"some_url","login":"true"})
+
+	def test_scrapeLikedVideos_should_call_parseDOM_to_find_playlist(self):
+		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content_&p=some_playlist&_blabal", "status":200}
+		
+		self.scraper.scrapeLikedVideos({})
+		
+		assert(sys.modules["__main__"].common.parseDOM.call_count > 0)
+		
 	def test_scrapeShowEpisodes_should_call_createUrl_to_get_proper_url(self):
 		
 		self.scraper.scrapeShowEpisodes({})		
