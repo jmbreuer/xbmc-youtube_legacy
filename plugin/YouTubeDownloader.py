@@ -125,7 +125,7 @@ class YouTubeDownloader():
 				percent = int(float(bytes_so_far) / float(total_size) * 100)
 				file.write(chunk)
 				
-				queue = self.cache.sqlGet("YouTubeDownloadQueue")
+				queue = self.cache.get("YouTubeDownloadQueue")
 
 				if queue:
 					try:

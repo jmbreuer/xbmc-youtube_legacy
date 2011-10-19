@@ -434,15 +434,15 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 
 
 	def test_getInfo_should_use_cache_when_possible(self):
-		sys.modules["__main__"].cache.sqlGet.return_value = '["something"]'
+		sys.modules["__main__"].cache.get.return_value = '["something"]'
 		player = YouTubePlayer()
 		
 		player.getInfo({"videoid":"some_id"})
 		
-		sys.modules["__main__"].cache.sqlGet.assert_called_with("videoidcachesome_id")
+		sys.modules["__main__"].cache.get.assert_called_with("videoidcachesome_id")
 		
 	def test_getInfo_should_call_fetchPage_with_correct_url(self):
-		sys.modules["__main__"].cache.sqlGet.return_value = {}
+		sys.modules["__main__"].cache.get.return_value = {}
 		sys.modules["__main__"].core._fetchPage.return_value = {"status":303, "content":"something"}
 		player = YouTubePlayer()
 		
@@ -451,7 +451,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		sys.modules[ "__main__"].core._fetchPage.assert_called_with({"api":"true","link":player.urls["video_info"] % ("some_id")})
 		
 	def test_getInfo_should_call_core_getVideoInfo_to_parse_youtube_xml(self):
-		sys.modules["__main__"].cache.sqlGet.return_value = {}
+		sys.modules["__main__"].cache.get.return_value = {}
 		sys.modules["__main__"].core._fetchPage.return_value = {"status":200, "content":"something"}
 		sys.modules["__main__"].core.getVideoInfo.return_value = [{"videoid":"some_id"}]
 		player = YouTubePlayer()
@@ -461,7 +461,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		sys.modules["__main__"].core.getVideoInfo.assert_called_with("something",{"videoid":"some_id"})
 	
 	def test_getInfo_should_fail_correctly_if_api_is_unavailable(self):
-		sys.modules["__main__"].cache.sqlGet.return_value = {}
+		sys.modules["__main__"].cache.get.return_value = {}
 		sys.modules[ "__main__"].core._fetchPage.return_value = {"status":200, "content":"something"}
 		sys.modules["__main__"].core.getVideoInfo.return_value = []
 		sys.modules["__main__"].language.return_value = "some_string"
@@ -474,14 +474,14 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		assert(video["apierror"] == "some_string")
 				
 	def test_getInfo_should_save_video_info_in_cache(self):
-		sys.modules["__main__"].cache.sqlGet.return_value = {}
+		sys.modules["__main__"].cache.get.return_value = {}
 		sys.modules[ "__main__"].core._fetchPage.return_value = {"status":200, "content":"something"}
 		sys.modules["__main__"].core.getVideoInfo.return_value = [{"videoid":"some_id"}]
 		player = YouTubePlayer()
 		
 		(video, status) = player.getInfo({"videoid":"some_id"})
 		
-		sys.modules["__main__"].cache.sqlSet.assert_called_with('videoidcachesome_id', "{'videoid': 'some_id'}")
+		sys.modules["__main__"].cache.set.assert_called_with('videoidcachesome_id', "{'videoid': 'some_id'}")
 
 	def test_selectVideoQuality_should_prefer_h264_over_vp8_for_720p_as_appletv2_cant_handle_vp8_properly(self):
 		sys.modules["__main__"].settings.getSetting.return_value = "2"

@@ -440,7 +440,7 @@ class YouTubePlayer():
 			
 	def getInfo(self, params):
 		get = params.get
-		video = self.cache.sqlGet("videoidcache" + get("videoid"))
+		video = self.cache.get("videoidcache" + get("videoid"))
 		if len(video) > 0:
 			self.common.log("returning cache ")
 			return ( eval(video), 200)
@@ -461,7 +461,7 @@ class YouTubePlayer():
 			
 			return (video,303)
 		video = video[0]
-		self.cache.sqlSet("videoidcache" + get("videoid"), repr(video))
+		self.cache.set("videoidcache" + get("videoid"), repr(video))
 		return (video, result["status"])
 	
 	def selectVideoQuality(self, links, params):

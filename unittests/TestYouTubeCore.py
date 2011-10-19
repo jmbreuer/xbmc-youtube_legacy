@@ -357,7 +357,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(result[1]["some_key2"] == "value2")
 		assert(result[2]["videoid"] == "false")
 		
-	def test_getBatchDetails_should_call_cache_sqlGetMulti_before_hitting_youtube(self):
+	def test_getBatchDetails_should_call_cache_getMulti_before_hitting_youtube(self):
 		settings = ["4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()		
 		core = YouTubeCore()
@@ -365,7 +365,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		
 		core.getBatchDetails([],{})
 		
-		sys.modules["__main__"].cache.sqlGetMulti.assert_called_with('videoidcache', [])
+		sys.modules["__main__"].cache.getMulti.assert_called_with('videoidcache', [])
 
 	def test_getBatchDetails_should_not_request_video_information_for_cached_videos(self):
 		settings = ["4","3" ]
@@ -375,7 +375,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		core.getVideoInfo = Mock()
 		core.getVideoInfo.return_value = []
 		core._fetchPage.return_value = {"content":"","status":303}
-		sys.modules["__main__"].cache.sqlGetMulti.return_value = ['{"videoid":"some_id_1"}',"","","",'{"videoid":"some_id_5"}']
+		sys.modules["__main__"].cache.getMulti.return_value = ['{"videoid":"some_id_1"}',"","","",'{"videoid":"some_id_5"}']
 		
 		core.getBatchDetails(["some_id_1","some_id_2","some_id_3","some_id_4","some_id_5"],{})
 		
@@ -391,7 +391,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		core.getVideoInfo = Mock()
 		core.getVideoInfo.return_value = []
 		core._fetchPage.return_value = {"content":"","status":303}
-		sys.modules["__main__"].cache.sqlGetMulti.return_value = []
+		sys.modules["__main__"].cache.getMulti.return_value = []
 		sys.modules["__main__"].common.parseDOM.return_value = ""
 		ids = []
 		i= 1
@@ -414,7 +414,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		core.getVideoInfo = Mock()
 		core.getVideoInfo.return_value = []
 		core._fetchPage.return_value = {"content":"","status":303}
-		sys.modules["__main__"].cache.sqlGetMulti.return_value = []
+		sys.modules["__main__"].cache.getMulti.return_value = []
 		sys.modules["__main__"].common.parseDOM.return_value = ""
 		ids = []
 		i= 1
@@ -438,7 +438,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		core.getVideoInfo = Mock()
 		core.getVideoInfo.return_value = []
 		core._fetchPage.return_value = {"content":"","status":303}
-		sys.modules["__main__"].cache.sqlGetMulti.return_value = []
+		sys.modules["__main__"].cache.getMulti.return_value = []
 		status = [[],["","403"]]
 		sys.modules["__main__"].common.parseDOM.side_effect = lambda x = "", y ="",attrs = {},ret = {}: status.pop()  
 		ids = []
@@ -461,7 +461,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		core.getVideoInfo = Mock()
 		core.getVideoInfo.return_value = []
 		core._fetchPage.return_value = {"content":"some_content","status":303}
-		sys.modules["__main__"].cache.sqlGetMulti.return_value = ['{"videoid":"some_id_1"}',"","","",'{"videoid":"some_id_5"}']
+		sys.modules["__main__"].cache.getMulti.return_value = ['{"videoid":"some_id_1"}',"","","",'{"videoid":"some_id_5"}']
 		
 		core.getBatchDetails(["some_id_1","some_id_2","some_id_3","some_id_4","some_id_5"],{"param":"some_params"})
 		
@@ -475,7 +475,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		core.getVideoInfo = Mock()
 		core.getVideoInfo.return_value = []
 		core._fetchPage.return_value = {"content":"","status":303}
-		sys.modules["__main__"].cache.sqlGetMulti.return_value = []
+		sys.modules["__main__"].cache.getMulti.return_value = []
 		sys.modules["__main__"].common.parseDOM.return_value = ""
 		ids = []
 		i= 1

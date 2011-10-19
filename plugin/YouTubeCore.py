@@ -260,7 +260,7 @@ class YouTubeCore():
 		# Run the following for the missing.
 		# Update cache in the end.
 
-		temp_objs = self.cache.sqlGetMulti("videoidcache", items)
+		temp_objs = self.cache.getMulti("videoidcache", items)
 		#status = 200
 		#return ( ytobjects, status)
 		for index, videoid in enumerate(items):
@@ -298,7 +298,7 @@ class YouTubeCore():
 			save_data = {}
 			for item in ytobjects:
 				save_data[item["videoid"]] = repr(item)
-			self.cache.sqlSetMulti("videoidcache", save_data)
+			self.cache.setMulti("videoidcache", save_data)
 
 		if len(ytobjects) > 0:
 			status = 200
@@ -685,6 +685,6 @@ class YouTubeCore():
 		for item in ytobjects:
 			if item.has_key("videoid"):
 				save_data[item["videoid"]] = repr(item)
-		self.cache.sqlSetMulti("videoidcache", save_data)
+		self.cache.setMulti("videoidcache", save_data)
 		return ytobjects;
 
