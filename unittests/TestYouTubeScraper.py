@@ -742,14 +742,9 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 		self.scraper.scrapeYouTubeTop100({})		
 		
 		assert(sys.modules["__main__"].common.parseDOM.call_count > 0)
-		
-	def test_scrapeYouTubeTop100_should_call_extractVID_to_find_video_ids(self):
-
-		self.scraper.scrapeYouTubeTop100({})		
-		
-		assert(sys.modules["__main__"].utils.extractVID.call_count > 0)
-		
+				
 	def test_scrapeYouTubeTop100_should_return_list_of_video_ids(self):
+		sys.modules["__main__"].common.parseDOM.return_value = ["some_id_1","some_id_2","some_id_3"]
 		
 		result , status = self.scraper.scrapeYouTubeTop100({})		
 		
