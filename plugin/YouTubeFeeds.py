@@ -25,6 +25,7 @@ class YouTubeFeeds():
 	urls['playlist'] = "http://gdata.youtube.com/feeds/api/playlists/%s"
 	urls['related'] = "http://gdata.youtube.com/feeds/api/videos/%s/related"
 	urls['search'] = "http://gdata.youtube.com/feeds/api/videos?q=%s&safeSearch=%s"
+	urls['watch_later'] = "https://gdata.youtube.com/feeds/api/users/default/watch_later?v=2"
 	
 	# YouTube User specific Feeds
 	urls['uploads'] = "http://gdata.youtube.com/feeds/api/users/%s/uploads"
