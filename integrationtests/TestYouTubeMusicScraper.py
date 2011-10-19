@@ -54,7 +54,7 @@ class TestYouTubeMusicScraper(BaseTestCase.BaseTestCase):
 		self.assert_directory_is_a_folder_list()
 		self.assert_directory_items_contain("artist")
 
-	def ttest_plugin_should_scrape_youtube_top_100_video_list_correctly(self):
+	def test_plugin_should_scrape_youtube_top_100_video_list_correctly(self):
 		self.navigation.listMenu({"scraper":"music_top100", "path":"/root/explore/music/top100"})
 		
 		self.assert_directory_count_greater_than_or_equals(10)
