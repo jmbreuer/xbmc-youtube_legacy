@@ -17,6 +17,7 @@
 
 [B]Version 2.7.0 (Beta)[/B]
 - Added new sqlite based caching system with script.common.plugin.cache
+- Added support for unlinked accounts
 - Fixed Downloads messages.
 - Changed Reworked Regex based scraper framework to be more reliable and easier to use
 - Changed Improved Dharma compatability by adding dummy xbmcvfs
