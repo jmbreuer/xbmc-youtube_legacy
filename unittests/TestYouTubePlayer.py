@@ -744,5 +744,18 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		print repr(result)
 		assert(result == self.readTestInput("flashvars-gyzlwNvf8ss-map-test-embed.txt"))
 
+
+	def test_getVideoLinks_should_call_getVideoUrlMap(self):
+		player = YouTubePlayer()
+		player.getVideoUrlMap = Mock()
+		player.getVideoUrlMap.return_value = {}
+		# watch-8wxOVn99FTE-rtmpe.html
+		sys.modules["__main__"].core._fetchPage.side_effect = [ {"status":500, "content": self.readTestInput("get_video_info-gyzlwNvf8ss", False)}, {"status":200, "content": self.readTestInput("get_video_info-gyzlwNvf8ss", False)} ]
+		sys.modules["__main__"].common.parseDOM.return_value = [ self.readTestInput("watch-gyzlwNvf8ss-flashvars.txt", False) ]
+		sys.modules["__main__"].core._findErrors.return_value = "mock error"
+
+		result = player._getVideoLinks({},{"videoid":"some_id"})
+		assert(player.getVideoUrlMap.call_args_list[0][0] == self.readTestInput("watch-gyzlwNvf8ss-getVideoUrlMap-call.txt"))
+
 if __name__ == '__main__':
 	nose.runmodule()
