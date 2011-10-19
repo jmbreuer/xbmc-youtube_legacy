@@ -683,11 +683,15 @@ class YouTubePlayer():
 			fresult = self.core._fetchPage({"link": self.urls["embed_stream"] % get("videoid") })
 		
 			# Fallback error reporting
+			print "A"
 			if fresult["content"].find("status=fail") > -1:
 				fresult["status"] = 303
-				error = re.compile('reason=(.*)%3Cbr').findall(fresult["content"])
-				if len(error) > 0:
-					video["apierror"] = re.compile('reason=(.*)%3Cbr').findall(fresult["content"])[0].replace("+", " ")
+				error = fresult["content"]
+				if error.find("reason=") > -1:
+					error = error[error.find("reason=") + len("reason="):]
+					if error.find("%3Cbr") > -1:
+						error = error[:error.find("%3Cbr")]
+				video["apierror"] = error.replace("+", " ")
 
 			if fresult["status"] == 200:
 				# this gives no player_object["PLAYER_CONFIG"]["url"] for rtmpe...

@@ -689,7 +689,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		
 		player.getInfo.assert_called_with({})
 		sys.modules["__main__"].language.assert_called_with(30618)
-	
+
 	def test_convertFlashVars_should_parse_html_properly(self):
 		player = YouTubePlayer()
 		
@@ -714,6 +714,16 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		
 		sys.modules["__main__"].core._fetchPage.assert_called_with({"link": player.urls["embed_stream"] % ("some_id")})
 
+	def test_getVideoLinks_should_get_error_message_from_embed(self):
+		sys.modules["__main__"].core._fetchPage.return_value = {"status":303, "content":self.readTestInput("watch-gyzlwNvf8ss-get_video_info.txt", False)}
+
+		player = YouTubePlayer()
+		result = player._getVideoLinks({},{"videoid":"some_id"})
+		print repr(result)
+		assert(result[0] == [])
+		assert(result[1] == {'apierror': u'Ugyldige parametre.'})
+		
+	
 	def test_getVideoLinks_should_parse_player_config_for_rtmpe(self):
 		player = YouTubePlayer()
 		# watch-8wxOVn99FTE-rtmpe.html
