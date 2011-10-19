@@ -683,7 +683,6 @@ class YouTubePlayer():
 			fresult = self.core._fetchPage({"link": self.urls["embed_stream"] % get("videoid") })
 		
 			# Fallback error reporting
-			print "A"
 			if fresult["content"].find("status=fail") > -1:
 				fresult["status"] = 303
 				error = fresult["content"]
