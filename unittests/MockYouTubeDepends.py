@@ -16,8 +16,7 @@ class MockYouTubeDepends:
 		sys.modules[ "__main__" ].utils = Mock(spec=YouTubeUtils.YouTubeUtils)
 		sys.modules[ "__main__" ].utils.INVALID_CHARS = "\\/:*?\"<>|"
 
-		import CommonFunctions
-		sys.modules[ "__main__" ].common = Mock(spec = CommonFunctions.CommonFunctions) 
+		sys.modules[ "__main__" ].common = Mock() 
 		sys.modules[ "__main__" ].log_override = self
 		sys.modules[ "__main__" ].common.log.side_effect = sys.modules[ "__main__" ].log_override.log
 		sys.modules[ "__main__" ].common.USERAGENT = "Mozilla/5.0 (MOCK)"
