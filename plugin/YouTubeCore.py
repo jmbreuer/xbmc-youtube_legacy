@@ -355,7 +355,7 @@ class YouTubeCore():
 
 		if get("api", "false") == "true":
 			self.common.log("got api")
-			request.add_header('GData-Version', '2') #confirmed
+			request.add_header('GData-Version', '2.1')
 			request.add_header('X-GData-Key', 'key=' + self.APIKEY)
 
 		else:
