@@ -39,6 +39,16 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		keys = [5, 18, 22, 34, 35, 37, 43, 44, 45, 82, 84]
 		for key in keys:
 			assert(key in result)
+
+
+	def test_getVideoUrlMap_should_parse_rtmpe(self):
+		player = YouTubePlayer()
+		result = player.getVideoUrlMap(self.readTestInput("rtmpMapTest2.txt"),{})
+		print repr(result)
+		assert(len(result) == 1)
+		keys = [78]
+		for key in keys:
+			assert(key in result)
 		
 	def test_getVideoUrlMap_should_parse_url_encoded_stream_map(self):
 		player = YouTubePlayer()
@@ -59,6 +69,20 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		keys = [5, 18, 22, 34, 35, 37, 43, 44, 45, 82, 84]
 		for key in keys:
 			assert(key in result)
+
+	def test_getVideoUrlMap_should_parse_url_map_fallback(self):
+		subtitlesettings = ["false"]
+                sys.modules[ "__main__"].settings.getSetting = Mock()
+                sys.modules[ "__main__"].settings.getSetting.return_value = "false"
+
+		player = YouTubePlayer()		
+		result = player.getVideoUrlMap(self.readTestInput("urlMapTest.txt"),{})
+		
+		assert(len(result) == 11)
+		keys = [5, 18, 22, 34, 35, 37, 43, 44, 45, 82, 84]
+		for key in keys:
+			assert(key in result)
+			assert(result[key].find("preferred") > result[key].find("fallback_host"))
 
 	def test_getVideoUrlMap_should_mark_live_play(self):
 		player = YouTubePlayer()
@@ -182,6 +206,16 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		player.getSubtitleUrl({"videoid":"some_id"})
 		
 		sys.modules["__main__"].core._fetchPage.assert_called_with({"link":player.urls["timed_text_index"] % ('some_id')}) 
+
+	def test_getTranscriptionUrl_should_call_return_correct_url(self):
+		player = YouTubePlayer()
+		sys.modules["__main__"].core._fetchPage = Mock()
+		sys.modules["__main__"].core._fetchPage.return_value = {"status":303, "content":""}
+                sys.modules["__main__"].settings.getSetting = Mock()
+                sys.modules["__main__"].settings.getSetting.return_value = "1"		
+		ret = player.getTranscriptionUrl({"videoid":"some_id", "ttsurl":"http://some.url/transcript"})
+		print ret;
+		assert(ret == "http://some.url/transcript&type=trackformat=1&lang=en&kind=asr&name=&v=some_id&tlang=en")
 		
 	def test_getSubtitleUrl_should_find_url_with_proper_language_code(self):
 		player = YouTubePlayer()
@@ -222,7 +256,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		result = player.transformSubtitleXMLtoSRT(self.readTestInput("subtitleTest.xml",False).encode("utf-8")) 
 		
 		assert(sys.modules[ "__main__"].utils.replaceHtmlCodes.call_count > 0) 
-	
+
 	def test_transformSubtitleXMLtoSRT_should_correctly_find_start_time_for_text_elements(self):
 		input = '<?xml version="1.0" encoding="utf-8" ?><transcript>\n\
 				<text start="14.017" dur="2.07">first</text>\n\
@@ -400,15 +434,15 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 
 
 	def test_getInfo_should_use_cache_when_possible(self):
-		sys.modules["__main__"].cache.sqlGet.return_value = '["something"]'
+		sys.modules["__main__"].cache.get.return_value = '["something"]'
 		player = YouTubePlayer()
 		
 		player.getInfo({"videoid":"some_id"})
 		
-		sys.modules["__main__"].cache.sqlGet.assert_called_with("videoidcachesome_id")
+		sys.modules["__main__"].cache.get.assert_called_with("videoidcachesome_id")
 		
 	def test_getInfo_should_call_fetchPage_with_correct_url(self):
-		sys.modules["__main__"].cache.sqlGet.return_value = {}
+		sys.modules["__main__"].cache.get.return_value = {}
 		sys.modules["__main__"].core._fetchPage.return_value = {"status":303, "content":"something"}
 		player = YouTubePlayer()
 		
@@ -417,7 +451,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		sys.modules[ "__main__"].core._fetchPage.assert_called_with({"api":"true","link":player.urls["video_info"] % ("some_id")})
 		
 	def test_getInfo_should_call_core_getVideoInfo_to_parse_youtube_xml(self):
-		sys.modules["__main__"].cache.sqlGet.return_value = {}
+		sys.modules["__main__"].cache.get.return_value = {}
 		sys.modules["__main__"].core._fetchPage.return_value = {"status":200, "content":"something"}
 		sys.modules["__main__"].core.getVideoInfo.return_value = [{"videoid":"some_id"}]
 		player = YouTubePlayer()
@@ -427,7 +461,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		sys.modules["__main__"].core.getVideoInfo.assert_called_with("something",{"videoid":"some_id"})
 	
 	def test_getInfo_should_fail_correctly_if_api_is_unavailable(self):
-		sys.modules["__main__"].cache.sqlGet.return_value = {}
+		sys.modules["__main__"].cache.get.return_value = {}
 		sys.modules[ "__main__"].core._fetchPage.return_value = {"status":200, "content":"something"}
 		sys.modules["__main__"].core.getVideoInfo.return_value = []
 		sys.modules["__main__"].language.return_value = "some_string"
@@ -440,14 +474,14 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		assert(video["apierror"] == "some_string")
 				
 	def test_getInfo_should_save_video_info_in_cache(self):
-		sys.modules["__main__"].cache.sqlGet.return_value = {}
+		sys.modules["__main__"].cache.get.return_value = {}
 		sys.modules[ "__main__"].core._fetchPage.return_value = {"status":200, "content":"something"}
 		sys.modules["__main__"].core.getVideoInfo.return_value = [{"videoid":"some_id"}]
 		player = YouTubePlayer()
 		
 		(video, status) = player.getInfo({"videoid":"some_id"})
 		
-		sys.modules["__main__"].cache.sqlSet.assert_called_with('videoidcachesome_id', "{'videoid': 'some_id'}")
+		sys.modules["__main__"].cache.set.assert_called_with('videoidcachesome_id', "{'videoid': 'some_id'}")
 
 	def test_selectVideoQuality_should_prefer_h264_over_vp8_for_720p_as_appletv2_cant_handle_vp8_properly(self):
 		sys.modules["__main__"].settings.getSetting.return_value = "2"
@@ -655,7 +689,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		
 		player.getInfo.assert_called_with({})
 		sys.modules["__main__"].language.assert_called_with(30618)
-	
+
 	def test_convertFlashVars_should_parse_html_properly(self):
 		player = YouTubePlayer()
 		
@@ -679,6 +713,59 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		player._getVideoLinks({},{"videoid":"some_id"})
 		
 		sys.modules["__main__"].core._fetchPage.assert_called_with({"link": player.urls["embed_stream"] % ("some_id")})
+
+	def test_getVideoLinks_should_get_error_message_from_embed(self):
+		sys.modules["__main__"].core._fetchPage.return_value = {"status":303, "content":self.readTestInput("watch-gyzlwNvf8ss-get_video_info.txt", False)}
+
+		player = YouTubePlayer()
+		result = player._getVideoLinks({},{"videoid":"some_id"})
+		print repr(result)
+		assert(result[0] == [])
+		assert(result[1] == {'apierror': u'Ugyldige parametre.'})
+		
+	
+	def test_getVideoLinks_should_parse_player_config_for_rtmpe(self):
+		player = YouTubePlayer()
+		# watch-8wxOVn99FTE-rtmpe.html
+		sys.modules["__main__"].core._fetchPage.return_value = {"status":200, "content":self.readTestInput("watch-8wxOVn99FTE-rtmpe.html", False)}
+		sys.modules["__main__"].common.parseDOM.return_value = ""
+
+		result = player._getVideoLinks({},{"videoid":"some_id"})
+		print repr(result)
+		assert(result == self.readTestInput("rtmpMapTest.txt"))
+
+	def test_getVideoLinks_should_parse_flashvars(self):
+		player = YouTubePlayer()
+		# watch-8wxOVn99FTE-rtmpe.html
+		sys.modules["__main__"].core._fetchPage.return_value = {"status":200, "content":self.readTestInput("watch-gyzlwNvf8ss-standard-without-player_config.html", False)}
+		sys.modules["__main__"].common.parseDOM.return_value = [ self.readTestInput("watch-gyzlwNvf8ss-flashvars.txt", False) ]
+
+		result = player._getVideoLinks({},{"videoid":"some_id"})
+		print repr(result)
+		assert(result == self.readTestInput("flashvars-gyzlwNvf8ss-map-test.txt"))
+
+	def test_getVideoLinks_should_parse_flashvars_from_embed(self):
+		player = YouTubePlayer()
+		# watch-8wxOVn99FTE-rtmpe.html
+		sys.modules["__main__"].core._fetchPage.side_effect = [ {"status":500, "content": self.readTestInput("get_video_info-gyzlwNvf8ss", False)}, {"status":200, "content": self.readTestInput("get_video_info-gyzlwNvf8ss", False)} ]
+		sys.modules["__main__"].common.parseDOM.return_value = [ self.readTestInput("watch-gyzlwNvf8ss-flashvars.txt", False) ]
+
+		result = player._getVideoLinks({},{"videoid":"some_id"})
+		print repr(result)
+		assert(result == self.readTestInput("flashvars-gyzlwNvf8ss-map-test-embed.txt"))
+
+
+	def test_getVideoLinks_should_call_getVideoUrlMap(self):
+		player = YouTubePlayer()
+		player.getVideoUrlMap = Mock()
+		player.getVideoUrlMap.return_value = {}
+		# watch-8wxOVn99FTE-rtmpe.html
+		sys.modules["__main__"].core._fetchPage.side_effect = [ {"status":500, "content": self.readTestInput("get_video_info-gyzlwNvf8ss", False)}, {"status":200, "content": self.readTestInput("get_video_info-gyzlwNvf8ss", False)} ]
+		sys.modules["__main__"].common.parseDOM.return_value = [ self.readTestInput("watch-gyzlwNvf8ss-flashvars.txt", False) ]
+		sys.modules["__main__"].core._findErrors.return_value = "mock error"
+
+		result = player._getVideoLinks({},{"videoid":"some_id"})
+		assert(player.getVideoUrlMap.call_args_list[0][0] == self.readTestInput("watch-gyzlwNvf8ss-getVideoUrlMap-call.txt"))
 
 if __name__ == '__main__':
 	nose.runmodule()

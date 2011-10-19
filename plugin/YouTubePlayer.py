@@ -341,7 +341,7 @@ class YouTubePlayer():
 		self.storage.storeValue( "vidstatus-" + video['videoid'], "7" )
 
 	def getVideoUrlMap(self, pl_obj, video = {}):
-		self.common.log("")
+		self.common.log(repr(pl_obj))
 		links = {}
 		video["url_map"] = "true"
 		
@@ -403,7 +403,6 @@ class YouTubePlayer():
 					
 					if final_url.find("&type") > 0:
 						final_url = final_url[:final_url.find("&type")]
-					
 					if self.settings.getSetting("preferred") == "false":
 						pos = final_url.find("://")
 						fpos = final_url.find("fallback_host")
@@ -414,7 +413,7 @@ class YouTubePlayer():
 							fmt_fallback = final_url[fpos + 14:]
 							if fmt_fallback.find("&") > -1:
 								fmt_fallback = fmt_fallback[:fmt_fallback.find("&")]
-							#self.common.log("Swapping cached host [%s] and fallback host [%s] " % ( host, fmt_fallback ))
+							self.common.log("Swapping cached host [%s] and fallback host [%s] " % ( host, fmt_fallback ), 5)
 							final_url = final_url.replace(host, fmt_fallback)
 							final_url = final_url.replace("fallback_host=" + fmt_fallback, "fallback_host=" + host)
 
@@ -441,7 +440,7 @@ class YouTubePlayer():
 			
 	def getInfo(self, params):
 		get = params.get
-		video = self.cache.sqlGet("videoidcache" + get("videoid"))
+		video = self.cache.get("videoidcache" + get("videoid"))
 		if len(video) > 0:
 			self.common.log("returning cache ")
 			return ( eval(video), 200)
@@ -462,7 +461,7 @@ class YouTubePlayer():
 			
 			return (video,303)
 		video = video[0]
-		self.cache.sqlSet("videoidcache" + get("videoid"), repr(video))
+		self.cache.set("videoidcache" + get("videoid"), repr(video))
 		return (video, result["status"])
 	
 	def selectVideoQuality(self, links, params):
@@ -637,11 +636,13 @@ class YouTubePlayer():
 		return (video, status)
 
 	def _convertFlashVars(self, html):
-		print "_convert " + repr(html)
+		self.common.log(repr(html))
 		obj = { "PLAYER_CONFIG": { "args": {} } }
 		temp = html.split("&")
 		for item in temp:
+			self.common.log(item, 9)
 			it = item.split("=")
+			self.common.log(it, 9)
 			obj["PLAYER_CONFIG"]["args"][it[0]] = urllib.unquote_plus(it[1])
 		return obj
 
@@ -658,22 +659,22 @@ class YouTubePlayer():
 		if result["status"] == 200:
 			data = result["content"].find("PLAYER_CONFIG")
 			if data > -1:
+				self.common.log("Found player_config", 4)
 				data = result["content"].rfind("yt.setConfig", 0, data)
 				data = re.compile('yt.setConfig\((.*?PLAYER_CONFIG.*?)\);').findall(result["content"][data:].replace("\n", ""))
 				if len(data) > 0:
-					#self.common.log("trying website : " + repr(data))
 					player_object = json.loads(data[0].replace('\'PLAYER_CONFIG\'', '"PLAYER_CONFIG"'))
-					print "player_object " + repr(player_object) 
+					self.common.log("player_object " + repr(player_object), 4)
 			else:
+				self.common.log("Using flashvars", 4)
 				data = self.common.parseDOM(result["content"], "embed", attrs = {"id": "movie_player" }, ret = "flashvars")
 				src = self.common.parseDOM(result["content"], "embed", attrs = {"id": "movie_player"}, ret = "src")
 				if len(data) > 0 and len(src) > 0:
+					self.common.log("Using flashvars converting", 4)
 					data = data[0].replace("&amp;", "&")
 					player_object = self._convertFlashVars(data)
 					if player_object.has_key("PLAYER_CONFIG"):
 						player_object["PLAYER_CONFIG"]["url"] = src[0]
-
-			fresult = False
 		elif get("no_embed", "false") == "false":
 			self.common.log("Falling back to embed")
 
@@ -682,9 +683,12 @@ class YouTubePlayer():
 			# Fallback error reporting
 			if fresult["content"].find("status=fail") > -1:
 				fresult["status"] = 303
-				error = re.compile('reason=(.*)%3Cbr').findall(fresult["content"])
-				if len(error) > 0:
-					video["apierror"] = re.compile('reason=(.*)%3Cbr').findall(fresult["content"])[0].replace("+", " ")
+				error = fresult["content"]
+				if error.find("reason=") > -1:
+					error = error[error.find("reason=") + len("reason="):]
+					if error.find("%3Cbr") > -1:
+						error = error[:error.find("%3Cbr")]
+				video["apierror"] = error.replace("+", " ")
 
 			if fresult["status"] == 200:
 				# this gives no player_object["PLAYER_CONFIG"]["url"] for rtmpe...

@@ -497,7 +497,7 @@ class TestYouTubeDownloader(BaseTestCase.BaseTestCase):
 		assert(dummy_connection.read.call_count == 6)
 		dummy_connection.read.assert_called_with(5)
 		
-	def test_downloadVideoURL_should_call_sqlGet_to_fetch_download_queue_while_downloading(self):
+	def test_downloadVideoURL_should_call_get_to_fetch_download_queue_while_downloading(self):
 		url_patcher = patch("urllib2.urlopen")
 		url_patcher.start()		
 		import urllib2
@@ -505,7 +505,7 @@ class TestYouTubeDownloader(BaseTestCase.BaseTestCase):
 		dummy_connection.read.return_value = ""
 		dummy_connection.geturl.return_value = ""
 		dummy_connection.info().getheader.return_value = "1000"
-		sys.modules["__main__"].cache.sqlGet.return_value = ""
+		sys.modules["__main__"].cache.get.return_value = ""
 		url_patcher(urllib2.urlopen).return_value = dummy_connection
 		sys.modules["__main__"].settings.getSetting.return_value = "mypath"
 		sys.modules["__main__"].language.return_value = "some_message"
@@ -517,7 +517,7 @@ class TestYouTubeDownloader(BaseTestCase.BaseTestCase):
 		
 		url_patcher.stop()
 		
-		sys.modules["__main__"].cache.sqlGet.assert_called_with("YouTubeDownloadQueue")
+		sys.modules["__main__"].cache.get.assert_called_with("YouTubeDownloadQueue")
 	
 	def test_downloadVideoURL_should_calculate_progress_correctly(self):
 		url_patcher = patch("urllib2.urlopen")
@@ -527,7 +527,7 @@ class TestYouTubeDownloader(BaseTestCase.BaseTestCase):
 		dummy_connection.read.return_value = ""
 		dummy_connection.geturl.return_value = ""
 		dummy_connection.info().getheader.return_value = "1000"
-		sys.modules["__main__"].cache.sqlGet.return_value = ""
+		sys.modules["__main__"].cache.get.return_value = ""
 		url_patcher(urllib2.urlopen).return_value = dummy_connection
 		sys.modules["__main__"].settings.getSetting.return_value = "mypath"
 		sys.modules["__main__"].language.return_value = "some_message"
@@ -539,7 +539,7 @@ class TestYouTubeDownloader(BaseTestCase.BaseTestCase):
 		
 		url_patcher.stop()
 		
-		sys.modules["__main__"].cache.sqlGet.assert_called_with("YouTubeDownloadQueue")
+		sys.modules["__main__"].cache.get.assert_called_with("YouTubeDownloadQueue")
 		
 	def test_downloadVideoURL_should_update_download_dialog_with_progress(self):
 		url_patcher = patch("urllib2.urlopen")
@@ -551,7 +551,7 @@ class TestYouTubeDownloader(BaseTestCase.BaseTestCase):
 		dummy_connection.read.side_effect = lambda x: chunks.pop()
 		dummy_connection.geturl.return_value = ""
 		dummy_connection.info().getheader.return_value = "1000"
-		sys.modules["__main__"].cache.sqlGet.return_value = ""
+		sys.modules["__main__"].cache.get.return_value = ""
 		url_patcher(urllib2.urlopen).return_value = dummy_connection
 		sys.modules["__main__"].settings.getSetting.return_value = "mypath"
 		sys.modules["__main__"].language.return_value = "some_message"
@@ -577,7 +577,7 @@ class TestYouTubeDownloader(BaseTestCase.BaseTestCase):
 		dummy_connection.read.return_value = ""
 		dummy_connection.geturl.return_value = ""
 		dummy_connection.info().getheader.return_value = "1000"
-		sys.modules["__main__"].cache.sqlGet.return_value = ""
+		sys.modules["__main__"].cache.get.return_value = ""
 		url_patcher(urllib2.urlopen).return_value = dummy_connection
 		sys.modules["__main__"].settings.getSetting.return_value = "mypath"
 		sys.modules["__main__"].language.return_value = "some_message"
@@ -600,7 +600,7 @@ class TestYouTubeDownloader(BaseTestCase.BaseTestCase):
 		dummy_connection.read.return_value = ""
 		dummy_connection.geturl.return_value = ""
 		dummy_connection.info().getheader.return_value = "1000"
-		sys.modules["__main__"].cache.sqlGet.return_value = ""
+		sys.modules["__main__"].cache.get.return_value = ""
 		url_patcher(urllib2.urlopen).return_value = dummy_connection
 		sys.modules["__main__"].settings.getSetting.return_value = "mypath"
 		sys.modules["__main__"].language.return_value = "some_message"
@@ -622,7 +622,7 @@ class TestYouTubeDownloader(BaseTestCase.BaseTestCase):
 		dummy_connection.read.return_value = ""
 		dummy_connection.geturl.return_value = ""
 		dummy_connection.info().getheader.return_value = "1000"
-		sys.modules["__main__"].cache.sqlGet.return_value = ""
+		sys.modules["__main__"].cache.get.return_value = ""
 		url_patcher(urllib2.urlopen).return_value = dummy_connection
 		sys.modules["__main__"].settings.getSetting.return_value = "mypath"
 		sys.modules["__main__"].language.return_value = "some_message"

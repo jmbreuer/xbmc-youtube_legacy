@@ -13,8 +13,8 @@ class MockYouTubeDepends:
 		
 		sys.modules[ "__main__" ].cache = Mock()
 		sys.modules[ "__main__" ].cache.cacheFunction.side_effect = self.execute
-		sys.modules[ "__main__" ].cache.sqlGetMulti.return_value = []
-		sys.modules[ "__main__" ].cache.sqlGet.return_value = ""
+		sys.modules[ "__main__" ].cache.getMulti.return_value = []
+		sys.modules[ "__main__" ].cache.get.return_value = ""
 	
 	def mockXBMC(self):
 		import sys

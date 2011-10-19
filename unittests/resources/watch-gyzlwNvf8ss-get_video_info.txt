@@ -1,1 +1,1 @@
-status=fail&errorcode=2&reason=Ugyldige+parametre.
+status=fail&errorcode=2&reason=Ugyldige+parametre.%3Cbr%3E

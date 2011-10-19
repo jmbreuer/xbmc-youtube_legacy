@@ -260,7 +260,7 @@ class YouTubeCore():
 		# Run the following for the missing.
 		# Update cache in the end.
 
-		temp_objs = self.cache.sqlGetMulti("videoidcache", items)
+		temp_objs = self.cache.getMulti("videoidcache", items)
 		#status = 200
 		#return ( ytobjects, status)
 		for index, videoid in enumerate(items):
@@ -298,7 +298,7 @@ class YouTubeCore():
 			save_data = {}
 			for item in ytobjects:
 				save_data[item["videoid"]] = repr(item)
-			self.cache.sqlSetMulti("videoidcache", save_data)
+			self.cache.setMulti("videoidcache", save_data)
 
 		if len(ytobjects) > 0:
 			status = 200
@@ -458,18 +458,23 @@ class YouTubeCore():
 		## Couldn't find 2 factor or normal login
 		error = self.common.parseDOM(ret['content'], "div", attrs={ "class": "errormsg" })
 		if len(error) == 0:   
-		# An error in 2-factor
+			# An error in 2-factor
+			self.common.log("1")
 			error = self.common.parseDOM(ret['content'], "div", attrs={ "class": "error smaller"})
 		if len(error) == 0:
+			self.common.log("2")
 			error = self.common.parseDOM(ret['content'], "div", attrs={ "id": "unavailable-message"})
 		if len(error) == 0 and ret['content'].find("yt:quota") > -1:
+			self.common.log("3")
 			# Api quota
 			html = self.common.parseDOM(ret['content'], "error")
 			error = self.common.parseDOM(html, "code")
+
 		if len(error) > 0:
+			self.common.log("4")
 			error = error[0]
 			error = urllib.unquote(error[0:error.find("[")]).replace("&#39;", "'")
-			self.common.log("returning error :" + error.strip())
+			self.common.log("returning error : " + error.strip())
 			return error.strip()
 
 		self.common.log("couldn't find any errors: " + repr(ret))
@@ -489,7 +494,6 @@ class YouTubeCore():
 
                         ret = self._fetchPage(fetch_options)
 			fetch_options = False
-
 			new_url = self.common.parseDOM(ret["content"], "form", attrs = { "id": "confirm-age-form"}, ret ="action")
 			if len(new_url) > 0:
 				self.common.log("Part A")
@@ -686,6 +690,6 @@ class YouTubeCore():
 		for item in ytobjects:
 			if item.has_key("videoid"):
 				save_data[item["videoid"]] = repr(item)
-		self.cache.sqlSetMulti("videoidcache", save_data)
+		self.cache.setMulti("videoidcache", save_data)
 		return ytobjects;
 

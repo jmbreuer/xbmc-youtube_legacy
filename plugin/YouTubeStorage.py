@@ -402,7 +402,7 @@ class YouTubeStorage():
 	
 	def storeValue(self, key, value):
 		if value:
-			self.cache.sqlSet(key, value)
+			self.cache.set(key, value)
 
 	def storeResultSet(self, key, results = [], params = {}):
 		get = params.get
@@ -412,14 +412,14 @@ class YouTubeStorage():
 				searchCount = ( 10, 20, 30, 40, )[ int( self.settings.getSetting( "saved_searches" ) ) ]
 				existing = self.retrieveResultSet(key)
 				existing = [results] + existing[:searchCount]
-				self.cache.sqlSet(key, repr(existing))
+				self.cache.set(key, repr(existing))
 			elif get("append"):
 				existing = self.retrieveResultSet(key)  
 				existing.append(results)
-				self.cache.sqlSet(key, repr(existing))
+				self.cache.set(key, repr(existing))
 			else:
 				value = repr(results)
-				self.cache.sqlSet(key,value)
+				self.cache.set(key,value)
 	
 	#============================= Retrieval Functions =================================
 	def retrieve(self, params = {}, type = "", item = {}):
@@ -435,14 +435,14 @@ class YouTubeStorage():
 	def retrieveValue(self, key):
 		value = ""
 		if key:
-			value = self.cache.sqlGet(key)
+			value = self.cache.get(key)
 		
 		return value
 	
 	def retrieveResultSet(self, key):
 		results = []
 		
-		value = self.cache.sqlGet(key)		
+		value = self.cache.get(key)		
 		if value: 
 			try:
 				results = eval(value)
@@ -456,7 +456,7 @@ class YouTubeStorage():
 		if self.cache.lock("YouTubeQueueLock"):
 			videos = []
 			
-			queue = self.cache.sqlGet("YouTubeDownloadQueue")
+			queue = self.cache.get("YouTubeDownloadQueue")
 			self.common.log("queue loaded : " + repr(queue))
 			
 			if queue:
@@ -481,7 +481,7 @@ class YouTubeStorage():
 
 			videos = []
 			if get("videoid"):
-				queue = self.cache.sqlGet("YouTubeDownloadQueue")
+				queue = self.cache.get("YouTubeDownloadQueue")
 				self.common.log("queue loaded : " + repr(queue))
 
 				if queue:
@@ -493,7 +493,7 @@ class YouTubeStorage():
 				if get("videoid") not in videos:
 					videos.append(get("videoid"))
 					
-					self.cache.sqlSet("YouTubeDownloadQueue", repr(videos))
+					self.cache.set("YouTubeDownloadQueue", repr(videos))
 					self.common.log("Added: " + get("videoid") + " to: " + repr(videos))
 
 			self.cache.unlock("YouTubeQueueLock")
@@ -505,7 +505,7 @@ class YouTubeStorage():
 		if self.cache.lock("YouTubeQueueLock"):
 			videos = []
 			
-			queue = self.cache.sqlGet("YouTubeDownloadQueue")
+			queue = self.cache.get("YouTubeDownloadQueue")
 			self.common.log("queue loaded : " + repr(queue))
 			if queue:
 				try:
@@ -516,7 +516,7 @@ class YouTubeStorage():
 			if videoid in videos:
 				videos.remove(videoid)
 
-				self.cache.sqlSet("YouTubeDownloadQueue", repr(videos))
+				self.cache.set("YouTubeDownloadQueue", repr(videos))
 				self.common.log("Removed: " + videoid + " from: " + repr(videos))
 			else:
 				self.common.log("Didn't remove: " + videoid + " from: " + repr(videos))

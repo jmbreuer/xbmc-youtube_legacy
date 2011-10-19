@@ -357,7 +357,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(result[1]["some_key2"] == "value2")
 		assert(result[2]["videoid"] == "false")
 		
-	def test_getBatchDetails_should_call_cache_sqlGetMulti_before_hitting_youtube(self):
+	def test_getBatchDetails_should_call_cache_getMulti_before_hitting_youtube(self):
 		settings = ["4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()		
 		core = YouTubeCore()
@@ -365,7 +365,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		
 		core.getBatchDetails([],{})
 		
-		sys.modules["__main__"].cache.sqlGetMulti.assert_called_with('videoidcache', [])
+		sys.modules["__main__"].cache.getMulti.assert_called_with('videoidcache', [])
 
 	def test_getBatchDetails_should_not_request_video_information_for_cached_videos(self):
 		settings = ["4","3" ]
@@ -375,7 +375,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		core.getVideoInfo = Mock()
 		core.getVideoInfo.return_value = []
 		core._fetchPage.return_value = {"content":"","status":303}
-		sys.modules["__main__"].cache.sqlGetMulti.return_value = ['{"videoid":"some_id_1"}',"","","",'{"videoid":"some_id_5"}']
+		sys.modules["__main__"].cache.getMulti.return_value = ['{"videoid":"some_id_1"}',"","","",'{"videoid":"some_id_5"}']
 		
 		core.getBatchDetails(["some_id_1","some_id_2","some_id_3","some_id_4","some_id_5"],{})
 		
@@ -391,7 +391,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		core.getVideoInfo = Mock()
 		core.getVideoInfo.return_value = []
 		core._fetchPage.return_value = {"content":"","status":303}
-		sys.modules["__main__"].cache.sqlGetMulti.return_value = []
+		sys.modules["__main__"].cache.getMulti.return_value = []
 		sys.modules["__main__"].common.parseDOM.return_value = ""
 		ids = []
 		i= 1
@@ -414,7 +414,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		core.getVideoInfo = Mock()
 		core.getVideoInfo.return_value = []
 		core._fetchPage.return_value = {"content":"","status":303}
-		sys.modules["__main__"].cache.sqlGetMulti.return_value = []
+		sys.modules["__main__"].cache.getMulti.return_value = []
 		sys.modules["__main__"].common.parseDOM.return_value = ""
 		ids = []
 		i= 1
@@ -438,7 +438,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		core.getVideoInfo = Mock()
 		core.getVideoInfo.return_value = []
 		core._fetchPage.return_value = {"content":"","status":303}
-		sys.modules["__main__"].cache.sqlGetMulti.return_value = []
+		sys.modules["__main__"].cache.getMulti.return_value = []
 		status = [[],["","403"]]
 		sys.modules["__main__"].common.parseDOM.side_effect = lambda x = "", y ="",attrs = {},ret = {}: status.pop()  
 		ids = []
@@ -461,7 +461,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		core.getVideoInfo = Mock()
 		core.getVideoInfo.return_value = []
 		core._fetchPage.return_value = {"content":"some_content","status":303}
-		sys.modules["__main__"].cache.sqlGetMulti.return_value = ['{"videoid":"some_id_1"}',"","","",'{"videoid":"some_id_5"}']
+		sys.modules["__main__"].cache.getMulti.return_value = ['{"videoid":"some_id_1"}',"","","",'{"videoid":"some_id_5"}']
 		
 		core.getBatchDetails(["some_id_1","some_id_2","some_id_3","some_id_4","some_id_5"],{"param":"some_params"})
 		
@@ -475,7 +475,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		core.getVideoInfo = Mock()
 		core.getVideoInfo.return_value = []
 		core._fetchPage.return_value = {"content":"","status":303}
-		sys.modules["__main__"].cache.sqlGetMulti.return_value = []
+		sys.modules["__main__"].cache.getMulti.return_value = []
 		sys.modules["__main__"].common.parseDOM.return_value = ""
 		ids = []
 		i= 1
@@ -893,8 +893,47 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		
 		assert(result == "Mock error")
 	
-	def ttest_verifyAge_should_work_at_some_point(self):
-		assert(False)
+	def test_verifyAge_should_verify(self):
+		settings = [ "","some_token","3"]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
+		
+		parsedom = [ ["/verifyAgeMock"], ["http://next.com" ], ["very racy"] ] * 6
+		sys.modules[ "__main__" ].common.parseDOM.side_effect = parsedom
+		url_data = { "next_url": "http://next", "set_racy": "very racy", "session_token" : "MY_token"}
+		core = YouTubeCore()
+		core._fetchPage = Mock()
+		core._fetchPage.return_value = { "status":303,"content":'<form method="POST" action="/verify_age?action_confirm=true" id="confirm-age-form">yt.setConfig({      \'XSRF_TOKEN\': \'MY_token\',      \'XSRF_FIELD_NAME\': \'session_token\'    }); ' }
+		result = core._verifyAge("http://mock.link","http://verify.age", { "link": "http://mock.link", "login": "true"} )
+		print repr(core._fetchPage.call_args_list)
+                core._fetchPage.assert_any_call({'login': 'true', 'link': 'http://www.youtube.com//verifyAgeMock', 'url_data': {'next_url': 'http://next.com', 'set_racy': 'very racy', 'session_token': 'MY_token'}, 'no_verify_age': 'true'})
+
+	def test_verifyAge_should_return_if_done(self):
+		settings = [ "","some_token","3"]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
+		
+		sys.modules[ "__main__" ].common.parseDOM.return_value = []
+		core = YouTubeCore()
+		core._fetchPage = Mock()
+		core._fetchPage.return_value = { "status":303,"content":'PLAYER_CONFIG' }
+		result = core._verifyAge("http://mock.link","http://verify.age", { "link": "http://mock.link", "login": "true"} )
+		print repr(result)
+		print repr(core._fetchPage.call_args_list)
+                core._fetchPage.assert_any_call({'login': 'true', 'link': 'http://verify.age', 'no_verify_age': 'true'})
+		assert(result == { "status":303,"content":'PLAYER_CONFIG' })
+
+	def test_verifyAge_should_try_assuming_it_is_logged_in(self):
+		settings = [ "","some_token","3"]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
+		
+		sys.modules[ "__main__" ].common.parseDOM.return_value = []
+		core = YouTubeCore()
+		core._fetchPage = Mock()
+		core._fetchPage.return_value = { "status":303,"content":'nothing here' }
+		result = core._verifyAge("http://mock.link","http://verify.age", { "link": "http://mock.link", "login": "true"} )
+		print repr(result)
+		print repr(core._fetchPage.call_args_list)
+                core._fetchPage.assert_any_call({'login': 'true', 'link': 'http://verify.age', 'no_verify_age': 'true'})
+                core._fetchPage.assert_any_call({'login': 'true', 'link': 'http://mock.link', 'no_verify_age': 'true'})
 
 	def test_oRefreshToken_should_reset_access_token_before_calling_fetch_page(self):
 		settings = [ "","some_token","3"]
