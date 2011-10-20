@@ -34,7 +34,7 @@ class TestYouTubePlaylistControl(BaseTestCase.BaseTestCase):
 		
 		control.getFavorites.assert_called_with({"user_feed":"favorites", 'fetch_all': 'true'})
 		
-	def test_playAll_should_call_getWatchLater_if_scraper_is_watch_later_in_params(self):
+	def test_playAll_should_call_getWatchLater_if_scraper_is_watch_later_in_params(self): # Think this is legacy  
 		control = YouTubePlaylistControl()
 		control.getWatchLater = Mock()
 		control.getWatchLater.return_value = ""
@@ -210,14 +210,6 @@ class TestYouTubePlaylistControl(BaseTestCase.BaseTestCase):
 		
 		assert(sys.modules["__main__"].feeds.listAll.call_count == 0)
 
-	def test_getWatchLater_should_call_scraper_scrapeWatchLater(self):
-		sys.modules["__main__"].scraper.scrapeWatchLater.return_value = ("",303)
-		control = YouTubePlaylistControl()
-		
-		control.getWatchLater({})
-		
-		sys.modules["__main__"].scraper.scrapeWatchLater.assert_called_with({})
-
 	def test_getDiscoSearch_should_call_scraper_searchDisco(self):
 		sys.modules["__main__"].scraper.searchDisco.return_value = ("",303)
 		control = YouTubePlaylistControl()
@@ -270,32 +262,6 @@ class TestYouTubePlaylistControl(BaseTestCase.BaseTestCase):
 		assert(sys.modules["__main__"].feeds.listAll.call_count == 1)
 		sys.modules["__main__"].feeds.listAll.assert_called_with({"user_feed":"newsubscriptions","contact":"some_contact"})
 		
-	def test_getRecommended_should_exit_cleanly_if_login_or_scraper_is_not_in_params(self):
-		control = YouTubePlaylistControl()
-		
-		control.getRecommended({})
-		
-		assert(sys.modules["__main__"].scraper.scrapeRecommended.call_count == 0)
-
-	def test_getRecommended_should_call_scraper_getRecommended(self):
-		sys.modules["__main__"].scraper.scrapeRecommended.return_value = ("",200)
-		sys.modules["__main__"].core.getBatchDetails.return_value = ("",200)
-		control = YouTubePlaylistControl()
-		
-		control.getRecommended({"login":"true","scraper":"recommended"})
-		
-		sys.modules["__main__"].scraper.scrapeRecommended.assert_called_with({"login":"true","scraper":"recommended"})
-
-	def test_getRecommended_should_call_core_getBatchDetails_if_scraper_succeded(self):
-		sys.modules["__main__"].scraper.scrapeRecommended.return_value = ("",200)
-		sys.modules["__main__"].core.getBatchDetails.return_value = ("",200)
-		control = YouTubePlaylistControl()
-		
-		control.getRecommended({"login":"true","scraper":"recommended"})
-		
-		sys.modules["__main__"].scraper.scrapeRecommended.assert_called_with({"login":"true","scraper":"recommended"})
-		sys.modules["__main__"].core.getBatchDetails.assert_called_with("", {"login":"true","scraper":"recommended"})
-
 	def test_getArtist_should_exit_cleanly_if_artist_is_not_in_params(self):
 		control = YouTubePlaylistControl()
 		
