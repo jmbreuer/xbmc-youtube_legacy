@@ -20,7 +20,7 @@
     <setting id="movies" value="true" />
     <setting id="music" value="true" />
     <setting id="notification_length" value="2" />
-    <setting id="perpage" value="6" />
+    <setting id="perpage" value="0" />
     <setting id="playlists" value="true" />
     <setting id="preferred" value="true" />
     <setting id="recommended" value="true" />

@@ -23,7 +23,7 @@ class TestYouTubeMusicScraper(BaseTestCase.BaseTestCase):
 		self.assert_directory_contains_only_unique_video_items()
 		self.assert_directory_items_should_have_external_thumbnails()
 	
-	def test_plugin_should_list_user_playlists_correctly(self): # Parsed as a video list
+	def test_plugin_should_list_user_playlists_correctly(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
 
 		self.navigation.listMenu({"user_feed":"playlists", "login":"true","path":"/root/playlists", "folder": "true"})
@@ -33,7 +33,7 @@ class TestYouTubeMusicScraper(BaseTestCase.BaseTestCase):
 		self.assert_directory_is_a_folder_list()
 		self.assert_directory_items_contain("playlist")
 	
-	def ttest_plugin_should_list_user_playlists_page_2_correctly(self): # Parsed as a video list
+	def test_plugin_should_list_user_playlists_page_2_correctly(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
 		
 		self.navigation.listMenu({"user_feed":"playlists", "login":"true", "page":"1","path":"/root/playlists", "folder": "true"})
