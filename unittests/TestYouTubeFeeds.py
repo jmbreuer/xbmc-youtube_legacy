@@ -607,7 +607,7 @@ class TestYouTubeFeeds(BaseTestCase.BaseTestCase):
 		
 		feeds.listAll({"login":"true"})
 		
-		sys.modules["__main__"].core._fetchPage.assert_called_with({"link":"some_urlv=2&start-index=1&max-results=50","auth":"true"})
+		sys.modules["__main__"].core._fetchPage.assert_called_with({"link":"some_urlv=2.1&start-index=1&max-results=50","auth":"true"})
 		
 	def test_listAll_should_call_core_getFolderInfo_if_folder_is_in_params(self):
 		sys.modules[ "__main__" ].settings.getSetting.return_value = "1"
