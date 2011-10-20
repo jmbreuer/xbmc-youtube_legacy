@@ -151,6 +151,7 @@ class YouTubePlayer():
 		get = video.get
 		
 		filename = ''.join(c for c in video['Title'].decode("utf-8") if c not in self.utils.INVALID_CHARS) + "-[" + get('videoid') + "]" + ".ssa"
+		filename = filename.encode("ascii", "ignore")
 		path = os.path.join( self.xbmc.translatePath( "special://temp" ).decode("utf-8"), filename )
 		w = self.storage.openFile(path)
 		w.write(result)
@@ -288,6 +289,7 @@ class YouTubePlayer():
 		self.common.log("fetching subtitle if available")
 		
 		filename = ''.join(c for c in video['Title'].decode("utf-8") if c not in self.utils.INVALID_CHARS) + "-[" + get('videoid') + "]" + ".ssa"
+		filename = filename.encode("ascii", "ignore")
 		download_path = os.path.join(self.settings.getSetting( "downloadPath" ).decode("utf-8"), filename )
 		path = os.path.join( self.xbmc.translatePath( "special://temp" ).decode("utf-8"), filename )
 		
@@ -307,7 +309,7 @@ class YouTubePlayer():
 				self.common.log("Waiting for playback to start ")
 				time.sleep(1)
 			
-			self.xbmc.Player().setSubtitles(path.encode("ascii", "ignore"));
+			self.xbmc.Player().setSubtitles(path)
 			self.common.log("added subtitle %s to playback" % path)
 	
 	# ================================ Video Playback ====================================
