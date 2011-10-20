@@ -91,6 +91,16 @@ class TestYouTubeMusicScraper(BaseTestCase.BaseTestCase):
 		self.assert_directory_count_less_than_or_equals(51)
 		self.assert_directory_is_a_folder_list()
 		self.assert_directory_items_contain("contact")
+		self.assert_directory_items_contain("options")
+
+	def test_plugin_should_list_user_contact_folder_list_correctly_(self):
+
+		self.navigation.listMenu({"options":"contact", "Tobuscus" 'login':'true', "path":"/root/contacts/smokey"})
+		
+		self.assert_directory_count_greater_than_or_equals(10)
+		self.assert_directory_count_less_than_or_equals(51)
+		self.assert_directory_is_a_folder_list()
+		self.assert_directory_items_contain("contact")
 		
 	def test_plugin_should_list_user_subscriptions_folder_list_correctly_(self):
 		
