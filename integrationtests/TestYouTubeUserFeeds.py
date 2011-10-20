@@ -61,7 +61,7 @@ class TestYouTubeMusicScraper(BaseTestCase.BaseTestCase):
 
 		self.navigation.listMenu({"feed":"watch_later", 'login':'true', "path":"/root/watch_later"})
 		
-		self.assert_directory_count_greater_than_or_equals(1)
+		self.assert_directory_count_greater_than_or_equals(10)
 		self.assert_directory_count_less_than_or_equals(51)
 		self.assert_directory_is_a_video_list()
 		self.assert_directory_contains_only_unique_video_items()
