@@ -67,7 +67,18 @@ class TestYouTubeMusicScraper(BaseTestCase.BaseTestCase):
 		self.assert_directory_contains_only_unique_video_items()
 		self.assert_directory_items_should_have_external_thumbnails()
 		self.assert_directory_items_contain("playlist_entry_id")
+	
+	def test_plugin_should_list_user_recommended_video_list_correctly(self):
+		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
+
+		self.navigation.listMenu({"feed":"recommended", 'login':'true', "path":"/root/watch_later"})
 		
+		self.assert_directory_count_greater_than_or_equals(10)
+		self.assert_directory_count_less_than_or_equals(51)
+		self.assert_directory_is_a_video_list()
+		self.assert_directory_contains_only_unique_video_items()
+		self.assert_directory_items_should_have_external_thumbnails()
+			
 	def test_plugin_should_list_user_watch_later_video_list_page_2_correctly(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
 		self.navigation.listMenu({"feed":"watch_later", 'login':'true', "page":"1", "path":"/root/watch_later"})
