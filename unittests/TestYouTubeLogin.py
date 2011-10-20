@@ -27,7 +27,7 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
 		calls = sys.modules["__main__"].settings.setSetting.call_args_list
 		assert(calls[0] == (("oauth2_access_token",""),{}))
 		assert(calls[1] == (("oauth2_refresh_token",""),{}))
-		assert(calls[2] == (("oauth2_expires at",""),{}))
+		assert(calls[2] == (("oauth2_expires_at",""),{}))
 		assert(calls[3] == (("nick",""),{}))
 		
 	def test_login_should_call_xbmc_execute_builtin(self):

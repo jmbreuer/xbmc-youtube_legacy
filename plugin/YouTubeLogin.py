@@ -62,7 +62,7 @@ class YouTubeLogin():
 
 				self.settings.setSetting("oauth2_access_token","")
 				self.settings.setSetting("oauth2_refresh_token","")
-				self.settings.setSetting("oauth2_expires at", "")
+				self.settings.setSetting("oauth2_expires_at", "")
 				self.settings.setSetting("nick", "")
 				(result, status) = self._httpLogin({ "new": "true"})
 

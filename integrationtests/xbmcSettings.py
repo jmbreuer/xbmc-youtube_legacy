@@ -23,13 +23,13 @@ class xbmcSettings():
 			self.load_strings()
 		
 		if value:
-			self.settingsString[id] = value
 			if self.path.find("settings-logged-in") > -1 and id in self.settingsString:
 				org = io.open(self.path).read()
 				org = org.replace(self.settingsString[id], value)
 				test = io.open(self.path, "w")
 				test.write(org)
-			
+			self.settingsString[id] = value
+		
 		elif id in self.settingsString:
 			return self.settingsString[id]
 		
