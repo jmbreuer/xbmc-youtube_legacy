@@ -123,7 +123,7 @@ class YouTubeFeeds():
 		get = params.get
 		result = { "content": "", "status": 303 }
 		
-		if get("folder"):
+		if get("folder") or get("feed") == "contacts":
 			return self.listFolder(params)
 		
 		if get("playlist"):
