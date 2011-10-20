@@ -5,9 +5,11 @@ class xbmcSettings():
 	
 	def __init__(self):
 		self.settingsString = {}
+		self.path = ""
 	
 	def load_strings(self, path = "./resources/settings.xml"):
 		print " *** *** loading settings strings *** ***"
+		self.path = path
 		file = io.open(path).read()
 		dom = minidom.parseString(file);
 		strings = dom.getElementsByTagName("setting")
@@ -22,6 +24,11 @@ class xbmcSettings():
 		
 		if value:
 			self.settingsString[id] = value
+			if self.path.find("settings-logged-in") > -1 and id in self.settingsString:
+				org = io.open(self.path).read()
+				org = org.replace(self.settingsString[id], value)
+				test = io.open(self.path, "w")
+				test.write(org)
 			
 		elif id in self.settingsString:
 			return self.settingsString[id]
