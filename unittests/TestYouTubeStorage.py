@@ -34,7 +34,7 @@ class TestYouTubeStorage(BaseTestCase.BaseTestCase):
 		
 		storage.getStoredSearches.assert_called_with({"store":"somestore"})
 
-	def test_openFile_should_call_io_open(self):
+	def ttest_openFile_should_call_io_open(self): # We no longer use io.
 		patcher = patch("io.open")
 		patcher.start()
 		import io
