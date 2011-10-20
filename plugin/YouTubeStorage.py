@@ -49,7 +49,7 @@ class YouTubeStorage():
 		elif get("store"):
 			return self.getStoredSearches(params)
 	
-	def openFile(self, filepath, options = "wb"):
+	def openFile(self, filepath, options = "w"):
 		return io.open(filepath, options)
 	
 	def getStoredArtists(self, params = {}):
