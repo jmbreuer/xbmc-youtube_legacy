@@ -131,7 +131,7 @@ class TestYouTubeMusicScraper(BaseTestCase.BaseTestCase):
 	
 	def test_plugin_should_list_subscription_favorties_video_list_correctly(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
-		self.navigation.listMenu({"feed":"subscription_favorites", "channel":"Chuggaconroy", "path":"/root/subscriptions"})
+		self.navigation.listMenu({"feed":"favorites", "channel":"Chuggaconroy", "path":"/root/subscriptions"})
 		
 		self.assert_directory_count_greater_than_or_equals(10)
 		self.assert_directory_count_less_than_or_equals(51)
@@ -141,7 +141,7 @@ class TestYouTubeMusicScraper(BaseTestCase.BaseTestCase):
 
 	def test_plugin_should_list_subscription_favorties_video_list_page_2_correctly(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
-		self.navigation.listMenu({"feed":"subscription_favorites", "channel":"Chuggaconroy", "page":"1", "path":"/root/subscriptions"})
+		self.navigation.listMenu({"feed":"favorites", "channel":"Chuggaconroy", "page":"1", "path":"/root/subscriptions"})
 		
 		self.assert_directory_count_greater_than_or_equals(10)
 		self.assert_directory_count_less_than_or_equals(51)
@@ -151,7 +151,7 @@ class TestYouTubeMusicScraper(BaseTestCase.BaseTestCase):
 	
 	def test_plugin_should_list_subscription_playlist_folder_list_correctly(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
-		self.navigation.listMenu({"feed":"subscription_playlists", "channel":"Chuggaconroy", "path":"/root/subscriptions"})
+		self.navigation.listMenu({"feed":"playlists", "channel":"Chuggaconroy", "path":"/root/subscriptions"})
 		
 		self.assert_directory_count_greater_than_or_equals(10)
 		self.assert_directory_count_less_than_or_equals(51)
@@ -160,7 +160,7 @@ class TestYouTubeMusicScraper(BaseTestCase.BaseTestCase):
 	
 	def test_plugin_should_list_subscription_uploads_video_list_correctly(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
-		self.navigation.listMenu({"feed":"subscription_uploads", "channel":"Chuggaconroy", "path":"/root/subscriptions"})
+		self.navigation.listMenu({"feed":"uploads", "channel":"Chuggaconroy", "path":"/root/subscriptions"})
 		
 		self.assert_directory_count_greater_than_or_equals(10)
 		self.assert_directory_count_less_than_or_equals(51)
@@ -170,7 +170,7 @@ class TestYouTubeMusicScraper(BaseTestCase.BaseTestCase):
 	
 	def test_plugin_should_list_subscription_uploads_video_list_page_2_correctly(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
-		self.navigation.listMenu({"feed":"subscription_uploads", "channel":"Chuggaconroy", "page":"1", "path":"/root/subscriptions"})
+		self.navigation.listMenu({"feed":"uploads", "channel":"Chuggaconroy", "page":"1", "path":"/root/subscriptions"})
 		
 		self.assert_directory_count_greater_than_or_equals(10)
 		self.assert_directory_count_less_than_or_equals(51)
