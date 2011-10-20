@@ -25,7 +25,7 @@ class YouTubeFeeds():
 	urls['playlist'] = "http://gdata.youtube.com/feeds/api/playlists/%s"
 	urls['related'] = "http://gdata.youtube.com/feeds/api/videos/%s/related"
 	urls['search'] = "http://gdata.youtube.com/feeds/api/videos?q=%s&safeSearch=%s"
-	urls['watch_later'] = "https://gdata.youtube.com/feeds/api/users/default/watch_later?v=2"
+	urls['watch_later'] = "https://gdata.youtube.com/feeds/api/users/default/watch_later?v=2.1"
 	
 	# YouTube User specific Feeds
 	urls['uploads'] = "http://gdata.youtube.com/feeds/api/users/%s/uploads"
@@ -259,6 +259,7 @@ class YouTubeFeeds():
 		return (result, 200)
 	
 	def listAll(self, params ={}):
+		self.common.log("")
 		get = params.get
 		result = { "content": "", "status": 303 }
 		
@@ -269,7 +270,7 @@ class YouTubeFeeds():
 		
 		feed = self.createUrl(params)
 		index = 1
-		url = feed + "v=2&start-index=" + str(index) + "&max-results=" + repr(50)
+		url = feed + "v=2.1&start-index=" + str(index) + "&max-results=" + repr(50)
 		url = url.replace(" ", "+")
 
 		ytobjects = []

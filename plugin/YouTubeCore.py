@@ -424,8 +424,10 @@ class YouTubeCore():
 		except urllib2.HTTPError, e:
 			cont = False
 			err = str(e)
-			#if e.errno == 403:
-			self.common.log("HTTPError : " + repr(e))
+			self.common.log("HTTPError : " + err)
+			if e.code == 400 or True:
+				msg = e.read()
+				self.common.log("Unhandled HTTPError : [%s] %s " % ( e.code, msg), 1)
 
 			if err.find("Token invalid") > -1:
 				self.common.log("refreshing token")

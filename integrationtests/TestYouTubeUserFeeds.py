@@ -89,6 +89,8 @@ class TestYouTubeMusicScraper(BaseTestCase.BaseTestCase):
 		self.assert_directory_items_contain("playlist_entry_id")
 	
 	def ttest_plugin_should_list_user_contacts_folder_list_correctly_(self): # This is parsed as a video list for some reason.
+		# http://gdata.youtube.com/feeds/api/users/default/contacts?v=2.1&start-index=1&max-results=50 <- from plugin
+		# http://gdata.youtube.com/feeds/api/users/default/contacts?start-index=1&max-results=50v=2.1&start-index=1&max-results=50
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
 
 		self.navigation.listMenu({"feed":"contacts", 'login':'true', "path":"/root/contacts/smokey"})
