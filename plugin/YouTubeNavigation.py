@@ -35,7 +35,6 @@ class YouTubeNavigation():
 		self.common = sys.modules[ "__main__" ].common
 		self.cache = sys.modules[ "__main__" ].cache
 		
-			
 		self.playlist = sys.modules[ "__main__" ].playlist
 		self.login = sys.modules[ "__main__" ].login
 		self.feeds = sys.modules[ "__main__" ].feeds
@@ -80,7 +79,7 @@ class YouTubeNavigation():
 					  {'Title':self.language( 30048 )  ,'path':"/root/explore/trailers/upcoming_game"  	, 'thumbnail':"trailers"			, 'login':"false" , 'scraper':"upcoming_game_trailers" },
 					  {'Title':self.language( 30046 )  ,'path':"/root/explore/trailers/popular_game"  	, 'thumbnail':"trailers"			, 'login':"false" , 'scraper':"popular_game_trailers" },
 					  {'Title':self.language( 30051 )  ,'path':"/root/explore/live"  					, 'thumbnail':"live"				, 'login':"false" , 'feed':"feed_live" },
-					  {'Title':self.language( 30019 )  ,'path':"/root/recommended"						, 'thumbnail':"recommended"			, 'login':"true"  , 'scraper':"recommended" },
+					  {'Title':self.language( 30019 )  ,'path':"/root/recommended"						, 'thumbnail':"recommended"			, 'login':"true"  , 'feed':"recommended" },
 					  {'Title':self.language( 30008 )  ,'path':"/root/watch_later"						, 'thumbnail':"watch_later"			, 'login':"true"  , 'feed':"watch_later" },
 					  {'Title':self.language( 30056 )  ,'path':"/root/liked"							, 'thumbnail':"liked"				, 'login':"true"  , 'scraper':"liked_videos" },
 					  {'Title':self.language( 30018 )  ,'path':"/root/contacts"			  				, 'thumbnail':"contacts"			, 'login':"true"  , 'user_feed':"contacts", 'folder':'true' },
