@@ -1,6 +1,6 @@
 <settings>
     <setting id="annotations" value="true" />
-    <setting id="auth" value="ya29.AHES6ZSjrqJxZ6X0iVQ6mGoVqZZwdoh8chDv6ijQQe-lDhM" />
+    <setting id="auth" value="ya29.AHES6ZSljwh1gNb4bhNUDInXs46VQqD6aTXMQpdTt511laRz" />
     <setting id="categories" value="true" />
     <setting id="contacts" value="true" />
     <setting id="debug" value="true" />
@@ -22,8 +22,8 @@
     <setting id="music" value="true" />
     <setting id="nick" value="YTlogintester" />
     <setting id="notification_length" value="2" />
-    <setting id="oauth2_access_token" value="ya29.AHES6ZSjrqJxZ6X0iVQ6mGoVqZZwdoh8chDv6ijQQe-lDhM" />
-    <setting id="oauth2_expires_at" value="1319121574.7" />
+    <setting id="oauth2_access_token" value="ya29.AHES6ZSljwh1gNb4bhNUDInXs46VQqD6aTXMQpdTt511laRz" />
+    <setting id="oauth2_expires_at" value="1319145030.93" />
     <setting id="oauth2_refresh_token" value="1/PybTuMXiaNco1gHAf39bO0db5NVZBgl-U-DI9a6QaYo" />
     <setting id="perpage" value="0" />
     <setting id="playlists" value="true" />
