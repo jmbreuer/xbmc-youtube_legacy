@@ -16,7 +16,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, urllib, io
+import sys, urllib
 
 class YouTubeStorage():
 
@@ -50,7 +50,7 @@ class YouTubeStorage():
 			return self.getStoredSearches(params)
 	
 	def openFile(self, filepath, options = "w"):
-		return io.open(filepath, options)
+		return open(filepath, options)
 	
 	def getStoredArtists(self, params = {}):
 		get = params.get
