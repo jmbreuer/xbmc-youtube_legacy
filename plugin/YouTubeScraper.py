@@ -585,26 +585,6 @@ class YouTubeScraper():
 				
 		self.common.log("Done")
 		return ( videos, result["status"] )
-
-	def scrapeWatchLater(self, params):	
-		get = params.get
-		self.common.log("")
-		
-		url = self.createUrl(params)
-		result = self.core._fetchPage({"link": url, "get_redirect":"true", "login": "true"})
-		
-		if result["status"] == 200:
-			if result["content"].find("p=") > 0:
-				result["content"] = result["content"][result["content"].find("p=") + 2:]
-				playlist_id = result["content"][:result["content"].find("&")]
-				params["user_feed"] = "playlist"
-				params["login"] = "true"
-				params["playlist"] = playlist_id
-				self.common.log("Done")
-				return self.feeds.list(params)
-		
-		self.common.log("Failed")
-		return ([], 303)
 	
 	def scrapeLikedVideos(self, params):
 		get = params.get
