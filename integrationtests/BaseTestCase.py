@@ -1,4 +1,4 @@
-import sys
+import sys, os
 import unittest2
 import MockYouTubeDepends
 
@@ -6,6 +6,12 @@ MockYouTubeDepends.MockYouTubeDepends().mockXBMC()
 
 sys.path.append('../plugin/')
 sys.path.append('../xbmc-mocks/')
+
+if not os.path.exists("tmp"):
+	os.mkdir("tmp")
+else:
+	for old_file in os.listdir("tmp"):
+		os.remove("./tmp/" + old_file)
 
 class BaseTestCase(unittest2.TestCase):
 	
