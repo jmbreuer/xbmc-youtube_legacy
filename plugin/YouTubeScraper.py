@@ -581,14 +581,8 @@ class YouTubeScraper():
 		url = self.createUrl(params)
 		result = self.core._fetchPage({"link": url, "login": "true"})
 		
-		videos = self.common.parseDOM(result["content"], "a", attrs = { "href": ".*feature=grec_browse" }, ret = "href")
-		videos = self.utils.extractVID(videos)
-		
-		if len(videos) == 0:
-			videos = self.common.parseDOM(result["content"], "div", attrs = { "id": "reco-.*"}, ret = "id")
-			for video in videos:
-				video = video.replace("reco-", "")
-		
+		videos = self.common.parseDOM(result["content"], "button", attrs = { "type":"button", "class":"addto-button.*?" }, ret = "data-video-ids")
+				
 		self.common.log("Done")
 		return ( videos, result["status"] )
 
