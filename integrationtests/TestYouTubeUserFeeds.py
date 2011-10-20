@@ -85,7 +85,7 @@ class TestYouTubeMusicScraper(BaseTestCase.BaseTestCase):
 	
 	def test_plugin_should_list_user_contacts_folder_list_correctly_(self):
 
-		self.navigation.listMenu({"feed":"contacts", 'login':'true', "path":"/root/contacts"})
+		self.navigation.listMenu({"feed":"contacts", 'login':'true', "path":"/root/contacts/smokey"})
 		
 		self.assert_directory_count_greater_than_or_equals(10)
 		self.assert_directory_count_less_than_or_equals(51)
