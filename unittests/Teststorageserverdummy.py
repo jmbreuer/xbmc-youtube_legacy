@@ -14,24 +14,24 @@ class Teststorageserverdummy(BaseTestCase.BaseTestCase):
 		temp_funct.assert_called_with('mock_args')
 		assert(result == "mock_return")
 
-	def test_sqlSet_data(self):
+	def test_set_data(self):
 		cache = StorageServer.StorageServer()
-		result = cache.sqlSet("name", "data")
+		result = cache.sSet("name", "data")
 		assert(result == "")
 
-	def test_sqlGet(self):
+	def test_get(self):
 		cache = StorageServer.StorageServer()
-		result = cache.sqlGet("name")
+		result = cache.get("name")
 		assert(result == "")
 
-	def test_sqlSetMulti(self):
+	def test_setMulti(self):
 		cache = StorageServer.StorageServer()
-		result = cache.sqlSetMulti("name", "data")
+		result = cache.setMulti("name", "data")
 		assert(result == "")
 
-	def test_sqlGetMulti(self):
+	def test_getMulti(self):
 		cache = StorageServer.StorageServer()
-		result = cache.sqlGetMulti("name", "data")
+		result = cache.getMulti("name", "data")
 		assert(result == "")
 
 	def test_lock(self):
