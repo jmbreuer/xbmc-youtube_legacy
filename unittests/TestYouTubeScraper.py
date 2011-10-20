@@ -560,32 +560,13 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 		assert(sys.modules["__main__"].common.parseDOM.call_count > 0)
 		
 	def test_scrapeRecommended_should_return_list_of_video_ids(self):
+		sys.modules["__main__"].common.parseDOM.return_value = ["some_id_1","some_id_2","some_id_3"]
 		
 		result, status = self.scraper.scrapeRecommended({})		
 		
 		assert(result[0] == "some_id_1")
 		assert(result[1] == "some_id_2")
-		assert(result[2] == "some_id_3")
-		
-	def test_scrapeWatchLater_should_call_createUrl_to_get_proper_url(self):
-		
-		self.scraper.scrapeWatchLater({})		
-		
-		self.scraper.createUrl.assert_any_call({})
-		
-	def test_scrapeWatchLater_should_call_fetchPage_to_get_page_content(self):
-		
-		self.scraper.scrapeWatchLater({})		
-		
-		sys.modules["__main__"].core._fetchPage.assert_any_call({"link":"some_url","get_redirect":"true","login":"true"})
-		
-	def test_scrapeWatchLater_should_call_feeds_list_if_playlist_is_found(self):
-		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content_&p=some_playlist&_blabal", "status":200}
-		
-		self.scraper.scrapeWatchLater({})
-		
-		sys.modules["__main__"].feeds.list.assert_any_call({'user_feed': 'playlist', 'login': 'true', 'playlist': 'some_playlist'})
-		
+		assert(result[2] == "some_id_3")		
 		
 	def test_scrapeLikedVideos_should_call_createUrl_to_get_proper_url(self):
 		#sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content_&p=some_playlist&_blabal", "status":200}
