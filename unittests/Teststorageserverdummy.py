@@ -16,7 +16,7 @@ class Teststorageserverdummy(BaseTestCase.BaseTestCase):
 
 	def test_set_data(self):
 		cache = StorageServer.StorageServer()
-		result = cache.sSet("name", "data")
+		result = cache.set("name", "data")
 		assert(result == "")
 
 	def test_get(self):
