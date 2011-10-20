@@ -170,7 +170,7 @@ class YouTubeFeeds():
 				next = 'true'
 			
 			videos = videos[(per_page * page):(per_page * (page + 1))]
-			print repr(videos)
+
 			(result, status) = self.core.getBatchDetailsOverride(videos, params)
 		else:
 			result = self.listAll(params)
@@ -221,7 +221,6 @@ class YouTubeFeeds():
 		
 		elif not get("page"):
 			result = self.listAll(params)
-			
 			if len(result) == 0:
 				return (result, 303)
 			
