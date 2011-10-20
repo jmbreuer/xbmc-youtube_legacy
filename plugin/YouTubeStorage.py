@@ -202,7 +202,7 @@ class YouTubeStorage():
 	def getUserOptionFolder(self, params = {}):
 		get = params.get
 		self.common.log("")
-
+		
 		result = []
 		for item in self.user_options:
 			item["path"] = get("path")
@@ -214,8 +214,7 @@ class YouTubeStorage():
 	def changeSubscriptionView(self, params = {}):
 		get = params.get
 		self.common.log("")
-
-		
+	
 		if (get("view_mode")):  
 			key = self.getStorageKey(params, "viewmode")
 			
