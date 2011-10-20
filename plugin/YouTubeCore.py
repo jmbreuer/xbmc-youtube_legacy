@@ -658,7 +658,7 @@ class YouTubeCore():
 			video['count'] = int(self._getNodeAttribute(node, "yt:statistics", 'viewCount', "0"))
 			infoString = ""
 			if video['Date'] != "Unknown Date":
-				c = time.strptime(video['Date'][:video['Date'].find(".000Z")], "%Y-%m-%dT%H:%M:%S")
+				c = time.strptime(video['Date'][:video['Date'].find(".")], "%Y-%m-%dT%H:%M:%S")
 				video['Date'] = time.strftime("%d-%m-%Y", c)
 				infoString += "Date Uploaded: " + time.strftime("%Y-%m-%d %H:%M:%S", c) + ", "
 			infoString += "View count: " + str(video['count'])

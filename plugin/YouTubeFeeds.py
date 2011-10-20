@@ -119,6 +119,7 @@ class YouTubeFeeds():
 		return url
 	
 	def list(self, params = {}):
+		self.common.log("", 4)
 		get = params.get
 		result = { "content": "", "status": 303 }
 		
@@ -136,6 +137,7 @@ class YouTubeFeeds():
 		url = self.createUrl(params)
 		
 		if url:
+			self.common.log(repr(url), 4)
 			result = self.core._fetchPage({"link": url, "auth": get("login"), "api": "true"})
 		
 		if result["status"] != 200:
@@ -151,7 +153,8 @@ class YouTubeFeeds():
 		
 		if thumbnail:
 			self.storage.store(params, thumbnail, "thumbnail")
-						
+					
+		self.common.log("Done", 4)
 		return (videos, 200)
 	
 	def listPlaylist(self, params = {}):
