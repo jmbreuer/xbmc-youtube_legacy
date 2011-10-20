@@ -308,7 +308,7 @@ class YouTubePlayer():
 			while not player.isPlaying():
 				self.common.log("Waiting for playback to start ")
 				time.sleep(1)
-			
+
 			self.xbmc.Player().setSubtitles(path)
 			self.common.log("added subtitle %s to playback" % path)
 	
