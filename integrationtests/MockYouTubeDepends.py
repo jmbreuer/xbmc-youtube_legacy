@@ -48,7 +48,7 @@ class MockYouTubeDepends:
 	
 	def log(self, description, level = 0):
 		import inspect
-		print "[%s] %s : '%s'" % ("YouTube", inspect.stack()[4][3], description) # 4 - 3 for TestYouTubeUserFeeds.py
+		print "[%s] %s : '%s'" % ("YouTube", inspect.stack()[4][3] , description.decode("utf-8","ignore")) # 4 - 3 for TestYouTubeUserFeeds.py
 		
 	def execute(self, function, *args):
 		return function(*args)
