@@ -1,6 +1,5 @@
 import BaseTestCase
-import unittest2
-import nose, sys, os
+import nose, sys
 
 class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 	
