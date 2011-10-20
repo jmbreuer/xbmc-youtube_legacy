@@ -2,7 +2,8 @@ import BaseTestCase
 import nose, sys
 
 class TestYouTubeMusicScraper(BaseTestCase.BaseTestCase):
-       	def test_plugin_should_list_user_favorites_video_list_correctly(self):
+	
+	def test_plugin_should_list_user_favorites_video_list_correctly(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
 		
 		self.navigation.listMenu({"feed":"favorites", "login":"true", "path":"/root/favorites"})
@@ -25,18 +26,8 @@ class TestYouTubeMusicScraper(BaseTestCase.BaseTestCase):
 	
 	def test_plugin_should_list_user_playlists_correctly(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
-
+		
 		self.navigation.listMenu({"user_feed":"playlists", "login":"true","path":"/root/playlists", "folder": "true"})
-		
-		self.assert_directory_count_greater_than_or_equals(5)
-		self.assert_directory_count_less_than_or_equals(51)
-		self.assert_directory_is_a_folder_list()
-		self.assert_directory_items_contain("playlist")
-	
-	def test_plugin_should_list_user_playlists_page_2_correctly(self):
-		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
-		
-		self.navigation.listMenu({"user_feed":"playlists", "login":"true", "page":"1","path":"/root/playlists", "folder": "true"})
 		
 		self.assert_directory_count_greater_than_or_equals(5)
 		self.assert_directory_count_less_than_or_equals(51)
@@ -151,6 +142,7 @@ class TestYouTubeMusicScraper(BaseTestCase.BaseTestCase):
 	
 	def test_plugin_should_list_subscription_uploads_video_list_correctly(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
+		
 		self.navigation.listMenu({"feed":"uploads", "channel":"chuggaaconroy", "path":"/root/subscriptions"})
 		
 		self.assert_directory_count_greater_than_or_equals(5)
