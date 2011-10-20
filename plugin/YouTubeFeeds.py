@@ -25,7 +25,6 @@ class YouTubeFeeds():
 	urls['playlist'] = "http://gdata.youtube.com/feeds/api/playlists/%s"
 	urls['related'] = "http://gdata.youtube.com/feeds/api/videos/%s/related"
 	urls['search'] = "http://gdata.youtube.com/feeds/api/videos?q=%s&safeSearch=%s"
-	urls['watch_later'] = "https://gdata.youtube.com/feeds/api/users/default/watch_later?v=2.1"
 	
 	# YouTube User specific Feeds
 	urls['uploads'] = "http://gdata.youtube.com/feeds/api/users/%s/uploads"
@@ -34,6 +33,8 @@ class YouTubeFeeds():
 	urls['contacts'] = "http://gdata.youtube.com/feeds/api/users/default/contacts"
 	urls['subscriptions'] = "http://gdata.youtube.com/feeds/api/users/%s/subscriptions"
 	urls['newsubscriptions'] = "http://gdata.youtube.com/feeds/api/users/%s/newsubscriptionvideos"
+	urls["recommended"] = "https://gdata.youtube.com/feeds/api/users/default/recommendations"
+	urls['watch_later'] = "https://gdata.youtube.com/feeds/api/users/default/watch_later?v=2.1"
 	
 	# YouTube Standard feeds
 	urls['feed_rated'] = "http://gdata.youtube.com/feeds/api/standardfeeds/top_rated?time=%s"
