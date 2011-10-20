@@ -27,12 +27,10 @@ class YouTubeScraper():
 	urls['disco_mix_list'] = "http://www.youtube.com/watch?v=%s&feature=disco&playnext=1&list=%s"
 	urls['disco_search'] = "http://www.youtube.com/disco?action_search=1&query=%s"
 	urls['game_trailers'] = "http://www.youtube.com/trailers?s=gtcs"
-	urls['live'] = "http://www.youtube.com/live"
 	urls['main'] = "http://www.youtube.com"
 	urls['movies'] = "http://www.youtube.com/ytmovies"
 	urls['popular_game_trailers'] = "http://www.youtube.com/trailers?s=gtp&p=%s&hl=en"
 	urls['popular_trailers'] = "http://www.youtube.com/trailers?s=trp&p=%s&hl=en"
-	urls['recommended'] = "http://www.youtube.com/videos?r=1&hl=en"
 	urls['show_list'] = "http://www.youtube.com/show"
 	urls['shows'] = "http://www.youtube.com/shows"
 	urls['trailers'] = "http://www.youtube.com/trailers?s=tr"
@@ -40,7 +38,6 @@ class YouTubeScraper():
 	urls['latest_game_trailers'] = "http://www.youtube.com/trailers?s=gtcs"
 	urls['upcoming_game_trailers'] = "http://www.youtube.com/trailers?s=gtcs&p=%s&hl=en"
 	urls['upcoming_trailers'] = "http://www.youtube.com/trailers?s=tros&p=%s&hl=en"
-	urls['watch_later'] = "http://www.youtube.com/my_watch_later_list"
 	urls['liked_videos'] = "http://www.youtube.com/my_liked_videos"
 	urls['music'] = "http://www.youtube.com/music"
 	urls['artist'] = "http://www.youtube.com/artist?a=%s&feature=artist"
@@ -574,18 +571,6 @@ class YouTubeScraper():
 				
 #=================================== User Scraper ============================================
 	
-	def scrapeRecommended(self, params = {}):
-		get = params.get
-		self.common.log("")
-		
-		url = self.createUrl(params)
-		result = self.core._fetchPage({"link": url, "login": "true"})
-		
-		videos = self.common.parseDOM(result["content"], "button", attrs = { "type":"button", "class":"addto-button.*?" }, ret = "data-video-ids")
-				
-		self.common.log("Done")
-		return ( videos, result["status"] )
-	
 	def scrapeLikedVideos(self, params):
 		get = params.get
 		self.common.log("")
@@ -866,9 +851,6 @@ class YouTubeScraper():
 			params["batch"] = "true"
 		if (get("scraper") == "liked_videos"):
 			function = self.scrapeLikedVideos
-			params["batch"] = "true"
-		if (get("scraper") == "recommended"):
-			function = self.scrapeRecommended
 			params["batch"] = "true"
 		if (get("scraper") == "music_top100"):
 			function = self.scrapeYouTubeTop100
@@ -1168,10 +1150,7 @@ class YouTubeScraper():
 	
 	def scrape(self, params = {}):
 		get = params.get
-		
-		if (get("scraper") == "watch_later"):
-			return self.scrapeWatchLater(params)
-		
+				
 		self.getNewResultsFunction(params)
 		
 		return self.paginator(params)
