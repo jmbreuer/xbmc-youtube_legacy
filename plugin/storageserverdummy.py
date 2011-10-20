@@ -7,16 +7,16 @@ class StorageServer():
     def cacheFunction(self, funct = False, *args):
         return funct(*args)
     
-    def Set(self, name, data):
+    def set(self, name, data):
         return ""
 
-    def Get(self, name):
+    def get(self, name):
         return ""
 
-    def SetMulti(self, name, data):
+    def setMulti(self, name, data):
         return ""
 
-    def GetMulti(self, name, items):
+    def getMulti(self, name, items):
         return ""
 
     def lock(self, name):
