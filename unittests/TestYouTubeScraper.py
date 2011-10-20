@@ -534,40 +534,7 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 		assert(result[0] == "some_id_1")
 		assert(result[1] == "some_id_2")
 		assert(result[2] == "some_id_3")
-		
-	def test_scrapeRecommended_should_call_createUrl_to_get_proper_url(self):
-	
-		self.scraper.scrapeRecommended({})		
-		
-		self.scraper.createUrl.assert_any_call({})
-		
-	def test_scrapeRecommended_should_call_fetchPage_to_get_page_content(self):
-		
-		self.scraper.scrapeRecommended({})		
-		
-		sys.modules["__main__"].core._fetchPage.assert_any_call({"link":"some_url","login":"true"})
-		
-	def test_scrapeRecommended_should_call_parseDOM_to_get_video_elements(self):
-		
-		self.scraper.scrapeRecommended({})		
-		
-		assert(sys.modules["__main__"].common.parseDOM.call_count > 0)
-		
-	def test_scrapeRecommended_should_call_extractVID_to_find_video_ids(self):
-
-		self.scraper.scrapeRecommended({})		
-		
-		assert(sys.modules["__main__"].common.parseDOM.call_count > 0)
-		
-	def test_scrapeRecommended_should_return_list_of_video_ids(self):
-		sys.modules["__main__"].common.parseDOM.return_value = ["some_id_1","some_id_2","some_id_3"]
-		
-		result, status = self.scraper.scrapeRecommended({})		
-		
-		assert(result[0] == "some_id_1")
-		assert(result[1] == "some_id_2")
-		assert(result[2] == "some_id_3")		
-		
+				
 	def test_scrapeLikedVideos_should_call_createUrl_to_get_proper_url(self):
 		#sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content_&p=some_playlist&_blabal", "status":200}
 		
@@ -819,15 +786,7 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 		
 		assert(params["batch"] == "true")
 		assert(params["new_results_function"] == self.scraper.scrapeLikedVideos)
-		
-	def test_getNewResultsFunction_should_set_proper_params_for_scrapeRecommended_if_scraper_is_recommended(self):
-		params = {"scraper":"recommended"}
-		
-		self.scraper.getNewResultsFunction(params)
-		
-		assert(params["batch"] == "true")
-		assert(params["new_results_function"] == self.scraper.scrapeRecommended)
-
+	
 	def test_getNewResultsFunction_should_set_proper_params_for_scrapeYouTubeTop100_if_scraper_is_music_top100(self):
 		params = {"scraper":"music_top100"}
 		
@@ -1035,14 +994,6 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 		
 		assert(params["new_results_function"] == self.scraper.scrapeTrailersGridFormat)
 		
-	
-	def test_createUrl_should_return_proper_url_for_scraper_param(self):
-		self.scraper = YouTubeScraper()
-		
-		url = self.scraper.createUrl({"scraper":"live"})
-		
-		assert(url[:url.find("?")] == self.scraper.urls["live"])
-	
 	def test_createUrl_should_return_proper_url_for_categories_scraper(self):
 		self.scraper = YouTubeScraper()
 		
@@ -1355,14 +1306,7 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 		
 		assert(result[0] == "some_cached_string_15")
 		assert(result[14] == "some_cached_string_29")
-		
-	def test_scrape_should_call_scrapeWatchLater_if_scraper_is_watch_later(self):
-		self.scraper.scrapeWatchLater = Mock()
-		
-		self.scraper.scrape({"scraper":"watch_later"})
-		
-		self.scraper.scrapeWatchLater.assert_called_with({"scraper":"watch_later"})
-		
+			
 	def test_scrape_should_call_getNewResultsFunction(self):
 		self.scraper.getNewResultsFunction = Mock()
 		self.scraper.paginator = Mock()
