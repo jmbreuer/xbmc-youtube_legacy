@@ -4,8 +4,8 @@ class MockYouTubeDepends:
 		import sys, string
 		from mock import Mock
 		sys.path.append("../plugin/")
-		import DialogDownloadProgress
-		sys.modules[ "__main__" ].DialogDownloadProgress = Mock(spec=DialogDownloadProgress)
+		#import DialogDownloadProgress
+		#sys.modules[ "__main__" ].DialogDownloadProgress = Mock(spec=DialogDownloadProgress)
 		
 		#Setup default test various values 
 		sys.modules[ "__main__" ].plugin = "YouTube - Integrationtest"
@@ -50,6 +50,10 @@ class MockYouTubeDepends:
 		sys.modules[ "__main__" ].settings = xbmcSettings.xbmcSettings()
 		import xbmcLanguage
 		sys.modules[ "__main__" ].language = xbmcLanguage.xbmcLanguage()
+
+                sys.modules["DialogDownloadProgress"] = __import__("mock")
+                sys.modules["DialogDownloadProgress"].DownloadProgress = Mock()
+
 	
 	def log(self, description, level = 0):
 		import inspect

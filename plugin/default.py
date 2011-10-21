@@ -17,7 +17,6 @@
 '''
 
 import sys, xbmc, xbmcplugin, xbmcaddon, xbmcgui, urllib2, cookielib
-import DialogDownloadProgress
 try: 
 	import xbmcvfs
 except ImportError: 
