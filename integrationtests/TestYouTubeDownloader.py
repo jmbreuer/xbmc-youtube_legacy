@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import BaseTestCase
-import nose, sys
+import nose, sys, os
 from mock import Mock
 
 class TestYouTubePlayer(BaseTestCase.BaseTestCase):	
@@ -11,7 +11,6 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		
 		self.navigation.executeAction({"action":"download", "videoid": "54VJWHL2K3I"})
 
-		import os
 		assert(os.path.exists('./tmp/Roll a D6-[54VJWHL2K3I].mp4'))
 
 	def test_plugin_should_download_agerestricted_over_18_videos(self):
@@ -21,7 +20,6 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 
 		self.navigation.executeAction({"action":"download", "videoid": "fOdNOtS8ZIs", "no_embed": "true"})
 
-		import os
 		assert(os.path.exists("./tmp/נלה מהיפה והחנון בסטריפ צ'אט בקליפ של חובבי ציון-[fOdNOtS8ZIs].mp4"))
 
 	def test_plugin_should_download_with_subtitles_when_available(self):
@@ -29,9 +27,8 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		sys.modules["__main__"].storage.getNextVideoFromDownloadQueue = Mock()
 		sys.modules["__main__"].storage.getNextVideoFromDownloadQueue.side_effect = ["bUcszN8jRB8", ""]
 
-		self.navigation.executeAction({"action":"download", "videoid": "byv-wpqDydI"}) #This is JUST annotations for now.
+		self.navigation.executeAction({"action":"download", "videoid": "byv-wpqDydI"}) 
 
-		import os
 		assert(os.path.exists('./tmp/Morning Dew — a bad lip reading of Bruno Mars, feat. Lady Gaga and Jay-Z-[bUcszN8jRB8].mp4'))
 		assert(os.path.exists('./tmp/Morning Dew  a bad lip reading of Bruno Mars, feat. Lady Gaga and Jay-Z-[bUcszN8jRB8].ssa'))
 		

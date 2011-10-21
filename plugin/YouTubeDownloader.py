@@ -17,6 +17,7 @@
 '''
 
 import sys, urllib2, os
+#import DialogDownloadProgress
 
 class YouTubeDownloader():
 	
@@ -66,6 +67,7 @@ class YouTubeDownloader():
 		
 		if videoid:
 			if not self.dialog:
+				#self.dialog = DialogDownloadProgress.DownloadProgress()
 				self.dialog = self.DialogDownloadProgress.DownloadProgress()
 	
 				self.common.log("BLA")

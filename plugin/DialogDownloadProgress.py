@@ -177,7 +177,7 @@ class Window:
 		error = 0
 		# get the id for the current 'active' window as an integer.
 		# http://wiki.xbmc.org/index.php?title=Window_IDs
-		try: currentWindowId = xbmcgui.getCurrentWindowId()
+		try: 	currentWindowId = xbmcgui.getCurrentWindowId()
 		except: currentWindowId = self.window
 
 		if hasattr( currentWindowId, "__int__" ) and currentWindowId != self.windowId:
@@ -186,6 +186,7 @@ class Window:
 			self.window = xbmcgui.Window( self.windowId )
 			self.initialize()
 
+		print "XXXXXXXXXXX : " + repr(hasattr( self.window, "addControl" ))
 		if not self.window or not hasattr( self.window, "addControl" ):
 			self.removeControls()
 			error = 1

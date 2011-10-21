@@ -37,6 +37,10 @@ class MockYouTubeDepends:
 		sys.modules[ "__main__" ].xbmcaddon = Mock(spec=xbmcaddon)
 		sys.modules[ "__main__" ].xbmcgui = Mock(spec=xbmcgui)
 		sys.modules[ "__main__" ].xbmcgui.WindowXMLDialog.return_value = "testWindowXML"
+                sys.modules[ "__main__" ].xbmcgui.getCurrentWindowId.return_value = 1
+		#window = Mock()
+		#window.addControl = Mock()
+                #sys.modules[ "__main__" ].xbmcgui.Window.return_value = window
 		
 		sys.modules[ "__main__" ].xbmcplugin = Mock(spec=xbmcplugin)
 		sys.modules[ "__main__" ].xbmcvfs = xbmcvfs
