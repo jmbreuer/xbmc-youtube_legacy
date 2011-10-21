@@ -51,15 +51,13 @@ class YouTubePlaylistControl():
 			result = self.getDiscoSearch(params)
 		elif get("user_feed") == "favorites":
 			result = self.getFavorites(params)
-		elif get("scraper") == "watch_later":
-			result = self.getWatchLater(params)
+#		elif get("scraper") == "watch_later":
+#			result = self.getWatchLater(params)
 		elif get("scraper") == "liked_videos":
 			result = self.getLikedVideos(params)
 		elif get("scraper") == "music_artists":
 			result = self.getArtist(params)
-		elif get("scraper") == "recommended":
-			result = self.getRecommended(params)
-		elif get("user_feed") == "newsubscriptions":
+		elif get("user_feed") in ["recommended", "watch_later", "newsubscriptions"]:
 			result = self.getNewSubscriptions(params)
 		else:
 			return
@@ -157,12 +155,12 @@ class YouTubePlaylistControl():
 		params["user_feed"] = "favorites"
 		return self.feeds.listAll(params)
 	
-	def getNewSubscriptions(self, params = {}):
+	def getUserFeed(self, params = {}):
 		get = params.get
 		
 		if not get("contact"):
 			return False
-		params["user_feed"] = "newsubscriptions"
+		
 		return self.feeds.listAll(params)
 	
 	def getRecommended(self, params = {}):
