@@ -17,7 +17,6 @@
 '''
 
 import sys, urllib2, os
-import DialogDownloadProgress
 
 class YouTubeDownloader():
 	
@@ -26,6 +25,7 @@ class YouTubeDownloader():
 	def __init__(self):
 		self.xbmc = sys.modules["__main__"].xbmc
 		self.xbmcvfs = sys.modules["__main__"].xbmcvfs
+		self.DialogDownloadProgress = sys.modules["__main__"].DialogDownloadProgress
 
 		self.settings = sys.modules[ "__main__" ].settings
 		self.language = sys.modules[ "__main__" ].language
@@ -66,7 +66,7 @@ class YouTubeDownloader():
 		
 		if videoid:
 			if not self.dialog:
-				self.dialog = DialogDownloadProgress.DownloadProgress()
+				self.dialog = self.DialogDownloadProgress.DownloadProgress()
 	
 				self.common.log("BLA")
 			self.common.log("BLA2")

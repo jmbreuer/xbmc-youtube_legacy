@@ -4,6 +4,8 @@ class MockYouTubeDepends:
 		import sys, string
 		from mock import Mock
 		sys.path.append("../plugin/")
+		import DialogDownloadProgress
+		sys.modules[ "__main__" ].DialogDownloadProgress = Mock(spec=DialogDownloadProgress)
 		
 		#Setup default test various values 
 		sys.modules[ "__main__" ].plugin = "YouTube - Integrationtest"
@@ -21,7 +23,6 @@ class MockYouTubeDepends:
 		from mock import Mock
 		sys.path.append("../xbmc-mocks/")
 		import xbmc, xbmcaddon, xbmcgui, xbmcplugin, xbmcvfs
-		
 		#Setup basic xbmc dependencies
 		sys.modules[ "__main__" ].xbmc = Mock(spec=xbmc)
 		sys.modules[ "__main__" ].xbmc.getSkinDir = Mock()
@@ -41,7 +42,6 @@ class MockYouTubeDepends:
 		sys.modules[ "__main__" ].xbmcvfs = xbmcvfs
 		sys.modules[ "__main__" ].xbmcvfs = Mock(spec=xbmcvfs)
 		sys.modules[ "__main__" ].xbmcvfs.exists.return_value = False
-		# DialogDownloadProgress.DownloadProgress MOCK 
 		import xbmcSettings
 		sys.modules[ "__main__" ].settings = xbmcSettings.xbmcSettings()
 		import xbmcLanguage
