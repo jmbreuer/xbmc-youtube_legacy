@@ -38,9 +38,10 @@ class MockYouTubeDepends:
 		sys.modules[ "__main__" ].xbmcgui.WindowXMLDialog.return_value = "testWindowXML"
 		
 		sys.modules[ "__main__" ].xbmcplugin = Mock(spec=xbmcplugin)
+		sys.modules[ "__main__" ].xbmcvfs = xbmcvfs
 		sys.modules[ "__main__" ].xbmcvfs = Mock(spec=xbmcvfs)
 		sys.modules[ "__main__" ].xbmcvfs.exists.return_value = False
-		
+		# DialogDownloadProgress.DownloadProgress MOCK 
 		import xbmcSettings
 		sys.modules[ "__main__" ].settings = xbmcSettings.xbmcSettings()
 		import xbmcLanguage

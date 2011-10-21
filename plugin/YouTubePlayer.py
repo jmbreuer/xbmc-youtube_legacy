@@ -77,6 +77,7 @@ class YouTubePlayer():
 				
 	# ================================ Subtitle Downloader ====================================
 	def downloadSubtitle(self, video = {}):
+		self.common.log("")
 		get = video.get
 
 		style = ""
@@ -104,8 +105,10 @@ class YouTubePlayer():
 
 			result += "Dialogue: Marked=0,0:00:0.00,0:00:0.00,Default,Name,0000,0000,0000,,\r\n" # This solves a bug.
 			self.saveSubtitle(result, video)
+			self.common.log("Done")
 			return True
 		
+		self.common.log("Failure")
 		return False
 	
 	def getSubtitleUrl(self, video = {}):
@@ -143,8 +146,7 @@ class YouTubePlayer():
 			if code:
 				url = self.urls["close_caption_url"] % ( get("videoid"), subtitle, code)
 		
-		self.common.log("found subtitle url: " + repr(url))
-		
+		self.common.log("found subtitle url: " + repr(url))		
 		return url
 
 	def saveSubtitle(self, result, video = {}):
@@ -301,7 +303,8 @@ class YouTubePlayer():
 			set_subtitle = True
 		elif self.downloadSubtitle(video):
 			set_subtitle = True
-		
+
+		self.common.log("Done trying to locate: " + path, 4)
 		if self.xbmcvfs.exists(path) and not video.has_key("downloadPath") and set_subtitle:
 			player = self.xbmc.Player()
 			

@@ -38,6 +38,7 @@ class YouTubeDownloader():
 		self.cache = sys.modules[ "__main__" ].cache
 	
 	def downloadVideo(self, params = {}):
+		self.common.log("")
 		get = params.get
 		
 		path = self.settings.getSetting( "downloadPath" )
@@ -59,12 +60,16 @@ class YouTubeDownloader():
 			self.storage.addVideoToDownloadQueue(params)
 
 	def processQueue(self, params = {}):
+		self.common.log("")
 		videoid = self.storage.getNextVideoFromDownloadQueue()
+		self.common.log("res: " + videoid)
 		
 		if videoid:
 			if not self.dialog:
 				self.dialog = DialogDownloadProgress.DownloadProgress()
 	
+				self.common.log("BLA")
+			self.common.log("BLA2")
 			while videoid:
 				params["videoid"] = videoid
 				( video, status ) = self.player.getVideoObject(params)
