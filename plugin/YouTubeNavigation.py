@@ -171,6 +171,8 @@ class YouTubeNavigation():
 			self.playlist.deletePlaylist(params)
 		if (get("action") == "reverse_order"):
 			self.storage.reversePlaylistOrder(params)
+		if (get("action") == "add_playlist"):
+			self.core.add_playlist(params)
 			
 	#==================================== Item Building and Listing ===========================================	
 	def list(self, params = {}):

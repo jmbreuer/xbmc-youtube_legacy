@@ -196,6 +196,7 @@ class BaseTestCase(unittest2.TestCase):
 				value = url[url.find(param + "=") + len(param + "="):]
 				if value.find("&") > 0:
 					value = value[:value.find("&")]
+
 				if len(value) == 0:
 					missing_count += 1
 

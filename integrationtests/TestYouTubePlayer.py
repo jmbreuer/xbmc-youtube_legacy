@@ -62,8 +62,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		assert(args[0][1].has_key("listitem"))
 		assert(args[0][1]["handle"] == -1)
 		assert(args[0][1]["succeeded"] == True)
-		#assert(False)
-
+		
 	def test_plugin_should_play_live_vidoes(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings.xml")
 				
