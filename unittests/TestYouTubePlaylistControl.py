@@ -7,14 +7,14 @@ from  YouTubePlaylistControl import YouTubePlaylistControl
 
 class TestYouTubePlaylistControl(BaseTestCase.BaseTestCase):
 	
-	def test_playAll_should_call_getPlayList_if_playlist_entry_in_params(self):
+	def test_playAll_should_call_getUserFeed_if_user_feed_is_playlist_in_params(self):
 		control = YouTubePlaylistControl()
-		control.getPlayList = Mock()
-		control.getPlayList.return_value = ""
+		control.getUserFeed = Mock()
+		control.getUserFeed.return_value = ""
 		
-		control.playAll({"playlist":"someid"})
+		control.playAll({"user_feed":"playlist", "playlist":"someid"})
 		
-		control.getPlayList.assert_called_with({"playlist":"someid", 'fetch_all': 'true'})
+		control.getUserFeed.assert_called_with({"playlist":"someid", "user_feed":"playlist",'fetch_all': 'true'})
 		
 	def test_playAll_should_call_getDiscoSearch_if_scraper_is_disco_search_in_params(self):
 		control = YouTubePlaylistControl()
@@ -25,14 +25,14 @@ class TestYouTubePlaylistControl(BaseTestCase.BaseTestCase):
 		
 		control.getDiscoSearch.assert_called_with({"search":"some_search","search_disco":"some_search", 'fetch_all': 'true'})
 				
-	def test_playAll_should_call_getFavorites_if_user_feed_is_favorites_in_params(self):
+	def test_playAll_should_call_getUserFeed_if_user_feed_is_favorites_in_params(self):
 		control = YouTubePlaylistControl()
-		control.getFavorites = Mock()
-		control.getFavorites.return_value = ""
+		control.getUserFeed = Mock()
+		control.getUserFeed.return_value = ""
 		
 		control.playAll({"user_feed":"favorites"})
 		
-		control.getFavorites.assert_called_with({"user_feed":"favorites", 'fetch_all': 'true'})
+		control.getUserFeed.assert_called_with({"user_feed":"favorites", 'fetch_all': 'true'})
 				
 	def test_playAll_should_call_getLikedVideos_if_scraper_is_liked_videos_in_params(self):
 		control = YouTubePlaylistControl()
@@ -52,14 +52,14 @@ class TestYouTubePlaylistControl(BaseTestCase.BaseTestCase):
 		
 		control.getArtist.assert_called_with({"scraper":"music_artists", 'fetch_all': 'true'})
 				
-	def test_playAll_should_call_getNewSubscriptions_if_user_feed_is_subscriptions_in_params(self):
+	def test_playAll_should_call_getUserFeed_if_user_feed_is_subscriptions_in_params(self):
 		control = YouTubePlaylistControl()
-		control.getNewSubscriptions = Mock()
-		control.getNewSubscriptions.return_value = ""
+		control.getUserFeed = Mock()
+		control.getUserFeed.return_value = ""
 		
 		control.playAll({"user_feed":"newsubscriptions"})
 		
-		control.getNewSubscriptions.assert_called_with({"user_feed":"newsubscriptions", 'fetch_all': 'true'})
+		control.getUserFeed.assert_called_with({"user_feed":"newsubscriptions", 'fetch_all': 'true'})
 		
 	def test_playAll_should_not_call_xbmc_player_if_params_is_empty(self):
 		control = YouTubePlaylistControl()
@@ -71,10 +71,10 @@ class TestYouTubePlaylistControl(BaseTestCase.BaseTestCase):
 		
 	def test_playAll_should_call_xbmc_player_stop_if_player_is_playing(self):
 		control = YouTubePlaylistControl()
-		control.getPlayList = Mock()
-		control.getPlayList.return_value = [{"Title":"someTitle", "videoid":"some_id","thumbnail":"some_thumbnail"}]
+		control.getUserFeed = Mock()
+		control.getUserFeed.return_value = [{"Title":"someTitle", "videoid":"some_id","thumbnail":"some_thumbnail"}]
 		
-		control.playAll({"playlist":"someid"})
+		control.playAll({"user_feed":"playlist", "playlist":"someid"})
 		
 		sys.modules["__main__"].xbmc.Player.assert_called_with()
 		sys.modules["__main__"].xbmc.Player().isPlaying.assert_called_with()
@@ -84,10 +84,10 @@ class TestYouTubePlaylistControl(BaseTestCase.BaseTestCase):
 		playlist_value = Mock()
 		sys.modules["__main__"].xbmc.PlayList.return_value = playlist_value
 		control = YouTubePlaylistControl()
-		control.getPlayList = Mock()
-		control.getPlayList.return_value = [{"Title":"someTitle", "videoid":"some_id","thumbnail":"some_thumbnail"}]
+		control.getUserFeed = Mock()
+		control.getUserFeed.return_value = [{"Title":"someTitle", "videoid":"some_id","thumbnail":"some_thumbnail"}]
 		
-		control.playAll({"playlist":"someid"})
+		control.playAll({"user_feed":"playlist", "playlist":"someid"})
 		
 		playlist_value.clear.assert_called_with()
 		
@@ -95,10 +95,10 @@ class TestYouTubePlaylistControl(BaseTestCase.BaseTestCase):
 		playlist_value = Mock()
 		sys.modules["__main__"].xbmc.PlayList.return_value = playlist_value
 		control = YouTubePlaylistControl()
-		control.getPlayList = Mock()
-		control.getPlayList.return_value = [{"Title":"someTitle", "videoid":"some_id","thumbnail":"some_thumbnail"}]
+		control.getUserFeed = Mock()
+		control.getUserFeed.return_value = [{"Title":"someTitle", "videoid":"some_id","thumbnail":"some_thumbnail"}]
 		
-		control.playAll({"playlist":"someid","shuffle":"true"})
+		control.playAll({"user_feed":"playlist", "playlist":"someid","shuffle":"true"})
 		
 		sys.modules["__main__"].xbmc.Player.assert_called_with()
 		sys.modules["__main__"].xbmc.Player().isPlaying.assert_called_with()
@@ -109,10 +109,10 @@ class TestYouTubePlaylistControl(BaseTestCase.BaseTestCase):
 		playlist_value = Mock()
 		sys.modules["__main__"].xbmc.PlayList.return_value = playlist_value
 		control = YouTubePlaylistControl()
-		control.getPlayList = Mock()
-		control.getPlayList.return_value = [{"Title":"someTitle1", "videoid":"some_id1","thumbnail":"some_thumbnail1"},{"Title":"someTitle2", "videoid":"some_id2","thumbnail":"some_thumbnail2"}]
+		control.getUserFeed = Mock()
+		control.getUserFeed.return_value = [{"Title":"someTitle1", "videoid":"some_id1","thumbnail":"some_thumbnail1"},{"Title":"someTitle2", "videoid":"some_id2","thumbnail":"some_thumbnail2"}]
 		
-		control.playAll({"playlist":"someid","shuffle":"true"})
+		control.playAll({"user_feed":"playlist","playlist":"someid","shuffle":"true"})
 		
 		assert(playlist_value.add.call_count == 2)
 	
@@ -120,10 +120,10 @@ class TestYouTubePlaylistControl(BaseTestCase.BaseTestCase):
 		playlist_value = Mock()
 		sys.modules["__main__"].xbmc.PlayList.return_value = playlist_value
 		control = YouTubePlaylistControl()
-		control.getPlayList = Mock()
-		control.getPlayList.return_value = [{"Title":"someTitle1", "videoid":"some_id1","thumbnail":"some_thumbnail1"},{"Title":"someTitle2", "videoid":"some_id2","thumbnail":"some_thumbnail2"}]
+		control.getUserFeed = Mock()
+		control.getUserFeed.return_value = [{"Title":"someTitle1", "videoid":"some_id1","thumbnail":"some_thumbnail1"},{"Title":"someTitle2", "videoid":"some_id2","thumbnail":"some_thumbnail2"}]
 		
-		control.playAll({"playlist":"someid"})
+		control.playAll({"user_feed":"playlist", "playlist":"someid"})
 		
 		sys.modules["__main__"].xbmc.executebuiltin.assert_called_with('playlist.playoffset(video , 0)')
 		
@@ -178,20 +178,6 @@ class TestYouTubePlaylistControl(BaseTestCase.BaseTestCase):
 		
 		assert(playlist_value.add.call_count == 3)
 
-	def test_getPlayList_should_call_feeds_list_all(self):
-		control = YouTubePlaylistControl()
-		
-		control.getPlayList({"playlist":"some_playlist"})
-		
-		sys.modules["__main__"].feeds.listAll.assert_called_with({'user_feed': 'playlist', 'playlist': 'some_playlist'})
-
-	def test_getPlayList_should_exit_cleanly_if_playlist_id_is_missing_from_params(self):
-		control = YouTubePlaylistControl()
-		
-		control.getPlayList({})
-		
-		assert(sys.modules["__main__"].feeds.listAll.call_count == 0)
-
 	def test_getDiscoSearch_should_call_scraper_searchDisco(self):
 		sys.modules["__main__"].scraper.searchDisco.return_value = ("",303)
 		control = YouTubePlaylistControl()
@@ -209,40 +195,37 @@ class TestYouTubePlaylistControl(BaseTestCase.BaseTestCase):
 		
 		sys.modules["__main__"].scraper.searchDisco.assert_called_with({})
 		sys.modules["__main__"].core.getBatchDetails.assert_called_with("", {})
+
+	def test_getUserFeed_should_call_feeds_list_all(self):
+		control = YouTubePlaylistControl()
 		
-	def test_getFavorites_should_exit_cleanly_if_contact_is_missing(self):
+		control.getUserFeed({"user_feed":"playlist","playlist":"some_playlist"})
+		
+		assert(sys.modules["__main__"].feeds.listAll.call_count > 0)
+		
+	def test_getUserFeed_should_exit_cleanly_if_contact_is_missing(self):
 		sys.modules["__main__"].feeds.listAll.return_value = ("",200)
 		control = YouTubePlaylistControl()
 		
-		control.getFavorites({})
+		control.getUserFeed({})
 		
 		assert(sys.modules["__main__"].feeds.listAll.call_count == 0)
 
-	def test_getFavorites_should_call_core_list_all_with_correct_params(self):
+	def test_getUserFeed_should_call_core_list_all_with_correct_params(self):
 		sys.modules["__main__"].feeds.listAll.return_value = ("",200)
 		control = YouTubePlaylistControl()
 		
-		control.getFavorites({"contact":"some_contact"})
+		control.getUserFeed({"contact":"some_contact", "user_feed":"favorites"})
 		
 		assert(sys.modules["__main__"].feeds.listAll.call_count == 1)
 		sys.modules["__main__"].feeds.listAll.assert_called_with({"user_feed":"favorites","contact":"some_contact"})
 
-	def ttest_getNewSubscriptions_should_exit_cleanly_if_contact_is_missing(self):
-		sys.modules["__main__"].feeds.listAll.return_value = ("",200)
+	def test_getUserFeed_should_exit_cleanly_if_user_feed_is_playlist_and_playlist_id_is_missing_from_params(self):
 		control = YouTubePlaylistControl()
 		
-		control.getNewSubscriptions({})
+		control.getUserFeed({"user_feed":"playlist"})
 		
 		assert(sys.modules["__main__"].feeds.listAll.call_count == 0)
-
-	def ttest_getNewSubscriptions_should_call_core_list_all_with_correct_params(self):
-		sys.modules["__main__"].feeds.listAll.return_value = ("",200)
-		control = YouTubePlaylistControl()
-		
-		control.getNewSubscriptions({"contact":"some_contact"})
-		
-		assert(sys.modules["__main__"].feeds.listAll.call_count == 1)
-		sys.modules["__main__"].feeds.listAll.assert_called_with({"user_feed":"newsubscriptions","contact":"some_contact"})
 		
 	def test_getArtist_should_exit_cleanly_if_artist_is_not_in_params(self):
 		control = YouTubePlaylistControl()
