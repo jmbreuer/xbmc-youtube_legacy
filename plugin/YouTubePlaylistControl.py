@@ -43,24 +43,17 @@ class YouTubePlaylistControl():
 
 		params["fetch_all"] = "true"
 		result = []
+		
 		# fetch the video entries
-		if get("playlist"):
-			result = self.getPlayList(params)
-		elif get("search_disco"):
+		if get("search_disco"):
 			params["search"] = params["search_disco"]
 			result = self.getDiscoSearch(params)
-		elif get("user_feed") == "favorites":
-			result = self.getFavorites(params)
-#		elif get("scraper") == "watch_later":
-#			result = self.getWatchLater(params)
 		elif get("scraper") == "liked_videos":
 			result = self.getLikedVideos(params)
 		elif get("scraper") == "music_artists":
 			result = self.getArtist(params)
-		elif get("user_feed") in ["recommended", "watch_later", "newsubscriptions"]:
-			result = self.getNewSubscriptions(params)
-		else:
-			return
+		elif get("user_feed") in ["recommended", "watch_later", "newsubscriptions", "favorites", "playlist"]:
+			result = self.getUserFeed(params)
 		
 		if len(result) == 0:
 			return
@@ -125,19 +118,7 @@ class YouTubePlaylistControl():
 			listitem.setInfo(type='Video', infoLabels=video)
 			playlist.add("%s?path=/root&action=play_video&videoid=%s" % (sys.argv[0], video["videoid"] ), listitem)
 			self.common.log("Queuing video: " + self.utils.makeAscii(video['Title']) + " - " + get('videoid') + " - " + video['video_url'])
-
-	def getPlayList(self, params = {}):
-		get = params.get
-		
-		if not get("playlist"):
-			return False
-		params["user_feed"] = "playlist" 
-		return self.feeds.listAll(params)
 	
-	def getWatchLater(self, params = {}):
-		(result, status ) = self.scraper.scrapeWatchLater(params)
-		return result
-
 	def getDiscoSearch(self, params = {}):
 		(result, status) = self.scraper.searchDisco(params)
 		
@@ -145,37 +126,18 @@ class YouTubePlaylistControl():
 			(result, status) = self.core.getBatchDetails(result, params)
 		
 		return result
-	
-	def getFavorites(self, params = {}):
-		get = params.get
 		
-		if not get("contact"):
-			return False
-		
-		params["user_feed"] = "favorites"
-		return self.feeds.listAll(params)
-	
 	def getUserFeed(self, params = {}):
 		get = params.get
-		
-		if not get("contact"):
+
+		if get("user_feed") == "playlist":
+			if not get("playlist"):
+				return False
+		elif not get("contact"):
 			return False
 		
 		return self.feeds.listAll(params)
-	
-	def getRecommended(self, params = {}):
-		get = params.get
 		
-		if not get("scraper") or not get("login"):
-			return False
-		
-		(result, status) = self.scraper.scrapeRecommended(params)
-		
-		if status == 200:
-			(result, status) = self.core.getBatchDetails(result, params)
-		
-		return result
-	
 	def getArtist(self, params = {}):
 		get = params.get
 		
