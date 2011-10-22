@@ -5,6 +5,7 @@ from mock import Mock, patch
 
 
 class TestYouTubeLogin(BaseTestCase.BaseTestCase):
+	
 	def test_plugin_should_perform_basic_login_correctly(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings.xml")
 
