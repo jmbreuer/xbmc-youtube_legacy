@@ -322,6 +322,7 @@ class YouTubePlayer():
 	
 	def playVideo(self, params = {}):
                 #params["proxy"] = "http://15aa51.info/browse.php?u="
+		self.common.log(repr(params), 3)
 		get = params.get
 		
 		(video, status) = self.getVideoObject(params);
@@ -334,7 +335,13 @@ class YouTubePlayer():
 		if get("proxy", "false") == "false":
 			listitem = self.xbmcgui.ListItem(label=video['Title'], iconImage=video['thumbnail'], thumbnailImage=video['thumbnail'], path=video['video_url'])
 		else:
-			listitem = self.xbmcgui.ListItem(label=video['Title'], iconImage=video['thumbnail'], thumbnailImage=video['thumbnail'], path=get("proxy") + video['video_url']);		
+			proxy = get("proxy")
+			proxy = proxy[:proxy.rfind("/")]
+			print "XXXXXXXXXXXXXXXXX : " + repr(video)
+			video["video_url"] = get("proxy") + video['video_url'].replace("|", "|Referer=" + proxy + " | ")
+			print "XXXXXXXXXXXXXXXXX : " + repr(video)
+			listitem = self.xbmcgui.ListItem(label=video['Title'], iconImage=video['thumbnail'], thumbnailImage=video['thumbnail'], path=video['video_url'])
+
 		listitem.setInfo(type='Video', infoLabels=video)
 		
 		self.common.log("Playing video: " + repr(video['Title']) + " - " + repr(get('videoid')) + " - " + repr(video['video_url']))
