@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import nose
 import BaseTestCase
-from mock import Mock
+from mock import Mock, patch
 import sys
 from YouTubePlayer import YouTubePlayer
 
@@ -350,6 +350,25 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		sys.modules["__main__"].xbmcvfs.exists.assert_called_with('testDownloadPath/testTitle-[testid].ssa')
 		sys.modules["__main__"].xbmc.Player().setSubtitles.assert_called_with('testDownloadPath/testTitle-[testid].ssa')		
 	
+	
+	def test_addSubtitles_should_sleep_for_1_second_if_player_isnt_ready(self):
+		sys.modules["__main__"].settings.getSetting.return_value = "testDownloadPath"
+		sys.modules["__main__"].xbmcvfs.exists.return_value = True
+		sys.modules["__main__"].xbmc.Player().isPlaying.side_effect = [False, True]
+		patcher = patch("time.sleep")
+		patcher.start()
+		sleep = Mock()
+		import time
+		time.sleep = sleep
+		player = YouTubePlayer()
+		player.downloadSubtitle = Mock()
+		player.downloadSubtitle.return_value = True
+		
+		player.addSubtitles({"videoid":"testid","Title":"testTitle"})
+		
+		patcher.stop()
+		sleep.assert_any_call(1)
+		
 	def test_addSubtitles_should_check_if_subtitle_exists_locally_before_calling_xbmcs_setSubtitles(self):
 		player = YouTubePlayer()
 		sys.modules["__main__"].settings.getSetting.return_value = "testDownloadPath"
