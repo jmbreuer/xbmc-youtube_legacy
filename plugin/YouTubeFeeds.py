@@ -67,6 +67,7 @@ class YouTubeFeeds():
 		per_page = ( 10, 15, 20, 25, 30, 40, 50 )[ int( self.settings.getSetting( "perpage" ) ) ]
 		region = ('', 'AU', 'BR', 'CA', 'CZ', 'FR', 'DE', 'GB', 'NL', 'HK', 'IN', 'IE', 'IL', 'IT', 'JP', 'MX', 'NZ', 'PL', 'RU', 'KR', 'ES','SE', 'TW', 'US', 'ZA' )[ int( self.settings.getSetting( "region_id" ) ) ]
 		
+		print "perpage " +repr(per_page)
 		page = get("page","0")
 		start_index = per_page * int(page) + 1
 		url = ""
