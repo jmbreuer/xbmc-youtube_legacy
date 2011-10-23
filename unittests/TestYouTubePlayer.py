@@ -575,16 +575,15 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		
 		assert(url.find("| Mozilla/5.0 (MOCK)") < 0)
 	
-	
 	def test_userSelectsVideoQuality_should_append_list_of_known_qualities(self):
 		sys.modules["__main__"].settings.getSetting.return_value = "1"
 		sys.modules["__main__"].xbmcgui.Dialog().select.return_value = -1
 		sys.modules["__main__"].language.return_value = "" 
 		player = YouTubePlayer()
 		
-		url = player.userSelectsVideoQuality({},{35:"SD",22:"720p",37:"1080p"})
+		url = player.userSelectsVideoQuality({},{35:"SD",22:"720p",37:"1080p",35:"480p",18:"380p",34:"360p",5:"240p",17:"144p"})
 		
-		sys.modules["__main__"].xbmcgui.Dialog().select.assert_called_with("",["1080p","720p","480p"])
+		sys.modules["__main__"].xbmcgui.Dialog().select.assert_any_call("",["1080p","720p","480p","380p","360p","240p","144p"])
 		
 	def test_userSelectsVideoQuality_should_prefer_h264_over_vp8_as_appletv2_cant_handle_vp8_properly(self):
 		sys.modules["__main__"].settings.getSetting.return_value = "1"
