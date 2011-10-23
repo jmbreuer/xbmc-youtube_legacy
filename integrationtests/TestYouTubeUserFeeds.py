@@ -2,8 +2,7 @@ import BaseTestCase
 import nose, sys
 
 class TestYouTubeMusicScraper(BaseTestCase.BaseTestCase):
-	
-	def test_plugin_should_list_user_favorites_video_list_correctly(self):
+	def test_plugin_should_list_user_favorites_video_list_correctly(self): # and this
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
 		
 		self.navigation.listMenu({"feed":"favorites", "login":"true", "path":"/root/favorites"})
@@ -13,11 +12,12 @@ class TestYouTubeMusicScraper(BaseTestCase.BaseTestCase):
 		self.assert_directory_is_a_video_list()
 		self.assert_directory_contains_only_unique_video_items()
 		self.assert_directory_items_should_have_external_thumbnails()
+		assert(False)
 	
 	def test_plugin_should_list_user_favorites_video_list_page_2_correctly(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
 		sys.modules["__main__"].settings.setSetting("perpage","2")
-		
+
 		self.navigation.listMenu({"feed":"favorites", "login":"true", "page":"1","path":"/root/favorites"})
 		
 		self.assert_directory_count_greater_than_or_equals(10)
@@ -25,6 +25,7 @@ class TestYouTubeMusicScraper(BaseTestCase.BaseTestCase):
 		self.assert_directory_is_a_video_list()
 		self.assert_directory_contains_only_unique_video_items()
 		self.assert_directory_items_should_have_external_thumbnails()
+		assert(False)
 	
 	def test_plugin_should_list_user_playlists_correctly(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
@@ -35,6 +36,7 @@ class TestYouTubeMusicScraper(BaseTestCase.BaseTestCase):
 		self.assert_directory_count_less_than_or_equals(51)
 		self.assert_directory_is_a_folder_list()
 		self.assert_directory_items_contain("playlist")
+		assert(False)
 	
 	def test_plugin_should_list_user_uploads_videos_list_correctly(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
@@ -46,6 +48,7 @@ class TestYouTubeMusicScraper(BaseTestCase.BaseTestCase):
 		self.assert_directory_is_a_video_list()
 		self.assert_directory_contains_only_unique_video_items()
 		self.assert_directory_items_should_have_external_thumbnails()
+		assert(False)
 		
 	def test_plugin_should_list_user_uploads_videos_list_page_2_correctly(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
@@ -58,8 +61,9 @@ class TestYouTubeMusicScraper(BaseTestCase.BaseTestCase):
 		self.assert_directory_is_a_video_list()
 		self.assert_directory_contains_only_unique_video_items()
 		self.assert_directory_items_should_have_external_thumbnails()
+		assert(False)
 
-	def test_plugin_should_list_user_watch_later_video_list_correctly(self):
+	def ttest_plugin_should_list_user_watch_later_video_list_correctly(self): #THIS 
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
 
 		self.navigation.listMenu({"feed":"watch_later", 'login':'true', "path":"/root/watch_later"})
@@ -70,6 +74,7 @@ class TestYouTubeMusicScraper(BaseTestCase.BaseTestCase):
 		self.assert_directory_contains_only_unique_video_items()
 		self.assert_directory_items_should_have_external_thumbnails()
 		self.assert_directory_items_contain("playlist_entry_id")
+		assert(False)
 	
 	def ttest_plugin_should_list_user_recommended_video_list_correctly(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")

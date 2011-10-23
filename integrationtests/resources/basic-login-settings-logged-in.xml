@@ -1,46 +1,44 @@
-<settings>
-    <setting id="annotations" value="true" />
-    <setting id="categories" value="true" />
-    <setting id="contacts" value="true" />
-    <setting id="debug" value="true" />
-    <setting id="disco" value="true" />
-    <setting id="downloadPath" value="./tmp/" />
-    <setting id="downloads" value="true" />
-    <setting id="explore" value="true" />
-    <setting id="favorites" value="true" />
-    <setting id="feeds" value="true" />
-    <setting id="firstrun" value="1" />
-    <setting id="hd_videos" value="0" />
-    <setting id="hd_videos_download" value="0" />
-    <setting id="lang_code" value="1" />
-    <setting id="liked" value="true" />
-    <setting id="list_view" value="0" />
-    <setting id="live" value="true" />
-    <setting id="movies" value="true" />
-    <setting id="music" value="true" />
-    <setting id="nick" value="YTlogintester" />
-    <setting id="notification_length" value="0" />
-    <setting id="perpage" value="0" />
-    <setting id="playlists" value="true" />
-    <setting id="preferred" value="true" />
-    <setting id="recommended" value="true" />
-    <setting id="region_id" value="0" />
-    <setting id="safe_search" value="0" />
-    <setting id="saved_searches" value="3" />
-    <setting id="search" value="true" />
-    <setting id="shows" value="true" />
-    <setting id="subscriptions" value="true" />
-    <setting id="timeout" value="3" />
-    <setting id="trailers" value="true" />
-    <setting id="transcode" value="true" />
-    <setting id="uploads" value="true" />
-    <setting id="user_password" value="yt tester" />
-    <setting id="username" value="logintester@tobiasussing.dk" />
-    <setting id="watch_later" value="true" />
-    <setting id="login_info" value="308df4ef7b048ed09061c05a796e9049c40AAAB7IjEiOiAxLCAiMyI6IDc3MTY5MTQ4MywgIjIiOiAiMDNyb0xSeW9CTWJzY1hxczJDRmYydz09IiwgIjUiOiA0NTAzNjAxNzY0NDY1NTM0LCAiNCI6ICJHQUlBIiwgIjciOiAxMzE5Mzc1NzM3LCAiNiI6IGZhbHNlLCAiOCI6IDExNTMwODYxNzc4NH0=" />
-    <setting id="oauth0_expires_at" value="1319379340.09" />
-    <setting id="oauth0_access_token" value="ya09.AHES6ZQaRUAzMlobBp0gIKGZPcigvXQG4C34cUQuPUS11Q" />
-    <setting id="oauth0_refresh_token" value="1/HcEygf4J8QUs7iwoD5wWzIIGIACoexgueMiCtXvCIG0" />
-    <setting id="oauth2_access_token" value="ya29.AHES6ZRqycfXvAOmNMVWib9EbEGNCGc6qp6Lw9oTw4_NJg" />
-    <setting id="oauth2_expires_at" value="1319379341.49" />
+<?xml version="1.0" ?><settings>
+    <setting id="annotations" value="true"/>
+    <setting id="categories" value="true"/>
+    <setting id="contacts" value="true"/>
+    <setting id="debug" value="true"/>
+    <setting id="disco" value="true"/>
+    <setting id="downloadPath" value="./tmp/"/>
+    <setting id="downloads" value="true"/>
+    <setting id="explore" value="true"/>
+    <setting id="favorites" value="true"/>
+    <setting id="feeds" value="true"/>
+    <setting id="firstrun" value="1"/>
+    <setting id="hd_videos" value="0"/>
+    <setting id="hd_videos_download" value="0"/>
+    <setting id="lang_code" value="1"/>
+    <setting id="liked" value="true"/>
+    <setting id="list_view" value="0"/>
+    <setting id="live" value="true"/>
+    <setting id="movies" value="true"/>
+    <setting id="music" value="true"/>
+    <setting id="nick" value="YTlogintester"/>
+    <setting id="notification_length" value="0"/>
+    <setting id="perpage" value="0"/>
+    <setting id="playlists" value="true"/>
+    <setting id="preferred" value="true"/>
+    <setting id="recommended" value="true"/>
+    <setting id="region_id" value="0"/>
+    <setting id="safe_search" value="0"/>
+    <setting id="saved_searches" value="3"/>
+    <setting id="search" value="true"/>
+    <setting id="shows" value="true"/>
+    <setting id="subscriptions" value="true"/>
+    <setting id="timeout" value="3"/>
+    <setting id="trailers" value="true"/>
+    <setting id="transcode" value="true"/>
+    <setting id="uploads" value="true"/>
+    <setting id="user_password" value="yt tester"/>
+    <setting id="username" value="logintester@tobiasussing.dk"/>
+    <setting id="watch_later" value="true"/>
+    <setting id="login_info" value="dd31ed15c84524b822e3430b7cb0b524c40AAAB7IjEiOiAxLCAiMyI6IDc3MTY5MTQ4MywgIjIiOiAiMDNyb0xSeW9CTWJzY1hxczJDRmYydz09IiwgIjUiOiA0NTAzNjAxNzY2NDY1NTM2LCAiNCI6ICJHQUlBIiwgIjciOiAxMzE5Mzc5MDAzLCAiNiI6IGZhbHNlLCAiOCI6IDExNTMwODYxNzc4NH0="/>
+    <setting id="oauth2_expires_at" value="1319382740.19"/>
+    <setting id="oauth2_access_token" value="ya29.AHES6ZRb1GBINzVNdO1HBV2AuzSE3zBbWm4W_PCNoKhZWL0"/>
+    <setting id="oauth2_refresh_token" value="1/_BExxY7O3oB3FMECDtlcXFqxfZHyPgT5GJHsJLNMptw"/>
 </settings>
