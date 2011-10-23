@@ -1,6 +1,6 @@
 <settings>
     <setting id="annotations" value="true" />
-    <setting id="auth" value="ya29.AHES6ZR1aZmFgYr5Tgl1qd4SkX5JS8fYR865gc5g1xzj1Fa1MPIb" />
+    <setting id="auth" value="ya09.AHES6ZR1aZmFgYr5Tgl1qd4SkX5JS8fYR865gc5g1xzj1Fa1MPIb" />
     <setting id="categories" value="true" />
     <setting id="contacts" value="true" />
     <setting id="debug" value="true" />
@@ -11,21 +11,21 @@
     <setting id="favorites" value="true" />
     <setting id="feeds" value="true" />
     <setting id="firstrun" value="1" />
-    <setting id="hd_videos" value="2" />
+    <setting id="hd_videos" value="0" />
     <setting id="hd_videos_download" value="0" />
     <setting id="lang_code" value="1" />
     <setting id="liked" value="true" />
     <setting id="list_view" value="0" />
     <setting id="live" value="true" />
-    <setting id="login_info" value="a1d63214927ce0e73605a44046bc7d62c40AAAB7IjEiOiAxLCAiMyI6IDc3MTY5MTQ4MywgIjIiOiAiMDNyb0xSeW9CTWJzY1hxczJDRmYydz09IiwgIjUiOiA0NTAzNjAxNzY2NDY1NTM2LCAiNCI6ICJHQUlBIiwgIjciOiAxMzE5MzY3MDc0LCAiNiI6IGZhbHNlLCAiOCI6IDExNTMwODYxNzc4NH0=" />
+    <setting id="login_info" value="a1d63014907ce0e73605a44046bc7d60c40AAAB7IjEiOiAxLCAiMyI6IDc3MTY5MTQ4MywgIjIiOiAiMDNyb0xSeW9CTWJzY1hxczJDRmYydz09IiwgIjUiOiA0NTAzNjAxNzY0NDY1NTM0LCAiNCI6ICJHQUlBIiwgIjciOiAxMzE5MzY3MDc0LCAiNiI6IGZhbHNlLCAiOCI6IDExNTMwODYxNzc4NH0=" />
     <setting id="movies" value="true" />
     <setting id="music" value="true" />
     <setting id="nick" value="YTlogintester" />
-    <setting id="notification_length" value="2" />
-    <setting id="oauth2_access_token" value="ya29.AHES6ZR1aZmFgYr5Tgl1qd4SkX5JS8fYR865gc5g1xzj1Fa1MPIb" />
-    <setting id="oauth2_expires_at" value="1319370677.49" />
-    <setting id="oauth2_refresh_token" value="1/CcaTh9F0cayVkgK5WNb44Is9X-iLXoAHjg4KfK8kzz0" />
-    <setting id="perpage" value="2" />
+    <setting id="notification_length" value="0" />
+    <setting id="oauth0_access_token" value="ya09.AHES6ZR1aZmFgYr5Tgl1qd4SkX5JS8fYR865gc5g1xzj1Fa1MPIb" />
+    <setting id="oauth0_expires_at" value="1319370677.49" />
+    <setting id="oauth0_refresh_token" value="1/CcaTh9F0cayVkgK5WNb44Is9X-iLXoAHjg4KfK8kzz0" />
+    <setting id="perpage" value="0" />
     <setting id="playlists" value="true" />
     <setting id="preferred" value="true" />
     <setting id="recommended" value="true" />
