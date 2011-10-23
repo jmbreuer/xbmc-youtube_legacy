@@ -349,7 +349,7 @@ class YouTubeStorage():
 			key += "view_mode_" + iget("channel")
 		
 		return key
-		
+	
 	def _getResultSetStorageKey(self, params = {}):
 		get = params.get
 		
