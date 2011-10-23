@@ -937,6 +937,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		patcher1.stop()
 		args = YouTubeCore.url2request().add_header.call_args_list
 		patcher2.stop()
+		patcher3.stop()
 		
 		time.sleep.assert_any_call(10)
 	
