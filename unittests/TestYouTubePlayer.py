@@ -80,8 +80,8 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 
 	def test_getVideoUrlMap_should_parse_url_map_fallback(self):
 		subtitlesettings = ["false"]
-                sys.modules[ "__main__"].settings.getSetting = Mock()
-                sys.modules[ "__main__"].settings.getSetting.return_value = "false"
+		sys.modules[ "__main__"].settings.getSetting = Mock()
+		sys.modules[ "__main__"].settings.getSetting.return_value = "false"
 
 		player = YouTubePlayer()		
 		result = player.getVideoUrlMap(self.readTestInput("urlMapTest.txt"),{})
@@ -219,8 +219,8 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		player = YouTubePlayer()
 		sys.modules["__main__"].core._fetchPage = Mock()
 		sys.modules["__main__"].core._fetchPage.return_value = {"status":303, "content":""}
-                sys.modules["__main__"].settings.getSetting = Mock()
-                sys.modules["__main__"].settings.getSetting.return_value = "1"		
+		sys.modules["__main__"].settings.getSetting = Mock()
+		sys.modules["__main__"].settings.getSetting.return_value = "1"		
 		ret = player.getTranscriptionUrl({"videoid":"some_id", "ttsurl":"http://some.url/transcript"})
 		print ret;
 		assert(ret == "http://some.url/transcript&type=trackformat=1&lang=en&kind=asr&name=&v=some_id&tlang=en")
@@ -421,7 +421,19 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		
 		assert(sys.modules["__main__"].xbmcplugin.setResolvedUrl.call_count > 0)
 		
+	def test_playVideo_should_appen_proxy_settings_to_video_url_if_proxy_is_in_params(self):
+		sys.modules["__main__"].settings.getSetting.return_value = "0"
+		player = YouTubePlayer()
+		player.addSubtitles = Mock()
+		player.getVideoObject = Mock()
+		params = {"Title":"someTitle","videoid":"some_id", "thumbnail":"someThumbnail", "video_url":"someUrl"}
+		player.getVideoObject.return_value = (params, 200)
+		sys.argv = ["test1","1","test2"]
 		
+		player.playVideo({"videoid":"some_id" ,"proxy":"true/smokey "})
+		
+		assert(params["video_url"] == "true/smokey someUrl")
+			
 	def test_playVideo_should_call_addSubtitles(self):
 		video = {"Title":"someTitle","videoid":"some_id", "thumbnail":"someThumbnail", "video_url":"someUrl"}
 		sys.modules["__main__"].settings.getSetting.return_value = "1"
@@ -651,7 +663,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		
 		player.getInfo.assert_called_with({})
 		
-	def test_getVideoObject_should_test_if_local_file_exists_if_download_path_is_set(self):
+	def test_getVideoObject_should_ttest_if_local_file_exists_if_download_path_is_set(self):
 		params = {"videoid":"some_id"}
 		sys.modules["__main__"].settings.getSetting.return_value = "somePath/"
 		sys.modules["__main__"].xbmcvfs.exists.return_value = False
