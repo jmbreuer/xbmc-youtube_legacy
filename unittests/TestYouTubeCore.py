@@ -922,7 +922,8 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		YouTubeCore.url2request = Mock()
 		fp = Mock()
 		fp.read.return_value = "something"
-		time.sleep = Mock() 		
+		sleep = Mock()
+		time.sleep = sleep 		
 		dummy_connection = Mock()
 		read_values = ["Nothing here\n","something verify-age-actions"]
 		dummy_connection.read.side_effect = urllib2.HTTPError("",400,"BOOM User Rate Limit Exceeded","",fp)
@@ -935,11 +936,11 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		ret = core._fetchPage(params)
 		
 		patcher1.stop()
-		args = YouTubeCore.url2request().add_header.call_args_list
+		args = time.sleep.call_args_list
 		patcher2.stop()
 		patcher3.stop()
 		
-		time.sleep.assert_any_call(10)
+		sleep.assert_any_call(10)
 	
 	def test_fetchPage_should_return_content_of_link_and_proper_status_code(self):
 		settings = ["4","3" ]
