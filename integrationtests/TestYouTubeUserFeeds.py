@@ -47,8 +47,9 @@ class TestYouTubeMusicScraper(BaseTestCase.BaseTestCase):
 		self.assert_directory_contains_only_unique_video_items()
 		self.assert_directory_items_should_have_external_thumbnails()
 		
-	def ttest_plugin_should_list_user_uploads_videos_list_page_2_correctly(self):
+	def test_plugin_should_list_user_uploads_videos_list_page_2_correctly(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
+		sys.modules["__main__"].settings.setSetting("perpage","0")
 		
 		self.navigation.listMenu({"feed":"uploads", 'login':'true', "page":"1", "path":"/root/uploads"})
 		
@@ -58,7 +59,7 @@ class TestYouTubeMusicScraper(BaseTestCase.BaseTestCase):
 		self.assert_directory_contains_only_unique_video_items()
 		self.assert_directory_items_should_have_external_thumbnails()
 
-	def ttest_plugin_should_list_user_watch_later_video_list_correctly(self):
+	def test_plugin_should_list_user_watch_later_video_list_correctly(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
 
 		self.navigation.listMenu({"feed":"watch_later", 'login':'true', "path":"/root/watch_later"})
