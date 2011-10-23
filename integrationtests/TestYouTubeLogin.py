@@ -5,7 +5,6 @@ from mock import Mock, patch
 
 
 class TestYouTubeLogin(BaseTestCase.BaseTestCase):
-	
 	def test_plugin_should_perform_basic_login_correctly(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings.xml")
 
@@ -53,9 +52,9 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
 		assert(len(oauth2_access_token) > 40)
 
 	def test_plugin_should_perform_basic_2factor_login_correctly(self):
-		import pyotp
+		import pyotp, time
 		totp = pyotp.TOTP("fbfkkk27ffmaihzg")
-		userpin = totp.now()
+		userpin = totp.at(time.time() + 15)
 		print "OTP: " + str(userpin)
 		sys.modules["__main__"].settings.load_strings("./resources/2factor-login-settings.xml")
 		sys.modules["__main__"].xbmc.Keyboard().getText.return_value = [str(userpin)]
