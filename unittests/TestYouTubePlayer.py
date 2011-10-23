@@ -23,6 +23,14 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		
 		sys.modules["__main__"].xbmcvfs.rename.assert_called_with("tempFilePath/testTitle-[someVideoId].ssa","downloadFilePath/testTitle-[someVideoId].ssa")
 	
+	def test_saveSubtitle_should_call_openFile_with_correct_params(self):
+		sys.modules["__main__"].xbmc.translatePath.return_value = "tempFilePath"				
+		player = YouTubePlayer()
+		
+		player.saveSubtitle("my_subtitle_stream",{"Title":"testTitle","videoid":"someVideoId","downloadPath":"downloadFilePath"})
+		
+		sys.modules["__main__"].storage.openFile.assert_called_with("tempFilePath/testTitle-[someVideoId].ssa","wb")
+		
 	def test_getVideoUrlMap_should_return_empty_dictionary_on_missing_map(self):
 		player = YouTubePlayer()
 		
