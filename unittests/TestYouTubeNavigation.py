@@ -917,9 +917,9 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		navigation = YouTubeNavigation()
 		navigation.addVideoContextMenuItems = Mock()
 		
-		navigation.addVideoListItem({"scraper":"search_disco"},{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"})
+		navigation.addVideoListItem({"scraper":"movies_now"},{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"})
 		
-		sys.modules["__main__"].utils.getThumbnail.assert_called_with("discoball")
+		sys.modules["__main__"].utils.getThumbnail.assert_called_with("movies")
 
 	def test_addVideoListItem_should_set_default_icon_for_live(self):
 		sys.argv = ["some_path",-1,"some_params"]
