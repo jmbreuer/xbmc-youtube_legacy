@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import nose
 import BaseTestCase
-from mock import Mock
+from mock import Mock, patch
 import sys
 from YouTubePlayer import YouTubePlayer
 
@@ -80,8 +80,8 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 
 	def test_getVideoUrlMap_should_parse_url_map_fallback(self):
 		subtitlesettings = ["false"]
-                sys.modules[ "__main__"].settings.getSetting = Mock()
-                sys.modules[ "__main__"].settings.getSetting.return_value = "false"
+		sys.modules[ "__main__"].settings.getSetting = Mock()
+		sys.modules[ "__main__"].settings.getSetting.return_value = "false"
 
 		player = YouTubePlayer()		
 		result = player.getVideoUrlMap(self.readTestInput("urlMapTest.txt"),{})
@@ -219,8 +219,8 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		player = YouTubePlayer()
 		sys.modules["__main__"].core._fetchPage = Mock()
 		sys.modules["__main__"].core._fetchPage.return_value = {"status":303, "content":""}
-                sys.modules["__main__"].settings.getSetting = Mock()
-                sys.modules["__main__"].settings.getSetting.return_value = "1"		
+		sys.modules["__main__"].settings.getSetting = Mock()
+		sys.modules["__main__"].settings.getSetting.return_value = "1"		
 		ret = player.getTranscriptionUrl({"videoid":"some_id", "ttsurl":"http://some.url/transcript"})
 		print ret;
 		assert(ret == "http://some.url/transcript&type=trackformat=1&lang=en&kind=asr&name=&v=some_id&tlang=en")
@@ -350,6 +350,25 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		sys.modules["__main__"].xbmcvfs.exists.assert_called_with('testDownloadPath/testTitle-[testid].ssa')
 		sys.modules["__main__"].xbmc.Player().setSubtitles.assert_called_with('testDownloadPath/testTitle-[testid].ssa')		
 	
+	
+	def test_addSubtitles_should_sleep_for_1_second_if_player_isnt_ready(self):
+		sys.modules["__main__"].settings.getSetting.return_value = "testDownloadPath"
+		sys.modules["__main__"].xbmcvfs.exists.return_value = True
+		sys.modules["__main__"].xbmc.Player().isPlaying.side_effect = [False, True]
+		patcher = patch("time.sleep")
+		patcher.start()
+		sleep = Mock()
+		import time
+		time.sleep = sleep
+		player = YouTubePlayer()
+		player.downloadSubtitle = Mock()
+		player.downloadSubtitle.return_value = True
+		
+		player.addSubtitles({"videoid":"testid","Title":"testTitle"})
+		
+		patcher.stop()
+		sleep.assert_any_call(1)
+		
 	def test_addSubtitles_should_check_if_subtitle_exists_locally_before_calling_xbmcs_setSubtitles(self):
 		player = YouTubePlayer()
 		sys.modules["__main__"].settings.getSetting.return_value = "testDownloadPath"
@@ -402,7 +421,19 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		
 		assert(sys.modules["__main__"].xbmcplugin.setResolvedUrl.call_count > 0)
 		
+	def test_playVideo_should_appen_proxy_settings_to_video_url_if_proxy_is_in_params(self):
+		sys.modules["__main__"].settings.getSetting.return_value = "0"
+		player = YouTubePlayer()
+		player.addSubtitles = Mock()
+		player.getVideoObject = Mock()
+		params = {"Title":"someTitle","videoid":"some_id", "thumbnail":"someThumbnail", "video_url":"someUrl"}
+		player.getVideoObject.return_value = (params, 200)
+		sys.argv = ["test1","1","test2"]
 		
+		player.playVideo({"videoid":"some_id" ,"proxy":"true/smokey "})
+		
+		assert(params["video_url"] == "true/smokey someUrl")
+			
 	def test_playVideo_should_call_addSubtitles(self):
 		video = {"Title":"someTitle","videoid":"some_id", "thumbnail":"someThumbnail", "video_url":"someUrl"}
 		sys.modules["__main__"].settings.getSetting.return_value = "1"
@@ -499,6 +530,30 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		
 		assert(url == "h264 | Mozilla/5.0 (MOCK)")
 		
+	def test_selectVideoQuality_should_prefer_1080p_if_asked_to(self):
+		sys.modules["__main__"].settings.getSetting.return_value = "2"
+		player = YouTubePlayer()
+		
+		url = player.selectVideoQuality({37:"1080p",22:"720p",35:"SD"},{"quality":"1080p"})
+		
+		assert(url == "1080p | Mozilla/5.0 (MOCK)")
+
+	def test_selectVideoQuality_should_prefer_720p_if_asked_to(self):
+		sys.modules["__main__"].settings.getSetting.return_value = "2"
+		player = YouTubePlayer()
+		
+		url = player.selectVideoQuality({37:"1080p",22:"720p",35:"SD"},{"quality":"720p"})
+		
+		assert(url == "720p | Mozilla/5.0 (MOCK)")
+
+	def test_selectVideoQuality_should_prefer_SD_if_asked_to(self):
+		sys.modules["__main__"].settings.getSetting.return_value = "2"
+		player = YouTubePlayer()
+		
+		url = player.selectVideoQuality({37:"1080p",22:"720p",35:"SD"},{"quality":"SD"})
+		
+		assert(url == "SD | Mozilla/5.0 (MOCK)")
+
 	def test_selectVideoQuality_should_choose_highest_sd_quality_if_only_multiple_sd_qualities_are_available(self):
 		sys.modules["__main__"].settings.getSetting.return_value = "1"
 		player = YouTubePlayer()
@@ -556,16 +611,15 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		
 		assert(url.find("| Mozilla/5.0 (MOCK)") < 0)
 	
-	
 	def test_userSelectsVideoQuality_should_append_list_of_known_qualities(self):
 		sys.modules["__main__"].settings.getSetting.return_value = "1"
 		sys.modules["__main__"].xbmcgui.Dialog().select.return_value = -1
 		sys.modules["__main__"].language.return_value = "" 
 		player = YouTubePlayer()
 		
-		url = player.userSelectsVideoQuality({},{35:"SD",22:"720p",37:"1080p"})
+		url = player.userSelectsVideoQuality({},{35:"SD",22:"720p",37:"1080p",35:"480p",18:"380p",34:"360p",5:"240p",17:"144p"})
 		
-		sys.modules["__main__"].xbmcgui.Dialog().select.assert_called_with("",["1080p","720p","480p"])
+		sys.modules["__main__"].xbmcgui.Dialog().select.assert_any_call("",["1080p","720p","480p","380p","360p","240p","144p"])
 		
 	def test_userSelectsVideoQuality_should_prefer_h264_over_vp8_as_appletv2_cant_handle_vp8_properly(self):
 		sys.modules["__main__"].settings.getSetting.return_value = "1"
@@ -609,7 +663,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		
 		player.getInfo.assert_called_with({})
 		
-	def test_getVideoObject_should_test_if_local_file_exists_if_download_path_is_set(self):
+	def test_getVideoObject_should_ttest_if_local_file_exists_if_download_path_is_set(self):
 		params = {"videoid":"some_id"}
 		sys.modules["__main__"].settings.getSetting.return_value = "somePath/"
 		sys.modules["__main__"].xbmcvfs.exists.return_value = False

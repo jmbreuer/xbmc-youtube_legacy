@@ -434,11 +434,12 @@ class YouTubeCore():
 		except urllib2.HTTPError, e:
 			cont = False
 			err = str(e)
+			
 			self.common.log("HTTPError : " + err)
 			if e.code == 400 or True:
 				msg = e.read()
 				self.common.log("Unhandled HTTPError : [%s] %s " % ( e.code, msg), 1)
-
+			
 			if err.find("Token invalid") > -1:
 				self.common.log("refreshing token")
 				self._oRefreshToken()
@@ -501,14 +502,15 @@ class YouTubeCore():
 		fetch_options = { "link": new_url, "no_verify_age": "true", "login": "true" }
 		verified = False
 		step = 0
+		ret = {}
 		while not verified and fetch_options and step < 6:
-                        self.common.log("Step : " + str(step))
+			self.common.log("Step : " + str(step))
 			step += 1
 
-                        if step == 17:
-                                return ( self.core._findErrors(ret), 303)
+			if step == 17:
+				return ( self.core._findErrors(ret), 303)
 
-                        ret = self._fetchPage(fetch_options)
+			ret = self._fetchPage(fetch_options)
 			fetch_options = False
 			new_url = self.common.parseDOM(ret["content"], "form", attrs = { "id": "confirm-age-form"}, ret ="action")
 			if len(new_url) > 0:
