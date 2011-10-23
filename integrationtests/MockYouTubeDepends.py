@@ -66,7 +66,7 @@ class MockYouTubeDepends:
 	def log(self, description, level = 0):
                 if sys.modules[ "__main__" ].dbg and sys.modules[ "__main__" ].dbglevel > level:
 			import inspect
-			print "[%s] %s : '%s'" % ("YouTube", inspect.stack()[4][3] , description.decode("utf-8","ignore")) # 4 - 3 for TestYouTubeUserFeeds.py
+			print "[%s] %s : '%s'" % ("YouTube4", inspect.stack()[3][3] , description.decode("utf-8","ignore")) # 3 - 3 for TestYouTubeUserFeeds.py
 		
 	def execute(self, function, *args):
 		return function(*args)

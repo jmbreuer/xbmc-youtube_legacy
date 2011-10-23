@@ -570,17 +570,19 @@ class YouTubeCore():
 		return False
 
 	def _getAuth(self):
+		now = time.time()
 		if self.settings.getSetting("oauth2_expires_at"):
-			expire = int( float(self.settings.getSetting("oauth2_expires_at")) - time.time() )
+			expire_at = float(self.settings.getSetting("oauth2_expires_at"))
 		else:
-			expire = 0
-		self.common.log("Oauth expires in %s seconds"  % expire)
+			expire_at = now
 
-		if float(expire) < time.time():
+		self.common.log("Oauth expires in %s seconds"  % int(expire_at - now))
+
+		if expire_at <= now:
 			self._oRefreshToken()
 
 		auth = self.settings.getSetting("oauth2_access_token")
-		self.common.log("oauth2_access_token: " + auth, 5)
+		self.common.log("oauth2_access_token: " + repr(auth), 5)
 
 		if (auth):
 			self.common.log("returning stored auth")

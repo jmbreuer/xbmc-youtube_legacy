@@ -2,7 +2,6 @@ import BaseTestCase
 import nose, sys
 
 class TestYouTubeMusicScraper(BaseTestCase.BaseTestCase):
-	
 	def test_plugin_should_list_user_favorites_video_list_correctly(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
 		
@@ -17,7 +16,7 @@ class TestYouTubeMusicScraper(BaseTestCase.BaseTestCase):
 	def test_plugin_should_list_user_favorites_video_list_page_2_correctly(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
 		sys.modules["__main__"].settings.setSetting("perpage","2")
-		
+
 		self.navigation.listMenu({"feed":"favorites", "login":"true", "page":"1","path":"/root/favorites"})
 		
 		self.assert_directory_count_greater_than_or_equals(10)

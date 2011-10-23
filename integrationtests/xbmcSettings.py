@@ -11,10 +11,10 @@ class xbmcSettings():
 		print " *** *** loading settings strings *** ***"
 		self.path = path
 		file = io.open(path).read()
-		dom = minidom.parseString(file);
-		strings = dom.getElementsByTagName("setting")
+		self.dom = minidom.parseString(file);
+		self.strings = self.dom.getElementsByTagName("setting")
 		
-		for string in strings:
+		for string in self.strings:
 			self.settingsString[string.getAttribute("id")] = string.getAttribute("value")		
 
 	def __call__(self, id = "", value = ""):
@@ -23,18 +23,14 @@ class xbmcSettings():
 			self.load_strings()
 		
 		if value:
-			if self.path.find("settings-logged-in") > -1:
-				org = io.open(self.path).read()
-				if org.find(id + "\" value=\"") > -1:
-					start = org.find(id + "\" value=\"") + len("\" value=\"") + len(id)
-					org_val = org[start:org.find("\"", start)]
-					org = org.replace(org_val, value)
-				else:
-					org = org.replace("</settings>", "    <setting id=\"%s\" value=\"%s\" />\n</settings>" % ( id, value))
-				test = io.open(self.path, "w")
-				test.write(org)
-
 			self.settingsString[id] = value
+			if self.path.find("settings-logged-in") > -1: # This only updates. No insert!
+				for string in self.strings:
+					if string.getAttribute("id") == id:
+						string.setAttribute("value", value)
+				f = open(self.path, 'w')
+				self.dom.writexml(f)
+				f.close()
 		
 		elif id in self.settingsString:
 			return self.settingsString[id]

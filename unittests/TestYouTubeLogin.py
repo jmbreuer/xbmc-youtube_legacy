@@ -143,7 +143,7 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
 		
 		login._apiLogin()
 		
-		sys.modules["__main__"].settings.setSetting.assert_called_with("auth","")
+		sys.modules["__main__"].settings.setSetting.assert_any_call("oauth2_access_token","")
 	
 	def test_apiLogin_should_call_oauth2_login_url_only_one_time_if_url_fails(self):
 		sys.modules["__main__"].core._fetchPage.return_value = {"content":""}
@@ -238,15 +238,14 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
 		login._apiLogin()
 		
 		args = sys.modules["__main__"].settings.setSetting.call_args_list
-		#print repr(args)
-		assert(args[1][0][0] == "oauth2_expires_at")
-		assert(len(args[1][0][1]) > 1)
-		assert(args[2][0][0] == "oauth2_access_token")
-		assert(args[2][0][1] == "my_favorite_access_token")
-		assert(args[3][0][0] == "auth")
-		assert(args[3][0][1] == "my_favorite_access_token")
-		assert(args[4][0][0] == "oauth2_refresh_token")
-		assert(args[4][0][1] == "my_favorite_refresh_token")
+		print repr(args)
+		print repr(args[1])
+		assert(args[3][0][0] == "oauth2_expires_at")
+		assert(len(args[3][0][1]) > 1)
+		assert(args[4][0][0] == "oauth2_access_token")
+		assert(args[4][0][1] == "my_favorite_access_token")
+		assert(args[5][0][0] == "oauth2_refresh_token")
+		assert(args[5][0][1] == "my_favorite_refresh_token")
 		
 	def test_apiLogin_should_provide_correct_message_and_success_status_code_on_success(self):
 		fetch_values = [{"content":""},{"content":'{"expires_in":"12", "access_token":"my_favorite_access_token", "refresh_token":"my_favorite_refresh_token" }'}]
