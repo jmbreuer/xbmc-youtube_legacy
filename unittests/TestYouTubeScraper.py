@@ -94,13 +94,13 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 		
 		result, status = self.scraper.scrapeCategoriesGrid()
 		
-		sys.modules["__main__"].common.parseDOM.assert_any_call('some_content', 'div', attrs={'class': 'yt-uix-pager'})
+		sys.modules["__main__"].common.parseDOM.assert_any_call('some_content', 'div',{'class': 'yt-uix-pager'})
 	
 	def test_scrapeCategoriesGrid_should_call_createUrl_to_get_correct_url(self):
 		
 		result, status = self.scraper.scrapeCategoriesGrid()
 		
-		self.scraper.createUrl.assert_any_call({})
+		self.scraper.createUrl.assert_any_call({"page":"0"})
 		
 	def test_scrapeCategoriesGrid_should_call_core_fetchPage_to_get_html_content(self):
 		
