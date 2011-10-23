@@ -502,14 +502,15 @@ class YouTubeCore():
 		fetch_options = { "link": new_url, "no_verify_age": "true", "login": "true" }
 		verified = False
 		step = 0
+		ret = {}
 		while not verified and fetch_options and step < 6:
-                        self.common.log("Step : " + str(step))
+			self.common.log("Step : " + str(step))
 			step += 1
 
-                        if step == 17:
-                                return ( self.core._findErrors(ret), 303)
+			if step == 17:
+				return ( self.core._findErrors(ret), 303)
 
-                        ret = self._fetchPage(fetch_options)
+			ret = self._fetchPage(fetch_options)
 			fetch_options = False
 			new_url = self.common.parseDOM(ret["content"], "form", attrs = { "id": "confirm-age-form"}, ret ="action")
 			if len(new_url) > 0:
