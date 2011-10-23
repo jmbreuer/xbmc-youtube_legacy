@@ -51,7 +51,9 @@ class YouTubeLogin():
 		self.settings.openSettings()
 		uname = self.settings.getSetting("username")
 		self.dbg = self.settings.getSetting("debug") == "true"
-		
+		result = ""
+		status = 500
+
 		if uname != "":
 			refreshed = False
 			if get("new", "false") == "false" and self.settings.getSetting( "oauth2_refresh_token" ) and ouname == uname and opass == self.settings.getSetting( "user_password" ):
@@ -74,9 +76,9 @@ class YouTubeLogin():
 					self.utils.showErrorMessage(self.language(30031), result, 303)
 				else:
 					self.utils.showErrorMessage(self.language(30609), result, status)
-				return (result, status)
 		
 		self.xbmc.executebuiltin( "Container.Refresh" )
+		return (result, status)
 
 	def _apiLogin(self, error = 0):
 		self.common.log("errors: " + str(error))
