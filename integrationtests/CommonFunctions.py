@@ -145,9 +145,9 @@ class CommonFunctions():
 				for match in lst:
 					tmp_list = re.compile('<' + name + '.*?' + ret + '=([\'"][^>]*?)>').findall(match)
 					lst2 += self.getDOMAttributes(tmp_list)
-					self.log(lst, 3)
-					self.log(match, 3)
-					self.log(lst2, 3)
+					self.log(repr(lst), 3)
+					self.log(repr(match), 3)
+					self.log(repr(lst2), 3)
 				lst = lst2
 			elif name != "img":
 				self.log("Getting element content for %s matches " % len(lst), 2)
@@ -156,9 +156,9 @@ class CommonFunctions():
 					temp = self.getDOMContent(item, name, match).strip()
 					item = item[item.find(match + temp) + len(match + temp):]
 					lst2.append(temp)
-					self.log(lst, 3)
-					self.log(match, 3)
-					self.log(lst2, 3)
+					self.log(repr(lst), 3)
+					self.log(repr(match), 3)
+					self.log(repr(lst2), 3)
 				lst = lst2
 			ret_lst += lst
 
