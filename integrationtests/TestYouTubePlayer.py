@@ -83,7 +83,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 	def test_plugin_should_play_videos_with_subtitles_when_available(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings.xml")
 		import os
-                sys.modules[ "__main__" ].xbmcvfs.exists.side_effect = os.path.exists
+		sys.modules[ "__main__" ].xbmcvfs.exists.side_effect = os.path.exists
 		self.navigation.executeAction({"action":"play_video", "videoid": "bUcszN8jRB8"})
 
 		args = sys.modules[ "__main__" ].xbmcplugin.setResolvedUrl.call_args_list
@@ -104,7 +104,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 	def test_plugin_should_play_videos_with_subtitles_and_annotation_when_available(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings.xml")
 		import os
-                sys.modules[ "__main__" ].xbmcvfs.exists.side_effect = os.path.exists
+		sys.modules[ "__main__" ].xbmcvfs.exists.side_effect = os.path.exists
 				
 		self.navigation.executeAction({"action":"play_video", "videoid": "byv-wpqDydI"}) #This is JUST annotations for now.
 		
@@ -125,7 +125,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 	def ttest_plugin_should_play_geolocked_videos(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings.xml")
 		import os
-                sys.modules[ "__main__" ].xbmcvfs.exists.side_effect = os.path.exists
+		sys.modules[ "__main__" ].xbmcvfs.exists.side_effect = os.path.exists
 				
 		self.navigation.executeAction({"action":"play_video", "videoid": "ha_NOX_-Aeg", "proxy": "http://15aa51.info/browse.php?u="})
 
