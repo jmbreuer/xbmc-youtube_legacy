@@ -44,6 +44,7 @@ class YouTubeLogin():
 		self.cache = sys.modules[ "__main__" ].cache
 		
 	def login(self, params = {}):
+		get = params.get
 		self.common.log("")
 		ouname = self.settings.getSetting("username")
 		opass = self.settings.getSetting( "user_password" )
@@ -53,7 +54,7 @@ class YouTubeLogin():
 		
 		if uname != "":
 			refreshed = False
-			if self.settings.getSetting( "oauth2_refresh_token" ) and ouname == uname and opass == self.settings.getSetting( "user_password" ):
+			if get("new", "false") == "false" and self.settings.getSetting( "oauth2_refresh_token" ) and ouname == uname and opass == self.settings.getSetting( "user_password" ):
 				self.common.log("refreshing token: " + str(refreshed))
 				refreshed = self.core._oRefreshToken()
 

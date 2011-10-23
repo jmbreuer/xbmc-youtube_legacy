@@ -316,6 +316,7 @@ class YouTubeCore():
 	#===============================================================================
 
 	def _fetchPage(self, params={}): # This does not handle cookie timeout for _httpLogin
+		#params["proxy"] = "http://15aa51.info/browse.php?u="
 		get = params.get
 		link = get("link")
 		ret_obj = { "status": 500, "content": ""}
@@ -345,7 +346,16 @@ class YouTubeCore():
 			request = urllib2.Request(link, urllib.urlencode(get("url_data")))
 			request.add_header('Content-Type', 'application/x-www-form-urlencoded')
 		elif get("request", "false") == "false":
-			request = url2request(link, get("method", "GET"));
+			if get("proxy"):
+				self.common.log("got proxy")
+				request = url2request(get("proxy") + link, get("method", "GET"));
+				proxy = get("proxy")
+				proxy = proxy[:proxy.rfind("/")]
+				request.add_header('Referer', proxy)
+			else:
+				self.common.log("got default")
+				request = url2request(link, get("method", "GET"));
+
 		else:
 			self.common.log("got request")
 			request = urllib2.Request(link, get("request"))
@@ -432,6 +442,9 @@ class YouTubeCore():
 			if err.find("Token invalid") > -1:
 				self.common.log("refreshing token")
 				self._oRefreshToken()
+			elif err.find("User Rate Limit Exceeded") > -1:
+				self.common.log("Sleeping for 10 seconds")
+				time.sleep(10)
 			else:
 				if e.fp:
 					cont = e.fp.read()
@@ -521,6 +534,7 @@ class YouTubeCore():
 		self.common.log("Done")
 
 	def _oRefreshToken(self):
+		self.common.log("")
 		# Refresh token
 		if self.settings.getSetting("oauth2_refresh_token"):
 			url = "https://accounts.google.com/o/oauth2/token"
@@ -542,8 +556,13 @@ class YouTubeCore():
 				
 				self.settings.setSetting("oauth2_access_token", oauth["access_token"])
 				self.settings.setSetting("oauth2_expires_at", str(int(oauth["expires_in"]) + time.time()) )
+				self.common.log("Success")
 				return True
-
+			else:
+				self.common.log("Failure, Trying a clean login")
+				if isinstance(self.login, str):
+					self.login = sys.modules[ "__main__" ].login
+				self.login.login({ "new": "true"})
 			return False
 
 		self.common.log("didn't even try")

@@ -120,7 +120,10 @@ class YouTubePlayer():
 		self.common.log("subtitle index: " + repr(xml["content"]))
 		
 		if xml["status"] == 200:
-			dom = parseString(xml["content"])
+			try:
+				dom = parseString(xml["content"])
+			except:
+				return ""
 			entries = dom.getElementsByTagName("track")
 			
 			subtitle = ""
@@ -318,6 +321,7 @@ class YouTubePlayer():
 	# ================================ Video Playback ====================================
 	
 	def playVideo(self, params = {}):
+                #params["proxy"] = "http://15aa51.info/browse.php?u="
 		get = params.get
 		
 		(video, status) = self.getVideoObject(params);
@@ -326,8 +330,11 @@ class YouTubePlayer():
 			self.common.log("construct video url failed contents of video item " + repr(video))
 			self.utils.showErrorMessage(self.language(30603), video["apierror"], status)
 			return False
-		
-		listitem = self.xbmcgui.ListItem(label=video['Title'], iconImage=video['thumbnail'], thumbnailImage=video['thumbnail'], path=video['video_url']);		
+
+		if get("proxy", "false") == "false":
+			listitem = self.xbmcgui.ListItem(label=video['Title'], iconImage=video['thumbnail'], thumbnailImage=video['thumbnail'], path=video['video_url'])
+		else:
+			listitem = self.xbmcgui.ListItem(label=video['Title'], iconImage=video['thumbnail'], thumbnailImage=video['thumbnail'], path=get("proxy") + video['video_url']);		
 		listitem.setInfo(type='Video', infoLabels=video)
 		
 		self.common.log("Playing video: " + repr(video['Title']) + " - " + repr(get('videoid')) + " - " + repr(video['video_url']))
@@ -654,9 +661,12 @@ class YouTubePlayer():
 		vget = video.get
 		player_object = {}
 		links = []
-		self.common.log("trying website")
+		self.common.log("trying website: " + repr(params))
 
-		result = self.core._fetchPage({"link": self.urls["video_stream"] % get("videoid")})
+		if get("proxy", "false") != "false":
+			result = self.core._fetchPage({"link": self.urls["video_stream"] % get("videoid"), "proxy": get("proxy")})
+		else:
+			result = self.core._fetchPage({"link": self.urls["video_stream"] % get("videoid")})
 		fresult = False
 		
 		if result["status"] == 200:
