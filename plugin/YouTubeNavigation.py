@@ -400,8 +400,8 @@ class YouTubeNavigation():
 
 		url = '%s?path=%s&action=play_video&videoid=%s' % ( sys.argv[0], item("path"), item("videoid"));
 		
-		if get("scraper") == "watch_later":
-			url+= "&watch_later=true&playlist=%s&playlist_entry_id=%s&" % (get("playlist"), item("playlist_entry_id")) 
+		if get("user_feed") == "watch_later":
+			url+= "&watch_later=true&playlist_entry_id=%s&" % item("playlist_entry_id") 
 			
 		cm = self.addVideoContextMenuItems(params, item_params)
 				

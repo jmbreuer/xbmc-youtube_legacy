@@ -341,7 +341,7 @@ class YouTubePlayer():
 			video["video_url"] = get("proxy") + video['video_url'].replace("|", "|Referer=" + proxy + " | ")
 			print "XXXXXXXXXXXXXXXXX : " + repr(video)
 			listitem = self.xbmcgui.ListItem(label=video['Title'], iconImage=video['thumbnail'], thumbnailImage=video['thumbnail'], path=video['video_url'])
-
+		
 		listitem.setInfo(type='Video', infoLabels=video)
 		
 		self.common.log("Playing video: " + repr(video['Title']) + " - " + repr(get('videoid')) + " - " + repr(video['video_url']))
@@ -351,9 +351,9 @@ class YouTubePlayer():
 		if self.settings.getSetting("lang_code") != "0" or self.settings.getSetting("annotations") == "true":
 			self.addSubtitles(video)
 		
-		if (get("watch_later") == "true" and get("playlist") and get("playlist_entry_id")):
+		if (get("watch_later") == "true" and get("playlist_entry_id")):
 			self.common.log("removing video from watch later playlist")
-			self.core.remove_from_playlist(params)
+			self.core.remove_from_watch_later(params)
 			
 		self.storage.storeValue( "vidstatus-" + video['videoid'], "7" )
 
