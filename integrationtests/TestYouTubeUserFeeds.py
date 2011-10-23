@@ -18,7 +18,7 @@ class TestYouTubeMusicScraper(BaseTestCase.BaseTestCase):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
 		sys.modules["__main__"].settings.setSetting("perpage","2")
 		
-		self.navigation.listMenu({"feed":"favorites", "login":"true", "page":"2","path":"/root/favorites"})
+		self.navigation.listMenu({"feed":"favorites", "login":"true", "page":"1","path":"/root/favorites"})
 		
 		self.assert_directory_count_greater_than_or_equals(10)
 		self.assert_directory_count_less_than_or_equals(51)
@@ -26,7 +26,7 @@ class TestYouTubeMusicScraper(BaseTestCase.BaseTestCase):
 		self.assert_directory_contains_only_unique_video_items()
 		self.assert_directory_items_should_have_external_thumbnails()
 	
-	def ttest_plugin_should_list_user_playlists_correctly(self):
+	def test_plugin_should_list_user_playlists_correctly(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
 		
 		self.navigation.listMenu({"user_feed":"playlists", "login":"true","path":"/root/playlists", "folder": "true"})
