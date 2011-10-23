@@ -54,8 +54,7 @@ class YouTubeCore():
 
 	urls = {};
 	urls['batch'] = "http://gdata.youtube.com/feeds/api/videos/batch"
-	urls['thumbnail'] = "http://i.ytimg.com/vi/%s/0.jpg"
-	urls['remove_watch_later'] = "http://www.youtube.com/addto_ajax?action_delete_from_playlist=1"	
+	urls['thumbnail'] = "http://i.ytimg.com/vi/%s/0.jpg"	
 
 
 	def __init__(self):
@@ -145,7 +144,14 @@ class YouTubeCore():
 		url = "http://gdata.youtube.com/feeds/api/playlists/%s/%s" % (get("playlist"), get("playlist_entry_id"))
 		result = self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true", "method": "DELETE"})
 		return (result["content"], result["status"])
-	
+		
+	def remove_from_watch_later(self, params = {}):
+		get = params.get
+		url = "https://gdata.youtube.com/feeds/api/users/default/watch_later/%s" % get("playlist_entry_id")
+		result = self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true", "method": "DELETE"})
+		return (result["content"], result["status"])
+		
+		
 	def getFolderInfo(self, xml, params={}):
 		get = params.get
 		result = ""
@@ -194,7 +200,7 @@ class YouTubeCore():
 			thumb = self.storage.retrieve(params, "thumbnail", folder)
 			if thumb:
 				folder["thumbnail"] = thumb 
-						
+			
 			folders.append(folder);
 		
 		if next:
@@ -619,6 +625,7 @@ class YouTubeCore():
 	
 	def getVideoInfo(self, xml, params={}):
 		get = params.get
+		print repr(xml)
 		dom = minidom.parseString(xml);
 		self.common.log(str(len(xml)))
 		links = dom.getElementsByTagName("link");
