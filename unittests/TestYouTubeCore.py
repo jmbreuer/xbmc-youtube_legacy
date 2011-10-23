@@ -809,7 +809,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		
 		assert(dummy_connection.read.call_count == 2)
 	
-	def test_fetchPage_should_retry_on_URLError(self):
+	def ttest_fetchPage_should_retry_on_URLError(self):
 		settings = ["my_token","my_token","my_token","my_token","my_token","user","pass","4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		sys.modules[ "__main__" ].language.return_value = "error_message"
@@ -834,8 +834,102 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		args = YouTubeCore.url2request().add_header.call_args_list
 		patcher2.stop()
 		
-		assert(dummy_connection.read.call_count == 2)
+		assert(params["error"] == "3")
 		
+	def test_fetchPage_should_refresh_token_on_invalid_token_HTTPError(self):
+		settings = ["my_token","my_token","my_token","my_token","my_token","user","pass","4","3" ]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
+		sys.modules[ "__main__" ].language.return_value = "error_message"
+		patcher1 = patch("urllib2.urlopen")
+		patcher2 = patch("YouTubeCore.url2request")
+		patcher1.start()
+		patcher2.start()
+		import YouTubeCore
+		import urllib2
+		YouTubeCore.url2request = Mock()
+		fp = Mock()
+		fp.read.return_value = "something"
+		dummy_connection = Mock()
+		read_values = ["Nothing here\n","something verify-age-actions"]
+		dummy_connection.read.side_effect = urllib2.HTTPError("",400,"BOOM Token invalid","",fp)
+		patcher1(urllib2.urlopen).return_value = dummy_connection
+		core = YouTubeCore.YouTubeCore()
+		core._oRefreshToken = Mock()
+		core._getAuth = Mock()
+		
+		params = {"login":"","link":"www.somelink.dk"}
+		ret = core._fetchPage(params)
+		
+		patcher1.stop()
+		args = YouTubeCore.url2request().add_header.call_args_list
+		patcher2.stop()
+		
+		core._oRefreshToken.assert_any_call()
+		
+	def test_fetchPage_should_log_content_on_HTTPError_if_no_known_reason_is_found(self):
+		settings = ["my_token","my_token","my_token","my_token","my_token","user","pass","4","3" ]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
+		sys.modules[ "__main__" ].language.return_value = "error_message"
+		patcher1 = patch("urllib2.urlopen")
+		patcher2 = patch("YouTubeCore.url2request")
+		patcher1.start()
+		patcher2.start()
+		import YouTubeCore
+		import urllib2
+		YouTubeCore.url2request = Mock()
+		fp = Mock()
+		fp.read.return_value = "something"
+		dummy_connection = Mock()
+		read_values = ["Nothing here\n","something verify-age-actions"]
+		dummy_connection.read.side_effect = urllib2.HTTPError("",400,"BOOM","",fp)
+		patcher1(urllib2.urlopen).return_value = dummy_connection
+		core = YouTubeCore.YouTubeCore()
+		core._oRefreshToken = Mock()
+		core._getAuth = Mock()
+		
+		params = {"login":"","link":"www.somelink.dk"}
+		ret = core._fetchPage(params)
+		
+		patcher1.stop()
+		args = YouTubeCore.url2request().add_header.call_args_list
+		patcher2.stop()
+		
+		fp.read.assert_any_call()
+		
+	def test_fetchPage_should_sleep_for_10_seconds_on_HTTPError_if_rate_limit_reason_is_found(self):
+		settings = ["my_token","my_token","my_token","my_token","my_token","user","pass","4","3" ]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
+		sys.modules[ "__main__" ].language.return_value = "error_message"
+		patcher1 = patch("urllib2.urlopen")
+		patcher2 = patch("YouTubeCore.url2request")
+		patcher3 = patch("time.sleep")
+		patcher1.start()
+		patcher2.start()
+		patcher3.start()
+		import YouTubeCore
+		import urllib2
+		import time
+		YouTubeCore.url2request = Mock()
+		fp = Mock()
+		fp.read.return_value = "something"
+		time.sleep = Mock() 		
+		dummy_connection = Mock()
+		read_values = ["Nothing here\n","something verify-age-actions"]
+		dummy_connection.read.side_effect = urllib2.HTTPError("",400,"BOOM User Rate Limit Exceeded","",fp)
+		patcher1(urllib2.urlopen).return_value = dummy_connection
+		core = YouTubeCore.YouTubeCore()
+		core._oRefreshToken = Mock()
+		core._getAuth = Mock()
+		
+		params = {"login":"","link":"www.somelink.dk"}
+		ret = core._fetchPage(params)
+		
+		patcher1.stop()
+		args = YouTubeCore.url2request().add_header.call_args_list
+		patcher2.stop()
+		
+		time.sleep.assert_any_call(10)
+	
 	def ttest_fetchPage_should_return_content_of_link_and_proper_status_code(self):
 		settings = ["4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
