@@ -1,6 +1,6 @@
 <settings>
     <setting id="annotations" value="true" />
-    <setting id="auth" value="ya09.AHES6ZR1aZmFgYr5Tgl1qd4SkX5JS8fYR865gc5g1xzj1Fa1MPIb" />
+    <setting id="auth" value="ya09.AHES6ZTSZ-AjqBmAIuZv0lXID4Rsjtd5R7JOZEi_Ekz1IugdW4PiuA" />
     <setting id="categories" value="true" />
     <setting id="contacts" value="true" />
     <setting id="debug" value="true" />
@@ -17,14 +17,14 @@
     <setting id="liked" value="true" />
     <setting id="list_view" value="0" />
     <setting id="live" value="true" />
-    <setting id="login_info" value="a1d63014907ce0e73605a44046bc7d60c40AAAB7IjEiOiAxLCAiMyI6IDc3MTY5MTQ4MywgIjIiOiAiMDNyb0xSeW9CTWJzY1hxczJDRmYydz09IiwgIjUiOiA0NTAzNjAxNzY0NDY1NTM0LCAiNCI6ICJHQUlBIiwgIjciOiAxMzE5MzY3MDc0LCAiNiI6IGZhbHNlLCAiOCI6IDExNTMwODYxNzc4NH0=" />
+    <setting id="login_info" value="9afd05384911bcdd5f7e0473784d06dbc40AAAB7IjEiOiAxLCAiMyI6IDc3MTY5MTQ4MywgIjIiOiAiMDNyb0xSeW9CTWJzY1hxczJDRmYydz09IiwgIjUiOiA0NTAzNjAxNzY0NDY1NTM0LCAiNCI6ICJHQUlBIiwgIjciOiAxMzE5MzcxMjEzLCAiNiI6IGZhbHNlLCAiOCI6IDExNTMwODYxNzc4NH0=" />
     <setting id="movies" value="true" />
     <setting id="music" value="true" />
     <setting id="nick" value="YTlogintester" />
     <setting id="notification_length" value="0" />
-    <setting id="oauth0_access_token" value="ya09.AHES6ZR1aZmFgYr5Tgl1qd4SkX5JS8fYR865gc5g1xzj1Fa1MPIb" />
-    <setting id="oauth0_expires_at" value="1319370677.49" />
-    <setting id="oauth0_refresh_token" value="1/CcaTh9F0cayVkgK5WNb44Is9X-iLXoAHjg4KfK8kzz0" />
+    <setting id="oauth0_access_token" value="ya09.AHES6ZTSZ-AjqBmAIuZv0lXID4Rsjtd5R7JOZEi_Ekz1IugdW4PiuA" />
+    <setting id="oauth0_expires_at" value="1319374817.17" />
+    <setting id="oauth0_refresh_token" value="1/Xd40CEPiDeYg-lm5DvhXn3O0v9H0Dj8CZbY0PBt__4Y" />
     <setting id="perpage" value="0" />
     <setting id="playlists" value="true" />
     <setting id="preferred" value="true" />
