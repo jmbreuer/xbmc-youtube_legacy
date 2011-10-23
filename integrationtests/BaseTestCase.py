@@ -29,7 +29,7 @@ class BaseTestCase(unittest2.TestCase):
 		sys.argv = ["something",-1,"something_else"]
 		import CommonFunctions
 		sys.modules[ "__main__" ].common = CommonFunctions.CommonFunctions() 
-                sys.modules[ "__main__" ].common.log = sys.modules[ "__main__" ].xbmc.log
+		sys.modules[ "__main__" ].common.log = sys.modules[ "__main__" ].xbmc.log
 		import YouTubeUtils
 		sys.modules[ "__main__" ].utils = YouTubeUtils.YouTubeUtils()
 		import YouTubeStorage
@@ -200,8 +200,9 @@ class BaseTestCase(unittest2.TestCase):
 
 				if len(value) == 0:
 					missing_count += 1
-
-		if missing_count > 1:
-			print 'Expected directory items url\'s to contain the "%s" but more than one item was missing this property'
-			print "Directory list: \r\n" + repr(args)
 		
+		if missing_count > 1:
+			print 'Expected directory items url\'s to contain the "%s" but more than one item was missing this property' % param
+			print "Directory list: \r\n" + repr(args)
+			
+		assert(missing_count <= 1)
