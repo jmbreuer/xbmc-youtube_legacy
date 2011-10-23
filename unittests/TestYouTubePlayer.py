@@ -447,7 +447,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		
 		player.addSubtitles.assert_called_with(video)
 	
-	def test_playVideo_should_call_remove_from_playlist_if_viewing_video_from_watch_later_queue(self): 
+	def test_playVideo_should_call_remove_from_watch_later_if_viewing_video_from_watch_later_queue(self): 
 		player = YouTubePlayer()
 		sys.modules["__main__"].settings.getSetting.return_value = "0"
 		sys.argv = ["test1","1","test2"]
@@ -458,7 +458,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		
 		player.playVideo(call_params)
 		
-		sys.modules["__main__"].core.remove_from_playlist.assert_called_with(call_params)
+		sys.modules["__main__"].core.remove_from_watch_later.assert_called_with(call_params)
 		
 	def test_playVideo_should_update_locally_stored_watched_status(self):
 		sys.modules["__main__"].settings.getSetting.return_value = "0"

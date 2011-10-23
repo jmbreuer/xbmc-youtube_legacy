@@ -151,6 +151,20 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(core._fetchPage.call_count == 1)
 		core._fetchPage.assert_called_with({"link": url, "api": "true", "login": "true", "auth": "true","method":"DELETE"})
 
+	def test_remove_from_watch_later_should_call_fetchPage_with_correct_fetch_options(self):
+		settings = ["4","3" ]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
+		core = YouTubeCore()
+		core._fetchPage = Mock()
+		core._fetchPage.return_value = {"content":"success", "status":200}
+		url = "https://gdata.youtube.com/feeds/api/users/default/watch_later/some_entry_id"
+		
+		core.remove_from_watch_later({ "playlist": "some_playlist","playlist_entry_id":"some_entry_id"})
+		
+		assert(core._fetchPage.called)
+		assert(core._fetchPage.call_count == 1)
+		core._fetchPage.assert_called_with({"link": url, "api": "true", "login": "true", "auth": "true","method":"DELETE"})
+		
 	def test_getFolderInfo_should_use_getElementsByTagName_to_look_for_link_and_entries(self):
 		settings = ["4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
