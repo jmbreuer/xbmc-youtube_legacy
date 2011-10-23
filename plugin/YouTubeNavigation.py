@@ -383,15 +383,15 @@ class YouTubeNavigation():
 		item = item_params.get
 		
 		icon = item("icon","default")
-		if (get("scraper", "").find("trailers") > 0):
+		if (get("scraper", "").find("trailers") > -1):
 			icon = "trailers"
-		elif(get("scraper","").find("movies") > 0):
+		elif(get("scraper","").find("movies") > -1):
 			icon = "movies"
-		elif(get("scraper","").find("music") > 0):
+		elif(get("scraper","").find("music") > -1):
 			icon = "music"
-		elif(get("scraper","").find("disco") > 0):
+		elif(get("scraper","").find("disco") > -1):
 			icon = "discoball"
-		elif(get("feed","").find("live") > 0):
+		elif(get("feed","").find("live") > -1):
 			icon = "live"
 		
 		icon = self.utils.getThumbnail(icon)
