@@ -518,6 +518,30 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		
 		assert(url == "h264 | Mozilla/5.0 (MOCK)")
 		
+	def test_selectVideoQuality_should_prefer_1080p_if_asked_to(self):
+		sys.modules["__main__"].settings.getSetting.return_value = "2"
+		player = YouTubePlayer()
+		
+		url = player.selectVideoQuality({37:"1080p",22:"720p",35:"SD"},{"quality":"1080p"})
+		
+		assert(url == "1080p | Mozilla/5.0 (MOCK)")
+
+	def test_selectVideoQuality_should_prefer_720p_if_asked_to(self):
+		sys.modules["__main__"].settings.getSetting.return_value = "2"
+		player = YouTubePlayer()
+		
+		url = player.selectVideoQuality({37:"1080p",22:"720p",35:"SD"},{"quality":"720p"})
+		
+		assert(url == "720p | Mozilla/5.0 (MOCK)")
+
+	def test_selectVideoQuality_should_prefer_SD_if_asked_to(self):
+		sys.modules["__main__"].settings.getSetting.return_value = "2"
+		player = YouTubePlayer()
+		
+		url = player.selectVideoQuality({37:"1080p",22:"720p",35:"SD"},{"quality":"SD"})
+		
+		assert(url == "SD | Mozilla/5.0 (MOCK)")
+
 	def test_selectVideoQuality_should_choose_highest_sd_quality_if_only_multiple_sd_qualities_are_available(self):
 		sys.modules["__main__"].settings.getSetting.return_value = "1"
 		player = YouTubePlayer()
