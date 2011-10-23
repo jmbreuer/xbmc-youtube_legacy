@@ -38,7 +38,7 @@
     <setting id="username" value="logintester@tobiasussing.dk"/>
     <setting id="watch_later" value="true"/>
     <setting id="login_info" value="dd31ed15c84524b822e3430b7cb0b524c40AAAB7IjEiOiAxLCAiMyI6IDc3MTY5MTQ4MywgIjIiOiAiMDNyb0xSeW9CTWJzY1hxczJDRmYydz09IiwgIjUiOiA0NTAzNjAxNzY2NDY1NTM2LCAiNCI6ICJHQUlBIiwgIjciOiAxMzE5Mzc5MDAzLCAiNiI6IGZhbHNlLCAiOCI6IDExNTMwODYxNzc4NH0="/>
-    <setting id="oauth2_expires_at" value="1319386620.17"/>
-    <setting id="oauth2_access_token" value="ya29.AHES6ZR5sp5d-4loWL4KNwfz01dRAnSAdYAYp87TSJObbo8"/>
+    <setting id="oauth2_expires_at" value="1319395445.08"/>
+    <setting id="oauth2_access_token" value="ya29.AHES6ZRdUdWEqrTsXs3vXOrfOqJcTehy81K1XPa490TCqUtc"/>
     <setting id="oauth2_refresh_token" value="1/_BExxY7O3oB3FMECDtlcXFqxfZHyPgT5GJHsJLNMptw"/>
 </settings>
