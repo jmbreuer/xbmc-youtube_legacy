@@ -815,10 +815,14 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		sys.modules[ "__main__" ].language.return_value = "error_message"
 		patcher1 = patch("urllib2.urlopen")
 		patcher2 = patch("YouTubeCore.url2request")
+		patcher3 = patch("time.sleep")
 		patcher1.start()
 		patcher2.start()
+		patcher3.start()
 		import YouTubeCore
 		import urllib2
+		import time
+		time.sleep = Mock()
 		YouTubeCore.url2request = Mock()
 		dummy_connection = Mock()
 		read_values = ["Nothing here\n","something verify-age-actions"]
@@ -833,6 +837,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		patcher1.stop()
 		args = YouTubeCore.url2request().add_header.call_args_list
 		patcher2.stop()
+		patcher3.stop()
 		
 		assert(params["error"] == "3")
 		
@@ -842,10 +847,14 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		sys.modules[ "__main__" ].language.return_value = "error_message"
 		patcher1 = patch("urllib2.urlopen")
 		patcher2 = patch("YouTubeCore.url2request")
+		patcher3 = patch("time.sleep")
 		patcher1.start()
 		patcher2.start()
+		patcher3.start()
 		import YouTubeCore
 		import urllib2
+		import time
+		time.sleep = Mock()
 		YouTubeCore.url2request = Mock()
 		fp = Mock()
 		fp.read.return_value = "something"
@@ -863,6 +872,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		patcher1.stop()
 		args = YouTubeCore.url2request().add_header.call_args_list
 		patcher2.stop()
+		patcher3.stop()
 		
 		core._oRefreshToken.assert_any_call()
 		
