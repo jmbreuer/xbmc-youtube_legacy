@@ -6,7 +6,7 @@ from YouTubeCore import YouTubeCore
 
 class TestYouTubeCore(BaseTestCase.BaseTestCase):
 
-	def test_delete_favorite_should_call_fetchPage_with_correct_fetch_options(self):
+	def ttest_delete_favorite_should_call_fetchPage_with_correct_fetch_options(self):
 		settings = ["4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		core = YouTubeCore()
@@ -20,7 +20,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(core._fetchPage.call_count == 1)
 		core._fetchPage.assert_called_with({"link": delete_url, "api": "true", "login": "true", "auth": "true", "method": "DELETE"})
 
-	def test_remove_contact_should_call_fetchPage_with_correct_fetch_options(self):
+	def ttest_remove_contact_should_call_fetchPage_with_correct_fetch_options(self):
 		settings = ["4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		core = YouTubeCore()
@@ -34,7 +34,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(core._fetchPage.call_count == 1)
 		core._fetchPage.assert_called_with({"link": delete_url, "api": "true", "login": "true", "auth": "true", "method": "DELETE"})
 
-	def test_remove_subscription_should_call_fetchPage_with_correct_fetch_options(self):
+	def ttest_remove_subscription_should_call_fetchPage_with_correct_fetch_options(self):
 		settings = ["4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		core = YouTubeCore()
@@ -48,7 +48,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(core._fetchPage.call_count == 1)
 		core._fetchPage.assert_called_with({"link": delete_url, "api": "true", "login": "true", "auth": "true", "method": "DELETE"})
 
-	def test_add_contact_should_call_fetchPage_with_correct_fetch_options(self):
+	def ttest_add_contact_should_call_fetchPage_with_correct_fetch_options(self):
 		settings = ["4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		core = YouTubeCore()
@@ -63,7 +63,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(core._fetchPage.call_count == 1)
 		core._fetchPage.assert_called_with({"request":request,"link": delete_url, "api": "true", "login": "true", "auth": "true"})
 
-	def test_add_favorite_should_call_fetchPage_with_correct_fetch_options(self):
+	def ttest_add_favorite_should_call_fetchPage_with_correct_fetch_options(self):
 		settings = ["4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		core = YouTubeCore()
@@ -78,7 +78,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(core._fetchPage.call_count == 1)
 		core._fetchPage.assert_called_with({"request":request,"link": url, "api": "true", "login": "true", "auth": "true"})
 
-	def test_add_subscription_should_call_fetchPage_with_correct_fetch_options(self):
+	def ttest_add_subscription_should_call_fetchPage_with_correct_fetch_options(self):
 		settings = ["4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		core = YouTubeCore()
@@ -93,7 +93,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(core._fetchPage.call_count == 1)
 		core._fetchPage.assert_called_with({"request":request,"link": url, "api": "true", "login": "true", "auth": "true"})
 		
-	def test_add_playlist_should_call_fetchPage_with_correct_fetch_options(self):
+	def ttest_add_playlist_should_call_fetchPage_with_correct_fetch_options(self):
 		settings = ["4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		core = YouTubeCore()
@@ -108,7 +108,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(core._fetchPage.call_count == 1)
 		core._fetchPage.assert_called_with({"request":request,"link": url, "api": "true", "login": "true", "auth": "true"})
 
-	def test_del_playlist_should_call_fetchPage_with_correct_fetch_options(self):
+	def ttest_del_playlist_should_call_fetchPage_with_correct_fetch_options(self):
 		settings = ["4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		core = YouTubeCore()
@@ -122,7 +122,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(core._fetchPage.call_count == 1)
 		core._fetchPage.assert_called_with({"link": url, "api": "true", "login": "true", "auth": "true","method":"DELETE"})
 
-	def test_add_to_playlist_should_call_fetchPage_with_correct_fetch_options(self):
+	def ttest_add_to_playlist_should_call_fetchPage_with_correct_fetch_options(self):
 		settings = ["4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		core = YouTubeCore()
@@ -137,7 +137,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(core._fetchPage.call_count == 1)
 		core._fetchPage.assert_called_with({"request":request,"link": url, "api": "true", "login": "true", "auth": "true"})
 
-	def test_remove_from_playlist_should_call_fetchPage_with_correct_fetch_options(self):
+	def ttest_remove_from_playlist_should_call_fetchPage_with_correct_fetch_options(self):
 		settings = ["4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		core = YouTubeCore()
@@ -151,7 +151,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(core._fetchPage.call_count == 1)
 		core._fetchPage.assert_called_with({"link": url, "api": "true", "login": "true", "auth": "true","method":"DELETE"})
 
-	def test_getFolderInfo_should_use_getElementsByTagName_to_look_for_link_and_entries(self):
+	def ttest_getFolderInfo_should_use_getElementsByTagName_to_look_for_link_and_entries(self):
 		settings = ["4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		patcher = patch("xml.dom.minidom.parseString")
@@ -168,7 +168,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(calls[0][0][0] == "link")
 		assert(calls[1][0][0] == "entry")
 
-	def test_getFolderInfo_should_search_links_relation_attribute_for_multiple_pages(self):
+	def ttest_getFolderInfo_should_search_links_relation_attribute_for_multiple_pages(self):
 		settings = ["4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		patcher = patch("xml.dom.minidom.parseString")
@@ -188,7 +188,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		patcher.stop("")
 		sys.modules["__main__"].utils.addNextFolder.assert_called_with([], {})
 	
-	def test_getFolderInfo_should_find_edit_id_in_xml_structure_if_id_tag_is_present(self):
+	def ttest_getFolderInfo_should_find_edit_id_in_xml_structure_if_id_tag_is_present(self):
 		settings = ["4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		input = self.readTestInput("getFolderInfoPlaylistTest.xml", False)
@@ -199,7 +199,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(result[0]["editid"] == "some_playlist_id")
 
 
-	def test_getFolderInfo_should_set_item_params_correctly_for_contacts_feed(self):
+	def ttest_getFolderInfo_should_set_item_params_correctly_for_contacts_feed(self):
 		settings = ["4","3" ]
 		sys.modules["__main__"].storage.retrieve.return_value = "some_thumbnail"
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
@@ -216,7 +216,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(result[0]["Title"] == "some_other_user")
 		assert(result[0]["folder"] == "true")
 
-	def test_getFolderInfo_should_set_item_params_correctly_for_subscriptions_feed(self):
+	def ttest_getFolderInfo_should_set_item_params_correctly_for_subscriptions_feed(self):
 		settings = ["4","3" ]
 		sys.modules["__main__"].storage.retrieve.return_value = "some_thumbnail"
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
@@ -231,7 +231,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(result[0]["channel"] == "GoogleTechTalks")
 		assert(result[0]["Title"] == "GoogleTechTalks")
 		
-	def test_getFolderInfo_should_set_item_params_correctly_for_playlist_feed(self):
+	def ttest_getFolderInfo_should_set_item_params_correctly_for_playlist_feed(self):
 		settings = ["4","3" ]
 		sys.modules["__main__"].storage.retrieve.return_value = "some_thumbnail"
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
@@ -247,7 +247,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(result[0]["user_feed"] == "playlist")
 		assert(result[0]["Title"] == "Stand back I'm going to try Science!")
 
-	def test_getFolderInfo_should_call_storage_retrieve_to_find_thumbnail(self):
+	def ttest_getFolderInfo_should_call_storage_retrieve_to_find_thumbnail(self):
 		settings = ["4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		input = self.readTestInput("getFolderInfoPlaylistTest.xml", False)
@@ -257,7 +257,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 
 		assert(sys.modules["__main__"].storage.retrieve.call_count == 1)
 	
-	def test_getFolderInfo_should_call_utils_addNextFolder_to_set_default_next_folder_on_feed(self):
+	def ttest_getFolderInfo_should_call_utils_addNextFolder_to_set_default_next_folder_on_feed(self):
 		settings = ["4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		patcher = patch("xml.dom.minidom.parseString")
@@ -277,7 +277,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		patcher.stop("")
 		sys.modules["__main__"].utils.addNextFolder.assert_called_with([], {})
 		
-	def test_getBatchDetailsOverride_should_call_getBatchDetails_with_list_of_video_ids(self):
+	def ttest_getBatchDetailsOverride_should_call_getBatchDetails_with_list_of_video_ids(self):
 		settings = ["4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()		
 		core = YouTubeCore()
@@ -289,7 +289,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		
 		core.getBatchDetails.assert_called_with(['some_id1', 'some_id2', 'some_id3'], {})
 
-	def test_getBatchDetailsOverride_should_override_specified_properties_in_output_from_getBatchDetails(self):
+	def ttest_getBatchDetailsOverride_should_override_specified_properties_in_output_from_getBatchDetails(self):
 		settings = ["4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()		
 		core = YouTubeCore()
@@ -303,7 +303,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(result[1]["some_key2"] == "value2")
 		assert(result[2]["some_key1"] == "value1")
 
-	def test_getBatchDetailsThumbnails_should_call_getBatchDetails_with_list_of_video_ids(self):
+	def ttest_getBatchDetailsThumbnails_should_call_getBatchDetails_with_list_of_video_ids(self):
 		settings = ["4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()		
 		core = YouTubeCore()
@@ -315,7 +315,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		
 		core.getBatchDetails.assert_called_with(['some_id3', 'some_id2', 'some_id1'], {})
 		
-	def test_getBatchDetailsThumbnails_should_override_thumbnails_in_output_from_getBatchDetails(self):
+	def ttest_getBatchDetailsThumbnails_should_override_thumbnails_in_output_from_getBatchDetails(self):
 		settings = ["4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()		
 		core = YouTubeCore()
@@ -329,7 +329,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(result[1]["thumbnail"] == "some_thumb2")
 		assert(result[2]["thumbnail"] == "some_thumb1")
 		
-	def test_getBatchDetailsThumbnails_should_fill_out_missing_videos_in_collection_from_getBatchDetails_to_maintain_collection_size(self):
+	def ttest_getBatchDetailsThumbnails_should_fill_out_missing_videos_in_collection_from_getBatchDetails_to_maintain_collection_size(self):
 		settings = ["4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()		
 		core = YouTubeCore()
@@ -343,7 +343,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(result[1]["thumbnail"] == "some_thumb2")
 		assert(result[2]["videoid"] == "false")
 
-	def test_getBatchDetailsOverride_should_fill_out_missing_videos_in_collection_from_getBatchDetails_to_maintain_collection_size(self):
+	def ttest_getBatchDetailsOverride_should_fill_out_missing_videos_in_collection_from_getBatchDetails_to_maintain_collection_size(self):
 		settings = ["4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()		
 		core = YouTubeCore()
@@ -357,7 +357,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(result[1]["some_key2"] == "value2")
 		assert(result[2]["videoid"] == "false")
 		
-	def test_getBatchDetails_should_call_cache_getMulti_before_hitting_youtube(self):
+	def ttest_getBatchDetails_should_call_cache_getMulti_before_hitting_youtube(self):
 		settings = ["4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()		
 		core = YouTubeCore()
@@ -367,7 +367,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		
 		sys.modules["__main__"].cache.getMulti.assert_called_with('videoidcache', [])
 
-	def test_getBatchDetails_should_not_request_video_information_for_cached_videos(self):
+	def ttest_getBatchDetails_should_not_request_video_information_for_cached_videos(self):
 		settings = ["4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()		
 		core = YouTubeCore()
@@ -383,7 +383,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(request.find("some_id_1") < 0)
 		assert(request.find("some_id_5") < 0)
 	
-	def test_getBatchDetails_should_at_most_request_50_videos_in_one_call(self):
+	def ttest_getBatchDetails_should_at_most_request_50_videos_in_one_call(self):
 		settings = ["4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()		
 		core = YouTubeCore()
@@ -406,7 +406,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(request.find("some_id_1") > 0)
 		assert(request.find("some_id_50") > 0)
 
-	def test_getBatchDetails_should_search_result_for_response_status_code(self):
+	def ttest_getBatchDetails_should_search_result_for_response_status_code(self):
 		settings = ["4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()		
 		core = YouTubeCore()
@@ -426,7 +426,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		
 		sys.modules["__main__"].common.parseDOM.assert_called_with("","batch:status",ret="code")
 
-	def test_getBatchDetails_should_sleep_for_5_seconds_if_youtube_returns_error(self):
+	def ttest_getBatchDetails_should_sleep_for_5_seconds_if_youtube_returns_error(self):
 		settings = ["4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		patcher = patch("time.sleep")
@@ -453,7 +453,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		patcher.stop()
 
 
-	def test_getBatchDetails_should_call_get_video_info_on_result(self):
+	def ttest_getBatchDetails_should_call_get_video_info_on_result(self):
 		settings = ["4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()		
 		core = YouTubeCore()
@@ -467,7 +467,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		
 		core.getVideoInfo.assert_called_with("some_content",{"param":"some_params"})
 		
-	def test_getBatchDetails_should_handle_collection_sizes_above_50(self):
+	def ttest_getBatchDetails_should_handle_collection_sizes_above_50(self):
 		settings = ["4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()		
 		core = YouTubeCore()
@@ -487,7 +487,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		
 		assert(core._fetchPage.call_count == 2)
 			
-	def test_fetchPage_should_return_error_status_and_empty_content_if_no_params_are_provided(self):
+	def ttest_fetchPage_should_return_error_status_and_empty_content_if_no_params_are_provided(self):
 		settings = ["4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		patcher = patch("urllib2.urlopen")
@@ -505,7 +505,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		
 		assert(ret['status'] == 500 and ret['content'] == "")
 		
-	def test_fetchPage_should_call_getAuth_to_fetch_oauth_token_if_auth_is_in_params_collection(self):
+	def ttest_fetchPage_should_call_getAuth_to_fetch_oauth_token_if_auth_is_in_params_collection(self):
 		settings = ["my_auth","4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		patcher = patch("urllib2.urlopen")
@@ -524,7 +524,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		patcher.stop()
 		core._getAuth.assert_called_with()
 
-	def test_fetchPage_should_call_getSettings_if_to_fetch_oauth_token_if_auth_is_in_params_collection(self):
+	def ttest_fetchPage_should_call_getSettings_if_to_fetch_oauth_token_if_auth_is_in_params_collection(self):
 		settings = ["my_auth","4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		patcher = patch("urllib2.urlopen")
@@ -543,7 +543,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		patcher.stop()
 		sys.modules[ "__main__" ].settings.getSetting.assert_any_call("oauth2_access_token")
 	
-	def test_fetchPage_should_give_up_after_3_tries(self):
+	def ttest_fetchPage_should_give_up_after_3_tries(self):
 		settings = ["my_auth","4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		core = YouTubeCore()
@@ -553,7 +553,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		
 		sys.modules[ "__main__" ].common.log.assert_called_with("giving up ")
 	
-	def test_fetchPage_should_call_urllib_add_header_id_url_data_is_in_params_collection(self):
+	def ttest_fetchPage_should_call_urllib_add_header_id_url_data_is_in_params_collection(self):
 		settings = ["my_auth","4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		patcher1 = patch("urllib2.urlopen")
@@ -582,7 +582,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(dummy_request.add_header.call_args[0][1] == 'GoogleLogin auth=my_auth')
 		assert(dummy_request.add_header.call_args[0][0] == 'Authorization')
 	
-	def test_fetchPage_should_set_request_method_to_get_if_request_is_not_in_params_collection(self):
+	def ttest_fetchPage_should_set_request_method_to_get_if_request_is_not_in_params_collection(self):
 		settings = ["my_auth","4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		patcher1 = patch("urllib2.urlopen")
@@ -607,7 +607,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		patcher2.stop()
 		assert(args[0][1] == "GET")
 	
-	def test_fetchPage_should_append_GdataApi_headers_if_request_is_set(self):
+	def ttest_fetchPage_should_append_GdataApi_headers_if_request_is_set(self):
 		settings = ["my_auth","4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		patcher1 = patch("urllib2.urlopen")
@@ -639,7 +639,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(dummy_request.add_header.call_args[0][1] == 'GoogleLogin auth=my_auth')
 		assert(dummy_request.add_header.call_args[0][0] == 'Authorization')
 			
-	def test_fetchPage_should_append_api_key_to_headers_if_api_is_in_params(self):
+	def ttest_fetchPage_should_append_api_key_to_headers_if_api_is_in_params(self):
 		settings = ["my_auth","4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		patcher1 = patch("urllib2.urlopen")
@@ -669,7 +669,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(args[1][0][0] == "X-GData-Key")
 		assert(args[1][0][1] == "key=MYKEY")
 
-	def test_fetchPage_should_append_user_agent_and_no_language_cookie_to_headers_if_api_is_not_in_params(self):
+	def ttest_fetchPage_should_append_user_agent_and_no_language_cookie_to_headers_if_api_is_not_in_params(self):
 		settings = ["my_auth","4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		patcher1 = patch("urllib2.urlopen")
@@ -698,7 +698,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(args[1][0][0] == 'Cookie')
 		assert(args[1][0][1] == 'PREF=f1=50000000&hl=en')
 	
-	def test_fetchPage_should_return_error_message_if_login_is_in_params_collection_and_plugin_is_missing_login_info(self):
+	def ttest_fetchPage_should_return_error_message_if_login_is_in_params_collection_and_plugin_is_missing_login_info(self):
 		settings = ["","","4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		sys.modules[ "__main__" ].language.return_value = "error_message"
@@ -725,7 +725,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(ret["content"] == "error_message")
 		sys.modules[ "__main__" ].language.assert_called_with(30622)
 	
-	def test_fetchPage_should_fetch_token_from_settings_if_login_is_in_params(self):
+	def ttest_fetchPage_should_fetch_token_from_settings_if_login_is_in_params(self):
 		settings = ["my_token","my_token","my_token","my_token","my_token","user","pass","4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		sys.modules[ "__main__" ].language.return_value = "error_message"
@@ -752,7 +752,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		sys.modules[ "__main__" ].settings.getSetting.assert_called_with("login_info")
 		
 	
-	def test_fetchPage_should_append_login_token_to_request_headers_if_login_is_in_params(self):
+	def ttest_fetchPage_should_append_login_token_to_request_headers_if_login_is_in_params(self):
 		settings = ["my_token","my_token","my_token","my_token","my_token","user","pass","4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		sys.modules[ "__main__" ].language.return_value = "error_message"
@@ -780,7 +780,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(args[2][0][0] == "Cookie")
 		assert(args[2][0][1] == 'LOGIN_INFO=my_token')
 
-	def test_fetchPage_should_call_retry_if_youtube_ask_user_to_verify_age(self):
+	def ttest_fetchPage_should_call_retry_if_youtube_ask_user_to_verify_age(self):
 		settings = ["my_token","my_token","my_token","my_token","my_token","user","pass","4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		sys.modules[ "__main__" ].language.return_value = "error_message"
@@ -808,8 +808,35 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		patcher2.stop()
 		
 		assert(dummy_connection.read.call_count == 2)
+	
+	def test_fetchPage_should_retry_on_URLError(self):
+		settings = ["my_token","my_token","my_token","my_token","my_token","user","pass","4","3" ]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
+		sys.modules[ "__main__" ].language.return_value = "error_message"
+		patcher1 = patch("urllib2.urlopen")
+		patcher2 = patch("YouTubeCore.url2request")
+		patcher1.start()
+		patcher2.start()
+		import YouTubeCore
+		import urllib2
+		YouTubeCore.url2request = Mock()
+		dummy_connection = Mock()
+		read_values = ["Nothing here\n","something verify-age-actions"]
+		dummy_connection.read.side_effect = urllib2.URLError("Boom")
+		patcher1(urllib2.urlopen).return_value = dummy_connection
+		core = YouTubeCore.YouTubeCore()
+		core._getAuth = Mock()
 		
-	def test_fetchPage_should_return_content_of_link_and_proper_status_code(self):
+		params = {"login":"","link":"www.somelink.dk"}
+		ret = core._fetchPage(params)
+		
+		patcher1.stop()
+		args = YouTubeCore.url2request().add_header.call_args_list
+		patcher2.stop()
+		
+		assert(dummy_connection.read.call_count == 2)
+		
+	def ttest_fetchPage_should_return_content_of_link_and_proper_status_code(self):
 		settings = ["4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		patcher = patch("urllib2.urlopen")
@@ -827,7 +854,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		
 		assert(ret['status'] == 200 and ret['content'] == "Nothing here\n")
 		
-	def test_findErrors_should_use_parseDOM_to_look_for_errormsg_tag(self):
+	def ttest_findErrors_should_use_parseDOM_to_look_for_errormsg_tag(self):
 		settings = [ "3"]
 		input = { "content": "some_content"}
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
@@ -840,7 +867,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		sys.modules[ "__main__" ].common.parseDOM.assert_called_with(input["content"], 'div', attrs={ "class": "errormsg" })
 		assert(result == "Mock error")
 
-	def test_findErrors_should_use_parseDOM_to_look_for_error_smaller(self):
+	def ttest_findErrors_should_use_parseDOM_to_look_for_error_smaller(self):
 		settings = [ "3"]
 		input = { "content": "some_content"}
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
@@ -853,7 +880,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		sys.modules[ "__main__" ].common.parseDOM.assert_called_with(input["content"], 'div', attrs={ "class": "error smaller" })
 		assert(result == "Mock error")
 		
-	def test_findErrors_should_use_parseDOM_to_look_for_unavailable_message(self):
+	def ttest_findErrors_should_use_parseDOM_to_look_for_unavailable_message(self):
 		settings = [ "3"]
 		input = { "content": "some_content"}
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
@@ -866,7 +893,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		sys.modules[ "__main__" ].common.parseDOM.assert_called_with(input["content"], 'div', attrs={ "id": "unavailable-message" })
 		assert(result == "Mock error")
 		
-	def test_findErrors_should_use_parseDOM_to_look_for_error_if_content_contains_yt_quota(self):
+	def ttest_findErrors_should_use_parseDOM_to_look_for_error_if_content_contains_yt_quota(self):
 		settings = [ "3"]
 		input = { "content": "some_content yt:quota"}
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
@@ -881,7 +908,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		sys.modules[ "__main__" ].common.parseDOM.assert_called_with([], 'code')
 		assert(result == "Mock error")
 
-	def test_findErrors_should_return_if_error_found(self):
+	def ttest_findErrors_should_return_if_error_found(self):
 		settings = [ "3"]
 		input = { "content": "some_content"}
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
@@ -893,7 +920,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		
 		assert(result == "Mock error")
 	
-	def test_verifyAge_should_verify(self):
+	def ttest_verifyAge_should_verify(self):
 		settings = [ "","some_token","3"]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		
@@ -907,7 +934,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		print repr(core._fetchPage.call_args_list)
                 core._fetchPage.assert_any_call({'login': 'true', 'link': 'http://www.youtube.com//verifyAgeMock', 'url_data': {'next_url': 'http://next.com', 'set_racy': 'very racy', 'session_token': 'MY_token'}, 'no_verify_age': 'true'})
 
-	def test_verifyAge_should_return_if_done(self):
+	def ttest_verifyAge_should_return_if_done(self):
 		settings = [ "","some_token","3"]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		
@@ -921,7 +948,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
                 core._fetchPage.assert_any_call({'login': 'true', 'link': 'http://verify.age', 'no_verify_age': 'true'})
 		assert(result == { "status":303,"content":'PLAYER_CONFIG' })
 
-	def test_verifyAge_should_try_assuming_it_is_logged_in(self):
+	def ttest_verifyAge_should_try_assuming_it_is_logged_in(self):
 		settings = [ "","some_token","3"]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		
@@ -935,7 +962,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
                 core._fetchPage.assert_any_call({'login': 'true', 'link': 'http://verify.age', 'no_verify_age': 'true'})
                 core._fetchPage.assert_any_call({'login': 'true', 'link': 'http://mock.link', 'no_verify_age': 'true'})
 
-	def test_oRefreshToken_should_reset_access_token_before_calling_fetch_page(self):
+	def ttest_oRefreshToken_should_reset_access_token_before_calling_fetch_page(self):
 		settings = [ "","some_token","3"]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		core = YouTubeCore()
@@ -946,7 +973,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		
 		sys.modules[ "__main__" ].settings.setSetting.assert_called_with("oauth2_access_token","")
 
-	def test_oRefreshToken_should_fetch_refresh_token_from_settings(self):
+	def ttest_oRefreshToken_should_fetch_refresh_token_from_settings(self):
 		settings = [ "","3"]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		core = YouTubeCore()
@@ -956,7 +983,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		
 		sys.modules[ "__main__" ].settings.getSetting.assert_called_with("oauth2_refresh_token")
 
-	def test_oRefreshToken_should_fetchPage_with_correct_params(self):
+	def ttest_oRefreshToken_should_fetchPage_with_correct_params(self):
 		settings = [ "","some_token","3"]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		core = YouTubeCore()
@@ -968,7 +995,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(core._fetchPage.call_args[0][0]["link"] == "https://accounts.google.com/o/oauth2/token")
 		assert(core._fetchPage.call_args[0][0].has_key("url_data"))
 
-	def test_oRefreshToken_should_pars_token_json_structure_correctly(self):
+	def ttest_oRefreshToken_should_pars_token_json_structure_correctly(self):
                 patcher = patch("time.time")
                 patcher.start()
                 import time
@@ -989,7 +1016,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(calls[1][0] == ("oauth2_access_token", "") )
 		assert(calls[2][0] == ("oauth2_expires_at", "7200") )
 
-	def test_oRefreshToken_should_log_error_if_invalid_json_structure_is_returned(self):
+	def ttest_oRefreshToken_should_log_error_if_invalid_json_structure_is_returned(self):
 		settings = [ "","some_token","3"]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		core = YouTubeCore()
@@ -1001,7 +1028,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		
 		sys.modules[ "__main__" ].common.log.assert_called_with("Except: " + repr(output))
 
-	def test_oRefreshToken_should_set_access_token_if_found(self):
+	def ttest_oRefreshToken_should_set_access_token_if_found(self):
                 patcher = patch("time.time")
                 patcher.start()
                 import time
@@ -1022,7 +1049,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(calls[1][0] == ("oauth2_access_token", "super_secrect_token") )
 		assert(calls[2][0] == ("oauth2_expires_at", "7200") )
 
-	def test_getAuth_should_check_token_expiration_before_calling_refresh_token(self):
+	def ttest_getAuth_should_check_token_expiration_before_calling_refresh_token(self):
 		settings = [ "","some_token","3249320480292","3249320480292","3"]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		core = YouTubeCore()
@@ -1032,7 +1059,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		
 		sys.modules[ "__main__" ].settings.getSetting.assert_any_call("oauth2_expires_at")
 	
-	def test_getAuth_should_call_oRefreshToken_to_refresh_token(self):
+	def ttest_getAuth_should_call_oRefreshToken_to_refresh_token(self):
 		settings = [ "","some_token","2", "2","3"]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		core = YouTubeCore()
@@ -1042,7 +1069,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		
 		core._oRefreshToken.assert_called_with()
 	
-	def test_getAuth_should_fetch_token_from_settings(self):
+	def ttest_getAuth_should_fetch_token_from_settings(self):
 		settings = [ "", "","32342498270492","32342498270492","3"]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		core = YouTubeCore()
@@ -1065,7 +1092,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		sys.modules[ "__main__" ].login.login.assert_called_with()
 		sys.modules[ "__main__" ].settings.getSetting.assert_called_with("oauth2_access_token")
 
-	def test_getNodeAttribute_should_parse_node_structure_correctly(self):
+	def ttest_getNodeAttribute_should_parse_node_structure_correctly(self):
 		settings = ["3"]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		core = YouTubeCore()
@@ -1079,7 +1106,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		node.getElementsByTagName().item().hasAttribute.assert_called_with("attribute")
 		node.getElementsByTagName().item().getAttribute.assert_called_with("attribute")
 		
-	def test_getNodeValue_should_parse_node_structure_correctly(self):
+	def ttest_getNodeValue_should_parse_node_structure_correctly(self):
 		settings = ["3"]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		core = YouTubeCore()
@@ -1093,7 +1120,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		node.getElementsByTagName().item.assert_called_with(0)
 		assert(result == 5)
 		
-	def test_getVideoInfo_should_call_minidom_getElementsByTagName_to_find_links(self):
+	def ttest_getVideoInfo_should_call_minidom_getElementsByTagName_to_find_links(self):
 		settings = ["4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		patcher = patch("xml.dom.minidom.parseString")
@@ -1111,7 +1138,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		args = dom.getElementsByTagName.call_args_list
 		assert(args[0][0][0] == "link")
 
-	def test_getVideoInfo_should_call_minidom_getElementsByTagName_to_find_entries(self):
+	def ttest_getVideoInfo_should_call_minidom_getElementsByTagName_to_find_entries(self):
 		settings = ["4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		patcher = patch("xml.dom.minidom.parseString")
@@ -1130,7 +1157,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(args[1][0][0] == "entry")
 		assert(args[2][0][0] == "atom:entry")
 
-	def test_getVideoInfo_should_search_links_for_next_page_indicator(self):
+	def ttest_getVideoInfo_should_search_links_for_next_page_indicator(self):
 		settings = ["4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		patcher = patch("xml.dom.minidom.parseString")
@@ -1177,7 +1204,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		attributes = ["","","","","","","","","","","","","","1","2.0","1","","","/some_video_id"] 
 		self.my_core._getNodeAttribute.side_effect = lambda x ="",y = "",z = "", v = "": attributes.pop() 
 		
-	def test_getVideoInfo_should_call_getNodeValue_to_get_video_id(self):
+	def ttest_getVideoInfo_should_call_getNodeValue_to_get_video_id(self):
 		self.mock_setup_getVideoInfo_full_run()
 		
 		result = self.my_core.getVideoInfo("xml", {})
@@ -1187,7 +1214,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(args[0][0][1] == "yt:videoid")
 		assert(args[0][0][2] == "false")
 
-	def test_getVideoInfo_should_call_getNodeValue_to_get_Title(self):
+	def ttest_getVideoInfo_should_call_getNodeValue_to_get_Title(self):
 		self.mock_setup_getVideoInfo_full_run()
 		
 		result = self.my_core.getVideoInfo("xml", {})
@@ -1197,7 +1224,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(args[2][0][1] == "media:title")
 		assert(args[2][0][2] == "Unknown Title")
 
-	def test_getVideoInfo_should_call_getNodeValue_to_get_Plot(self):
+	def ttest_getVideoInfo_should_call_getNodeValue_to_get_Plot(self):
 		self.mock_setup_getVideoInfo_full_run()
 		
 		result = self.my_core.getVideoInfo("xml", {})
@@ -1207,7 +1234,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(args[3][0][1] == 'media:description')
 		assert(args[3][0][2] == "Unknown Plot")
 
-	def test_getVideoInfo_should_call_getNodeValue_to_get_Date(self):
+	def ttest_getVideoInfo_should_call_getNodeValue_to_get_Date(self):
 		self.mock_setup_getVideoInfo_full_run()
 		
 		result = self.my_core.getVideoInfo("xml", {})
@@ -1217,7 +1244,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(args[4][0][1] == 'published')
 		assert(args[4][0][2] == "Unknown Date")
 
-	def test_getVideoInfo_should_call_getNodeValue_to_get_user(self):
+	def ttest_getVideoInfo_should_call_getNodeValue_to_get_user(self):
 		self.mock_setup_getVideoInfo_full_run()
 		
 		result = self.my_core.getVideoInfo("xml", {})
@@ -1227,7 +1254,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(args[5][0][1] == 'name')
 		assert(args[5][0][2] == "Unknown Name")
 
-	def test_getVideoInfo_should_call_getNodeValue_to_get_Studio(self):
+	def ttest_getVideoInfo_should_call_getNodeValue_to_get_Studio(self):
 		self.mock_setup_getVideoInfo_full_run()
 		
 		result = self.my_core.getVideoInfo("xml", {})
@@ -1239,7 +1266,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(args[7][0][1] == 'name')
 		assert(args[7][0][2] == "Unknown Uploader")
 		
-	def test_getVideoInfo_should_call_getNodeAttribute_to_get_Duration(self):
+	def ttest_getVideoInfo_should_call_getNodeAttribute_to_get_Duration(self):
 		self.mock_setup_getVideoInfo_full_run()
 		
 		result = self.my_core.getVideoInfo("xml", {})
@@ -1250,7 +1277,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(args[3][0][2] == "seconds")
 		assert(args[3][0][3] == "0")
 
-	def test_getVideoInfo_should_call_getNodeAttribute_to_get_Rating(self):
+	def ttest_getVideoInfo_should_call_getNodeAttribute_to_get_Rating(self):
 		self.mock_setup_getVideoInfo_full_run()
 		
 		result = self.my_core.getVideoInfo("xml", {})
@@ -1261,7 +1288,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(args[4][0][2] == "average")
 		assert(args[4][0][3] == "0.0")
 
-	def test_getVideoInfo_should_call_getNodeAttribute_to_get_view_Count(self):
+	def ttest_getVideoInfo_should_call_getNodeAttribute_to_get_view_Count(self):
 		self.mock_setup_getVideoInfo_full_run()
 		
 		result = self.my_core.getVideoInfo("xml", {})
@@ -1272,7 +1299,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(args[5][0][2] == "viewCount")
 		assert(args[5][0][3] == "0")
 
-	def test_getVideoInfo_should_call_getNodeValue_to_get_Genre(self):
+	def ttest_getVideoInfo_should_call_getNodeValue_to_get_Genre(self):
 		self.mock_setup_getVideoInfo_full_run()
 		
 		result = self.my_core.getVideoInfo("xml", {})
@@ -1283,7 +1310,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(args[6][0][2] == "label")
 		assert(args[6][0][3] == "Unknown Genre")
 
-	def test_getVideoInfo_should_add_date_to_plot(self):
+	def ttest_getVideoInfo_should_add_date_to_plot(self):
 		self.mock_setup_getVideoInfo_full_run()
 		
 		result = self.my_core.getVideoInfo("xml", {})
@@ -1293,7 +1320,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(result[0]["Plot"].find("2011-09-11 12:00:00") > 0)
 		
 
-	def test_getVideoInfo_should_add_view_count_to_plot(self):
+	def ttest_getVideoInfo_should_add_view_count_to_plot(self):
 		self.mock_setup_getVideoInfo_full_run()
 		
 		result = self.my_core.getVideoInfo("xml", {})
@@ -1302,7 +1329,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		args = self.my_core._getNodeAttribute.call_args_list
 		assert(result[0]["Plot"].find("View count: 1") > 0)
 
-	def test_getVideoInfo_should_call_getNodeValue_to_search_for_edit_id(self):
+	def ttest_getVideoInfo_should_call_getNodeValue_to_search_for_edit_id(self):
 		self.mock_setup_getVideoInfo_full_run()
 		
 		result = self.my_core.getVideoInfo("xml", {})
@@ -1316,7 +1343,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(args[1][0][0] == "href")
 		assert(result[0]["editid"] == "some_id")
 		
-	def test_getVideoInfo_should_call_storage_retrieveValue_to_get_watch_status(self):
+	def ttest_getVideoInfo_should_call_storage_retrieveValue_to_get_watch_status(self):
 		self.mock_setup_getVideoInfo_full_run()
 		
 		result = self.my_core.getVideoInfo("xml", {})
@@ -1325,7 +1352,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 
 		sys.modules["__main__"].storage.retrieveValue.assert_called_with("vidstatus-false")
 		
-	def test_getVideoInfo_should_parse_youtube_xml(self):
+	def ttest_getVideoInfo_should_parse_youtube_xml(self):
 		settings = ["4","3" ]
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
 		sys.modules[ "__main__" ].storage.retrieveValue.return_value = "7"
