@@ -4,7 +4,7 @@ import nose
 
 class TestYouTubeTrailersScraper(BaseTestCase.BaseTestCase):
 	def test_plugin_should_scrape_live_list_correctly(self):
-		self.navigation.listMenu({"feed":"feed_live", "folder":"true", "path":"/root/explore/movies"})
+		self.navigation.listMenu({"feed":"feed_live", "path":"/root/explore/movies"})
 
 		self.assert_directory_count_greater_than_or_equals(10)
 		self.assert_directory_count_less_than_or_equals(51)

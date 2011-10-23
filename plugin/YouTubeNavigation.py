@@ -199,7 +199,7 @@ class YouTubeNavigation():
 			(results , status) = self.feeds.list(params)
 		
 		if status == 200:
-			if get("folder"):
+			if get("folder", "false") != "false":
 				self.parseFolderList(params, results)
 			else:
 				self.parseVideoList(params, results)
