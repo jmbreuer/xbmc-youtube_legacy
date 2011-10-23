@@ -321,7 +321,7 @@ class YouTubePlayer():
 	# ================================ Video Playback ====================================
 	
 	def playVideo(self, params = {}):
-                #params["proxy"] = "http://15aa51.info/browse.php?u="
+		#params["proxy"] = "http://15aa51.info/browse.php?u="
 		self.common.log(repr(params), 3)
 		get = params.get
 		
@@ -581,7 +581,7 @@ class YouTubePlayer():
 			list.append((45,"720p"))	
 		
 		if link(35): 
-			list.append((18,"480p"))
+			list.append((35,"480p"))
 		elif link(44): 
 			list.append((44,"480p"))
 
