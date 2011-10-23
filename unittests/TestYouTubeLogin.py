@@ -239,7 +239,6 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
 		
 		args = sys.modules["__main__"].settings.setSetting.call_args_list
 		print repr(args)
-		print repr(args[1])
 		assert(args[3][0][0] == "oauth2_expires_at")
 		assert(len(args[3][0][1]) > 1)
 		assert(args[4][0][0] == "oauth2_access_token")
