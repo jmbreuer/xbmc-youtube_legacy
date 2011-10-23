@@ -395,7 +395,7 @@ class YouTubeCore():
 		if get("auth", "false") == "true":
 			self.common.log("got auth")
 			if self._getAuth():
-				request.add_header('Authorization', 'GoogleLogin auth=' + self.settings.getSetting("auth"))
+				request.add_header('Authorization', 'GoogleLogin auth=' + self.settings.getSetting("oauth2_access_token"))
 			else:
 				self.common.log("couldn't get login token")
 		
@@ -409,7 +409,7 @@ class YouTubeCore():
 			ret_obj["header"] = str(con.info())
 			con.close()
 
-			self.common.log("Result: %s " % repr(ret_obj), 5)
+			self.common.log("Result: %s " % repr(ret_obj), 9)
 			# Return result if it isn't age restricted
 			if (ret_obj["content"].find("verify-actions") == -1 and ret_obj["content"].find("verify-age-actions") == -1):
 				self.common.log("done")
@@ -570,11 +570,17 @@ class YouTubeCore():
 		return False
 
 	def _getAuth(self):
-		self.common.log("Oauth expires in %s seconds"  % int( float(self.settings.getSetting("oauth2_expires_at")) - time.time() ) )
-		if float(self.settings.getSetting("oauth2_expires_at")) < time.time():
+		if self.settings.getSetting("oauth2_expires_at"):
+			expire = int( float(self.settings.getSetting("oauth2_expires_at")) - time.time() )
+		else:
+			expire = 0
+		self.common.log("Oauth expires in %s seconds"  % expire)
+
+		if float(expire) < time.time():
 			self._oRefreshToken()
 
 		auth = self.settings.getSetting("oauth2_access_token")
+		self.common.log("oauth2_access_token: " + auth, 5)
 
 		if (auth):
 			self.common.log("returning stored auth")

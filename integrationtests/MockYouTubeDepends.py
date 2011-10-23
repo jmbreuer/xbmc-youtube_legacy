@@ -1,7 +1,8 @@
+import sys
 class MockYouTubeDepends:
 	
 	def mock(self):
-		import sys, string
+		import string, platform
 		from mock import Mock
 		sys.path.append("../plugin/")
 		#import DialogDownloadProgress
@@ -10,7 +11,15 @@ class MockYouTubeDepends:
 		#Setup default test various values 
 		sys.modules[ "__main__" ].plugin = "YouTube - Integrationtest"
 		sys.modules[ "__main__" ].dbg = True
-		sys.modules[ "__main__" ].dbglevel = 10
+		try:
+			plat = platform.uname()
+		except:
+			plat = ('', '', '', '', '', '')
+
+		if plat[0] == "FreeBSD":
+			sys.modules[ "__main__" ].dbglevel = 10
+		else:
+			sys.modules[ "__main__" ].dbglevel = 3
 		sys.modules[ "__main__" ].login = "" 
 		
 		sys.modules[ "__main__" ].cache = Mock()
@@ -19,7 +28,6 @@ class MockYouTubeDepends:
 		sys.modules[ "__main__" ].cache.get.return_value = ""
 	
 	def mockXBMC(self):
-		import sys
 		from mock import Mock
 		sys.path.append("../xbmc-mocks/")
 		import xbmc, xbmcaddon, xbmcgui, xbmcplugin, xbmcvfs
@@ -56,8 +64,9 @@ class MockYouTubeDepends:
 
 	
 	def log(self, description, level = 0):
-		import inspect
-		print "[%s] %s : '%s'" % ("YouTube", inspect.stack()[4][3] , description.decode("utf-8","ignore")) # 4 - 3 for TestYouTubeUserFeeds.py
+                if sys.modules[ "__main__" ].dbg and sys.modules[ "__main__" ].dbglevel > level:
+			import inspect
+			print "[%s] %s : '%s'" % ("YouTube", inspect.stack()[4][3] , description.decode("utf-8","ignore")) # 4 - 3 for TestYouTubeUserFeeds.py
 		
 	def execute(self, function, *args):
 		return function(*args)

@@ -74,13 +74,16 @@ class YouTubeLogin():
 					self.utils.showErrorMessage(self.language(30031), result, 303)
 				else:
 					self.utils.showErrorMessage(self.language(30609), result, status)
+				return (result, status)
 		
 		self.xbmc.executebuiltin( "Container.Refresh" )
 
 	def _apiLogin(self, error = 0):
 		self.common.log("errors: " + str(error))
 		
-		self.settings.setSetting('auth', "")
+		self.settings.setSetting("oauth2_expires_at", "")
+		self.settings.setSetting("oauth2_access_token", "")
+		self.settings.setSetting("oauth2_refresh_token", "")
 
 		url = "https://accounts.google.com/o/oauth2/auth?client_id=208795275779.apps.googleusercontent.com&redirect_uri=urn:ietf:wg:oauth:2.0:oob&scope=http%3A%2F%2Fgdata.youtube.com&response_type=code"
 
@@ -127,7 +130,6 @@ class YouTubeLogin():
 					self.common.log("Part D " + repr(oauth["expires_in"]))
 					self.settings.setSetting("oauth2_expires_at", str(int(oauth["expires_in"]) + time.time()) ) 
 					self.settings.setSetting("oauth2_access_token", oauth["access_token"])
-					self.settings.setSetting('auth', oauth["access_token"])
 					self.settings.setSetting("oauth2_refresh_token", oauth["refresh_token"])
 					
 					logged_in = True

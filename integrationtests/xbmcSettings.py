@@ -23,11 +23,17 @@ class xbmcSettings():
 			self.load_strings()
 		
 		if value:
-			if self.path.find("settings-logged-in") > -1 and id in self.settingsString:
+			if self.path.find("settings-logged-in") > -1:
 				org = io.open(self.path).read()
-				org = org.replace(self.settingsString[id], value)
+				if org.find(id + "\" value=\"") > -1:
+					start = org.find(id + "\" value=\"") + len("\" value=\"") + len(id)
+					org_val = org[start:org.find("\"", start)]
+					org = org.replace(org_val, value)
+				else:
+					org = org.replace("</settings>", "    <setting id=\"%s\" value=\"%s\" />\n</settings>" % ( id, value))
 				test = io.open(self.path, "w")
 				test.write(org)
+
 			self.settingsString[id] = value
 		
 		elif id in self.settingsString:
