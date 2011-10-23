@@ -331,7 +331,7 @@ class YouTubePlayer():
 			self.common.log("construct video url failed contents of video item " + repr(video))
 			self.utils.showErrorMessage(self.language(30603), video["apierror"], status)
 			return False
-
+		
 		if get("proxy", "false") == "false":
 			listitem = self.xbmcgui.ListItem(label=video['Title'], iconImage=video['thumbnail'], thumbnailImage=video['thumbnail'], path=video['video_url'])
 		else:
