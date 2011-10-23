@@ -11,6 +11,7 @@ class TestYouTubeTrailersScraper(BaseTestCase.BaseTestCase):
 		self.assert_directory_is_a_folder_list()
 		self.assert_directory_items_should_have_thumbnails()
 		self.assert_directory_items_contain("category")	
+		#assert(False)
 	
 if __name__ == "__main__":
 	nose.runmodule()
