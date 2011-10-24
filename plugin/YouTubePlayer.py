@@ -50,7 +50,7 @@ class YouTubePlayer():
 	urls['video_info'] = "http://gdata.youtube.com/feeds/api/videos/%s"
 	urls['close_caption_url'] = "http://www.youtube.com/api/timedtext?type=track&v=%s&name=%s&lang=%s"
 	urls['transcription_url'] = "http://www.youtube.com/api/timedtext?sparams=asr_langs,caps,expire,v&asr_langs=en,ja&caps=asr&expire=%s&key=yttt1&signature=%s&hl=en&type=trackformat=1&lang=en&kind=asr&name=&v=%s&tlang=en"
-	urls['annotation_url'] = "http://www.youtube.com/api/reviews/y/read2?video_id=%s"
+	urls['annotation_url'] = "http://www.youtube.com/annotations/read2?video_id=%s&feat=TC";
 	urls['remove_watch_later'] = "http://www.youtube.com/addto_ajax?action_delete_from_playlist=1"
 	
 	def __init__(self):
@@ -84,7 +84,6 @@ class YouTubePlayer():
 		result = ""
 		
 		if self.settings.getSetting("annotations") == "true" and not video.has_key("downloadPath"):
-
 			xml = self.core._fetchPage({"link": self.urls["annotation_url"] % get('videoid')})
 			if xml["status"] == 200 and xml["content"]:
 				( result, style ) = self.transformAnnotationToSSA(xml["content"])
@@ -112,6 +111,7 @@ class YouTubePlayer():
 		return False
 	
 	def getSubtitleUrl(self, video = {}):
+		self.common.log("")
 		get = video.get
 		url = ""
 		
@@ -153,6 +153,7 @@ class YouTubePlayer():
 		return url
 
 	def saveSubtitle(self, result, video = {}):
+		self.common.log("")
 		get = video.get
 		
 		filename = ''.join(c for c in video['Title'].decode("utf-8") if c not in self.utils.INVALID_CHARS) + "-[" + get('videoid') + "]" + ".ssa"
@@ -166,6 +167,7 @@ class YouTubePlayer():
 			self.xbmcvfs.rename(path, os.path.join( video["downloadPath"], filename ))
 	
 	def getTranscriptionUrl(self, video = {}):
+		self.common.log("")
 		get = video.get
 		trans_url = ""
 		if video.has_key("ttsurl"):
@@ -177,6 +179,7 @@ class YouTubePlayer():
 		return trans_url
 		
 	def transformSubtitleXMLtoSRT(self, xml):
+		self.common.log("")
 		dom = parseString(xml)
 		entries = dom.getElementsByTagName("text")
 		
@@ -206,6 +209,7 @@ class YouTubePlayer():
 		return result
 
 	def transformAnnotationToSSA(self, xml):
+		self.common.log("")
 		dom = parseString(xml)
 		entries = dom.getElementsByTagName("annotation")
 		result = ""
