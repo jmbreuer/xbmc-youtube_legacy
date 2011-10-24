@@ -1,4 +1,4 @@
-import sys, os
+import sys, os, time
 import unittest2
 import MockYouTubeDepends
 
@@ -14,8 +14,8 @@ else:
 		os.remove("./tmp/" + old_file)
 
 class BaseTestCase(unittest2.TestCase):
-	
 	def setUp(self):
+		time.sleep(10)
 		MockYouTubeDepends.MockYouTubeDepends().mock()
 		MockYouTubeDepends.MockYouTubeDepends().mockXBMC()
 		self.intializePlugin()

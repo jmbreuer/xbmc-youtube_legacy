@@ -185,7 +185,7 @@ class YouTubeLogin():
 			if len(newurl) > 0:
 				( galx, url_data ) = self._fillLoginInfo(ret["content"])
 				if len(galx) > 0 and len(url_data) > 0:
-					fetch_options = { "link": newurl[0], "no-language-cookie": "true", "url_data": url_data }
+					fetch_options = { "link": newurl[0], "no-language-cookie": "true", "url_data": url_data, "hidden": "true" }
 					self.common.log("Part B:" + repr(fetch_options), 10) ## WARNING, SHOWS LOGIN INFO/PASSWORD
 					continue
 			

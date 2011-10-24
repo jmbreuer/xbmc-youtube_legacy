@@ -368,7 +368,7 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
 		
 		login._fillLoginInfo.assert_called_with("somePage")
 		assert(sys.modules["__main__"].core._fetchPage.call_count == 2)
-		sys.modules["__main__"].core._fetchPage.assert_called_with({'link': 'someURL', 'no-language-cookie': 'true', 'url_data': {'some_key': 'some_value'}})
+		sys.modules["__main__"].core._fetchPage.assert_called_with({'link': 'someURL', 'no-language-cookie': 'true', 'url_data': {'some_key': 'some_value'}, "hidden": "true"})
 	
 	def test_httpLogin_should_use_parseDOM_to_check_for_new_url_redirects(self):
 		sys.modules["__main__"].core._fetchPage.return_value = {"content":"","status":200}

@@ -327,7 +327,7 @@ class YouTubeCore():
 		link = get("link")
 		ret_obj = { "status": 500, "content": ""}
 
-		if (get("url_data") or get("request")):
+		if (get("url_data") or get("request") or get("hidden")):
 			self.common.log("called for : " + repr(params['link']))
 		else:
 			self.common.log("called for : " + repr(params))
