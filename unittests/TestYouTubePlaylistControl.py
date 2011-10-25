@@ -207,7 +207,7 @@ class TestYouTubePlaylistControl(BaseTestCase.BaseTestCase):
 		sys.modules["__main__"].feeds.listAll.return_value = ("",200)
 		control = YouTubePlaylistControl()
 		
-		control.getUserFeed({})
+		control.getUserFeed({"user_feed":"favorites"})
 		
 		assert(sys.modules["__main__"].feeds.listAll.call_count == 0)
 
