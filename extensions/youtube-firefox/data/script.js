@@ -3,12 +3,6 @@
 // http://userscripts.org/scripts/show/92945 (by deepseth)
 // http://userscripts.org/scripts/show/62064 (by Wolph)
 
-/*
-  XBMC.RunPlugin(%s?path=%s&action=play_all&playlist=%s&) <- afspil playlist
-  XBMC.RunPlugin(%s?path=%s&action=play_all&shuffle=true&playlist=%s&) <- shuffle playlist
-  XBMC.RunPlugin(%s?path=%s&action=play_all&playlist=%s&videoid=%s&) <- start playlist at videoid
-  du skal kalde det der svare til run plugin dog
-*/
 xbmc_path = ""
 xbmc_url = ""
 xbmc_host = ""
@@ -38,7 +32,18 @@ function playVideoList(list){
 }
 
 function playPlaylist(list){
-    callJSONRpc("Player.Open", { item: { file: "/?path=/root/playlists&action=play_all&playlist=" + list } } )
+    file = "/?path=/root/playlists&action=play_all&playlist=" + list;
+    var id = extractVideoId(false);
+    if ( id ) {
+        file += "&videoid=" + id;
+    }
+
+    var shuffle = false;
+    if ( shuffle ) {
+        file += "&shuffle=true";
+    }
+
+    callJSONRpc("Player.Open", { item: { file: file } } );
 }
 
 function GM_xmlhttpRequest(details) {
@@ -323,7 +328,7 @@ function addPlaylistButton(menu) {
 	    }
 	    playlist.splice(0, parseInt(index) - 1);
 	}
-	if ( playlist ) {
+	if ( playlist && false ) {
 	    playVideoList(playlist.join(","));
 	} else {
 	    playlist_id = ("" + window.location).substr(("" + window.location).indexOf('list=') + 5);
