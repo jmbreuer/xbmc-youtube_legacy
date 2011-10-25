@@ -230,7 +230,7 @@ class YouTubePlayer():
 			alpha = "-1" # No background.
 		else:
 			# YouTube and SSA have inverted alphas.
-			alpha = int(float(alpha) * 100)
+			alpha = int(float(alpha) * 256)
 			alpha = hex(256 - alpha)
 			alpha = alpha[2:]
 

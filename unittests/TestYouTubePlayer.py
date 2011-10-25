@@ -305,7 +305,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		
 		color = player.transformAlpha("0.800000011921")
 		print color
-		assert(color == "b0")
+		assert(color == "34")
 
 	def test_transformColor_should_convert_white(self):
 		player = YouTubePlayer()
