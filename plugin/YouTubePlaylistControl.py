@@ -52,7 +52,10 @@ class YouTubePlaylistControl():
 			result = self.getLikedVideos(params)
 		elif get("scraper") == "music_artists":
 			result = self.getArtist(params)
-		elif get("user_feed") in ["recommended", "watch_later", "newsubscriptions", "favorites", "playlist"]:
+		elif get("playlist"):
+			params["user_feed"] = "playlist"
+			result = self.getUserFeed(params)
+		elif get("user_feed") in ["recommended", "watch_later", "newsubscriptions", "favorites"]:
 			result = self.getUserFeed(params)
 		elif get("video_list"):
 			( ytobjects, status) = self.core.getBatchDetails(get("video_list").split(","))
