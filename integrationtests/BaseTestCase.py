@@ -112,9 +112,9 @@ class BaseTestCase(unittest2.TestCase):
 		
 		for call in args:
 			url = call[1]["url"]
-			if url.find("videoid=") > 0:
+			if url.find("videoid=") > -1:
 				video = url[url.find("videoid=") + len("videoid="):]
-				if video.find("&"):
+				if video.find("&") > -1:
 					video = video[:video.find("&")]
 				
 				if video:
@@ -195,7 +195,7 @@ class BaseTestCase(unittest2.TestCase):
 				missing_count += 1
 			else:
 				value = url[url.find(param + "=") + len(param + "="):]
-				if value.find("&") > 0:
+				if value.find("&") > -1:
 					value = value[:value.find("&")]
 
 				if len(value) == 0:
@@ -238,9 +238,9 @@ class BaseTestCase(unittest2.TestCase):
 		
 		for call in args:
 			url = call[0][0]
-			if url.find("videoid=") > 0:
+			if url.find("videoid=") > -1:
 				video = url[url.find("videoid=") + len("videoid="):]
-				if video.find("&"):
+				if video.find("&") > -1:
 					video = video[:video.find("&")]
 				
 				if video:
@@ -260,16 +260,38 @@ class BaseTestCase(unittest2.TestCase):
 		
 		for call in args:
 			url = call[0][0]
-			if url.find("videoid=") > 0:
+			if url.find("videoid=") > -1:
 				video = url[url.find("videoid=") + len("videoid="):]
-				if video.find("&"):
+				if video.find("&") > -1:
 					video = video[:video.find("&")]
 				
 				if video not in video_ids:
 					video_ids.append(video)
 		
+		print repr(video_ids)
+		
 		if videoid not in video_ids:
 			print 'Expected to find %s in playlist items' % videoid
 			print "Playlist items: \r\n" + repr(args)
-			
+		
 		assert(videoid in video_ids)
+
+	def assert_playlist_videos_does_not_contain(self, videoid):
+		video_ids = []
+		args = sys.modules["__main__"].xbmc.PlayList().add.call_args_list
+		
+		for call in args:
+			url = call[0][0]
+			if url.find("videoid=") > -1:
+				video = url[url.find("videoid=") + len("videoid="):]
+				if video.find("&") > -1:
+					video = video[:video.find("&")]
+				
+				if video not in video_ids:
+					video_ids.append(video)
+		
+		if videoid in video_ids:
+			print 'Expected not to find %s in playlist items' % videoid
+			print "Playlist items: \r\n" + repr(args)
+			
+		assert(videoid not in video_ids)
