@@ -313,7 +313,7 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 		
 		result, status = self.scraper.searchDisco({"search":"some_search"})		
 		
-		self.scraper.createUrl.assert_any_call({'mix_list_id': 'some_mix_list', 'search': 'some_search', 'videoid': 'some_video_id'})
+		self.scraper.createUrl.assert_any_call({'mix_list_id': 'some_mix_list', 'search': 'some_search', 'disco_videoid': 'some_video_id'})
 		
 	def test_searchDisco_should_call_fetchPage_to_get_search_result(self):
 		
@@ -1142,7 +1142,7 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 	def test_createUrl_should_return_proper_url_for_search_disco_with_mix_list_and_videoid(self):
 		self.scraper = YouTubeScraper()
 		
-		url = self.scraper.createUrl({"scraper":"search_disco", "search":"some_search", "mix_list_id":"some_mix_list_id", "videoid":"some_videoid"})
+		url = self.scraper.createUrl({"scraper":"search_disco", "search":"some_search", "mix_list_id":"some_mix_list_id", "disco_videoid":"some_videoid"})
 		
 		assert(url ==  self.scraper.urls["disco_mix_list"] % ("some_videoid", "some_mix_list_id"))
 	

@@ -21,9 +21,9 @@ class TestYouTubePlaylistControl(BaseTestCase.BaseTestCase):
 		control.getDiscoSearch = Mock()
 		control.getDiscoSearch.return_value = ""
 		
-		control.playAll({"search_disco":"some_search"})
+		control.playAll({"scraper":"search_disco", "search":"some_search"})
 		
-		control.getDiscoSearch.assert_called_with({"search":"some_search","search_disco":"some_search", 'fetch_all': 'true'})
+		control.getDiscoSearch.assert_called_with({"search":"some_search","scraper":"search_disco", 'fetch_all': 'true'})
 				
 	def test_playAll_should_call_getUserFeed_if_user_feed_is_favorites_in_params(self):
 		control = YouTubePlaylistControl()
