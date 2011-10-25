@@ -206,3 +206,70 @@ class BaseTestCase(unittest2.TestCase):
 			print "Directory list: \r\n" + repr(args)
 			
 		assert(missing_count <= 1)
+
+	def assert_playlist_count_greater_than_or_equals(self, count):
+		args = sys.modules["__main__"].xbmc.PlayList().add.call_args_list
+		
+		if len(args) < count:
+			print "Playlist list length %s is not greater than or equal to expected list lengt %s" % (repr(len(args)), repr(count))
+		
+		assert(len(args) >= count)
+		
+	def assert_playlist_count_less_than_or_equals(self, count):
+		args = sys.modules["__main__"].xbmc.PlayList().add.call_args_list
+		
+		if len(args) > count:
+			print "Playlist list length %s is not less than or equal to expected list lengt %s" % (repr(len(args)), repr(count))
+		
+		assert(len(args) <= count)
+
+	def assert_playlist_count_equals(self, count):
+		args = sys.modules["__main__"].xbmc.PlayList().add.call_args_list
+		
+		if len(args) != count:
+			print "Playlist list length %s does not equal expected list lengt %s" % (repr(len(args)), repr(count))
+		
+		assert(len(args) == count)
+
+	def assert_playlist_contains_only_unique_video_items(self):
+		video_ids = []
+		non_unique = []
+		args = sys.modules["__main__"].xbmc.PlayList().add.call_args_list
+		
+		for call in args:
+			url = call[0][0]
+			if url.find("videoid=") > 0:
+				video = url[url.find("videoid=") + len("videoid="):]
+				if video.find("&"):
+					video = video[:video.find("&")]
+				
+				if video:
+					if video in video_ids:
+						non_unique.append(video)
+					video_ids.append(video)
+		
+		if len(non_unique) > 0:
+			print "Playlist contains one or more duplicate videoids.\r\n Duplicates: %s \r\n Full List: %s" % (repr(non_unique), repr(video_ids)) 
+			print "Playlist: \r\n" + repr(args)
+			
+		assert(len(non_unique) == 0)
+		
+	def assert_playlist_videos_contain(self, videoid):
+		video_ids = []
+		args = sys.modules["__main__"].xbmc.PlayList().add.call_args_list
+		
+		for call in args:
+			url = call[0][0]
+			if url.find("videoid=") > 0:
+				video = url[url.find("videoid=") + len("videoid="):]
+				if video.find("&"):
+					video = video[:video.find("&")]
+				
+				if video not in video_ids:
+					video_ids.append(video)
+		
+		if videoid not in video_ids:
+			print 'Expected to find %s in playlist items' % videoid
+			print "Playlist items: \r\n" + repr(args)
+			
+		assert(videoid in video_ids)
