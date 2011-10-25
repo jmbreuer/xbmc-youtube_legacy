@@ -16,10 +16,12 @@
 [B]Version 2.7.0 (Beta)[/B]
 - Added new sqlite based caching system with script.common.plugin.cache
 - Added support for unlinked accounts
-- Added unittest suite of plugin
-- Added integration test of plugins main functions including full scraper coverage.
-- Added Caching module for scraper reducing the trafic load on youtube.
+- Added unit test suite of plugin
+- Added integration test suite of plugins main functions including full scraper coverage.
+- Added Caching module to reduce the trafic load on youtube.
 - Fixed Downloads messages.
+- Changed scrapers to use custom regex based parsing framework instead of BeautifullSoup since this greatly improved scraper speed.
+- Changed default video streams up to 720p to h264 since apple tv doesn't handle VP8 well.
 - Changed switched Watch Later to api feed removing a scraper
 - Changed switched YouTube Suggests to api feed removing a scraper
 - Changed Reworked Regex based scraper framework to be more reliable and easier to use
