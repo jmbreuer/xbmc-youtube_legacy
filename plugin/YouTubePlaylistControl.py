@@ -40,18 +40,18 @@ class YouTubePlaylistControl():
 	def playAll(self, params={}):
 		get = params.get
 		self.common.log("")
-
 		params["fetch_all"] = "true"
 		result = []
 		
 		# fetch the video entries
-		if get("search_disco"):
-			params["search"] = params["search_disco"]
+		if get("scraper") == "search_disco":
 			result = self.getDiscoSearch(params)
 		elif get("scraper") == "liked_videos":
 			result = self.getLikedVideos(params)
 		elif get("scraper") == "music_artists":
 			result = self.getArtist(params)
+		elif get("scraper") == "music_top100":
+			result = self.getYouTubeTop100(params)
 		elif get("playlist"):
 			params["user_feed"] = "playlist"
 			result = self.getUserFeed(params)
@@ -73,7 +73,7 @@ class YouTubePlaylistControl():
 				vget = video.get
 				if vget("videoid") == get("videoid"):
 					video_index = index
-			if video_index >= 0:
+			if video_index > -1:
 				result = result[video_index:]
 		
 		player = self.xbmc.Player()
@@ -87,10 +87,13 @@ class YouTubePlaylistControl():
 		# queue all entries
 		for entry in result:
 			video = entry.get
+			if video("videoid") == "false":
+				continue
 			listitem=self.xbmcgui.ListItem(label=video("Title"), iconImage=video("thumbnail"), thumbnailImage=video("thumbnail"))
 			listitem.setProperty('IsPlayable', 'true')
 			listitem.setProperty( "Video", "true" )
 			listitem.setInfo(type='Video', infoLabels=entry)
+			
 			playlist.add(video_url % (sys.argv[0], video("videoid") ), listitem)
 		
 		if (get("shuffle")):
@@ -144,6 +147,15 @@ class YouTubePlaylistControl():
 			return False
 		
 		return self.feeds.listAll(params)
+		
+	def getYouTubeTop100(self, params = {}):
+		(result, status) = self.scraper.scrapeYouTubeTop100(params)
+		
+		print repr(result)
+		if status == 200:
+			(result, status) = self.core.getBatchDetails(result, params)
+		
+		return result
 		
 	def getArtist(self, params = {}):
 		get = params.get
