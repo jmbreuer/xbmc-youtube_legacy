@@ -24,12 +24,12 @@ function restore_options() {
     if (window.localStorage["xbmc_youtube_path"]) {
 		document.getElementById("xbmc_youtube_path").value = window.localStorage["xbmc_youtube_path"];
     } else {
-                document.getElementById("xbmc_youtube_path").value = "plugin.video.youtube"
+                document.getElementById("xbmc_youtube_path").value = "plugin.video.youtube";
     }
     if (window.localStorage["xbmc_autoplay"]) {
-		document.getElementById("xbmc_autoplay").checked = window.localStorage["xbmc_autoplay"];
+		document.getElementById("xbmc_autoplay").checked = window.localStorage["xbmc_autoplay"]  == "true";
     } else {
-                document.getElementById("xbmc_autoplay").checked = false
+                document.getElementById("xbmc_autoplay").checked = false;
     }
 }
 

@@ -42,17 +42,19 @@ function playPlaylist(list){
 }
 
 function GM_xmlhttpRequest(details) {
-    if ( chrome.extension ) {
+    if (typeof(chrome) != "undefined") {
 	chrome.extension.sendRequest({ type: "httpRequest", "details": details});
-    } else if ( self.postMessage ) {
-	self.postMessage({ "kind": "GM_xmlhttpRequest", "details": details}); 
+    } else {
+	self.postMessage({ "type": "httpRequest", "details": details}); 
     }
 }
 
 function callJSONRpc(method, params, id) {
     if (!xbmc_url) {
-	chrome.tabs.create({'url': chrome.extension.getURL("options.html")},function(){});
-        return false;
+	if (typeof(chrome) != "undefined") {
+	    chrome.tabs.create({'url': chrome.extension.getURL("options.html")},function(){});
+            return false;
+	}
     }
     var mid = id | 1;
     var data = {
@@ -212,7 +214,11 @@ function updateXBMCMenu(a) {
 	}
 	
 	document.getElementById("xbmc-host").addEventListener("click", function(e) {
-	    chrome.extension.sendRequest({ type: "configure" },function(){});
+	    if (typeof(chrome) != "undefined") {
+		chrome.extension.sendRequest({ type: "configure" },function(){});
+	    } else {
+		self.postMessage({ "type": "open_settings"});
+	    }
 	}, false);
     }
 }
@@ -378,14 +384,28 @@ function run() {
 
 
 function loadSettings(){
-    chrome.extension.sendRequest({ type: "settings" }, 
-				 function(response) {
-				     response = eval(response);
-				     xbmc_path = response[0];
-				     xbmc_url = response[1];
-				     xbmc_host = response[2];
-				     xbmc_autoplay = response[3];
-				     run(); 
-				 });
+    if (typeof(chrome) != "undefined") {
+	chrome.extension.sendRequest({ type: "settings" }, 
+				     function(response) {
+					 response = eval(response);
+					 xbmc_path = response[0];
+					 xbmc_url = response[1];
+					 xbmc_host = response[2];
+					 xbmc_autoplay = response[3];
+					 run(); 
+				     });
+    } else {
+	console.log("adding message listener");
+	self.on("message", function(response) {
+	    console.log("GOT DATA: " + JSON.stringify(response));
+	    xbmc_path = response[0];
+            xbmc_url = response[1];
+            xbmc_host = response[2];
+            xbmc_autoplay = response[3];
+	    run();
+	});
+	console.log("sending load_settings request");
+	self.postMessage({ "type": "load_settings"});
+    }
 }
 loadSettings();

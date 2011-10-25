@@ -1,19 +1,81 @@
-// Based on:
-// http://greasefire.userscripts.org/scripts/review/101305 (by Frz)
-// http://userscripts.org/scripts/show/92945 (by deepseth)
-// http://userscripts.org/scripts/show/62064 (by Wolph)
+var self = require("self"); 
 
-/*
-  XBMC.RunPlugin(%s?path=%s&action=play_all&playlist=%s&) <- afspil playlist
-  XBMC.RunPlugin(%s?path=%s&action=play_all&shuffle=true&playlist=%s&) <- shuffle playlist
-  XBMC.RunPlugin(%s?path=%s&action=play_all&playlist=%s&videoid=%s&) <- start playlist at videoid
-  du skal kalde det der svare til run plugin dog
-*/
 var pageMod = require("page-mod"); 
 var self = require("self"); 
-//var request = require("request");
+var tabs = require("tabs"); 
 var Request = require('request').Request;
 const xhr = require("api-utils/xhr");
+var ss = require("simple-storage");
+var xbmc_path = "plugin.video.youtube";
+var xbmc_url = false;
+var xbmc_host = false;
+
+if (ss.storage.xbmc_host) {
+    xbmc_host = ss.storage.xbmc_host;
+    xbmc_url = 'http://' + xbmc_host + '/jsonrpc';
+} else {
+    openSettings();
+}
+
+if (ss.storage.xbmc_path) {
+    xbmc_path = ss.storage.xbmc_path;
+}
+
+if (ss.storage.xbmc_autoplay) {
+    xbmc_autoplay = ss.storage.xbmc_autoplay;
+} else {
+    xbmc_autoplay = false
+}
+
+function openSettings() {
+    const data = require("self").data;
+    var tabs = require("tabs");
+
+    tabs.on('ready', function(tab) {
+	console.log("Title: " + tab.title);
+	if ( tab.title == "YouTube XBMC Extension" ) {
+	    worker = tab.attach({
+		contentScriptWhen : 'ready',
+		contentScriptFile: [self.data.url("options.js")]
+	    });
+            worker.on('message', function(message) {
+		console.log("tabs.worker.on: " + JSON.stringify(message));
+		switch(message.type) {
+		case "settings":
+		    console.log("settings");
+		    details = "Settings";
+		    console.log("settings to return: " + JSON.stringify([xbmc_path, xbmc_url, xbmc_host, xbmc_autoplay]));
+		    return [xbmc_path, xbmc_url, xbmc_host, xbmc_autoplay];
+		    break;
+		case "open_settings":
+		    openSettings();
+		    break;
+		case "load_settings":
+		    console.log("load_settings");
+		    var settings = [ xbmc_path, xbmc_url, xbmc_host, xbmc_autoplay];
+		    console.log("settings to return: " + JSON.stringify(settings));
+		    worker.postMessage(settings);
+		    break;
+		case "save_settings":
+		    console.log("save_settings");
+		    ss.storage.xbmc_path = message.details[0];
+		    xbmc_path = message.details[0];
+		    ss.storage.xbmc_host = message.details[1];
+		    xbmc_host = message.details[1];
+		    ss.storage.xbmc_autoplay = message.details[2];
+		    xbmc_autoplay = message.details[2];
+		    xbmc_url = 'http://' + xbmc_host + '/jsonrpc';
+		    console.log("settings saved: " + JSON.stringify([xbmc_path, xbmc_url, xbmc_host, xbmc_autoplay]));
+		    break;
+		}
+	    });
+	}
+    });
+
+    tabs.open({
+        url : self.data.url("options.html")
+    });
+}
 
 exports.main = function() { 
     pageMod.PageMod({ 
@@ -21,23 +83,22 @@ exports.main = function() {
         contentScriptWhen: 'ready', 
         contentScriptFile: [self.data.url('script.js')],
         onAttach: function onAttach(worker) { 
-            worker.on('message', function(message) { 
-		switch(message.kind) {
-		case "GM_xmlhttpRequest":
+            worker.on('message', function(message) {
+		console.log("worker.on: " + JSON.stringify(message));
+		switch(message.type) {
+		case "open_settings":
+		    openSettings();
+		    break;
+		case "load_settings":
+		    console.log("load_settings");
+		    var settings = [ xbmc_path, xbmc_url, xbmc_host, xbmc_autoplay];
+		    console.log("settings to return: " + JSON.stringify(settings));
+		    worker.postMessage(settings);
+		    break;
+		case "httpRequest":
 		    details = message.details;
-		    console.log("A: " + JSON.stringify(details));
-		    /*
-		    Request({
-			url: details.url,
-			headers: {'Content-type': 'application/json'},
-			content: details.Data,
-			onComplete: function (response) {
-			    console.log("B: " + JSON.stringify(response.text));
-			}
-		    }).post();
-		    */
-		    
-		    //var xmlhttp = new XMLHttpRequest();
+		    console.log("httpRequest: " + JSON.stringify(details));
+
 		    var xmlhttp = new xhr.XMLHttpRequest();
 		    xmlhttp.onreadystatechange = function() {
 			var responseState = {
@@ -64,8 +125,11 @@ exports.main = function() {
 		    try {
 			xmlhttp.open(details.method, details.url);
 		    } catch(e) {
-			if( details["onerror"] ) {
-			    details["onerror"]({responseXML:'',responseText:'',readyState:4,responseHeaders:'',status:403,statusText:'Forbidden'});
+			console.log("ERROR: " + JSON.stringify(e))
+			if ( typeof(details) != "undefined") {
+			    if( details["onerror"] ) {
+				details["onerror"]({responseXML:'',responseText:'',readyState:4,responseHeaders:'',status:403,statusText:'Forbidden'});
+			    }
 			}
 			return;
 		    }
@@ -75,10 +139,10 @@ exports.main = function() {
 			}
 		    }
 		    xmlhttp.send((typeof(details.data)!='undefined')?details.data:null);
-		    console.log((typeof(details.data)!='undefined')?details.data:null);
+		    console.log("Did send: " + ((typeof(details.data)!='undefined')?details.data:null));
 		    break;
 		default:
-                    console.log(message.message); 
+                    console.log("default: " + message.message); 
 		    break;
 		    
 		}

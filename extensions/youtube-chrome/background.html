@@ -1,9 +1,8 @@
 <script>
-  chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
-
   var xbmc_path = "plugin.video.youtube";
   var xbmc_url = false;
   var xbmc_host = false
+  var xbmc_autoplay = false
   
   if (window.localStorage["xbmc_youtube_host"]) {
     xbmc_host = window.localStorage["xbmc_youtube_host"];
@@ -18,6 +17,7 @@
     xbmc_autoplay = window.localStorage["xbmc_autoplay"];
   }
 
+  chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
   if ( request.type == "Player.Open" ) {
      callJSONRpc(request.type, { item: { file: "plugin://" + xbmc_path + request.path } } )
   } else if ( request.type == "Files.GetDirectory" ) {

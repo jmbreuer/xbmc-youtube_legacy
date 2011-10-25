@@ -3,42 +3,58 @@
 // http://userscripts.org/scripts/show/92945 (by deepseth)
 // http://userscripts.org/scripts/show/62064 (by Wolph)
 
-
-  //var xbmc_path = "plugin.video.youtube";
-  var xbmc_path = "plugin.video.youtube.beta";
-  var xbmc_url = false;
-  var xbmc_host = false;
-  
-  if (window.localStorage["xbmc_youtube_host"]) {
-    xbmc_host = window.localStorage["xbmc_youtube_host"];
-    xbmc_url = 'http://' + xbmc_host + '/jsonrpc';
-  }
-  
-  if (window.localStorage["xbmc_youtube_path"]) {
-    xbmc_path = window.localStorage["xbmc_youtube_path"];
-  }
-  
 /*
-  if ( request.type == "Player.Open" ) {
-     callJSONRpc(request.type, { file: "plugin://" + xbmc_path + request.path })
-  } else if ( request.type == "Files.GetDirectory" ) {
-     callJSONRpc(request.type, { directory: "plugin://" + xbmc_path + request.path })
-  } else if ( request.type == "configure" ) {
-    chrome.tabs.create({'url': chrome.extension.getURL("options.html")},function(){});
-  } else {
-    sendResponse("ERROR");
-  }
+  XBMC.RunPlugin(%s?path=%s&action=play_all&playlist=%s&) <- afspil playlist
+  XBMC.RunPlugin(%s?path=%s&action=play_all&shuffle=true&playlist=%s&) <- shuffle playlist
+  XBMC.RunPlugin(%s?path=%s&action=play_all&playlist=%s&videoid=%s&) <- start playlist at videoid
+  du skal kalde det der svare til run plugin dog
 */
+xbmc_path = ""
+xbmc_url = ""
+xbmc_host = ""
+xbmc_autoplay = false
+
+function insertafter(newChild, refChild) { 
+    refChild.parentNode.insertBefore(newChild, refChild.nextSibling); 
+} 
+
+function extractVideoId(id) {
+    if (id.id) {
+	return id.id;
+    } else {
+	return getVideoId();
+    }
+}
+
+function playVideo(id){
+    id = extractVideoId(id);
+    if ( id ) {
+        callJSONRpc("Player.Open", { item: { file: "/?action=play_video&videoid=" + extractVideoId(id) } } )
+    }
+}
+
+function playVideoList(list){
+    callJSONRpc("Player.Open", { item: { file: "/?action=play_all&video_list=" + list } } )
+}
+
+function playPlaylist(list){
+    callJSONRpc("Player.Open", { item: { file: "/?path=/root/playlists&action=play_all&playlist=" + list } } )
+}
 
 function GM_xmlhttpRequest(details) {
-    self.postMessage({ "kind": "GM_xmlhttpRequest", "details": details});
+    if (typeof(chrome) != "undefined") {
+	chrome.extension.sendRequest({ type: "httpRequest", "details": details});
+    } else {
+	self.postMessage({ "type": "httpRequest", "details": details}); 
+    }
 }
 
 function callJSONRpc(method, params, id) {
     if (!xbmc_url) {
-	//chrome.tabs.create({'url': chrome.extension.getURL("options.html")},function(){});
-        //return false;
-	xbmc_url = "http://xbmc:xbmc@localhost:8080/jsonrpc";
+	if (typeof(chrome) != "undefined") {
+	    chrome.tabs.create({'url': chrome.extension.getURL("options.html")},function(){});
+            return false;
+	}
     }
     var mid = id | 1;
     var data = {
@@ -63,62 +79,6 @@ function callJSONRpc(method, params, id) {
     });
 }
 
-
-
-
-
-
-
-//////////////////////////////////
-
-function insertafter(newChild, refChild) { 
-    refChild.parentNode.insertBefore(newChild, refChild.nextSibling); 
-} 
-
-
-function extractVideoId(id) {
-    if (id.id) {
-	return id.id;
-    } else {
-	return getVideoId();
-    }
-}
-
-function playVideo(id){
-    id = extractVideoId(id);
-    if ( id ) {
-	callJSONRpc("Player.Open", { item: { file: "/?action=play_video&videoid=" + extractVideoId(id) } } )
-    }
-}
-
-// http://www.youtube.com/playlist?p=PLF3DFB800F05F551A <- Fails here. Menu needs to use playlist call instead of media call.
-function playVideoList(list){
-    alert(list)
-    //chrome.extension.sendRequest({ type: "Player.Open", file: "/?action=play_all&video_list=" + list }, function(response) {console.log(response);});
-}
-
-function downloadVideo(id){
-    callJSONRpc("XBMC.RunPlugin", { file: "/?action=download&videoid=" + extractVideoId(id) });
-}
-
-function searchVideo(id){
-    // path was directory
-    callJSONRpc("Files.GetDirectory", { file: "/?path=/root/search&action=search&search=" + getVideoTitle() });
-}
-
-// NOTICE: YouTube Beta-2.1.0 ARGV: ['plugin://plugin.video.youtube.beta/', '-1', '?path=/root/playlists&action=play_all&playlist=2D12175B23E3F457&']
-// NOTICE: YouTube-2.2.4 ARGV: ['plugin://plugin.video.youtube/', '0', '?path=/root/playlists&action=play_all&playlist=2D12175B23E3F457&']
-
-function playPlaylist(id){
-    callJSONRpc("XBMC.RunPlugin", { file: "/?path=/root/playlists&action=play_all&playlist=2D12175B23E3F457&" });
-}
-
-function queueVideo(id) {
-    callJSONRpc("XBMC.RunPlugin", { file: "/?action=queue_video&videoid=" + extractVideoId(id) });
-
-    //callJSONRpc("VideoPlaylist.Add", { item: { file: "plugin://" + xbmc_youtube + "/?action=queue_video&videoid=" + extractVideoId(id), directory: "", playlist: { id: "", file: uri } } });
-}
-
 function getVideoId(querystring) {
     if ( !querystring ) {
 	querystring = window.location.search.substring(1);
@@ -132,7 +92,11 @@ function getVideoId(querystring) {
 	}
     }
     if (window.location.hash && window.location.host.indexOf("youtube.com") > -1 ) {
-	return window.location.hash.substr(window.location.hash.lastIndexOf('/') + 1);
+	video_id = window.location.hash.substr(window.location.hash.lastIndexOf('/') + 1);
+	if ( video_id.indexOf("?") > -1 ) {
+	    video_id = video_id.substr(0, video_id.indexOf("?"));
+	}
+	return video_id;
     }
     // Embeded
     return querystring.substr(querystring.lastIndexOf("/") + 1);
@@ -222,7 +186,7 @@ function updateAddTo(a) {
 	    return false;
 	}
 	var loldiv = document.createElement("div");
-	loldiv.innerHTML = '<li><span id="" onclick="return false;" class="yt-uix-button-menu-item addto-label">XBMC:</span></li><li><span id="xbmc-play-addto" class="yt-uix-button-menu-item addto-item addto-create-item">Play in XBMC</span></li>'; //<li><span id="xbmc-enqueue-addto" class="yt-uix-button-menu-item addto-item addto-create-item">Enque in XBMC</span></li>';
+	loldiv.innerHTML = '<li><span id="" onclick="return false;" class="yt-uix-button-menu-item addto-label">XBMC:</span></li><li><span id="xbmc-play-addto" class="yt-uix-button-menu-item addto-item addto-create-item">Play in XBMC</span></li>';
 	
 	while (loldiv.hasChildNodes()) {	
 	    menu.appendChild(loldiv.firstChild);
@@ -231,11 +195,6 @@ function updateAddTo(a) {
 	document.getElementById("xbmc-play-addto").addEventListener("click", function(e) {
 	    playVideo({id: getContextMenuId()});
 	}, false);
-	/*
-	  document.getElementById("xbmc-enqueue-addto").addEventListener("click", function() {
-	  queueVideo({id: getContextMenuId()});
-	  }, false);
-	*/
     }
 }
 
@@ -255,73 +214,29 @@ function updateXBMCMenu(a) {
 	}
 	
 	document.getElementById("xbmc-host").addEventListener("click", function(e) {
-	    chrome.extension.sendRequest({ type: "configure" },function(){});
+	    if (typeof(chrome) != "undefined") {
+		chrome.extension.sendRequest({ type: "configure" },function(){});
+	    } else {
+		self.postMessage({ "type": "open_settings"});
+	    }
 	}, false);
-	/*
-	  document.getElementById("xbmc-enqueue").addEventListener("click", function() {
-	  queueVideo({id: getContextMenuId()});
-	  }, false);
-	  document.getElementById("xbmc-download").addEventListener("click", function() {
-	  downloadVideo({id: getContextMenuId()});
-	  }, false);
-	  document.getElementById("xbmc-find-similar").addEventListener("click", function() {
-	  searchVideo({id: getContextMenuId()});
-	  }, false);
-	*/
     }
 }
 
-if ( window.location.host.indexOf("youtube.com") > -1 ) {
-    // Leanback
-    if ( ( "" + window.location).indexOf("/leanback") > -1 ) {
-	var oldLocation = "";
-        setInterval(function() {
-            if(location.href != oldLocation) {
-                playVideo(false)
-		        oldLocation = location.href
-            }
-        }, 1000); // check every second                                                                                                      
-    }
-
-    // Add XBMC Play button and menu.
-    var menu = document.getElementById("watch-actions");
-    if ( menu ) {
-	var xbmc_test = '<button type="button" id="xbmc-play-button" class="start yt-uix-tooltip-reverse addto-button-plus-hide-arrow yt-uix-button yt-uix-tooltip" onclick="" title="Play in XBMC" data-button-menu-id="" data-button-action="" role="button" aria-pressed="false"><img class="yt-uix-button-arrow" src="//s.ytimg.com/yt/img/pixel-vfl3z5WfW.gif" alt=""></button><button type="button" class="end yt-uix-tooltip-reverse yt-uix-button yt-uix-tooltip yt-uix-button-empty" onclick=";return false;" title="More XBMC Functions" data-button-menu-id="shared-xbmc-menu" data-button-action="" role="button" aria-pressed="false"><img class="yt-uix-button-arrow" src="//s.ytimg.com/yt/img/pixel-vfl3z5WfW.gif" alt=""></button><div id="shared-xbmc-menu" style="display: none;"><ul class="xbmc-menu"></ul>';
-	var bla_test = document.createElement('span');
-	bla_test.setAttribute("dir", "ltr");
-	bla_test.className = "yt-uix-button-group addto-container   watch show-label"
-	bla_test.setAttribute("data-feature", "watch");
-	bla_test.innerHTML = xbmc_test;
-	menu.appendChild(bla_test);
-
-	bla_test = document.getElementById("xbmc-play-button");
-	if ( bla_test ) {
-	    bla_test.addEventListener('click', function () {
-		playVideo(false)
-		return false;
-	    }, false);
+function leanback() {
+    var oldLocation = "";
+    setInterval(function() {
+	if(location.href != oldLocation) {
+	    playVideo(false);
+	    oldLocation = location.href;
 	}
+    }, 1000); // check every second
+}
 
-	var img = document.createElement("img");
-	img.src = xbmc_play_image.src;
-	img.setAttribute("id", "xbmc-icon");
-	bla_test.appendChild(img);
-	img.addEventListener("mouseover", function () {
-	    var img = document.getElementById("xbmc-icon");
-	    img.src = xbmc_play_image_dark.src;
-	}, false);
-	img.addEventListener("mouseout", function () {
-	    var img = document.getElementById("xbmc-icon");
-	    img.src = xbmc_play_image.src;
-	}, false);
-    } else { // /user/#p/l/<id>
-	var menu = document.getElementById("playnav-panel-tab-flag");
-
+function addButtonWithMenu() {
+	var menu = document.getElementById("watch-actions");
 	if ( menu ) {
-	    menu = menu.parentNode;
-            var xbmc_test = "<td id=\"playnav-panel-tab-xbmc\" ><table class=\"panel-tabs\"><tr><td class=\"panel-tab-title-cell\"><div class=\"playnav-panel-tab-icon\" id=\"panel-icon-xbmc\"></div><div class=\"playnav-bottom-link\" id=\"xbmc-bottom-link\"><a href=\"javascript:;\" id=\"xbmc-play-button\"></a></div><div class=\"spacer\">&nbsp;</div></td></tr><tr><td class=\"panel-tab-indicator-cell inner-box-opacity\"><div class=\"panel-tab-indicator-arrow\"></div></td></tr></table></td>";
-	    var xbmc_test_baseline = '<button type="button" id="xbmc-play-button" class="start yt-uix-tooltip-reverse addto-button-plus-hide-arrow yt-uix-button yt-uix-tooltip" onclick="" title="Play in XBMC" data-button-menu-id="" data-button-action="" role="button" aria-pressed="false"><img class="yt-uix-button-arrow" src="//s.ytimg.com/yt/img/pixel-vfl3z5WfW.gif" alt=""></button><button type="button" class="end yt-uix-tooltip-reverse yt-uix-button yt-uix-tooltip yt-uix-button-empty" onclick=";return false;" title="More XBMC Functions" data-button-menu-id="shared-xbmc-menu" data-button-action="" role="button" aria-pressed="false"><img class="yt-uix-button-arrow" src="//s.ytimg.com/yt/img/pixel-vfl3z5WfW.gif" alt=""></button><div id="shared-xbmc-menu" style="display: none;"><ul class="xbmc-menu"></ul>';
-	    xbmc_test = xbmc_test_baseline;
+	    var xbmc_test = '<button type="button" id="xbmc-play-button" class="start yt-uix-tooltip-reverse addto-button-plus-hide-arrow yt-uix-button yt-uix-tooltip" onclick="" title="Play in XBMC" data-button-menu-id="" data-button-action="" role="button" aria-pressed="false"><img class="yt-uix-button-arrow" src="//s.ytimg.com/yt/img/pixel-vfl3z5WfW.gif" alt=""></button><button type="button" class="end yt-uix-tooltip-reverse yt-uix-button yt-uix-tooltip yt-uix-button-empty" onclick=";return false;" title="More XBMC Functions" data-button-menu-id="shared-xbmc-menu" data-button-action="" role="button" aria-pressed="false"><img class="yt-uix-button-arrow" src="//s.ytimg.com/yt/img/pixel-vfl3z5WfW.gif" alt=""></button><div id="shared-xbmc-menu" style="display: none;"><ul class="xbmc-menu"></ul>';
 	    var bla_test = document.createElement('span');
 	    bla_test.setAttribute("dir", "ltr");
 	    bla_test.className = "yt-uix-button-group addto-container   watch show-label"
@@ -333,7 +248,7 @@ if ( window.location.host.indexOf("youtube.com") > -1 ) {
 	    if ( bla_test ) {
 		bla_test.addEventListener('click', function () {
 		    playVideo(false)
-		return false;
+		    return false;
 		}, false);
 	    }
 	    
@@ -341,7 +256,6 @@ if ( window.location.host.indexOf("youtube.com") > -1 ) {
 	    img.src = xbmc_play_image.src;
 	    img.setAttribute("id", "xbmc-icon");
 	    bla_test.appendChild(img);
-	    
 	    img.addEventListener("mouseover", function () {
 		var img = document.getElementById("xbmc-icon");
 		img.src = xbmc_play_image_dark.src;
@@ -350,60 +264,148 @@ if ( window.location.host.indexOf("youtube.com") > -1 ) {
 		var img = document.getElementById("xbmc-icon");
 		img.src = xbmc_play_image.src;
 	    }, false);
+	} else { // /user/#p/l/<id>
+	    var menu = document.getElementById("playnav-panel-tab-flag");
 	    
-	}
-    }
-
-    // Add XBMC play button to bottom playlist
-    var menu = document.getElementById("playlist-bar-info");
-
-    if ( menu ) {
-	var xbmc_test = '<button type="button" class="yt-uix-button-masked yt-uix-button-reverse yt-uix-button" onclick=";return false;"  role="button" aria-pressed="false" aria-expanded="false" aria-haspopup="true" aria-activedescendant=""><span class="yt-uix-button-content"><img id="xbmc-icon2" alt=""></span><div id="playlist-bar-extras-menu"><ul><</div></div></div></button>';
-	var bla_test = document.createElement('span');
-	bla_test.setAttribute("id", "xbmc-play-button2");
-	bla_test.innerHTML = xbmc_test;
-	menu.appendChild(bla_test);
-	bla_test.addEventListener('click', function () {
-	    //alert(document.getElementById("playlist-bar-tray-content").innerHTML); //<- playlist content.
-	    //alert(document.querySelector("playlist-bar-item-playing").innerHTML); <- curently playing video id.
-	    var playlist = ("" + document.getElementById("playlist-bar").getAttribute("data-video-ids")).split(",");
-	    var index = ""+ document.location;
-	    if ( index.indexOf("index=") > -1 ) {
-		index = index.substr(index.indexOf("index=") + "index=".length, index.length);
-		if ( index.indexOf("&") > -1 ) {
-		    index = index.substr(0, index.indexOf("&"));
+	    if ( menu ) {
+		menu = menu.parentNode;
+		var xbmc_test = "<td id=\"playnav-panel-tab-xbmc\" ><table class=\"panel-tabs\"><tr><td class=\"panel-tab-title-cell\"><div class=\"playnav-panel-tab-icon\" id=\"panel-icon-xbmc\"></div><div class=\"playnav-bottom-link\" id=\"xbmc-bottom-link\"><a href=\"javascript:;\" id=\"xbmc-play-button\"></a></div><div class=\"spacer\">&nbsp;</div></td></tr><tr><td class=\"panel-tab-indicator-cell inner-box-opacity\"><div class=\"panel-tab-indicator-arrow\"></div></td></tr></table></td>";
+		var xbmc_test_baseline = '<button type="button" id="xbmc-play-button" class="start yt-uix-tooltip-reverse addto-button-plus-hide-arrow yt-uix-button yt-uix-tooltip" onclick="" title="Play in XBMC" data-button-menu-id="" data-button-action="" role="button" aria-pressed="false"><img class="yt-uix-button-arrow" src="//s.ytimg.com/yt/img/pixel-vfl3z5WfW.gif" alt=""></button><button type="button" class="end yt-uix-tooltip-reverse yt-uix-button yt-uix-tooltip yt-uix-button-empty" onclick=";return false;" title="More XBMC Functions" data-button-menu-id="shared-xbmc-menu" data-button-action="" role="button" aria-pressed="false"><img class="yt-uix-button-arrow" src="//s.ytimg.com/yt/img/pixel-vfl3z5WfW.gif" alt=""></button><div id="shared-xbmc-menu" style="display: none;"><ul class="xbmc-menu"></ul>';
+		xbmc_test = xbmc_test_baseline;
+		var bla_test = document.createElement('span');
+		bla_test.setAttribute("dir", "ltr");
+		bla_test.className = "yt-uix-button-group addto-container   watch show-label"
+		bla_test.setAttribute("data-feature", "watch");
+		bla_test.innerHTML = xbmc_test;
+		menu.appendChild(bla_test);
+		
+		bla_test = document.getElementById("xbmc-play-button");
+		if ( bla_test ) {
+		    bla_test.addEventListener('click', function () {
+			playVideo(false)
+			return false;
+		    }, false);
 		}
-		playlist.splice(0, parseInt(index) - 1);
+		
+		var img = document.createElement("img");
+		img.src = xbmc_play_image.src;
+		img.setAttribute("id", "xbmc-icon");
+		bla_test.appendChild(img);
+		
+		img.addEventListener("mouseover", function () {
+		    var img = document.getElementById("xbmc-icon");
+		    img.src = xbmc_play_image_dark.src;
+		}, false);
+		img.addEventListener("mouseout", function () {
+		    var img = document.getElementById("xbmc-icon");
+		    img.src = xbmc_play_image.src;
+		}, false);
+	    
 	    }
-	    if ( playlist) {
-		playVideoList(playlist.join(","));
-	    }
-	    return false;
-	}, false);
-
-	var img = document.getElementById("xbmc-icon2");
-	img.src = xbmc_play_image.src;
-	img.addEventListener("mouseover", function () {
-	    var img = document.getElementById("xbmc-icon2");
-	    img.src = xbmc_play_image_dark.src;
-	}, false);
-	img.addEventListener("mouseout", function () {
-	    var img = document.getElementById("xbmc-icon2");
-	    img.src = xbmc_play_image.src;
-	}, false);
-    }
-
-    if ( document.getElementById('xbmc-host') ) {
-	updateAddTo();
-	document.getElementById("shared-addto-menu").addEventListener('DOMNodeRemoved', updateAddTo, false);
-    }
-
-    // Main page || /user/#p/l/<id>
-    if (document.getElementById("watch-flag") || document.getElementById("playnav-panel-tab-flag") ) {
-	updateXBMCMenu();
-	document.getElementById("shared-xbmc-menu").addEventListener('DOMNodeRemoved', updateXBMCMenu, false);
-    }
-} else { // Check for embedded videos.
-    embedVideo();
+	}
 }
 
+function addPlaylistButton(menu) {
+    var xbmc_test = '<button type="button" class="yt-uix-button-masked yt-uix-button-reverse yt-uix-button" onclick=";return false;"  role="button" aria-pressed="false" aria-expanded="false" aria-haspopup="true" aria-activedescendant=""><span class="yt-uix-button-content"><img id="xbmc-icon2" alt=""></span><div id="playlist-bar-extras-menu"><ul><</div></div></div></button>';
+    var bla_test = document.createElement('span');
+    bla_test.setAttribute("id", "xbmc-play-button2");
+    bla_test.innerHTML = xbmc_test;
+    menu.appendChild(bla_test);
+    bla_test.addEventListener('click', function () {
+	//alert(document.getElementById("playlist-bar-tray-content").innerHTML); //<- playlist content.
+	//alert(document.querySelector("playlist-bar-item-playing").innerHTML); <- curently playing video id.
+	var playlist = ("" + document.getElementById("playlist-bar").getAttribute("data-video-ids")).split(",");
+	var index = ""+ document.location;
+	if ( index.indexOf("index=") > -1 ) {
+	    index = index.substr(index.indexOf("index=") + "index=".length, index.length);
+	    if ( index.indexOf("&") > -1 ) {
+		index = index.substr(0, index.indexOf("&"));
+	    }
+	    playlist.splice(0, parseInt(index) - 1);
+	}
+	if ( playlist ) {
+	    playVideoList(playlist.join(","));
+	} else {
+	    playlist_id = ("" + window.location).substr(("" + window.location).indexOf('list=') + 5);
+	    if ( playlist_id.indexOf("&") > -1 ) {
+		playlist_id = playlist_id.substr(0, playlist_id.indexOf("6"));
+	    }
+	    playPlaylist(playlist_id);
+	}
+    }, false);
+    
+    var img = document.getElementById("xbmc-icon2");
+    img.src = xbmc_play_image.src;
+    img.addEventListener("mouseover", function () {
+	var img = document.getElementById("xbmc-icon2");
+	img.src = xbmc_play_image_dark.src;
+    }, false);
+    img.addEventListener("mouseout", function () {
+	var img = document.getElementById("xbmc-icon2");
+	img.src = xbmc_play_image.src;
+    }, false);
+}
+
+function run() {
+    if ( window.location.host.indexOf("youtube.com") > -1 ) {
+	if ( xbmc_autoplay ) {
+	    playVideo(false);
+	}
+
+	if ( ( "" + window.location).indexOf("/leanback") > -1 ) {
+	    leanback();
+	}
+
+	// Add XBMC Play button and menu.
+	addButtonWithMenu();
+
+	// Add XBMC play button to bottom playlist
+	var menu = document.getElementById("playlist-bar-info");
+	if ( menu ) {
+	    addPlaylistButton(menu);
+	}
+
+	// Update play button
+	if ( document.getElementById('xbmc-host') ) {
+	    updateAddTo();
+	    document.getElementById("shared-addto-menu").addEventListener('DOMNodeRemoved', updateAddTo, false);
+	}
+
+	// Update menu
+	// Main page || /user/#p/l/<id>
+	if (document.getElementById("watch-flag") || document.getElementById("playnav-panel-tab-flag") ) {
+	    updateXBMCMenu();
+	    document.getElementById("shared-xbmc-menu").addEventListener('DOMNodeRemoved', updateXBMCMenu, false);
+	}
+    } else { // Check for embedded videos.
+	embedVideo();
+    }
+}
+
+
+function loadSettings(){
+    if (typeof(chrome) != "undefined") {
+	chrome.extension.sendRequest({ type: "settings" }, 
+				     function(response) {
+					 response = eval(response);
+					 xbmc_path = response[0];
+					 xbmc_url = response[1];
+					 xbmc_host = response[2];
+					 xbmc_autoplay = response[3];
+					 run(); 
+				     });
+    } else {
+	console.log("adding message listener");
+	self.on("message", function(response) {
+	    console.log("GOT DATA: " + JSON.stringify(response));
+	    xbmc_path = response[0];
+            xbmc_url = response[1];
+            xbmc_host = response[2];
+            xbmc_autoplay = response[3];
+	    run();
+	});
+	console.log("sending load_settings request");
+	self.postMessage({ "type": "load_settings"});
+    }
+}
+loadSettings();
