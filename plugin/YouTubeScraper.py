@@ -1019,7 +1019,7 @@ class YouTubeScraper():
 		if (get("scraper") in "search_disco"):
 			url = self.urls["disco_search"] % urllib.quote_plus(get("search"))
 			if get("mix_list_id") and get("disco_videoid"):
-				url = self.urls["disco_mix_list"] % (get("videoid"), get("mix_list_id"))
+				url = self.urls["disco_mix_list"] % (get("disco_videoid"), get("mix_list_id"))
 		if (get("scraper") == "disco_top_artist"):
 			url = self.urls["disco_main"]
 		
