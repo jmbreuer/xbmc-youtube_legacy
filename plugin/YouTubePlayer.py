@@ -221,6 +221,8 @@ class YouTubePlayer():
 			if node:
 				stype = node.getAttribute("type")
 				style = node.getAttribute("style")
+				self.common.log("stype : " + stype, 5)
+				self.common.log("style : " + style, 5)
 
 				if stype == "highlight":
 					linkt = self.core._getNodeAttribute(node, "url", "type", "")
@@ -228,8 +230,9 @@ class YouTubePlayer():
 					if linkt == "video":
 						self.common.log("Reference to video : " + linkv)
 				elif node.firstChild:
-					if node.firstChild.nodeValue:
-						text = self.core._getNodeValue(node, "TEXT", "").replace("\n", "\\n")
+					self.common.log("node.firstChild: %s - value : %s" % ( repr(node.firstChild), repr(self.core._getNodeValue(node, "TEXT", ""))), 5)
+					text = self.core._getNodeValue(node, "TEXT", "")
+					if text:
 						text = self.utils.replaceHtmlCodes(text)
 						start = ""
 						
@@ -244,14 +247,15 @@ class YouTubePlayer():
 
 						snode = node.getElementsByTagName("appearance")
 						ns_fsize = 60
+						self.common.log("snode: %s" % snode, 5)
 						if snode:
 							if snode.item(0).hasAttribute("textSize"):
 								ns_fsize = int(1.2 * (1280 * float(snode.item(0).getAttribute("textSize")) / 100) ) 
 							else:
 								ns_fsize = 60
-							ns_fcolor = snode.item(0).getAttribute("fgColor").replace("0x0000000000", "")
+							ns_fcolor = snode.item(0).getAttribute("fgColor")
 							ns_fcolor = ns_fcolor[4:6] + ns_fcolor[2:4] + ns_fcolor[0:2]
-							ns_bcolor = snode.item(0).getAttribute("bgColor").replace("0x0000000000", "")
+							ns_bcolor = snode.item(0).getAttribute("bgColor")
 							ns_bcolor = ns_bcolor[4:6] + ns_bcolor[2:4] + ns_bcolor[0:2]
 							ns_alpha = snode.item(0).getAttribute("bgAlpha")
 							
@@ -269,7 +273,8 @@ class YouTubePlayer():
 								start = cnode.item(0).getAttribute("t")
 							if cnode.item(1):
 								end = cnode.item(1).getAttribute("t")
-						
+
+						self.common.log("start: %s - end: %s - style: %s" % ( start, end, style), 5)
 						if start and end and style != "highlightText":
 							marginV = 1280 * float(cnode.item(0).getAttribute("y")) / 100
 							marginV += 1280 * float(cnode.item(0).getAttribute("h")) / 100
@@ -291,6 +296,7 @@ class YouTubePlayer():
 					if time.strptime(a_end[0:a_end.rfind(".")], "%H:%M:%S") < time.strptime(b_start[0:b_start.rfind(".")], "%H:%M:%S"):
 						result += "Dialogue: Marked=0,%s,%s,Default,Name,0000,0000,0000,,\r\n" % ( a_end, b_start )
 		
+		self.common.log("Done : " + repr((result, append_style)), 5)
 		return ( result, append_style)
 		
 	def addSubtitles(self, video = {}):
