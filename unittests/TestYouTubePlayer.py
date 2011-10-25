@@ -300,7 +300,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		
 		(result, style) = player.transformAnnotationToSSA(self.readTestInput("annotationsTest.xml",False).encode("utf-8")) 
 		
-		assert(len(result.split("\r\n")) == 6)
+		assert(len(result.split("\r\n")) == 11)
 	
 	def test_transformAnnotationToSSA_should_call_replaceHtmlCodes_for_user_visible_text(self):
 		player = YouTubePlayer()

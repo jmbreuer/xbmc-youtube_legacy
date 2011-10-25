@@ -54,8 +54,12 @@ class YouTubePlaylistControl():
 			result = self.getArtist(params)
 		elif get("user_feed") in ["recommended", "watch_later", "newsubscriptions", "favorites", "playlist"]:
 			result = self.getUserFeed(params)
+		elif get("video_list"):
+			( ytobjects, status) = self.core.getBatchDetails(get("video_list").split(","))
+			result = ytobjects
 		
 		if len(result) == 0:
+			self.common.log("no results")
 			return
 		
 		self.common.log(repr(len(result)) + " video results ")
