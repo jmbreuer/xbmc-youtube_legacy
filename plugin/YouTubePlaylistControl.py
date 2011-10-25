@@ -139,12 +139,13 @@ class YouTubePlaylistControl():
 		
 	def getUserFeed(self, params = {}):
 		get = params.get
-
+		
 		if get("user_feed") == "playlist":
 			if not get("playlist"):
 				return False
-		elif not get("contact"):
-			return False
+		elif get("user_feed") in ["newsubscriptions","favorites"]:
+			if not get("contact"):
+				return False
 		
 		return self.feeds.listAll(params)
 		
