@@ -19,7 +19,7 @@ function restore_options() {
     if (xbmc_host) {
 		document.getElementById("xbmc_youtube_host").value = xbmc_host;
     } else {
-                document.getElementById("xbmc_youtube_host").value = "username:password@host:port";
+                document.getElementById("xbmc_youtube_host").value = "username:password@localhost:8080";
     }
     if (xbmc_path) {
 		document.getElementById("xbmc_youtube_path").value = xbmc_path;
