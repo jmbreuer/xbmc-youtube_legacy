@@ -13,13 +13,21 @@
   if (window.localStorage["xbmc_youtube_path"]) {
     xbmc_path = window.localStorage["xbmc_youtube_path"];
   }
-  
+
+  if (window.localStorage["xbmc_autoplay"]) {
+    xbmc_autoplay = window.localStorage["xbmc_autoplay"];
+  }
+
   if ( request.type == "Player.Open" ) {
      callJSONRpc(request.type, { item: { file: "plugin://" + xbmc_path + request.path } } )
   } else if ( request.type == "Files.GetDirectory" ) {
      callJSONRpc(request.type, { directory: "plugin://" + xbmc_path + request.path })
   } else if ( request.type == "configure" ) {
     chrome.tabs.create({'url': chrome.extension.getURL("options.html")},function(){});
+  } else if ( request.type == "settings" ) {
+    sendResponse(JSON.stringify([xbmc_path, xbmc_url, xbmc_host, xbmc_autoplay]));
+  } else if ( request.type == "httpRequest" ) {
+    GM_xmlhttpRequest(request.details)
   } else {
     sendResponse("ERROR");
   }
@@ -61,36 +69,7 @@ function GM_xmlhttpRequest(details) {
         }
     }
     xmlhttp.send((typeof(details.data)!='undefined')?details.data:null);
-   }
-
-function callJSONRpc(method, params, id) {
-    if (!xbmc_url) {
-	chrome.tabs.create({'url': chrome.extension.getURL("options.html")},function(){});
-        return false;
-    }
-    var mid = id | 1;
-    var data = {
-      jsonrpc : "2.0",
-      method : method,
-      id : mid
-    }
-    if (params) {
-      data.params = params;
-    }
-    var strData = JSON.stringify(data);
-    //console.log("Calling " + strData);
-    //alert("Calling " + strData);
-    GM_xmlhttpRequest({
-      method: 'POST',
-      url: xbmc_url,
-      headers: 'Content-type: application/json',
-      data: strData,
-      onload: function (r) {
-            //alert("log :"  + JSON.stringify(r));
-            console.log("RESPONSE : " + JSON.stringify(r));
-      }
-    });
-}
- 
+   } 
 });
+
 </script>
