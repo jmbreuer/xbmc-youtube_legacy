@@ -208,6 +208,35 @@ class YouTubePlayer():
 		
 		return result
 
+	def transformColor(self, color):
+		self.common.log("Color: %s - len: %s" % (color, len(color)), 5)
+		color = hex(int(color))
+		color = str(color)
+		color = color[2:]
+		self.common.log("Color: %s - len: %s" % (color, len(color)), 5)
+		if color == "0":
+			color = "000000"
+		if len(color) == 4:
+			color = "00" + color
+		if len(color) == 6:
+			color = color[4:6] + color[2:4] + color[0:2]
+
+		self.common.log("Returning color: %s - len: %s" % (color, len(color)), 5)
+		return color
+
+	def transformAlpha(self, alpha):
+		self.common.log("Alpha: %s - len: %s" % (alpha, len(alpha)), 5)
+		if not alpha or alpha == "0" or alpha == "0.0":
+			alpha = "-1" # No background.
+		else:
+			# YouTube and SSA have inverted alphas.
+			alpha = int(float(alpha) * 100)
+			alpha = hex(256 - alpha)
+			alpha = alpha[2:]
+
+		self.common.log("Alpha: %s - len: %s" % (alpha, len(alpha)), 5)
+		return alpha
+
 	def transformAnnotationToSSA(self, xml):
 		self.common.log("")
 		dom = parseString(xml)
@@ -254,16 +283,14 @@ class YouTubePlayer():
 							else:
 								ns_fsize = 60
 							ns_fcolor = snode.item(0).getAttribute("fgColor")
-							ns_fcolor = ns_fcolor[4:6] + ns_fcolor[2:4] + ns_fcolor[0:2]
+							ns_fcolor = self.transformColor(ns_fcolor)
+
 							ns_bcolor = snode.item(0).getAttribute("bgColor")
-							ns_bcolor = ns_bcolor[4:6] + ns_bcolor[2:4] + ns_bcolor[0:2]
+							ns_bcolor = self.transformColor(ns_bcolor)
+
 							ns_alpha = snode.item(0).getAttribute("bgAlpha")
-							
-							if not ns_alpha or ns_alpha == "0":
-								ns_alpha = "-1"
-							else:
-								ns_alpha = int(265 - (float(ns_alpha) * 100))
-								ns_alpha = hex(ns_alpha)[2:]
+							ns_alpha = self.transformAlpha(ns_alpha)
+
 							append_style += style_template % ( styles_count, ns_fsize, ns_fcolor, ns_fcolor, ns_fcolor, ns_alpha + ns_bcolor )
 							style = "annot" + str(styles_count)
 							styles_count += 1

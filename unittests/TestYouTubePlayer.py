@@ -292,6 +292,48 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 				
 		assert(result[0].find("0:00:16.087,Default") > 0)
 		assert(result[1].find("0:00:19.083,Default") > 0)
+
+	def test_transformAlpha_should_tranform_transparent(self):
+		player = YouTubePlayer()
+		
+		color = player.transformAlpha("0.0")
+		print color
+		assert(color == "-1")
+
+	def test_transformAlpha_should_tranform_80(self):
+		player = YouTubePlayer()
+		
+		color = player.transformAlpha("0.800000011921")
+		print color
+		assert(color == "b0")
+
+	def test_transformColor_should_convert_white(self):
+		player = YouTubePlayer()
+		
+		color = player.transformColor("16777215")
+		print color
+		assert(color == "ffffff")
+
+	def test_transformColor_should_convert_red(self):
+		player = YouTubePlayer()
+		
+		color = player.transformColor("13369344")
+		print color
+		assert(color == "0000cc")
+
+	def test_transformColor_should_convert_blue(self):
+		player = YouTubePlayer()
+		
+		color = player.transformColor("9828")
+		print color
+		assert(color == "642600")
+
+	def test_transformColor_should_convert_0(self):
+		player = YouTubePlayer()
+		
+		color = player.transformColor("0")
+		print color
+		assert(color == "000000")
 				
 	def test_transformAnnotationToSSA_should_parse_youtube_annotations_xml(self):
 		player = YouTubePlayer()
