@@ -15,7 +15,7 @@ else:
 
 class BaseTestCase(unittest2.TestCase):
 	def setUp(self):
-		time.sleep(10)
+		time.sleep(5)
 		MockYouTubeDepends.MockYouTubeDepends().mock()
 		MockYouTubeDepends.MockYouTubeDepends().mockXBMC()
 		self.intializePlugin()
