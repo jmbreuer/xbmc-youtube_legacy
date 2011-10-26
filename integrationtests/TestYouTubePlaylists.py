@@ -61,5 +61,14 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		self.assert_directory_items_should_have_thumbnails()
 		self.assert_playlist_contains_only_unique_video_items()
 		
+	def test_plugin_should_queue_user_new_subscriptions_feed_if_user_selects_play_all_on_external_user_outside_list(self):
+		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings.xml")
+		
+		self.navigation.executeAction({"action":"play_all", "contact":"TobiasTheViking", "user_feed":"newsubscriptions"})
+		
+		self.assert_playlist_count_greater_than_or_equals(10)
+		self.assert_directory_items_should_have_thumbnails()
+		self.assert_playlist_contains_only_unique_video_items()
+
 if __name__ == "__main__":
 	nose.runmodule()
