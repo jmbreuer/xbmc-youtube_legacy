@@ -48,9 +48,9 @@ class TestYouTubePlaylistControl(BaseTestCase.BaseTestCase):
 		control.getArtist = Mock()
 		control.getArtist.return_value = ""
 		
-		control.playAll({"scraper":"music_artists"})
+		control.playAll({"scraper":"music_artist"})
 		
-		control.getArtist.assert_called_with({"scraper":"music_artists", 'fetch_all': 'true'})
+		control.getArtist.assert_called_with({"scraper":"music_artist", 'fetch_all': 'true'})
 				
 	def test_playAll_should_call_getUserFeed_if_user_feed_is_subscriptions_in_params(self):
 		control = YouTubePlaylistControl()
