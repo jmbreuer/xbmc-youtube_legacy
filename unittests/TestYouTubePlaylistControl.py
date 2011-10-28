@@ -333,7 +333,7 @@ class TestYouTubePlaylistControl(BaseTestCase.BaseTestCase):
 		sys.modules["__main__"].language.return_value = "my_string"
 		control = YouTubePlaylistControl()
 		
-		control.createPlayList({})
+		control.createPlaylist({})
 		
 		sys.modules["__main__"].utils.getUserInput.assert_called_with("my_string")
 		sys.modules["__main__"].language.assert_called_with(30529)
@@ -344,7 +344,7 @@ class TestYouTubePlaylistControl(BaseTestCase.BaseTestCase):
 		sys.modules["__main__"].language.return_value = "my_string"
 		control = YouTubePlaylistControl()
 		
-		control.createPlayList({})
+		control.createPlaylist({})
 		
 		sys.modules["__main__"].core.add_playlist.assert_called_with({"title":"my_playlist_name"})
 		
@@ -354,7 +354,7 @@ class TestYouTubePlaylistControl(BaseTestCase.BaseTestCase):
 		sys.modules["__main__"].language.return_value = "my_string"
 		control = YouTubePlaylistControl()
 		
-		control.createPlayList({})
+		control.createPlaylist({})
 		
 		assert(sys.modules["__main__"].core.add_playlist.call_count == 0)
 
