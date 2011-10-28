@@ -35,7 +35,7 @@ class TestYouTubeMusicScraper(BaseTestCase.BaseTestCase):
 		self.assert_directory_count_greater_than_or_equals(10)
 		self.assert_directory_count_less_than_or_equals(51)
 		self.assert_directory_is_a_folder_list()
-		self.assert_directory_items_contain("playlist")
+		self.assert_directory_item_urls_contain("playlist")
 	
 	def test_plugin_should_list_user_uploads_videos_list_correctly(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
@@ -70,7 +70,7 @@ class TestYouTubeMusicScraper(BaseTestCase.BaseTestCase):
 		self.assert_directory_is_a_video_list()
 		self.assert_directory_contains_only_unique_video_items()
 		self.assert_directory_items_should_have_external_thumbnails()
-		self.assert_directory_items_contain("playlist_entry_id")
+		self.assert_directory_item_urls_contain("playlist_entry_id")
 	
 	def test_plugin_should_list_user_recommended_video_list_correctly(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
@@ -92,7 +92,7 @@ class TestYouTubeMusicScraper(BaseTestCase.BaseTestCase):
 		self.assert_directory_is_a_video_list()
 		self.assert_directory_contains_only_unique_video_items()
 		self.assert_directory_items_should_have_external_thumbnails()
-		self.assert_directory_items_contain("playlist_entry_id")
+		self.assert_directory_item_urls_contain("playlist_entry_id")
 	
 	def test_plugin_should_list_user_contacts_folder_list_correctly_(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
@@ -102,7 +102,7 @@ class TestYouTubeMusicScraper(BaseTestCase.BaseTestCase):
 		self.assert_directory_count_greater_than_or_equals(2)
 		self.assert_directory_count_less_than_or_equals(51)
 		self.assert_directory_is_a_folder_list()
-		self.assert_directory_items_contain("contact")
+		self.assert_directory_item_urls_contain("contact")
 
 	def test_plugin_should_list_user_subscriptions_folder_list_correctly_(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
@@ -112,7 +112,7 @@ class TestYouTubeMusicScraper(BaseTestCase.BaseTestCase):
 		self.assert_directory_count_greater_than_or_equals(2)
 		self.assert_directory_count_less_than_or_equals(51)
 		self.assert_directory_is_a_folder_list()
-		self.assert_directory_items_contain("channel")
+		self.assert_directory_item_urls_contain("channel")
 		
 	def test_plugin_should_list_newsubscriptions_video_list_correctly(self):	
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
