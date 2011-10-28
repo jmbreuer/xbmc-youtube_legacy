@@ -1487,8 +1487,8 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		sys.modules["__main__"].language.assert_any_call(30522)
 		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.Container.Update(some_plugin?path=some_path&scraper=similar_artist&artist=some_artist&folder=true&)')
 		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=delete_artist&store=artists&artist=some_artist&)')
-		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=play_all&scraper=music_artists&artist=some_artist&)')
-		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=play_all&shuffle=true&scraper=music_artists&artist=some_artist&)')
+		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=play_all&scraper=music_artist&artist=some_artist&)')
+		self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=play_all&shuffle=true&scraper=music_artist&artist=some_artist&)')
 
 	def test_addFolderContextMenuItems_should_add_play_all_option_to_newsubsctiptions_feed(self):
 		self.prepareContestMenu()
