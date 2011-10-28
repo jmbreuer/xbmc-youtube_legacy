@@ -10,7 +10,7 @@ class TestYouTubeMusicScraper(BaseTestCase.BaseTestCase):
 		self.assert_directory_count_greater_than_or_equals(10)
 		self.assert_directory_count_less_than_or_equals(51)
 		self.assert_directory_is_a_folder_list()
-		self.assert_directory_items_contain("category")
+		self.assert_directory_item_urls_contain("category")
 		
 				
 	def test_plugin_should_scrape_category_video_list_correctly(self):

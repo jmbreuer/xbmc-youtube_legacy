@@ -20,7 +20,7 @@ class TestYouTubeMusicScraper(BaseTestCase.BaseTestCase):
 		self.assert_directory_count_greater_than_or_equals(10)
 		self.assert_directory_count_less_than_or_equals(51)
 		self.assert_directory_is_a_folder_list()
-		self.assert_directory_items_contain("search")
+		self.assert_directory_item_urls_contain("search")
 	
 if __name__ == "__main__":
 	nose.runmodule()
