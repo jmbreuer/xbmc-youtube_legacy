@@ -171,8 +171,8 @@ class YouTubeNavigation():
 			self.playlist.deletePlaylist(params)
 		if (get("action") == "reverse_order"):
 			self.storage.reversePlaylistOrder(params)
-		if (get("action") == "add_playlist"):
-			self.core.add_playlist(params)
+		if (get("action") == "create_playlist"):
+			self.playlist.createPlaylist(params)
 			
 	#==================================== Item Building and Listing ===========================================	
 	def list(self, params = {}):
@@ -522,29 +522,29 @@ class YouTubeNavigation():
 			cm.append ( (self.language(30540), "XBMC.RunPlugin(%s?path=%s&action=delete_artist&store=artists&artist=%s&)" % ( sys.argv[0], item("path"), item("artist") ) ) )			
 			cm.append( (self.language( 30520 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&scraper=music_artists&artist=%s&)" % ( sys.argv[0], item("path"), item("artist") ) ) )
 			cm.append( (self.language( 30522 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&shuffle=true&scraper=music_artists&artist=%s&)" % ( sys.argv[0], item("path"), item("artist") ) ) )
-
-			
-		if (item("user_feed") == "favorites" or item("user_feed") == "newsubscriptions"):
-			cm.append ( (self.language(30520), "XBMC.RunPlugin(%s?path=%s&action=play_all&user_feed=%s&contact=%s&)" % ( sys.argv[0], item("path"), item("user_feed"), "default" ) ) )
-			cm.append ( (self.language(30522), "XBMC.RunPlugin(%s?path=%s&action=play_all&shuffle=true&user_feed=%s&contact=%s&)" % ( sys.argv[0], item("path"), item("user_feed"), "default" ) ) )
-		if (item("playlist")):
-			cm.append ( (self.language(30531), "XBMC.RunPlugin(%s?path=%s&action=reverse_order&playlist=%s&)" % ( sys.argv[0], item("path"), item("playlist") ) ) )
-			cm.append ( (self.language(30520), "XBMC.RunPlugin(%s?path=%s&action=play_all&playlist=%s&)" % ( sys.argv[0], item("path"), item("playlist") ) ) )
-			cm.append ( (self.language(30522), "XBMC.RunPlugin(%s?path=%s&action=play_all&shuffle=true&playlist=%s&)" % ( sys.argv[0], item("path"), item("playlist") ) ) )
-			if not get("external"):
-				cm.append ( (self.language(30539), "XBMC.RunPlugin(%s?path=%s&action=delete_playlist&playlist=%s&)" % ( sys.argv[0], item("path"), item("playlist") ) ) )
-			
-		if item("scraper") in ["watch_later","liked_videos","recommended"]:
+		
+		if (item("user_feed") in ["favorites", "newsubscriptions", "watch_later", "recommended"] ):
+			cm.append ( (self.language(30520), "XBMC.RunPlugin(%s?path=%s&action=play_all&user_feed=%s&contact=%s&login=true&)" % ( sys.argv[0], item("path"), item("user_feed"), "default" ) ) )
+			cm.append ( (self.language(30522), "XBMC.RunPlugin(%s?path=%s&action=play_all&shuffle=true&user_feed=%s&contact=%s&login=true&)" % ( sys.argv[0], item("path"), item("user_feed"), "default" ) ) )
+		
+		if item("scraper") in ["liked_videos"]:
 			cm.append( (self.language( 30520 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&scraper=%s&login=true&)" % ( sys.argv[0], item("path"), item("scraper") ) ) )
 			cm.append( (self.language( 30522 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&shuffle=true&scraper=%s&login=true&)" % ( sys.argv[0], item("path"), item("scraper") ) ) )
-				
+
+		if (item("playlist")):
+			cm.append ( (self.language(30531), "XBMC.RunPlugin(%s?path=%s&action=reverse_order&playlist=%s&)" % ( sys.argv[0], item("path"), item("playlist") ) ) )
+			cm.append ( (self.language(30520), "XBMC.RunPlugin(%s?path=%s&action=play_all&user_feed=playlist&playlist=%s&)" % ( sys.argv[0], item("path"), item("playlist") ) ) )
+			cm.append ( (self.language(30522), "XBMC.RunPlugin(%s?path=%s&action=play_all&user_feed=playlist&shuffle=true&playlist=%s&)" % ( sys.argv[0], item("path"), item("playlist") ) ) )
+			if not get("external"):
+				cm.append ( (self.language(30539), "XBMC.RunPlugin(%s?path=%s&action=delete_playlist&playlist=%s&)" % ( sys.argv[0], item("path"), item("playlist") ) ) )
+							
 		if (item("scraper") == "search_disco"):
-			cm.append( (self.language( 30520 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&search_disco=%s&)" % ( sys.argv[0], item("path"), item("search") ) ) )
-			cm.append( (self.language( 30522 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&shuffle=true&search_disco=%s&)" % ( sys.argv[0], item("path"), item("search") ) ) )
+			cm.append( (self.language( 30520 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&scraper=search_disco&search=%s&)" % ( sys.argv[0], item("path"), item("search") ) ) )
+			cm.append( (self.language( 30522 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&shuffle=true&scraper=search_disco&search=%s&)" % ( sys.argv[0], item("path"), item("search") ) ) )
 			if not get("scraper") == "disco_top_artist":			
 				cm.append( ( self.language( 30524 ), 'XBMC.Container.Update(%s?path=%s&action=edit_disco&store=disco_searches&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
 				cm.append( ( self.language( 30525 ), 'XBMC.RunPlugin(%s?path=%s&action=delete_disco&store=disco_searches&delete=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )								
-
+		
 		if (item("feed") == "search"):
 			cm.append( ( self.language( 30515 ), 'XBMC.Container.Update(%s?path=%s&action=edit_search&store=searches&search=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
 			cm.append( ( self.language( 30508 ), 'XBMC.RunPlugin(%s?path=%s&action=delete_search&store=searches&delete=%s&)' % ( sys.argv[0], item("path"), item("search") ) ) )
