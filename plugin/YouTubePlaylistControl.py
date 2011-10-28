@@ -48,7 +48,7 @@ class YouTubePlaylistControl():
 			result = self.getDiscoSearch(params)
 		elif get("scraper") == "liked_videos":
 			result = self.getLikedVideos(params)
-		elif get("scraper") == "music_artists":
+		elif get("scraper") == "music_artist":
 			result = self.getArtist(params)
 		elif get("scraper") == "music_top100":
 			result = self.getYouTubeTop100(params)
