@@ -52,10 +52,10 @@ class YouTubePlaylistControl():
 			result = self.getArtist(params)
 		elif get("scraper") == "music_top100":
 			result = self.getYouTubeTop100(params)
-		elif get("playlist"):
+		elif get("playlist") and not get("user_feed"):
 			params["user_feed"] = "playlist"
 			result = self.getUserFeed(params)
-		elif get("user_feed") in ["recommended", "watch_later", "newsubscriptions", "favorites"]:
+		elif get("user_feed") in ["recommended", "watch_later", "newsubscriptions", "favorites","playlist"]:
 			result = self.getUserFeed(params)
 		elif get("video_list"):
 			( ytobjects, status) = self.core.getBatchDetails(get("video_list").split(","))
@@ -220,7 +220,7 @@ class YouTubePlaylistControl():
 		
 		return False
 	
-	def createPlayList(self, params = {}):
+	def createPlaylist(self, params = {}):
 		get = params.get
 		
 		input = self.utils.getUserInput(self.language(30529))
