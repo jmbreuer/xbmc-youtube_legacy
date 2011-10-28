@@ -184,7 +184,7 @@ class BaseTestCase(unittest2.TestCase):
 			print "List Items: \r\n" + repr(args)
 		assert(next_folder_count == 1)
 		
-	def assert_directory_items_contain(self, param):
+	def assert_directory_item_urls_contain(self, param):
 		args = sys.modules["__main__"].xbmcplugin.addDirectoryItem.call_args_list
 		
 		missing_count = 0
@@ -207,6 +207,38 @@ class BaseTestCase(unittest2.TestCase):
 			
 		assert(missing_count <= 1)
 
+	def assert_directory_item_titles_contain(self, param):
+		args = sys.modules["__main__"].xbmcplugin.addDirectoryItem.call_args_list
+		
+		found = False
+		
+		for call in args:
+			title = call[1]["Title"]
+			if title.find(param) > -1:
+				found = True 
+		
+		if not found:
+			print 'Couldnt find %s in list of directory item title\'s' % param
+			print "Directory list: \r\n" + repr(args)
+			
+		assert(found == True)
+
+	def assert_directory_item_titles_does_not_contain(self, param):
+		args = sys.modules["__main__"].xbmcplugin.addDirectoryItem.call_args_list
+		
+		found = False
+		
+		for call in args:
+			title = call[1]["Title"]
+			if title.find(param) > -1:
+				found = True 
+		
+		if found:
+			print 'Found %s in list of directory item title\'s' % param
+			print "Directory list: \r\n" + repr(args)
+			
+		assert(found == False)
+				
 	def assert_playlist_count_greater_than_or_equals(self, count):
 		args = sys.modules["__main__"].xbmc.PlayList().add.call_args_list
 		
