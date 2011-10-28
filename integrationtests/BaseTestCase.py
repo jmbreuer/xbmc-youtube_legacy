@@ -128,6 +128,29 @@ class BaseTestCase(unittest2.TestCase):
 			
 		assert(len(non_unique) == 0)
 	
+	def assert_directory_contains_almost_only_unique_video_items(self):
+		video_ids = []
+		non_unique = []
+		args = sys.modules["__main__"].xbmcplugin.addDirectoryItem.call_args_list
+		
+		for call in args:
+			url = call[1]["url"]
+			if url.find("videoid=") > -1:
+				video = url[url.find("videoid=") + len("videoid="):]
+				if video.find("&") > -1:
+					video = video[:video.find("&")]
+				
+				if video:
+					if video in video_ids:
+						non_unique.append(video)
+					video_ids.append(video)
+		
+		if len(non_unique) > 1:
+			print "Directory contains two or more duplicate videoids.\r\n Duplicates: %s \r\n Full List: %s" % (repr(non_unique), repr(video_ids)) 
+			print "Directory list: \r\n" + repr(args)
+			
+		assert(len(non_unique) == 0)
+	
 	def assert_directory_items_should_have_external_thumbnails(self):
 		args = sys.modules["__main__"].xbmcgui.ListItem.call_args_list
 		
