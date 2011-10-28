@@ -105,7 +105,7 @@ class TestYouTubePlaylistControl(BaseTestCase.BaseTestCase):
 		sys.modules["__main__"].xbmc.Player().stop.assert_called_with()
 		playlist_value.shuffle.assert_called_with()
 		
-	def test_playAll_should_correctly_queue_all_items_in_result_list(self):
+	def test_playAll_should_queue_all_items_in_result_list(self):
 		playlist_value = Mock()
 		sys.modules["__main__"].xbmc.PlayList.return_value = playlist_value
 		control = YouTubePlaylistControl()
@@ -113,6 +113,17 @@ class TestYouTubePlaylistControl(BaseTestCase.BaseTestCase):
 		control.getUserFeed.return_value = [{"Title":"someTitle1", "videoid":"some_id1","thumbnail":"some_thumbnail1"},{"Title":"someTitle2", "videoid":"some_id2","thumbnail":"some_thumbnail2"}]
 		
 		control.playAll({"user_feed":"playlist","playlist":"someid","shuffle":"true"})
+		
+		assert(playlist_value.add.call_count == 2)
+		
+	def test_playAll_should_queue_all_items_in_result_list_after_provided_videoid(self):
+		playlist_value = Mock()
+		sys.modules["__main__"].xbmc.PlayList.return_value = playlist_value
+		control = YouTubePlaylistControl()
+		control.getUserFeed = Mock()
+		control.getUserFeed.return_value = [{"Title":"someTitle1", "videoid":"some_id1","thumbnail":"some_thumbnail1"},{"Title":"someTitle2", "videoid":"some_id2","thumbnail":"some_thumbnail2"},{"Title":"someTitle3", "videoid":"some_id3","thumbnail":"some_thumbnail3"},{"Title":"someTitle4", "videoid":"some_id4","thumbnail":"some_thumbnail4"}]
+		
+		control.playAll({"user_feed":"playlist","playlist":"someid","shuffle":"true","videoid":"some_id3"})
 		
 		assert(playlist_value.add.call_count == 2)
 	
@@ -226,7 +237,25 @@ class TestYouTubePlaylistControl(BaseTestCase.BaseTestCase):
 		control.getUserFeed({"user_feed":"playlist"})
 		
 		assert(sys.modules["__main__"].feeds.listAll.call_count == 0)
+	
+	def test_getYouTubeTop100_should_call_scrapeYouTubeTop100(self):
+		sys.modules["__main__"].scraper.scrapeYouTubeTop100.return_value = ("",303)
+		sys.modules["__main__"].core.getBatchDetails.return_value = ("",200)
+		control = YouTubePlaylistControl()
 		
+		control.getYouTubeTop100({})
+		
+		assert(sys.modules["__main__"].scraper.scrapeYouTubeTop100.call_count == 1)
+	
+	def test_getYouTubeTop100_should_call_getBatchDetails(self):
+		sys.modules["__main__"].scraper.scrapeYouTubeTop100.return_value = ("",200)
+		sys.modules["__main__"].core.getBatchDetails.return_value = ("",200)
+		control = YouTubePlaylistControl()
+		
+		control.getYouTubeTop100({})
+
+		assert(sys.modules["__main__"].core.getBatchDetails.call_count == 1)
+	
 	def test_getArtist_should_exit_cleanly_if_artist_is_not_in_params(self):
 		control = YouTubePlaylistControl()
 		
