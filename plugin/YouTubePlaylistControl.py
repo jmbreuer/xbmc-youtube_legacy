@@ -152,7 +152,6 @@ class YouTubePlaylistControl():
 	def getYouTubeTop100(self, params = {}):
 		(result, status) = self.scraper.scrapeYouTubeTop100(params)
 		
-		print repr(result)
 		if status == 200:
 			(result, status) = self.core.getBatchDetails(result, params)
 		
