@@ -149,7 +149,7 @@ class BaseTestCase(unittest2.TestCase):
 			print "Directory contains two or more duplicate videoids.\r\n Duplicates: %s \r\n Full List: %s" % (repr(non_unique), repr(video_ids)) 
 			print "Directory list: \r\n" + repr(args)
 			
-		assert(len(non_unique) == 0)
+		assert(len(non_unique) <= 1)
 	
 	def assert_directory_items_should_have_external_thumbnails(self):
 		args = sys.modules["__main__"].xbmcgui.ListItem.call_args_list
@@ -308,7 +308,7 @@ class BaseTestCase(unittest2.TestCase):
 			print "Playlist: \r\n" + repr(args)
 			
 		assert(len(non_unique) == 0)
-		
+	
 	def assert_playlist_videos_contain(self, videoid):
 		video_ids = []
 		args = sys.modules["__main__"].xbmc.PlayList().add.call_args_list
