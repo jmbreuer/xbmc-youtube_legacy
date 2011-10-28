@@ -520,8 +520,8 @@ class YouTubeNavigation():
 		if item("artist"):
 			cm.append ( (self.language(30507), "XBMC.Container.Update(%s?path=%s&scraper=similar_artist&artist=%s&folder=true&)" % ( sys.argv[0], item("path"), item("artist") ) ) )
 			cm.append ( (self.language(30540), "XBMC.RunPlugin(%s?path=%s&action=delete_artist&store=artists&artist=%s&)" % ( sys.argv[0], item("path"), item("artist") ) ) )			
-			cm.append( (self.language( 30520 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&scraper=music_artists&artist=%s&)" % ( sys.argv[0], item("path"), item("artist") ) ) )
-			cm.append( (self.language( 30522 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&shuffle=true&scraper=music_artists&artist=%s&)" % ( sys.argv[0], item("path"), item("artist") ) ) )
+			cm.append( (self.language( 30520 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&scraper=music_artist&artist=%s&)" % ( sys.argv[0], item("path"), item("artist") ) ) )
+			cm.append( (self.language( 30522 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&shuffle=true&scraper=music_artist&artist=%s&)" % ( sys.argv[0], item("path"), item("artist") ) ) )
 		
 		if (item("user_feed") in ["favorites", "newsubscriptions", "watch_later", "recommended"] ):
 			cm.append ( (self.language(30520), "XBMC.RunPlugin(%s?path=%s&action=play_all&user_feed=%s&contact=%s&login=true&)" % ( sys.argv[0], item("path"), item("user_feed"), "default" ) ) )
