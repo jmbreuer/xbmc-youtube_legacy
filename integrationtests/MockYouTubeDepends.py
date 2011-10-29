@@ -5,11 +5,9 @@ class MockYouTubeDepends:
 		import string, platform
 		from mock import Mock
 		sys.path.append("../plugin/")
-		#import DialogDownloadProgress
-		#sys.modules[ "__main__" ].DialogDownloadProgress = Mock(spec=DialogDownloadProgress)
 		
 		#Setup default test various values 
-		sys.modules[ "__main__" ].plugin = "YouTube - Integrationtest"
+		sys.modules[ "__main__" ].plugin = "YouTube - IntegrationTest"
 		sys.modules[ "__main__" ].dbg = True
 		try:
 			plat = platform.uname()
@@ -63,7 +61,7 @@ class MockYouTubeDepends:
 	def log(self, description, level = 0):
 		if sys.modules[ "__main__" ].dbg and sys.modules[ "__main__" ].dbglevel > level:
 			import inspect
-			print "[%s] %s : '%s'" % ("YouTube4", inspect.stack()[3][3] , description.decode("utf-8","ignore")) # 3 - 3 for TestYouTubeUserFeeds.py
+			print "[%s] %s : '%s'" % ("YouTube IntegrationTest", inspect.stack()[3][3] , description.decode("utf-8","ignore")) # 3 - 3 for TestYouTubeUserFeeds.py
 		
 	def execute(self, function, *args):
 		return function(*args)
