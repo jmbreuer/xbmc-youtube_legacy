@@ -45,10 +45,7 @@ class MockYouTubeDepends:
 		sys.modules[ "__main__" ].xbmcaddon = Mock(spec=xbmcaddon)
 		sys.modules[ "__main__" ].xbmcgui = Mock(spec=xbmcgui)
 		sys.modules[ "__main__" ].xbmcgui.WindowXMLDialog.return_value = "testWindowXML"
-                sys.modules[ "__main__" ].xbmcgui.getCurrentWindowId.return_value = 1
-		#window = Mock()
-		#window.addControl = Mock()
-                #sys.modules[ "__main__" ].xbmcgui.Window.return_value = window
+		sys.modules[ "__main__" ].xbmcgui.getCurrentWindowId.return_value = 1
 		
 		sys.modules[ "__main__" ].xbmcplugin = Mock(spec=xbmcplugin)
 		sys.modules[ "__main__" ].xbmcvfs = xbmcvfs
@@ -59,12 +56,12 @@ class MockYouTubeDepends:
 		import xbmcLanguage
 		sys.modules[ "__main__" ].language = xbmcLanguage.xbmcLanguage()
 
-                sys.modules["DialogDownloadProgress"] = __import__("mock")
-                sys.modules["DialogDownloadProgress"].DownloadProgress = Mock()
+		sys.modules["DialogDownloadProgress"] = __import__("mock")
+		sys.modules["DialogDownloadProgress"].DownloadProgress = Mock()
 
 	
 	def log(self, description, level = 0):
-                if sys.modules[ "__main__" ].dbg and sys.modules[ "__main__" ].dbglevel > level:
+		if sys.modules[ "__main__" ].dbg and sys.modules[ "__main__" ].dbglevel > level:
 			import inspect
 			print "[%s] %s : '%s'" % ("YouTube4", inspect.stack()[3][3] , description.decode("utf-8","ignore")) # 3 - 3 for TestYouTubeUserFeeds.py
 		
