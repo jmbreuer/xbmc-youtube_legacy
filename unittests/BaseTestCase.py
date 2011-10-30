@@ -8,7 +8,7 @@ MockYouTubeDepends.MockYouTubeDepends().mockXBMC()
 sys.path.append('../plugin/')
 sys.path.append('../xbmc-mocks/')
 
-class BaseTestCase(unittest2.TestCase):
+class BaseTestCase(unittest2.TestCase): #pragma: no cover
 	
 	def setUp(self):
 		MockYouTubeDepends.MockYouTubeDepends().mockXBMC()
@@ -20,3 +20,6 @@ class BaseTestCase(unittest2.TestCase):
 		if should_eval:
 			inputdata = eval(inputdata)
 		return inputdata
+	
+	def raiseError(self, exception):
+		raise exception
