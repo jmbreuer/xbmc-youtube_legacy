@@ -8,7 +8,7 @@ MockYouTubeDepends.MockYouTubeDepends().mockXBMC()
 sys.path.append('../plugin/')
 sys.path.append('../xbmc-mocks/')
 
-class BaseTestCase(unittest2.TestCase): #pragma: no cover
+class BaseTestCase(unittest2.TestCase):#pragma: no cover
 	
 	def setUp(self):
 		MockYouTubeDepends.MockYouTubeDepends().mockXBMC()
