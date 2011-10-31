@@ -203,7 +203,7 @@ class YouTubePlaylistControl():
 			selected = dialog.select(self.language(30528), list)
 			
 		if selected == 0:
-			self.createPlayList(params)
+			self.createPlaylist(params)
 			if get("title"):
 				result = self.feeds.listAll(params)
 				for item in result:

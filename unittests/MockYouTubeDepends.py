@@ -1,7 +1,8 @@
+import sys, time
 class MockYouTubeDepends:
 	common = ""
 	def mock(self):
-		import sys, string
+		import string
 		from mock import Mock
 		sys.path.append("../plugin/")
 		
@@ -45,7 +46,6 @@ class MockYouTubeDepends:
 		sys.modules[ "__main__" ].navigation = Mock(spec=YouTubeNavigation.YouTubeNavigation)
 	
 	def mockXBMC(self):
-		import sys
 		from mock import Mock
 		sys.path.append("../xbmc-mocks/")
 		import xbmc, xbmcaddon, xbmcgui, xbmcplugin, xbmcvfs
@@ -70,5 +70,9 @@ class MockYouTubeDepends:
 		sys.modules["DialogDownloadProgress"].DownloadProgress = Mock()
 
 	def log(self, description, level = 0):
-		import inspect
-		print "[%s] %s : '%s'" % ("YouTube", inspect.stack()[1][3], description)
+                if sys.modules[ "__main__" ].dbg and sys.modules[ "__main__" ].dbglevel > level:
+			import inspect
+			if isinstance(description, str):
+				print "%s [%s] %s : '%s'" % (time.strftime('%H:%M:%S'), "YouTube-Mock", inspect.stack()[1][3] , description.decode("utf-8","ignore"))
+			else:
+				print "%s [%s] %s : '%s'" % (time.strftime('%H:%M:%S'), "YouTube-Mock", inspect.stack()[1][3] , description)

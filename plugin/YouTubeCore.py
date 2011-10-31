@@ -77,6 +77,7 @@ class YouTubeCore():
 		return None
 	
 	def delete_favorite(self, params={}):
+		self.common.log("")
 		get = params.get
 		
 		delete_url = "http://gdata.youtube.com/feeds/api/users/default/favorites"
@@ -85,6 +86,7 @@ class YouTubeCore():
 		return (result["content"], result["status"])
 	
 	def remove_contact(self, params={}):
+		self.common.log("")
 		get = params.get
 		delete_url = "http://gdata.youtube.com/feeds/api/users/default/contacts" 
 		delete_url += "/" + get("contact")
@@ -92,6 +94,7 @@ class YouTubeCore():
 		return (result["content"], result["status"])
 
 	def remove_subscription(self, params={}):
+		self.common.log("")
 		get = params.get
 		delete_url = "http://gdata.youtube.com/feeds/api/users/default/subscriptions"
 		delete_url += "/" + get("editid")
@@ -99,6 +102,7 @@ class YouTubeCore():
 		return (result["content"], result["status"])
 			
 	def add_contact(self, params={}):
+		self.common.log("")
 		get = params.get
 		url = "http://gdata.youtube.com/feeds/api/users/default/contacts"
 		add_request = '<?xml version="1.0" encoding="UTF-8"?> <entry xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://gdata.youtube.com/schemas/2007"><yt:username>%s</yt:username></entry>' % get("contact")
@@ -113,6 +117,7 @@ class YouTubeCore():
 		return (result["content"], result["status"])
 		
 	def add_subscription(self, params={}):
+		self.common.log("")
 		get = params.get
 		url = "http://gdata.youtube.com/feeds/api/users/default/subscriptions"
 		add_request = '<?xml version="1.0" encoding="UTF-8"?><entry xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://gdata.youtube.com/schemas/2007"> <category scheme="http://gdata.youtube.com/schemas/2007/subscriptiontypes.cat" term="user"/><yt:username>%s</yt:username></entry>' % get("channel")
@@ -127,6 +132,7 @@ class YouTubeCore():
 		return (result["content"], result["status"])
 		
 	def del_playlist(self, params={}):
+		self.common.log("")
 		get = params.get
 		url = "http://gdata.youtube.com/feeds/api/users/default/playlists/%s" % (get("playlist"))
 		result = self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true", "method": "DELETE"})
@@ -134,23 +140,25 @@ class YouTubeCore():
 
 	def add_to_playlist(self, params={}):
 		get = params.get
+		self.common.log("")
 		url = "http://gdata.youtube.com/feeds/api/playlists/%s" % get("playlist")
 		add_request = '<?xml version="1.0" encoding="UTF-8"?><entry xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://gdata.youtube.com/schemas/2007"><id>%s</id></entry>' % get("videoid")
 		result = self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true", "request": add_request})
 		return (result["content"], result["status"])
 	
 	def remove_from_playlist(self, params={}):
-		get = params.get
+		self.common.log("")
+ 		get = params.get
 		url = "http://gdata.youtube.com/feeds/api/playlists/%s/%s" % (get("playlist"), get("playlist_entry_id"))
 		result = self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true", "method": "DELETE"})
 		return (result["content"], result["status"])
 		
 	def remove_from_watch_later(self, params = {}):
+		self.common.log("")
 		get = params.get
 		url = "https://gdata.youtube.com/feeds/api/users/default/watch_later/%s" % get("playlist_entry_id")
 		result = self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true", "method": "DELETE"})
-		return (result["content"], result["status"])
-		
+		return (result["content"], result["status"])		
 		
 	def getFolderInfo(self, xml, params={}):
 		get = params.get
@@ -440,22 +448,52 @@ class YouTubeCore():
 		except urllib2.HTTPError, e:
 			cont = False
 			err = str(e)
+			msg = e.read()
 			
 			self.common.log("HTTPError : " + err)
 			if e.code == 400 or True:
-				msg = e.read()
 				self.common.log("Unhandled HTTPError : [%s] %s " % ( e.code, msg), 1)
 			
-			if err.find("Token invalid") > -1:
-				self.common.log("refreshing token")
-				self._oRefreshToken()
-			elif err.find("User Rate Limit Exceeded") > -1:
-				self.common.log("Sleeping for 10 seconds")
-				time.sleep(10)
-			else:
-				if e.fp:
-					cont = e.fp.read()
-				self.common.log("HTTPError - Headers: " + str(e.headers) + " - Content: " + cont)
+
+			if msg.find("<?xml") > -1:
+				acted = False
+
+				dom = minidom.parseString(msg);
+				self.common.log(str(len(msg)))
+				domains = dom.getElementsByTagName("domain");
+				codes = dom.getElementsByTagName("code");
+				for domain in domains:
+					self.common.log(repr(domain.firstChild.nodeValue),5)
+					if domain.firstChild.nodeValue == "yt:quota":
+						self.common.log("Hit quota... sleeping for 10 seconds")
+						time.sleep(10)
+						acted = True
+						
+				if not acted:
+					for code in codes:
+						self.common.log(repr(code.firstChild.nodeValue),5)
+						if code.firstChild.nodeValue == "too_many_recent_calls":
+							self.common.log("Hit quota... sleeping for 10 seconds")
+							time.sleep(10)
+							acted = True
+
+			else: # Legacy this.
+				if msg.find("yt:quota") > 1:
+					self.common.log("Hit quota... sleeping for 10 seconds")
+					time.sleep(10)
+				elif msg.find("too_many_recent_calls") > 1:
+					self.common.log("Hit quota... sleeping for 10 seconds")
+					time.sleep(10)
+				elif err.find("Token invalid") > -1:
+					self.common.log("refreshing token")
+					self._oRefreshToken()
+				elif err.find("User Rate Limit Exceeded") > -1:
+					self.common.log("Hit limit... Sleeping for 10 seconds")
+					time.sleep(10)
+				else:
+					if e.fp:
+						cont = e.fp.read()
+						self.common.log("HTTPError - Headers: " + str(e.headers) + " - Content: " + cont)
 
 			params["error"] = str(int(get("error", "0")) + 1)
 			ret_obj = self._fetchPage(params)

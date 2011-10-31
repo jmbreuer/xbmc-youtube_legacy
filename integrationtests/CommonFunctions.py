@@ -21,13 +21,25 @@ import sys, urllib2, re, inspect
 class CommonFunctions():
 	
 	def __init__(self):
-		self.xbmc = sys.modules["__main__"].xbmc
-		self.settings = sys.modules[ "__main__"].settings 
-		self.plugin = sys.modules[ "__main__"].plugin
-		self.language = sys.modules[ "__main__" ].language
-		self.dbglevel = sys.modules[ "__main__" ].dbglevel
-		self.dbg = sys.modules[ "__main__" ].dbg
+		self.plugin = "Common Functions-0.8"
 		self.USERAGENT = "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-GB; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8"
+
+
+		if sys.modules[ "__main__" ].xbmc:
+			self.xbmc = sys.modules["__main__"].xbmc
+		else:
+			import xbmc
+			self.xbmc = xbmc
+
+		if sys.modules[ "__main__" ].dbglevel:
+			self.dbglevel = sys.modules[ "__main__" ].dbglevel
+		else:
+			self.dbglevel = 3
+
+		if sys.modules[ "__main__" ].dbg:
+			self.dbg = sys.modules[ "__main__" ].dbg
+		else:
+			self.dbg = True
 
 	def stripTags(self, html):
 		sub_start = html.find("<")
@@ -145,9 +157,9 @@ class CommonFunctions():
 				for match in lst:
 					tmp_list = re.compile('<' + name + '.*?' + ret + '=([\'"][^>]*?)>').findall(match)
 					lst2 += self.getDOMAttributes(tmp_list)
-					self.log(repr(lst), 3)
-					self.log(repr(match), 3)
-					self.log(repr(lst2), 3)
+					self.log(lst, 3)
+					self.log(match, 3)
+					self.log(lst2, 3)
 				lst = lst2
 			elif name != "img":
 				self.log("Getting element content for %s matches " % len(lst), 2)
@@ -156,9 +168,9 @@ class CommonFunctions():
 					temp = self.getDOMContent(item, name, match).strip()
 					item = item[item.find(match + temp) + len(match + temp):]
 					lst2.append(temp)
-					self.log(repr(lst), 3)
-					self.log(repr(match), 3)
-					self.log(repr(lst2), 3)
+					self.log(lst, 3)
+					self.log(match, 3)
+					self.log(lst2, 3)
 				lst = lst2
 			ret_lst += lst
 
@@ -212,4 +224,4 @@ class CommonFunctions():
 		if self.dbg and self.dbglevel > level:
 			# Funny stuff..
 			# [1][3] needed for calls from scrapeShow
-			self.xbmc.log("[%s] %s : '%s'" % (self.plugin, inspect.stack()[1][3], description), self.xbmc.LOGNOTICE)
+			self.xbmc.log("[%s] %s : '%s'" % (self.plugin, inspect.stack()[1][3], description.encode("utf8", "ignore")), self.xbmc.LOGNOTICE)

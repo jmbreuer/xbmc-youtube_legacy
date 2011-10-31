@@ -130,6 +130,7 @@ class YouTubeNavigation():
 		self.xbmcplugin.endOfDirectory( handle=int( sys.argv[ 1 ] ), succeeded=True, cacheToDisc=cache )
 	
 	def executeAction(self, params = {}):
+		self.common.log(params, 3)
 		get = params.get
 		if (get("action") == "settings"):
 			self.login.login(params)

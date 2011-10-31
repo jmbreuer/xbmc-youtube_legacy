@@ -1,4 +1,4 @@
-import sys
+import sys, time
 class MockYouTubeDepends:
 	
 	def mock(self):
@@ -17,7 +17,7 @@ class MockYouTubeDepends:
 		if plat[0] == "FreeBSD":
 			sys.modules[ "__main__" ].dbglevel = 10
 		else:
-			sys.modules[ "__main__" ].dbglevel = 3
+			sys.modules[ "__main__" ].dbglevel = 30
 		sys.modules[ "__main__" ].login = "" 
 		
 		sys.modules[ "__main__" ].cache = Mock()
@@ -61,7 +61,11 @@ class MockYouTubeDepends:
 	def log(self, description, level = 0):
 		if sys.modules[ "__main__" ].dbg and sys.modules[ "__main__" ].dbglevel > level:
 			import inspect
-			print "[%s] %s : '%s'" % ("YouTube IntegrationTest", inspect.stack()[3][3] , description.decode("utf-8","ignore")) # 3 - 3 for TestYouTubeUserFeeds.py
+			# 3 - 3 for TestYouTubeUserFeeds.py
+			if isinstance(description, str):
+				print "%s [%s] %s : '%s'" % (time.strftime('%H:%M:%S'), "YouTube-Mock", inspect.stack()[3][3] , description.decode("utf-8","ignore"))
+			else:
+				print "%s [%s] %s : '%s'" % (time.strftime('%H:%M:%S'), "YouTube-Mock", inspect.stack()[3][3] , description)
 		
 	def execute(self, function, *args):
 		return function(*args)
