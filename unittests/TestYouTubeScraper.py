@@ -1191,7 +1191,6 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 		assert(result[0].has_key("Title"))
 		assert(result[0]["scraper"] == "categories")		
 	
-	
 	def test_paginator_should_call_cache_function_with_pointer_to_new_results_function_if_scraper_is_not_show(self):
 		
 		result, status = self.scraper.paginator({"scraper":"some_scraper","new_results_function":"some_function_pointer"})
@@ -1248,10 +1247,17 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 		
 	def test_paginator_should_call_utils_addNextFolder_if_item_list_is_longer_than_per_page_count(self):
 		sys.modules["__main__"].core.getBatchDetails.return_value = ([],200)
+		videos = []
+		i = 0
+		while i < 50:
+			videos.append("some_cached_string_" + str(i))
+			i += 1
+			
+		sys.modules["__main__"].cache.cacheFunction.return_value = (videos, 200)
 		
 		result, status = self.scraper.paginator({"scraper":"some_scraper","new_results_function":"some_function_pointer", "batch":"true"})
 		
-		assert(sys.modules["__main__"].core.getBatchDetails.call_count > 0)
+		assert(sys.modules["__main__"].utils.addNextFolder.call_count > 0)
 		
 	def test_paginator_should_store_thumbnail_if_scraper_is_search_disco(self):
 		sys.modules["__main__"].cache.cacheFunction.return_value = ([{"thumbnail":"some_cached_string"}], 200)

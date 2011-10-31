@@ -13,7 +13,7 @@ else:
 	for old_file in os.listdir("tmp"):
 		os.remove("./tmp/" + old_file)
 
-class BaseTestCase(unittest2.TestCase):
+class BaseTestCase(unittest2.TestCase):#pragma: no cover
 	def setUp(self):
 		time.sleep(5)
 		MockYouTubeDepends.MockYouTubeDepends().mock()

@@ -75,7 +75,7 @@ class TestYouTubeMusicScraper(BaseTestCase.BaseTestCase):
 	def test_plugin_should_list_user_recommended_video_list_correctly(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
 
-		self.navigation.listMenu({"feed":"recommended", 'login':'true', "path":"/root/watch_later"})
+		self.navigation.listMenu({"user_feed":"recommended", 'login':'true', "path":"/root/watch_later"})
 		
 		self.assert_directory_count_greater_than_or_equals(10)
 		self.assert_directory_count_less_than_or_equals(51)

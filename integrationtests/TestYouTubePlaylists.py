@@ -3,9 +3,8 @@ import nose, sys
 
 class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 	
-	def ttest_plugin__should_queue_playlist_and_start_playback_if_user_selects_play_all_in_playlist(self):
+	def test_plugin__should_queue_playlist_and_start_playback_if_user_selects_play_all_in_playlist(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
-		
 		self.navigation.executeAction({"action":"play_all", "videoid": "Q7GVSx7yMaA","playlist":"E3E0C28746217FA6"})
 		
 		self.assert_playlist_count_greater_than_or_equals(30)
@@ -14,9 +13,8 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		self.assert_playlist_videos_does_not_contain("6CaawfTDBM8")
 		self.assert_playlist_videos_contain("Q7GVSx7yMaA")
 	
-	def ttest_plugin__should_queue_playlist_and_start_playback_if_user_selects_play_all_outside_playlist(self):
+	def test_plugin__should_queue_playlist_and_start_playback_if_user_selects_play_all_outside_playlist(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
-		
 		self.navigation.executeAction({"action":"play_all", "playlist":"E3E0C28746217FA6"})
 		
 		self.assert_playlist_count_greater_than_or_equals(30)
@@ -61,7 +59,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		self.assert_directory_items_should_have_thumbnails()
 		self.assert_playlist_contains_only_unique_video_items()
 		
-	def ttest_plugin__should_queue_user_new_subscriptions_feed_if_user_selects_play_all_on_external_user_outside_list(self):
+	def test_plugin__should_queue_user_new_subscriptions_feed_if_user_selects_play_all_on_external_user_outside_list(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
 		
 		self.navigation.executeAction({"action":"play_all", "contact":"TobiasTheViking", "user_feed":"newsubscriptions"})
