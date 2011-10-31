@@ -77,6 +77,7 @@ class YouTubeCore():
 		return None
 	
 	def delete_favorite(self, params={}):
+		self.common.log("")
 		get = params.get
 		
 		delete_url = "http://gdata.youtube.com/feeds/api/users/default/favorites"
@@ -85,6 +86,7 @@ class YouTubeCore():
 		return (result["content"], result["status"])
 	
 	def remove_contact(self, params={}):
+		self.common.log("")
 		get = params.get
 		delete_url = "http://gdata.youtube.com/feeds/api/users/default/contacts" 
 		delete_url += "/" + get("contact")
@@ -92,6 +94,7 @@ class YouTubeCore():
 		return (result["content"], result["status"])
 
 	def remove_subscription(self, params={}):
+		self.common.log("")
 		get = params.get
 		delete_url = "http://gdata.youtube.com/feeds/api/users/default/subscriptions"
 		delete_url += "/" + get("editid")
@@ -99,6 +102,7 @@ class YouTubeCore():
 		return (result["content"], result["status"])
 			
 	def add_contact(self, params={}):
+		self.common.log("")
 		get = params.get
 		url = "http://gdata.youtube.com/feeds/api/users/default/contacts"
 		add_request = '<?xml version="1.0" encoding="UTF-8"?> <entry xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://gdata.youtube.com/schemas/2007"><yt:username>%s</yt:username></entry>' % get("contact")
@@ -113,6 +117,7 @@ class YouTubeCore():
 		return (result["content"], result["status"])
 		
 	def add_subscription(self, params={}):
+		self.common.log("")
 		get = params.get
 		url = "http://gdata.youtube.com/feeds/api/users/default/subscriptions"
 		add_request = '<?xml version="1.0" encoding="UTF-8"?><entry xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://gdata.youtube.com/schemas/2007"> <category scheme="http://gdata.youtube.com/schemas/2007/subscriptiontypes.cat" term="user"/><yt:username>%s</yt:username></entry>' % get("channel")
@@ -127,6 +132,7 @@ class YouTubeCore():
 		return (result["content"], result["status"])
 		
 	def del_playlist(self, params={}):
+		self.common.log("")
 		get = params.get
 		url = "http://gdata.youtube.com/feeds/api/users/default/playlists/%s" % (get("playlist"))
 		result = self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true", "method": "DELETE"})
@@ -134,23 +140,25 @@ class YouTubeCore():
 
 	def add_to_playlist(self, params={}):
 		get = params.get
+		self.common.log("")
 		url = "http://gdata.youtube.com/feeds/api/playlists/%s" % get("playlist")
 		add_request = '<?xml version="1.0" encoding="UTF-8"?><entry xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://gdata.youtube.com/schemas/2007"><id>%s</id></entry>' % get("videoid")
 		result = self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true", "request": add_request})
 		return (result["content"], result["status"])
 	
 	def remove_from_playlist(self, params={}):
-		get = params.get
+		self.common.log("")
+ 		get = params.get
 		url = "http://gdata.youtube.com/feeds/api/playlists/%s/%s" % (get("playlist"), get("playlist_entry_id"))
 		result = self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true", "method": "DELETE"})
 		return (result["content"], result["status"])
 		
 	def remove_from_watch_later(self, params = {}):
+		self.common.log("")
 		get = params.get
 		url = "https://gdata.youtube.com/feeds/api/users/default/watch_later/%s" % get("playlist_entry_id")
 		result = self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true", "method": "DELETE"})
-		return (result["content"], result["status"])
-		
+		return (result["content"], result["status"])		
 		
 	def getFolderInfo(self, xml, params={}):
 		get = params.get

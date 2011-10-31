@@ -4,7 +4,7 @@ import nose, sys, os
 from mock import Mock, patch
 
 
-class TestYouTubeLogin(BaseTestCase.BaseTestCase):
+class TestYouTubeUserActions(BaseTestCase.BaseTestCase):
 	def test_plugin_should_add_favorite(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
 
@@ -129,34 +129,41 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
 				playlist_entry_id = item["playlist_entry_id"]
 
 		if playlistid and playlist_entry_id:
-			self.navigation.executeAction({"action":"remove_from_playlist", "playlist_entry_id": playlist_entry_id, "playlist": playlist_id})
+			self.navigation.executeAction({"action": "remove_from_playlist", "playlist_entry_id": playlist_entry_id, "playlist": playlist_id})
 			assert(False)
 		else:
 			assert(False)
 
 	def test_plugin_should_add_playlist(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
+
+		sys.modules["__main__"].xbmc.Keyboard().isConfirmed.return_value = True
+		sys.modules["__main__"].xbmc.Keyboard().getText.return_value = "testlist"
+
 		result = sys.modules[ "__main__" ].core._fetchPage({ "link": "http://gdata.youtube.com/feeds/api/users/default/playlists?v=2.1&start-index=1&max-results=50", "auth": "true"})
 		items = sys.modules[ "__main__" ].core.getFolderInfo(result["content"])
 
 		for item in items:
 			if item["Title"] == "testlist":
+				print "Deleting stale playlist with editid: %s" % item["editid"]
 				self.navigation.executeAction({"action":"delete_playlist", "playlist": item["editid"]})
 
-		self.navigation.executeAction({"action":"add_playlist", "title": "testlist", "summary": "test"})
+		self.navigation.executeAction({"action": "create_playlist", "title": "testlist", "summary": "test"})
 
 		exists = False
 		result = sys.modules[ "__main__" ].core._fetchPage({ "link": "http://gdata.youtube.com/feeds/api/users/default/playlists?v=2.1&start-index=1&max-results=50", "auth": "true"})
 		items = sys.modules[ "__main__" ].core.getFolderInfo(result["content"])
 
 		for item in items:
-			print repr(item)
+			print repr(item) + " - looking for 'testlist'"
 			if item["Title"] == "testlist":
 				exists = True
 		assert(exists)
 
 	def test_plugin_should_remove_playlist(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
+		sys.modules["__main__"].xbmc.Keyboard().isConfirmed.return_value = True
+		sys.modules["__main__"].xbmc.Keyboard().getText.return_value = "testlist"
 
 		exists = False
 		result = sys.modules[ "__main__" ].core._fetchPage({ "link": "http://gdata.youtube.com/feeds/api/users/default/playlists?v=2.1&start-index=1&max-results=50", "auth": "true"})
@@ -164,9 +171,12 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
 
 		for item in items:
 			if item["Title"] == "testlist":
+				print "Playlist 'testlist' exists."
 				exists = True
 		if not exists:
-			self.navigation.executeAction({"action":"add_playlist", "title": "testlist", "summary": "test"})
+			print "Playlist does not exist. Creating."
+			#self.navigation.executeAction({"action": "create_playlist", "title": "testlist", "summary": "test"})
+			self.navigation.executeAction({"action": "create_playlist", "summary": "test"})
 
 
 		result = sys.modules[ "__main__" ].core._fetchPage({ "link": "http://gdata.youtube.com/feeds/api/users/default/playlists?v=2.1&start-index=1&max-results=50", "auth": "true"})
@@ -174,12 +184,13 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
 		print repr(items)
 		editid = False
 		for item in items:
+			print repr(item) + " - looking for 'testlist'"
 			if item["Title"] == "testlist":
 				editid = item["editid"]
-				self.navigation.executeAction({"action":"delete_playlist", "playlist": item["editid"]})
+				self.navigation.executeAction({"action": "delete_playlist", "playlist": item["editid"]})
 
 
-                self.navigation.listMenu({"user_feed":"playlists", "login":"true","path":"/root/playlists", "folder": "true"})
+                self.navigation.listMenu({"user_feed": "playlists", "login": "true","path": "/root/playlists", "folder": "true"})
 
 		args = sys.modules["__main__"].xbmcplugin.addDirectoryItem.call_args_list
 		result = False

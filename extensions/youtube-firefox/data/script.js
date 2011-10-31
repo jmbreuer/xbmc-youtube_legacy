@@ -413,4 +413,5 @@ function loadSettings(){
 	self.postMessage({ "type": "load_settings"});
     }
 }
+
 loadSettings();
