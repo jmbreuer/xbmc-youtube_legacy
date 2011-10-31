@@ -22,6 +22,9 @@ class CommonFunctions():
 	
 	def __init__(self):
 		self.plugin = "Common Functions-0.8"
+		self.USERAGENT = "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-GB; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8"
+
+
 		if sys.modules[ "__main__" ].xbmc:
 			self.xbmc = sys.modules["__main__"].xbmc
 		else:
@@ -32,8 +35,11 @@ class CommonFunctions():
 			self.dbglevel = sys.modules[ "__main__" ].dbglevel
 		else:
 			self.dbglevel = 3
-		self.dbg = True
-		self.USERAGENT = "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-GB; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8"
+
+		if sys.modules[ "__main__" ].dbg:
+			self.dbg = sys.modules[ "__main__" ].dbg
+		else:
+			self.dbg = True
 
 	def stripTags(self, html):
 		sub_start = html.find("<")
