@@ -1,4 +1,4 @@
-import sys
+import sys, time
 class MockYouTubeDepends:
 	
 	def mock(self):
@@ -68,9 +68,9 @@ class MockYouTubeDepends:
 			import inspect
 			# 3 - 3 for TestYouTubeUserFeeds.py
 			if isinstance(description, str):
-				print "[%s] %s : '%s'" % ("YouTube-Mock", inspect.stack()[3][3] , description.decode("utf-8","ignore"))
+				print "%s [%s] %s : '%s'" % (time.strftime('%H:%M:%S'), "YouTube-Mock", inspect.stack()[3][3] , description.decode("utf-8","ignore"))
 			else:
-				print "[%s] %s : '%s'" % ("YouTube-Mock", inspect.stack()[3][3] , description)
+				print "%s [%s] %s : '%s'" % (time.strftime('%H:%M:%S'), "YouTube-Mock", inspect.stack()[3][3] , description)
 		
 	def execute(self, function, *args):
 		return function(*args)
