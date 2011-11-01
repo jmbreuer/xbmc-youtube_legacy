@@ -332,11 +332,11 @@ class TestYouTubePlaylistControl(BaseTestCase.BaseTestCase):
 		sys.modules["__main__"].xbmcgui.Dialog().select.return_value = 0
 		sys.modules["__main__"].feeds.listAll.return_value = ([{"Title":"PlayList1"},{"Title":"PlayList2"}])
 		control = YouTubePlaylistControl()
-		control.createPlayList = Mock()
+		control.createPlaylist = Mock()
 		
 		control.addToPlaylist({})
 		
-		control.createPlayList.assert_called_with({'user_feed': 'playlists', 'login': 'true', 'folder': 'true'})
+		control.createPlaylist.assert_called_with({'user_feed': 'playlists', 'login': 'true', 'folder': 'true'})
 
 	def test_addToPlaylist_should_call_core_add_to_playlist_if_playlist_is_in_params(self):
 		control = YouTubePlaylistControl()
