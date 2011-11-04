@@ -14,7 +14,7 @@
   }
 
   if (window.localStorage["xbmc_autoplay"]) {
-    xbmc_autoplay = window.localStorage["xbmc_autoplay"];
+    xbmc_autoplay = window.localStorage["xbmc_autoplay"] == "true";
   }
 
   chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
