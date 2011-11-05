@@ -41,7 +41,6 @@ class YouTubeLogin():
 		self.utils =  sys.modules[ "__main__" ].utils
 		self.core = sys.modules["__main__" ].core
 		self.common = sys.modules[ "__main__" ].common
-		self.cache = sys.modules[ "__main__" ].cache
 		
 	def login(self, params = {}):
 		get = params.get
