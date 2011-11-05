@@ -208,18 +208,19 @@ class YouTubePlayer():
 		
 		return result
 
-	def transformColor(self, color):
-		self.common.log("Color: %s - len: %s" % (color, len(color)), 5)
-		color = hex(int(color))
-		color = str(color)
-		color = color[2:]
-		self.common.log("Color: %s - len: %s" % (color, len(color)), 5)
-		if color == "0":
-			color = "000000"
-		if len(color) == 4:
-			color = "00" + color
-		if len(color) == 6:
-			color = color[4:6] + color[2:4] + color[0:2]
+	def transformColor(self, color):	
+		self.common.log("Color: %s - len: %s" % (color, len(color)), 3)
+		if color:
+			color = hex(int(color))
+			color = str(color)
+			color = color[2:]
+			self.common.log("Color: %s - len: %s" % (color, len(color)), 5)
+			if color == "0":
+				color = "000000"
+			if len(color) == 4:
+				color = "00" + color
+			if len(color) == 6:
+				color = color[4:6] + color[2:4] + color[0:2]
 
 		self.common.log("Returning color: %s - len: %s" % (color, len(color)), 5)
 		return color
@@ -295,9 +296,12 @@ class YouTubePlayer():
 							style = "annot" + str(styles_count)
 							styles_count += 1
 
+						start = False
+						end = False
 						if cnode:
 							if cnode.item(0):
 								start = cnode.item(0).getAttribute("t")
+
 							if cnode.item(1):
 								end = cnode.item(1).getAttribute("t")
 
