@@ -922,6 +922,24 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		
 		assert(ret['status'] == 200 and ret['content'] == "Nothing here\n")
 		
+	def test_fetchPage_should_add_proxy_when_forced_true(self):
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = [ "3", "true", "proxy/?browse=", "proxy/?browse=", "proxy/?browse=" ]
+		patcher = patch("urllib2.urlopen")
+		patcher.start()
+		import urllib2
+		dummy_connection = Mock()
+		dummy_connection.read.return_value = "Nothing here\n"
+		dummy_connection.geturl.return_value = ""
+		dummy_connection.info.return_value = "Mock header"
+		patcher(urllib2.urlopen).return_value = dummy_connection
+		core = YouTubeCore()
+				
+		ret = core._fetchPage({ "link": "http://tobiasussing.dk"})
+		patcher.stop()
+		print repr(ret)
+		assert(ret['status'] == 200 and ret['content'] == "Nothing here\n")
+		sys.modules[ "__main__" ].common.log.assert_any_call("got proxy: proxy/?browse=http%3A//tobiasussing.dk")
+		
 	def test_findErrors_should_use_parseDOM_to_look_for_errormsg_tag(self):
 		input = { "content": "some_content"}
 		parsedom = [ ["Mock error [" ] ] # This should probably be updated to something real.
