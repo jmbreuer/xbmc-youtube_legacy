@@ -186,7 +186,6 @@ class Window:
 			self.window = xbmcgui.Window( self.windowId )
 			self.initialize()
 
-		print "XXXXXXXXXXX : " + repr(hasattr( self.window, "addControl" ))
 		if not self.window or not hasattr( self.window, "addControl" ):
 			self.removeControls()
 			error = 1

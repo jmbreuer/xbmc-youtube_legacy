@@ -330,7 +330,9 @@ class YouTubeCore():
 	#===============================================================================
 
 	def _fetchPage(self, params={}): # This does not handle cookie timeout for _httpLogin
-		#params["proxy"] = "http://15aa51.info/browse.php?u="
+		if self.settings.getSetting("force_proxy") == "true" and self.settings.getSetting("proxy"):
+			params["proxy"] = self.settings.getSetting("proxy")
+
 		get = params.get
 		link = get("link")
 		ret_obj = { "status": 500, "content": ""}
@@ -353,7 +355,7 @@ class YouTubeCore():
 				self.common.log("couldn't get login token")
 
 		if not link or int(get("error", "0")) > 2 :
-			self.common.log("giving up ")
+			self.common.log("giving up")
 			return ret_obj
 
 		if get("url_data"):
@@ -361,21 +363,26 @@ class YouTubeCore():
 			request.add_header('Content-Type', 'application/x-www-form-urlencoded')
 		elif get("request", "false") == "false":
 			if get("proxy"):
-				self.common.log("got proxy")
-				request = url2request(get("proxy") + link, get("method", "GET"));
 				proxy = get("proxy")
-				proxy = proxy[:proxy.rfind("/")]
-				request.add_header('Referer', proxy)
+				link = proxy + urllib.quote(link)
+				self.common.log("got proxy: %s" % link)
 			else:
 				self.common.log("got default")
-				request = url2request(link, get("method", "GET"));
 
+			request = url2request(link, get("method", "GET"));
 		else:
 			self.common.log("got request")
 			request = urllib2.Request(link, get("request"))
 			request.add_header('X-GData-Client', "")
 			request.add_header('Content-Type', 'application/atom+xml') 
 			request.add_header('Content-Length', str(len(get("request")))) 
+
+		if get("proxy") or link.find(self.settings.getSetting("proxy")) > -1:
+			proxy = self.settings.getSetting("proxy")
+			referer = proxy[:proxy.rfind("/")]
+			self.common.log("Added refer: %s" % referer)
+			request.add_header('Referer', referer)				
+
 
 		if get("api", "false") == "true":
 			self.common.log("got api")
@@ -454,7 +461,6 @@ class YouTubeCore():
 			if e.code == 400 or True:
 				self.common.log("Unhandled HTTPError : [%s] %s " % ( e.code, msg), 1)
 			
-
 			if msg.find("<?xml") > -1:
 				acted = False
 
@@ -551,29 +557,36 @@ class YouTubeCore():
 			self.common.log("Step : " + str(step))
 			step += 1
 
-			if step == 17:
+			if step == 5:
 				return ( self.core._findErrors(ret), 303)
 
 			ret = self._fetchPage(fetch_options)
 			fetch_options = False
 			new_url = self.common.parseDOM(ret["content"], "form", attrs = { "id": "confirm-age-form"}, ret ="action")
+
 			if len(new_url) > 0:
-				self.common.log("Part A")
+				self.common.log("Part A - Type 1")
 				new_url = "http://www.youtube.com/" + new_url[0]
 				next_url = self.common.parseDOM(ret["content"], "input", attrs = { "name": "next_url" }, ret = "value")
 				set_racy = self.common.parseDOM(ret["content"], "input", attrs = { "name": "set_racy" }, ret = "value")
 				session_token_start = ret["content"].find("'XSRF_TOKEN': '") + len("'XSRF_TOKEN': '")
 				session_token_stop = ret["content"].find("',", session_token_start)
 				session_token = ret["content"][session_token_start:session_token_stop]
-
+					
 				fetch_options = { "link": new_url, "no_verify_age": "true", "login": "true", "url_data": { "next_url": next_url[0], "set_racy": set_racy[0], "session_token" : session_token} }
-
+			else:
+				self.common.log("Part A - Type 2")
+				actions = self.common.parseDOM(ret["content"], "div", attrs = { "id": "verify-actions" })
+				if len(actions) > 0:
+					new_url = self.common.parseDOM(actions, "button", attrs = { "type": "button" }, ret = "href")
+					fetch_options = { "link": new_url[0], "no_verify_age": "true", "login": "true"}
+					
 			if ret["content"].find("PLAYER_CONFIG") > -1:
 				self.common.log("Found PLAYER_CONFIG. Verify successful")
 				return ret
 
 			if not fetch_options:
-				self.common.log("Nothign hit, assume we are logged in.")
+				self.common.log("Nothing hit, assume we are verified.")
 				fetch_options = { "link": org_link, "no_verify_age": "true", "login": "true" }
 				return self._fetchPage(fetch_options)
 

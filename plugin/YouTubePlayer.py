@@ -362,7 +362,6 @@ class YouTubePlayer():
 	# ================================ Video Playback ====================================
 	
 	def playVideo(self, params = {}):
-		#params["proxy"] = "http://15aa51.info/browse.php?u="
 		self.common.log(repr(params), 3)
 		get = params.get
 		
@@ -373,15 +372,7 @@ class YouTubePlayer():
 			self.utils.showErrorMessage(self.language(30603), video["apierror"], status)
 			return False
 		
-		if get("proxy", "false") == "false":
-			listitem = self.xbmcgui.ListItem(label=video['Title'], iconImage=video['thumbnail'], thumbnailImage=video['thumbnail'], path=video['video_url'])
-		else:
-			proxy = get("proxy")
-			proxy = proxy[:proxy.rfind("/")]
-			print "XXXXXXXXXXXXXXXXX : " + repr(video)
-			video["video_url"] = get("proxy") + video['video_url'].replace("|", "|Referer=" + proxy + " | ")
-			print "XXXXXXXXXXXXXXXXX : " + repr(video)
-			listitem = self.xbmcgui.ListItem(label=video['Title'], iconImage=video['thumbnail'], thumbnailImage=video['thumbnail'], path=video['video_url'])
+		listitem = self.xbmcgui.ListItem(label=video['Title'], iconImage=video['thumbnail'], thumbnailImage=video['thumbnail'], path=video['video_url'])
 		
 		listitem.setInfo(type='Video', infoLabels=video)
 		
@@ -600,7 +591,11 @@ class YouTubePlayer():
 		if not len(video_url) > 0:
 			self.common.log("- construct_video_url failed, video_url not set")
 			return video_url
-		
+
+                if get("proxy"):
+			proxy = get("proxy")
+			video_url = proxy + urllib.quote(video_url) + " |Referer=" + proxy[:proxy.rfind("/")]
+
 		if get("action") != "download":
 			video_url += " | " + self.common.USERAGENT
 		
@@ -674,6 +669,10 @@ class YouTubePlayer():
 				self.common.log("attempt to locate local file failed with unknown error, trying youtube instead")
 
 		(links, video) = self._getVideoLinks(video, params)
+
+		if not links:
+			params["proxy"] = self.settings.getSetting("proxy")
+			(links, video) = self._getVideoLinks(video, params)
 		
 		if links:
 			video["video_url"] = self.selectVideoQuality(links, params)
@@ -709,14 +708,15 @@ class YouTubePlayer():
 		vget = video.get
 		player_object = {}
 		links = []
+		fresult = False
+
 		self.common.log("trying website: " + repr(params))
 
-		if get("proxy", "false") != "false":
+		if get("proxy"):
 			result = self.core._fetchPage({"link": self.urls["video_stream"] % get("videoid"), "proxy": get("proxy")})
 		else:
 			result = self.core._fetchPage({"link": self.urls["video_stream"] % get("videoid")})
-		fresult = False
-		
+
 		if result["status"] == 200:
 			data = result["content"].find("PLAYER_CONFIG")
 			if data > -1:
@@ -736,11 +736,15 @@ class YouTubePlayer():
 					player_object = self._convertFlashVars(data)
 					if player_object.has_key("PLAYER_CONFIG"):
 						player_object["PLAYER_CONFIG"]["url"] = src[0]
+
 		elif get("no_embed", "false") == "false":
 			self.common.log("Falling back to embed")
 
-			fresult = self.core._fetchPage({"link": self.urls["embed_stream"] % get("videoid") })
-		
+			if get("proxy"):
+				fresult = self.core._fetchPage({"link": self.urls["embed_stream"] % get("videoid"), "proxy": get("proxy")})
+			else:
+				fresult = self.core._fetchPage({"link": self.urls["embed_stream"] % get("videoid") })
+
 			# Fallback error reporting
 			if fresult["content"].find("status=fail") > -1:
 				fresult["status"] = 303
