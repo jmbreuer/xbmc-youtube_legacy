@@ -490,6 +490,7 @@ class YouTubePlayer():
 	def getInfo(self, params):
 		get = params.get
 		video = self.cache.get("videoidcache" + get("videoid"))
+		print "A"
 		if len(video) > 0:
 			self.common.log("returning cache ")
 			return ( eval(video), 200)
@@ -497,6 +498,7 @@ class YouTubePlayer():
 		result = self.core._fetchPage({"link": self.urls["video_info"] % get("videoid"), "api": "true"})
 		
 		if result["status"] == 200:
+			print "AB"
 			video = self.core.getVideoInfo(result["content"], params)
 			
 			if len(video) == 0:
@@ -653,7 +655,6 @@ class YouTubePlayer():
 		get = params.get
 		video = {}
 		links = []
-				
 		(video, status) = self.getInfo(params)
 		
 		#Check if file has been downloaded locally and use that as a source instead
@@ -670,7 +671,7 @@ class YouTubePlayer():
 
 		(links, video) = self._getVideoLinks(video, params)
 
-		if not links:
+		if not links and self.settings.getSetting("proxy"):
 			params["proxy"] = self.settings.getSetting("proxy")
 			(links, video) = self._getVideoLinks(video, params)
 		

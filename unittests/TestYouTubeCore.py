@@ -458,6 +458,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(ret['status'] == 500 and ret['content'] == "")
 		
 	def test_fetchPage_should_call_getAuth_to_fetch_oauth_token_if_auth_is_in_params_collection(self):
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = [ "3", "4", "my_token", "false", "my_token" ]
 		patcher = patch("urllib2.urlopen")
 		patcher.start()
 		import urllib2
@@ -475,6 +476,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		core._getAuth.assert_called_with()
 
 	def test_fetchPage_should_call_getSettings_if_to_fetch_oauth_token_if_auth_is_in_params_collection(self):
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = [ "3", "4", "my_token", "false", "my_token" ]
 		patcher = patch("urllib2.urlopen")
 		patcher.start()
 		import urllib2
@@ -497,10 +499,11 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		
 		ret = core._fetchPage({"auth":"true", "link":"www.somelink.dk", "error":"3"})
 		
-		sys.modules[ "__main__" ].common.log.assert_called_with("giving up ")
+		sys.modules[ "__main__" ].common.log.assert_called_with("giving up")
 
 	def test_fetchPage_should_properly_handle_quota(self):
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = ["3","4","",""]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = ["3","4","", "", "false", "", "false", ""]
 		patcher1 = patch("urllib2.urlopen")
 		patcher2 = patch("time.sleep")
 		patcher1.start()
@@ -528,6 +531,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		sys.modules[ "__main__" ].common.log.assert_any_call("Hit quota... sleeping for 10 seconds")
 	
 	def test_fetchPage_should_call_urllib_add_header_id_url_data_is_in_params_collection(self):
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = ["3","4","4", "false", "my_auth"]
 		patcher1 = patch("urllib2.urlopen")		
 		patcher2 = patch("urllib2.Request")
 		patcher1.start()
@@ -548,12 +552,16 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		args = urllib2.Request.call_args
 		patcher1.stop()
 		patcher2.stop()
+		print repr(args)
 		assert(args[0][0] == 'www.somelink.dk?oauth_token=4')
 		assert(args[0][1]== 'data=some_data')
 		assert(dummy_request.add_header.call_args[0][1] == 'GoogleLogin auth=my_auth')
 		assert(dummy_request.add_header.call_args[0][0] == 'Authorization')
 	
 	def test_fetchPage_should_set_request_method_to_get_if_request_is_not_in_params_collection(self):
+                sys.modules[ "__main__" ].settings.getSetting = Mock()
+                sys.modules[ "__main__" ].settings.getSetting.side_effect = ["3","4","false","false", "false", "false"]
+
 		patcher1 = patch("urllib2.urlopen")
 		patcher2 = patch("YouTubeCore.url2request")
 		patcher1.start()
@@ -577,6 +585,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(args[0][1] == "GET")
 	
 	def test_fetchPage_should_append_GdataApi_headers_if_request_is_set(self):
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = [ "3", "4", "my_token", "false", "my_auth" ]
 		patcher1 = patch("urllib2.urlopen")		
 		patcher2 = patch("urllib2.Request")
 		patcher1.start()
@@ -597,6 +606,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		
 		patcher1.stop()
 		patcher2.stop()
+
 		assert(dummy_request.add_header.call_args_list[0][0][0] == 'X-GData-Client')
 		assert(dummy_request.add_header.call_args_list[1][0][0] == 'Content-Type')
 		assert(dummy_request.add_header.call_args_list[1][0][1] == 'application/atom+xml')
@@ -661,7 +671,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(args[1][0][1] == 'PREF=f1=50000000&hl=en')
 	
 	def test_fetchPage_should_return_error_message_if_login_is_in_params_collection_and_plugin_is_missing_login_info(self):
-		sys.modules[ "__main__" ].settings.getSetting.side_effect = ["3","4","",""]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = ["3","4","", "", "false", ""]
 		patcher1 = patch("urllib2.urlopen")
 		patcher2 = patch("YouTubeCore.url2request")
 		patcher1.start()
@@ -739,8 +749,8 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(args[2][0][1] == 'LOGIN_INFO=my_token')
 
 	def test_fetchPage_should_call_retry_if_youtube_ask_user_to_verify_age(self):
-		settings = ["my_token","my_token","my_token","my_token","my_token","user","pass","4","3" ]
-		sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
+		settings = [ "3", "4", "false", "false", "false", "user", "pass", "my_token","my_token","my_token","my_token","my_token" ] 
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = settings
 		patcher1 = patch("urllib2.urlopen")
 		patcher2 = patch("YouTubeCore.url2request")
 		patcher1.start()
@@ -896,6 +906,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		sleep.assert_any_call(10)
 	
 	def test_fetchPage_should_return_content_of_link_and_proper_status_code(self):
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = [ "3", "4", "false" ]
 		patcher = patch("urllib2.urlopen")
 		patcher.start()
 		import urllib2

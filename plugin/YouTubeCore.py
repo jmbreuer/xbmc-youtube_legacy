@@ -381,8 +381,7 @@ class YouTubeCore():
 			proxy = self.settings.getSetting("proxy")
 			referer = proxy[:proxy.rfind("/")]
 			self.common.log("Added refer: %s" % referer)
-			request.add_header('Referer', referer)				
-
+			request.add_header('Referer', referer)
 
 		if get("api", "false") == "true":
 			self.common.log("got api")
@@ -558,7 +557,7 @@ class YouTubeCore():
 			step += 1
 
 			if step == 5:
-				return ( self.core._findErrors(ret), 303)
+				return ( self._findErrors(ret), 303)
 
 			ret = self._fetchPage(fetch_options)
 			fetch_options = False
