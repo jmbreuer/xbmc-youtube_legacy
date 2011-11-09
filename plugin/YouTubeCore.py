@@ -148,7 +148,7 @@ class YouTubeCore():
 	
 	def remove_from_playlist(self, params={}):
 		self.common.log("")
- 		get = params.get
+		get = params.get
 		url = "http://gdata.youtube.com/feeds/api/playlists/%s/%s" % (get("playlist"), get("playlist_entry_id"))
 		result = self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true", "method": "DELETE"})
 		return (result["content"], result["status"])
