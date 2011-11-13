@@ -272,14 +272,13 @@ class YouTubeScraper():
 			result = self.core._fetchPage({"link":url})
 			
 			artist_container = self.common.parseDOM(result["content"], "div", attrs = { "id": "artist-recs-container"})
-			artists = self.common.parseDOM(artist_container, "li",  { "class": "yt-uix-slider-slide-item.*?"})
+			artists = self.common.parseDOM(artist_container, "div",  { "class": "artist-recommendation.*?"})
 			
 			for artist in artists:
-				div = self.common.parseDOM(artist, "div", attrs = { "class": "browse-item collection-item browse-item-inline" })
-				
-				ahref = self.common.parseDOM(div, "a", attrs = {"class":"collection-item-link"}, ret = "href")
+				div = self.common.parseDOM(artist, "div", attrs = { "class": "browse-item-content" })
+				ahref = self.common.parseDOM(div, "a", ret = "href")
 				atitle = self.common.parseDOM(div, "a", ret = "title")
-				athumb = self.common.parseDOM(div, "img", ret = "data-thumb")
+				athumb = self.common.parseDOM(artist, "img", ret = "data-thumb")
 				
 				if len(atitle) == len(ahref) == len(athumb) and len(ahref) > 0:
 					for i in range(0 , len(ahref)):
@@ -313,7 +312,7 @@ class YouTubeScraper():
 			result = self.core._fetchPage({"link":url})
 			
 			container = self.common.parseDOM(result["content"], "div", { "id": "music-guide-container"})
-			content = self.common.parseDOM(container, "a", attrs = {"class": "ux-thumb-wrap " }, ret = "href")
+			content = self.common.parseDOM(container, "a", attrs = {"class": "ux-thumb-wrap.*?" }, ret = "href")
 			items = self.utils.extractVID(content)
 
 		self.common.log("Done")
@@ -710,12 +709,12 @@ class YouTubeScraper():
 			
 			showcont = self.common.parseDOM(result["content"], "ul", { "class": "browse-item-list"})
 
-			if (len(showcont) > 0):
-				page += 1
-				next = "true"
 			showcont = "".join(showcont)
 			
-			shows = self.common.parseDOM(showcont, "div", { "class": "browse-item show-item yt-uix-hovercard " })
+			shows = self.common.parseDOM(showcont, "div", { "class": "browse-item show-item.*?" })
+			if (len(shows) > 0):
+				page += 1
+				next = "true"
 			
 			for show in shows:
 				ahref = self.common.parseDOM(show, "a", attrs = { "title": ".*?" }, ret = "href" )
