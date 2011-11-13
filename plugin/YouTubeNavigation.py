@@ -538,7 +538,11 @@ class YouTubeNavigation():
 			cm.append ( (self.language(30522), "XBMC.RunPlugin(%s?path=%s&action=play_all&user_feed=playlist&shuffle=true&playlist=%s&)" % ( sys.argv[0], item("path"), item("playlist") ) ) )
 			if not get("external"):
 				cm.append ( (self.language(30539), "XBMC.RunPlugin(%s?path=%s&action=delete_playlist&playlist=%s&)" % ( sys.argv[0], item("path"), item("playlist") ) ) )
-							
+		
+		if (item("scraper") == "music_top100"):
+			cm.append( (self.language( 30520 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&scraper=music_top100&)" % ( sys.argv[0], item("path") ) ) )
+			cm.append( (self.language( 30522 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&shuffle=true&scraper=music_top100&)" % ( sys.argv[0], item("path") ) ) )
+			
 		if (item("scraper") == "search_disco"):
 			cm.append( (self.language( 30520 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&scraper=search_disco&search=%s&)" % ( sys.argv[0], item("path"), item("search") ) ) )
 			cm.append( (self.language( 30522 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&shuffle=true&scraper=search_disco&search=%s&)" % ( sys.argv[0], item("path"), item("search") ) ) )
