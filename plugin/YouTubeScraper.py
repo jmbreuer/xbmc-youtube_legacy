@@ -832,7 +832,7 @@ class YouTubeScraper():
 			else:
 				function = self.scrapeMusicCategories
 		
-		if (get("scraper") in ["categories", "movies", "shows"] and not get("category")):
+		if (get("scraper") in ["movies", "shows"] and not get("category")):
 			function = self.scrapeCategoryList
 			params["folder"] = "true"
 
@@ -983,11 +983,11 @@ class YouTubeScraper():
 		get = params.get
 		self.common.log("")
 		
-		scraper = "categories"
+		scraper = "movies"
 		thumbnail = "explore"
 		yobjects = []
 		
-		if (get("scraper") and get("scraper") != "categories"):
+		if (get("scraper") and get("scraper") != "movies"):
 			scraper = get("scraper")
 			thumbnail = get("scraper")
 		
@@ -1015,16 +1015,6 @@ class YouTubeScraper():
 					item['Title'] = title
 					
 					cat = ahref[i].replace("/" + scraper + "/", "")
-
-					if get("scraper") == "categories":
-						if title == "Music":
-							continue
-						if cat.find("comedy") > 0:
-							cat = "?c=23"
-						if cat.find("gaming") > 0:
-							cat = "?c=20"
-						if cat.find("education") > 0:
-							item["subcategory"] = "true"
 
 					if get("scraper") == "movies":
 						if cat.find("pt=nr") > 0:
