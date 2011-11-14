@@ -47,7 +47,7 @@ class YouTubeNavigation():
 		#			   label						  , path									        , thumbnail					  		,  login		  ,  feed / action
 		self.categories = (
 					  {'Title':self.language( 30044 )  ,'path':"/root/explore"			 				, 'thumbnail':"explore"				, 'login':"false" },
-					  {'Title':self.language( 30041 )  ,'path':"/root/explore/categories"				, 'thumbnail':"explore"				, 'login':"false" , 'scraper':'categories', 'folder':'true'},
+					  {'Title':self.language( 30041 )  ,'path':"/root/explore/categories"				, 'thumbnail':"explore"				, 'login':"false" , 'feed':'feed_categories', 'folder':'true'},
 					  {'Title':self.language( 30037 )  ,'path':"/root/explore/disco"					, 'thumbnail':"discoball"		 	, 'login':"false" , 'store':"disco_searches", 'folder':'true' },
 					  {'Title':self.language( 30040 )  ,'path':"/root/explore/disco/new"				, 'thumbnail':"search"		   		, 'login':"false" , 'scraper':"search_disco"},
 					  {'Title':self.language( 30055 )  ,'path':"/root/explore/disco/top100"				, 'thumbnail':"discoball"		 	, 'login':"false" , 'scraper':"music_top100"},
