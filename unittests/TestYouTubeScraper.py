@@ -836,14 +836,7 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 		self.scraper.getNewResultsFunction(params)
 		
 		assert(params["new_results_function"] == self.scraper.scrapeMusicCategories)
-		
-	def test_getNewResultsFunction_should_set_proper_params_for_scrapeCategoryList_if_scraper_is_categories_and_category_is_not_in_params(self):
-		params = {"scraper":"categories"}
-		
-		self.scraper.getNewResultsFunction(params)
-		
-		assert(params["new_results_function"] == self.scraper.scrapeCategoryList)
-		
+				
 	def test_getNewResultsFunction_should_set_proper_params_for_scrapeCategoryList_if_scraper_is_movies_and_category_is_not_in_params(self):
 		params = {"scraper":"movies"}
 		
@@ -1158,7 +1151,7 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 		assert(result[0].has_key("category"))
 		assert(result[0].has_key("thumbnail"))
 		assert(result[0].has_key("Title"))
-		assert(result[0]["scraper"] == "categories")		
+		assert(result[0]["scraper"] == "movies")		
 	
 	def test_paginator_should_call_cache_function_with_pointer_to_new_results_function_if_scraper_is_not_show(self):
 		
