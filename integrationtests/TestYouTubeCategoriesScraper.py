@@ -2,9 +2,9 @@ import BaseTestCase
 import nose
 
 
-class TestYouTubeMusicScraper(BaseTestCase.BaseTestCase):
+class TestYouTubeCategoriesScraper(BaseTestCase.BaseTestCase):
 	
-	def test_plugin_should_scrape_categories_folder_list_correctly(self):
+	def ttest_plugin_should_scrape_categories_folder_list_correctly(self):
 		self.navigation.listMenu({"scraper":"categories", "folder":"true", "path":"/root/explore/categories"})
 		
 		self.assert_directory_count_greater_than_or_equals(10)
@@ -22,7 +22,7 @@ class TestYouTubeMusicScraper(BaseTestCase.BaseTestCase):
 		self.assert_directory_contains_only_unique_video_items()
 		self.assert_directory_items_should_have_external_thumbnails()
 	
-	def test_plugin_should_scrape_category_page_2_video_list_correctly(self):
+	def ttest_plugin_should_scrape_category_page_2_video_list_correctly(self):
 		self.navigation.listMenu({"scraper":"categories", 'category':'/categories?c=26', "page":"1", "path":"/root/explore/categories"})
 		
 		self.assert_directory_count_greater_than_or_equals(10)
