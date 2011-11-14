@@ -179,7 +179,7 @@ class YouTubeCore():
 			
 			folder['category'] = node.getAttribute("term")
 			folder["icon"] = "explore"
-			folder["thumbnail"] = "explore"		
+			folder["thumbnail"] = "explore"
 			folder["feed"] = "feed_category"
 			
 			folders.append(folder);
