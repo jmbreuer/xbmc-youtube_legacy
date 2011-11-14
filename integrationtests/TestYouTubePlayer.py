@@ -20,7 +20,8 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 	def test_plugin_should_play_agerestricted_over_18_videos(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
 
-		self.navigation.executeAction({"action":"play_video", "videoid": "fOdNOtS8ZIs", "no_embed": "true"})
+		#self.navigation.executeAction({"action":"play_video", "videoid": "fOdNOtS8ZIs", "no_embed": "true"})
+		self.navigation.executeAction({"action":"play_video", "videoid": "QOpyyrtzgBU", "no_embed": "true"})
 
 		args = sys.modules[ "__main__" ].xbmcplugin.setResolvedUrl.call_args_list
 		print "Args: " + repr(args)

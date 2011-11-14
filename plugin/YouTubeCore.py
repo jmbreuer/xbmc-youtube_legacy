@@ -675,7 +675,6 @@ class YouTubeCore():
 	
 	def getVideoInfo(self, xml, params={}):
 		get = params.get
-		print repr(xml)
 		dom = minidom.parseString(xml);
 		self.common.log(str(len(xml)))
 		links = dom.getElementsByTagName("link");
