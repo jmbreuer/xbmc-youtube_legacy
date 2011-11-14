@@ -463,18 +463,6 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		
 		assert(sys.modules["__main__"].xbmcplugin.setResolvedUrl.call_count > 0)
 		
-	def test_playVideo_should_appen_proxy_settings_to_video_url_if_proxy_is_in_params(self):
-		sys.modules["__main__"].settings.getSetting.return_value = "0"
-		player = YouTubePlayer()
-		player.addSubtitles = Mock()
-		player.getVideoObject = Mock()
-		params = {"Title":"someTitle","videoid":"some_id", "thumbnail":"someThumbnail", "video_url":"someUrl"}
-		player.getVideoObject.return_value = (params, 200)
-		sys.argv = ["test1","1","test2"]
-		
-		player.playVideo({"videoid":"some_id" ,"proxy":"true/smokey "})
-		
-		assert(params["video_url"] == "true/smokey someUrl")
 			
 	def test_playVideo_should_call_addSubtitles(self):
 		video = {"Title":"someTitle","videoid":"some_id", "thumbnail":"someThumbnail", "video_url":"someUrl"}
@@ -653,6 +641,16 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		
 		assert(url.find("| Mozilla/5.0 (MOCK)") < 0)
 	
+	def test_selectVideoQuality_should_append_proxy_settings_to_video_url_if_proxy_is_in_params(self):
+		sys.modules["__main__"].settings.getSetting.return_value = "1"
+		player = YouTubePlayer()
+		params = {"Title":"someTitle","videoid":"some_id", "thumbnail":"someThumbnail", "video_url":"someUrl"}
+		
+		#player.playVideo({"videoid":"some_id"})
+		url = player.selectVideoQuality({35:"SD",22:"720p",37:"1080p"},{"action":"download", "proxy": "smokey/?browse="})
+		print url
+		assert(url == "smokey/?browse=SD |Referer=smokey")
+
 	def test_userSelectsVideoQuality_should_append_list_of_known_qualities(self):
 		sys.modules["__main__"].settings.getSetting.return_value = "1"
 		sys.modules["__main__"].xbmcgui.Dialog().select.return_value = -1
@@ -695,6 +693,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		assert(sys.modules["__main__"].xbmcgui.Dialog().select.call_count > 0)
 	
 	def test_getVideoObject_should_get_video_information_from_getInfo(self):
+		sys.modules[ "__main__"].settings.getSetting.return_value = ""
 		player = YouTubePlayer()
 		player.getInfo = Mock()
 		player.getInfo.return_value = ({},303)
@@ -783,6 +782,8 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		sys.modules["__main__"].xbmcvfs.exists.assert_called_with(u"somePath\xe9/\u05e0\u05dc\u05d4 \u05de\u05d4\u05d9\u05e4\u05d4 \u05d5\u05d4\u05d7\u05e0\u05d5\u05df \u05d1\u05e1\u05d8\u05e8\u05d9\u05e4 \u05e6'\u05d0\u05d8 \u05d1\u05e7\u05dc\u05d9\u05e4 \u05e9\u05dc \u05d7\u05d5\u05d1\u05d1\u05d9 \u05e6\u05d9\u05d5\u05df-[some_id].mp4")
 	
 	def test_getVideoObject_should_use_pre_defined_error_messages_on_missing_url(self):
+		sys.modules[ "__main__"].settings.getSetting.return_value = ""
+
 		player = YouTubePlayer()
 		player.getInfo = Mock()
 		player.getInfo.return_value = ({},303)

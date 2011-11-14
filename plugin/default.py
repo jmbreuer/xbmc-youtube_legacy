@@ -66,6 +66,7 @@ if (__name__ == "__main__" ):
 
 	import CommonFunctions
 	common = CommonFunctions.CommonFunctions() 
+	common.plugin = plugin
 	import YouTubeUtils
 	utils = YouTubeUtils.YouTubeUtils()
 	import YouTubeStorage

@@ -37,6 +37,6 @@
     <setting id="user_password" value="yt tester"/>
     <setting id="username" value="logintester@tobiasussing.dk"/>
     <setting id="watch_later" value="true"/>
-    <setting id="proxy" value="http://15aa51.info/browse.php?u="/>
+    <setting id="proxy" value="http://proxywimp.com/browse.php?u="/>
     <setting id="force_proxy" value="false"/>
 </settings>

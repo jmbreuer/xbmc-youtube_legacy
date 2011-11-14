@@ -20,7 +20,8 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 	def test_plugin_should_play_agerestricted_over_18_videos(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
 
-		self.navigation.executeAction({"action":"play_video", "videoid": "fOdNOtS8ZIs", "no_embed": "true"})
+		#self.navigation.executeAction({"action":"play_video", "videoid": "fOdNOtS8ZIs", "no_embed": "true"})
+		self.navigation.executeAction({"action":"play_video", "videoid": "QOpyyrtzgBU", "no_embed": "true"})
 
 		args = sys.modules[ "__main__" ].xbmcplugin.setResolvedUrl.call_args_list
 		print "Args: " + repr(args)
@@ -127,7 +128,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		import os
 		sys.modules[ "__main__" ].xbmcvfs.exists.side_effect = os.path.exists
 				
-		self.navigation.executeAction({"action":"play_video", "videoid": "ha_NOX_-Aeg", "proxy": "http://15aa51.info/browse.php?u="})
+		self.navigation.executeAction({"action":"play_video", "videoid": "ha_NOX_-Aeg"})
 
 		args = sys.modules[ "__main__" ].xbmcplugin.setResolvedUrl.call_args_list
 		print "Args: " + repr(args)
@@ -138,7 +139,23 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		assert(args[0][1].has_key("listitem"))
 		assert(args[0][1]["handle"] == -1)
 		assert(args[0][1]["succeeded"] == True)
-		#assert(False)
+
+	def test_plugin_should_play_geolocked_videos_4oD(self):
+		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-proxy-uk.xml")
+		import os
+		sys.modules[ "__main__" ].xbmcvfs.exists.side_effect = os.path.exists
+				
+		self.navigation.executeAction({"action":"play_video", "videoid": "1aHKCQlyAL0"})
+
+		args = sys.modules[ "__main__" ].xbmcplugin.setResolvedUrl.call_args_list
+		print "Args: " + repr(args)
+		print repr(args[0][1].has_key("listitem"))
+		print repr(args[0][1]["handle"] == -1)
+		print repr(args[0][1]["succeeded"] == True)
+
+		assert(args[0][1].has_key("listitem"))
+		assert(args[0][1]["handle"] == -1)
+		assert(args[0][1]["succeeded"] == True)
 		
 if __name__ == "__main__":
 	nose.runmodule()
