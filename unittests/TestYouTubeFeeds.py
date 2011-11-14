@@ -69,6 +69,17 @@ class TestYouTubeFeeds(BaseTestCase.BaseTestCase):
 		url = feeds.urls["favorites"] % ("some_channel")
 		assert( result == url)
 	
+	def test_createUrl_should_add_category_and_time_to_url_if_category_is_in_params(self):
+		sys.modules[ "__main__" ].settings.getSetting.return_value = "0"
+		feeds = YouTubeFeeds()
+		
+		result = feeds.createUrl({"feed":"feed_category", "category":"some_category"})
+		
+		result = result[:result.rfind("&")]
+		result = result[:result.rfind("&")]
+		url = feeds.urls["feed_category"] % (("some_category"), "today")
+		assert( result == url)
+
 	def test_createUrl_should_add_playlist_to_url_if_playlist_is_in_params(self):
 		sys.modules[ "__main__" ].settings.getSetting.return_value = "1"
 		feeds = YouTubeFeeds()
@@ -114,14 +125,6 @@ class TestYouTubeFeeds(BaseTestCase.BaseTestCase):
 		result = feeds.createUrl({"feed":"feed_linked"})
 		
 		assert(result.find("?time=this_week") > 0)
-
-	def test_createUrl_should_add_time_if_url_contains_time_and_category_param(self):
-		sys.modules[ "__main__" ].settings.getSetting.return_value = "1"
-		feeds = YouTubeFeeds()
-		
-		result = feeds.createUrl({"feed":"feed_linked", "category":"Comedy"})
-		
-		assert(result.find("?time=this_week&category=Comedy") > 0)
 	
 	def test_list_should_call_listFolder_if_folder_is_in_params(self):
 		sys.modules[ "__main__" ].settings.getSetting.return_value = "1"
