@@ -72,7 +72,7 @@ function callJSONRpc(method, params, id) {
       data.params = params;
     }
     var strData = JSON.stringify(data);
-    console.log("Calling " + strData);
+    console.log("Calling " + xbmc_host + " with " + strData);
     GM_xmlhttpRequest({
       method: 'POST',
       url: xbmc_url,
@@ -392,6 +392,7 @@ function loadSettings(){
     if (typeof(chrome) != "undefined") {
 	chrome.extension.sendRequest({ type: "settings" }, 
 				     function(response) {
+					 console.log("GOT DATA: " + JSON.stringify(response));
 					 response = eval(response);
 					 xbmc_path = response[0];
 					 xbmc_url = response[1];
@@ -413,5 +414,4 @@ function loadSettings(){
 	self.postMessage({ "type": "load_settings"});
     }
 }
-
 loadSettings();
