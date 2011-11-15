@@ -47,7 +47,7 @@ class YouTubeNavigation():
 		#			   label						  , path									        , thumbnail					  		,  login		  ,  feed / action
 		self.categories = (
 					  {'Title':self.language( 30044 )  ,'path':"/root/explore"			 				, 'thumbnail':"explore"				, 'login':"false" },
-					  {'Title':self.language( 30041 )  ,'path':"/root/explore/categories"				, 'thumbnail':"explore"				, 'login':"false" , 'scraper':'categories', 'folder':'true'},
+					  {'Title':self.language( 30041 )  ,'path':"/root/explore/categories"				, 'thumbnail':"explore"				, 'login':"false" , 'feed':'feed_categories', 'folder':'true'},
 					  {'Title':self.language( 30037 )  ,'path':"/root/explore/disco"					, 'thumbnail':"discoball"		 	, 'login':"false" , 'store':"disco_searches", 'folder':'true' },
 					  {'Title':self.language( 30040 )  ,'path':"/root/explore/disco/new"				, 'thumbnail':"search"		   		, 'login':"false" , 'scraper':"search_disco"},
 					  {'Title':self.language( 30055 )  ,'path':"/root/explore/disco/top100"				, 'thumbnail':"discoball"		 	, 'login':"false" , 'scraper':"music_top100"},
@@ -538,7 +538,11 @@ class YouTubeNavigation():
 			cm.append ( (self.language(30522), "XBMC.RunPlugin(%s?path=%s&action=play_all&user_feed=playlist&shuffle=true&playlist=%s&)" % ( sys.argv[0], item("path"), item("playlist") ) ) )
 			if not get("external"):
 				cm.append ( (self.language(30539), "XBMC.RunPlugin(%s?path=%s&action=delete_playlist&playlist=%s&)" % ( sys.argv[0], item("path"), item("playlist") ) ) )
-							
+		
+		if (item("scraper") == "music_top100"):
+			cm.append( (self.language( 30520 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&scraper=music_top100&)" % ( sys.argv[0], item("path") ) ) )
+			cm.append( (self.language( 30522 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&shuffle=true&scraper=music_top100&)" % ( sys.argv[0], item("path") ) ) )
+			
 		if (item("scraper") == "search_disco"):
 			cm.append( (self.language( 30520 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&scraper=search_disco&search=%s&)" % ( sys.argv[0], item("path"), item("search") ) ) )
 			cm.append( (self.language( 30522 ), "XBMC.RunPlugin(%s?path=%s&action=play_all&shuffle=true&scraper=search_disco&search=%s&)" % ( sys.argv[0], item("path"), item("search") ) ) )

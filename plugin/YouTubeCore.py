@@ -159,7 +159,33 @@ class YouTubeCore():
 		url = "https://gdata.youtube.com/feeds/api/users/default/watch_later/%s" % get("playlist_entry_id")
 		result = self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true", "method": "DELETE"})
 		return (result["content"], result["status"])		
+	
+	def getCategoriesFolderInfo(self, xml, params={}):
+		self.common.log("")
+		get = params.get
+		result = ""
 		
+		dom = minidom.parseString(xml);
+		entries = dom.getElementsByTagName("atom:category");
+		next = False
+		
+		folders = [];
+		for node in entries:
+			folder = {};
+
+			if node.getElementsByTagName("yt:deprecated"):
+				continue
+			folder['Title'] = node.getAttribute("label")
+			
+			folder['category'] = node.getAttribute("term")
+			folder["icon"] = "explore"
+			folder["thumbnail"] = "explore"
+			folder["feed"] = "feed_category"
+			
+			folders.append(folder);
+		
+		return folders;
+	
 	def getFolderInfo(self, xml, params={}):
 		get = params.get
 		result = ""
@@ -181,7 +207,8 @@ class YouTubeCore():
 		for node in entries:
 			folder = {};
 			
-			folder["login"] = "true"
+			if get("feed") != "feed_categories":
+				folder["login"] = "true"
 			folder['Title'] = node.getElementsByTagName("title").item(0).firstChild.nodeValue.replace('Activity of : ', '').replace('Videos published by : ', '').encode("utf-8");
 			folder['published'] = self._getNodeValue(node, "published", "2008-07-05T19:56:35.000-07:00")
 			

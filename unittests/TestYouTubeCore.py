@@ -150,6 +150,69 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		assert(core._fetchPage.call_count == 1)
 		core._fetchPage.assert_called_with({"link": url, "api": "true", "login": "true", "auth": "true","method":"DELETE"})
 		
+	
+	def test_getCategoriesFolderInfo_should_set_item_params_correctly_for_contacts_feed(self):
+		input = self.readTestInput("categories-test.xml", False)
+		core = YouTubeCore()
+		
+		result = core.getCategoriesFolderInfo(input, {"feed":"feed_categories"})
+		
+		assert(len(result) > 0)
+		assert(result[0]["thumbnail"] == "explore")
+		assert(result[0]["Title"] == "Film & Animation")
+		assert(result[0]["category"] == "Film")
+		
+	def test_getCategoriesFolderInfo_should_use_getElementsByTagName_to_look_for_categories(self):
+		patcher = patch("xml.dom.minidom.parseString")
+		patcher.start()
+		import xml.dom.minidom
+		xml.dom.minidom.parseString = Mock()
+		xml.dom.minidom.parseString().getElementsByTagName.return_value = ""
+		core = YouTubeCore()
+
+		core.getCategoriesFolderInfo("xml", {})
+		
+		calls = xml.dom.minidom.parseString().getElementsByTagName.call_args_list
+		
+		patcher.stop("")
+		assert(calls[0][0][0] == "atom:category")
+	
+	def test_getCategoriesFolderInfo_should_use_getElementsByTagName_to_look_for_deprecated_categories(self):
+		patcher = patch("xml.dom.minidom.parseString")
+		patcher.start()
+		import xml.dom.minidom
+		node = Mock()
+		xml.dom.minidom.parseString = Mock()
+		xml.dom.minidom.parseString().getElementsByTagName.side_effect = [[node],""]
+		core = YouTubeCore()
+
+		core.getCategoriesFolderInfo("xml", {})
+		
+		calls = xml.dom.minidom.parseString().getElementsByTagName.call_args_list
+		
+		patcher.stop("")
+		
+		node.getElementsByTagName.assert_any_call("yt:deprecated")
+		
+	def test_getCategoriesFolderInfo_should_skip_deprecated_categories(self):
+		patcher = patch("xml.dom.minidom.parseString")
+		patcher.start()
+		import xml.dom.minidom
+		node = Mock()
+		xml.dom.minidom.parseString = Mock()
+		xml.dom.minidom.parseString().getElementsByTagName.side_effect = [[node],""]
+		core = YouTubeCore()
+
+		result = core.getCategoriesFolderInfo("xml", {})
+		
+		calls = xml.dom.minidom.parseString().getElementsByTagName.call_args_list
+		
+		patcher.stop("")
+		
+		node.getElementsByTagName.assert_any_call("yt:deprecated")
+		assert(node.getAttribute.call_count == 0)
+		assert(len(result) == 0)
+		
 	def test_getFolderInfo_should_use_getElementsByTagName_to_look_for_link_and_entries(self):
 		patcher = patch("xml.dom.minidom.parseString")
 		patcher.start()

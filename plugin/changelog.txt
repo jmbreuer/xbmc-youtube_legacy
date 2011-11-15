@@ -13,6 +13,10 @@
 - [XBMC] Subtitles and Annotations dont work the first time 90% of the time
 - Download of rtmpe streams not supported.
 
+[B]Version 2.8.0 (Beta)[/B]
+- Changed Replaced the categories scraper with api calls
+- Added play all option to youtube top 100 
+
 [B]Version 2.7.0 (Beta)[/B]
 - Added new sqlite based caching system with script.common.plugin.cache
 - Added support for unlinked accounts
