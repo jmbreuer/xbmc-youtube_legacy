@@ -4,6 +4,7 @@
 - Allow users to change sort on searches
 - Scrape Education.
 - Hook-in Caching the right places. And only the right places. (mostly scrapers)
+- All videos should have a unique path from xbmc's perspective eventhough they're present in different folders. 
 
 [B]Errata[/B]
 - [XBMC] Thumbnails sometimes turns into black box or Folder (XBMC not detecting when thumbnail is set and defaulting to icon?)
