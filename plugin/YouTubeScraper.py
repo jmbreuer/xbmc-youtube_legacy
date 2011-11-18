@@ -226,33 +226,30 @@ class YouTubeScraper():
 		items = []
 		
 		if get("category"):
-			category = urllib.unquote_plus(get("category"))
 			url = self.createUrl(params) 
 			result = self.core._fetchPage({"link":url})
 			
 			artist_container = self.common.parseDOM(result["content"], "div", attrs = { "id": "artist-recs-container"})
-			artists = self.common.parseDOM(artist_container, "div",  { "class": "artist-recommendation.*?"})
-			
+			artists = self.common.parseDOM(artist_container, "div",  { "class": "artist-recommendation .*?"})
+
 			for artist in artists:
 				div = self.common.parseDOM(artist, "div", attrs = { "class": "browse-item-content" })
-				ahref = self.common.parseDOM(div, "a", ret = "href")
-				atitle = self.common.parseDOM(div, "a", ret = "title")
-				athumb = self.common.parseDOM(artist, "img", ret = "data-thumb")
+				ahref = self.common.parseDOM(div, "a", ret = "href")[0]
+				atitle = self.common.parseDOM(div, "a", ret = "title")[0]
+				athumb = self.common.parseDOM(artist, "img", ret = "data-thumb")[0]
 				
-				if len(atitle) == len(ahref) == len(athumb) and len(ahref) > 0:
-					for i in range(0 , len(ahref)):
-						item = {}
-						title = self.utils.makeAscii(atitle[i])
-						title = self.utils.replaceHtmlCodes(title)
-						item["Title"] = title
-						item["scraper"] = "music_artist"
-						item["artist_name"] = urllib.quote_plus(title)
-						link = ahref[i]
-						link = link[link.find("?a=") + 3:link.find("&")]
-						item["artist"] = link
-						item["icon"] = "music"
-						item["thumbnail"] = athumb[i]
-						items.append(item)
+				item = {}
+				title = self.utils.makeAscii(atitle)
+				title = self.utils.replaceHtmlCodes(title)
+				item["Title"] = title
+				item["scraper"] = "music_artist"
+				item["artist_name"] = urllib.quote_plus(title)
+				link = ahref
+				link = link[link.find("?a=") + 3:link.find("&")]
+				item["artist"] = link
+				item["icon"] = "music"
+				item["thumbnail"] = athumb
+				items.append(item)
 		
 		self.common.log("Done")
 		return (items, status)
