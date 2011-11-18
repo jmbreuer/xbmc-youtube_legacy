@@ -15,6 +15,7 @@
 
 [B]Version 2.8.0 (Beta)[/B]
 - Changed Replaced the categories scraper with api calls
+- Fixed music artist and top hit's scraper
 - Added play all option to youtube top 100 
 
 [B]Version 2.7.0 (Beta)[/B]
