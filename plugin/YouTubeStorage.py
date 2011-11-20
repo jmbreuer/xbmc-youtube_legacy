@@ -59,7 +59,13 @@ class YouTubeStorage():
 		try:
 			return open(filepath, options)
 		except:
-			return open(filepath, alternate)
+			try:
+				return open(filepath, alternate)
+			except:
+				try:
+					return io.open(filepath, options)
+				except:
+					return io.open(filepath, alternate)
 	
 	def getStoredArtists(self, params = {}):
 		get = params.get
