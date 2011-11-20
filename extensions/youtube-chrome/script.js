@@ -23,7 +23,7 @@ function extractVideoId(id) {
 function playVideo(id){
     id = extractVideoId(id);
     if ( id ) {
-        callJSONRpc("Player.Open", { item: { file: "/?action=play_video&videoid=" + extractVideoId(id) } } )
+        callJSONRpc("Player.Open", { item: { file: "/?action=play_video&videoid=" + id } } )
     }
 }
 

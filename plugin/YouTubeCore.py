@@ -417,10 +417,11 @@ class YouTubeCore():
 
 		else:
 			request.add_header('User-Agent', self.common.USERAGENT)
+			#request.add_header('Cookie', 'VISITOR_INFO1_LIVE=ST1Ti53r4fU')
 
 			if get("no-language-cookie", "false") == "false":
 				request.add_header('Cookie', 'PREF=f1=50000000&hl=en')
-		
+
 		if get("login", "false") == "true":
 			self.common.log("got login")
 			if (self.settings.getSetting("username") == "" or self.settings.getSetting("user_password") == ""):

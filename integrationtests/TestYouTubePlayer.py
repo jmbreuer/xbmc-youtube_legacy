@@ -140,7 +140,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		assert(args[0][1]["handle"] == -1)
 		assert(args[0][1]["succeeded"] == True)
 
-	def ttest_plugin_should_play_geolocked_videos_4oD(self):
+	def ttest_plugin_should_play_geolocked_videos_4oD(self): # Need to find a stable video.
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-proxy-uk.xml")
 		import os
 		sys.modules[ "__main__" ].xbmcvfs.exists.side_effect = os.path.exists
