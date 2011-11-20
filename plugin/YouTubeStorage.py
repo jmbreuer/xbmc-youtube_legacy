@@ -57,15 +57,9 @@ class YouTubeStorage():
 			alternate = options.replace("b", "")
 
 		try:
-			return open(filepath, options)
+			return io.open(filepath, options)
 		except:
-			try:
-				return open(filepath, alternate)
-			except:
-				try:
-					return io.open(filepath, options)
-				except:
-					return io.open(filepath, alternate)
+			return io.open(filepath, alternate)
 	
 	def getStoredArtists(self, params = {}):
 		get = params.get
