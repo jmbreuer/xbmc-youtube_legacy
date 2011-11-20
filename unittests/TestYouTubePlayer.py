@@ -228,7 +228,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 	def test_getSubtitleUrl_should_find_url_with_proper_language_code(self):
 		player = YouTubePlayer()
 		sys.modules["__main__"].core._fetchPage = Mock()
-		sys.modules["__main__"].core._fetchPage.return_value = {"status":200, "content":self.readTestInput("timedtextDirectoryTest.xml", False).encode("utf-8", "ignore")}
+		sys.modules["__main__"].core._fetchPage.return_value = {"status":200, "content":self.readTestInput("timedtextDirectoryTest.xml", False)}
 		sys.modules["__main__"].settings.getSetting = Mock()
 		sys.modules["__main__"].settings.getSetting.return_value = "3"
 		
@@ -239,7 +239,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 	def test_getSubtitleUrl_should_fall_back_to_english_if_proper_language_code_is_not_found(self):
 		player = YouTubePlayer()
 		sys.modules["__main__"].core._fetchPage = Mock()
-		sys.modules["__main__"].core._fetchPage.return_value = {"status":200, "content":self.readTestInput("timedtextDirectoryTest.xml", False).encode("utf-8", "ignore")}
+		sys.modules["__main__"].core._fetchPage.return_value = {"status":200, "content":self.readTestInput("timedtextDirectoryTest.xml", False)}
 		sys.modules["__main__"].settings.getSetting = Mock()
 		sys.modules["__main__"].settings.getSetting.return_value = "2"
 		
@@ -252,7 +252,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		sys.modules["__main__"].utils.replaceHtmlCodes = Mock()
 		sys.modules["__main__"].utils.replaceHtmlCodes.side_effect = lambda x: x.encode("ascii", 'ignore')
 		
-		result = player.transformSubtitleXMLtoSRT(self.readTestInput("subtitleTest.xml",False).encode("utf-8", "ignore")) 
+		result = player.transformSubtitleXMLtoSRT(self.readTestInput("subtitleTest.xml",False)) 
 		
 		assert(len(result.split("\r\n")) == 66) 
 		
@@ -261,7 +261,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		sys.modules["__main__"].utils.replaceHtmlCodes = Mock()
 		sys.modules["__main__"].utils.replaceHtmlCodes.side_effect = lambda x: x.encode("ascii", 'ignore')
 		
-		result = player.transformSubtitleXMLtoSRT(self.readTestInput("subtitleTest.xml",False).encode("utf-8", "ignore")) 
+		result = player.transformSubtitleXMLtoSRT(self.readTestInput("subtitleTest.xml",False)) 
 		
 		assert(sys.modules[ "__main__"].utils.replaceHtmlCodes.call_count > 0) 
 
@@ -340,7 +340,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		sys.modules["__main__"].utils.replaceHtmlCodes = Mock()
 		sys.modules["__main__"].utils.replaceHtmlCodes.side_effect = lambda x: x.encode("ascii", 'ignore')
 		
-		(result, style) = player.transformAnnotationToSSA(self.readTestInput("annotationsTest.xml",False).encode("utf-8", "ignore")) 
+		(result, style) = player.transformAnnotationToSSA(self.readTestInput("annotationsTest.xml",False).encode("utf-8")) 
 		
 		assert(len(result.split("\r\n")) == 11)
 	
@@ -349,7 +349,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		sys.modules["__main__"].utils.replaceHtmlCodes = Mock()
 		sys.modules["__main__"].utils.replaceHtmlCodes.side_effect = lambda x: x.encode("ascii", 'ignore')
 		
-		result = player.transformAnnotationToSSA(self.readTestInput("annotationsTest.xml",False).encode("utf-8", "ignore")) 
+		result = player.transformAnnotationToSSA(self.readTestInput("annotationsTest.xml",False).encode("utf-8")) 
 		
 		assert(sys.modules[ "__main__"].utils.replaceHtmlCodes.call_count > 0)
 	
@@ -768,11 +768,11 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 	
 	def test_getVideoObject_should_handle_accents_and_utf8(self):
 		params = {"videoid":"some_id"}
-		sys.modules["__main__"].settings.getSetting.return_value = u"somePathé/".encode("utf-8", "ignore")
+		sys.modules["__main__"].settings.getSetting.return_value = u"somePathé/".encode("utf-8")
 		sys.modules["__main__"].xbmcvfs.exists.return_value = False
 		player = YouTubePlayer()
 		player.getInfo = Mock()
-		player.getInfo.return_value = ({"videoid":"some_id","Title": u"נלה מהיפה והחנון בסטריפ צ'אט בקליפ של חובבי ציון".encode("utf-8", "ignore")},200)
+		player.getInfo.return_value = ({"videoid":"some_id","Title": u"נלה מהיפה והחנון בסטריפ צ'אט בקליפ של חובבי ציון".encode("utf-8")},200)
 		player._getVideoLinks = Mock()
 		player._getVideoLinks.return_value = ([],{})
 		player.selectVideoQuality = Mock()

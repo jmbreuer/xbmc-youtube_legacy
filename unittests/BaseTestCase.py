@@ -16,10 +16,10 @@ class BaseTestCase(unittest2.TestCase):#pragma: no cover
 	
 	def readTestInput(self, filename, should_eval = True):
 		try:
-			testinput = io.open("resources/" + filename)
+			testinput = open("resources/" + filename)
 			inputdata = testinput.read()
 		except:
-			testinput = open("resources/" + filename)
+			testinput = io.open("resources/" + filename)
 			inputdata = testinput.read()
 
 		if should_eval:
