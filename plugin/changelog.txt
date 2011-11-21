@@ -4,7 +4,6 @@
 - Allow users to change sort on searches
 - Scrape Education.
 - Hook-in Caching the right places. And only the right places. (mostly scrapers)
-- All videos should have a unique path from xbmc's perspective eventhough they're present in different folders. 
 
 [B]Errata[/B]
 - [XBMC] Thumbnails sometimes turns into black box or Folder (XBMC not detecting when thumbnail is set and defaulting to icon?)
@@ -15,6 +14,7 @@
 - Download of rtmpe streams not supported.
 
 [B]Version 2.8.0 (Beta)[/B]
+- Changed All videos now have a unique path from xbmc's perspective eventhough they're present in different folders.
 - Changed Replaced the categories scraper with api calls
 - Fixed music artist and top hit's scraper
 - Added play all option to youtube top 100 
