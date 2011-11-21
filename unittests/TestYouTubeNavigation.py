@@ -888,6 +888,7 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		
 		sys.modules["__main__"].xbmcgui.ListItem().setProperty.assert_called_with("IsPlayable","true")
 
+
 	def test_addActionListItem_should_call_xbmcplugin_addDirectoryItem_correctly(self):
 		sys.argv = ["some_path",-1,"some_params"]
 		sys.modules["__main__"].xbmcgui.ListItem.return_value = []
@@ -1023,7 +1024,20 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		
 		navigation.addVideoListItem({},{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"})
 		
-		sys.modules["__main__"].xbmcplugin.addDirectoryItem.assert_called_with(handle=-1, url = "some_path?path=None&action=play_video&videoid=None", listitem=list_item, isFolder=False, totalItems=1)
+		sys.modules["__main__"].xbmcplugin.addDirectoryItem.assert_called_with(handle=-1, url = "some_path?path=/root/video&action=play_video&videoid=None", listitem=list_item, isFolder=False, totalItems=1)
+
+	def test_addActionListItem_should_set_default_path_for_videos_correctly(self):
+		sys.argv = ["some_path",-1,"some_params"]
+		sys.modules["__main__"].utils.getThumbnail.return_value = "some_image_path"
+		list_item = Mock()
+		sys.modules["__main__"].xbmcgui.ListItem.return_value = list_item 
+		navigation = YouTubeNavigation()
+		navigation.addVideoContextMenuItems = Mock()
+		navigation.addVideoContextMenuItems.return_value = []
+		
+		navigation.addVideoListItem({},{"Title":"some_title","icon":"some_icon","thumbnail":"some_thumbnail"})
+		
+		sys.modules["__main__"].xbmcplugin.addDirectoryItem.assert_called_with(handle=-1, url = "some_path?path=/root/video&action=play_video&videoid=None", listitem=list_item, isFolder=False, totalItems=1)
 
 	def test_parseFolderList_should_set_cache_false_if_item_is_store_og_user_feed(self):
 		sys.argv = ["some_path",-1,"some_params"]
