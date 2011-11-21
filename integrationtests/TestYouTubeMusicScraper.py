@@ -35,7 +35,7 @@ class TestYouTubeMusicScraper(BaseTestCase.BaseTestCase):
 		self.assert_directory_count_greater_than_or_equals(4)
 		self.assert_directory_count_less_than_or_equals(51)
 		self.assert_directory_is_a_video_list()
-		self.assert_directory_contains_only_unique_video_items()
+		self.assert_directory_contains_almost_only_unique_video_items()
 		
 	def test_plugin_should_scrape_music_artist_video_list_correctly(self):
 		self.navigation.listMenu({"scraper":"music_artist", "artist":"GxdCwVVULXeDd7ydWg7mR6cPW2bA2G-j", "artist_name":"Beyonc%C3%A9&", "path":"/root/explore/music/artists"})
@@ -43,7 +43,7 @@ class TestYouTubeMusicScraper(BaseTestCase.BaseTestCase):
 		self.assert_directory_count_greater_than_or_equals(10)
 		self.assert_directory_count_less_than_or_equals(51)
 		self.assert_directory_is_a_video_list()
-		self.assert_directory_contains_only_unique_video_items()
+		self.assert_directory_contains_almost_only_unique_video_items()
 		self.assert_directory_items_should_have_thumbnails()
 	
 	def test_plugin_should_scrape_similar_artist_listing_correctly(self):
@@ -60,7 +60,7 @@ class TestYouTubeMusicScraper(BaseTestCase.BaseTestCase):
 		self.assert_directory_count_greater_than_or_equals(10)
 		self.assert_directory_count_less_than_or_equals(51)
 		self.assert_directory_is_a_video_list()
-		self.assert_directory_contains_only_unique_video_items()
+		self.assert_directory_contains_almost_only_unique_video_items()
 		self.assert_directory_items_should_have_thumbnails()
 		
 	def ttest_plugin_should_remeber_recently_viewed_artist_and_present_them_correctly(self):
