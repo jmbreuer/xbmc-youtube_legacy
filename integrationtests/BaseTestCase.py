@@ -104,32 +104,7 @@ class BaseTestCase(unittest2.TestCase):#pragma: no cover
 			print "Directory list: \r\n" + repr(args)
 			
 		assert(video_count == 0)
-		
-	def assert_directory_contains_only_unique_video_items(self):
-		video_ids = []
-		non_unique = []
-		args = sys.modules["__main__"].xbmcplugin.addDirectoryItem.call_args_list
-		
-		for call in args:
-			url = call[1]["url"]
-			if url.find("videoid=") > -1:
-				video = url[url.find("videoid=") + len("videoid="):]
-				if video.find("&") > -1:
-					video = video[:video.find("&")]
-				
-				if video:
-					video_ids.append(video)
-		
-		unique = list(set(video_ids))
-
-		percent = ( 100 / len(video_ids) * len(unique) )
-		print "XXXXXXXXXXXX : %s " % repr(percent)
-		if percent < 90:
-			print "Directory contains less than 90% unique videos.\r\n Uniques: %s \r\n Full List: %s" % (repr(unique), repr(video_ids)) 
-			print "Directory list: \r\n" + repr(args)
 			
-		assert(percent >= 90)
-	
 	def assert_directory_contains_almost_only_unique_video_items(self):
 		video_ids = []
 		non_unique = []
