@@ -1,9 +1,13 @@
 [B]TODO:[/B]
-- Fix RTMP'e seems refactor broke it, and make a unittest + integrations test that parsing works (playpath seems wrong)
+- Fix RTMP'e, seems refactor broke it, and make a unittest + integrations test that parsing works (playpath seems wrong)
   - Make rtmp suck setup once Handshake 10 is supported.
 - Allow users to change sort on searches
 - Scrape Education.
+- Support playback of 3d anaglyph movies from youtube
+- Add roller Settings to control how and when 3d movies are displayed -> Off -> Ask -> When available
+- Merge 3d support with playback code so that plugin only asks once if user choose ask for both 3d and normal playback
 - Hook-in Caching the right places. And only the right places. (mostly scrapers)
+- Refactor downloader and make it external from plugin so it can be share with other plugins (look into jdownloader support mayhaps?)
 
 [B]Errata[/B]
 - [XBMC] Thumbnails sometimes turns into black box or Folder (XBMC not detecting when thumbnail is set and defaulting to icon?)
