@@ -398,8 +398,8 @@ class YouTubeNavigation():
 		icon = self.utils.getThumbnail(icon)
 		
 		listitem=self.xbmcgui.ListItem(item("Title"), iconImage=icon, thumbnailImage=item("thumbnail") )
-
-		url = '%s?path=%s&action=play_video&videoid=%s' % ( sys.argv[0], item("path"), item("videoid"));
+		
+		url = '%s?path=plu%s&action=play_video&videoid=%s' % ( sys.argv[0], "/root/video", item("videoid"));
 		
 		if get("user_feed") == "watch_later":
 			url+= "&watch_later=true&playlist_entry_id=%s&" % item("playlist_entry_id") 
