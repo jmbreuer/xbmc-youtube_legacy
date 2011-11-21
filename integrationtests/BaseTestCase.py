@@ -118,15 +118,17 @@ class BaseTestCase(unittest2.TestCase):#pragma: no cover
 					video = video[:video.find("&")]
 				
 				if video:
-					if video in video_ids:
-						non_unique.append(video)
 					video_ids.append(video)
 		
-		if len(non_unique) > 0:
-			print "Directory contains one or more duplicate videoids.\r\n Duplicates: %s \r\n Full List: %s" % (repr(non_unique), repr(video_ids)) 
+		unique = list(set(video_ids))
+
+		percent = ( 100 / len(video_ids) * len(unique) )
+		print "XXXXXXXXXXXX : %s " % repr(percent)
+		if percent < 90:
+			print "Directory contains less than 90% unique videos.\r\n Uniques: %s \r\n Full List: %s" % (repr(unique), repr(video_ids)) 
 			print "Directory list: \r\n" + repr(args)
 			
-		assert(len(non_unique) == 0)
+		assert(percent >= 90)
 	
 	def assert_directory_contains_almost_only_unique_video_items(self):
 		video_ids = []
