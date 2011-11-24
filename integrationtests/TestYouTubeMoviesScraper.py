@@ -1,8 +1,7 @@
 import BaseTestCase
 import nose
 
-
-class TestYouTubeTrailersScraper(BaseTestCase.BaseTestCase):
+class TestYouTubeMoviesScraper(BaseTestCase.BaseTestCase):
 	
 	def test_plugin_should_scrape_movie_category_listing_correctly(self):
 		self.navigation.listMenu({"scraper":"movies", "folder":"true", "path":"/root/explore/movies"})

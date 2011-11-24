@@ -1,8 +1,7 @@
 import BaseTestCase
 import nose
 
-
-class TestYouTubeMusicScraper(BaseTestCase.BaseTestCase):
+class TestYouTubeDiscoScraper(BaseTestCase.BaseTestCase):
 	
 	def test_plugin_should_scrape_disco_search_video_list_correctly(self):
 		self.navigation.listMenu({"scraper":"search_disco", "search":"Lady Gaga", "path":"/root/explore/disco/new"})

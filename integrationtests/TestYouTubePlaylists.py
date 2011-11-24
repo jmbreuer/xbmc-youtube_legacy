@@ -1,7 +1,7 @@
 import BaseTestCase
 import nose, sys
 
-class TestYouTubePlayer(BaseTestCase.BaseTestCase):
+class TestYouTubePlaylists(BaseTestCase.BaseTestCase):
 	
 	def test_plugin__should_queue_playlist_and_start_playback_if_user_selects_play_all_in_playlist(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")

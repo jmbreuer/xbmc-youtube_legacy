@@ -1,7 +1,7 @@
 import BaseTestCase
 import nose, sys
 
-class TestYouTubeMusicScraper(BaseTestCase.BaseTestCase):
+class TestYouTubeUserScraper(BaseTestCase.BaseTestCase):
 		
 	def test_plugin_should_scrape_liked_videos_list_correctly(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")

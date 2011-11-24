@@ -1,7 +1,7 @@
 import BaseTestCase
 import nose, sys
 
-class TestYouTubeMusicScraper(BaseTestCase.BaseTestCase):
+class TestYouTubePublicFeedsScraper(BaseTestCase.BaseTestCase):
 	
 	def test_plugin_should_list_categories_folder_list_correctly(self):
 		self.navigation.listMenu({"feed":"feed_categories", "path":"/root/explore/categories", "folder":"true"})

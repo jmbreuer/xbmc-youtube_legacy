@@ -1,7 +1,6 @@
 import BaseTestCase
 import nose
 
-
 class TestYouTubeMusicScraper(BaseTestCase.BaseTestCase):
 	
 	def test_plugin_should_scrape_music_hits_category_listing_correctly(self):

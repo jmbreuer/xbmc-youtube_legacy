@@ -3,7 +3,7 @@ import BaseTestCase
 import nose, sys, os
 from mock import Mock
 
-class TestYouTubePlayer(BaseTestCase.BaseTestCase):	
+class TestYouTubeDownloader(BaseTestCase.BaseTestCase):	
 	def test_plugin_should_download_standard_videos(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings.xml")
 		sys.modules["__main__"].storage.getNextVideoFromDownloadQueue = Mock()
