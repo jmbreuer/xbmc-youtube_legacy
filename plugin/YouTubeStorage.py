@@ -50,10 +50,16 @@ class YouTubeStorage():
 			return self.getStoredSearches(params)
 	
 	def openFile(self, filepath, options = "w"):
+		
+		if options.find("b") == -1: # Toggle binary mode on failure
+			alternate = options + "b"
+		else:
+			alternate = options.replace("b", "")
+
 		try:
 			return io.open(filepath, options)
 		except:
-			return io.open(filepath, options + "b")
+			return io.open(filepath, alternate)
 	
 	def getStoredArtists(self, params = {}):
 		get = params.get

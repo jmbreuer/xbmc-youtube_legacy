@@ -27,7 +27,7 @@ class TestYouTubeShowsScraper(BaseTestCase.BaseTestCase):
 		self.assert_directory_count_greater_than_or_equals(5)
 		self.assert_directory_count_less_than_or_equals(51)
 		self.assert_directory_is_a_video_list()
-		self.assert_directory_contains_only_unique_video_items()
+		self.assert_directory_contains_almost_only_unique_video_items()
 		self.assert_directory_items_should_have_external_thumbnails()
 
 	def test_plugin_should_scrape_show_season_folder_list_correctly(self):
@@ -45,7 +45,7 @@ class TestYouTubeShowsScraper(BaseTestCase.BaseTestCase):
 		self.assert_directory_count_greater_than_or_equals(30)
 		self.assert_directory_count_less_than_or_equals(51)
 		self.assert_directory_is_a_video_list()
-		self.assert_directory_contains_only_unique_video_items()
+		self.assert_directory_contains_almost_only_unique_video_items()
 		self.assert_directory_items_should_have_external_thumbnails()
 
 	def test_plugin_should_scrape_show_season_episode_video_list_page_2_correctly(self): # Epic failure
@@ -54,7 +54,7 @@ class TestYouTubeShowsScraper(BaseTestCase.BaseTestCase):
 		self.assert_directory_count_greater_than_or_equals(10)
 		self.assert_directory_count_less_than_or_equals(51)
 		self.assert_directory_is_a_video_list()
-		self.assert_directory_contains_only_unique_video_items()
+		self.assert_directory_contains_almost_only_unique_video_items()
 		self.assert_directory_items_should_have_thumbnails()
 		
 if __name__ == "__main__":

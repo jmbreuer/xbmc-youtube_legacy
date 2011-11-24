@@ -15,8 +15,13 @@ class BaseTestCase(unittest2.TestCase):#pragma: no cover
 		MockYouTubeDepends.MockYouTubeDepends().mock()
 	
 	def readTestInput(self, filename, should_eval = True):
-		testinput = io.open("resources/" + filename)
-		inputdata = testinput.read()
+		try:
+			testinput = open("resources/" + filename)
+			inputdata = testinput.read()
+		except:
+			testinput = io.open("resources/" + filename)
+			inputdata = testinput.read()
+
 		if should_eval:
 			inputdata = eval(inputdata)
 		return inputdata

@@ -12,7 +12,7 @@ class TestYouTubeUserFeeds(BaseTestCase.BaseTestCase):
 		self.assert_directory_count_greater_than_or_equals(20)
 		self.assert_directory_count_less_than_or_equals(50)
 		self.assert_directory_is_a_video_list()
-		self.assert_directory_contains_only_unique_video_items()
+		self.assert_directory_contains_almost_only_unique_video_items()
 		self.assert_directory_items_should_have_external_thumbnails()
 	
 	def test_plugin_should_list_user_favorites_video_list_page_2_correctly(self):
@@ -24,7 +24,7 @@ class TestYouTubeUserFeeds(BaseTestCase.BaseTestCase):
 		self.assert_directory_count_greater_than_or_equals(10)
 		self.assert_directory_count_less_than_or_equals(51)
 		self.assert_directory_is_a_video_list()
-		self.assert_directory_contains_only_unique_video_items()
+		self.assert_directory_contains_almost_only_unique_video_items()
 		self.assert_directory_items_should_have_external_thumbnails()
 	
 	def test_plugin_should_list_user_playlists_correctly(self):
@@ -45,7 +45,7 @@ class TestYouTubeUserFeeds(BaseTestCase.BaseTestCase):
 		self.assert_directory_count_greater_than_or_equals(10)
 		self.assert_directory_count_less_than_or_equals(51)
 		self.assert_directory_is_a_video_list()
-		self.assert_directory_contains_only_unique_video_items()
+		self.assert_directory_contains_almost_only_unique_video_items()
 		self.assert_directory_items_should_have_external_thumbnails()
 		
 	def test_plugin_should_list_user_uploads_videos_list_page_2_correctly(self):
@@ -57,7 +57,7 @@ class TestYouTubeUserFeeds(BaseTestCase.BaseTestCase):
 		self.assert_directory_count_greater_than_or_equals(5)
 		self.assert_directory_count_less_than_or_equals(51)
 		self.assert_directory_is_a_video_list()
-		self.assert_directory_contains_only_unique_video_items()
+		self.assert_directory_contains_almost_only_unique_video_items()
 		self.assert_directory_items_should_have_external_thumbnails()
 
 	def test_plugin_should_list_user_watch_later_video_list_correctly(self):
@@ -68,7 +68,7 @@ class TestYouTubeUserFeeds(BaseTestCase.BaseTestCase):
 		self.assert_directory_count_greater_than_or_equals(10)
 		self.assert_directory_count_less_than_or_equals(51)
 		self.assert_directory_is_a_video_list()
-		self.assert_directory_contains_only_unique_video_items()
+		self.assert_directory_contains_almost_only_unique_video_items()
 		self.assert_directory_items_should_have_external_thumbnails()
 		self.assert_directory_item_urls_contain("playlist_entry_id")
 	
@@ -80,7 +80,7 @@ class TestYouTubeUserFeeds(BaseTestCase.BaseTestCase):
 		self.assert_directory_count_greater_than_or_equals(10)
 		self.assert_directory_count_less_than_or_equals(51)
 		self.assert_directory_is_a_video_list()
-		self.assert_directory_contains_only_unique_video_items()
+		self.assert_directory_contains_almost_only_unique_video_items()
 		self.assert_directory_items_should_have_external_thumbnails()
 		
 	def test_plugin_should_list_user_watch_later_video_list_page_2_correctly(self):
@@ -90,7 +90,7 @@ class TestYouTubeUserFeeds(BaseTestCase.BaseTestCase):
 		self.assert_directory_count_greater_than_or_equals(5)
 		self.assert_directory_count_less_than_or_equals(51)
 		self.assert_directory_is_a_video_list()
-		self.assert_directory_contains_only_unique_video_items()
+		self.assert_directory_contains_almost_only_unique_video_items()
 		self.assert_directory_items_should_have_external_thumbnails()
 		self.assert_directory_item_urls_contain("playlist_entry_id")
 
@@ -140,7 +140,7 @@ class TestYouTubeUserFeeds(BaseTestCase.BaseTestCase):
 		self.assert_directory_count_greater_than_or_equals(10)
 		self.assert_directory_count_less_than_or_equals(51)
 		self.assert_directory_is_a_video_list()
-		self.assert_directory_contains_only_unique_video_items()
+		self.assert_directory_contains_almost_only_unique_video_items()
 		self.assert_directory_items_should_have_external_thumbnails()
 					
 if __name__ == "__main__":
