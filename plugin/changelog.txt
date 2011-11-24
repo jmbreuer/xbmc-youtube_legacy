@@ -8,6 +8,7 @@
 - Merge 3d support with playback code so that plugin only asks once if user choose ask for both 3d and normal playback
 - Hook-in Caching the right places. And only the right places. (mostly scrapers)
 - Refactor downloader and make it external from plugin so it can be share with other plugins (look into jdownloader support mayhaps?)
+- Get downloader to auto-hide again and create an advanced setting to control this behaviour. 
 
 [B]Errata[/B]
 - [XBMC] Thumbnails sometimes turns into black box or Folder (XBMC not detecting when thumbnail is set and defaulting to icon?)
