@@ -498,8 +498,8 @@ class YouTubeCore():
 				for domain in domains:
 					self.common.log(repr(domain.firstChild.nodeValue),5)
 					if domain.firstChild.nodeValue == "yt:quota":
-						self.common.log("Hit quota... sleeping for 10 seconds")
-						time.sleep(10)
+						self.common.log("Hit quota... sleeping for 100 seconds")
+						time.sleep(100)
 						acted = True
 						
 				if not acted:
