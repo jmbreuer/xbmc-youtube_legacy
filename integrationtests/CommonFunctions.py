@@ -224,6 +224,15 @@ class CommonFunctions():
 			ret_obj["status"] = 500
 			return ret_obj
 
+		except urllib2.URLError, e:
+                        err = str(e)
+			self.common.log("URLError : " + err)
+
+                        time.sleep(3)
+			params["error"] = str(int(get("error", "0")) + 1)
+			ret_obj = self._fetchPage(params)
+                        return ret_obj
+
         # This function implements a horrible hack related to python 2.4's terrible unicode handling. 
 	def makeAscii(self, str):
                 if sys.hexversion >= 0x02050000:
