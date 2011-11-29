@@ -158,8 +158,9 @@ class YouTubeNavigation():
 			params["video_url"] = video['video_url']
                         params["Title"] = video['Title']
 			#params["callback_for_url"] = self.player.getVideoObject
-			#params["callback_for_done"] = self.download_done
 			self.downloader.downloadVideo(params)
+			self.player.downloadSubtitle(video)
+			# self.storage.storeValue( "vidstatus-" + video['videoid'], "1" )
 		if (get("action") == "play_video"):
 			self.player.playVideo(params)
 		if (get("action") == "queue_video"):
@@ -179,13 +180,6 @@ class YouTubeNavigation():
 			self.storage.reversePlaylistOrder(params)
 		if (get("action") == "create_playlist"):
 			self.playlist.createPlaylist(params)
-
-
-	def download_done(self, video):
-		self.common.log("")
-		self.player.downloadSubtitle(video)
-		self.storage.storeValue( "vidstatus-" + video['videoid'], "1" )
-		self.common.log("done")
 
 	#==================================== Item Building and Listing ===========================================	
 	def list(self, params = {}):
