@@ -262,11 +262,13 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		navigation.addSubscription.assert_called_with({"action":"add_subscription"})
 
 	def test_executeAction_should_call_downloader_downloadVideo_if_action_is_download(self):
+		sys.modules["__main__"].player.getVideoObject = Mock()
+		sys.modules["__main__"].player.getVideoObject.return_value = ( { "video_url": "Mock url", "Title": "Mock Title" }, "mock" )
 		navigation = YouTubeNavigation()
 		
 		navigation.executeAction({"action":"download"})
 		
-		sys.modules["__main__"].downloader.downloadVideo.assert_called_with({"action":"download"})
+		sys.modules["__main__"].downloader.downloadVideo.assert_called_with({'action': 'download', 'video_url': 'Mock url', 'Title': 'Mock Title'})
 	
 	def test_executeAction_should_call_player_playVideo_if_action_is_play_video(self):
 		navigation = YouTubeNavigation()
