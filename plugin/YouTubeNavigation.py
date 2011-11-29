@@ -154,6 +154,11 @@ class YouTubeNavigation():
 		if (get("action") == "add_subscription"):
 			self.addSubscription(params)
 		if (get("action") == "download"):
+                        (video, status) = self.player.getVideoObject(params)
+			params["video_url"] = video['video_url']
+                        params["Title"] = video['Title']
+			#params["callback_for_url"] = self.player.getVideoObject
+			#params["callback_for_done"] = self.download_done
 			self.downloader.downloadVideo(params)
 		if (get("action") == "play_video"):
 			self.player.playVideo(params)
@@ -174,7 +179,14 @@ class YouTubeNavigation():
 			self.storage.reversePlaylistOrder(params)
 		if (get("action") == "create_playlist"):
 			self.playlist.createPlaylist(params)
-			
+
+
+	def download_done(self, video):
+		self.common.log("")
+		self.player.downloadSubtitle(video)
+		self.storage.storeValue( "vidstatus-" + video['videoid'], "1" )
+		self.common.log("done")
+
 	#==================================== Item Building and Listing ===========================================	
 	def list(self, params = {}):
 		get = params.get
