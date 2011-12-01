@@ -232,6 +232,7 @@ class YouTubeLogin():
 			if not fetch_options:
 				# Check if we are logged in.
 				if ret["content"].find("USERNAME', ") > 0:
+					print "XXXXXXXXXXXXXXX1 : " + repr(ret["content"])
 					logged_in = True
 					self.common.log("Logged in. Parsing data.")
 					break;

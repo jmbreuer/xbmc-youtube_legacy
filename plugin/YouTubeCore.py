@@ -394,7 +394,7 @@ class YouTubeCore():
 				link = proxy + urllib.quote(link)
 				self.common.log("got proxy: %s" % link)
 			else:
-				self.common.log("got default")
+				self.common.log("got default: %s" % link)
 
 			request = url2request(link, get("method", "GET"));
 		else:
@@ -404,11 +404,11 @@ class YouTubeCore():
 			request.add_header('Content-Type', 'application/atom+xml') 
 			request.add_header('Content-Length', str(len(get("request")))) 
 
-		if get("proxy") or link.find(self.settings.getSetting("proxy")) > -1:
-			proxy = self.settings.getSetting("proxy")
-			referer = proxy[:proxy.rfind("/")]
-			self.common.log("Added refer: %s" % referer)
-			request.add_header('Referer', referer)
+		#if get("proxy") or link.find(self.settings.getSetting("proxy")) > -1:
+		#	proxy = self.settings.getSetting("proxy")
+		#	referer = proxy[:proxy.rfind("/")]
+		#	self.common.log("Added refer: %s" % referer)
+		#	request.add_header('Referer', referer)
 
 		if get("api", "false") == "true":
 			self.common.log("got api")
@@ -429,26 +429,23 @@ class YouTubeCore():
 				ret_obj["status"] = 303
 				ret_obj["content"] = self.language(30622)
 				return ret_obj
+
 			# This should be a call to self.login._httpLogin()
 			if self.settings.getSetting("login_info") == "":
+				self.common.log("XXXX no login_info")
 				if isinstance(self.login, str):
+					self.common.log("XXXX Trying to add login module")
 					self.login = sys.modules[ "__main__" ].login
+				self.common.log("XXXX calling login module")
 				self.login._httpLogin()
 
 			if self.settings.getSetting("login_info") != "":
-				self.common.log("returning existing login info: " + self.settings.getSetting("login_info"))
 				info = self.settings.getSetting("login_info")
+				self.common.log("Addding login_info to cookie: " + info)
 				request.add_header('Cookie', 'LOGIN_INFO=' + info)
 		
-		if get("auth", "false") == "true":
-			self.common.log("got auth")
-			if self._getAuth():
-				request.add_header('Authorization', 'GoogleLogin auth=' + self.settings.getSetting("oauth2_access_token"))
-			else:
-				self.common.log("couldn't get login token")
-		
 		try:
-			self.common.log("connecting to server... ")
+			self.common.log("connecting to server... %s" % link )
 
 			con = urllib2.urlopen(request)
 			

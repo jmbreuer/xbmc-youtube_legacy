@@ -25,9 +25,12 @@ class xbmcSettings():
 		if value:
 			self.settingsString[id] = value
 			if self.path.find("settings-logged-in") > -1: # This only updates. No insert!
+				updated = False
 				for string in self.strings:
 					if string.getAttribute("id") == id:
 						string.setAttribute("value", value)
+						updated = True
+				print "YYYYYYYYYYYYYYYYYYYYYYYYYYYY UPDATING SETTINGS OBJECT"
 				f = open(self.path, 'w')
 				self.dom.writexml(f)
 				f.close()

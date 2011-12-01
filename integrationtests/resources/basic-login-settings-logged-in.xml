@@ -38,6 +38,11 @@
     <setting id="username" value="logintester@tobiasussing.dk"/>
     <setting id="watch_later" value="true"/>
     <setting id="proxy_org" value="http://15aa51.info/browse.php?u="/>
-    <setting id="proxy" value="http://fiberproxy.us/browse.php?u="/>
+    <setting id="proxy_dis" value="http://fiberproxy.us/browse.php?u="/>
     <setting id="force_proxy" value="false"/>
+    <setting id="auth" value=""/>
+    <setting id="login_info" value="3ed26b733579879cf35ac3fc362f7dbdc40AAAB7IjEiOiAxLCAiMyI6IDc3MTY5MTQ4MywgIjIiOiAiMDNyb0xSeW9CTWJzY1hxczJDRmYydz09IiwgIjUiOiA0NTAzNjAxNzY2NDY1NTM2LCAiNCI6ICJHQUlBIiwgIjciOiAxMzIyNzY1MDI4LCAiNiI6IGZhbHNlLCAiOCI6IDExNTMwODYxNzc4NH0="/>
+    <setting id="oauth2_access_token" value=""/>
+    <setting id="oauth2_expires_at" value=""/>
+    <setting id="oauth2_refresh_token" value=""/>
 </settings>
