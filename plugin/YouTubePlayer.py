@@ -116,7 +116,7 @@ class YouTubePlayer():
 		url = ""
 		
 		xml = self.core._fetchPage({"link": self.urls["timed_text_index"] % get('videoid')})
-		
+
 		self.common.log("subtitle index: " + repr(xml["content"]))
 		
 		if xml["status"] == 200:

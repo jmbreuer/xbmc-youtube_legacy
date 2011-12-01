@@ -168,7 +168,7 @@ class SimpleDownloader():
 		url = urllib2.Request(video['video_url'])
 		url.add_header('User-Agent', self.common.USERAGENT);
 		filename = "%s-[%s].mp4" % ( ''.join(c for c in video['Title'].decode("utf-8") if c not in self.INVALID_CHARS), video["videoid"] )
-		filename_incomplete = os.path.join(self.xbmc.translatePath( "special://temp" ).decode("utf-8"), "incomplete-" + filename )
+		filename_incomplete = os.path.join(self.xbmc.translatePath( "special://temp" ).decode("utf-8"), filename )
 		filename_complete = os.path.join(self.download_path.decode("utf-8"), filename)
 
 		if self.xbmcvfs.exists(filename_complete):
@@ -183,8 +183,8 @@ class SimpleDownloader():
 		if con.info().getheader('Content-Length').strip():			
 			total_size = int(con.info().getheader('Content-Length').strip())	
 			chunk_size = int(total_size / 200) # We only want 200 updates of the status bar.
-			if chunk_size < 100:
-				chunk_size = 100
+			if chunk_size <= 0:
+				chunk_size = 5
 		try:
 			bytes_so_far = 0
 			

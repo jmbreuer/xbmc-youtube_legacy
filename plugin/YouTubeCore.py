@@ -545,6 +545,10 @@ class YouTubeCore():
 			params["error"] = str(int(get("error", "0")) + 1)
 			ret_obj = self._fetchPage(params)
 			return ret_obj
+
+		except socket.timeout:
+			self.common.log("Socket timeout")
+			return ret_obj
 		
 	def _findErrors(self, ret):
 		self.common.log("")

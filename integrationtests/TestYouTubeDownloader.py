@@ -30,10 +30,10 @@ class TestYouTubeDownloader(BaseTestCase.BaseTestCase):
 		sys.modules[ "__main__" ].xbmcvfs.rename.side_effect = os.rename
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings.xml")
 		sys.modules[ "__main__" ].downloader.getNextVideoFromDownloadQueue = Mock()
-		(video, status) = sys.modules[ "__main__" ].player.getVideoObject({"action":"download", "videoid": "byv-wpqDydI"})
+		(video, status) = sys.modules[ "__main__" ].player.getVideoObject({"action":"download", "videoid": "bUcszN8jRB8"})
 		sys.modules[ "__main__" ].downloader.getNextVideoFromDownloadQueue.side_effect = [video, {}]
 
-		self.navigation.executeAction({"action":"download", "videoid": "byv-wpqDydI"}) 
+		self.navigation.executeAction({"action":"download", "videoid": "bUcszN8jRB8"}) 
 
 		assert(os.path.exists('./tmp/Morning Dew — a bad lip reading of Bruno Mars, feat. Lady Gaga and Jay-Z-[bUcszN8jRB8].mp4'))
 		assert(os.path.exists('./tmp/Morning Dew  a bad lip reading of Bruno Mars, feat. Lady Gaga and Jay-Z-[bUcszN8jRB8].ssa'))
