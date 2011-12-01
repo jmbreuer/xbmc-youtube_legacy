@@ -1,5 +1,5 @@
 '''
-   YouTube plugin for XBMC
+   Parsedom for XBMC plugins
    Copyright (C) 2010-2011 Tobias Ussing And Henrik Mosgaard Jensen
 
    This program is free software: you can redistribute it and/or modify
@@ -16,14 +16,14 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, urllib2, re, inspect
+import sys, urllib2, re, io, inspect
 
-class CommonFunctions():
-	
+class CommonFunctions():	
 	def __init__(self):
-		self.plugin = "Common Functions-0.8"
-		self.USERAGENT = "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-GB; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8"
+		self.plugin = "CommonFunctions-0.8"
+		print self.plugin
 
+		self.USERAGENT = "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-GB; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8"
 
 		if sys.modules[ "__main__" ].xbmc:
 			self.xbmc = sys.modules["__main__"].xbmc
@@ -40,6 +40,9 @@ class CommonFunctions():
 			self.dbg = sys.modules[ "__main__" ].dbg
 		else:
 			self.dbg = True
+
+		if sys.modules[ "__main__" ].plugin:
+			self.plugin = sys.modules[ "__main__" ].plugin
 
 	def stripTags(self, html):
 		sub_start = html.find("<")
@@ -72,10 +75,10 @@ class CommonFunctions():
 			html = ""
 		elif start > -1 and end > -1:
 			html = html[start + len(match):end]
-		#elif end > -1:
-		#	html = html[:end]
-		#elif start > -1:
-		#	html = html[start + len(match):]
+		elif end > -1:
+			html = html[:end]
+		elif start > -1:
+			html = html[start + len(match):]
 
 		self.log("done html length: " + str(len(html)) + ", content: " + html, 2)
 		return html
@@ -165,12 +168,13 @@ class CommonFunctions():
 				self.log("Getting element content for %s matches " % len(lst), 2)
 				lst2 = []
 				for match in lst:
+					self.log("Getting element content for %s" % match, 4)
 					temp = self.getDOMContent(item, name, match).strip()
-					item = item[item.find(match + temp) + len(match + temp):]
+					item = item[item.find(temp, item.find(match)) + len(temp):]
 					lst2.append(temp)
-					self.log(lst, 3)
-					self.log(match, 3)
-					self.log(lst2, 3)
+					self.log(lst, 4)
+					self.log(match, 4)
+					self.log(lst2, 4)
 				lst = lst2
 			ret_lst += lst
 
@@ -219,9 +223,52 @@ class CommonFunctions():
 
 			ret_obj["status"] = 500
 			return ret_obj
+
+		except urllib2.URLError, e:
+                        err = str(e)
+			self.common.log("URLError : " + err)
+
+                        time.sleep(3)
+			params["error"] = str(int(get("error", "0")) + 1)
+			ret_obj = self._fetchPage(params)
+                        return ret_obj
+
+        # This function implements a horrible hack related to python 2.4's terrible unicode handling. 
+	def makeAscii(self, str):
+                if sys.hexversion >= 0x02050000:
+			return str
+                try:
+                        return str.encode('ascii')
+                except:
+                        print self.plugin + " Hit except on : " + repr(str)
+                        s = ""
+                        for i in str:
+                                try:
+                                        i.encode("ascii", "ignore")
+                                except:
+                                        continue
+				else:
+                                        s += i
+                        return s
+
+        def openFile(self, filepath, options = "w"):
+                if options.find("b") == -1: # Toggle binary mode on failure
+                        alternate = options + "b"
+                else:
+                        alternate = options.replace("b", "")
+
+                try:
+			return io.open(filepath, options)
+                except:
+                        return io.open(filepath, alternate)
 	
 	def log(self, description, level = 0):
 		if self.dbg and self.dbglevel > level:
 			# Funny stuff..
 			# [1][3] needed for calls from scrapeShow
-			self.xbmc.log("[%s] %s : '%s'" % (self.plugin, inspect.stack()[1][3], description.encode("utf8", "ignore")), self.xbmc.LOGNOTICE)
+			#print repr(inspect.stack())
+			try:
+				self.xbmc.log("[%s] %s : '%s'" % (self.plugin, inspect.stack()[1][3], description.encode("utf-8", "ignore")), self.xbmc.LOGNOTICE)
+			except:
+				self.xbmc.log("[%s] %s : '%s'" % (self.plugin, inspect.stack()[1][3], description), self.xbmc.LOGNOTICE)
+

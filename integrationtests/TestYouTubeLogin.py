@@ -53,10 +53,14 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
 	def test_plugin_should_perform_basic_2factor_login_correctly(self):
 		import pyotp, time
 		totp = pyotp.TOTP("fbfkkk27ffmaihzg")
-		userpin = totp.at(time.time() + 15)
-		print "OTP: " + str(userpin)
+		userpin1 = totp.at(time.time())
+		userpin2 = totp.at(time.time() + 5)
+		userpin3 = totp.at(time.time() + 10)
+		print "OTP1: " + str(userpin1)
+		print "OTP2: " + str(userpin2)
+		print "OTP3: " + str(userpin3)
 		sys.modules["__main__"].settings.load_strings("./resources/2factor-login-settings.xml")
-		sys.modules["__main__"].xbmc.Keyboard().getText.return_value = [str(userpin)]
+		sys.modules["__main__"].xbmc.Keyboard().getText.side_effect = [ [str(userpin1)], [str(userpin2)], [str(userpin3)] ]
 
 		assert(sys.modules["__main__"].settings.getSetting("nick") == "")
 		assert(sys.modules["__main__"].settings.getSetting("auth") == "")

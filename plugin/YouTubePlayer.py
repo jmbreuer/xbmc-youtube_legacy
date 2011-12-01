@@ -116,7 +116,7 @@ class YouTubePlayer():
 		url = ""
 		
 		xml = self.core._fetchPage({"link": self.urls["timed_text_index"] % get('videoid')})
-		
+
 		self.common.log("subtitle index: " + repr(xml["content"]))
 		
 		if xml["status"] == 200:
@@ -160,7 +160,7 @@ class YouTubePlayer():
 		filename = filename.encode("ascii", "ignore")
 		path = os.path.join( self.xbmc.translatePath( "special://temp" ).decode("utf-8"), filename )
 		w = self.storage.openFile(path, "wb")
-		w.write(result.encode("utf8", "ignore"))
+		w.write(result.encode("utf-8", "ignore"))
 		w.close()
 		
 		if video.has_key("downloadPath"):

@@ -1,24 +1,29 @@
 import os, sys, re
 from traceback import print_exc
 
-xbmc = sys.modules[ "__main__" ].xbmc
-settings = sys.modules[ "__main__" ].settings
-xbmcgui = sys.modules[ "__main__" ].xbmcgui
-addonDir  = settings.getAddonInfo( "path" )
+if sys.modules[ "__main__" ].xbmc:
+	xbmc = sys.modules["__main__"].xbmc
+else:
+	import xbmc
 
+if sys.modules[ "__main__" ].xbmcgui:
+	xbmcgui = sys.modules["__main__"].xbmcgui
+else:
+	import xbmcgui
+
+if sys.modules[ "__main__" ].xbmcaddon:
+	xbmcaddon = sys.modules["__main__"].xbmcaddon
+else:
+	import xbmcaddon
+
+try:
+	settings = xbmcaddon.Addon(id='script.module.simple.downloader')
+except:
+	if sys.modules[ "__main__" ].settings:
+		settings = sys.modules[ "__main__" ].settings
+
+addonDir = settings.getAddonInfo( "path" )
 XBMC_SKIN  = xbmc.getSkinDir()
-SKINS_PATH = os.path.join( addonDir, "resources", "skins" )
-ADDON_SKIN = ( "default", XBMC_SKIN )[ os.path.exists( os.path.join( SKINS_PATH, XBMC_SKIN ) ) ]
-MEDIA_PATH = os.path.join( SKINS_PATH, ADDON_SKIN, "media" )
-
-
-def getTexture( texture ):
-	if not xbmc.skinHasImage( texture ):
-		if os.path.isfile( os.path.join( MEDIA_PATH, texture ) ):
-			texture = os.path.join( MEDIA_PATH, texture )
-		else:
-			texture = ""
-	return texture
 
 class xbmcguiWindowError( Exception ):
 	def __init__( self, winError=None ):
@@ -26,6 +31,10 @@ class xbmcguiWindowError( Exception ):
 
 class Control:
 	def __init__( self, control, coords=( 0, 0 ), anim=[], **kwargs ):
+		self.SKINS_PATH = os.path.join( addonDir, "resources", "skins" )
+		self.ADDON_SKIN = ( "default", XBMC_SKIN )[ os.path.exists( os.path.join( self.SKINS_PATH, XBMC_SKIN ) ) ]
+		self.MEDIA_PATH = os.path.join( self.SKINS_PATH, self.ADDON_SKIN, "media" )
+
 		self.controlXML = control
 		self.id = self.controlXML.getId()
 		self.label = xbmc.getInfoLabel( "Control.GetLabel(%i)" % self.id )
@@ -48,7 +57,7 @@ class Control:
 					option[ key ] = '0x' + value
 				elif key == "aspectRatio" and value.isdigit():
 					option[ key ] = int( value )
-			texture = getTexture( texture )
+			texture = self.getTexture( texture )
 			# ControlImage( x, y, width, height, filename[, colorKey, aspectRatio, colorDiffuse] )
 			self.control = xbmcgui.ControlImage( x, y, w, h, texture, **option )
 
@@ -76,9 +85,17 @@ class Control:
 			for key, value in kwargs.items():
 				key, value = key.strip(), value.strip()
 				if key not in valideOption: continue
-				option[ key ] = getTexture( value )
+				option[ key ] = self.getTexture( value )
 			# ControlProgress(x, y, width, height[, texturebg, textureleft, texturemid, textureright, textureoverlay])
 			self.control = xbmcgui.ControlProgress( x, y, w, h, **option )
+
+	def getTexture( self, texture ):
+		if not xbmc.skinHasImage( texture ):
+			if os.path.isfile( os.path.join( self.MEDIA_PATH, texture ) ):
+				texture = os.path.join( self.MEDIA_PATH, texture )
+			else:
+				texture = ""
+		return texture
 
 	def getCoords( self, default ):
 		x, y = self.controlXML.getPosition()
@@ -99,7 +116,7 @@ class Control:
 		return align
 
 	def setAnimations( self ):
-		if self.anim:
+		if self.anim and settings.getSetting( "animation" ) == "true":
 			try: self.control.setAnimations( self.anim )
 			except: print_exc()
 
@@ -161,7 +178,10 @@ class Window:
 		if xbmc.getInfoLabel( "Window.Property(DialogDownloadProgress.IsAlive)" ) == "true":
 			raise xbmcguiWindowError( "DialogDownloadProgress IsAlive: Not possible to overscan!" )
 		
-		windowXml = DialogDownloadProgressXML( "DialogDownloadProgress.xml", addonDir, ADDON_SKIN )
+		self.SKINS_PATH = os.path.join( addonDir, "resources", "skins" )
+		self.ADDON_SKIN = ( "default", XBMC_SKIN )[ os.path.exists( os.path.join( self.SKINS_PATH, XBMC_SKIN ) ) ]
+
+		windowXml = DialogDownloadProgressXML( "DialogDownloadProgress.xml", addonDir, self.ADDON_SKIN )
 		self.controls = windowXml.controls
 		del windowXml
 
@@ -177,7 +197,7 @@ class Window:
 		error = 0
 		# get the id for the current 'active' window as an integer.
 		# http://wiki.xbmc.org/index.php?title=Window_IDs
-		try: 	currentWindowId = xbmcgui.getCurrentWindowId()
+		try: currentWindowId = xbmcgui.getCurrentWindowId()
 		except: currentWindowId = self.window
 
 		if hasattr( currentWindowId, "__int__" ) and currentWindowId != self.windowId:
@@ -191,7 +211,7 @@ class Window:
 			error = 1
 		if error:
 			raise xbmcguiWindowError( "xbmcgui.Window(%s)" % repr( currentWindowId ) )
-		
+
 		#self.window.setProperty( "DialogDownloadProgress.IsAlive", "true" )
 
 	def initialize( self ):
@@ -241,6 +261,7 @@ class DownloadProgress( Window ):
 	def __init__( self, parent_win=None, **kwargs ):
 		# get class Window object
 		Window.__init__( self, parent_win, **kwargs )
+		self.hide_during_playback = False
 		self.canceled = False
 		self.header = ""
 		self.line = ""
@@ -261,19 +282,21 @@ class DownloadProgress( Window ):
 		return self.canceled
 
 	def update( self, percent=0, heading="", label="" ):
-		player = xbmc.Player()
-		self.setupWindow()
-
-		if heading and hasattr( self.heading, "setLabel" ):
-			# set heading
-			try: self.heading.setLabel( heading )
-			except: print_exc()
-		if label and hasattr( self.label, "setLabel" ):
-			# set label
-			self.line = label
-			try: self.label.setLabel( label )
-			except: print_exc()
-		if percent and hasattr( self.progress, "setPercent" ):
-			# set progress of listing
-			try: self.progress.setPercent( percent )
-			except: print_exc()
+		if not self.hide_during_playback or not xbmc.Player().isPlaying():
+			print "Updating %s - %s" % ( heading, label)
+			self.setupWindow()
+			if heading and hasattr( self.heading, "setLabel" ):
+				# set heading
+				try: self.heading.setLabel( heading )
+				except: print_exc()
+			if label and hasattr( self.label, "setLabel" ):
+				# set label
+				self.line = label
+				try: self.label.setLabel( label )
+				except: print_exc()
+			if percent and hasattr( self.progress, "setPercent" ):
+				# set progress of listing
+				try: self.progress.setPercent( percent )
+				except: print_exc()
+		else:
+			print "Updating [Hidden] %s - %s" % ( heading, label)

@@ -1,4 +1,4 @@
-import sys, time
+import sys, time, inspect
 class MockYouTubeDepends:
 	
 	def mock(self):
@@ -59,13 +59,11 @@ class MockYouTubeDepends:
 
 	
 	def log(self, description, level = 0):
-		if sys.modules[ "__main__" ].dbg and sys.modules[ "__main__" ].dbglevel > level:
-			import inspect
-			# 3 - 3 for TestYouTubeUserFeeds.py
-			if isinstance(description, str):
-				print "%s [%s] %s : '%s'" % (time.strftime('%H:%M:%S'), "YouTube-Mock", inspect.stack()[3][3] , description.decode("utf-8","ignore"))
-			else:
-				print "%s [%s] %s : '%s'" % (time.strftime('%H:%M:%S'), "YouTube-Mock", inspect.stack()[3][3] , description)
+                if sys.modules[ "__main__" ].dbg and sys.modules[ "__main__" ].dbglevel > level:
+                        try:
+				print "%s [%s] %s : '%s'" % (time.strftime("%H:%M:%S"), "BlipTv IntegrationTest", inspect.stack()[3][3] , description.decode("utf-8","ignore")) 
+                        except:
+				print "%s [%s] %s : '%s'" % (time.strftime("%H:%M:%S"), "BlipTv IntegrationTest", inspect.stack()[3][3] , description) 
 		
 	def execute(self, function, *args):
 		return function(*args)

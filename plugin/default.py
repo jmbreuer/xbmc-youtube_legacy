@@ -79,8 +79,8 @@ if (__name__ == "__main__" ):
 	feeds = YouTubeFeeds.YouTubeFeeds()
 	import YouTubePlayer
 	player = YouTubePlayer.YouTubePlayer()
-	import YouTubeDownloader
-	downloader = YouTubeDownloader.YouTubeDownloader()
+	import SimpleDownloader as downloader
+	downloader = downloader.SimpleDownloader()
 	import YouTubeScraper
 	scraper = YouTubeScraper.YouTubeScraper()
 	import YouTubePlaylistControl

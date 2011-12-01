@@ -588,10 +588,10 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 
 		patcher1.stop()
 
-                time.sleep.assert_called_with(10)
+                time.sleep.assert_called_with(100)
 		patcher2.stop()
 
-		sys.modules[ "__main__" ].common.log.assert_any_call("Hit quota... sleeping for 10 seconds")
+		sys.modules[ "__main__" ].common.log.assert_any_call("Hit quota... sleeping for 100 seconds")
 	
 	def test_fetchPage_should_call_urllib_add_header_id_url_data_is_in_params_collection(self):
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = ["3","4","4", "false", "my_auth"]

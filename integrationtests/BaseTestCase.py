@@ -26,10 +26,13 @@ class BaseTestCase(unittest2.TestCase):#pragma: no cover
 		opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(sys.modules[ "__main__" ].cookiejar))
 		urllib2.install_opener(opener)
 		
+
 		sys.argv = ["something",-1,"something_else"]
 		import CommonFunctions
 		sys.modules[ "__main__" ].common = CommonFunctions.CommonFunctions() 
 		sys.modules[ "__main__" ].common.log = sys.modules[ "__main__" ].xbmc.log
+                import SimpleDownloader
+                sys.modules[ "__main__" ].downloader = SimpleDownloader.SimpleDownloader()
 		import YouTubeUtils
 		sys.modules[ "__main__" ].utils = YouTubeUtils.YouTubeUtils()
 		import YouTubeStorage
@@ -44,8 +47,6 @@ class BaseTestCase(unittest2.TestCase):#pragma: no cover
 		sys.modules[ "__main__" ].scraper = YouTubeScraper.YouTubeScraper()
 		import YouTubePlayer
 		sys.modules[ "__main__" ].player = YouTubePlayer.YouTubePlayer()
-		import YouTubeDownloader
-		sys.modules[ "__main__" ].downloader = YouTubeDownloader.YouTubeDownloader()
 		import YouTubeScraper
 		sys.modules[ "__main__" ].scraper = YouTubeScraper.YouTubeScraper()
 		import YouTubePlaylistControl
