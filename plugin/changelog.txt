@@ -6,11 +6,9 @@
 [B]TODO 2.8:[/B]
 - Allow users to change sort on searches
 - Support playback of 3d anaglyph movies from youtube
-- Add roller Settings to control how and when 3d movies are displayed -> Off -> Ask -> When available
 - Merge 3d support with playback code so that plugin only asks once if user choose ask for both 3d and normal playback
 - Hook-in Caching the right places. And only the right places. (mostly scrapers)
 - Scrape Education. Search for feeds.
-- Music -> popular artists.
 - Check live feed vs scrape
 - Replace scraper with feeds for: Trailers, shows, music, education, disco.
 - If not replaceable refactor show scraper at least.
@@ -19,7 +17,6 @@
 - Integration tests on all user actions.
 - http://forum.xbmc.org/showpost.php?p=934392&postcount=1512
 - youtube videos in smartplaylist.
-- All videos should have a unique path from xbmc's perspective eventhough they're present in different folders. 
 - Get downloader to auto-hide again and create an advanced setting to control this behaviour. 
 
 [B]Errata[/B]
@@ -33,8 +30,10 @@
 [B]Version 2.8.0 (Beta)[/B]
 - Changed All videos now have a unique path from xbmc's perspective eventhough they're present in different folders.
 - Changed Replaced the categories scraper with api calls
+- Moved some functions from youtube utils to common so they can be shared between different plugins
 - Fixed music artist and top hit's scraper
-- Added play all option to youtube top 100 
+- Added play all option to youtube top 100
+- Added setting to control playback of 3d anaglyph streams 
 
 [B]Version 2.7.0 (Beta)[/B]
 - Added new sqlite based caching system with script.common.plugin.cache

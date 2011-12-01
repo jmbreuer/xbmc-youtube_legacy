@@ -64,7 +64,7 @@
     <!-- Plugin settings strings -->
     <string id="30200">Username</string>
     <string id="30201">Password</string>
-    <string id="30202"></string>
+    <string id="30202">Play 3D videos</string>
     <string id="30203">All time</string>
     <string id="30204">Today</string>
     <string id="30205">This week</string>
@@ -137,7 +137,7 @@
     <string id="30272">Thumbnails Everywhere</string>
     <string id="30273">XBMC Default</string>
     <string id="30274">Transcribe Audio</string>
-    <string id="30275"></string>
+    <string id="30275">When available</string>
     <string id="30276">Subtitle Language</string>
     <string id="30277">Off</string>
     <string id="30278">English</string>
