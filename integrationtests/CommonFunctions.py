@@ -16,7 +16,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, urllib2, re, inspect
+import sys, urllib2, re, io, inspect
 
 class CommonFunctions():	
 	def __init__(self):
@@ -251,6 +251,16 @@ class CommonFunctions():
                                         s += i
                         return s
 
+        def openFile(self, filepath, options = "w"):
+                if options.find("b") == -1: # Toggle binary mode on failure
+                        alternate = options + "b"
+                else:
+                        alternate = options.replace("b", "")
+
+                try:
+			return io.open(filepath, options)
+                except:
+                        return io.open(filepath, alternate)
 	
 	def log(self, description, level = 0):
 		if self.dbg and self.dbglevel > level:
