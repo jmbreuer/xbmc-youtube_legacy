@@ -41,8 +41,8 @@
     <setting id="proxy_dis" value="http://fiberproxy.us/browse.php?u="/>
     <setting id="force_proxy" value="false"/>
     <setting id="auth" value=""/>
-    <setting id="login_info" value="3ed26b733579879cf35ac3fc362f7dbdc40AAAB7IjEiOiAxLCAiMyI6IDc3MTY5MTQ4MywgIjIiOiAiMDNyb0xSeW9CTWJzY1hxczJDRmYydz09IiwgIjUiOiA0NTAzNjAxNzY2NDY1NTM2LCAiNCI6ICJHQUlBIiwgIjciOiAxMzIyNzY1MDI4LCAiNiI6IGZhbHNlLCAiOCI6IDExNTMwODYxNzc4NH0="/>
-    <setting id="oauth2_access_token" value=""/>
-    <setting id="oauth2_expires_at" value=""/>
-    <setting id="oauth2_refresh_token" value=""/>
+    <setting id="login_info" value="756b62bd8d22e3ef474736cbdb605f32c40AAAB7IjEiOiAxLCAiMyI6IDc3MTY5MTQ4MywgIjIiOiAiMDNyb0xSeW9CTWJzY1hxczJDRmYydz09IiwgIjUiOiA0NTAzNjAxNzY2NDY1NTM2LCAiNCI6ICJHQUlBIiwgIjciOiAxMzIyNzY2Mjg0LCAiNiI6IGZhbHNlLCAiOCI6IDExNTMwODYxNzc4NH0="/>
+    <setting id="oauth2_access_token" value="ya29.AHES6ZQZ6neCOg4rXlmHgsaNgc35fGAav7d680ktQ3GhbA_sjTVc0g"/>
+    <setting id="oauth2_expires_at" value="1322769886.85"/>
+    <setting id="oauth2_refresh_token" value="1/eiQwbwivbJHdJB2RfVIvOfca-njEAogElPcSxAZF7y0"/>
 </settings>
