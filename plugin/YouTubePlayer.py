@@ -352,9 +352,13 @@ class YouTubePlayer():
 		if self.xbmcvfs.exists(path) and not video.has_key("downloadPath") and set_subtitle:
 			player = self.xbmc.Player()
 			
+			i = 0
 			while not player.isPlaying():
+				i += 1
 				self.common.log("Waiting for playback to start ")
 				time.sleep(1)
+				if i > 10:
+					break
 
 			self.xbmc.Player().setSubtitles(path)
 			self.common.log("added subtitle %s to playback" % path)
