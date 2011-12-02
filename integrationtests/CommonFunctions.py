@@ -44,6 +44,48 @@ class CommonFunctions():
 		if sys.modules[ "__main__" ].plugin:
 			self.plugin = sys.modules[ "__main__" ].plugin
 
+
+        # This function raises a keyboard for user input
+        def getUserInput(self, title = "Input", default="", hidden=False):
+                result = None
+
+                # Fix for when this functions is called with default=None
+                if not default:
+                        default = ""
+
+                keyboard = self.xbmc.Keyboard(default, title)
+                keyboard.setHiddenInput(hidden)
+                keyboard.doModal()
+
+                if keyboard.isConfirmed():
+                        result = keyboard.getText()
+
+                return result
+
+        # Converts the request url passed on by xbmc to the plugin into a dict of key-value pairs
+        def getParameters(self, parameterString):
+                commands = {}
+                splitCommands = parameterString[parameterString.find('?')+1:].split('&')
+
+                for command in splitCommands:
+                        if (len(command) > 0):
+                                splitCommand = command.split('=')
+                                key = splitCommand[0]
+                                value = splitCommand[1]
+                                commands[key] = value
+
+                return commands
+
+	def replaceHtmlCodes(self, str):
+		str = str.strip()
+                str = str.replace("&amp;", "&")
+                str = str.replace("&quot;", '"')
+                str = str.replace("&hellip;", "...")
+                str = str.replace("&gt;",">")
+                str = str.replace("&lt;","<")
+                str = str.replace("&#39;","'")
+                return str
+
 	def stripTags(self, html):
 		sub_start = html.find("<")
 		sub_end = html.find(">")
