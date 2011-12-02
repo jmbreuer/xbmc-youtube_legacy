@@ -41,7 +41,8 @@
     <setting id="proxy_dis" value="http://fiberproxy.us/browse.php?u="/>
     <setting id="force_proxy" value="false"/>
     <setting id="auth" value=""/>
-    <setting id="login_info" value="756b62bd8d22e3ef474736cbdb605f32c40AAAB7IjEiOiAxLCAiMyI6IDc3MTY5MTQ4MywgIjIiOiAiMDNyb0xSeW9CTWJzY1hxczJDRmYydz09IiwgIjUiOiA0NTAzNjAxNzY2NDY1NTM2LCAiNCI6ICJHQUlBIiwgIjciOiAxMzIyNzY2Mjg0LCAiNiI6IGZhbHNlLCAiOCI6IDExNTMwODYxNzc4NH0="/>
+    <setting id="login_info" value="52093fa49686ef877117002c40646c6bc40AAAB7IjEiOiAxLCAiMyI6IDc3MTY5MTQ4MywgIjIiOiAiMDNyb0xSeW9CTWJzY1hxczJDRmYydz09IiwgIjUiOiA0NTAzNjAxNzY2NDY1NTM2LCAiNCI6ICJHQUlBIiwgIjciOiAxMzIyODA5NDUyLCAiNiI6IGZhbHNlLCAiOCI6IDExNTMwODYxNzc4NH0="/>
+    <setting id="SID" value="DQAAAJsAAABQB_GYo15maRZPKtigZ1Ut9qw19EdVGkB5ga1tyFr8mlJwvLeYHdBcaXiUO6FsftKzrbIyV-5YD4MmjQ1dtvGYC1wOwoyX6eLFN0qHEtApgesmvkDccLN_2Y7BGscBW2GQn0F45ZcXNfm3r9cuBhI3HrHD37y7LYfBTA_5L0jU_pby2XA_las7Yrq2-sRyUvljZG5qKDLp5_Sm4QjR5So3"/>
     <setting id="oauth2_access_token" value="ya29.AHES6ZQZ6neCOg4rXlmHgsaNgc35fGAav7d680ktQ3GhbA_sjTVc0g"/>
     <setting id="oauth2_expires_at" value="1322769886.85"/>
     <setting id="oauth2_refresh_token" value="1/eiQwbwivbJHdJB2RfVIvOfca-njEAogElPcSxAZF7y0"/>

@@ -18,6 +18,7 @@
     <setting id="list_view" value="0" />
     <setting id="live" value="true" />
     <setting id="login_info" value="e7d6f4994ec9dd45a88f7f3ecd0e9273c40AAAB7IjEiOiAxLCAiMyI6IDc3MTY5MTQ4MywgIjIiOiAiMDNyb0xSeW9CTWJzY1hxczJDRmYydz09IiwgIjUiOiA0NTAzNjAxNzY2NDY1NTM2LCAiNCI6ICJHQUlBIiwgIjciOiAxMzE5MTE0Mjg2LCAiNiI6IGZhbHNlLCAiOCI6IDExNTMwODYxNzc4NH0=" />
+    <setting id="SID" value="" />
     <setting id="movies" value="true" />
     <setting id="music" value="true" />
     <setting id="nick" value="YTlogintester" />

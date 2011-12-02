@@ -30,7 +30,6 @@ class xbmcSettings():
 					if string.getAttribute("id") == id:
 						string.setAttribute("value", value)
 						updated = True
-				print "YYYYYYYYYYYYYYYYYYYYYYYYYYYY UPDATING SETTINGS OBJECT"
 				f = open(self.path, 'w')
 				self.dom.writexml(f)
 				f.close()

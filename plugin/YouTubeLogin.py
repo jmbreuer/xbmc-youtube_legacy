@@ -148,13 +148,14 @@ class YouTubeLogin():
 		result = ""
 		status = 500
 
-		if get("new", "false") == "true":
+		if get("new", "false") == "true" or get("page", "false") != "false":
 			self.settings.setSetting( "login_info", "" )
 		elif self.settings.getSetting( "login_info" ) != "":
 			self.common.log("returning existing login info: " + self.settings.getSetting( "login_info" ))
 			return ( self.settings.getSetting( "login_info" ), 200)
 
 		fetch_options = { "link": get("link", "http://www.youtube.com/") }
+
 		step = 0
 		galx = ""
 		while fetch_options and step < 18: # 6 steps for 2-factor login
@@ -165,6 +166,7 @@ class YouTubeLogin():
 				return ( self.core._findErrors(ret), 303)
 
 			ret = self.core._fetchPage(fetch_options)
+
 			if ret["content"].find("captcha") > -1:
 				self.common.log("Captcha needs to be filled")
 				break;
@@ -175,7 +177,7 @@ class YouTubeLogin():
 			if len(newurl) > 0:
 				# Start login procedure
 				if newurl[0] != "#":
-					fetch_options = { "link": newurl[0].replace("&amp;", "&") }
+					fetch_options = { "link": newurl[0].replace("&amp;", "&"), "referer": ret["location"]}
 					self.common.log("Part A : " + repr(fetch_options) )
 
 			# Fill out login information and send.
@@ -183,7 +185,7 @@ class YouTubeLogin():
 			if len(newurl) > 0:
 				( galx, url_data ) = self._fillLoginInfo(ret["content"])
 				if len(galx) > 0 and len(url_data) > 0:
-					fetch_options = { "link": newurl[0], "no-language-cookie": "true", "url_data": url_data, "hidden": "true" }
+					fetch_options = { "link": newurl[0], "no-language-cookie": "true", "url_data": url_data, "hidden": "true", "referer": ret["location"] }
 					self.common.log("Part B" )
 					self.common.log("fetch options: " + repr(fetch_options), 10) ## WARNING, SHOWS LOGIN INFO/PASSWORD
 					continue
@@ -192,7 +194,8 @@ class YouTubeLogin():
 			if len(newurl) > 0 :
 				newurl = newurl[0].replace("&amp;", "&")
 				newurl = newurl[newurl.find("&#39;") + 5 : newurl.rfind("&#39;")]
-				fetch_options = { "link": newurl, "no-language-cookie": "true" }
+				import urllib
+				fetch_options = { "link": newurl, "no-language-cookie": "true", "referer": ret["location"] }
 				self.common.log("Part C: "  + repr(fetch_options))
 				continue
 
@@ -207,7 +210,7 @@ class YouTubeLogin():
 					target_url += "/"
 
 				new_part = self.common.parseDOM(ret["content"], "form", attrs = { "name": "verifyForm"}, ret = "action")
-				fetch_options = { "link": target_url + new_part[0], "url_data": url_data, "no-language-cookie": "true" }
+				fetch_options = { "link": target_url + new_part[0], "url_data": url_data, "no-language-cookie": "true", "referer": ret["location"] }
 
 				self.common.log("Part D: " + repr(fetch_options))
 				continue
@@ -223,27 +226,27 @@ class YouTubeLogin():
 					     "GALX": galx}
 
 				target_url = self.common.parseDOM(ret["content"], "form", attrs = { "name": "hiddenpost"}, ret = "action")
-				fetch_options = { "link": target_url[0], "url_data": url_data, "no-language-cookie": "true" }
+				fetch_options = { "link": target_url[0], "url_data": url_data, "no-language-cookie": "true", "referer": ret["location"] }
 				self.common.log("Part E: " + repr(fetch_options))
 				continue
 
+			# Check if we are logged in.
+			nick = self.common.parseDOM(ret["content"], "span", attrs= { "class": "masthead-user-username"} )
+	
 			## 2-factor login finish
-			
 			if not fetch_options:
 				# Check if we are logged in.
-				
 				nick = self.common.parseDOM(ret["content"], "span", attrs= { "class": "masthead-user-username"} )
+
 				if len(nick) > 0:
 					self.common.log("Logged in. Parsing data.")
 					status = self._getLoginInfo(ret["content"])
-					if status == 200:
-						result = self.settings.getSetting( "login_info" )
-					return(result, status)
+					return(ret, status)
 
-				# Look for errors and return error.
+				# Or check for errors.
 				return ( self.core._findErrors(ret), 303)
 
-		return (result, status)
+		return (ret, status)
 
 	def _fillLoginInfo(self, content):
 		rmShown = self.common.parseDOM(content, "input", attrs = { "name": "rmShown"}, ret = "value" )
@@ -306,6 +309,7 @@ class YouTubeLogin():
 		return {}
 
 	def _getLoginInfo(self, content):
+		self.common.log("")
 		nick = ""
 		status = 303
 		nick = self.common.parseDOM(content, "span", attrs= { "class": "masthead-user-username"} )
@@ -316,18 +320,29 @@ class YouTubeLogin():
 			self.common.log("Failed to get usename from youtube")
 
 		# Save cookiefile in settings
-		self.common.log("Scanning cookies for login info")
 		
 		login_info = ""
+		SID = ""
 		cookies = repr(sys.modules[ "__main__" ].cookiejar)
 			
 		if cookies.find("name='LOGIN_INFO', value='") > 0:
 			start = cookies.find("name='LOGIN_INFO', value='") + len("name='LOGIN_INFO', value='")
 			login_info = cookies[start:cookies.find("', port=None", start)]
-		
-		if login_info:
+			self.common.log("LOGIN_INFO: " + login_info)
 			self.settings.setSetting( "login_info", login_info )
+		else:
+			self.common.log("Failed to get LOGIN_INFO from youtube")
+
+		if cookies.find("name='SID', value='") > 0:
+			start = cookies.find("name='SID', value='") + len("name='SID', value='")
+			SID = cookies[start:cookies.find("', port=None", start)]
+			self.common.log("SID: " + SID)
+			self.settings.setSetting( "SID", SID )
+		else:
+			self.common.log("Failed to get SID from youtube")
+		
+		if SID and login_info:
 			status = 200
 
-		self.common.log("Done : " + str(status) + " - " + login_info)
+		self.common.log("Done")
 		return status
