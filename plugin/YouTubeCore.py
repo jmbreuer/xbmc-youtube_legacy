@@ -404,11 +404,11 @@ class YouTubeCore():
 			request.add_header('Content-Type', 'application/atom+xml') 
 			request.add_header('Content-Length', str(len(get("request")))) 
 
-		#if get("proxy") or link.find(self.settings.getSetting("proxy")) > -1:
-		#	proxy = self.settings.getSetting("proxy")
-		#	referer = proxy[:proxy.rfind("/")]
-		#	self.common.log("Added refer: %s" % referer)
-		#	request.add_header('Referer', referer)
+		if get("proxy") or link.find(self.settings.getSetting("proxy")) > -1:
+			proxy = self.settings.getSetting("proxy")
+			referer = proxy[:proxy.rfind("/")]
+			self.common.log("Added refer: %s" % referer)
+			request.add_header('Referer', referer)
 
 		if get("api", "false") == "true":
 			self.common.log("got api")

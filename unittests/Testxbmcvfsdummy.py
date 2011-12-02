@@ -61,6 +61,7 @@ class Testxbmcvfsdummy(BaseTestCase.BaseTestCase):
 		patcher2.start()
 		import os
 		os.path.isfile.return_value = True
+		os.path.isdir.return_value = False
 		os.unlink.return_value = "my_result"
 
 		result = xbmcvfs.delete("someFile")
