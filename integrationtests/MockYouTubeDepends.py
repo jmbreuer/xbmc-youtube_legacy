@@ -56,6 +56,7 @@ class MockYouTubeDepends:
 
 		sys.modules["DialogDownloadProgress"] = __import__("mock")
 		sys.modules["DialogDownloadProgress"].DownloadProgress = Mock()
+		sys.modules["storageserverdummy"] = Mock()
 
 	
 	def log(self, description, level = 0):
