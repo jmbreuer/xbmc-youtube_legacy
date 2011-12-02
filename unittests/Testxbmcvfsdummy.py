@@ -3,11 +3,10 @@ import nose
 import BaseTestCase
 from mock import Mock, patch
 import sys
-import xbmcvfsdummy as xbmcvfs
 
 class Testxbmcvfsdummy(BaseTestCase.BaseTestCase):
-	
 	def test_exists_should_call_os_path_exists(self):
+		import xbmcvfsdummy as xbmcvfs
 		patcher = patch("os.path")
 		patcher.start()
 
@@ -24,6 +23,7 @@ class Testxbmcvfsdummy(BaseTestCase.BaseTestCase):
 		assert(result == "my_result")
 
 	def test_rename_should_call_os_path_rename(self):
+		import xbmcvfsdummy as xbmcvfs
 		patcher = patch("os.rename")
 		patcher.start()
 
@@ -34,13 +34,13 @@ class Testxbmcvfsdummy(BaseTestCase.BaseTestCase):
 
 		args = os.rename.call_args_list
 		patcher.stop()
-
 		print repr(args)	
 		assert(args[0][0][0] == "someFile")
 		assert(args[0][0][1] == "someOtherFile")
 		assert(result == "my_result")
 
 	def test_delete_file_should_return_false_if_path_is_directory(self):
+		import xbmcvfsdummy as xbmcvfs
 		patcher = patch("os.path")
 		patcher.start()
 		import os
@@ -55,6 +55,8 @@ class Testxbmcvfsdummy(BaseTestCase.BaseTestCase):
 		assert(result == False)
 
 	def test_delete_file_should_call_os_unlink(self):
+		import xbmcvfsdummy as xbmcvfs
+
 		patcher = patch("os.path")
 		patcher.start()
 		patcher2 = patch("os.unlink")
@@ -70,7 +72,7 @@ class Testxbmcvfsdummy(BaseTestCase.BaseTestCase):
 		args2 = os.unlink.call_args_list
 		patcher.stop()
 		patcher2.stop()
-
+		print repr(xbmcvfs)
 		print repr(result)
 		assert(result == "my_result")
 	
