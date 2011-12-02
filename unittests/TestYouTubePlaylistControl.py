@@ -180,7 +180,7 @@ class TestYouTubePlaylistControl(BaseTestCase.BaseTestCase):
 		sys.modules["__main__"].xbmc.PlayList.return_value = playlist_value
 		sys.modules["__main__"].language.return_value = ""
 		sys.modules["__main__"].core.getBatchDetails.return_value = ([{"Title":"someTitle1","videoid":"some_id1", "thumbnail":"thumbnail1","video_url":"some_url1"}, {"Title":"someTitle1","videoid":"some_id1", "thumbnail":"thumbnail1","video_url":"some_url1"}, {"Title":"someTitle1","videoid":"some_id1", "thumbnail":"thumbnail1","video_url":"some_url1"}], 200)
-		sys.modules["__main__"].utils.makeAscii.return_value = ""
+		sys.modules["__main__"].common.makeAscii.return_value = ""
 		control = YouTubePlaylistControl()
 		control.getPlayList = Mock()
 		control.getPlayList.return_value = [{"Title":"someTitle1", "videoid":"some_id1","thumbnail":"some_thumbnail1"},{"Title":"someTitle2", "videoid":"some_id2","thumbnail":"some_thumbnail2"}]
@@ -357,18 +357,18 @@ class TestYouTubePlaylistControl(BaseTestCase.BaseTestCase):
 		sys.modules["__main__"].core.add_to_playlist.assert_called_with({'user_feed': 'playlists', 'login': 'true', 'playlist': 'playlist1', 'folder': 'true'})
 
 	def test_createPlayList_should_ask_user_for_input(self):
-		sys.modules["__main__"].utils.getUserInput.return_value = ""
+		sys.modules["__main__"].common.getUserInput.return_value = ""
 		sys.modules["__main__"].xbmcgui.Dialog().select.return_value = 1
 		sys.modules["__main__"].language.return_value = "my_string"
 		control = YouTubePlaylistControl()
 		
 		control.createPlaylist({})
 		
-		sys.modules["__main__"].utils.getUserInput.assert_called_with("my_string")
+		sys.modules["__main__"].common.getUserInput.assert_called_with("my_string")
 		sys.modules["__main__"].language.assert_called_with(30529)
 
 	def test_createPlayList_should_call_addPlaylist_if_user_provided_playlist_name(self):
-		sys.modules["__main__"].utils.getUserInput.return_value = "my_playlist_name"
+		sys.modules["__main__"].common.getUserInput.return_value = "my_playlist_name"
 		sys.modules["__main__"].xbmcgui.Dialog().select.return_value = 1
 		sys.modules["__main__"].language.return_value = "my_string"
 		control = YouTubePlaylistControl()
@@ -378,7 +378,7 @@ class TestYouTubePlaylistControl(BaseTestCase.BaseTestCase):
 		sys.modules["__main__"].core.add_playlist.assert_called_with({"title":"my_playlist_name"})
 		
 	def test_createPlayList_should_not_call_addPlaylist_if_user_cancels(self):
-		sys.modules["__main__"].utils.getUserInput.return_value = ""
+		sys.modules["__main__"].common.getUserInput.return_value = ""
 		sys.modules["__main__"].xbmcgui.Dialog().select.return_value = 1
 		sys.modules["__main__"].language.return_value = "my_string"
 		control = YouTubePlaylistControl()

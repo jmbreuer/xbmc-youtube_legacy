@@ -187,7 +187,7 @@ class YouTubeStorage():
 
 		if (get("search")):
 			old_query = urllib.unquote_plus(get("search"))
-			new_query = self.utils.getUserInput(self.language(30515), old_query)
+			new_query = self.common.getUserInput(self.language(30515), old_query)
 			params["search"] = new_query
 			params["old_search"] = old_query
 			

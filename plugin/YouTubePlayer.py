@@ -23,24 +23,30 @@ except ImportError: import json
 from xml.dom.minidom import parseString
 
 class YouTubePlayer():
-	
 	fmt_value = { 
-		35 : "480p h264 flv container",
-		59 : "480 for rtmpe",
-		44 : "480p vp8 webm container",
-		78 : "seems to be around 400 for rtmpe",
-		34 : "360p h264 flv container",
-		43 : "360p h264 flv container",
-		26 : "???",
-		18 : "360p h264 mp4 container | 270 for rtmpe?",
-		33 : "???",
 		5 : "240p h263 flv container",
+		18 : "360p h264 mp4 container | 270 for rtmpe?",
 		22 : "720p h264 mp4 container",
-		45 : "720p vp8 webm container",
+		26 : "???",
+		33 : "???",
+		34 : "360p h264 flv container",
+		35 : "480p h264 flv container",
 		37 : "1080p h264 mp4 container",
 		38 : "720p vp8 webm container",
+		43 : "360p h264 flv container",
+		44 : "480p vp8 webm container",
+		45 : "720p vp8 webm container",
+		46 : "520p vp8 webm stereo",
+		59 : "480 for rtmpe",
+		78 : "seems to be around 400 for rtmpe",
 		82 : "360p h264 stereo",
-		84 : "720p h264 stereo"}
+		83 : "240p h264 stereo",
+		84 : "720p h264 stereo",
+		85 : "520p h264 stereo",
+		100 : "360p vp8 webm stereo",
+		101 : "480p vp8 webm stereo",
+		102 : "720p vp8 webm stereo"
+		}
 	
 	# YouTube Playback Feeds
 	urls = {}
@@ -189,7 +195,7 @@ class YouTubePlayer():
 			if node:
 				if node.firstChild:
 					if node.firstChild.nodeValue:
-						text = self.utils.replaceHtmlCodes(node.firstChild.nodeValue).replace("\n", "\\n")
+						text = self.common.replaceHtmlCodes(node.firstChild.nodeValue).replace("\n", "\\n")
 						start = ""
 						
 						if node.getAttribute("start"):
@@ -263,7 +269,7 @@ class YouTubePlayer():
 					self.common.log("node.firstChild: %s - value : %s" % ( repr(node.firstChild), repr(self.core._getNodeValue(node, "TEXT", ""))), 5)
 					text = self.core._getNodeValue(node, "TEXT", "")
 					if text:
-						text = self.utils.replaceHtmlCodes(text)
+						text = self.common.replaceHtmlCodes(text)
 						start = ""
 						
 						if style == "popup":

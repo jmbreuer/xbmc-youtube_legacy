@@ -350,7 +350,7 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		
 		navigation.list({"feed":"search"})
 		
-		sys.modules["__main__"].utils.getUserInput.assert_called_with("some_string","")
+		sys.modules["__main__"].common.getUserInput.assert_called_with("some_string","")
 
 	def test_list_should_ask_user_for_input_if_scraper_is_search_disco_and_search_is_missing_from_params(self):
 		sys.modules["__main__"].scraper.scrape.return_value = ([],200)
@@ -362,12 +362,12 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 		
 		navigation.list({"scraper":"search_disco"})
 		
-		sys.modules["__main__"].utils.getUserInput.assert_called_with("some_string","")
+		sys.modules["__main__"].common.getUserInput.assert_called_with("some_string","")
 
 	def test_list_should_call_storage_saveStoredSearch_if_feed_is_search(self):
 		sys.modules["__main__"].feeds.list.return_value = ([],200)
 		sys.modules["__main__"].language.return_value = "some_string"
-		sys.modules["__main__"].utils.getUserInput.return_value = "some_user_string"
+		sys.modules["__main__"].common.getUserInput.return_value = "some_user_string"
 		navigation = YouTubeNavigation()
 		navigation.parseVideoList = Mock()
 		navigation.parseFolderList = Mock()
@@ -380,7 +380,7 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 	def test_list_should_call_storage_saveStoredSearch_if_scraper_is_search_disco(self):
 		sys.modules["__main__"].scraper.scrape.return_value = ([],200)
 		sys.modules["__main__"].language.return_value = "some_string"
-		sys.modules["__main__"].utils.getUserInput.return_value = "some_user_string"
+		sys.modules["__main__"].common.getUserInput.return_value = "some_user_string"
 		navigation = YouTubeNavigation()
 		navigation.parseVideoList = Mock()
 		navigation.parseFolderList = Mock()
@@ -559,11 +559,11 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 	def test_addContact_should_ask_user_for_contact_name_if_missing(self):
 		navigation = YouTubeNavigation()
 		sys.modules["__main__"].language.return_value = "some_title"
-		sys.modules["__main__"].utils.getUserInput.return_value = ""
+		sys.modules["__main__"].common.getUserInput.return_value = ""
 		
 		navigation.addContact()
 		
-		sys.modules["__main__"].utils.getUserInput.assert_called_with("some_title","")
+		sys.modules["__main__"].common.getUserInput.assert_called_with("some_title","")
 		
 	def test_addContact_should_call_core_add_contact(self):
 		navigation = YouTubeNavigation()
@@ -577,13 +577,13 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 	def test_addContact_should_exit_cleanly_if_contact_is_missing_and_no_contact_is_given(self):
 		navigation = YouTubeNavigation()
 		sys.modules["__main__"].language.return_value = "some_title"
-		sys.modules["__main__"].utils.getUserInput.return_value = ""
+		sys.modules["__main__"].common.getUserInput.return_value = ""
 		
 		navigation.addContact()
 		
 		assert(sys.modules["__main__"].core.add_contact.call_count == 0)
 		assert(sys.modules["__main__"].utils.showErrorMessage.call_count == 0)	
-		sys.modules["__main__"].utils.getUserInput.assert_called_with("some_title","")
+		sys.modules["__main__"].common.getUserInput.assert_called_with("some_title","")
 		
 	def test_addContact_should_show_error_message_on_failure(self):
 		sys.modules["__main__"].core.add_contact.return_value = ("", 303)
@@ -1184,31 +1184,31 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 	def test_addVideoContextMenuItems_should_call_utils_makeAscii_on_Title(self):
 		sys.argv = ["some_plugin",-1,"some_path"]
 		sys.modules["__main__"].language.return_value = "some_button_string %s"
-		sys.modules["__main__"].utils.makeAscii.side_effect = lambda x: x
+		sys.modules["__main__"].common.makeAscii.side_effect = lambda x: x
 		navigation = YouTubeNavigation()
 		path_params = {}
 		item_params = {"Title":"some_title","path":"some_path","icon":"some_icon","thumbnail":"some_thumbnail"}
 		
 		cm = navigation.addVideoContextMenuItems(path_params,item_params)
 		
-		sys.modules["__main__"].utils.makeAscii.assert_any_call("some_title")
+		sys.modules["__main__"].common.makeAscii.assert_any_call("some_title")
 		
 	def test_addVideoContextMenuItems_should_call_utils_makeAscii_on_Studio(self):
 		sys.argv = ["some_plugin",-1,"some_path"]
 		sys.modules["__main__"].language.return_value = "some_button_string %s"
-		sys.modules["__main__"].utils.makeAscii.side_effect = lambda x: x
+		sys.modules["__main__"].common.makeAscii.side_effect = lambda x: x
 		navigation = YouTubeNavigation()
 		path_params = {}
 		item_params = {"Title":"some_title","path":"some_path","icon":"some_icon","thumbnail":"some_thumbnail"}
 		
 		cm = navigation.addVideoContextMenuItems(path_params,item_params)
 		
-		sys.modules["__main__"].utils.makeAscii.assert_called_with("Unknown Author")
+		sys.modules["__main__"].common.makeAscii.assert_called_with("Unknown Author")
 		
 	def prepareContestMenu(self):
 		sys.argv = ["some_plugin",-1,"some_path"]
 		sys.modules["__main__"].language.return_value = "some_button_string %s"
-		sys.modules["__main__"].utils.makeAscii.side_effect = lambda x: x
+		sys.modules["__main__"].common.makeAscii.side_effect = lambda x: x
 		
 	def assert_context_menu_contains(self, cm, title, path):
 		found = False

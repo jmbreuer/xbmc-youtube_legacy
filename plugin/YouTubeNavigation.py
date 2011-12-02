@@ -187,7 +187,7 @@ class YouTubeNavigation():
 		results = []
 		if (get("feed") == "search" or get("scraper") == "search_disco"):
 			if not get("search"):
-				query = self.utils.getUserInput(self.language(30006), '')
+				query = self.common.getUserInput(self.language(30006), '')
 				if not query:
 					return False
 				params["search"] = query
@@ -266,7 +266,7 @@ class YouTubeNavigation():
 		get = params.get
 
 		if not get("contact"):
-			contact = self.utils.getUserInput(self.language(30519), '')
+			contact = self.common.getUserInput(self.language(30519), '')
 			params["contact"] = contact
 			
 		if (get("contact")):
@@ -475,9 +475,9 @@ class YouTubeNavigation():
 		get = params.get
 		item = item_params.get
 
-		title = self.utils.makeAscii(item("Title"))
+		title = self.common.makeAscii(item("Title"))
 		url_title = urllib.quote_plus(title)
-		studio = self.utils.makeAscii(item("Studio","Unknown Author"))
+		studio = self.common.makeAscii(item("Studio","Unknown Author"))
 		url_studio = urllib.quote_plus(studio)
 				
 		cm.append( ( self.language( 30504 ), "XBMC.Action(Queue)", ) )

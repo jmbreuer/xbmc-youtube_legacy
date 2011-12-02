@@ -95,7 +95,7 @@ if (__name__ == "__main__" ):
 	if (not sys.argv[2]):
 		navigation.listMenu()
 	else:
-		params = utils.getParameters(sys.argv[2])
+		params = common.getParameters(sys.argv[2])
 		get = params.get
 		if (get("action")):
 			navigation.executeAction(params)

@@ -273,7 +273,7 @@ class YouTubeLogin():
 		pword = self.settings.getSetting( "user_password" )
 
 		if pword == "":
-			pword = self.utils.getUserInput(self.language(30628), hidden = True)
+			pword = self.common.getUserInput(self.language(30628), hidden = True)
 
 		if len(galx) == 0 or len(cont) == 0 or len(uilel) == 0 or len(dsh) == 0 or len(rmShown) == 0 or uname == "" or pword == "":
 			self.common.log("_fillLoginInfo missing values for login form " + repr(galx) + repr(cont) + repr(uilel) + repr(dsh) + repr(rmShown) + repr(uname) + str(len(pword)))
@@ -304,7 +304,7 @@ class YouTubeLogin():
 		smsToken = self.common.parseDOM(content, "input", attrs = { "name": "smsToken" }, ret = "value")
 		self.smsToken = smsToken
 		email = self.common.parseDOM(content, "input", attrs = { "name": "email" }, ret = "value")
-		userpin = self.utils.getUserInput(self.language(30627))
+		userpin = self.common.getUserInput(self.language(30627))
 
 		if len(smsToken) > 0 and len(email) > 0 and len(userpin) > 0:
 			url_data = { "smsToken": smsToken[0],

@@ -400,7 +400,7 @@ class TestYouTubeStorage(BaseTestCase.BaseTestCase):
 
 	def test_editStoredSearch_should_exit_cleanly_if_search_param_is_missing(self):
 		sys.modules["__main__"].settings.getSetting.return_value = "0"
-		sys.modules["__main__"].utils.getUserInput.return_value = "some_search3"
+		sys.modules["__main__"].common.getUserInput.return_value = "some_search3"
 		storage = YouTubeStorage()
 		storage.retrieve = Mock()
 		storage.retrieve.return_value =  ["some_search2"]
@@ -414,7 +414,7 @@ class TestYouTubeStorage(BaseTestCase.BaseTestCase):
 	def test_editStoredSearch_should_ask_user_for_new_search_phrase(self):
 		sys.modules["__main__"].settings.getSetting.return_value = "0"
 		sys.modules["__main__"].language.return_value = "some_title"
-		sys.modules["__main__"].utils.getUserInput.return_value = "some_search3"
+		sys.modules["__main__"].common.getUserInput.return_value = "some_search3"
 		storage = YouTubeStorage()
 		storage.retrieve = Mock()
 		storage.retrieve.return_value =  ["some_search2"]
@@ -422,12 +422,12 @@ class TestYouTubeStorage(BaseTestCase.BaseTestCase):
 		
 		storage.editStoredSearch({"search":"some_search1"})
 		
-		sys.modules["__main__"].utils.getUserInput.assert_called_with('some_title', 'some_search1')
+		sys.modules["__main__"].common.getUserInput.assert_called_with('some_title', 'some_search1')
 
 	def test_editStoredSearch_should_set_store_to_searches_if_editing_searches(self):
 		sys.modules["__main__"].settings.getSetting.return_value = "0"
 		sys.modules["__main__"].language.return_value = "some_title"
-		sys.modules["__main__"].utils.getUserInput.return_value = "some_search3"
+		sys.modules["__main__"].common.getUserInput.return_value = "some_search3"
 		storage = YouTubeStorage()
 		storage.retrieve = Mock()
 		storage.retrieve.return_value =  ["some_search2"]
@@ -440,7 +440,7 @@ class TestYouTubeStorage(BaseTestCase.BaseTestCase):
 	def test_editStoredSearch_should_set_store_to_disco_if_editing_disco_searches(self):
 		sys.modules["__main__"].settings.getSetting.return_value = "0"
 		sys.modules["__main__"].language.return_value = "some_title"
-		sys.modules["__main__"].utils.getUserInput.return_value = "some_search3"
+		sys.modules["__main__"].common.getUserInput.return_value = "some_search3"
 		storage = YouTubeStorage()
 		storage.retrieve = Mock()
 		storage.retrieve.return_value =  ["some_search2"]
@@ -453,7 +453,7 @@ class TestYouTubeStorage(BaseTestCase.BaseTestCase):
 	def test_editStoredSearch_should_call_saveStoredSearch(self):
 		sys.modules["__main__"].settings.getSetting.return_value = "0"
 		sys.modules["__main__"].language.return_value = "some_title"
-		sys.modules["__main__"].utils.getUserInput.return_value = "some_search3"
+		sys.modules["__main__"].common.getUserInput.return_value = "some_search3"
 		storage = YouTubeStorage()
 		storage.retrieve = Mock()
 		storage.retrieve.return_value =  ["some_search2"]
@@ -467,7 +467,7 @@ class TestYouTubeStorage(BaseTestCase.BaseTestCase):
 	def test_editStoredSearch_should_remove_old_search_param_before_exiting(self):
 		sys.modules["__main__"].settings.getSetting.return_value = "0"
 		sys.modules["__main__"].language.return_value = "some_title"
-		sys.modules["__main__"].utils.getUserInput.return_value = "some_search3"
+		sys.modules["__main__"].common.getUserInput.return_value = "some_search3"
 		storage = YouTubeStorage()
 		storage.retrieve = Mock()
 		storage.retrieve.return_value =  ["some_search2"]
@@ -482,7 +482,7 @@ class TestYouTubeStorage(BaseTestCase.BaseTestCase):
 	def test_editStoredSearch_should_set_search_params_before_exiting(self):
 		sys.modules["__main__"].settings.getSetting.return_value = "0"
 		sys.modules["__main__"].language.return_value = "some_title"
-		sys.modules["__main__"].utils.getUserInput.return_value = "some_search3"
+		sys.modules["__main__"].common.getUserInput.return_value = "some_search3"
 		storage = YouTubeStorage()
 		storage.retrieve = Mock()
 		storage.retrieve.return_value =  ["some_search2"]

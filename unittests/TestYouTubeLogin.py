@@ -597,18 +597,18 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
 		sys.modules["__main__"].settings.getSetting.return_value = "" 
 		sys.modules["__main__"].common.parseDOM.return_value = ""
 		sys.modules["__main__"].language.return_value = "someTitle"
-		sys.modules["__main__"].utils.getUserInput.return_value = "somePword"
+		sys.modules["__main__"].common.getUserInput.return_value = "somePword"
 		login = YouTubeLogin()
 		
 		result = login._fillLoginInfo("new")
 
-		sys.modules["__main__"].utils.getUserInput.assert_any_call('someTitle', hidden=True)
+		sys.modules["__main__"].common.getUserInput.assert_any_call('someTitle', hidden=True)
 
 	def test_fillLoginInfo_should_return_login_info_if_all_values_are_found(self):
 		sys.modules["__main__"].settings.getSetting.return_value = "value1" 
 		sys.modules["__main__"].common.parseDOM.return_value = ["value2"]
 		sys.modules["__main__"].language.return_value = "someTitle"
-		sys.modules["__main__"].utils.getUserInput.return_value = "somePword"
+		sys.modules["__main__"].common.getUserInput.return_value = "somePword"
 		login = YouTubeLogin()
 		
 		(galx, url_data) = login._fillLoginInfo("new")
@@ -625,7 +625,7 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
 		sys.modules["__main__"].settings.getSetting.return_value = "" 
 		sys.modules["__main__"].common.parseDOM.return_value = ""
 		sys.modules["__main__"].language.return_value = "someTitle"
-		sys.modules["__main__"].utils.getUserInput.return_value = "somePword"
+		sys.modules["__main__"].common.getUserInput.return_value = "somePword"
 		login = YouTubeLogin()
 		
 		(galx, url_data) = login._fillLoginInfo("new")
@@ -637,7 +637,7 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
 		sys.modules["__main__"].settings.getSetting.return_value = "" 
 		sys.modules["__main__"].common.parseDOM.return_value = ""
 		sys.modules["__main__"].language.return_value = ""
-		sys.modules["__main__"].utils.getUserInput.return_value = ""
+		sys.modules["__main__"].common.getUserInput.return_value = ""
 		login = YouTubeLogin()
 		
 		result = login._fillUserPin("new")
@@ -650,7 +650,7 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
 		sys.modules["__main__"].settings.getSetting.return_value = "" 
 		sys.modules["__main__"].common.parseDOM.return_value = ""
 		sys.modules["__main__"].language.return_value = ""
-		sys.modules["__main__"].utils.getUserInput.return_value = ""
+		sys.modules["__main__"].common.getUserInput.return_value = ""
 		login = YouTubeLogin()
 		
 		result = login._fillUserPin("new")
@@ -663,18 +663,18 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
 		sys.modules["__main__"].settings.getSetting.return_value = "" 
 		sys.modules["__main__"].common.parseDOM.return_value = ""
 		sys.modules["__main__"].language.return_value = "someTitle"
-		sys.modules["__main__"].utils.getUserInput.return_value = ""
+		sys.modules["__main__"].common.getUserInput.return_value = ""
 		login = YouTubeLogin()
 		
 		result = login._fillUserPin("new")
 		
-		sys.modules["__main__"].utils.getUserInput.assert_called_with('someTitle')
+		sys.modules["__main__"].common.getUserInput.assert_called_with('someTitle')
 		
 	def test_fillUserPin_should_return_url_data_structure_if_all_values_are_found(self):
 		sys.modules["__main__"].settings.getSetting.return_value = "value1" 
 		sys.modules["__main__"].common.parseDOM.return_value = ["value2"]
 		sys.modules["__main__"].language.return_value = "someTitle"
-		sys.modules["__main__"].utils.getUserInput.return_value = "value3"
+		sys.modules["__main__"].common.getUserInput.return_value = "value3"
 		login = YouTubeLogin()
 		
 		result = login._fillUserPin("new")
@@ -687,7 +687,7 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
 		sys.modules["__main__"].settings.getSetting.return_value = "" 
 		sys.modules["__main__"].common.parseDOM.return_value = ""
 		sys.modules["__main__"].language.return_value = ""
-		sys.modules["__main__"].utils.getUserInput.return_value = ""
+		sys.modules["__main__"].common.getUserInput.return_value = ""
 		login = YouTubeLogin()
 		
 		result = login._fillUserPin("new")
