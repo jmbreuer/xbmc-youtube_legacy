@@ -106,7 +106,6 @@ class SimpleDownloader():
 			self.dbg = self.settings.getSetting("debug") == "true"
 			self.download_path = self.settings.getSetting( "downloadPath" )
 
-		print "XXXXXXXXXXX : " + repr(self.cache.lock("SimpleDownloaderLock"))
 		if self.cache.lock("SimpleDownloaderLock"):
 			self.common.log("Downloader not active, initializing downloader.")
 			
