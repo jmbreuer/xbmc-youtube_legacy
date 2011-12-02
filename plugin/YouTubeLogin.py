@@ -154,11 +154,10 @@ class YouTubeLogin():
 			self.common.log("returning existing login info: " + self.settings.getSetting( "login_info" ))
 			return ( self.settings.getSetting( "login_info" ), 200)
 
-		logged_in = False
 		fetch_options = { "link": get("link", "http://www.youtube.com/") }
 		step = 0
 		galx = ""
-		while not logged_in and fetch_options and step < 18: # 6 steps for 2-factor login
+		while fetch_options and step < 18: # 6 steps for 2-factor login
 			self.common.log("Step : " + str(step))
 			step += 1
 
@@ -185,7 +184,8 @@ class YouTubeLogin():
 				( galx, url_data ) = self._fillLoginInfo(ret["content"])
 				if len(galx) > 0 and len(url_data) > 0:
 					fetch_options = { "link": newurl[0], "no-language-cookie": "true", "url_data": url_data, "hidden": "true" }
-					self.common.log("Part B:" + repr(fetch_options), 10) ## WARNING, SHOWS LOGIN INFO/PASSWORD
+					self.common.log("Part B" )
+					self.common.log("fetch options: " + repr(fetch_options), 10) ## WARNING, SHOWS LOGIN INFO/PASSWORD
 					continue
 			
 			newurl = self.common.parseDOM(ret["content"], "meta", attrs = { "http-equiv": "refresh"}, ret = "content")
@@ -231,19 +231,17 @@ class YouTubeLogin():
 			
 			if not fetch_options:
 				# Check if we are logged in.
-				if ret["content"].find("USERNAME', ") > 0:
-					print "XXXXXXXXXXXXXXX1 : " + repr(ret["content"])
-					logged_in = True
+				
+				nick = self.common.parseDOM(ret["content"], "span", attrs= { "class": "masthead-user-username"} )
+				if len(nick) > 0:
 					self.common.log("Logged in. Parsing data.")
-					break;
+					status = self._getLoginInfo(ret["content"])
+					if status == 200:
+						result = self.settings.getSetting( "login_info" )
+					return(result, status)
+
 				# Look for errors and return error.
 				return ( self.core._findErrors(ret), 303)
-		
-		if logged_in:
-			status = self._getLoginInfo(ret["content"])
-			if status == 200:
-				result = self.settings.getSetting( "login_info" )
-			## Maybe verify age here?
 
 		return (result, status)
 
@@ -310,12 +308,10 @@ class YouTubeLogin():
 	def _getLoginInfo(self, content):
 		nick = ""
 		status = 303
-		if content.find("USERNAME', ") > 0:
-			nick = content[content.find("USERNAME', ") + 12:]
-			nick = nick[:nick.find('")')]
-		
-		if nick:
-			self.settings.setSetting("nick", nick)
+		nick = self.common.parseDOM(content, "span", attrs= { "class": "masthead-user-username"} )
+
+		if len(nick) > 0 :
+			self.settings.setSetting("nick", nick[0])
 		else:
 			self.common.log("Failed to get usename from youtube")
 
