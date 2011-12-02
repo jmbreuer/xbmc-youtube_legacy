@@ -123,7 +123,7 @@ class SimpleDownloader():
 		if video:
 			if not self.dialog:
 				self.dialog = self.DialogDownloadProgress.DownloadProgress()
-				#self.dialog.create(self.language(30605), "")
+				self.dialog.create(self.language(30605), "")
 
 			while video:
 				params["videoid"] = video['videoid']
@@ -206,7 +206,7 @@ class SimpleDownloader():
 				
 				heading = "[%s] %s - %s%%" % ( str(len(videos)), self.language(30624), str(percent))
 
-				self.common.log("DIALOG - Updating %s - %s" % ( heading, self.common.makeAscii(video["Title"])), 2)
+				self.common.log("Updating %s - %s" % ( heading, self.common.makeAscii(video["Title"])), 2)
 				if self.xbmc.Player().isPlaying() and self.xbmc.getCondVisibility("VideoPlayer.IsFullscreen"):
 					if self.dialog:
 						self.dialog.close()
@@ -214,7 +214,7 @@ class SimpleDownloader():
 				else:
 					if not self.dialog:
 						self.dialog = self.DialogDownloadProgress.DownloadProgress()
-						#self.dialog.create(self.language(30605), "")
+						self.dialog.create(self.language(30605), "")
 					self.dialog.update(percent=percent, heading = heading, label=video["Title"])
 
 				if not chunk:
