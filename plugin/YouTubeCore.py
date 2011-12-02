@@ -459,6 +459,19 @@ class YouTubeCore():
 			con.close()
 
 			self.common.log("Result: %s " % repr(ret_obj), 9)
+			if ret_obj["content"].find("gaia_loginform") > -1 and get("ignore_gaia", "false") == "false" and False:
+				self.common.log("Found gaia loginform", 2)
+				if isinstance(self.login, str):
+					self.login = sys.modules[ "__main__" ].login
+				ret_obj = self.login._httpLogin({ "page": ret_obj })
+				ret_obj = ret_obj[0]
+				params["error"] = get("error", 0) + 1
+				params["login"] = "true"
+				params["referer"] = ret_obj["location"]
+				params["ignore_gaia"] = "true"
+				if get("error") > 2:
+					return ret_obj
+				return self._fetchPage(params)
 
 			# Return result if it isn't age restricted
 			if (ret_obj["content"].find("verify-actions") == -1 and ret_obj["content"].find("verify-age-actions") == -1):
@@ -602,13 +615,13 @@ class YouTubeCore():
 			if len(new_url) == 1:
 				if isinstance(self.login, str):
                                         self.login = sys.modules[ "__main__" ].login
-                                ret = self.login._httpLogin({ "page": ret })
-				ret = ret[0]
+				self.login._httpLogin({ "page": ret })
 
 			new_url = self.common.parseDOM(ret["content"], "form", attrs = { "id": "confirm-age-form"}, ret ="action")
 
 			if len(new_url) > 0:
 				self.common.log("Part A - Type 1")
+				self.common.log("BLA:" + repr(ret))
 				new_url = "http://www.youtube.com/" + new_url[0]
 				next_url = self.common.parseDOM(ret["content"], "input", attrs = { "name": "next_url" }, ret = "value")
 				set_racy = self.common.parseDOM(ret["content"], "input", attrs = { "name": "set_racy" }, ret = "value")
@@ -643,7 +656,7 @@ class YouTubeCore():
 
 			if not fetch_options:
 				self.common.log("Nothing hit, assume we are verified: " + repr(ret))
-				fetch_options = { "link": org_link + "&has_verified=1", "no_verify_age": "true", "login": "true" }
+				fetch_options = { "link": org_link, "no_verify_age": "true", "login": "true" }
 				return self._fetchPage(fetch_options)
 
 		self.common.log("Done")

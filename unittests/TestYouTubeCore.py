@@ -565,8 +565,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		sys.modules[ "__main__" ].common.log.assert_called_with("giving up")
 
 	def test_fetchPage_should_properly_handle_quota(self):
-		sys.modules[ "__main__" ].settings.getSetting.side_effect = ["3","4","",""]
-		sys.modules[ "__main__" ].settings.getSetting.side_effect = ["3","4","", "", "false", "", "false", ""]
+		sys.modules[ "__main__" ].settings.getSetting.side_effect = ["3","4","", "", "false", "", "false", "", "", "", "", "", "", "", ""]
 		patcher1 = patch("urllib2.urlopen")
 		patcher2 = patch("time.sleep")
 		patcher1.start()
@@ -584,7 +583,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		core = YouTubeCore()
 		core._getAuth = Mock()
 	
-		ret = core._fetchPage({"auth":"true", "link":"www.somelink.dk", "error":"2"})
+		ret = core._fetchPage({"auth":"true", "link":"www.somelink.dk"})
 
 		patcher1.stop()
 
@@ -781,7 +780,8 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		patcher1.stop()
 		patcher2.stop()
 		
-		sys.modules[ "__main__" ].settings.getSetting.assert_called_with("login_info")
+		sys.modules[ "__main__" ].settings.getSetting.assert_called_any("SID")
+		sys.modules[ "__main__" ].settings.getSetting.assert_called_any("login_info")
 		
 	
 	def test_fetchPage_should_append_login_token_to_request_headers_if_login_is_in_params(self):
@@ -867,8 +867,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		args = YouTubeCore.url2request().add_header.call_args_list
 		patcher2.stop()
 		patcher3.stop()
-		
-		assert(params["error"] == "3")
+		assert(params["error"] == 3)
 		
 	def test_fetchPage_should_refresh_token_on_invalid_token_HTTPError(self):
 		settings = ["my_token","my_token","my_token","my_token","my_token","user","pass","4","3" ]
@@ -1063,6 +1062,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		parsedom = [ ["/verifyAgeMock"], ["http://next.com" ], ["very racy"] ] * 6
 		sys.modules[ "__main__" ].common.parseDOM.side_effect = parsedom
 		url_data = { "next_url": "http://next", "set_racy": "very racy", "session_token" : "MY_token"}
+		sys.modules[ "__main__" ].login._httpLogin.return_value = ( { "content": "", "status": "200"} , "")
 		core = YouTubeCore()
 		core._fetchPage = Mock()
 		core._fetchPage.return_value = { "status":303,"content":'<form method="POST" action="/verify_age?action_confirm=true" id="confirm-age-form">yt.setConfig({      \'XSRF_TOKEN\': \'MY_token\',      \'XSRF_FIELD_NAME\': \'session_token\'    }); ' }

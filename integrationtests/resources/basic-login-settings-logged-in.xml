@@ -41,8 +41,8 @@
     <setting id="proxy_dis" value="http://fiberproxy.us/browse.php?u="/>
     <setting id="force_proxy" value="false"/>
     <setting id="auth" value=""/>
-    <setting id="login_info" value="52093fa49686ef877117002c40646c6bc40AAAB7IjEiOiAxLCAiMyI6IDc3MTY5MTQ4MywgIjIiOiAiMDNyb0xSeW9CTWJzY1hxczJDRmYydz09IiwgIjUiOiA0NTAzNjAxNzY2NDY1NTM2LCAiNCI6ICJHQUlBIiwgIjciOiAxMzIyODA5NDUyLCAiNiI6IGZhbHNlLCAiOCI6IDExNTMwODYxNzc4NH0="/>
-    <setting id="SID" value="DQAAAJsAAABQB_GYo15maRZPKtigZ1Ut9qw19EdVGkB5ga1tyFr8mlJwvLeYHdBcaXiUO6FsftKzrbIyV-5YD4MmjQ1dtvGYC1wOwoyX6eLFN0qHEtApgesmvkDccLN_2Y7BGscBW2GQn0F45ZcXNfm3r9cuBhI3HrHD37y7LYfBTA_5L0jU_pby2XA_las7Yrq2-sRyUvljZG5qKDLp5_Sm4QjR5So3"/>
+    <setting id="login_info" value="70389b1900d817ca78257a1f1e3f6b46c40AAAB7IjEiOiAxLCAiMyI6IDc3MTY5MTQ4MywgIjIiOiAiMDNyb0xSeW9CTWJzY1hxczJDRmYydz09IiwgIjUiOiA0NTAzNjAxNzY2NDY1NTM2LCAiNCI6ICJHQUlBIiwgIjciOiAxMzIyODEwNjkyLCAiNiI6IGZhbHNlLCAiOCI6IDExNTMwODYxNzc4NH0="/>
+    <setting id="SID" value="DQAAAJsAAABx7TswOfM-09xHWXXiNs6lJGnn-BxvXQoy2NIp6fZ9HFB94b8gzMUotGH28IfMkVlSa0RugHKzJu37_XnhVetdel1GguSV7AmOoVCPyrzhF0fGsdJXomzJ2jh4JIh91c5MbGY7Eicxpp_IN-4u10En8wpm85sDCiXQUu_KNzYsChbYtq9BScUKK7R3d26s0q3dj9RyebtRpWTOk75dUtFo"/>
     <setting id="oauth2_access_token" value="ya29.AHES6ZQZ6neCOg4rXlmHgsaNgc35fGAav7d680ktQ3GhbA_sjTVc0g"/>
     <setting id="oauth2_expires_at" value="1322769886.85"/>
     <setting id="oauth2_refresh_token" value="1/eiQwbwivbJHdJB2RfVIvOfca-njEAogElPcSxAZF7y0"/>

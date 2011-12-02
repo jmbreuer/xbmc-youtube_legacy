@@ -154,6 +154,10 @@ class YouTubeLogin():
 			self.common.log("returning existing login info: " + self.settings.getSetting( "login_info" ))
 			return ( self.settings.getSetting( "login_info" ), 200)
 
+		if get("page", "false") == "true":
+			skip = True
+		else:
+			skip = False
 		fetch_options = { "link": get("link", "http://www.youtube.com/") }
 
 		step = 0
@@ -165,7 +169,12 @@ class YouTubeLogin():
 			if step == 17:
 				return ( self.core._findErrors(ret), 303)
 
-			ret = self.core._fetchPage(fetch_options)
+			if skip:
+				ret = get("page")
+				skip = False
+			else:
+				fetch_options["ignore_gaia"] = "true"
+				ret = self.core._fetchPage(fetch_options)
 
 			if ret["content"].find("captcha") > -1:
 				self.common.log("Captcha needs to be filled")
