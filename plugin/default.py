@@ -33,7 +33,7 @@ url = "www.xbmc.com"
 settings = xbmcaddon.Addon(id='plugin.video.youtube.beta')
 language = settings.getLocalizedString
 dbg = settings.getSetting("debug") == "true"
-dbglevel = 1
+dbglevel = 3
 
 # plugin structure 
 feeds = ""

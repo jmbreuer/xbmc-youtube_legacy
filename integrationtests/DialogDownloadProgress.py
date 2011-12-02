@@ -261,7 +261,6 @@ class DownloadProgress( Window ):
 	def __init__( self, parent_win=None, **kwargs ):
 		# get class Window object
 		Window.__init__( self, parent_win, **kwargs )
-		self.hide_during_playback = False
 		self.canceled = False
 		self.header = ""
 		self.line = ""
@@ -282,21 +281,17 @@ class DownloadProgress( Window ):
 		return self.canceled
 
 	def update( self, percent=0, heading="", label="" ):
-		if not self.hide_during_playback or not xbmc.Player().isPlaying():
-			print "Updating %s - %s" % ( heading, label)
-			self.setupWindow()
-			if heading and hasattr( self.heading, "setLabel" ):
-				# set heading
-				try: self.heading.setLabel( heading )
-				except: print_exc()
-			if label and hasattr( self.label, "setLabel" ):
-				# set label
-				self.line = label
-				try: self.label.setLabel( label )
-				except: print_exc()
-			if percent and hasattr( self.progress, "setPercent" ):
-				# set progress of listing
-				try: self.progress.setPercent( percent )
-				except: print_exc()
-		else:
-			print "Updating [Hidden] %s - %s" % ( heading, label)
+		self.setupWindow()
+		if heading and hasattr( self.heading, "setLabel" ):
+			# set heading
+			try: self.heading.setLabel( heading )
+			except: print_exc()
+		if label and hasattr( self.label, "setLabel" ):
+			# set label
+			self.line = label
+			try: self.label.setLabel( label )
+			except: print_exc()
+		if percent and hasattr( self.progress, "setPercent" ):
+			# set progress of listing
+			try: self.progress.setPercent( percent )
+			except: print_exc()

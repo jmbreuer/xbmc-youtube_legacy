@@ -33,15 +33,13 @@ class SimpleDownloader():
 			common = CommonFunctions.CommonFunctions()
 			common.plugin = self.plugin
 
-		if sys.modules[ "__main__" ].cache:
-			self.cache = sys.modules[ "__main__" ].cache
-		else:
-			try:
-				import StorageServer
-			except:
-				import storageserverdummy as StorageServer
-			self.cache = StorageServer.StorageServer()
-			self.cache.table_name = "Downloader"
+		try:
+			import StorageServer
+		except:
+			import storageserverdummy as StorageServer
+
+		self.cache = StorageServer.StorageServer()
+		self.cache.table_name = "Downloader"
 
                 if sys.modules[ "__main__" ].xbmc:
                         self.xbmc = sys.modules["__main__"].xbmc
@@ -108,8 +106,8 @@ class SimpleDownloader():
 			self.dbg = self.settings.getSetting("debug") == "true"
 			self.download_path = self.settings.getSetting( "downloadPath" )
 
+		print "XXXXXXXXXXX : " + repr(self.cache.lock("SimpleDownloaderLock"))
 		if self.cache.lock("SimpleDownloaderLock"):
-			params["silent"] = "true"
 			self.common.log("Downloader not active, initializing downloader.")
 			
 			self.addVideoToDownloadQueue(params)
@@ -126,7 +124,7 @@ class SimpleDownloader():
 		if video:
 			if not self.dialog:
 				self.dialog = self.DialogDownloadProgress.DownloadProgress()
-				self.dialog.hide_during_playback = self.hide_during_playback
+				#self.dialog.create(self.language(30605), "")
 
 			while video:
 				params["videoid"] = video['videoid']
@@ -185,6 +183,8 @@ class SimpleDownloader():
 			chunk_size = int(total_size / 200) # We only want 200 updates of the status bar.
 			if chunk_size <= 0:
 				chunk_size = 5
+			elif chunk_size > 3000000:
+				chunk_size = 3000000
 		try:
 			bytes_so_far = 0
 			
@@ -206,7 +206,17 @@ class SimpleDownloader():
 					videos = {}
 				
 				heading = "[%s] %s - %s%%" % ( str(len(videos)), self.language(30624), str(percent))
-				self.dialog.update(percent=percent, heading = heading, label=video["Title"])
+
+				self.common.log("DIALOG - Updating %s - %s" % ( heading, self.common.makeAscii(video["Title"])), 2)
+				if self.xbmc.Player().isPlaying() and self.xbmc.getCondVisibility("VideoPlayer.IsFullscreen"):
+					if self.dialog:
+						self.dialog.close()
+						self.dialog = ""
+				else:
+					if not self.dialog:
+						self.dialog = self.DialogDownloadProgress.DownloadProgress()
+						#self.dialog.create(self.language(30605), "")
+					self.dialog.update(percent=percent, heading = heading, label=video["Title"])
 
 				if not chunk:
 					break
@@ -214,15 +224,20 @@ class SimpleDownloader():
 			con.close()
 			file.close()
 		except:
+			self.common.log("Download failed.")
 			try:
 				con.close()
 				file.close()
 			except:
 				self.common.log("Failed to close download stream and file handle")
+			self.showMessage(self.language(30625), "ERROR")
+			return ( {}, 500 )
+
 		
-		self.common.log(filename_incomplete)
-		self.common.log(filename_complete)
 		self.xbmcvfs.rename(filename_incomplete, filename_complete)
+
+		if not self.dialog:
+			self.dialog = self.DialogDownloadProgress.DownloadProgress()
 		self.dialog.update(heading = self.language(30604), label=video["Title"])
 
 		if video.has_key("callback_for_done"):
@@ -230,7 +245,6 @@ class SimpleDownloader():
 
 		self.common.log("done")
 		return ( video, 200 )
-
 		
 	#============================= Download Queue =================================
 	def getNextVideoFromDownloadQueue(self):
