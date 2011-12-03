@@ -390,9 +390,8 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 		player.addSubtitles({"videoid":"testid","Title":"testTitle"})
 		
 		sys.modules["__main__"].xbmcvfs.exists.assert_called_with('testDownloadPath/testTitle-[testid].ssa')
-		sys.modules["__main__"].xbmc.Player().setSubtitles.assert_called_with('testDownloadPath/testTitle-[testid].ssa')		
-	
-	
+		sys.modules["__main__"].xbmc.Player().setSubtitles.assert_called_with('testDownloadPath/testTitle-[testid].ssa')
+
 	def test_addSubtitles_should_sleep_for_1_second_if_player_isnt_ready(self):
 		sys.modules["__main__"].settings.getSetting.return_value = "testDownloadPath"
 		sys.modules["__main__"].xbmcvfs.exists.return_value = True
