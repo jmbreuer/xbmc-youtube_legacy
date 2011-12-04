@@ -955,22 +955,7 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 		self.scraper.getNewResultsFunction(params)
 		
 		assert(params["new_results_function"] == self.scraper.scrapeTrailersGridFormat)
-		
-	def test_createUrl_should_return_proper_url_for_categories_scraper(self):
-		self.scraper = YouTubeScraper()
-		
-		url = self.scraper.createUrl({"scraper":"categories"})
-		
-		assert(url[:url.find("?")] == self.scraper.urls["categories"])
-	
-	def test_createUrl_should_return_proper_url_for_categories_scraper_with_category(self):
-		self.scraper = YouTubeScraper()
-		
-		url = self.scraper.createUrl({"scraper":"categories","category":"/some_category"})
-		
-		assert(url[:url.rfind("/")] == self.scraper.urls["main"])
-		assert(url.find("/some_category") > 0)
-		
+				
 	def test_createUrl_should_return_proper_url_for_shows_scraper(self):
 		self.scraper = YouTubeScraper()
 		
