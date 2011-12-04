@@ -422,7 +422,7 @@ class YouTubeCore():
 
 			if get("no-language-cookie", "false") == "false":
 				cookie += "PREF=f1=50000000&hl=en;"
-				#request.add_header('Cookie', 'PREF=f1=50000000&hl=en')
+				request.add_header('Cookie', 'PREF=f1=50000000&hl=en')
 
 		if get("login", "false") == "true":
 			self.common.log("got login")
@@ -451,7 +451,7 @@ class YouTubeCore():
 			self.common.log("connecting to server... %s" % link )
 
 			if cookie:
-				self.common.log("Settinc cookie: " + cookie)
+				self.common.log("Setting cookie: " + cookie)
 				request.add_header('Cookie', cookie)
 		
 			con = urllib2.urlopen(request)
@@ -463,20 +463,6 @@ class YouTubeCore():
 			con.close()
 
 			self.common.log("Result: %s " % repr(ret_obj), 9)
-			if ret_obj["content"].find("gaia_loginform") > -1 and get("ignore_gaia", "false") == "false" and False:
-				self.common.log("Found gaia loginform", 2)
-				if isinstance(self.login, str):
-					self.login = sys.modules[ "__main__" ].login
-				ret_obj = self.login._httpLogin({ "page": ret_obj })
-				ret_obj = ret_obj[0]
-				params["error"] = get("error", 0) + 1
-				params["login"] = "true"
-				if hasattr(ret_obj, "location"):
-					params["referer"] = ret_obj["location"]
-				params["ignore_gaia"] = "true"
-				if get("error") > 2:
-					return ret_obj
-				return self._fetchPage(params)
 
 			# Return result if it isn't age restricted
 			if (ret_obj["content"].find("verify-actions") == -1 and ret_obj["content"].find("verify-age-actions") == -1):
