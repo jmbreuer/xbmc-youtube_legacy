@@ -556,7 +556,7 @@ class YouTubeCore():
 			self.common.log("Socket timeout")
 			return ret_obj
 		
-	def _findErrors(self, ret):
+	def _findErrors(self, ret, silent = False):
 		self.common.log("")
 
 		## Couldn't find 2 factor or normal login
@@ -574,6 +574,14 @@ class YouTubeCore():
 			html = self.common.parseDOM(ret['content'], "error")
 			error = self.common.parseDOM(html, "code")
 
+		if len(error) == 0: # Bad password for _httpLogin.
+			error = self.common.parseDOM(ret['content'], "span", attrs={ "class": "errormsg" })
+
+			# Has a link. Lets remove that.
+			if len(error) == 1:
+				if error[0].find("<") > -1:
+					error[0] = error[0][0:error[0].find("<")]
+		
 		if len(error) > 0:
 			self.common.log("4")
 			error = error[0]
@@ -581,7 +589,8 @@ class YouTubeCore():
 			self.common.log("returning error : " + error.strip())
 			return error.strip()
 
-		self.common.log("couldn't find any errors: " + repr(ret))
+		if not silent:
+			self.common.log("couldn't find any errors: " + repr(ret))
 		return False
 
 	def _verifyAge(self, org_link, next_url, params={}):

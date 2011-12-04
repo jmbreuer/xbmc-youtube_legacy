@@ -185,6 +185,11 @@ class YouTubeLogin():
 			# Check if we are logged in.
 			nick = self.common.parseDOM(ret["content"], "span", attrs= { "class": "masthead-user-username"} )
 
+			# Check if there are any errors to report
+			errors = self.core._findErrors(ret, silent = True)
+			if errors:
+				return (errors, 303)
+
 			if len(nick) > 0:
 				self.common.log("Logged in. Parsing data.")
 				status = self._getLoginInfo(ret["content"])
