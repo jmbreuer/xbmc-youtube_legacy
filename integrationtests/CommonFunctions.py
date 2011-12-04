@@ -129,11 +129,11 @@ class CommonFunctions():
 		self.log("", 2)
 		ret = []
 		for tmp in lst:
-			if tmp.find('="') > -1:
-				tmp = tmp[:tmp.find('="')]
+			if tmp.find('="', tmp.find('"', 1)) > -1:
+				tmp = tmp[:tmp.find('="', tmp.find('"', 1))]
 
-			if tmp.find('=\'') > -1:
-				tmp = tmp[:tmp.find('=\'')]
+			if tmp.find('=\'', tmp.find("'", 1)) > -1:
+				tmp = tmp[:tmp.find('=\'', tmp.find("'", 1))]
 
 			cont_char = tmp[0]
 			tmp = tmp[1:]

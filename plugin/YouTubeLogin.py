@@ -182,6 +182,14 @@ class YouTubeLogin():
 				break;
 			fetch_options = False
 
+			# Check if we are logged in.
+			nick = self.common.parseDOM(ret["content"], "span", attrs= { "class": "masthead-user-username"} )
+
+			if len(nick) > 0:
+				self.common.log("Logged in. Parsing data.")
+				status = self._getLoginInfo(ret["content"])
+				return(ret, status)
+
 			# Click login link on youtube.com
 			newurl = self.common.parseDOM(ret["content"], "a", attrs = {"class": "end" }, ret = "href")
 			if len(newurl) > 0:
@@ -245,15 +253,7 @@ class YouTubeLogin():
 	
 			## 2-factor login finish
 			if not fetch_options:
-				# Check if we are logged in.
-				nick = self.common.parseDOM(ret["content"], "span", attrs= { "class": "masthead-user-username"} )
-
-				if len(nick) > 0:
-					self.common.log("Logged in. Parsing data.")
-					status = self._getLoginInfo(ret["content"])
-					return(ret, status)
-
-				# Or check for errors.
+				# Check for errors.
 				return ( self.core._findErrors(ret), 303)
 
 		return (ret, status)
@@ -348,7 +348,7 @@ class YouTubeLogin():
 
 		if len(login_info) == 1:
 			self.common.log("LOGIN_INFO: " + repr(login_info))
-			self.settings.setSetting( "login_info", login_info[0] + "=" )  # ParseDOM misses the last =
+			self.settings.setSetting( "login_info", login_info[0])
 		else:
 			self.common.log("Failed to get LOGIN_INFO from youtube")
 		
