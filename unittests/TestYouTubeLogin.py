@@ -764,6 +764,13 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
 		result = login._getLoginInfo("")
 		
 		assert(result == 200)
+
+	def test__getCookieInfo_properly_converts(self):
+		login = YouTubeLogin()
+                result = login._getLoginInfo("")
+
+                assert(result == 200)
+
 				
 if __name__ == '__main__':
 	nose.runmodule()

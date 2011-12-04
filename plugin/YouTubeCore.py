@@ -363,6 +363,7 @@ class YouTubeCore():
 		get = params.get
 		link = get("link")
 		ret_obj = { "status": 500, "content": ""}
+		cookie = ""
 
 		if (get("url_data") or get("request") or get("hidden")):
 			self.common.log("called for : " + repr(params['link']))
@@ -420,7 +421,8 @@ class YouTubeCore():
 			#request.add_header('Cookie', 'VISITOR_INFO1_LIVE=ST1Ti53r4fU')
 
 			if get("no-language-cookie", "false") == "false":
-				request.add_header('Cookie', 'PREF=f1=50000000&hl=en')
+				cookie += "PREF=f1=50000000&hl=en;"
+				#request.add_header('Cookie', 'PREF=f1=50000000&hl=en')
 
 		if get("login", "false") == "true":
 			self.common.log("got login")
@@ -439,9 +441,7 @@ class YouTubeCore():
 			if self.settings.getSetting("login_info") != "":
 				info = self.settings.getSetting("login_info")
 				SID = self.settings.getSetting("SID")
-				self.common.log("Addding login cookies")
-				request.add_header('Cookie', 'LOGIN_INFO=' + info)
-				request.add_header('Cookie', 'SID=' + SID)
+				cookie += 'LOGIN_INFO=' + info +';SID=' + SID +';'
 		
 		if get("referer"):
 			self.common.log("Added referer: %s" % get("referer"))
@@ -450,6 +450,10 @@ class YouTubeCore():
 		try:
 			self.common.log("connecting to server... %s" % link )
 
+			if cookie:
+				self.common.log("Settinc cookie: " + cookie)
+				request.add_header('Cookie', cookie)
+		
 			con = urllib2.urlopen(request)
 			
 			ret_obj["content"] = con.read()
@@ -467,7 +471,8 @@ class YouTubeCore():
 				ret_obj = ret_obj[0]
 				params["error"] = get("error", 0) + 1
 				params["login"] = "true"
-				params["referer"] = ret_obj["location"]
+				if hasattr(ret_obj, "location"):
+					params["referer"] = ret_obj["location"]
 				params["ignore_gaia"] = "true"
 				if get("error") > 2:
 					return ret_obj

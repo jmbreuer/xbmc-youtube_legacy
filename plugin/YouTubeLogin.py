@@ -150,6 +150,7 @@ class YouTubeLogin():
 
 		if get("new", "false") == "true" or get("page", "false") != "false":
 			self.settings.setSetting( "login_info", "" )
+                        self.settings.setSetting( "SID", "" )
 		elif self.settings.getSetting( "login_info" ) != "":
 			self.common.log("returning existing login info: " + self.settings.getSetting( "login_info" ))
 			return ( self.settings.getSetting( "login_info" ), 200)
@@ -317,6 +318,15 @@ class YouTubeLogin():
 			return url_data
 		return {}
 
+	def _getCookieInfo(self):
+		cookie = repr(sys.modules[ "__main__" ].cookiejar)
+		cookie = cookie.replace("<_LWPCookieJar.LWPCookieJar[", "")
+		cookie = cookie.replace("), Cookie(version=0,", "></cookie><cookie ")
+		cookie = cookie.replace(")]>", "></cookie>")
+		cookie = cookie.replace("Cookie(version=0,", "<cookie ")
+		cookie = cookie.replace(", ", " ")
+		return cookie
+
 	def _getLoginInfo(self, content):
 		self.common.log("")
 		nick = ""
@@ -332,25 +342,23 @@ class YouTubeLogin():
 		
 		login_info = ""
 		SID = ""
-		cookies = repr(sys.modules[ "__main__" ].cookiejar)
-			
-		if cookies.find("name='LOGIN_INFO', value='") > 0:
-			start = cookies.find("name='LOGIN_INFO', value='") + len("name='LOGIN_INFO', value='")
-			login_info = cookies[start:cookies.find("', port=None", start)]
-			self.common.log("LOGIN_INFO: " + login_info)
-			self.settings.setSetting( "login_info", login_info )
+		cookies = self._getCookieInfo()
+		login_info = self.common.parseDOM(cookies, "cookie", attrs = { "name": "LOGIN_INFO" }, ret = "value")
+		SID = self.common.parseDOM(cookies, "cookie", attrs = { "name": "SID", "domain": ".youtube.com"}, ret = "value")
+
+		if len(login_info) == 1:
+			self.common.log("LOGIN_INFO: " + repr(login_info))
+			self.settings.setSetting( "login_info", login_info[0] + "=" )  # ParseDOM misses the last =
 		else:
 			self.common.log("Failed to get LOGIN_INFO from youtube")
-
-		if cookies.find("name='SID', value='") > 0:
-			start = cookies.find("name='SID', value='") + len("name='SID', value='")
-			SID = cookies[start:cookies.find("', port=None", start)]
-			self.common.log("SID: " + SID)
-			self.settings.setSetting( "SID", SID )
+		
+		if len(SID) == 1:
+			self.common.log("SID: " + repr(SID))
+			self.settings.setSetting( "SID", SID[0])
 		else:
 			self.common.log("Failed to get SID from youtube")
-		
-		if SID and login_info:
+
+		if len(SID) == 1 and len(login_info) == 1:
 			status = 200
 
 		self.common.log("Done")

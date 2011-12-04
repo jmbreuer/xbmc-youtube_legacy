@@ -535,7 +535,6 @@ class YouTubeScraper():
 		url = self.createUrl(params)
 		
 		result = self.core._fetchPage({"link": url, "login": "true"})
-
 		liked = self.common.parseDOM(result["content"], "div", { "id": "vm-video-list-container"})
 
 		items = []
