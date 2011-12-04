@@ -24,7 +24,7 @@ except ImportError:
 
 
 # plugin constants
-version = "2.7.0"
+version = "2.8.0"
 plugin = "YouTube Beta-" + version
 author = "TheCollective"
 url = "www.xbmc.com"

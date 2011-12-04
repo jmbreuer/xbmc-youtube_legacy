@@ -122,10 +122,10 @@ class CommonFunctions():
 		elif start > -1:
 			html = html[start + len(match):]
 
-		self.log("done html length: " + str(len(html)) + ", content: " + html, 2)
+		self.log("done html length: " + str(len(html)), 2)
 		return html
 
-	def getDOMAttributes(self, lst):
+	def getDOMAttributes_org(self, lst):
 		self.log("", 2)
 		ret = []
 		for tmp in lst:
@@ -136,6 +136,26 @@ class CommonFunctions():
 				tmp = tmp[:tmp.find('=\'', tmp.find("'", 1))]
 
 			cont_char = tmp[0]
+			tmp = tmp[1:]
+			if tmp.rfind(cont_char) > -1:
+				tmp = tmp[:tmp.rfind(cont_char)]
+			tmp = tmp.strip()
+			ret.append(tmp)
+
+		self.log("Done: " + repr(ret), 2)
+		return ret
+
+	def getDOMAttributes(self, lst):
+		self.log("", 2)
+		ret = []
+		for tmp in lst:
+			cont_char = tmp[0]
+			if tmp.find('="', tmp.find(cont_char, 1)) > -1:
+				tmp = tmp[:tmp.find('="', tmp.find(cont_char, 1))]
+
+			if tmp.find('=\'', tmp.find(cont_char, 1)) > -1:
+				tmp = tmp[:tmp.find('=\'', tmp.find(cont_char, 1))]
+
 			tmp = tmp[1:]
 			if tmp.rfind(cont_char) > -1:
 				tmp = tmp[:tmp.rfind(cont_char)]
