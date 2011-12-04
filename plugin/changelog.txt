@@ -3,7 +3,7 @@
   - Make rtmp suck setup once Handshake 10 is supported.
 - Purchasable movies.
 
-[B]TODO 2.8:[/B]
+[B]TODO 2.9:[/B]
 - Allow users to change sort on searches
 - Hook-in Caching the right places. And only the right places. (mostly scrapers)
 - Scrape Education. Search for feeds.
@@ -21,7 +21,7 @@
 - [XBMC] Subtitles and Annotations dont work the first time 90% of the time
 - [RTMPDUMP] Doesn't support handshake type 10 which is required by youtube.
 
-[B]Version 2.8.0 (Beta)[/B]
+[B]Version 2.8.0[/B]
 - Changed All videos now have a unique path from xbmc's perspective eventhough they're present in different folders.
 - Changed Replaced the categories scraper with api calls
 - Moved some functions from youtube utils to common so they can be shared between different plugins
