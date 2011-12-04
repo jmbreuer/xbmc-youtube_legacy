@@ -184,7 +184,7 @@ class YouTubeLogin():
 
 			# Check if we are logged in.
 			nick = self.common.parseDOM(ret["content"], "span", attrs= { "class": "masthead-user-username"} )
-
+			print "nick :" + repr(nick)
 			if len(nick) > 0:
 				self.common.log("Logged in. Parsing data.")
 				status = self._getLoginInfo(ret["content"])
@@ -192,6 +192,7 @@ class YouTubeLogin():
 
 			# Click login link on youtube.com
 			newurl = self.common.parseDOM(ret["content"], "a", attrs = {"class": "end" }, ret = "href")
+			print "newurl :" + repr(newurl)
 			if len(newurl) > 0:
 				# Start login procedure
 				if newurl[0] != "#":
@@ -200,15 +201,17 @@ class YouTubeLogin():
 
 			# Fill out login information and send.
 			newurl = self.common.parseDOM(ret["content"].replace("\n", " "), "form", attrs = { "id": "gaia_loginform"}, ret = "action")
+			print "newurl :" + repr(newurl)
 			if len(newurl) > 0:
 				( galx, url_data ) = self._fillLoginInfo(ret["content"])
 				if len(galx) > 0 and len(url_data) > 0:
 					fetch_options = { "link": newurl[0], "no-language-cookie": "true", "url_data": url_data, "hidden": "true", "referer": ret["location"] }
-					self.common.log("Part B" )
+					self.common.log("Part B")
 					self.common.log("fetch options: " + repr(fetch_options), 10) ## WARNING, SHOWS LOGIN INFO/PASSWORD
 					continue
 			
 			newurl = self.common.parseDOM(ret["content"], "meta", attrs = { "http-equiv": "refresh"}, ret = "content")
+			print "newurl :" + repr(newurl)
 			if len(newurl) > 0 :
 				newurl = newurl[0].replace("&amp;", "&")
 				newurl = newurl[newurl.find("&#39;") + 5 : newurl.rfind("&#39;")]
@@ -235,7 +238,9 @@ class YouTubeLogin():
 
 			smsToken = self.common.parseDOM(ret["content"].replace("\n", ""), "input", attrs= { "name": "smsToken" }, ret= "value")
 			cont = self.common.parseDOM(ret["content"], "input", attrs= { "name": "continue"}, ret="value" )
-
+			print "smsToken : " + repr(smsToken)
+			print "cont : " + repr(cont)
+			print "galx : " + galx
 			if len(cont) > 0 and len(smsToken) > 0 and galx != "":
 				url_data = { "smsToken": smsToken[0],
 					     "continue": cont[0],

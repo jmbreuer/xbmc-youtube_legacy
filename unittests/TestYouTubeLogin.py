@@ -476,9 +476,9 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
 		assert(args[5][1] == {'attrs': {'name': 'continue'}, 'ret': 'value'})
 
 	def test_httpLogin_should_call_fetchPage_with_correct_fetch_options_if_smsToken_is_found(self):
-		dom_values = [["USERNAME"], ["USERNAME"], ["USERNAME"], [], [],[],[],[],["http://www.mock.com"],["some cont"],["some smsToken"],[],[],[],["galx"],[], ""]
-		#dom_values = [ ["some cont"], ["some smstoken"], "", "", "", ""]
-		login_values = [("",""),("some_galx", "some_url_data")]
+		dom_values = [["USERNAME"], ["USERNAME"], ["USERNAME"], [], [],[],[],[],["http://www.mock.com"],["some cont"],["some smsToken"],[],[],[], "", ["galx"], "", ""]
+		#dom_values = [ ["some smstoken"], "", "", "", ""]
+		login_values = [("",""), ("some_galx", "some_url_data")]
 		sys.modules["__main__"].core._fetchPage.return_value = {"content":"","status":200, "location": "here"}
 		sys.modules["__main__"].settings.getSetting.return_value = "smokey" 
 		sys.modules["__main__"].common.parseDOM.side_effect = lambda x = "",y = "",attrs = {},ret = "": dom_values.pop()
