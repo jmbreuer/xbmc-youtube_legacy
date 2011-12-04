@@ -320,7 +320,6 @@ class YouTubeLogin():
 
 	def _getCookieInfo(self):
 		cookie = repr(sys.modules[ "__main__" ].cookiejar)
-		#print "XXXXXXXXXXXXX COOKIES : " + repr(cookie)
 		cookie = cookie.replace("<_LWPCookieJar.LWPCookieJar[", "")
 		cookie = cookie.replace("), Cookie(version=0,", "></cookie><cookie ")
 		cookie = cookie.replace(")]>", "></cookie>")
