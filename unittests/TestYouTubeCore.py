@@ -780,8 +780,8 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		patcher1.stop()
 		patcher2.stop()
 		
-		sys.modules[ "__main__" ].settings.getSetting.assert_called_any("SID")
-		sys.modules[ "__main__" ].settings.getSetting.assert_called_any("login_info")
+		sys.modules[ "__main__" ].settings.getSetting.assert_any_call("SID")
+		sys.modules[ "__main__" ].settings.getSetting.assert_any_call("login_info")
 		
 	
 	def test_fetchPage_should_append_login_token_to_request_headers_if_login_is_in_params(self):
@@ -808,8 +808,9 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		args = YouTubeCore.url2request().add_header.call_args_list
 		patcher2.stop()
 		
+		print repr(args)
 		assert(args[2][0][0] == "Cookie")
-		assert(args[2][0][1] == 'LOGIN_INFO=my_token')
+		assert(args[2][0][1] == 'PREF=f1=50000000&hl=en;LOGIN_INFO=my_token;SID=my_token;')
 
 	def test_fetchPage_should_call_retry_if_youtube_ask_user_to_verify_age(self):
 		settings = [ "3", "4", "false", "false", "false", "user", "pass", "my_token","my_token","my_token","my_token","my_token" ] 
