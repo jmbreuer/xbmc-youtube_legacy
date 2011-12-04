@@ -21,7 +21,6 @@ import sys, urllib
 class YouTubeScraper():	
 	
 	urls = {}
-	urls['categories'] = "http://www.youtube.com/videos"
 	urls['current_trailers'] = "http://www.youtube.com/trailers?s=trit&p=%s&hl=en"
 	urls['disco_main'] = "http://www.youtube.com/disco" 
 	urls['disco_mix_list'] = "http://www.youtube.com/watch?v=%s&feature=disco&playnext=1&list=%s"
@@ -515,13 +514,6 @@ class YouTubeScraper():
 			
 			links = self.utils.extractVID(ahref)
 			items.extend(links)
-#			for i in range(0 , len(ahref)):
-#				link = ahref[i]
-#				if (link.find("/watch?v=") != -1):
-#					link = link[link.find("=") + 1:]
-#				if (link.find("&") > 0):
-#					link = link[:link.find("&")]
-#				items.append(link)
 
 		self.common.log("Done")
 		return (items, result["status"])
@@ -887,25 +879,7 @@ class YouTubeScraper():
 				url += "&p=" + page
 			else:
 				url += "?p=" + page
-		
-		if (get("scraper") == "categories"):
-			if (get("category")):
-				category = get("category")
-				category = urllib.unquote_plus(category)
-				category = category.replace("/videos", "")
-				if (category.find("/") > -1):
-					if category.find("?") > -1:
-						url = self.urls["main"] + category + "&hl=en" + "&p=" + page
-					else:
-						url = self.urls["main"] + category + "?hl=en" + "&p=" + page
-				else:
-					if category.find("?") > -1:
-						url = self.urls["main"] + "/categories" + category + "&hl=en" + "&p=" + page
-					else:
-						url = self.urls["main"] + "/categories" + category + "?hl=en" + "&p=" + page
-			else:
-				url = self.urls["categories"] + "?hl=en"
-		
+				
 		if (get("scraper") == "shows"):
 			url = self.urls["shows"] + "?hl=en"
 			
