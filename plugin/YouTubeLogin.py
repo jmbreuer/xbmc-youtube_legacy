@@ -320,6 +320,7 @@ class YouTubeLogin():
 
 	def _getCookieInfo(self):
 		cookie = repr(sys.modules[ "__main__" ].cookiejar)
+		#print "XXXXXXXXXXXXX COOKIES : " + repr(cookie)
 		cookie = cookie.replace("<_LWPCookieJar.LWPCookieJar[", "")
 		cookie = cookie.replace("), Cookie(version=0,", "></cookie><cookie ")
 		cookie = cookie.replace(")]>", "></cookie>")
@@ -348,7 +349,7 @@ class YouTubeLogin():
 
 		if len(login_info) == 1:
 			self.common.log("LOGIN_INFO: " + repr(login_info))
-			self.settings.setSetting( "login_info", login_info[0] + "=" )  # ParseDOM misses the last =
+			self.settings.setSetting( "login_info", login_info[0])
 		else:
 			self.common.log("Failed to get LOGIN_INFO from youtube")
 		
