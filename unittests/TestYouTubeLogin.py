@@ -683,18 +683,18 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
 		sys.modules["__main__"].settings.getSetting.return_value = "" 
 		sys.modules["__main__"].common.parseDOM.return_value = ""
 		sys.modules["__main__"].language.return_value = "someTitle"
-		sys.modules["__main__"].common.getUserInput.return_value = ""
+		sys.modules["__main__"].common.getUserInputNumbers.return_value = ""
 		login = YouTubeLogin()
 		
 		result = login._fillUserPin("new")
 		
-		sys.modules["__main__"].common.getUserInput.assert_called_with('someTitle')
+		sys.modules["__main__"].common.getUserInputNumbers.assert_called_with('someTitle')
 		
 	def test_fillUserPin_should_return_url_data_structure_if_all_values_are_found(self):
 		sys.modules["__main__"].settings.getSetting.return_value = "value1" 
 		sys.modules["__main__"].common.parseDOM.return_value = ["value2"]
 		sys.modules["__main__"].language.return_value = "someTitle"
-		sys.modules["__main__"].common.getUserInput.return_value = "value3"
+		sys.modules["__main__"].common.getUserInputNumbers.return_value = "value3"
 		login = YouTubeLogin()
 		
 		result = login._fillUserPin("new")

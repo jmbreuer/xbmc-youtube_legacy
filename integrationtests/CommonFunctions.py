@@ -20,7 +20,8 @@ import sys, urllib2, re, io, inspect
 
 class CommonFunctions():	
 	def __init__(self):
-		self.plugin = "CommonFunctions-0.8"
+		self.version = "0.9.0"
+		self.plugin = "CommonFunctions-" + self.version
 		print self.plugin
 
 		self.USERAGENT = "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-GB; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8"
@@ -30,6 +31,12 @@ class CommonFunctions():
 		else:
 			import xbmc
 			self.xbmc = xbmc
+
+		if sys.modules[ "__main__" ].xbmcgui:
+			self.xbmcgui = sys.modules["__main__"].xbmcgui
+		else:
+			import xbmcgui
+			self.xbmcgui = xbmcgui
 
 		if sys.modules[ "__main__" ].dbglevel:
 			self.dbglevel = sys.modules[ "__main__" ].dbglevel
@@ -44,47 +51,59 @@ class CommonFunctions():
 		if sys.modules[ "__main__" ].plugin:
 			self.plugin = sys.modules[ "__main__" ].plugin
 
+	# This function raises a keyboard for user input
+	def getUserInput(self, title = "Input", default="", hidden=False):
+		result = None
 
-        # This function raises a keyboard for user input
-        def getUserInput(self, title = "Input", default="", hidden=False):
-                result = None
+		# Fix for when this functions is called with default=None
+		if not default:
+			default = ""
 
-                # Fix for when this functions is called with default=None
-                if not default:
-                        default = ""
+		keyboard = self.xbmc.Keyboard(default, title)
+		keyboard.setHiddenInput(hidden)
+		keyboard.doModal()
 
-                keyboard = self.xbmc.Keyboard(default, title)
-                keyboard.setHiddenInput(hidden)
-                keyboard.doModal()
+		if keyboard.isConfirmed():
+			result = keyboard.getText()
+		
+		return result
 
-                if keyboard.isConfirmed():
-                        result = keyboard.getText()
+	# This function raises a keyboard for user input
+	def getUserInputNumbers(self, title = "Input", default="", hidden=False):
+		result = None
 
-                return result
+		# Fix for when this functions is called with default=None
+		if not default:
+			default = ""
 
-        # Converts the request url passed on by xbmc to the plugin into a dict of key-value pairs
-        def getParameters(self, parameterString):
-                commands = {}
-                splitCommands = parameterString[parameterString.find('?')+1:].split('&')
+		keyboard = self.xbmcgui.Dialog()
+		result = keyboard.numeric(0, title, default)
+		
+		return result
 
-                for command in splitCommands:
-                        if (len(command) > 0):
-                                splitCommand = command.split('=')
-                                key = splitCommand[0]
-                                value = splitCommand[1]
-                                commands[key] = value
+	# Converts the request url passed on by xbmc to the plugin into a dict of key-value pairs
+	def getParameters(self, parameterString):
+		commands = {}
+		splitCommands = parameterString[parameterString.find('?')+1:].split('&')
 
-                return commands
+		for command in splitCommands:
+			if (len(command) > 0):
+				splitCommand = command.split('=')
+				key = splitCommand[0]
+				value = splitCommand[1]
+				commands[key] = value
+
+		return commands
 
 	def replaceHtmlCodes(self, str):
 		str = str.strip()
-                str = str.replace("&amp;", "&")
-                str = str.replace("&quot;", '"')
-                str = str.replace("&hellip;", "...")
-                str = str.replace("&gt;",">")
-                str = str.replace("&lt;","<")
-                str = str.replace("&#39;","'")
-                return str
+		str = str.replace("&amp;", "&")
+		str = str.replace("&quot;", '"')
+		str = str.replace("&hellip;", "...")
+		str = str.replace("&gt;",">")
+		str = str.replace("&lt;","<")
+		str = str.replace("&#39;","'")
+		return str
 
 	def stripTags(self, html):
 		sub_start = html.find("<")
@@ -107,9 +126,9 @@ class CommonFunctions():
 
 		while pos < end and pos != -1:
 			tend = html.find(endstr, end + len(endstr))
-                        if tend != -1:
-                                end = tend
-                        pos = html.find("<" + name, pos + 1)
+			if tend != -1:
+				end = tend
+			pos = html.find("<" + name, pos + 1)
 			self.log("loop: " + str(start) + " < " + str(end) + " pos = " + str(pos), 8)
 
 		self.log("start: %s, end: %s" % ( start + len(match), end), 2)
@@ -124,26 +143,6 @@ class CommonFunctions():
 
 		self.log("done html length: " + str(len(html)), 2)
 		return html
-
-	def getDOMAttributes_org(self, lst):
-		self.log("", 2)
-		ret = []
-		for tmp in lst:
-			if tmp.find('="', tmp.find('"', 1)) > -1:
-				tmp = tmp[:tmp.find('="', tmp.find('"', 1))]
-
-			if tmp.find('=\'', tmp.find("'", 1)) > -1:
-				tmp = tmp[:tmp.find('=\'', tmp.find("'", 1))]
-
-			cont_char = tmp[0]
-			tmp = tmp[1:]
-			if tmp.rfind(cont_char) > -1:
-				tmp = tmp[:tmp.rfind(cont_char)]
-			tmp = tmp.strip()
-			ret.append(tmp)
-
-		self.log("Done: " + repr(ret), 2)
-		return ret
 
 	def getDOMAttributes(self, lst):
 		self.log("", 2)
@@ -287,42 +286,42 @@ class CommonFunctions():
 			return ret_obj
 
 		except urllib2.URLError, e:
-                        err = str(e)
+			err = str(e)
 			self.common.log("URLError : " + err)
 
-                        time.sleep(3)
+			time.sleep(3)
 			params["error"] = str(int(get("error", "0")) + 1)
 			ret_obj = self._fetchPage(params)
-                        return ret_obj
+			return ret_obj
 
-        # This function implements a horrible hack related to python 2.4's terrible unicode handling. 
+	# This function implements a horrible hack related to python 2.4's terrible unicode handling. 
 	def makeAscii(self, str):
-                if sys.hexversion >= 0x02050000:
+		if sys.hexversion >= 0x02050000:
 			return str
-                try:
-                        return str.encode('ascii')
-                except:
-                        print self.plugin + " Hit except on : " + repr(str)
-                        s = ""
-                        for i in str:
-                                try:
-                                        i.encode("ascii", "ignore")
-                                except:
-                                        continue
+		try:
+			return str.encode('ascii')
+		except:
+			print self.plugin + " Hit except on : " + repr(str)
+			s = ""
+			for i in str:
+				try:
+					i.encode("ascii", "ignore")
+				except:
+					continue
 				else:
-                                        s += i
-                        return s
+					s += i
+			return s
 
-        def openFile(self, filepath, options = "w"):
-                if options.find("b") == -1: # Toggle binary mode on failure
-                        alternate = options + "b"
-                else:
-                        alternate = options.replace("b", "")
+	def openFile(self, filepath, options = "w"):
+		if options.find("b") == -1: # Toggle binary mode on failure
+			alternate = options + "b"
+		else:
+			alternate = options.replace("b", "")
 
-                try:
+		try:
 			return io.open(filepath, options)
-                except:
-                        return io.open(filepath, alternate)
+		except:
+			return io.open(filepath, alternate)
 	
 	def log(self, description, level = 0):
 		if self.dbg and self.dbglevel > level:
