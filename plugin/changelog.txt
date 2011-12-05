@@ -3,7 +3,7 @@
   - Make rtmp suck setup once Handshake 10 is supported.
 - Purchasable movies.
 
-[B]TODO 2.9:[/B]
+[B]TODO 2.9.0:[/B]
 - Allow users to change sort on searches
 - Hook-in Caching the right places. And only the right places. (mostly scrapers)
 - Scrape Education. Search for feeds.
