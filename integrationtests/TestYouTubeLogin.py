@@ -54,8 +54,8 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
 		import pyotp, time
 		totp = pyotp.TOTP("fbfkkk27ffmaihzg")
 		userpin1 = totp.at(time.time())
-		userpin2 = totp.at(time.time() + 5)
-		userpin3 = totp.at(time.time() + 10)
+		userpin2 = totp.at(time.time() + 60)
+		userpin3 = totp.at(time.time() + 120)
 		print "OTP1: " + str(userpin1)
 		print "OTP2: " + str(userpin2)
 		print "OTP3: " + str(userpin3)
