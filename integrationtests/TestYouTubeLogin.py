@@ -60,7 +60,7 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
 		print "OTP2: " + str(userpin2)
 		print "OTP3: " + str(userpin3)
 		sys.modules["__main__"].settings.load_strings("./resources/2factor-login-settings.xml")
-		sys.modules["__main__"].xbmc.Keyboard().getText.side_effect = [ [str(userpin1)], [str(userpin2)], [str(userpin3)] ]
+		sys.modules["__main__"].xbmcgui.Dialog().numeric.side_effect = [ [str(userpin1)], [str(userpin2)], [str(userpin3)] ]
 
 		assert(sys.modules["__main__"].settings.getSetting("nick") == "")
 		assert(sys.modules["__main__"].settings.getSetting("auth") == "")
