@@ -393,7 +393,7 @@ function loadSettings(){
 	chrome.extension.sendRequest({ type: "settings" }, 
 				     function(response) {
 					 console.log("GOT DATA: " + JSON.stringify(response));
-					 response = eval(response);
+					 response = JSON.parse(response);
 					 xbmc_path = response[0];
 					 xbmc_url = response[1];
 					 xbmc_host = response[2];

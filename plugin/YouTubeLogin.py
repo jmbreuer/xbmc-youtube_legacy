@@ -318,7 +318,7 @@ class YouTubeLogin():
 			return url_data
 		return {}
 
-	def _getCookieInfo(self):
+	def _getCookieInfoAsHTML(self):
 		cookie = repr(sys.modules[ "__main__" ].cookiejar)
 		cookie = cookie.replace("<_LWPCookieJar.LWPCookieJar[", "")
 		cookie = cookie.replace("), Cookie(version=0,", "></cookie><cookie ")
@@ -342,7 +342,7 @@ class YouTubeLogin():
 		
 		login_info = ""
 		SID = ""
-		cookies = self._getCookieInfo()
+		cookies = self._getCookieInfoAsHTML()
 		login_info = self.common.parseDOM(cookies, "cookie", attrs = { "name": "LOGIN_INFO" }, ret = "value")
 		SID = self.common.parseDOM(cookies, "cookie", attrs = { "name": "SID", "domain": ".youtube.com"}, ret = "value")
 

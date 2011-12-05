@@ -727,7 +727,7 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
 		sys.modules["__main__"].settings.getSetting.return_value = "" 
 		sys.modules["__main__"].common.parseDOM.return_value = ["some_value"]
 		login = YouTubeLogin()
-		login._getCookieInfo = Mock()
+		login._getCookieInfoAsHTML = Mock()
 
 		result = login._getLoginInfo("")
 		
@@ -737,10 +737,10 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
 		sys.modules["__main__"].settings.getSetting.return_value = "" 
 		sys.modules["__main__"].common.parseDOM.side_effect = [["honk"], ["honk honk"], ["honk honk2"]] 
 		login = YouTubeLogin()
-		login._getCookieInfo = Mock()
+		login._getCookieInfoAsHTML = Mock()
 
 		result = login._getLoginInfo("   USERNAME', 'some_value" + '")')
-		login._getCookieInfo.assert_called_with()
+		login._getCookieInfoAsHTML.assert_called_with()
 		
 	def test_getLoginInfo_should_call_setSetting_to_save_login_info(self):
 		dummy_content = Mock()
@@ -748,11 +748,11 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
 		sys.modules["__main__"].settings.getSetting.return_value = "" 
 		sys.modules["__main__"].common.parseDOM.side_effect = [["honk"], ["honk honk"], ["honk honk2"]] 
 		login = YouTubeLogin()
-		login._getCookieInfo = Mock()
+		login._getCookieInfoAsHTML = Mock()
 		
 		result = login._getLoginInfo("")
 		
-		login._getCookieInfo.assert_called_with()
+		login._getCookieInfoAsHTML.assert_called_with()
 		assert(sys.modules["__main__"].settings.setSetting.call_count == 3)
 		sys.modules["__main__"].settings.setSetting.assert_any_call("login_info","honk honk")
 		sys.modules["__main__"].settings.setSetting.assert_any_call("SID","honk honk2")
@@ -776,13 +776,13 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
 		sys.modules["__main__"].settings.getSetting.return_value = "" 
 		sys.modules["__main__"].common.parseDOM.side_effect = [["honk"], ["honk honk"], ["honk honk2"]] 
 		login = YouTubeLogin()
-		login._getCookieInfo = Mock()
+		login._getCookieInfoAsHTML = Mock()
 
 		result = login._getLoginInfo("")
 		
 		assert(result == 200)
 
-	def ttest__getCookieInfo_properly_converts(self):
+	def ttest__getCookieInfoAsHTML_properly_converts(self):
 		login = YouTubeLogin()
                 result = login._getLoginInfo("")
                 sys.modules[ "__main__" ].cookiejar = Mock()
