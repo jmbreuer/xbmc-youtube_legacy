@@ -1,6 +1,8 @@
 [B]TODO:[/B]
 - Fix RTMP'e, seems refactor broke it, and make a unittest + integrations test that parsing works (playpath seems wrong)
   - Make rtmp suck setup once Handshake 10 is supported.
+  - -y "sparams=rtmpe%2Cid%2Cexpire%2Citag&fexp=904542%2C905244&key=yt1&itag=34&sver=3&rtmpe=yes&expire=1317498461&signature=D1929D3078E4A8B658F222CE77A22A905C3FACDE.0D2AD7ED65383CB3FE89BC2254754D9123426BE2&id=63189e3d0573757d?ptk=stv&ptchn=STVPeople"
+  - http://stream-recorder.com/forum/handshake-10-problem-downloading-youtube-com-t10126.html
 - Purchasable movies.
 
 [B]TODO 2.9.0:[/B]
