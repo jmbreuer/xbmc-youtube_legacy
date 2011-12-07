@@ -195,7 +195,7 @@ class YouTubePlayer():
 			if node:
 				if node.firstChild:
 					if node.firstChild.nodeValue:
-						text = self.common.replaceHtmlCodes(node.firstChild.nodeValue).replace("\n", "\\n")
+						text = self.common.replaceHTMLCodes(node.firstChild.nodeValue).replace("\n", "\\n")
 						start = ""
 						
 						if node.getAttribute("start"):
@@ -269,7 +269,7 @@ class YouTubePlayer():
 					self.common.log("node.firstChild: %s - value : %s" % ( repr(node.firstChild), repr(self.core._getNodeValue(node, "TEXT", ""))), 5)
 					text = self.core._getNodeValue(node, "TEXT", "")
 					if text:
-						text = self.common.replaceHtmlCodes(text)
+						text = self.common.replaceHTMLCodes(text)
 						start = ""
 						
 						if style == "popup":

@@ -144,7 +144,7 @@ class YouTubeScraper():
 				for i in range(0 , len(ahref)):
 					item = {}
 					title = self.common.makeAscii(acontent[i])
-					title = self.common.replaceHtmlCodes(title)
+					title = self.common.replaceHTMLCodes(title)
 					link = ahref[i].replace("/music/","/")
 					item["Title"] = title
 					item["category"] = urllib.quote_plus(link)
@@ -203,7 +203,7 @@ class YouTubeScraper():
 					for i in range(0, len(ahref)):
 						item = {}
 						title = self.common.makeAscii(atitle[i])
-						title = self.common.replaceHtmlCodes(title)
+						title = self.common.replaceHTMLCodes(title)
 						item["Title"] = title
 						item["artist_name"] = urllib.quote_plus(title)
 						link = ahref[i]
@@ -239,7 +239,7 @@ class YouTubeScraper():
 				
 				item = {}
 				title = self.common.makeAscii(atitle)
-				title = self.common.replaceHtmlCodes(title)
+				title = self.common.replaceHTMLCodes(title)
 				item["Title"] = title
 				item["scraper"] = "music_artist"
 				item["artist_name"] = urllib.quote_plus(title)
@@ -383,7 +383,7 @@ class YouTubeScraper():
 			
 			item = {}
 
-			item['Title'] = self.common.replaceHtmlCodes(atitle[0])
+			item['Title'] = self.common.replaceHTMLCodes(atitle[0])
 			item['Title'] = "Videos"
 			show_url = ahref[0]
 			show_url = show_url.replace("/education?category=", "")
@@ -397,7 +397,7 @@ class YouTubeScraper():
 			items.append(item)
 
 			item = {}
-			item['Title'] = self.common.replaceHtmlCodes(atitle[0])
+			item['Title'] = self.common.replaceHTMLCodes(atitle[0])
 			item['Title'] = "Courses"
 			show_url = ahref[0]
 			show_url = show_url.replace("/education?category=", "")
@@ -412,7 +412,7 @@ class YouTubeScraper():
 			for i in range(1 , len(ahref)):
 				item = {}
 
-				item['Title'] = self.common.replaceHtmlCodes(atitle[i])
+				item['Title'] = self.common.replaceHTMLCodes(atitle[i])
 				show_url = ahref[i]
 				show_url = show_url.replace("/education?category=", "")
 				show_url = urllib.quote_plus(show_url).replace("%25", "%")
@@ -465,7 +465,7 @@ class YouTubeScraper():
 			for i in range(1 , len(ahref)):
 				item = {}
 
-				item['Title'] = self.common.replaceHtmlCodes(atitle[i])
+				item['Title'] = self.common.replaceHTMLCodes(atitle[i])
 				show_url = ahref[i]
 				show_url = show_url.replace("/education?category=", "")
 				if (show_url.find("list=") != -1):
@@ -677,7 +677,7 @@ class YouTubeScraper():
 
 						count = self.common.stripTags(acount[i].replace("\n", "").replace(",", ", "))
 						title = acont[i] + " (" + count + ")"
-						title = self.common.replaceHtmlCodes(title)
+						title = self.common.replaceHTMLCodes(title)
 						item['Title'] = title
 						
 						show_url = ahref[i]
@@ -742,7 +742,7 @@ class YouTubeScraper():
 				item = {}
 				cat = ahref[0]
 				title = acont[0].replace("&raquo;", "").strip()
-				item['Title'] = self.common.replaceHtmlCodes(title)
+				item['Title'] = self.common.replaceHTMLCodes(title)
 				cat = urllib.quote_plus(cat)
 				item['category'] = cat
 				item['scraper'] = "movies"
