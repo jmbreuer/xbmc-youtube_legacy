@@ -20,35 +20,35 @@ import sys, urllib2, re, io, inspect
 
 class CommonFunctions():	
 	def __init__(self):
-		self.version = "0.9.0"
+		self.version = "0.9.1"
 		self.plugin = "CommonFunctions-" + self.version
 		print self.plugin
 
 		self.USERAGENT = "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-GB; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8"
 
-		if sys.modules[ "__main__" ].xbmc:
+		if hasattr(sys.modules[ "__main__" ], "xbmc"):
 			self.xbmc = sys.modules["__main__"].xbmc
 		else:
 			import xbmc
 			self.xbmc = xbmc
 
-		if sys.modules[ "__main__" ].xbmcgui:
+		if hasattr(sys.modules[ "__main__" ], "xbmcgui"):
 			self.xbmcgui = sys.modules["__main__"].xbmcgui
 		else:
 			import xbmcgui
 			self.xbmcgui = xbmcgui
 
-		if sys.modules[ "__main__" ].dbglevel:
+		if hasattr(sys.modules[ "__main__" ], "dbglevel"):
 			self.dbglevel = sys.modules[ "__main__" ].dbglevel
 		else:
 			self.dbglevel = 3
 
-		if sys.modules[ "__main__" ].dbg:
+		if hasattr(sys.modules[ "__main__" ], "dbg"):
 			self.dbg = sys.modules[ "__main__" ].dbg
 		else:
 			self.dbg = True
 
-		if sys.modules[ "__main__" ].plugin:
+		if hasattr(sys.modules[ "__main__" ], "plugin"):
 			self.plugin = sys.modules[ "__main__" ].plugin
 
 	# This function raises a keyboard for user input
@@ -68,7 +68,7 @@ class CommonFunctions():
 		
 		return result
 
-	# This function raises a keyboard for user input
+	# This function raises a keyboard numpad for user input
 	def getUserInputNumbers(self, title = "Input", default="", hidden=False):
 		result = None
 
@@ -115,7 +115,7 @@ class CommonFunctions():
 
 		return html
 
-	def getDOMContent(self, html, name, match):
+	def _getDOMContent(self, html, name, match):
 		self.log("match: " + match, 2)
 		start = html.find(match)
 		endstr = "</" + name + ">"
@@ -144,7 +144,7 @@ class CommonFunctions():
 		self.log("done html length: " + str(len(html)), 2)
 		return html
 
-	def getDOMAttributes(self, lst):
+	def _getDOMAttributes(self, lst):
 		self.log("", 2)
 		ret = []
 		for tmp in lst:
@@ -220,7 +220,7 @@ class CommonFunctions():
 				lst2 = []
 				for match in lst:
 					tmp_list = re.compile('<' + name + '.*?' + ret + '=([\'"][^>]*?)>').findall(match)
-					lst2 += self.getDOMAttributes(tmp_list)
+					lst2 += self._getDOMAttributes(tmp_list)
 					self.log(lst, 3)
 					self.log(match, 3)
 					self.log(lst2, 3)
@@ -230,7 +230,7 @@ class CommonFunctions():
 				lst2 = []
 				for match in lst:
 					self.log("Getting element content for %s" % match, 4)
-					temp = self.getDOMContent(item, name, match).strip()
+					temp = self._getDOMContent(item, name, match).strip()
 					item = item[item.find(temp, item.find(match)) + len(temp):]
 					lst2.append(temp)
 					self.log(lst, 4)
@@ -242,7 +242,7 @@ class CommonFunctions():
 		self.log("Done", 1)
 		return ret_lst
 
-	def _fetchPage(self, params = {}):
+	def fetchPage(self, params = {}):
 		get = params.get
 		link = get("link")
 		ret_obj = {}
@@ -276,7 +276,7 @@ class CommonFunctions():
 			self.log("HTTPError - Headers: " + str(e.headers) + " - Content: " + e.fp.read())
 			
 			params["error"] = str(int(get("error", "0")) + 1)
-			ret = self._fetchPage(params)
+			ret = self.fetchPage(params)
 
 			if not ret.has_key("content") and e.fp:
 				ret["content"] = e.fp.read()
@@ -291,7 +291,7 @@ class CommonFunctions():
 
 			time.sleep(3)
 			params["error"] = str(int(get("error", "0")) + 1)
-			ret_obj = self._fetchPage(params)
+			ret_obj = self.fetchPage(params)
 			return ret_obj
 
 	# This function implements a horrible hack related to python 2.4's terrible unicode handling. 
