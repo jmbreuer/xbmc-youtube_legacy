@@ -13,7 +13,7 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 		sys.modules["__main__"].common.parseDOM.return_value = ["some_string","some_string","some_string"]
 		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content","status":200}
 		sys.modules["__main__"].common.makeAscii.return_value = "some_ascii_string"
-		sys.modules["__main__"].common.replaceHtmlCodes.return_value = "some_html_free_string"
+		sys.modules["__main__"].common.replaceHTMLCodes.return_value = "some_html_free_string"
 		sys.modules["__main__"].utils.extractVID.return_value = ["some_id_1","some_id_2","some_id_3"]
 		sys.modules["__main__"].language.return_value = "some_language_string %s"
 		sys.modules["__main__"].common.stripTags.return_value = "some_tag_less_string"
@@ -108,11 +108,11 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 		
 		sys.modules["__main__"].common.makeAscii.assert_any_call("some_string")
 		
-	def test_scrapeMusicCategories_should_call_replaceHtmlCodes_to_remove_html_formating(self):
+	def test_scrapeMusicCategories_should_call_replaceHTMLCodes_to_remove_html_formating(self):
 		
 		result, status = self.scraper.scrapeMusicCategories()
 		
-		sys.modules["__main__"].common.replaceHtmlCodes.assert_any_call("some_ascii_string")
+		sys.modules["__main__"].common.replaceHTMLCodes.assert_any_call("some_ascii_string")
 		
 	def test_scrapeMusicCategories_should_retur_properly_formated_structure(self):
 		
@@ -198,11 +198,11 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 		
 		sys.modules["__main__"].common.makeAscii.assert_any_call("some_string")
 		
-	def test_scrapeSimilarArtists_should_call_replaceHtmlCodes_to_remove_html_formating(self):
+	def test_scrapeSimilarArtists_should_call_replaceHTMLCodes_to_remove_html_formating(self):
 		
 		result, status = self.scraper.scrapeSimilarArtists({"artist":"some_artist"})		
 		
-		sys.modules["__main__"].common.replaceHtmlCodes.assert_any_call("some_ascii_string")
+		sys.modules["__main__"].common.replaceHTMLCodes.assert_any_call("some_ascii_string")
 
 	def test_scrapeMusicCategoryArtists_should_call_createUrl_to_get_proper_url(self):
 		
@@ -228,11 +228,11 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 		
 		sys.modules["__main__"].common.makeAscii.assert_any_call("some_string")
 		
-	def test_scrapeMusicCategoryArtists_should_call_replaceHtmlCodes_to_remove_html_formating(self):
+	def test_scrapeMusicCategoryArtists_should_call_replaceHTMLCodes_to_remove_html_formating(self):
 		
 		result, status = self.scraper.scrapeMusicCategoryArtists({"category":"some_category"})		
 		
-		sys.modules["__main__"].common.replaceHtmlCodes.assert_any_call("some_ascii_string")
+		sys.modules["__main__"].common.replaceHTMLCodes.assert_any_call("some_ascii_string")
 		
 	def test_scrapeMusicCategoryArtists_should_return_proper_structure(self):
 		
@@ -409,11 +409,11 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 		
 		assert(sys.modules["__main__"].common.parseDOM.call_count > 0)
 		
-	def test_scrapeEducationSubCategories_should_call_replaceHtmlCodes_to_remove_html_chars_from_title(self):
+	def test_scrapeEducationSubCategories_should_call_replaceHTMLCodes_to_remove_html_chars_from_title(self):
 		
 		self.scraper.scrapeEducationSubCategories({})
 		
-		sys.modules["__main__"].common.replaceHtmlCodes.assert_any_call("some_string")
+		sys.modules["__main__"].common.replaceHTMLCodes.assert_any_call("some_string")
 		
 	def test_scrapeEducationSubCategories_should_return_proper_structure(self):
 		
@@ -446,12 +446,12 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 		
 		assert(sys.modules["__main__"].common.parseDOM.call_count > 0)
 		
-	def test_scrapeEducationCourses_should_call_replaceHtmlCodes_to_remove_html_chars_from_title(self):
+	def test_scrapeEducationCourses_should_call_replaceHTMLCodes_to_remove_html_chars_from_title(self):
 		sys.modules["__main__"].common.parseDOM.side_effect = [["some_string"],["some_string"],["some_string","some_title1"],["some_string","some_title2"],["some_string","some_title3"]]
 		
 		self.scraper.scrapeEducationCourses({})
 		
-		sys.modules["__main__"].common.replaceHtmlCodes.assert_any_call("some_title2")
+		sys.modules["__main__"].common.replaceHTMLCodes.assert_any_call("some_title2")
 		
 	def test_scrapeEducationCourses_should_call_return_proper_structure(self):
 		sys.modules["__main__"].common.parseDOM.side_effect = [["some_string"],["some_string"],["some_string","some_title1"],["some_string","some_title2"],["some_string","some_title3"]]
@@ -644,12 +644,12 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 		
 		sys.modules["__main__"].common.stripTags.assert_called_with("some_title4")
 		
-	def test_scrapeShowsGrid_should_call_utils_replaceHtmlCodes_to_remove_html_chars_from_title(self):
+	def test_scrapeShowsGrid_should_call_utils_replaceHTMLCodes_to_remove_html_chars_from_title(self):
 		sys.modules["__main__"].common.parseDOM.side_effect = [["some_string"],["some_string"],["some_string","some_title1"],["some_string","some_title2"],["some_string","some_title3"],["some_string","some_title4"],[],[]]
 		
 		self.scraper.scrapeShowsGrid({})		
 		
-		sys.modules["__main__"].common.replaceHtmlCodes.assert_any_call('some_string (some_tag_less_string)')
+		sys.modules["__main__"].common.replaceHTMLCodes.assert_any_call('some_string (some_tag_less_string)')
 		
 	def test_scrapeYouTubeTop100_should_call_createUrl_to_get_proper_url(self):
 		self.scraper.scrapeYouTubeTop100({})		
@@ -688,11 +688,11 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 		
 		sys.modules["__main__"].core._fetchPage.assert_any_call({"link":"some_url"})
 
-	def test_scrapeMovieSubCategory_should_call_utils_replaceHtmlCodes_to_remove_html_chars_from_title(self):
+	def test_scrapeMovieSubCategory_should_call_utils_replaceHTMLCodes_to_remove_html_chars_from_title(self):
 
 		self.scraper.scrapeMovieSubCategory({})		
 		
-		sys.modules["__main__"].common.replaceHtmlCodes.assert_any_call('some_string')
+		sys.modules["__main__"].common.replaceHTMLCodes.assert_any_call('some_string')
 		
 	def test_scrapeMovieSubCategory_should_return_proper_structure(self):
 

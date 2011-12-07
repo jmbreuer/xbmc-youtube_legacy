@@ -249,21 +249,21 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 			
 	def test_transformSubtitleXMLtoSRT_should_parse_youtube_subtitle_xml(self):
 		player = YouTubePlayer()
-		sys.modules["__main__"].common.replaceHtmlCodes = Mock()
-		sys.modules["__main__"].common.replaceHtmlCodes.side_effect = lambda x: x.encode("ascii", 'ignore')
+		sys.modules["__main__"].common.replaceHTMLCodes = Mock()
+		sys.modules["__main__"].common.replaceHTMLCodes.side_effect = lambda x: x.encode("ascii", 'ignore')
 		
 		result = player.transformSubtitleXMLtoSRT(self.readTestInput("subtitleTest.xml",False)) 
 		
 		assert(len(result.split("\r\n")) == 66) 
 		
-	def test_transformSubtitleXMLtoSRT_should_call_replaceHtmlCodes_for_user_visible_text(self):
+	def test_transformSubtitleXMLtoSRT_should_call_replaceHTMLCodes_for_user_visible_text(self):
 		player = YouTubePlayer()
-		sys.modules["__main__"].common.replaceHtmlCodes = Mock()
-		sys.modules["__main__"].common.replaceHtmlCodes.side_effect = lambda x: x.encode("ascii", 'ignore')
+		sys.modules["__main__"].common.replaceHTMLCodes = Mock()
+		sys.modules["__main__"].common.replaceHTMLCodes.side_effect = lambda x: x.encode("ascii", 'ignore')
 		
 		result = player.transformSubtitleXMLtoSRT(self.readTestInput("subtitleTest.xml",False)) 
 		
-		assert(sys.modules[ "__main__"].common.replaceHtmlCodes.call_count > 0) 
+		assert(sys.modules[ "__main__"].common.replaceHTMLCodes.call_count > 0) 
 
 	def test_transformSubtitleXMLtoSRT_should_correctly_find_start_time_for_text_elements(self):
 		input = '<?xml version="1.0" encoding="utf-8" ?><transcript>\n\
@@ -271,8 +271,8 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 				<text start="16.087" dur="2.996">second</text>\n\
 				</transcript>'
 		player = YouTubePlayer()
-		sys.modules["__main__"].common.replaceHtmlCodes = Mock()
-		sys.modules["__main__"].common.replaceHtmlCodes.side_effect = lambda x: x.encode("ascii", 'ignore')
+		sys.modules["__main__"].common.replaceHTMLCodes = Mock()
+		sys.modules["__main__"].common.replaceHTMLCodes.side_effect = lambda x: x.encode("ascii", 'ignore')
 		
 		result = player.transformSubtitleXMLtoSRT(input).split("\r\n")
 
@@ -285,8 +285,8 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 				<text start="16.087" dur="2.996">second</text>\n\
 				</transcript>'
 		player = YouTubePlayer()
-		sys.modules["__main__"].common.replaceHtmlCodes = Mock()
-		sys.modules["__main__"].common.replaceHtmlCodes.side_effect = lambda x: x.encode("ascii", 'ignore')
+		sys.modules["__main__"].common.replaceHTMLCodes = Mock()
+		sys.modules["__main__"].common.replaceHTMLCodes.side_effect = lambda x: x.encode("ascii", 'ignore')
 		
 		result = player.transformSubtitleXMLtoSRT(input).split("\r\n")
 				
@@ -337,21 +337,21 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 				
 	def test_transformAnnotationToSSA_should_parse_youtube_annotations_xml(self):
 		player = YouTubePlayer()
-		sys.modules["__main__"].common.replaceHtmlCodes = Mock()
-		sys.modules["__main__"].common.replaceHtmlCodes.side_effect = lambda x: x.encode("ascii", 'ignore')
+		sys.modules["__main__"].common.replaceHTMLCodes = Mock()
+		sys.modules["__main__"].common.replaceHTMLCodes.side_effect = lambda x: x.encode("ascii", 'ignore')
 		
 		(result, style) = player.transformAnnotationToSSA(self.readTestInput("annotationsTest.xml",False).encode("utf-8")) 
 		
 		assert(len(result.split("\r\n")) == 11)
 	
-	def test_transformAnnotationToSSA_should_call_replaceHtmlCodes_for_user_visible_text(self):
+	def test_transformAnnotationToSSA_should_call_replaceHTMLCodes_for_user_visible_text(self):
 		player = YouTubePlayer()
-		sys.modules["__main__"].common.replaceHtmlCodes = Mock()
-		sys.modules["__main__"].common.replaceHtmlCodes.side_effect = lambda x: x.encode("ascii", 'ignore')
+		sys.modules["__main__"].common.replaceHTMLCodes = Mock()
+		sys.modules["__main__"].common.replaceHTMLCodes.side_effect = lambda x: x.encode("ascii", 'ignore')
 		
 		result = player.transformAnnotationToSSA(self.readTestInput("annotationsTest.xml",False).encode("utf-8")) 
 		
-		assert(sys.modules[ "__main__"].common.replaceHtmlCodes.call_count > 0)
+		assert(sys.modules[ "__main__"].common.replaceHTMLCodes.call_count > 0)
 	
 	def test_addSubtitles_should_call_downloadSubtitle(self):
 		player = YouTubePlayer()
