@@ -95,7 +95,7 @@ class CommonFunctions():
 
 		return commands
 
-	def replaceHtmlCodes(self, str):
+	def replaceHTMLCodes(self, str):
 		str = str.strip()
 		str = str.replace("&amp;", "&")
 		str = str.replace("&quot;", '"')
