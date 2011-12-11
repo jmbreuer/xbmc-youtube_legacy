@@ -321,49 +321,7 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 		assert(result[0] == "some_id_1")
 		assert(result[1] == "some_id_2")
 		assert(result[2] == "some_id_3")
-		
-	def test_scrapeDiscoTopArtist_should_call_createUrl_to_get_proper_url(self):
-		
-		self.scraper.scrapeDiscoTopArtist({})		
-		
-		self.scraper.createUrl.assert_any_call({"thumb":"true"})
-		
-	def test_scrapeDiscoTopArtist_should_call_fetchPage_to_get_page_content(self):
-		
-		self.scraper.scrapeDiscoTopArtist({})		
-		
-		sys.modules["__main__"].core._fetchPage.assert_any_call({"link":"some_url"})
-
-	def test_scrapeDiscoTopArtist_should_call_parseDOM_to_find_artist_list(self):
-		sys.modules["__main__"].common.parseDOM.return_value = ["some_id_1,some_id_2,some_id_3,some_id_4"]
-		
-		self.scraper.scrapeDiscoTopArtist({})		
-		
-		assert(sys.modules["__main__"].common.parseDOM.call_count > 0)
-		
-	def test_scrapeDiscoTopArtist_should_call_utils_makeAscii_to_encode_title(self):
-		sys.modules["__main__"].common.parseDOM.return_value = ["some_artist"]
-		
-		self.scraper.scrapeDiscoTopArtist({})		
-		
-		sys.modules["__main__"].common.makeAscii.assert_any_call("some_artist")
-		
-	def test_scrapeDiscoTopArtist_should_call_storage_retrieve_to_get_thumbnail(self):
-		
-		self.scraper.scrapeDiscoTopArtist({})		
-		
-		assert(sys.modules["__main__"].storage.retrieve.call_count > 0)
-		
-	def test_scrapeDiscoTopArtist_should_return_proper_structure(self):
-		
-		result, status = self.scraper.scrapeDiscoTopArtist({})		
-		
-		assert(result[0].has_key("Title"))
-		assert(result[0]["scraper"] == "search_disco")
-		assert(result[0].has_key("path"))
-		assert(result[0].has_key("search"))
-		assert(result[0].has_key("thumbnail"))
-		
+				
 	def test_scrapeEducationCategories_should_call_createUrl_to_get_proper_url(self):
 		
 		self.scraper.scrapeEducationCategories({})		
@@ -561,7 +519,7 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 	
 	def test_scrapeShowEpisodes_should_call_parseDOM_to_find_next_url(self):
 		
-		self.scraper.scrapeDiscoTopArtist({})		
+		self.scraper.scrapeShowEpisodes({})		
 		
 		assert(sys.modules["__main__"].common.parseDOM.call_count > 1)
 		
@@ -770,15 +728,7 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 		
 		assert(params["batch"] == "true")
 		assert(params["new_results_function"] == self.scraper.scrapeYouTubeTop100)
-		
-	def test_getNewResultsFunction_should_set_proper_params_for_scrapeDiscoTopArtist_if_scraper_is_disco_top_artist(self):
-		params = {"scraper":"disco_top_artist"}
-		
-		self.scraper.getNewResultsFunction(params)
-		
-		assert(params["folder"] == "true")
-		assert(params["new_results_function"] == self.scraper.scrapeDiscoTopArtist)
-		
+			
 	def test_getNewResultsFunction_should_set_proper_params_for_scrapeArtist_if_scraper_is_music_artist(self):
 		params = {"scraper":"music_artist"}
 		
@@ -1092,14 +1042,7 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 		url = self.scraper.createUrl({"scraper":"search_disco", "search":"some_search", "mix_list_id":"some_mix_list_id", "disco_videoid":"some_videoid"})
 		
 		assert(url ==  self.scraper.urls["disco_mix_list"] % ("some_videoid", "some_mix_list_id"))
-	
-	def test_createUrl_should_return_proper_url_for_disco_top_artists(self):
-		self.scraper = YouTubeScraper()
 		
-		url = self.scraper.createUrl({"scraper":"disco_top_artist"})
-		
-		assert(url == self.scraper.urls["disco_main"])
-	
 	def test_scrapeCategoriesList_should_call_parseDOM_to_find_categories(self):
 		sys.modules["__main__"].common.parseDOM.side_effect = [["some_string"],["some_string"],["some_string"],["some_string1","some_string2","some_string3"],["some_string"],["some_string"],["some_string"],[],[]]
 		

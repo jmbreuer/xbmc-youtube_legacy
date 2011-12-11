@@ -304,38 +304,7 @@ class YouTubeScraper():
 		
 		self.common.log("Done")
 		return ( items, result["status"])
-	
-	def scrapeDiscoTopArtist(self, params = {}):
-		get = params.get
-		self.common.log("")
-		
-		url = self.createUrl(params)
-		result = self.core._fetchPage({"link":url})
-		
-		popular = self.common.parseDOM(result["content"], "div", { "class": "ytg-fl popular-artists"})
-		yobjects = []
-		if len(popular) > 0:
-			artists = self.common.parseDOM(popular, "li", attrs = { "class": "popular-artist-row disco-search" }, ret = "data-artist-name")
-			for artist in artists:
-				item = {}
-				title = self.common.makeAscii(artist)
-				item["search"] = title
-				item["Title"] = title
-				
-				params["thumb"] = "true"
-				thumb = self.storage.retrieve(params, "thumbnail", item)
-				if not thumb:
-					item["thumbnail"] = "discoball"
-				else:
-					item["thumbnail"] = thumb
-				
-				item["path"] = get("path")
-				item["scraper"] = "search_disco"
-				yobjects.append(item)
-				
-		self.common.log("Done : " + repr(yobjects))
-		return (yobjects, result["status"])
-				
+					
 #=================================== Eduction ============================================
 	def scrapeEducationCategories(self, params = {}):
 		get = params.get
@@ -804,9 +773,6 @@ class YouTubeScraper():
 		if (get("scraper") == "music_top100"):
 			function = self.scrapeYouTubeTop100
 			params["batch"] = "true"
-		if (get("scraper") == "disco_top_artist"):
-			function = self.scrapeDiscoTopArtist
-			params["folder"] = "true"
 		if (get("scraper") == "music_artist"):
 			function = self.scrapeArtist
 			params["batch"] = "true"
@@ -945,9 +911,7 @@ class YouTubeScraper():
 			url = self.urls["disco_search"] % urllib.quote_plus(get("search"))
 			if get("mix_list_id") and get("disco_videoid"):
 				url = self.urls["disco_mix_list"] % (get("disco_videoid"), get("mix_list_id"))
-		if (get("scraper") == "disco_top_artist"):
-			url = self.urls["disco_main"]
-		
+				
 		return url
 	
 	def scrapeCategoryList(self, params = {}):
