@@ -23,6 +23,10 @@
 - [XBMC] Subtitles and Annotations dont work the first time 90% of the time
 - [RTMPDUMP] Doesn't support handshake type 10 which is required by youtube.
 
+[B]Version 2.9.0[/B]
+- Changed Merged Music and disco since YouTube removed almost all disco features
+- Changed Removed disco top artists since YouTube Removed it from their site
+
 [B]Version 2.8.0[/B]
 - Changed All videos now have a unique path from xbmc's perspective eventhough they're present in different folders.
 - Changed Replaced the categories scraper with api calls
