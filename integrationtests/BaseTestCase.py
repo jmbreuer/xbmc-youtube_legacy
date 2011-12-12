@@ -123,11 +123,11 @@ class BaseTestCase(unittest2.TestCase):#pragma: no cover
 						non_unique.append(video)
 					video_ids.append(video)
 		
-		if len(non_unique) > 1:
-			print "Directory contains two or more duplicate videoids.\r\n Duplicates: %s \r\n Full List: %s" % (repr(non_unique), repr(video_ids)) 
+		if len(non_unique) > 2:
+			print "Directory contains three or more duplicate videoids.\r\n Duplicates: %s \r\n Full List: %s" % (repr(non_unique), repr(video_ids)) 
 			print "Directory list: \r\n" + repr(args)
 			
-		assert(len(non_unique) <= 1)
+		assert(len(non_unique) <= 2)
 	
 	def assert_directory_items_should_have_external_thumbnails(self):
 		args = sys.modules["__main__"].xbmcgui.ListItem.call_args_list
