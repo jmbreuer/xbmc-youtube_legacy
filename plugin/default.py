@@ -54,8 +54,7 @@ if (__name__ == "__main__" ):
 	if dbg:
 		print plugin + " ARGV: " + repr(sys.argv)
 	else:
-		print plugin
-	
+		print plugin	
 
 	try:
 		import StorageServer
@@ -67,6 +66,7 @@ if (__name__ == "__main__" ):
 	import CommonFunctions
 	common = CommonFunctions.CommonFunctions() 
 	common.plugin = plugin 
+
 	import YouTubeUtils
 	utils = YouTubeUtils.YouTubeUtils()
 	import YouTubeStorage

@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, urllib2, time
+import sys, time
 try: import simplejson as json
 except ImportError: import json
 
@@ -320,6 +320,10 @@ class YouTubeLogin():
 
 	def _getCookieInfoAsHTML(self):
 		cookie = repr(sys.modules[ "__main__" ].cookiejar)
+		self.common.log("Cookiejar: " + cookie)
+		if cookie == '<_LWPCookieJar.LWPCookieJar[]>':
+			return ""
+
 		cookie = cookie.replace("<_LWPCookieJar.LWPCookieJar[", "")
 		cookie = cookie.replace("), Cookie(version=0,", "></cookie><cookie ")
 		cookie = cookie.replace(")]>", "></cookie>")

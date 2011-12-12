@@ -68,7 +68,7 @@ class YouTubeCore():
 		self.utils = sys.modules[ "__main__" ].utils
 		self.common = sys.modules[ "__main__" ].common
 		
-		#urllib2.install_opener(sys.modules[ "__main__" ].opener)
+		urllib2.install_opener(sys.modules[ "__main__" ].opener)
 
 		timeout = [5, 10, 15, 20, 25][int(self.settings.getSetting("timeout"))]
 		if not timeout:

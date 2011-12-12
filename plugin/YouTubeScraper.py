@@ -507,7 +507,10 @@ class YouTubeScraper():
 				items.append(videoid)
 		
 		self.common.log("Done")
-		return (items, result["status"])
+		if len(liked) > 0:
+			return (items, result["status"])
+		else:
+			return ([], 303) # Something else
 			
 #=================================== Shows ============================================
 	def scrapeShowEpisodes(self, params = {}):
