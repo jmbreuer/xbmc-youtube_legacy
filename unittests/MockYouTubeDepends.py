@@ -12,6 +12,8 @@ class MockYouTubeDepends:
 		sys.modules[ "__main__" ].dbglevel = 10
 		sys.modules[ "__main__" ].login = "" 
 		sys.modules[ "__main__" ].language = Mock()
+		sys.modules[ "__main__" ].opener = Mock()
+		sys.modules[ "__main__" ].cookiejar = Mock()
 		
 		import YouTubeUtils
 		sys.modules[ "__main__" ].utils = Mock(spec=YouTubeUtils.YouTubeUtils)
