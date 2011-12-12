@@ -269,10 +269,10 @@ class YouTubeCore():
 	def getBatchDetailsThumbnails(self, items, params={}):
 		ytobjects = []
 		videoids = []
-		
+
 		for (videoid, thumb) in items:
 			videoids.append(videoid)
-		
+
 		(tempobjects, status) = self.getBatchDetails(videoids, params)
 		
 		for i in range(0, len(items)):
@@ -280,14 +280,22 @@ class YouTubeCore():
 			for item in tempobjects:
 				if item['videoid'] == videoid:
 					item['thumbnail'] = thumbnail
-					ytobjects.append(item)					
+					ytobjects.append(item)
+					break;
 
 		while len(items) > len(ytobjects):
 			ytobjects.append({'videoid': 'false'});
 		
 		return (ytobjects, 200)
 
+	def testing_something(self, items):
+		for item in items:
+			if repr(item).find("79VUfeq5M4g") > -1:
+				self.common.log(repr(item))
+
 	def getBatchDetails(self, items, params={}):
+		self.common.log("params: " + repr(params))
+		self.common.log("items: " + str(len(items)))
 		request_start = "<feed xmlns='http://www.w3.org/2005/Atom'\n xmlns:media='http://search.yahoo.com/mrss/'\n xmlns:batch='http://schemas.google.com/gdata/batch'\n xmlns:yt='http://gdata.youtube.com/schemas/2007'>\n <batch:operation type='query'/> \n"
 		request_end = "</feed>"
 		
@@ -296,14 +304,10 @@ class YouTubeCore():
 		ytobjects = []
 		status = 500
 		i = 1
-		## Call to cache
-		# Filter matches.
-		# Run the following for the missing.
-		# Update cache in the end.
+
 
 		temp_objs = self.cache.getMulti("videoidcache", items)
-		#status = 200
-		#return ( ytobjects, status)
+
 		for index, videoid in enumerate(items):
 			if index < len(temp_objs):
 				if temp_objs[index]:
@@ -343,6 +347,8 @@ class YouTubeCore():
 
 		if len(ytobjects) > 0:
 			status = 200
+
+		self.common.log("ytobjects: " + str(len(ytobjects)))
 
 		return (ytobjects, status)
 		
@@ -443,7 +449,7 @@ class YouTubeCore():
 				SID = self.settings.getSetting("SID")
 				cookie += 'LOGIN_INFO=' + info +';SID=' + SID +';'
 		
-		if get("referer"):
+		if get("referer", "false") != "false":
 			self.common.log("Added referer: %s" % get("referer"))
 			request.add_header('Referer', get("referer"))
 			

@@ -587,7 +587,7 @@ class YouTubeScraper():
 			
 			season_list = self.common.parseDOM(seasons, "button", attrs = { "type": "button" }, ret = "data-season-number")
 			
-			print repr(season_list)
+			self.common.log(repr(season_list))
 			atitle = self.common.parseDOM(seasons, "button", attrs = { "type": "button" }, ret = "title")
 
 			if len(season_list) == len(atitle) and len(atitle) > 0:
@@ -673,7 +673,7 @@ class YouTubeScraper():
 			del params["page"]
 		
 		self.common.log("Done")
-		print "funky : " + repr(items)
+		self.common.log("funky : " + repr(items))
 		return (items, result["status"])
 
 
@@ -749,14 +749,15 @@ class YouTubeScraper():
 						
 			videoids = self.common.parseDOM(result["content"], "button", { "class": "addto-button.*?"}, ret = "data-video-ids")
 			thumbs = self.common.parseDOM(result["content"], "img", attrs = { "alt": "Thumbnail" }, ret = "data-thumb")
-			
 			page += 1
+			#self.common.log("Found videoids: " + repr(videoids))
+			#self.common.log("Items before: " + repr(items))
 			if len(videoids) == len(thumbs) and len(videoids) > 0:
 				for i in range(0 , len(videoids)):
 					items.append( (videoids[i], thumbs[i]) )
+			#self.common.log("Items now: " + repr(items))
 		
 		del params["page"]
-		print repr(items)
 		self.common.log("Done : " + str(len(items)))
 		return (items, result["status"])
 
@@ -975,6 +976,7 @@ class YouTubeScraper():
 
 	
 	def paginator(self, params = {}):
+		self.common.log(repr(params))
 		get = params.get
 		
 		status = 303
@@ -986,13 +988,15 @@ class YouTubeScraper():
 		if get("page"):
 			del params["page"]
 		
-		if get("scraper") == "shows" and get("show"):
+		if ( get("scraper") == "shows" and get("show") ):
 			(result, status) = params["new_results_function"](params)
 		else:
 			(result, status) = self.cache.cacheFunction(params["new_results_function"], params)
 		
+
 		self.common.log("paginator new result " + str(repr(len(result[0:50]))))
 		
+
 		if len(result) == 0:
 			if get("scraper") not in ["music_top100"]:
 				return (result, 303)
@@ -1001,6 +1005,7 @@ class YouTubeScraper():
 				status = 200
 		elif get("scraper") in ["music_top100"]:
 			self.storage.store(params, result)
+
 		
 		if not get("folder") or (get("scraper") == "shows" and get("category")):
 			if ( per_page * ( page + 1 ) < len(result) ):
@@ -1008,16 +1013,17 @@ class YouTubeScraper():
 			
 			if (get("fetch_all") != "true"):
 				result = result[(per_page * page):(per_page * (page + 1))]
-			print " tomomomom " + repr(len(result))
-			print " tomomomom2 " + repr(result)
+			#self.common.log("tomomomom " + repr(len(result)))
+			#self.common.log("tomomomom2 " + repr(result))
 			if len(result) == 0:
 				return (result, status)
 		
+
 		if get("batch") == "thumbnails":
 			(result, status) = self.core.getBatchDetailsThumbnails(result, params)
 		elif get("batch"):
 			(result, status) = self.core.getBatchDetails(result, params)
-		
+
 		if get("batch"):
 			del params["batch"]
 		if page > 0:
@@ -1037,7 +1043,9 @@ class YouTubeScraper():
 				
 		self.getNewResultsFunction(params)
 		
-		return self.paginator(params)
+		result = self.paginator(params)
+		self.common.log(repr(result), 5)
+		return result
 	
 if __name__ == '__main__':
 	sys.exit(0)
