@@ -368,7 +368,7 @@ class YouTubeCore():
 
 		get = params.get
 		link = get("link")
-		ret_obj = { "status": 500, "content": ""}
+		ret_obj = { "status": 500, "content": "", "error": 0}
 		cookie = ""
 
 		if (get("url_data") or get("request") or get("hidden")):
