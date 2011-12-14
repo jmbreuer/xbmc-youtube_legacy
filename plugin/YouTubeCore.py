@@ -552,7 +552,11 @@ class YouTubeCore():
 		except urllib2.URLError, e:
 			err = str(e)
 			self.common.log("URLError : " + err)
-			
+			if err.find("SSL") > -1:
+				ret_obj["status"] = 303
+				ret_obj["content"] = self.language(30629)
+				return ret_obj 
+
 			time.sleep(3)
 			params["error"] = get("error", 0) + 1
 			ret_obj = self._fetchPage(params)
@@ -846,6 +850,7 @@ class YouTubeCore():
 				self.common.log("videoid set to false : " + repr(video))
 
 			ytobjects.append(video);
+
 		if next:
 			self.utils.addNextFolder(ytobjects, params)
 				
