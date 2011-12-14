@@ -593,17 +593,17 @@ class YouTubeCore():
 				if error[0].find("<") > -1:
 					error[0] = error[0][0:error[0].find("<")]
 
-		# If no error was found. But fetchPage has an error level of 3+, return the fetchPage content.
-		if len(error) == 0 and ret["error"] >= 3:
-			self.common.log("THIS HIT. THIS IS IMPORTANT. NOTICE ME! : " + repr(ret))
-			return ret["content"]
-
 		if len(error) > 0:
 			self.common.log("4")
 			error = error[0]
 			error = urllib.unquote(error[0:error.find("[")]).replace("&#39;", "'")
 			self.common.log("returning error : " + error.strip())
 			return error.strip()
+
+		# If no error was found. But fetchPage has an error level of 3+, return the fetchPage content.
+		if len(error) == 0 and ret["error"] >= 3:
+			self.common.log("Returning error from _fetchPage : " + repr(ret))
+			return ret["content"]
 
 		if not silent:
 			self.common.log("couldn't find any errors: " + repr(ret))
