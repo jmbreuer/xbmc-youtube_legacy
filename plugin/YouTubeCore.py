@@ -595,6 +595,7 @@ class YouTubeCore():
 
 		# If no error was found. But fetchPage has an error level of 3+, return the fetchPage content.
 		if len(error) and ret["error"] >= 3:
+			self.common.log("THIS HIT. THIS IS IMPORTANT. NOTICE ME! : " + repr(ret))
 			return ret["content"]
 
 		if len(error) > 0:

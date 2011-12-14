@@ -178,6 +178,7 @@ class YouTubeLogin():
 
 			# Check if there are any errors to report
 			errors = self.core._findErrors(ret, silent = True)
+			self.common.log("THIS HIT. And is important if not false: " + repr(errors))
 			if errors:
 				self.common.log("Returning error")
 				return (errors, 303)
