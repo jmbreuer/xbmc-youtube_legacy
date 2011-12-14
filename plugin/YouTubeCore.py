@@ -555,6 +555,7 @@ class YouTubeCore():
 			if err.find("SSL") > -1:
 				ret_obj["status"] = 303
 				ret_obj["content"] = self.language(30629)
+				ret_obj["error"] = 3 # Tell _findErrors that we have an error
 				return ret_obj 
 
 			time.sleep(3)
@@ -591,7 +592,11 @@ class YouTubeCore():
 			if len(error) == 1:
 				if error[0].find("<") > -1:
 					error[0] = error[0][0:error[0].find("<")]
-		
+
+		# If no error was found. But fetchPage has an error level of 3+, return the fetchPage content.
+		if len(error) and ret["error"] >= 3:
+			return ret["content"]
+
 		if len(error) > 0:
 			self.common.log("4")
 			error = error[0]
@@ -601,6 +606,7 @@ class YouTubeCore():
 
 		if not silent:
 			self.common.log("couldn't find any errors: " + repr(ret))
+
 		return False
 
 	def _verifyAge(self, org_link, next_url, params={}):
