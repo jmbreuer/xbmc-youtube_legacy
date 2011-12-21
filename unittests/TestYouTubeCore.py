@@ -727,10 +727,12 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		args = YouTubeCore.url2request().add_header.call_args_list
 		patcher2.stop()
 		
+		print repr(args)
+
 		assert(args[0][0][0] == 'User-Agent')
 		assert(args[0][0][1] == 'Mozilla/5.0 (MOCK)')
 		assert(args[1][0][0] == 'Cookie')
-		assert(args[1][0][1] == 'PREF=f1=50000000&hl=en')
+		assert(args[1][0][1] == 'PREF=f1=50000000&hl=en;')
 	
 	def test_fetchPage_should_return_error_message_if_login_is_in_params_collection_and_plugin_is_missing_login_info(self):
 		sys.modules[ "__main__" ].settings.getSetting.side_effect = ["3","4","", "", "false", ""]
@@ -809,8 +811,8 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 		patcher2.stop()
 		
 		print repr(args)
-		assert(args[2][0][0] == "Cookie")
-		assert(args[2][0][1] == 'PREF=f1=50000000&hl=en;LOGIN_INFO=my_token;SID=my_token;')
+		assert(args[1][0][0] == "Cookie")
+		assert(args[1][0][1] == 'PREF=f1=50000000&hl=en;LOGIN_INFO=my_token;SID=my_token;')
 
 	def test_fetchPage_should_call_retry_if_youtube_ask_user_to_verify_age(self):
 		settings = [ "3", "4", "false", "false", "false", "user", "pass", "my_token","my_token","my_token","my_token","my_token" ] 
