@@ -56,7 +56,8 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
 		self.lastpin = False
 		def generatePin():
 			userpin = totp.at(time.time())
-			if userpin == self.lastpin:
+			print "GENERATED PIN : " + str(userpin)
+			if userpin == self.lastpin or len(str(userpin)) < 6:
 				time.sleep(15)
 				return self.generatePin() 
 			return userpin
