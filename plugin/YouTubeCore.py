@@ -414,21 +414,19 @@ class YouTubeCore():
 		if get("proxy") or link.find(self.settings.getSetting("proxy")) > -1:
 			proxy = self.settings.getSetting("proxy")
 			referer = proxy[:proxy.rfind("/")]
-			self.common.log("Added refer: %s" % referer)
+			self.common.log("Added proxy refer: %s" % referer)
+
 			request.add_header('Referer', referer)
 
 		if get("api", "false") == "true":
 			self.common.log("got api")
 			request.add_header('GData-Version', '2.1')
 			request.add_header('X-GData-Key', 'key=' + self.APIKEY)
-
 		else:
 			request.add_header('User-Agent', self.common.USERAGENT)
-			#request.add_header('Cookie', 'VISITOR_INFO1_LIVE=ST1Ti53r4fU')
 
 			if get("no-language-cookie", "false") == "false":
 				cookie += "PREF=f1=50000000&hl=en;"
-				request.add_header('Cookie', 'PREF=f1=50000000&hl=en')
 
 		if get("login", "false") == "true":
 			self.common.log("got login")
