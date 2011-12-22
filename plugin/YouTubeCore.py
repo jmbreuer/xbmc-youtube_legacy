@@ -6,7 +6,7 @@
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
-    
+
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -16,33 +16,40 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, urllib, urllib2, re, time, socket
+import sys
+import urllib
+import urllib2
+import re
+import time
+import socket
 import xml.dom.minidom as minidom
-try: import simplejson as json
-except ImportError: import json
-#from xml.dom.minidom import parseString
+try:
+        import simplejson as json
+except ImportError:
+        import json
 
 # ERRORCODES:
 # 200 = OK
 # 303 = See other (returned an error message)
 # 500 = uncaught error
 
-class url2request(urllib2.Request):
-	"""Workaround for using DELETE with urllib2"""
-	def __init__(self, url, method, data=None, headers={}, origin_req_host=None, unverifiable=False):
-		self._method = method
-		urllib2.Request.__init__(self, url, data, headers, origin_req_host, unverifiable)
 
-	def get_method(self):
-		if self._method:
-			return self._method
-		else:
-			return urllib2.Request.get_method(self) 
+class url2request(urllib2.Request):
+        """Workaround for using DELETE with urllib2"""
+        def __init__(self, url, method, data=None, headers={}, origin_req_host=None, unverifiable=False):
+                self._method = method
+                urllib2.Request.__init__(self, url, data, headers, origin_req_host, unverifiable)
+
+        def get_method(self):
+                if self._method:
+                        return self._method
+                else:
+                        return urllib2.Request.get_method(self)
+
 
 class YouTubeCore():
-	
 	APIKEY = "AI39si6hWF7uOkKh4B9OEAX-gK337xbwR9Vax-cdeF9CF9iNAcQftT8NVhEXaORRLHAmHxj6GjM-Prw04odK4FxACFfKkiH9lg";
-	
+
 	#===============================================================================
 	# The time parameter restricts the search to videos uploaded within the specified time. 
 	# Valid values for this parameter are today (1 day), this_week (7 days), this_month (1 month) and all_time. 
@@ -54,7 +61,7 @@ class YouTubeCore():
 
 	urls = {};
 	urls['batch'] = "http://gdata.youtube.com/feeds/api/videos/batch"
-	urls['thumbnail'] = "http://i.ytimg.com/vi/%s/0.jpg"	
+	urls['thumbnail'] = "http://i.ytimg.com/vi/%s/0.jpg"
 
 
 	def __init__(self):
@@ -67,7 +74,6 @@ class YouTubeCore():
 		self.login = sys.modules[ "__main__" ].login
 		self.utils = sys.modules[ "__main__" ].utils
 		self.common = sys.modules[ "__main__" ].common
-		
 		urllib2.install_opener(sys.modules[ "__main__" ].opener)
 
 		timeout = [5, 10, 15, 20, 25][int(self.settings.getSetting("timeout"))]
@@ -75,16 +81,16 @@ class YouTubeCore():
 			timeout = "15"
 		socket.setdefaulttimeout(float(timeout))
 		return None
-	
+
 	def delete_favorite(self, params={}):
 		self.common.log("")
 		get = params.get
-		
+
 		delete_url = "http://gdata.youtube.com/feeds/api/users/default/favorites"
 		delete_url += "/" + get('editid') 
 		result = self._fetchPage({"link": delete_url, "api": "true", "login": "true", "auth": "true", "method": "DELETE"})
 		return (result["content"], result["status"])
-	
+
 	def remove_contact(self, params={}):
 		self.common.log("")
 		get = params.get
@@ -100,7 +106,7 @@ class YouTubeCore():
 		delete_url += "/" + get("editid")
 		result = self._fetchPage({"link": delete_url, "api": "true", "login": "true", "auth": "true", "method": "DELETE"})
 		return (result["content"], result["status"])
-			
+
 	def add_contact(self, params={}):
 		self.common.log("")
 		get = params.get
@@ -108,14 +114,14 @@ class YouTubeCore():
 		add_request = '<?xml version="1.0" encoding="UTF-8"?> <entry xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://gdata.youtube.com/schemas/2007"><yt:username>%s</yt:username></entry>' % get("contact")
 		result = self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true", "request": add_request})
 		return (result["content"], result["status"])
-		
+
 	def add_favorite(self, params={}):
 		get = params.get 
 		url = "http://gdata.youtube.com/feeds/api/users/default/favorites"
 		add_request = '<?xml version="1.0" encoding="UTF-8"?><entry xmlns="http://www.w3.org/2005/Atom"><id>%s</id></entry>' % get("videoid")
 		result = self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true", "request": add_request})
 		return (result["content"], result["status"])
-		
+
 	def add_subscription(self, params={}):
 		self.common.log("")
 		get = params.get
@@ -123,14 +129,14 @@ class YouTubeCore():
 		add_request = '<?xml version="1.0" encoding="UTF-8"?><entry xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://gdata.youtube.com/schemas/2007"> <category scheme="http://gdata.youtube.com/schemas/2007/subscriptiontypes.cat" term="user"/><yt:username>%s</yt:username></entry>' % get("channel")
 		result = self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true", "request": add_request})
 		return (result["content"], result["status"])
-	
+
 	def add_playlist(self, params={}):
 		get = params.get
 		url = "http://gdata.youtube.com/feeds/api/users/default/playlists"
 		add_request = '<?xml version="1.0" encoding="UTF-8"?><entry xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://gdata.youtube.com/schemas/2007"><title type="text">%s</title><summary>%s</summary></entry>' % (get("title"), get("summary"))
 		result = self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true", "request": add_request})
 		return (result["content"], result["status"])
-		
+
 	def del_playlist(self, params={}):
 		self.common.log("")
 		get = params.get
@@ -145,30 +151,30 @@ class YouTubeCore():
 		add_request = '<?xml version="1.0" encoding="UTF-8"?><entry xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://gdata.youtube.com/schemas/2007"><id>%s</id></entry>' % get("videoid")
 		result = self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true", "request": add_request})
 		return (result["content"], result["status"])
-	
+
 	def remove_from_playlist(self, params={}):
 		self.common.log("")
 		get = params.get
 		url = "http://gdata.youtube.com/feeds/api/playlists/%s/%s" % (get("playlist"), get("playlist_entry_id"))
 		result = self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true", "method": "DELETE"})
 		return (result["content"], result["status"])
-		
+
 	def remove_from_watch_later(self, params = {}):
 		self.common.log("")
 		get = params.get
 		url = "https://gdata.youtube.com/feeds/api/users/default/watch_later/%s" % get("playlist_entry_id")
 		result = self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true", "method": "DELETE"})
 		return (result["content"], result["status"])		
-	
+
 	def getCategoriesFolderInfo(self, xml, params={}):
 		self.common.log("")
 		get = params.get
 		result = ""
-		
+
 		dom = minidom.parseString(xml);
 		entries = dom.getElementsByTagName("atom:category");
-		next = False
-		
+		show_next = False
+
 		folders = [];
 		for node in entries:
 			folder = {};
@@ -176,57 +182,57 @@ class YouTubeCore():
 			if node.getElementsByTagName("yt:deprecated"):
 				continue
 			folder['Title'] = node.getAttribute("label")
-			
+
 			folder['category'] = node.getAttribute("term")
 			folder["icon"] = "explore"
 			folder["thumbnail"] = "explore"
 			folder["feed"] = "feed_category"
-			
+
 			folders.append(folder);
-		
+
 		return folders;
-	
+
 	def getFolderInfo(self, xml, params={}):
 		get = params.get
 		result = ""
-		
+
 		dom = minidom.parseString(xml);
 		links = dom.getElementsByTagName("link");
 		entries = dom.getElementsByTagName("entry");
-		next = False
-		
+		show_next = False
+
 		#find out if there are more pages
 		if (len(links)):
 			for link in links:
 				lget = link.attributes.get
 				if (lget("rel").value == "next"):
-					next = True
+					show_next = True
 					break
-		
+
 		folders = [];
 		for node in entries:
 			folder = {};
-			
+
 			if get("feed") != "feed_categories":
 				folder["login"] = "true"
 			folder['Title'] = node.getElementsByTagName("title").item(0).firstChild.nodeValue.replace('Activity of : ', '').replace('Videos published by : ', '').encode("utf-8");
 			folder['published'] = self._getNodeValue(node, "published", "2008-07-05T19:56:35.000-07:00")
-			
+
 			if node.getElementsByTagName("id"):
 				entryid = self._getNodeValue(node, "id", "")
 				entryid = entryid[entryid.rfind(":") + 1:]
 				folder["editid"] = entryid
-			
+
 			thumb = ""
 			if get("user_feed") == "contacts":
 				folder["thumbnail"] = "user"
 				folder["contact"] = folder["Title"]
 				folder["store"] = "contact_options"
 				folder["folder"] = "true"
-			
+
 			if get("user_feed") == "subscriptions":
 				folder["channel"] = folder["Title"]
-			
+
 			if get("user_feed") == "playlists":
 				folder['playlist'] = self._getNodeValue(node, 'yt:playlistId', '')
 				folder["user_feed"] = "playlist"
@@ -235,37 +241,37 @@ class YouTubeCore():
 			thumb = self.storage.retrieve(params, "thumbnail", folder)
 			if thumb:
 				folder["thumbnail"] = thumb 
-			
+
 			folders.append(folder);
-		
-		if next:
+
+		if show_next:
 			self.utils.addNextFolder(folders, params)
-		
+
 		return folders;
-	
+
 	def getBatchDetailsOverride(self, items, params={}):
 		ytobjects = []
 		videoids = []
-		
+
 		for video in items:
 			for k, v in video.items():
 				if k == "videoid":
 					videoids.append(v)
-		
+
 		(ytobjects, status) = self.getBatchDetails(videoids, params)
-		
+
 		for video in items:
 			videoid = video["videoid"]
 			for item in ytobjects:
 				if item['videoid'] == videoid:
 					for k, v in video.items():
 						item[k] = v
-		
+
 		while len(items) > len(ytobjects):
 			ytobjects.append({'videoid': 'false'});
-		
+
 		return (ytobjects, 200)
-	
+
 	def getBatchDetailsThumbnails(self, items, params={}):
 		ytobjects = []
 		videoids = []
@@ -274,7 +280,7 @@ class YouTubeCore():
 			videoids.append(videoid)
 
 		(tempobjects, status) = self.getBatchDetails(videoids, params)
-		
+
 		for i in range(0, len(items)):
 			(videoid, thumbnail) = items[i]
 			for item in tempobjects:
@@ -285,7 +291,7 @@ class YouTubeCore():
 
 		while len(items) > len(ytobjects):
 			ytobjects.append({'videoid': 'false'});
-		
+
 		return (ytobjects, 200)
 
 	def testing_something(self, items):
@@ -298,9 +304,9 @@ class YouTubeCore():
 		self.common.log("items: " + str(len(items)))
 		request_start = "<feed xmlns='http://www.w3.org/2005/Atom'\n xmlns:media='http://search.yahoo.com/mrss/'\n xmlns:batch='http://schemas.google.com/gdata/batch'\n xmlns:yt='http://gdata.youtube.com/schemas/2007'>\n <batch:operation type='query'/> \n"
 		request_end = "</feed>"
-		
+
 		video_request = ""
-		
+
 		ytobjects = []
 		status = 500
 		i = 1
@@ -332,11 +338,11 @@ class YouTubeCore():
 					video_request = ""
 					i = 1
 				i += 1
-		
+
 		if i > 1:
 			final_request = request_start + video_request + request_end
 			result = self._fetchPage({"link": "http://gdata.youtube.com/feeds/api/videos/batch", "api": "true", "request": final_request})
-				
+
 			temp = self.getVideoInfo(result["content"], params)
 			ytobjects += temp
 
@@ -351,7 +357,7 @@ class YouTubeCore():
 		self.common.log("ytobjects: " + str(len(ytobjects)))
 
 		return (ytobjects, status)
-		
+
 	#===============================================================================
 	#
 	# Internal functions to YouTubeCore.py
@@ -446,20 +452,20 @@ class YouTubeCore():
 				info = self.settings.getSetting("login_info")
 				SID = self.settings.getSetting("SID")
 				cookie += 'LOGIN_INFO=' + info +';SID=' + SID +';'
-		
+
 		if get("referer", "false") != "false":
 			self.common.log("Added referer: %s" % get("referer"))
 			request.add_header('Referer', get("referer"))
-			
+
 		try:
 			self.common.log("connecting to server... %s" % link )
 
 			if cookie:
 				self.common.log("Setting cookie: " + cookie)
 				request.add_header('Cookie', cookie)
-		
+
 			con = urllib2.urlopen(request)
-			
+
 			ret_obj["content"] = con.read()
 			ret_obj["location"] = link
 			ret_obj["new_url"] = con.geturl()
@@ -488,16 +494,16 @@ class YouTubeCore():
 					#ret_obj["status"] = 303
 					#ret_obj["content"] = self.language(30606)
 					return ret_obj
-		
+
 		except urllib2.HTTPError, e:
 			cont = False
 			err = str(e)
 			msg = e.read()
-			
+
 			self.common.log("HTTPError : " + err)
 			if e.code == 400 or True:
 				self.common.log("Unhandled HTTPError : [%s] %s " % ( e.code, msg), 1)
-			
+
 			if msg.find("<?xml") > -1:
 				acted = False
 
@@ -511,7 +517,7 @@ class YouTubeCore():
 						self.common.log("Hit quota... sleeping for 100 seconds")
 						time.sleep(100)
 						acted = True
-						
+
 				if not acted:
 					for code in codes:
 						self.common.log(repr(code.firstChild.nodeValue),5)
@@ -564,7 +570,7 @@ class YouTubeCore():
 		except socket.timeout:
 			self.common.log("Socket timeout")
 			return ret_obj
-		
+
 	def _findErrors(self, ret, silent = False):
 		self.common.log("")
 
@@ -643,7 +649,7 @@ class YouTubeCore():
 				session_token_start = ret["content"].find("'XSRF_TOKEN': '") + len("'XSRF_TOKEN': '")
 				session_token_stop = ret["content"].find("',", session_token_start)
 				session_token = ret["content"][session_token_start:session_token_stop]
-					
+
 				fetch_options = { "link": new_url, "no_verify_age": "true", "login": "true", "url_data": { "next_url": next_url[0], "set_racy": set_racy[0], "session_token" : session_token} }
 				continue
 			else:
@@ -664,7 +670,7 @@ class YouTubeCore():
 
 				fetch_options = { "link": target_url + new_url[0], "no_verify_age": "true", "login": "true" }
 				continue
-					
+
 			if ret["content"].find("PLAYER_CONFIG") > -1:
 				self.common.log("Found PLAYER_CONFIG. Verify successful")
 				return ret
@@ -694,9 +700,9 @@ class YouTubeCore():
 				except:
 					self.common.log("Except: " + repr(ret))
 					return False
-			
+
 				self.common.log("- returning, got result a: " + repr(oauth))
-				
+
 				self.settings.setSetting("oauth2_access_token", oauth["access_token"])
 				self.settings.setSetting("oauth2_expires_at", str(int(oauth["expires_in"]) + time.time()) )
 				self.common.log("Success")
@@ -739,25 +745,25 @@ class YouTubeCore():
 			if status == 200:
 				self.common.log("returning new auth")
 				return self.settings.getSetting("oauth2_access_token")
-			
+
 		self.common.log("failed because login failed")
-		
+
 		return False
-	
+
 	def _getNodeAttribute(self, node, tag, attribute, default=""):
 		if node.getElementsByTagName(tag).item(0):
 			if node.getElementsByTagName(tag).item(0).hasAttribute(attribute):
 				return node.getElementsByTagName(tag).item(0).getAttribute(attribute)
 
 		return default;
-	
+
 	def _getNodeValue(self, node, tag, default=""):
 		if node.getElementsByTagName(tag).item(0):
 			if node.getElementsByTagName(tag).item(0).firstChild:
 				return node.getElementsByTagName(tag).item(0).firstChild.nodeValue
-		
+
 		return default;
-	
+
 	def getVideoInfo(self, xml, params={}):
 		get = params.get
 		dom = minidom.parseString(xml);
@@ -766,14 +772,14 @@ class YouTubeCore():
 		entries = dom.getElementsByTagName("entry");
 		if (not entries):
 			entries = dom.getElementsByTagName("atom:entry");
-		next = False
+		show_next = False
 
 		# find out if there are more pages
 		if (len(links)):
 			for link in links:
 				lget = link.attributes.get
 				if (lget("rel").value == "next"):
-					next = True
+					show_next = True
 					break
 
 		ytobjects = [];
@@ -802,7 +808,7 @@ class YouTubeCore():
 				# Ignore unplayable items.
 				if (state == 'deleted' or state == 'rejected'):
 					video['videoid'] = "false"
-								
+
 				# Get reason for why we can't playback the file.		
 				if node.getElementsByTagName("yt:state").item(0).hasAttribute('reasonCode'):
 					reason = self._getNodeAttribute(node, "yt:state", 'reasonCode', 'Unknown reasonCode')
@@ -814,19 +820,19 @@ class YouTubeCore():
 					elif reason != 'limitedSyndication':
 						self.common.log("removing video, reason: %s value: %s" % (reason, value))
 						video['videoid'] = "false";
-									
+
 			video['Title'] = self._getNodeValue(node, "media:title", "Unknown Title").encode('utf-8') # Convert from utf-16 to combat breakage
 			video['Plot'] = self._getNodeValue(node, "media:description", "Unknown Plot").encode("utf-8")
 			video['Date'] = self._getNodeValue(node, "published", "Unknown Date").encode("utf-8")
 			video['user'] = self._getNodeValue(node, "name", "Unknown Name").encode("utf-8")
-			
+
 			# media:credit is not set for favorites, playlists
 			video['Studio'] = self._getNodeValue(node, "media:credit", "").encode("utf-8")
 			if video['Studio'] == "":
 				video['Studio'] = self._getNodeValue(node, "name", "Unknown Uploader").encode("utf-8")
-			
+
 			duration = int(self._getNodeAttribute(node, "yt:duration", 'seconds', '0'))
-			video['Duration'] = "%02d:%02d" % (duration / 60, duration % 60)
+			video['Duration'] = "%02d:%02d" % (int(duration / 60), int(duration % 60))
 			video['Rating'] = float(self._getNodeAttribute(node, "gd:rating", 'average', "0.0"))
 			video['count'] = int(self._getNodeAttribute(node, "yt:statistics", 'viewCount', "0"))
 			infoString = ""
@@ -846,19 +852,19 @@ class YouTubeCore():
 						video['editid'] = obj[obj.rfind('/') + 1:]
 
 			video['thumbnail'] = self.urls["thumbnail"] % video['videoid']
-			
+
 			overlay = self.storage.retrieveValue("vidstatus-" + video['videoid'])
 			if overlay:
 				video['Overlay'] = int(overlay)
-			
+
 			if video['videoid'] == "false":
 				self.common.log("videoid set to false : " + repr(video))
 
 			ytobjects.append(video);
 
-		if next:
+		if show_next:
 			self.utils.addNextFolder(ytobjects, params)
-				
+
 		self.common.log("Done: " + str(len(ytobjects)))
 		save_data = {}
 		for item in ytobjects:
@@ -866,4 +872,3 @@ class YouTubeCore():
 				save_data[item["videoid"]] = repr(item)
 		self.cache.setMulti("videoidcache", save_data)
 		return ytobjects;
-
