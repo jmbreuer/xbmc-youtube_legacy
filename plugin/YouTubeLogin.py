@@ -175,6 +175,8 @@ class YouTubeLogin():
 
 			# Check if we are logged in.
 			nick = self.common.parseDOM(ret["content"], "span", attrs= { "class": "masthead-user-username"} )
+                        if len(nick) == 0:
+                                nick = self.common.parseDOM(ret["content"], "p", attrs= { "id": "masthead-expanded-menu-email"})
 
 			# Check if there are any errors to report
 			errors = self.core._findErrors(ret, silent = True)
@@ -248,9 +250,6 @@ class YouTubeLogin():
 				self.common.log("Part E: " + repr(fetch_options))
 				continue
 
-			# Check if we are logged in.
-			nick = self.common.parseDOM(ret["content"], "span", attrs= { "class": "masthead-user-username"} )
-	
 			## 2-factor login finish
 			if not fetch_options:
 				# Check for errors.
@@ -336,6 +335,8 @@ class YouTubeLogin():
 		nick = ""
 		status = 303
 		nick = self.common.parseDOM(content, "span", attrs= { "class": "masthead-user-username"} )
+                if len(nick) == 0:
+                        nick = self.common.parseDOM(content, "p", attrs= { "id": "masthead-expanded-menu-email"})
 
 		if len(nick) > 0 :
 			self.settings.setSetting("nick", nick[0])

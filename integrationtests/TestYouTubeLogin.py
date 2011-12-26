@@ -59,7 +59,7 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
 			print "GENERATED PIN : " + str(userpin)
 			if userpin == self.lastpin or len(str(userpin)) < 6:
 				time.sleep(15)
-				return self.generatePin() 
+				return generatePin() 
 			return userpin
 			
 		sys.modules["__main__"].settings.load_strings("./resources/2factor-login-settings.xml")
