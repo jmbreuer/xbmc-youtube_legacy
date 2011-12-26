@@ -200,7 +200,6 @@ class YouTubeLogin():
 
 			# Fill out login information and send.
 			newurl = self.common.parseDOM(ret["content"].replace("\n", " "), "form", attrs = { "id": "gaia_loginform"}, ret = "action")
-
 			if len(newurl) > 0:
 				( galx, url_data ) = self._fillLoginInfo(ret["content"])
 				if len(galx) > 0 and len(url_data) > 0:
