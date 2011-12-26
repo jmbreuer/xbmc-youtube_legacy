@@ -141,7 +141,7 @@ class YouTubeLogin():
 		else:
 			self.common.log("Failed") 
 		return ( self.language(30609), 303 )
-	
+
 	def _httpLogin(self, params = {}):
 		get = params.get
 		self.common.log("")
