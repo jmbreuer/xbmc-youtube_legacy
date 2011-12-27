@@ -3,8 +3,9 @@
      Version: 1.0
 '''
 
+
 class StorageServer():
-    def cacheFunction(self, funct = False, *args):
+    def cacheFunction(self, funct=False, *args):
         return funct(*args)
     
     def set(self, name, data):
