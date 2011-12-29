@@ -153,11 +153,15 @@ class YouTubeNavigation():
                         self.addSubscription(params)
                 if (get("action") == "download"):
                         (video, status) = self.player.getVideoObject(params)
-                        params["video_url"] = video['video_url']
-                        params["Title"] = video['Title']
-                        self.downloader.download(video["videoid"], params)
-                        self.player.downloadSubtitle(video)
-
+                        if "video_url" in video:
+                                params["url"] = video['video_url']
+                                filename = "%s-[%s].mp4" % (''.join(c for c in video['Title'].decode("utf-8") if c not in self.utils.INVALID_CHARS), video["videoid"])
+                                self.downloader.download(filename, params)
+                        else:
+                                if "apierror" in video:
+                                                self.utils.showMessage(self.language(30625), video["apierror"])
+                                else:
+                                        self.utils.showMessage(self.language(30625), "ERROR")
                 if (get("action") == "play_video"):
                         self.player.playVideo(params)
                 if (get("action") == "queue_video"):

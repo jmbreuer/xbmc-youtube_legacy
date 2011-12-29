@@ -1,7 +1,7 @@
 '''
     YouTube plugin for XBMC
     Copyright (C) 2010-2011 Tobias Ussing And Henrik Mosgaard Jensen
-    
+
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
@@ -11,7 +11,7 @@
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
@@ -47,20 +47,22 @@ player = ""
 cache = ""
 
 cookiejar = cookielib.LWPCookieJar()
-opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookiejar))
-urllib2.install_opener(opener)
+cookie_handler = urllib2.HTTPCookieProcessor(cookiejar)
+opener = urllib2.build_opener(cookie_handler)
 
 if (__name__ == "__main__" ):
         if dbg:
                 print plugin + " ARGV: " + repr(sys.argv)
         else:
-                print plugin        
+                print plugin
 
         try:
                 import StorageServer
+                cache = StorageServer.StorageServer()
         except:
                 import storageserverdummy as StorageServer
-        cache = StorageServer.StorageServer()
+                cache = StorageServer.StorageServer()
+
         cache.table_name = "YouTube"
 
         import CommonFunctions
