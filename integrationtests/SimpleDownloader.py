@@ -11,424 +11,466 @@
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-   
+
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, urllib2, os, xbmcaddon, time
+import sys
+import urllib2
+import os
+import time
 import DialogDownloadProgress
 
+
 class SimpleDownloader():
-	dialog = ""
-	def __init__(self):
-		self.version = "0.9.0"
-		self.plugin = "SimpleDownloader-" + self.version
+        dialog = ""
 
-		self.INVALID_CHARS = "\\/:*?\"<>|"
+        def __init__(self):
+                self.version = "0.9.0"
+                self.plugin = "SimpleDownloader-" + self.version
 
-		if sys.modules[ "__main__" ].common:
-			self.common = sys.modules[ "__main__" ].common
-		else:
-			import CommonFunctions
-			common = CommonFunctions.CommonFunctions()
-			common.plugin = self.plugin
+                self.INVALID_CHARS = "\\/:*?\"<>|"
 
-		try:
-			import StorageServer
-		except:
-			import storageserverdummy as StorageServer
+                if sys.modules["__main__"].common:
+                        self.common = sys.modules["__main__"].common
+                else:
+                        import CommonFunctions
+                        common = CommonFunctions.CommonFunctions()
+                        common.plugin = self.plugin
 
-		self.cache = StorageServer.StorageServer()
-		self.cache.table_name = "Downloader"
+                try:
+                        import StorageServer
+                        self.cache = StorageServer.StorageServer()
+                        self.cache.table_name = "Downloader"
+                except:
+                        import storageserverdummy as StorageServer
+                        self.cache = StorageServer.StorageServer()
+                        self.cache.table_name = "Downloader"
 
-                if sys.modules[ "__main__" ].xbmc:
+                if sys.modules["__main__"].xbmc:
                         self.xbmc = sys.modules["__main__"].xbmc
                 else:
                         import xbmc
                         self.xbmc = xbmc
 
-                if sys.modules[ "__main__" ].xbmcvfs:
+                if sys.modules["__main__"].xbmcvfs:
                         self.xbmcvfs = sys.modules["__main__"].xbmcvfs
                 else:
-			try:
-				import xbmcvfs
-			except ImportError:
-				import xbmcvfsdummy as xbmcvfs				
-                        self.xbmcvfs = xbmcvfs
+                        try:
+                                import xbmcvfs
+                                self.xbmcvfs = xbmcvfs
+                        except ImportError:
+                                import xbmcvfsdummy as xbmcvfs
+                                self.xbmcvfs = xbmcvfs
 
-		if sys.modules[ "__main__" ].dbglevel:
-                        self.dbglevel = sys.modules[ "__main__" ].dbglevel
-		else:
+                if sys.modules["__main__"].dbglevel:
+                        self.dbglevel = sys.modules["__main__"].dbglevel
+                else:
                         self.dbglevel = 3
 
-		if sys.modules[ "__main__" ].dbg:
-			self.dbg = sys.modules[ "__main__" ].dbg
-		else:
-			self.dbg = True
+                if sys.modules["__main__"].dbg:
+                        self.dbg = sys.modules["__main__"].dbg
+                else:
+                        self.dbg = True
 
-		self.settings = sys.modules[ "__main__" ].settings
+                self.settings = sys.modules["__main__"].settings
 
-		self.language = self.settings.getLocalizedString
-		self.download_path = self.settings.getSetting( "downloadPath" )
-		self.hide_during_playback = self.settings.getSetting( "hideDuringPlayback" ) == "true"
-		self.notification_length = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10][int(self.settings.getSetting( 'notification_length' ))]
-		
-		if hasattr(sys.modules[ "__main__" ], "settings"):
-			inherited_settings = sys.modules[ "__main__" ].settings
-			if inherited_settings.getSetting( "downloadPath" ):
-				self.download_path = inherited_settings.getSetting( "downloadPath" )
-			if inherited_settings.getSetting( "hideDuringPlayback" ):
-				self.hide_during_playback = inherited_settings.getSetting( "hideDuringPlayback" ) == "true"
-			if inherited_settings.getSetting( "notification_length" ):
-				self.notification_length = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10][int(inherited_settings.getSetting( 'notification_length' ))]
+                self.language = self.settings.getLocalizedString
+                self.download_path = self.settings.getSetting("downloadPath")
+                self.hide_during_playback = self.settings.getSetting("hideDuringPlayback") == "true"
+                self.notification_length = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10][int(self.settings.getSetting('notification_length'))]
 
-		if sys.modules[ "__main__" ].plugin:
-			self.plugin = sys.modules[ "__main__" ].plugin
-	
-	def downloadVideo(self, params = {}):
-		self.common.log("")
-		get = params.get
-		
-		if (not self.download_path):
-			self._showMessage(self.language(30600), self.language(30611))
-			self.settings.openSettings()
-			self.download_path = self.settings.getSetting( "downloadPath" )
+                if hasattr(sys.modules["__main__"], "settings"):
+                        inherited_settings = sys.modules["__main__"].settings
+                        if inherited_settings.getSetting("downloadPath"):
+                                self.download_path = inherited_settings.getSetting("downloadPath")
+                        if inherited_settings.getSetting("hideDuringPlayback"):
+                                self.hide_during_playback = inherited_settings.getSetting("hideDuringPlayback") == "true"
+                        if inherited_settings.getSetting("notification_length"):
+                                self.notification_length = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10][int(inherited_settings.getSetting('notification_length'))]
 
-		if self.cache.lock("SimpleDownloaderLock"):
-			self.common.log("Downloader not active, initializing downloader.")
-			
-			self._addVideoToDownloadQueue(params)
-			self._processQueue(params)
-			self.cache.unlock("SimpleDownloaderLock")
-		else:
-			self.common.log("Downloader is active, Queueing video.")
-			self._addVideoToDownloadQueue(params)
+                if sys.modules["__main__"].plugin:
+                        self.plugin = sys.modules["__main__"].plugin
 
-	def _processQueue(self, params = {}):
-		self.common.log("")
-		video = self._getNextVideoFromDownloadQueue()
-		
-		if video:
-			if not self.dialog:
-				self.dialog = DialogDownloadProgress.DownloadProgress()
-				self.dialog.create(self.language(30605), "")
+        def download(self, itemid, params={}):
+                self.common.log("")
 
-			while video:
-				params["videoid"] = video['videoid']
-				if not video.has_key("video_url") and video.has_key("callback_for_url"):
-					( video, status ) = video['callback_for_url'](params)
+                if (not self.download_path):
+                        self._showMessage(self.language(30600), self.language(30611))
+                        self.settings.openSettings()
+                        self.download_path = self.settings.getSetting("downloadPath")
 
-				if not video.has_key("video_url"):
-					if video.has_key("apierror"):
-						self._showMessage(self.language(30625), video["apierror"])
-					else:
-						self._showMessage(self.language(30625), "ERROR")
-					self._removeVideoFromDownloadQueue(video['videoid'])
-					video = self._getNextVideoFromDownloadQueue()
-					continue
+                if self.cache.lock("SimpleDownloaderLock"):
+                        self.common.log("Downloader not active, initializing downloader.")
 
-				if video.has_key("stream_map"):
-					self._showMessage(self.language(30607), self.language(30619))
-					self._removeVideoFromDownloadQueue(video['videoid'])
-					video = self._getNextVideoFromDownloadQueue()
-					continue
+                        self._addItemToQueue(itemid, params)
+                        self._processQueue(params)
+                        self.cache.unlock("SimpleDownloaderLock")
+                else:
+                        self.common.log("Downloader is active, Queueing item.")
+                        self._addItemToQueue(itemid, params)
 
-				if video["video_url"].find("swfurl") > 0 or video["video_url"].find("rtmp") > -1:
-					self.common.log("Found RTMP stream")
-					( dvideo, status ) = self._downloadVideoRTMP(video, params)
-					if status != 200:
-						self._showMessage(self.language( 30625 ), self.language(30619))
-				else:
-					( dvideo, status ) = self._downloadVideoURL(video)
-				self._removeVideoFromDownloadQueue(video['videoid'])
-				video = self._getNextVideoFromDownloadQueue()
+        def _processQueue(self, params={}):
+                self.common.log("")
+                (itemid, item) = self._getNextItemFromQueue()
 
-			self.common.log("Finished download queue.")
-			if self.dialog:
-				self.dialog.close()
-				self.common.log("Closed dialog")
-			self.dialog = ""
+                if item:
+                        if not self.dialog:
+                                self.dialog = DialogDownloadProgress.DownloadProgress()
+                                self.dialog.create(self.language(30605), "")
 
-	def _downloadVideoRTMP(self, video, params = {}):
-		get = params.get
-		self.common.log(video['Title'])
+                        while item:
+                                if not "video_url" in item:
+                                        print "a"
+                                        if "apierror" in item:
+                                                self._showMessage(self.language(30625), item["apierror"])
+                                        else:
+                                                self._showMessage(self.language(30625), "ERROR")
+                                        self._removeItemFromQueue(itemid)
+                                        item = self._getNextItemFromQueue()
+                                        continue
 
-		if video.has_key("player_url"):
-			player_url = video["player_url"]
-		else:
-			player_url = None
+                                if "stream_map" in item:
+                                        print "b"
+                                        self._showMessage(self.language(30607), self.language(30619))
+                                        self._removeItemFromQueue(itemid)
+                                        item = self._getNextItemFromQueue()
+                                        continue
 
+                                if item["video_url"].find("swfurl") > 0 or item["video_url"].find("rtmp") > -1:
+                                        print "c"
+                                        self.common.log("Found RTMP stream")
+                                        (ditem, status) = self._downloadRTMP(item, params)
+                                        if status != 200:
+                                                self._showMessage(self.language(30625), self.language(30619))
+                                else:
+                                        print "d"
+                                        (ditem, status) = self._downloadURL(item)
+                                self._removeItemFromQueue(itemid)
+                                item = self._getNextItemFromQueue()
+                                print "done"
 
-		video["downloadPath"] = self.download_path
-		filename = "%s-[%s].mp4" % ( ''.join(c for c in video['Title'].decode("utf-8") if c not in self.INVALID_CHARS), video["videoid"] )
-		filename_incomplete = os.path.join(self.xbmc.translatePath( "special://temp" ).decode("utf-8"), filename )
-		filename_complete = os.path.join(self.download_path.decode("utf-8"), filename)
+                        self.common.log("Finished download queue.")
+                        if self.dialog:
+                                self.dialog.close()
+                                self.common.log("Closed dialog")
+                        self.dialog = ""
 
-		if self.xbmcvfs.exists(filename_complete):
-			self.xbmcvfs.delete(filename_complete)
+        def _downloadRTMP(self, video, params={}):
+                get = params.get
+                self.common.log(video['Title'])
 
-		try:
-			import subprocess
-			probe_args = ['rtmpdump', '-B', '1'] + [[], ['-v']][get("live", "false") == "true"] + [[], ['-W', player_url]][player_url is not None] + ['-r', video["video_url"], '-o', filename_incomplete]
-			p = subprocess.Popen(probe_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-			output = p.communicate()[1]
-			if output.find("filesize") > -1:
-				total_size = int(float(output[output.find("filesize") + len("filesize"):output.find("\n", output.find("filesize"))]))
-			else:
-				total_size = 0
+                if "player_url" in video:
+                        player_url = video["player_url"]
+                else:
+                        player_url = None
 
-		except (OSError, IOError):
-			self.self._showMessage(self.language(30600), self.language(30619))
-			return ( {}, 500 )
+                video["downloadPath"] = self.download_path
+                if "videoid" in video:
+                        filename = "%s-[%s].mp4" % (''.join(c for c in video['Title'].decode("utf-8") if c not in self.INVALID_CHARS), video["videoid"])
+                else:
+                        filename = "%s.mp4" % (''.join(c for c in video['Title'].decode("utf-8") if c not in self.INVALID_CHARS))
 
-		basic_args = ['rtmpdump', '-V'] + [[], ['-v']][get("live", "false") == "true"] + [[], ['-W', player_url]][player_url is not None] + ['-r', video["video_url"], '-o', filename_incomplete]
+                filename_incomplete = os.path.join(self.xbmc.translatePath("special://temp").decode("utf-8"), filename)
+                filename_complete = os.path.join(self.download_path.decode("utf-8"), filename)
 
-		p = subprocess.Popen(basic_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-		bytes_so_far = 0
-		opercent = -1
-		retval = 1
-		if total_size == 0:
-			total_size = int(get("max_size", "10000000"))
+                if self.xbmcvfs.exists(filename_complete):
+                        self.xbmcvfs.delete(filename_complete)
 
-		self.common.log('total_size ')
-		for chunk in p.stderr:
-			bytes_so_far = os.path.getsize(filename_incomplete)
-			self.common.log('bytes_so_far : ' + str(bytes_so_far))
-			if total_size > 0:
-				percent = float(bytes_so_far) / float(total_size) * 100
-			else:
-				percent = opercent + 1 
-				if percent == 100:
-					percent = 0.1
+                try:
+                        import subprocess
+                        probe_args = ['rtmpdump', '-B', '1'] + [[], ['-v']][get("live", "false") == "true"] + [[], ['-W', player_url]][player_url is not None] + ['-r', video["video_url"], '-o', filename_incomplete]
+                        p = subprocess.Popen(probe_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                        output = p.communicate()[1]
+                        if output.find("filesize") > -1:
+                                total_size = int(float(output[output.find("filesize") + len("filesize"):output.find("\n", output.find("filesize"))]))
+                        else:
+                                total_size = 0
 
-			if percent != opercent:
-				opercent = percent
-				queue = self.cache.get("SimpleDownloaderQueue")
+                except (OSError, IOError):
+                        self._showMessage(self.language(30600), self.language(30619))
+                        return ({}, 500)
 
-				if queue:
-					try:
-						videos = eval(queue)
-					except:
-						videos = {}
-				else:
-					videos = {}
-				
-				heading = "[%s] %s - %s%%" % ( str(len(videos)), self.language(30624), str(int(percent)))
+                basic_args = ['rtmpdump', '-V'] + [[], ['-v']][get("live", "false") == "true"] + [[], ['-W', player_url]][player_url is not None] + ['-r', video["video_url"], '-o', filename_incomplete]
 
-			       	self.common.log("Updating %s - %s" % ( heading, self.common.makeAscii(video["Title"])), 2)
-				if self.xbmc.Player().isPlaying() and self.xbmc.getCondVisibility("VideoPlayer.IsFullscreen"):
-					if self.dialog:
-						self.dialog.close()
-						self.dialog = ""
-				else:
-					if not self.dialog:
-						self.dialog = DialogDownloadProgress.DownloadProgress()
-						self.dialog.create(self.language(30605), "")
-					self.dialog.update(percent=percent, heading = heading, label=video["Title"])
+                p = subprocess.Popen(basic_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                self.bytes_so_far = 0
+                opercent = -1
+                retval = 1
+                if total_size == 0:
+                        total_size = int(get("max_size", "10000000"))
 
-			self.common.log('total_size : ' + str(total_size))
-			if bytes_so_far >= total_size and total_size != 0:
-				self.common.log("Download complete")
-				retval = 0
-				break
-			# Some rtmp streams seem abort after ~ 99.8%. Don't complain for those
-			if total_size * 0.998 < bytes_so_far:
-				self.common.log("Download complete. Size disrepancy: " + str( total_size - bytes_so_far))
-				retval = 0
-				break
+                self.mark = time.time()
+                self.queue_mark = 0.0
+                self.old_percent = -1
+                self.common.log('total_size ')
+                for chunk in p.stderr:
+                        self.bytes_so_far = os.path.getsize(filename_incomplete)
+                        self.common.log('bytes_so_far : ' + str(self.bytes_so_far))
+                        if total_size > 0:
+                                percent = float(self.bytes_so_far) / float(total_size) * 100
+                        else:
+                                percent = opercent + 1
+                                if percent == 100:
+                                        percent = 0.1
 
-		if retval == 0:
-			if self.xbmcvfs.exists(filename_incomplete):
-				self.common.log("Found incomplete file: " + filename_incomplete)
-				self.xbmcvfs.rename(filename_incomplete, filename_complete)
-			else:
-				self.common.log("Download complete but couldn't find file: " + filename_incomplete)
+                        if percent > self.old_percent:
+                                self._updateProgress(video, percent)
+                                self.old_percent = percent
 
-			if not self.dialog:
-				self.dialog = DialogDownloadProgress.DownloadProgress()
-			self.dialog.update(heading = self.language(30604), label=video["Title"])
+                        if self.bytes_so_far >= total_size and total_size != 0:
+                                self.common.log("Download complete")
+                                retval = 0
+                                break
 
-			self.common.log("done")
-			return ( video, 200 )
-		else:
-			self.common.log("Download failed")
-			return ( {}, 500 )
-			
-	def _downloadVideoURL(self, video, params = {}):
-		self.common.log(video['Title'])
-		
-		video["downloadPath"] = self.download_path
+                        # Some rtmp streams seem abort after ~ 99.8%. Don't complain for those
+                        if total_size * 0.998 < self.bytes_so_far:
+                                self.common.log("Download complete. Size disrepancy: " + str(total_size - self.bytes_so_far))
+                                retval = 0
+                                break
 
-		url = urllib2.Request(video['video_url'])
-		url.add_header('User-Agent', self.common.USERAGENT);
-		filename = "%s-[%s].mp4" % ( ''.join(c for c in video['Title'].decode("utf-8") if c not in self.INVALID_CHARS), video["videoid"] )
-		filename_incomplete = os.path.join(self.xbmc.translatePath( "special://temp" ).decode("utf-8"), filename )
-		filename_complete = os.path.join(self.download_path.decode("utf-8"), filename)
+                if retval == 0:
+                        if self.xbmcvfs.exists(filename_incomplete):
+                                self.xbmcvfs.rename(filename_incomplete, filename_complete)
+                                self.common.log("Download complete")
+                        else:
+                                self.common.log("Download complete but couldn't find file: " + filename_incomplete)
 
-		if self.xbmcvfs.exists(filename_complete):
-			self.xbmcvfs.delete(filename_complete)
+                        if not self.dialog:
+                                self.dialog = DialogDownloadProgress.DownloadProgress()
+                        self.dialog.update(heading=self.language(30604), label=video["Title"])
 
-		file = self.common.openFile(filename_incomplete, "wb")
-		con = urllib2.urlopen(url);
+                        self.common.log("done")
+                        return (video, 200)
+                else:
+                        self.common.log("Download failed")
+                        return ({}, 500)
 
-		total_size = 8192 * 25
-		chunk_size = 8192
+        def _downloadURL(self, item, params={}):
+                self.common.log(item['Title'])
 
-		if con.info().getheader('Content-Length').strip():			
-			total_size = int(con.info().getheader('Content-Length').strip())	
-			chunk_size = int(total_size / 200) # We only want 200 updates of the status bar.
-			if chunk_size <= 0:
-				chunk_size = 5
-			elif chunk_size > 3000000:
-				chunk_size = 3000000
-		try:
-			bytes_so_far = 0
-			
-			videos = {}
-			while 1:
-				chunk = con.read(chunk_size)
-				bytes_so_far += len(chunk)
-				percent = float(bytes_so_far) / float(total_size) * 100
-				file.write(chunk)
-				
-				queue = self.cache.get("SimpleDownloaderQueue")
+                item["downloadPath"] = self.download_path
 
-				if queue:
-					try:
-						videos = eval(queue)
-					except:
-						videos = {}
-				else:
-					videos = {}
-				
-				heading = "[%s] %s - %s%%" % ( str(len(videos)), self.language(30624), str(int(percent)))
+                url = urllib2.Request(item['video_url'])
+                url.add_header('User-Agent', self.common.USERAGENT)
+                if "videoid" in item:
+                        filename = "%s-[%s].mp4" % (''.join(c for c in item['Title'].decode("utf-8") if c not in self.INVALID_CHARS), item["videoid"])
+                else:
+                        filename = "%s.mp4" % (''.join(c for c in item['Title'].decode("utf-8") if c not in self.INVALID_CHARS))
 
-				self.common.log("Updating %s - %s" % ( heading, self.common.makeAscii(video["Title"])), 2)
-				if self.xbmc.Player().isPlaying() and self.xbmc.getCondVisibility("VideoPlayer.IsFullscreen"):
-					if self.dialog:
-						self.dialog.close()
-						self.dialog = ""
-				else:
-					if not self.dialog:
-						self.dialog = DialogDownloadProgress.DownloadProgress()
-						self.dialog.create(self.language(30605), "")
-					self.dialog.update(percent=percent, heading = heading, label=video["Title"])
+                filename_incomplete = os.path.join(self.xbmc.translatePath("special://temp").decode("utf-8"), filename)
+                filename_complete = os.path.join(self.download_path.decode("utf-8"), filename)
 
-				if not chunk:
-					break
-			
-			con.close()
-			file.close()
-		except:
-			self.common.log("Download failed.")
-			try:
-				con.close()
-				file.close()
-			except:
-				self.common.log("Failed to close download stream and file handle")
-			self._showMessage(self.language(30625), "ERROR")
-			return ( {}, 500 )
-		
-		if self.xbmcvfs.exists(filename_incomplete):
-			self.common.log("Found incomplete file: " + filename_incomplete)
-			self.xbmcvfs.rename(filename_incomplete, filename_complete)
-			self.common.log("Moved file")
-		else:
-			self.common.log("Download complete but couldn't find file: " + filename_incomplete)
+                if self.xbmcvfs.exists(filename_complete):
+                        self.xbmcvfs.delete(filename_complete)
 
+                file = self.common.openFile(filename_incomplete, "wb")
+                con = urllib2.urlopen(url)
 
-		if not self.dialog:
-			self.dialog = DialogDownloadProgress.DownloadProgress()
-		self.dialog.update(heading = self.language(30604), label=video["Title"])
+                total_size = 1
+                chunk_size = 1024 * 8  # Taken from urllib.py
 
-		self.common.log("done")
-		return ( video, 200 )
-		
-	#============================= Download Queue =================================
-	def _getNextVideoFromDownloadQueue(self):
-		if self.cache.lock("SimpleDownloaderQueueLock"):
-			videos = []
-			
-			queue = self.cache.get("SimpleDownloaderQueue")
-			self.common.log("queue loaded : " + repr(queue))
+                if con.info().getheader('Content-Length').strip():
+                        total_size = int(con.info().getheader('Content-Length').strip())
 
-			if queue:
-				try:
-					videos = eval(queue)
-				except: 
-					videos = []
-		
-			video = {}
-			if len(videos) > 0:
-				video = videos[0]
-				self.common.log("_getNextVideoFromDownloadQueue released. returning : " + video["videoid"])
+                try:
+                        self.bytes_so_far = 0
 
-			self.cache.unlock("SimpleDownloaderQueueLock")
-			return video
-		else:
-			self.common.log("_getNextVideoFromDownloadQueue Couldn't aquire lock")
+                        self.old_percent = -1
+                        self.mark = time.time()
+                        self.queue_mark = 0.0
+                        while 1:
+                                chunk = con.read(chunk_size)
 
-	def _addVideoToDownloadQueue(self, params = {}):
-		if self.cache.lock("SimpleDownloaderQueueLock"):
-			get = params.get
+                                self.bytes_so_far += len(chunk)
+                                percent = float(self.bytes_so_far) / float(total_size) * 100
+                                percent = float(int(percent * 10)) / 10
+                                file.write(chunk)
 
-			videos = []
-			if get("videoid"):
-				queue = self.cache.get("SimpleDownloaderQueue")
-				self.common.log("queue loaded : " + repr(queue))
+                                if percent > self.old_percent:
+                                        self._updateProgress(item, percent)
+                                        self.old_percent = percent
 
-				if queue:
-					try:
-						videos = eval(queue)
-					except:
-						videos = []
-		
-				append = True
-				for index, video in enumerate(videos):
-					if video["videoid"] == get("videoid"):
-						print "FOUND ID"
-						append = False
-						del videos[index]
-						break;
-				if append:					
-					videos.append(params)
-					self.common.log("Moved " + get("videoid") + " to front of queue. - " + str(len(videos)))
-				else:
-					videos.insert(1, params)
-					self.common.log("Added: " + get("videoid") + " to queue - " + str(len(videos)))
+                                if not chunk:
+                                        break
 
-				self.cache.set("SimpleDownloaderQueue", repr(videos))
+                        con.close()
+                        file.close()
+                except:
+                        self.common.log("Download failed.")
+                        try:
+                                con.close()
+                                file.close()
+                        except:
+                                self.common.log("Failed to close download stream and file handle")
+                        self._showMessage(self.language(30625), "ERROR")
+                        return ({}, 500)
 
-			self.cache.unlock("SimpleDownloaderQueueLock")
-			self.common.log("_addVideoToDownloadQueue released")
-		else:
-			self.common.log("_addVideoToDownloadQueue Couldn't lock")
-		
-	def _removeVideoFromDownloadQueue(self, videoid):
-		if self.cache.lock("SimpleDownloaderQueueLock"):
-			videos = []
-			
-			queue = self.cache.get("SimpleDownloaderQueue")
-			self.common.log("queue loaded : " + repr(queue))
-			if queue:
-				try:
-					videos = eval(queue)
-				except:
-					videos = []
+                if self.xbmcvfs.exists(filename_incomplete):
+                        self.xbmcvfs.rename(filename_incomplete, filename_complete)
+                        self.common.log("Download complete")
+                else:
+                        self.common.log("Download complete but couldn't find file: " + filename_incomplete)
 
-			for index, video in enumerate(videos):
-				if video["videoid"] == videoid:
-					del videos[index]
-					self.cache.set("SimpleDownloaderQueue", repr(videos))
-					self.common.log("Removed: " + video["videoid"] + " from queue")
+                if not self.dialog:
+                        self.dialog = DialogDownloadProgress.DownloadProgress()
+                self.dialog.update(heading=self.language(30604), label=item["Title"])
 
-			self.cache.unlock("SimpleDownloaderQueueLock")
-			self.common.log("_removeVideoFromDownloadQueue released")
-		else:
-			self.common.log("_removeVideoFromDownloadQueue Exception")
+                self.common.log("done")
+                return (item, 200)
 
-	# Shows a more user-friendly notification
+        def _updateProgress(self, item, percent):
+                queue = False
+                new_mark = time.time()
+                speed = int((self.bytes_so_far / 1024) / (new_mark - self.mark))
+
+                if new_mark - self.queue_mark > 1.5:
+                        queue = self.cache.get("SimpleDownloaderQueue")
+                        self.queue = queue
+                elif hasattr(self, "queue"):
+                        queue = self.queue
+
+                try:
+                        items = eval(queue)
+                except:
+                        items = {}
+
+                if new_mark - self.queue_mark > 1.5:
+                        heading = "[%s] %sKb/s (%s%%)" % (len(items), speed, percent)
+                        self.common.log("Updating %s - %s" % (heading, self.common.makeUTF8(item["Title"])), 2)
+                        self.queue_mark = new_mark
+
+                if self.xbmc.Player().isPlaying() and self.xbmc.getCondVisibility("VideoPlayer.IsFullscreen"):
+                        if self.dialog:
+                                self.dialog.close()
+                                self.dialog = ""
+                else:
+                        if not self.dialog:
+                                self.dialog = DialogDownloadProgress.DownloadProgress()
+                                self.dialog.create(self.language(30605), "")
+
+                        heading = "[%s] %s - %s%%" % (len(items), self.language(30624), percent)
+                        self.dialog.update(percent=percent, heading=heading, label=item["Title"])
+
+        #============================= Download Queue =================================
+        def _getNextItemFromQueue(self):
+                if self.cache.lock("SimpleDownloaderQueueLock"):
+                        items = []
+
+                        queue = self.cache.get("SimpleDownloaderQueue")
+                        self.common.log("queue loaded : " + repr(queue))
+
+                        if queue:
+                                try:
+                                        items = eval(queue)
+                                except:
+                                        items = []
+
+                        item = {}
+                        if len(items) > 0:
+                                item = items[0]
+                                self.common.log("returning : " + item[0])
+
+                        self.cache.unlock("SimpleDownloaderQueueLock")
+                        return item
+                else:
+                        self.common.log("Couldn't aquire lock")
+
+        def _addItemToQueue(self, itemid, params={}):
+                if self.cache.lock("SimpleDownloaderQueueLock"):
+
+                        items = []
+                        if itemid:
+                                queue = self.cache.get("SimpleDownloaderQueue")
+                                self.common.log("queue loaded : " + repr(queue))
+
+                                if queue:
+                                        try:
+                                                items = eval(queue)
+                                        except:
+                                                items = []
+
+                                append = True
+                                for index, item in enumerate(items):
+                                        (item_id, item) = item
+                                        if item_id == itemid:
+                                                print "FOUND ID"
+                                                append = False
+                                                del items[index]
+                                                break
+                                if append:
+                                        items.append((itemid, params))
+                                        self.common.log("Added: " + itemid + " to queue - " + str(len(items)))
+                                else:
+                                        items.insert(1, (itemid, params))
+                                        self.common.log("Moved " + itemid + " to front of queue. - " + str(len(items)))
+
+                                self.cache.set("SimpleDownloaderQueue", repr(items))
+
+                        self.cache.unlock("SimpleDownloaderQueueLock")
+                        self.common.log("Done")
+                else:
+                        self.common.log("Couldn't lock")
+
+        def _removeItemFromQueue(self, itemid):
+                print "D"
+                if self.cache.lock("SimpleDownloaderQueueLock"):
+                        print "De"
+                        items = []
+
+                        queue = self.cache.get("SimpleDownloaderQueue")
+                        self.common.log("queue loaded : " + repr(queue))
+
+                        if queue:
+                                try:
+                                        items = eval(queue)
+                                except:
+                                        items = []
+
+                        for index, item in enumerate(items):
+                                (queue_itemid, item) = item
+                                if queue_itemid == itemid:
+                                        del items[index]
+                                        self.cache.set("SimpleDownloaderQueue", repr(items))
+                                        self.common.log("Removed: " + queue_itemid + " from queue")
+
+                        self.cache.unlock("SimpleDownloaderQueueLock")
+                        self.common.log("Done")
+                else:
+                        self.common.log("Exception")
+
+        def movieItemToPosition(self, itemid, position):
+                if position > 0 and  self.cache.lock("SimpleDownloaderQueueLock"):
+
+                        items = []
+                        if itemid:
+                                queue = self.cache.get("SimpleDownloaderQueue")
+                                self.common.log("queue loaded : " + repr(queue))
+
+                                if queue:
+                                        try:
+                                                items = eval(queue)
+                                        except:
+                                                items = []
+
+                                self.common.log("pre items: %s " % repr(items))
+                                for index, item in enumerate(items):
+                                        (queue_itemid, item) = item
+                                        if queue_itemid == itemid:
+                                                print "FOUND ID"
+                                                del items[index]
+                                                items = items[:position] + [(queue_itemid, item)] + items[position:]
+                                                break
+                                self.common.log("post items: %s " % repr(items))
+
+                                self.cache.set("SimpleDownloaderQueue", repr(items))
+
+                        self.cache.unlock("SimpleDownloaderQueueLock")
+                        self.common.log("Done")
+                else:
+                        self.common.log("Couldn't lock")
+
+        # Shows a more user-friendly notification
         def _showMessage(self, heading, message):
-                self.xbmc.executebuiltin('XBMC.Notification("%s", "%s", %s)' % ( heading, message, self.notification_length) )
-
+                self.xbmc.executebuiltin('XBMC.Notification("%s", "%s", %s)' % (heading, message, self.notification_length))

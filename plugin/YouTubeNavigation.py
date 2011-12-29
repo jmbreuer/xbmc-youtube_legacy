@@ -155,7 +155,7 @@ class YouTubeNavigation():
                         (video, status) = self.player.getVideoObject(params)
                         params["video_url"] = video['video_url']
                         params["Title"] = video['Title']
-                        self.downloader.downloadVideo(params)
+                        self.downloader.download(video["videoid"], params)
                         self.player.downloadSubtitle(video)
 
                 if (get("action") == "play_video"):

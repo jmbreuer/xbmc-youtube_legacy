@@ -35,7 +35,7 @@ language = settings.getLocalizedString
 dbg = settings.getSetting("debug") == "true"
 dbglevel = 3
 
-# plugin structure 
+# plugin structure
 feeds = ""
 scraper = ""
 playlist = ""
@@ -64,8 +64,8 @@ if (__name__ == "__main__" ):
         cache.table_name = "YouTube"
 
         import CommonFunctions
-        common = CommonFunctions.CommonFunctions() 
-        common.plugin = plugin 
+        common = CommonFunctions
+        common.plugin = plugin
 
         import YouTubeUtils
         utils = YouTubeUtils.YouTubeUtils()
