@@ -268,7 +268,7 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 
                 navigation.executeAction({"action": "download"})
 
-                sys.modules["__main__"].downloader.download.assert_called_with("ytvideo1", {'action': 'download', 'video_url': 'Mock url', 'Title': 'Mock Title'})
+                sys.modules["__main__"].downloader.download.assert_called_with("Mock Title-[ytvideo1].mp4", {'action': 'download', 'url': 'Mock url'})
         
         def test_executeAction_should_call_player_playVideo_if_action_is_play_video(self):
                 navigation = YouTubeNavigation()
