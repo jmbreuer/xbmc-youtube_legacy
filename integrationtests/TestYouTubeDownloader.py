@@ -10,9 +10,9 @@ class TestYouTubeDownloader(BaseTestCase.BaseTestCase):
         def test_plugin_should_download_standard_videos(self):
                 sys.modules["__main__"].xbmcvfs.rename.side_effect = os.rename
                 sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings.xml")
-                sys.modules["__main__"].downloader._getNextVideoFromDownloadQueue = Mock()
+                sys.modules["__main__"].downloader._getNextItemFromQueue = Mock()
                 (video, status) = sys.modules["__main__"].player.getVideoObject({"action": "download", "videoid": "54VJWHL2K3I"})
-                sys.modules["__main__"].downloader._getNextVideoFromDownloadQueue.side_effect = [("54VJWHL2K3I", video), {}]
+                sys.modules["__main__"].downloader._getNextItemFromQueue.side_effect = [("54VJWHL2K3I", video), {}]
 
                 self.navigation.executeAction({"action": "download", "videoid": "54VJWHL2K3I"})
 
@@ -21,9 +21,9 @@ class TestYouTubeDownloader(BaseTestCase.BaseTestCase):
         def test_plugin_should_download_agerestricted_over_18_videos(self):
                 sys.modules["__main__"].xbmcvfs.rename.side_effect = os.rename
                 sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings.xml")
-                sys.modules["__main__"].downloader._getNextVideoFromDownloadQueue = Mock()
+                sys.modules["__main__"].downloader._getNextItemFromQueue = Mock()
                 (video, status) = sys.modules["__main__"].player.getVideoObject({"action": "download", "videoid": "fOdNOtS8ZIs"})
-                sys.modules["__main__"].downloader._getNextVideoFromDownloadQueue.side_effect = [("fOdNOtS8ZIs", video), {}]
+                sys.modules["__main__"].downloader._getNextItemFromQueue.side_effect = [("fOdNOtS8ZIs", video), {}]
 
                 self.navigation.executeAction({"action": "download", "videoid": "fOdNOtS8ZIs", "no_embed": "true"})
 
@@ -32,9 +32,9 @@ class TestYouTubeDownloader(BaseTestCase.BaseTestCase):
         def test_plugin_should_download_with_subtitles_when_available(self):
                 sys.modules["__main__"].xbmcvfs.rename.side_effect = os.rename
                 sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings.xml")
-                sys.modules["__main__"].downloader._getNextVideoFromDownloadQueue = Mock()
+                sys.modules["__main__"].downloader._getNextItemFromQueue = Mock()
                 (video, status) = sys.modules["__main__"].player.getVideoObject({"action": "download", "videoid": "bUcszN8jRB8"})
-                sys.modules["__main__"].downloader._getNextVideoFromDownloadQueue.side_effect = [("bUcszN8jRB8", video), {}]
+                sys.modules["__main__"].downloader._getNextItemFromQueue.side_effect = [("bUcszN8jRB8", video), {}]
 
                 self.navigation.executeAction({"action": "download", "videoid": "bUcszN8jRB8"})
 
