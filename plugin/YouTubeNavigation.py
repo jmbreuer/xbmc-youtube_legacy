@@ -156,6 +156,7 @@ class YouTubeNavigation():
                         if "video_url" in video:
                                 params["url"] = video['video_url']
                                 filename = "%s-[%s].mp4" % (''.join(c for c in video['Title'].decode("utf-8") if c not in self.utils.INVALID_CHARS), video["videoid"])
+                                self.player.downloadSubtitle(video)
                                 self.downloader.download(filename, params)
                         else:
                                 if "apierror" in video:
