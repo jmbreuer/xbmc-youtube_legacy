@@ -58,12 +58,10 @@ if (__name__ == "__main__" ):
 
         try:
                 import StorageServer
-                cache = StorageServer.StorageServer()
+                cache = StorageServer.StorageServer("YouTube")
         except:
                 import storageserverdummy as StorageServer
-                cache = StorageServer.StorageServer()
-
-        cache.table_name = "YouTube"
+                cache = StorageServer.StorageServer("YouTube")
 
         import CommonFunctions
         common = CommonFunctions
