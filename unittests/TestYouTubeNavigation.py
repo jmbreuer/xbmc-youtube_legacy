@@ -264,11 +264,12 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
         def test_executeAction_should_call_downloader_downloadVideo_if_action_is_download(self):
                 sys.modules["__main__"].player.getVideoObject = Mock()
                 sys.modules["__main__"].player.getVideoObject.return_value = ({"videoid": "ytvideo1", "video_url": "Mock url", "Title": "Mock Title" }, "mock" )
+                sys.modules["__main__"].settings.getSetting.return_value = "some_path"
                 navigation = YouTubeNavigation()
 
                 navigation.executeAction({"action": "download"})
 
-                sys.modules["__main__"].downloader.download.assert_called_with("Mock Title-[ytvideo1].mp4", {'action': 'download', 'url': 'Mock url'})
+                sys.modules["__main__"].downloader.download.assert_called_with("Mock Title-[ytvideo1].mp4", {'action': 'download', 'url': 'Mock url', "download_path": "some_path"})
         
         def test_executeAction_should_call_player_playVideo_if_action_is_play_video(self):
                 navigation = YouTubeNavigation()
