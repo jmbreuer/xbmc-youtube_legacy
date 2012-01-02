@@ -111,8 +111,8 @@ class YouTubeNavigation():
                             if (cat_get("feed") == "downloads"):
                                 if (self.settings.getSetting("downloadPath")):
                                     self.addListItem(params, category)
-                                else:
-                                    self.addListItem(params, category)
+                            else:
+                                self.addListItem(params, category)
 
         if (get("feed") or get("user_feed") or get("options") or get("store") or get("scraper")):
             return self.list(params)
@@ -489,30 +489,30 @@ class YouTubeNavigation():
                 contact = get("contact")
             cm.append((self.language(30521), "XBMC.RunPlugin(%s?path=%s&action=play_all&user_feed=%s&contact=%s&videoid=%s&)" % (sys.argv[0], item("path"), get("user_feed"), contact, item("videoid"))))
 
-            cm.append((self.language(30501), "XBMC.RunPlugin(%s?path=%s&action=download&videoid=%s)" % (sys.argv[0], item("path"), item("videoid"))))
+        cm.append((self.language(30501), "XBMC.RunPlugin(%s?path=%s&action=download&videoid=%s)" % (sys.argv[0], item("path"), item("videoid"))))
 
-            if (self.settings.getSetting("username") != "" and self.settings.getSetting("oauth2_access_token")):
-                if (get("user_feed") == "favorites" and not get("contact")):
-                    cm.append((self.language(30506), 'XBMC.RunPlugin(%s?path=%s&action=remove_favorite&editid=%s&)' % (sys.argv[0], item("path"), item("editid"))))
-                else:
-                    cm.append((self.language(30503), 'XBMC.RunPlugin(%s?path=%s&action=add_favorite&videoid=%s&)' % (sys.argv[0], item("path"), item("videoid"))))
+        if (self.settings.getSetting("username") != "" and self.settings.getSetting("oauth2_access_token")):
+            if (get("user_feed") == "favorites" and not get("contact")):
+                cm.append((self.language(30506), 'XBMC.RunPlugin(%s?path=%s&action=remove_favorite&editid=%s&)' % (sys.argv[0], item("path"), item("editid"))))
+            else:
+                cm.append((self.language(30503), 'XBMC.RunPlugin(%s?path=%s&action=add_favorite&videoid=%s&)' % (sys.argv[0], item("path"), item("videoid"))))
 
-                if (get("external") == "true" or (get("feed") not in ["subscriptions_favorites", "subscriptions_uploads", "subscriptions_playlists"] and (get("user_feed") != "uploads" and not get("external")))):
-                    cm.append((self.language(30512) % studio, 'XBMC.RunPlugin(%s?path=%s&channel=%s&action=add_subscription)' % (sys.argv[0], item("path"), url_studio)))
+            if (get("external") == "true" or (get("feed") not in ["subscriptions_favorites", "subscriptions_uploads", "subscriptions_playlists"] and (get("user_feed") != "uploads" and not get("external")))):
+                cm.append((self.language(30512) % studio, 'XBMC.RunPlugin(%s?path=%s&channel=%s&action=add_subscription)' % (sys.argv[0], item("path"), url_studio)))
 
-                if (get("playlist") and item("playlist_entry_id")):
-                    cm.append((self.language(30530), "XBMC.RunPlugin(%s?path=%s&action=remove_from_playlist&playlist=%s&playlist_entry_id=%s&)" % (sys.argv[0], item("path"), get("playlist"), item("playlist_entry_id"))))
-                    cm.append((self.language(30528), "XBMC.RunPlugin(%s?path=%s&action=add_to_playlist&videoid=%s&)" % (sys.argv[0], item("path"), item("videoid"))))
+            if (get("playlist") and item("playlist_entry_id")):
+                cm.append((self.language(30530), "XBMC.RunPlugin(%s?path=%s&action=remove_from_playlist&playlist=%s&playlist_entry_id=%s&)" % (sys.argv[0], item("path"), get("playlist"), item("playlist_entry_id"))))
+            cm.append((self.language(30528), "XBMC.RunPlugin(%s?path=%s&action=add_to_playlist&videoid=%s&)" % (sys.argv[0], item("path"), item("videoid"))))
 
-            if (get("feed") != "uploads" and get("user_feed") != "uploads"):
-                cm.append((self.language(30516) % studio, "XBMC.Container.Update(%s?path=%s&feed=uploads&channel=%s)" % (sys.argv[0], get("path"), url_studio)))
+        if (get("feed") != "uploads" and get("user_feed") != "uploads"):
+            cm.append((self.language(30516) % studio, "XBMC.Container.Update(%s?path=%s&feed=uploads&channel=%s)" % (sys.argv[0], get("path"), url_studio)))
 
-            cm.append((self.language(30514), "XBMC.Container.Update(%s?path=%s&feed=search&search=%s)" % (sys.argv[0], get("path"), url_title)))
-            cm.append((self.language(30527), "XBMC.Container.Update(%s?path=%s&feed=related&videoid=%s)" % (sys.argv[0], get("path"), item("videoid"))))
-            cm.append((self.language(30523), "XBMC.ActivateWindow(VideoPlaylist)"))
-            cm.append((self.language(30502), "XBMC.Action(Info)",))
+        cm.append((self.language(30514), "XBMC.Container.Update(%s?path=%s&feed=search&search=%s)" % (sys.argv[0], get("path"), url_title)))
+        cm.append((self.language(30527), "XBMC.Container.Update(%s?path=%s&feed=related&videoid=%s)" % (sys.argv[0], get("path"), item("videoid"))))
+        cm.append((self.language(30523), "XBMC.ActivateWindow(VideoPlaylist)"))
+        cm.append((self.language(30502), "XBMC.Action(Info)",))
 
-            return cm
+        return cm
 
     def addFolderContextMenuItems(self, params={}, item_params={}):
         cm = []
@@ -562,17 +562,17 @@ class YouTubeNavigation():
             cm_url = 'XBMC.Container.Update(%s?path=%s&channel=%s&action=change_subscription_view&view_mode=%s&' % (sys.argv[0], item("path"), item("channel"), "%s")
             if (item("external")):
                 cm_url += "external=true&contact=" + get("contact") + "&"
-                cm_url += ")"
+            cm_url += ")"
 
-                if (item("user_feed") == "favorites"):
-                    cm.append((self.language(30511), cm_url % ("uploads")))
-                    cm.append((self.language(30526), cm_url % ("playlists&folder=true")))
-                elif(item("user_feed") == "playlists"):
-                    cm.append((self.language(30511), cm_url % ("uploads")))
-                    cm.append((self.language(30510), cm_url % ("favorites")))
-                elif (item("user_feed") == "uploads"):
-                    cm.append((self.language(30510), cm_url % ("favorites")))
-                    cm.append((self.language(30526), cm_url % ("playlists&folder=true")))
+            if (item("user_feed") == "favorites"):
+                cm.append((self.language(30511), cm_url % ("uploads")))
+                cm.append((self.language(30526), cm_url % ("playlists&folder=true")))
+            elif(item("user_feed") == "playlists"):
+                cm.append((self.language(30511), cm_url % ("uploads")))
+                cm.append((self.language(30510), cm_url % ("favorites")))
+            elif (item("user_feed") == "uploads"):
+                cm.append((self.language(30510), cm_url % ("favorites")))
+                cm.append((self.language(30526), cm_url % ("playlists&folder=true")))
 
         if (item("channel") or item("contact")):
             if (self.settings.getSetting("username") != "" and self.settings.getSetting("oauth2_access_token")):
