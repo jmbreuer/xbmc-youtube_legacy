@@ -371,7 +371,7 @@ class YouTubeCore():
                 ret_obj = {"status": 500, "content": "", "error": 0}
                 cookie = ""
 
-                if (get("url_data") or get("request") or get("hidden")):
+                if (get("url_data") or get("request") or get("hidden")) and False:
                         self.common.log("called for : " + repr(params['link']))
                 else:
                         self.common.log("called for : " + repr(params))
