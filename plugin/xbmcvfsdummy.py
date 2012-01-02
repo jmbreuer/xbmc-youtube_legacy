@@ -1,12 +1,9 @@
-''' 
+'''
      XBMCVFS override for Dharma.
      Version: 1.0
 '''
 
 import os
-import sys
-import time
-import errno
 
 
 def exists(target):

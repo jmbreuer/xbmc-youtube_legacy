@@ -16,12 +16,17 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys, xbmc, xbmcplugin, xbmcaddon, xbmcgui, urllib2, cookielib
-try: 
-        import xbmcvfs
-except ImportError: 
-        import xbmcvfsdummy as xbmcvfs
-
+import sys
+import xbmc
+import xbmcplugin
+import xbmcaddon
+import xbmcgui
+import urllib2
+import cookielib
+try:
+    import xbmcvfs
+except ImportError:
+    import xbmcvfsdummy as xbmcvfs
 
 # plugin constants
 version = "2.9.0"
@@ -51,55 +56,55 @@ cookie_handler = urllib2.HTTPCookieProcessor(cookiejar)
 opener = urllib2.build_opener(cookie_handler)
 
 if (__name__ == "__main__" ):
-        if dbg:
-                print plugin + " ARGV: " + repr(sys.argv)
+    if dbg:
+        print plugin + " ARGV: " + repr(sys.argv)
+    else:
+        print plugin
+
+    try:
+        import StorageServer
+        cache = StorageServer.StorageServer("YouTube")
+    except:
+        import storageserverdummy as StorageServer
+        cache = StorageServer.StorageServer("YouTube")
+
+    import CommonFunctions
+    common = CommonFunctions
+    common.plugin = plugin
+
+    import YouTubeUtils
+    utils = YouTubeUtils.YouTubeUtils()
+    import YouTubeStorage
+    storage = YouTubeStorage.YouTubeStorage()
+    import YouTubeCore
+    core = YouTubeCore.YouTubeCore()
+    import YouTubeLogin
+    login = YouTubeLogin.YouTubeLogin()
+    import YouTubeFeeds
+    feeds = YouTubeFeeds.YouTubeFeeds()
+    import YouTubePlayer
+    player = YouTubePlayer.YouTubePlayer()
+    import SimpleDownloader as downloader
+    downloader = downloader.SimpleDownloader()
+    import YouTubeScraper
+    scraper = YouTubeScraper.YouTubeScraper()
+    import YouTubePlaylistControl
+    playlist = YouTubePlaylistControl.YouTubePlaylistControl()
+    import YouTubeNavigation
+    navigation = YouTubeNavigation.YouTubeNavigation()
+
+    if (not settings.getSetting("firstrun")):
+        login.login()
+        settings.setSetting("firstrun", "1")
+
+    if (not sys.argv[2]):
+        navigation.listMenu()
+    else:
+        params = common.getParameters(sys.argv[2])
+        get = params.get
+        if (get("action")):
+            navigation.executeAction(params)
+        elif (get("path")):
+            navigation.listMenu(params)
         else:
-                print plugin
-
-        try:
-                import StorageServer
-                cache = StorageServer.StorageServer("YouTube")
-        except:
-                import storageserverdummy as StorageServer
-                cache = StorageServer.StorageServer("YouTube")
-
-        import CommonFunctions
-        common = CommonFunctions
-        common.plugin = plugin
-
-        import YouTubeUtils
-        utils = YouTubeUtils.YouTubeUtils()
-        import YouTubeStorage
-        storage = YouTubeStorage.YouTubeStorage()
-        import YouTubeCore
-        core = YouTubeCore.YouTubeCore()
-        import YouTubeLogin
-        login = YouTubeLogin.YouTubeLogin()
-        import YouTubeFeeds
-        feeds = YouTubeFeeds.YouTubeFeeds()
-        import YouTubePlayer
-        player = YouTubePlayer.YouTubePlayer()
-        import SimpleDownloader as downloader
-        downloader = downloader.SimpleDownloader()
-        import YouTubeScraper
-        scraper = YouTubeScraper.YouTubeScraper()
-        import YouTubePlaylistControl
-        playlist = YouTubePlaylistControl.YouTubePlaylistControl()
-        import YouTubeNavigation
-        navigation = YouTubeNavigation.YouTubeNavigation()
-
-        if ( not settings.getSetting( "firstrun" ) ):
-                login.login()
-                settings.setSetting( "firstrun", '1' )
-        
-        if (not sys.argv[2]):
-                navigation.listMenu()
-        else:
-                params = common.getParameters(sys.argv[2])
-                get = params.get
-                if (get("action")):
-                        navigation.executeAction(params)
-                elif (get("path")):
-                        navigation.listMenu(params)
-                else:
-                        print plugin + " ARGV Nothing done.. verify params " + repr(params)
+            print plugin + " ARGV Nothing done.. verify params " + repr(params)

@@ -4,7 +4,7 @@ import sys
 
 
 class TestYouTubeUserActions(BaseTestCase.BaseTestCase):
-        def test_plugin_should_add_favorite(self):
+        def ttest_plugin_should_add_favorite(self):
                 sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
 
                 self.navigation.listMenu({"user_feed":"favorites", "login":"true", "path":"/root/favorites"})
@@ -28,7 +28,7 @@ class TestYouTubeUserActions(BaseTestCase.BaseTestCase):
                                 result = True
                 assert(result)
                 
-        def test_plugin_should_remove_favorite(self):
+        def ttest_plugin_should_remove_favorite(self):
                 sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
 
                 self.navigation.listMenu({"user_feed":"favorites", "login":"true", "path":"/root/favorites"})
@@ -133,7 +133,7 @@ class TestYouTubeUserActions(BaseTestCase.BaseTestCase):
                 else:
                         assert(False)
 
-        def test_plugin_should_add_playlist(self):
+        def ttest_plugin_should_add_playlist(self):
                 sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
 
                 sys.modules["__main__"].xbmc.Keyboard().isConfirmed.return_value = True
@@ -159,7 +159,7 @@ class TestYouTubeUserActions(BaseTestCase.BaseTestCase):
                                 exists = True
                 assert(exists)
 
-        def test_plugin_should_remove_playlist(self):
+        def ttest_plugin_should_remove_playlist(self):
                 sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
                 sys.modules["__main__"].xbmc.Keyboard().isConfirmed.return_value = True
                 sys.modules["__main__"].xbmc.Keyboard().getText.return_value = "testlist"
