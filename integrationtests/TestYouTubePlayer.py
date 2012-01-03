@@ -4,7 +4,7 @@ import sys
 
 
 class TestYouTubePlayer(BaseTestCase.BaseTestCase):
-    def ttest_plugin_should_play_standard_videos(self):
+    def test_plugin_should_play_standard_videos(self):
         sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
 
         self.navigation.executeAction({"action": "play_video", "videoid": "54VJWHL2K3I"})
@@ -19,7 +19,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         assert(args[0][1]["handle"] == -1)
         assert(args[0][1]["succeeded"] == True)
 
-    def ttest_plugin_should_play_agerestricted_over_18_videos(self):
+    def test_plugin_should_play_agerestricted_over_18_videos(self):
         sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
 
         self.navigation.executeAction({"action": "play_video", "videoid": "QOpyyrtzgBU"})
@@ -34,7 +34,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         assert(args[0][1]["handle"] == -1)
         assert(args[0][1]["succeeded"] == True)
 
-    def ttest_plugin_should_play_agerestricted_over_18_videos_not_embeded(self):
+    def test_plugin_should_play_agerestricted_over_18_videos_not_embeded(self):
         sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
 
         self.navigation.executeAction({"action": "play_video", "videoid": "QOpyyrtzgBU", "no_embed": "true"})
@@ -49,7 +49,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         assert(args[0][1]["handle"] == -1)
         assert(args[0][1]["succeeded"] == True)
 
-    def ttest_plugin_should_play_rtmpe_vidoes(self):
+    def test_plugin_should_play_rtmpe_vidoes(self):
         sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
 
         self.navigation.executeAction({"action": "play_video", "videoid": "8wxOVn99FTE"})
@@ -64,7 +64,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         assert(args[0][1]["handle"] == -1)
         assert(args[0][1]["succeeded"] == True)
 
-    def ttest_plugin_should_play_live_vidoes(self):
+    def test_plugin_should_play_live_vidoes(self):
         sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
 
         self.navigation.executeAction({"action": "play_video", "videoid": "JpYHuK45We0"})
@@ -81,7 +81,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
             assert(args[0][1]["handle"] == -1)
             assert(args[0][1]["succeeded"] == True)
 
-    def ttest_plugin_should_play_videos_with_subtitles_when_available(self):
+    def test_plugin_should_play_videos_with_subtitles_when_available(self):
         sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
         import os
         sys.modules["__main__"].xbmcvfs.exists.side_effect = os.path.exists
@@ -102,7 +102,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         assert(args2[0][0][0] == './tmp/Morning Dew  a bad lip reading of Bruno Mars, feat. Lady Gaga and Jay-Z-[bUcszN8jRB8].ssa')
 
 
-    def ttest_plugin_should_play_videos_with_subtitles_and_annotation_when_available(self):
+    def test_plugin_should_play_videos_with_subtitles_and_annotation_when_available(self):
         sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
         import os
         sys.modules["__main__"].xbmcvfs.exists.side_effect = os.path.exists
