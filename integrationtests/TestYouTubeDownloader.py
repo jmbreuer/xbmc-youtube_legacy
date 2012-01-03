@@ -7,7 +7,7 @@ from mock import Mock
 
 
 class TestYouTubeDownloader(BaseTestCase.BaseTestCase):
-        def test_plugin_should_download_standard_videos(self):
+        def ttest_plugin_should_download_standard_videos(self):
                 sys.modules["__main__"].xbmcvfs.rename.side_effect = os.rename
                 sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings.xml")
                 sys.modules["__main__"].downloader._getNextItemFromQueue = Mock()
@@ -18,7 +18,7 @@ class TestYouTubeDownloader(BaseTestCase.BaseTestCase):
 
                 assert(os.path.exists('./tmp/Roll a D6-[54VJWHL2K3I].mp4'))
 
-        def test_plugin_should_download_agerestricted_over_18_videos(self):
+        def ttest_plugin_should_download_agerestricted_over_18_videos(self):
                 sys.modules["__main__"].xbmcvfs.rename.side_effect = os.rename
                 sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings.xml")
                 sys.modules["__main__"].downloader._getNextItemFromQueue = Mock()
@@ -29,7 +29,7 @@ class TestYouTubeDownloader(BaseTestCase.BaseTestCase):
 
                 assert(os.path.exists("./tmp/נלה מהיפה והחנון בסטריפ צ'אט בקליפ של חובבי ציון-[fOdNOtS8ZIs].mp4"))
 
-        def test_plugin_should_download_with_subtitles_when_available(self):
+        def ttest_plugin_should_download_with_subtitles_when_available(self):
                 sys.modules["__main__"].xbmcvfs.rename.side_effect = os.rename
                 sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings.xml")
                 sys.modules["__main__"].downloader._getNextItemFromQueue = Mock()

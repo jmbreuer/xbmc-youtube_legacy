@@ -41,9 +41,9 @@
     <setting id="proxy" value="http://www.keepanonymous.com/search.php?u="/>
     <setting id="force_proxy" value="false"/>
     <setting id="auth" value=""/>
-    <setting id="login_info" value="b554a1e7d71f6316eeb1b62cb5bfb354c40AAAB7IjEiOiAxLCAiMyI6IDc3MTY5MTQ4MywgIjIiOiAiMDNyb0xSeW9CTWJzY1hxczJDRmYydz09IiwgIjUiOiA0NTAzNjAxNzY2NDY1NTM2LCAiNCI6ICJHQUlBIiwgIjciOiAxMzI1MTMxMzExLCAiNiI6IGZhbHNlLCAiOCI6IDExNTMwODYxNzc4NH0="/>
-    <setting id="SID" value="DQAAAJsAAADOdvQ9Sc22AoK36bS4v705vPDg1IYvxebQMWxV4wgdScYL0RP4uC187B7sLWAn3rnQPtE7z5ZuBS5LaDeVuPUwx4hnRqqLzUlbzNC9UtIPdqmAoysBESnxGDSjhUxXY3RaoYcNNlBr-nNlGtD0a0HBYzRA8MocaHn3NbQNvBmfQ4Lded9zdfqEGVZejLk56a8kKbCIx852MYTGNOpTCuB9"/>
-    <setting id="oauth2_access_token" value="ya29.AHES6ZTSqEFHfZ7mBAQNpmmDO7CYSqccSs1k-hyKlaakyLo"/>
-    <setting id="oauth2_expires_at" value="1325548140.89"/>
-    <setting id="oauth2_refresh_token" value="1/LeQpXp7T_QBaSvUqwQ6VJ0JO6HyO6qmTVzcZe0O1wNE"/>
+    <setting id="login_info" value="0f9b29ecc2e3b734365331cadcf926e0c40AAAB7IjEiOiAxLCAiMyI6IDc3MTY5MTQ4MywgIjIiOiAiMDNyb0xSeW9CTWJzY1hxczJDRmYydz09IiwgIjUiOiA0NTAzNjAxNzY2NDY1NTM2LCAiNCI6ICJHQUlBIiwgIjciOiAxMzI1NTk1NTg0LCAiNiI6IGZhbHNlLCAiOCI6IDExNTMwODYxNzc4NH0="/>
+    <setting id="SID" value="DQAAAJsAAACsamC-xIn1osrZtMo7ATJTlIUD6xMlBmc4cqQgvJGr9bqI4tqy1mQFMV7iNg6d5KKZHNVIjwx178QzhlJyEJ2SSzyUt-hBSwbGWIar2gTs8YBcL0J_TcZGqSV-dh3M3V_c-XVVuuq43_p_z_Is8kCwZNSmdKJA7iz5_aFqcD7_f_3CIwn1_lznyGN6opMJVM-LU3yY952HePmn2fMzv-dI"/>
+    <setting id="oauth2_access_token" value="ya29.AHES6ZQOcTH8TxOIhi2hVFkT0zfpEOdu2-XsXFbKUwTLKA"/>
+    <setting id="oauth2_expires_at" value="1325599188.87"/>
+    <setting id="oauth2_refresh_token" value="1/LmaaaFziEumcQ6OlG9o9NaqlJ1ZcMk51QjI9B2uzy6I"/>
 </settings>
