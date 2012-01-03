@@ -3,7 +3,7 @@ import nose, sys
 
 class TestYouTubeUserFeeds(BaseTestCase.BaseTestCase):
 	
-	def ttest_plugin_should_list_user_favorites_video_list_correctly(self):
+	def test_plugin_should_list_user_favorites_video_list_correctly(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
 		sys.modules["__main__"].settings.setSetting("perpage","5")
 		
@@ -15,7 +15,7 @@ class TestYouTubeUserFeeds(BaseTestCase.BaseTestCase):
 		self.assert_directory_contains_almost_only_unique_video_items()
 		self.assert_directory_items_should_have_external_thumbnails()
 	
-	def ttest_plugin_should_list_user_favorites_video_list_page_2_correctly(self):
+	def test_plugin_should_list_user_favorites_video_list_page_2_correctly(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
 		sys.modules["__main__"].settings.setSetting("perpage","2")
 
@@ -27,7 +27,7 @@ class TestYouTubeUserFeeds(BaseTestCase.BaseTestCase):
 		self.assert_directory_contains_almost_only_unique_video_items()
 		self.assert_directory_items_should_have_external_thumbnails()
 	
-	def ttest_plugin_should_list_user_playlists_correctly(self):
+	def test_plugin_should_list_user_playlists_correctly(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
 		
 		self.navigation.listMenu({"user_feed":"playlists", "login":"true","path":"/root/playlists", "folder": "true"})
@@ -37,7 +37,7 @@ class TestYouTubeUserFeeds(BaseTestCase.BaseTestCase):
 		self.assert_directory_is_a_folder_list()
 		self.assert_directory_item_urls_contain("playlist")
 	
-	def ttest_plugin_should_list_user_uploads_videos_list_correctly(self):
+	def test_plugin_should_list_user_uploads_videos_list_correctly(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
 		
 		self.navigation.listMenu({"feed":"uploads", 'login':'true', "path":"/root/uploads"})
@@ -48,7 +48,7 @@ class TestYouTubeUserFeeds(BaseTestCase.BaseTestCase):
 		self.assert_directory_contains_almost_only_unique_video_items()
 		self.assert_directory_items_should_have_external_thumbnails()
 		
-	def ttest_plugin_should_list_user_uploads_videos_list_page_2_correctly(self):
+	def test_plugin_should_list_user_uploads_videos_list_page_2_correctly(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
 		sys.modules["__main__"].settings.setSetting("perpage","0")
 		
@@ -60,7 +60,7 @@ class TestYouTubeUserFeeds(BaseTestCase.BaseTestCase):
 		self.assert_directory_contains_almost_only_unique_video_items()
 		self.assert_directory_items_should_have_external_thumbnails()
 
-	def ttest_plugin_should_list_user_watch_later_video_list_correctly(self):
+	def test_plugin_should_list_user_watch_later_video_list_correctly(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
 
 		self.navigation.listMenu({"user_feed":"watch_later", 'login':'true', "path":"/root/watch_later"})
@@ -72,7 +72,7 @@ class TestYouTubeUserFeeds(BaseTestCase.BaseTestCase):
 		self.assert_directory_items_should_have_external_thumbnails()
 		self.assert_directory_item_urls_contain("playlist_entry_id")
 	
-	def ttest_plugin_should_list_user_recommended_video_list_correctly(self):
+	def test_plugin_should_list_user_recommended_video_list_correctly(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
 
 		self.navigation.listMenu({"user_feed":"recommended", 'login':'true', "path":"/root/watch_later"})
@@ -83,7 +83,7 @@ class TestYouTubeUserFeeds(BaseTestCase.BaseTestCase):
 		self.assert_directory_contains_almost_only_unique_video_items()
 		self.assert_directory_items_should_have_external_thumbnails()
 		
-	def ttest_plugin_should_list_user_watch_later_video_list_page_2_correctly(self):
+	def test_plugin_should_list_user_watch_later_video_list_page_2_correctly(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
 		self.navigation.listMenu({"user_feed":"watch_later", 'login':'true', "page":"1", "path":"/root/watch_later"})
 		
@@ -94,7 +94,7 @@ class TestYouTubeUserFeeds(BaseTestCase.BaseTestCase):
 		self.assert_directory_items_should_have_external_thumbnails()
 		self.assert_directory_item_urls_contain("playlist_entry_id")
 
-	def ttest_plugin_should_list_user_playlist_video_list_correctly_(self):
+	def test_plugin_should_list_user_playlist_video_list_correctly_(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
 
 		#self.navigation.listMenu({"user_feed":"playlist", 'login':'true', "path":"/root/playlist/smokey", "playlist":"E3E0C28746217FA6"})
@@ -103,7 +103,7 @@ class TestYouTubeUserFeeds(BaseTestCase.BaseTestCase):
 		#self.assert_directory_count_less_than_or_equals(51)
 		#self.assert_directory_is_a_video_list()
 	
-	def ttest_plugin_should_list_user_playlist_video_list_page_2_correctly_(self):
+	def test_plugin_should_list_user_playlist_video_list_page_2_correctly_(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
 
 		self.navigation.listMenu({"user_feed":"playlist", 'login':'true', "path":"/root/playlist/smokey", "playlist":"E3E0C28746217FA6", "page":"1"})
@@ -112,7 +112,7 @@ class TestYouTubeUserFeeds(BaseTestCase.BaseTestCase):
 		self.assert_directory_count_less_than_or_equals(51)
 		self.assert_directory_is_a_video_list()
 
-	def ttest_plugin_should_list_user_contacts_folder_list_correctly(self):
+	def test_plugin_should_list_user_contacts_folder_list_correctly(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
 
 		self.navigation.listMenu({"user_feed":"contacts", 'login':'true', "path":"/root/contacts/smokey", "folder": "true"})
@@ -122,7 +122,7 @@ class TestYouTubeUserFeeds(BaseTestCase.BaseTestCase):
 		self.assert_directory_is_a_folder_list()
 		self.assert_directory_item_urls_contain("contact")
 
-	def ttest_plugin_should_list_user_subscriptions_folder_list_correctly_(self):
+	def test_plugin_should_list_user_subscriptions_folder_list_correctly_(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
 		
 		self.navigation.listMenu({"user_feed":"subscriptions", 'login':'true', "folder":"true", "path":"/root/subscriptions/something/smokey"})
@@ -132,7 +132,7 @@ class TestYouTubeUserFeeds(BaseTestCase.BaseTestCase):
 		self.assert_directory_is_a_folder_list()
 		self.assert_directory_item_urls_contain("channel")
 		
-	def ttest_plugin_should_list_newsubscriptions_video_list_correctly(self):	
+	def test_plugin_should_list_newsubscriptions_video_list_correctly(self):	
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
 		
 		self.navigation.listMenu({"feed":"newsubscriptions", "login":"true", "path":"/root/subscriptions/new"})

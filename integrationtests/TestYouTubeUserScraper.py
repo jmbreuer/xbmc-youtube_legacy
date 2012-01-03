@@ -4,22 +4,10 @@ import sys
 
 
 class TestYouTubeUserScraper(BaseTestCase.BaseTestCase):
-    
     def test_plugin_should_scrape_liked_videos_list_correctly(self):
         sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
 
         self.navigation.listMenu({"scraper": "liked_videos", 'login': 'true', "path": "/root/liked_videos"})
-
-        self.assert_directory_count_greater_than_or_equals(10)
-        self.assert_directory_count_less_than_or_equals(51)
-        self.assert_directory_is_a_video_list()
-        self.assert_directory_contains_almost_only_unique_video_items()
-        self.assert_directory_items_should_have_external_thumbnails()
-
-    def test_plugin_should_scrape_watched_history_videos_list_correctly(self):
-        sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
-
-        self.navigation.listMenu({"scraper": "watched_history", 'login': 'true', "path": "/root/watched_history"})
 
         self.assert_directory_count_greater_than_or_equals(10)
         self.assert_directory_count_less_than_or_equals(51)

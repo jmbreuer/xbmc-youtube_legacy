@@ -3,7 +3,7 @@ import nose
 
 
 class TestYouTubeDiscoScraper(BaseTestCase.BaseTestCase):
-    def ttest_plugin_should_scrape_disco_search_video_list_correctly(self):
+    def test_plugin_should_scrape_disco_search_video_list_correctly(self):
         self.navigation.listMenu({"scraper": "search_disco", "search": "Lady Gaga", "path": "/root/explore/music/disco/new"})
 
         self.assert_directory_count_greater_than_or_equals(10)
