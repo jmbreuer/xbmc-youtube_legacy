@@ -62,8 +62,5 @@ class TestYouTubeMusicScraper(BaseTestCase.BaseTestCase):
         self.assert_directory_contains_almost_only_unique_video_items()
         self.assert_directory_items_should_have_thumbnails()
 
-    def ttest_plugin_should_remeber_recently_viewed_artist_and_present_them_correctly(self):
-        assert(False)
-
 if __name__ == "__main__":
     nose.runmodule()
