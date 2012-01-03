@@ -440,6 +440,7 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
 
 		login = YouTubeLogin()
 		login._fillUserPin = Mock()
+                login._fillUserPin.return_value = "123456"
 		
 		result = login._httpLogin({"new":"true"})
 		
@@ -665,6 +666,7 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
 		sys.modules["__main__"].common.parseDOM.return_value = ""
 		sys.modules["__main__"].language.return_value = ""
 		sys.modules["__main__"].common.getUserInput.return_value = ""
+                sys.modules["__main__"].common.getUserInputNumbers.return_value = "123456"
 		login = YouTubeLogin()
 		
 		result = login._fillUserPin("new")
@@ -678,6 +680,7 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
 		sys.modules["__main__"].common.parseDOM.return_value = ""
 		sys.modules["__main__"].language.return_value = ""
 		sys.modules["__main__"].common.getUserInput.return_value = ""
+                sys.modules["__main__"].common.getUserInputNumbers.return_value = "123456"
 		login = YouTubeLogin()
 		
 		result = login._fillUserPin("new")
@@ -690,7 +693,8 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
 		sys.modules["__main__"].settings.getSetting.return_value = "" 
 		sys.modules["__main__"].common.parseDOM.return_value = ""
 		sys.modules["__main__"].language.return_value = "someTitle"
-		sys.modules["__main__"].common.getUserInputNumbers.return_value = ""
+		sys.modules["__main__"].common.getUserInputNumbers.return_value = "123456"
+                sys.modules["__main__"].common.getUserInputNumbers.return_value = "123456"
 		login = YouTubeLogin()
 		
 		result = login._fillUserPin("new")
@@ -715,6 +719,7 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
 		sys.modules["__main__"].common.parseDOM.return_value = ""
 		sys.modules["__main__"].language.return_value = ""
 		sys.modules["__main__"].common.getUserInput.return_value = ""
+                sys.modules["__main__"].common.getUserInputNumbers.return_value = ""
 		login = YouTubeLogin()
 		
 		result = login._fillUserPin("new")
