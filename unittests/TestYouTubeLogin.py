@@ -663,7 +663,7 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
 		
 	def test_fillUserPin_should_call_parseDOM_for_smsToken(self):
 		sys.modules["__main__"].settings.getSetting.return_value = "" 
-		sys.modules["__main__"].common.parseDOM.return_value = ""
+		sys.modules["__main__"].common.parseDOM.return_value = "something"
 		sys.modules["__main__"].language.return_value = ""
 		sys.modules["__main__"].common.getUserInput.return_value = ""
                 sys.modules["__main__"].common.getUserInputNumbers.return_value = "123456"
@@ -677,7 +677,7 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
 		
 	def test_fillUserPin_should_call_parseDOM_for_email(self):
 		sys.modules["__main__"].settings.getSetting.return_value = "" 
-		sys.modules["__main__"].common.parseDOM.return_value = ""
+		sys.modules["__main__"].common.parseDOM.return_value = "something"
 		sys.modules["__main__"].language.return_value = ""
 		sys.modules["__main__"].common.getUserInput.return_value = ""
                 sys.modules["__main__"].common.getUserInputNumbers.return_value = "123456"
@@ -691,10 +691,9 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
 		
 	def test_fillUserPin_should_ask_user_for_user_pin(self):
 		sys.modules["__main__"].settings.getSetting.return_value = "" 
-		sys.modules["__main__"].common.parseDOM.return_value = ""
+		sys.modules["__main__"].common.parseDOM.return_value = "something"
 		sys.modules["__main__"].language.return_value = "someTitle"
 		sys.modules["__main__"].common.getUserInputNumbers.return_value = "123456"
-                sys.modules["__main__"].common.getUserInputNumbers.return_value = "123456"
 		login = YouTubeLogin()
 		
 		result = login._fillUserPin("new")
