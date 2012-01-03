@@ -81,7 +81,7 @@ class YouTubeNavigation():
             {'Title':self.language(30019)  ,'path':"/root/recommended"                     , 'thumbnail':"recommended"       , 'login':"true"  , 'feed':"recommended" },
             {'Title':self.language(30008)  ,'path':"/root/watch_later"                     , 'thumbnail':"watch_later"       , 'login':"true"  , 'feed':"watch_later" },
             {'Title':self.language(30056)  ,'path':"/root/liked"                           , 'thumbnail':"liked"             , 'login':"true"  , 'scraper':"liked_videos" },
-            {'Title':self.language(30059)  ,'path':"/root/history"                         , 'thumbnail':"history"           , 'login':"true"  , 'scraper':"watched_history" },
+            {'Title':self.language(30059)  ,'path':"/root/history"                         , 'thumbnail':"watch_later"       , 'login':"true"  , 'scraper':"watched_history" },
             {'Title':self.language(30018)  ,'path':"/root/contacts"                        , 'thumbnail':"contacts"          , 'login':"true"  , 'user_feed':"contacts", 'folder':'true' },
             {'Title':self.language(30024)  ,'path':"/root/contacts/new"                    , 'thumbnail':"contacts"          , 'login':"true"  , 'action':"add_contact"},
             {'Title':self.language(30002)  ,'path':"/root/favorites"                       , 'thumbnail':"favorites"         , 'login':"true"  , 'user_feed':"favorites" },
