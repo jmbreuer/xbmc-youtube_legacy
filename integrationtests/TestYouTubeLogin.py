@@ -1,6 +1,7 @@
 import BaseTestCase
 import nose
 import sys
+from mock import Mock
 
 
 class TestYouTubeLogin(BaseTestCase.BaseTestCase):
@@ -65,7 +66,10 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
             return userpin
 
         sys.modules["__main__"].settings.load_strings("./resources/2factor-login-settings.xml")
-        sys.modules["__main__"].xbmcgui.Dialog().numeric().side_effect = [str(generatePin()), str(generatePin()), str(generatePin())]
+        dialogdummy = Mock()
+        dialogdummy.numeric.return_value = str(generatePin())
+        sys.modules["__main__"].xbmcgui.Dialog.return_value = dialogdummy
+        #sys.modules["__main__"].xbmcgui.Dialog().numeric.return_value = str(generatePin())
 
         assert(sys.modules["__main__"].settings.getSetting("nick") == "")
         assert(sys.modules["__main__"].settings.getSetting("auth") == "")
