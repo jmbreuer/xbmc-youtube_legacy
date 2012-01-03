@@ -38,6 +38,7 @@ class YouTubeScraper():
         urls['latest_game_trailers'] = "http://www.youtube.com/trailers?s=gtcs"
         urls['upcoming_game_trailers'] = "http://www.youtube.com/trailers?s=gtcs&p=%s&hl=en"
         urls['upcoming_trailers'] = "http://www.youtube.com/trailers?s=tros&p=%s&hl=en"
+        urls['watched_history'] = "http://www.youtube.com/my_history"
         urls['liked_videos'] = "http://www.youtube.com/my_liked_videos"
         urls['music'] = "http://www.youtube.com/music"
         urls['artist'] = "http://www.youtube.com/artist?a=%s&feature=artist"
@@ -481,7 +482,7 @@ class YouTubeScraper():
 
 #=================================== User Scraper ============================================
 
-        def scrapeLikedVideos(self, params):
+        def scrapeUserVideoFeed(self, params):
                 self.common.log("")
 
                 url = self.createUrl(params)
@@ -750,8 +751,8 @@ class YouTubeScraper():
                 if (get("scraper") == "search_disco"):
                         function = self.searchDisco
                         params["batch"] = "true"
-                if (get("scraper") == "liked_videos"):
-                        function = self.scrapeLikedVideos
+                if (get("scraper") in ["liked_videos", "watched_history"]):
+                        function = self.scrapeUserVideoFeed
                         params["batch"] = "true"
                 if (get("scraper") == "music_top100"):
                         function = self.scrapeYouTubeTop100

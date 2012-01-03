@@ -176,7 +176,7 @@ class YouTubePlaylistControl():
                 if not get("scraper") or not get("login"):
                         return False
 
-                (result, status) = self.scraper.scrapeLikedVideos(params)
+                (result, status) = self.scraper.scrapeUserVideoFeed(params)
                 self.common.log("Liked videos "  + repr(result))
                 if status == 200:
                         (result, status) = self.core.getBatchDetails(result, params)
