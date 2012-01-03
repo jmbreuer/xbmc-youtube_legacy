@@ -54,7 +54,7 @@ class YouTubeStorage():
                 self.common.log("Done", 5)
 
         def openFile(self, filepath, options="w"):
-                self.common.log(repr(params), 5)
+                self.common.log(repr(filepath), 5)
                 if options.find("b") == -1:  # Toggle binary mode on failure
                         alternate = options + "b"
                 else:
