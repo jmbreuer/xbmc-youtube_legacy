@@ -10,7 +10,6 @@ class xbmcSettings():
 
     def load_strings(self, path="./resources/settings.xml"):
         print " *** *** loading settings strings *** ***"
-        return None
         self.path = path
         file = io.open(path).read()
         self.dom = minidom.parseString(file)
