@@ -472,21 +472,21 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 	def test_scrapeLikedVideos_should_call_createUrl_to_get_proper_url(self):
 		#sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content_&p=some_playlist&_blabal", "status":200}
 		
-		self.scraper.scrapeLikedVideos({})
+		self.scraper.scrapeUserVideoFeed({})
 		
 		self.scraper.createUrl.assert_any_call({})
 
 	def test_scrapeLikedVideos_should_call_core_fetchPage_to_get_page_content(self):
 		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content_&p=some_playlist&_blabal", "status":200}
 		
-		self.scraper.scrapeLikedVideos({})
+		self.scraper.scrapeUserVideoFeed({})
 		
 		sys.modules["__main__"].core._fetchPage.assert_any_call({"link":"some_url","login":"true"})
 
 	def test_scrapeLikedVideos_should_call_parseDOM_to_find_playlist(self):
 		sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content_&p=some_playlist&_blabal", "status":200}
 		
-		self.scraper.scrapeLikedVideos({})
+		self.scraper.scrapeUserVideoFeed({})
 		
 		assert(sys.modules["__main__"].common.parseDOM.call_count > 0)
 		
@@ -719,7 +719,7 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 		self.scraper.getNewResultsFunction(params)
 		
 		assert(params["batch"] == "true")
-		assert(params["new_results_function"] == self.scraper.scrapeLikedVideos)
+		assert(params["new_results_function"] == self.scraper.scrapeUserVideoFeed)
 	
 	def test_getNewResultsFunction_should_set_proper_params_for_scrapeYouTubeTop100_if_scraper_is_music_top100(self):
 		params = {"scraper":"music_top100"}
