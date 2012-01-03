@@ -3,7 +3,7 @@ import nose
 
 
 class TestYouTubeTrailersScraper(BaseTestCase.BaseTestCase):
-    def ttest_plugin_should_scrape_latest_trailers_correctly(self):
+    def test_plugin_should_scrape_latest_trailers_correctly(self):
         self.navigation.listMenu({"scraper":"latest_trailers","path":"/root/explore/trailers/latest"})
         
         self.assert_directory_count_greater_than_or_equals(10)
@@ -13,7 +13,7 @@ class TestYouTubeTrailersScraper(BaseTestCase.BaseTestCase):
         self.assert_directory_items_should_have_external_thumbnails()
         self.assert_directory_items_should_have_poster_thumbnails()
     
-    def ttest_plugin_should_scrape_current_trailers_correctly(self):
+    def test_plugin_should_scrape_current_trailers_correctly(self):
         self.navigation.listMenu({"scraper":"current_trailers","path":"/root/explore/trailers/current"})
         
         self.assert_directory_count_greater_than_or_equals(10)
@@ -23,7 +23,7 @@ class TestYouTubeTrailersScraper(BaseTestCase.BaseTestCase):
         self.assert_directory_items_should_have_external_thumbnails()
         self.assert_directory_items_should_have_poster_thumbnails()
 
-    def ttest_plugin_should_scrape_upcoming_trailers_correctly(self):
+    def test_plugin_should_scrape_upcoming_trailers_correctly(self):
         self.navigation.listMenu({"scraper":"upcoming_trailers","path":"/root/explore/trailers/upcoming"})
         
         self.assert_directory_count_greater_than_or_equals(1)
@@ -33,7 +33,7 @@ class TestYouTubeTrailersScraper(BaseTestCase.BaseTestCase):
         self.assert_directory_items_should_have_external_thumbnails()
         self.assert_directory_items_should_have_poster_thumbnails()
 
-    def ttest_plugin_should_scrape_popular_trailers_correctly(self):
+    def test_plugin_should_scrape_popular_trailers_correctly(self):
         self.navigation.listMenu({"scraper":"popular_trailers","path":"/root/explore/trailers/popular"})
         
         self.assert_directory_count_greater_than_or_equals(10)
@@ -44,7 +44,7 @@ class TestYouTubeTrailersScraper(BaseTestCase.BaseTestCase):
         self.assert_directory_items_should_have_poster_thumbnails()
         self.assert_directory_should_have_next_folder()
 
-    def ttest_plugin_should_scrape_latest_game_trailers_correctly(self):
+    def test_plugin_should_scrape_latest_game_trailers_correctly(self):
         self.navigation.listMenu({"scraper":"latest_game_trailers","path":"/root/explore/trailers/popular"})
         
         self.assert_directory_count_greater_than_or_equals(10)
@@ -54,7 +54,7 @@ class TestYouTubeTrailersScraper(BaseTestCase.BaseTestCase):
         self.assert_directory_items_should_have_external_thumbnails()
         self.assert_directory_items_should_have_poster_thumbnails()
 
-    def ttest_plugin_should_scrape_popular_game_trailers_correctly(self):
+    def test_plugin_should_scrape_popular_game_trailers_correctly(self):
         self.navigation.listMenu({"scraper":"popular_game_trailers","path":"/root/explore/trailers/popular"})
         
         self.assert_directory_count_greater_than_or_equals(10)

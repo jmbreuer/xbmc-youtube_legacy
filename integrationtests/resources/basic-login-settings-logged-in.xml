@@ -43,7 +43,7 @@
     <setting id="auth" value=""/>
     <setting id="login_info" value="0f9b29ecc2e3b734365331cadcf926e0c40AAAB7IjEiOiAxLCAiMyI6IDc3MTY5MTQ4MywgIjIiOiAiMDNyb0xSeW9CTWJzY1hxczJDRmYydz09IiwgIjUiOiA0NTAzNjAxNzY2NDY1NTM2LCAiNCI6ICJHQUlBIiwgIjciOiAxMzI1NTk1NTg0LCAiNiI6IGZhbHNlLCAiOCI6IDExNTMwODYxNzc4NH0="/>
     <setting id="SID" value="DQAAAJsAAACsamC-xIn1osrZtMo7ATJTlIUD6xMlBmc4cqQgvJGr9bqI4tqy1mQFMV7iNg6d5KKZHNVIjwx178QzhlJyEJ2SSzyUt-hBSwbGWIar2gTs8YBcL0J_TcZGqSV-dh3M3V_c-XVVuuq43_p_z_Is8kCwZNSmdKJA7iz5_aFqcD7_f_3CIwn1_lznyGN6opMJVM-LU3yY952HePmn2fMzv-dI"/>
-    <setting id="oauth2_access_token" value="ya29.AHES6ZTcLFq7dIPHU3BKKEUfzWEhsffP44OZRYfce-ki3PU"/>
-    <setting id="oauth2_expires_at" value="1325623848.3"/>
+    <setting id="oauth2_access_token" value="ya29.AHES6ZQ_EveJqWa7bqDq6X-DEmx4eTJX-T8-Z1OXfq-iKK0"/>
+    <setting id="oauth2_expires_at" value="1325635273.94"/>
     <setting id="oauth2_refresh_token" value="1/LmaaaFziEumcQ6OlG9o9NaqlJ1ZcMk51QjI9B2uzy6I"/>
 </settings>

@@ -4,8 +4,7 @@ import sys
 
 
 class TestYouTubeStorageFolders(BaseTestCase.BaseTestCase):
-    
-    def ttest_plugin_should_list_stored_searches_folder_list_correctly(self):
+    def test_plugin_should_list_stored_searches_folder_list_correctly(self):
         self.navigation.listMenu({"path": "/root/search/new", "feed": "search", "search": "Tuna"})
         self.navigation.listMenu({"path": "/root/search/new", "feed": "search", "search": "Tulip"})
         self.navigation.listMenu({"path": "/root/search/new", "feed": "search", "search": "Monkey"})

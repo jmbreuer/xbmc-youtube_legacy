@@ -17,15 +17,15 @@
     <setting id="liked" value="true"/>
     <setting id="list_view" value="0"/>
     <setting id="live" value="true"/>
-    <setting id="login_info" value="761a19c53d047610fd40c36b2fe391efc40AAAB7IjEiOiAxLCAiMyI6IDc3MTY5MTQ4MywgIjIiOiAiMDNyb0xSeW9CTWJzY1hxczJDRmYydz09IiwgIjUiOiA0NTAzNjAxNzY2NDY1NTM2LCAiNCI6ICJHQUlBIiwgIjciOiAxMzI1NTI5OTUxLCAiNiI6IGZhbHNlLCAiOCI6IDExNTMwODYxNzc4NH0="/>
-    <setting id="SID" value="DQAAAJoAAAAIDzFt-fBLSROV-pn741iixGfeTXGl_tSsD3uKvKxXodMHL6zoln3bYCTAONl9m-M3obaDrOnMPcP2enjyXPVtvABWTy_c5FS1E6Oqjh3DiyI8HqYXaLhWJbBT2T6gBKeots4joScAgfb7QCIGahvHKvNKLe7z12P8aXI8oKu15dWqJq25kJby2g2hhkgORSQ-TVm6_NyM2G8epHa4RtHP"/>
+    <setting id="login_info" value="d216ea48e1de0168a6696c0d26c1d1edc40AAAB7IjEiOiAxLCAiMyI6IDc3MTY5MTQ4MywgIjIiOiAiMDNyb0xSeW9CTWJzY1hxczJDRmYydz09IiwgIjUiOiA0NTAzNjAxNzY2NDY1NTM2LCAiNCI6ICJHQUlBIiwgIjciOiAxMzI1NjMxNjc4LCAiNiI6IGZhbHNlLCAiOCI6IDExNTMwODYxNzc4NH0="/>
+    <setting id="SID" value="DQAAAJsAAACDjNnR5eRklI1uuwwdYwnTUowg-eVkqJhiT6a-SBwx5hJO7cRc2JkwLmV9nSQCaeMooyEpr_caFUOMdxdtsKJitF59iZbwxkff36QYmMKon0mtYKUM9aPu-eD3erQwK43mv6To4UGHYs9A_uLSIE5w2kQ1494vaphlLG09KZatEhJ-qiSfiAy-vIcKLvrrf9sySLyXBaFZhWMK_ytFV7ap"/>
     <setting id="movies" value="true"/>
     <setting id="music" value="true"/>
     <setting id="nick" value="YTlogintester"/>
     <setting id="notification_length" value="2"/>
-    <setting id="oauth2_access_token" value="ya29.AHES6ZRH1RlKVNaFKbk-Y8u4Ld4yJOop-wtRceWLIQ-kX4c"/>
-    <setting id="oauth2_expires_at" value="1325533555.02"/>
-    <setting id="oauth2_refresh_token" value="1/TzXc6VEXK1eLv_TbE6KvtcR4bMddF4116PNJ_L5Wvjs"/>
+    <setting id="oauth2_access_token" value="ya29.AHES6ZQPdMD4-CulaBkr37vHe7mcqESg_Rhyboqo6CB7LIM"/>
+    <setting id="oauth2_expires_at" value="1325635282.81"/>
+    <setting id="oauth2_refresh_token" value="1/fdaZv2Ey8LHR5eTJPOF_VSZEu0j57Tkyg-Hsz67SSco"/>
     <setting id="perpage" value="0"/>
     <setting id="playlists" value="true"/>
     <setting id="preferred" value="true"/>
