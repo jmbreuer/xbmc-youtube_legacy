@@ -62,11 +62,7 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
         sys.modules["__main__"].settings.load_strings("./resources/2factor-login-settings.xml")
         tmp = sys.modules["__main__"].xbmcgui.Dialog()
         tmp.numeric.side_effect = self.generatePin
-        #self.intializePlugin()
-        #tmp = sys.modules["__main__"].common.getUserInputNumbers("testing")
 
-        #print repr(tmp)
-        #assert(False)
         assert(sys.modules["__main__"].settings.getSetting("nick") == "")
         assert(sys.modules["__main__"].settings.getSetting("auth") == "")
         assert(sys.modules["__main__"].settings.getSetting("oauth2_access_token") == "")
