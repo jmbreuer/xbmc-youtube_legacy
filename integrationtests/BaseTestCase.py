@@ -32,6 +32,7 @@ class BaseTestCase(unittest2.TestCase):  #pragma: no cover
 
                 sys.argv = ["something", -1, "something_else"]
                 import CommonFunctions
+                reload(CommonFunctions)
                 sys.modules["__main__"].common = CommonFunctions
                 sys.modules["__main__"].common.log = sys.modules["__main__"].xbmc.log
                 import SimpleDownloader
