@@ -43,6 +43,7 @@ class YouTubeStorage():
                                        )
 
         def list(self, params={}):
+                self.common.log(repr(params), 5)
                 get = params.get
                 if get("store") == "contact_options":
                         return self.getUserOptionFolder(params)
@@ -50,8 +51,10 @@ class YouTubeStorage():
                         return self.getStoredArtists(params)
                 elif get("store"):
                         return self.getStoredSearches(params)
+                self.common.log("Done", 5)
 
         def openFile(self, filepath, options="w"):
+                self.common.log(repr(params), 5)
                 if options.find("b") == -1:  # Toggle binary mode on failure
                         alternate = options + "b"
                 else:
@@ -63,8 +66,8 @@ class YouTubeStorage():
                         return io.open(filepath, alternate)
 
         def getStoredArtists(self, params={}):
+                self.common.log(repr(params), 5)
                 get = params.get
-                self.common.log("")
 
                 artists = self.retrieve(params)
 
@@ -87,8 +90,8 @@ class YouTubeStorage():
                 return (result, 200)
 
         def deleteStoredArtist(self, params={}):
+                self.common.log(repr(params), 5)
                 get = params.get
-                self.common.log("")
 
                 artist = get("artist")
                 artists = self.retrieve(params)
@@ -103,8 +106,8 @@ class YouTubeStorage():
                 self.xbmc.executebuiltin("Container.Refresh")
 
         def saveStoredArtist(self, params={}):
+                self.common.log(repr(params), 5)
                 get = params.get
-                self.common.log("")
 
                 if get("artist") and get("artist_name"):
                         params["store"] = "artists"
@@ -115,10 +118,10 @@ class YouTubeStorage():
                         del params["store"]
 
         def getStoredSearches(self, params={}):
+                self.common.log(repr(params), 5)
                 get = params.get
-                self.common.log("")
 
-                searches = self.retrieve(params)
+                searches = self.retrieveSettings(params)
 
                 result = []
                 for search in searches:
@@ -134,21 +137,22 @@ class YouTubeStorage():
                                 item["scraper"] = "search_disco"
                                 item["icon"] = "discoball"
 
-                        thumbnail = self.retrieve(params, "thumbnail", item)
+                        thumbnail = self.retrieveSettings(params, "thumbnail", item)
                         if thumbnail:
                                 item["thumbnail"] = thumbnail
                         else:
                                 item["thumbnail"] = item["icon"]
                         result.append(item)
 
+                self.common.log("Done: " + repr(result), 5)
                 return (result, 200)
 
         def deleteStoredSearch(self, params={}):
+                self.common.log(repr(params), 5)
                 get = params.get
-                self.common.log("")
 
                 query = urllib.unquote_plus(get("delete"))
-                searches = self.retrieve(params)
+                searches = self.retrieveSettings(params)
 
                 for count, search in enumerate(searches):
                         if (search.lower() == query.lower()):
@@ -160,11 +164,12 @@ class YouTubeStorage():
                 self.xbmc.executebuiltin("Container.Refresh")
 
         def saveStoredSearch(self, params={}):
+                self.common.log(repr(params), 5)
                 get = params.get
-                self.common.log("")
 
                 if get("search"):
-                        searches = self.retrieve(params)
+                        searches = self.retrieveSettings(params)
+                        self.common.log("1: " + repr(searches), 5)
 
                         new_query = urllib.unquote_plus(get("search"))
                         old_query = new_query
@@ -179,11 +184,13 @@ class YouTubeStorage():
 
                         searchCount = (10, 20, 30, 40,)[int(self.settings.getSetting("saved_searches"))] - 1
                         searches = [new_query] + searches[:searchCount]
+                        self.common.log("2: " + repr(searches), 5)
                         self.store(params, searches)
+                self.common.log("Done", 5)
 
         def editStoredSearch(self, params={}):
+                self.common.log(repr(params), 5)
                 get = params.get
-                self.common.log("")
 
                 if (get("search")):
                         old_query = urllib.unquote_plus(get("search"))
@@ -209,8 +216,8 @@ class YouTubeStorage():
                         del params["store"]
 
         def getUserOptionFolder(self, params={}):
+                self.common.log(repr(params), 5)
                 get = params.get
-                self.common.log("")
 
                 result = []
                 for item in self.user_options:
@@ -221,8 +228,8 @@ class YouTubeStorage():
                 return (result, 200)
 
         def changeSubscriptionView(self, params={}):
+                self.common.log(repr(params), 5)
                 get = params.get
-                self.common.log("")
 
                 if (get("view_mode")):
                         key = self.getStorageKey(params, "viewmode")
@@ -234,8 +241,8 @@ class YouTubeStorage():
                                 params["folder"] = "true"  # No result
 
         def reversePlaylistOrder(self, params={}):
+                self.common.log(repr(params), 5)
                 get = params.get
-                self.common.log("")
 
                 if (get("playlist")):
                         value = "true"
@@ -248,8 +255,8 @@ class YouTubeStorage():
                         self.xbmc.executebuiltin("Container.Refresh")
 
         def getReversePlaylistOrder(self, params={}):
+                self.common.log(repr(params), 5)
                 get = params.get
-                self.common.log("")
 
                 result = False
                 if (get("playlist")):
@@ -261,6 +268,7 @@ class YouTubeStorage():
 
         #=================================== Storage Key ========================================
         def getStorageKey(self, params={}, type="", item={}):
+                self.common.log(repr(params), 5)
                 if type == "value":
                         return self._getValueStorageKey(params, item)
                 elif type == "viewmode":
@@ -270,6 +278,7 @@ class YouTubeStorage():
                 return self._getResultSetStorageKey(params)
 
         def _getThumbnailStorageKey(self, params={}, item={}):
+                self.common.log(repr(params), 5)
                 get = params.get
                 iget = item.get
                 key = ""
@@ -318,6 +327,7 @@ class YouTubeStorage():
                 return key
 
         def _getValueStorageKey(self, params={}, item={}):
+                self.common.log(repr(params), 5)
                 get = params.get
                 iget = item.get
                 key = ""
@@ -336,6 +346,7 @@ class YouTubeStorage():
                 return key 
 
         def _getViewModeStorageKey(self, params={}, item={}):
+                self.common.log(repr(params), 5)
                 get = params.get
                 iget = item.get
                 key = ""
@@ -353,6 +364,7 @@ class YouTubeStorage():
                 return key
 
         def _getResultSetStorageKey(self, params={}):
+                self.common.log(repr(params), 5)
                 get = params.get
 
                 key = ""
@@ -390,10 +402,12 @@ class YouTubeStorage():
                 if get("store"):
                         key = "store_" + get("store")
 
+                self.common.log("Done : %s" % key, 5)
                 return key
 
         #============================= Storage Functions =================================
-        def store(self, params={}, results = [], type = "", item={}):
+        def store(self, params={}, results=[], type="", item={}):
+                self.common.log(repr(params), 5)
                 key = self.getStorageKey(params, type, item)
 
                 self.common.log("Got key " + repr(key))
@@ -401,13 +415,17 @@ class YouTubeStorage():
                 if type == "thumbnail" or type == "viewmode" or type == "value":
                         self.storeValue(key, results)
                 else:
-                        self.storeResultSet(key, results)
+                        self.storeResultSetSettings(key, results)
+                self.common.log("done", 5)
 
         def storeValue(self, key, value):
+                self.common.log(repr(key) + " - " + repr(value), 5)
                 if value:
                         self.cache.set(key, value)
+                self.common.log("done", 5)
 
         def storeResultSet(self, key, results=[], params={}):
+                self.common.log(repr(params), 5)
                 get = params.get
 
                 if results:
@@ -421,11 +439,42 @@ class YouTubeStorage():
                                 existing.append(results)
                                 self.cache.set(key, repr(existing))
                         else:
+                                self.common.log("hit else", 5)
                                 value = repr(results)
+                                self.common.log(repr(key) + " - " + repr(value), 5)
                                 self.cache.set(key, value)
+                self.common.log("done", 5)
+
+        def storeValueSettings(self, key, value):
+                self.common.log(repr(key) + " - " + repr(value), 5)
+                if value:
+                        self.settings.setSetting(key, value)
+                self.common.log("done", 5)
+
+        def storeResultSetSettings(self, key, results=[], params={}):
+                self.common.log(repr(params), 5)
+                get = params.get
+
+                if results:
+                        if get("prepend"):
+                                searchCount = (10, 20, 30, 40,)[int(self.settings.getSetting("saved_searches"))]
+                                existing = self.retrieveResultSet(key)
+                                existing = [results] + existing[:searchCount]
+                                self.settings.setSetting(key, repr(existing))
+                        elif get("append"):
+                                existing = self.retrieveResultSet(key)
+                                existing.append(results)
+                                self.settings.setSetting(key, repr(existing))
+                        else:
+                                self.common.log("hit else", 5)
+                                value = repr(results)
+                                self.common.log(repr(key) + " - " + repr(value), 5)
+                                self.settings.setSetting(key, value)
+                self.common.log("done", 5)
 
         #============================= Retrieval Functions =================================
         def retrieve(self, params={}, type="", item={}):
+                self.common.log(repr(params), 5)
                 key = self.getStorageKey(params, type, item)
 
                 self.common.log("Got key " + repr(key))
@@ -436,6 +485,7 @@ class YouTubeStorage():
                         return self.retrieveResultSet(key)
 
         def retrieveValue(self, key):
+                self.common.log(repr(key), 5)
                 value = ""
                 if key:
                         value = self.cache.get(key)
@@ -443,9 +493,44 @@ class YouTubeStorage():
                 return value
 
         def retrieveResultSet(self, key):
+                self.common.log(repr(key), 5)
                 results = []
 
                 value = self.cache.get(key)
+                self.common.log(repr(value), 5)
+                if value:
+                        try:
+                                results = eval(value)
+                        except:
+                                results = []
+
+                return results
+
+        def retrieveSettings(self, params={}, type="", item={}):
+                self.common.log(repr(params), 5)
+                key = self.getStorageKey(params, type, item)
+
+                self.common.log("Got key " + repr(key))
+
+                if type == "thumbnail" or type == "viewmode" or type == "value":
+                        return self.retrieveValueSettings(key)
+                else:
+                        return self.retrieveResultSetSettings(key)
+
+        def retrieveValueSettings(self, key):
+                self.common.log(repr(key), 5)
+                value = ""
+                if key:
+                        value = self.settings.getSetting(key)
+
+                return value
+
+        def retrieveResultSetSettings(self, key):
+                self.common.log(repr(key), 5)
+                results = []
+
+                value = self.settings.getSetting(key)
+                self.common.log(repr(value), 5)
                 if value:
                         try:
                                 results = eval(value)

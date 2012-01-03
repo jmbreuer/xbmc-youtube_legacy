@@ -57,6 +57,15 @@ class BaseTestCase(unittest2.TestCase):  #pragma: no cover
                 import YouTubeNavigation
                 self.navigation = YouTubeNavigation.YouTubeNavigation()
 
+        def reset_xbmc_mocks(self):
+                sys.modules["__main__"].xbmcplugin.addDirectoryItem.reset_mock()
+                sys.modules["__main__"].xbmcplugin.reset_mock()
+                sys.modules["__main__"].xbmc.PlayList().add.reset_mock()
+                sys.modules["__main__"].xbmc.PlayList().reset_mock()
+                sys.modules["__main__"].xbmc.reset_mock()
+                sys.modules["__main__"].xbmcgui.ListItem.reset_mock()
+                sys.modules["__main__"].xbmcgui.reset_mock()
+
         def assert_directory_count_greater_than_or_equals(self, count):
                 args = sys.modules["__main__"].xbmcplugin.addDirectoryItem.call_args_list
 
@@ -210,6 +219,22 @@ class BaseTestCase(unittest2.TestCase):  #pragma: no cover
                         print "Directory list: \r\n" + repr(args)
                         
                 assert(missing_count <= 1)
+
+        def assert_directory_item_urls_contain_at_least_one(self, param):
+                args = sys.modules["__main__"].xbmcplugin.addDirectoryItem.call_args_list
+
+                found = False
+
+                for call in args:
+                        url = call[1]["url"]
+                        if url.find(param) > -1:
+                            found = True
+                
+                if not found:
+                        print 'Couldnt find %s in list of directory item title\'s' % param
+                        print "Directory list: \r\n" + repr(args)
+                        
+                assert(found == True)
 
         def assert_directory_item_titles_contain(self, param):
                 args = sys.modules["__main__"].xbmcplugin.addDirectoryItem.call_args_list

@@ -97,6 +97,7 @@ class YouTubeNavigation():
 
     #==================================== Main Entry Points===========================================
     def listMenu(self, params={}):
+        self.common.log(repr(params), 5)
         get = params.get
         cache = True
 
@@ -126,6 +127,7 @@ class YouTubeNavigation():
             self.xbmc.executebuiltin("Container.SetViewMode(500)")
 
         self.xbmcplugin.endOfDirectory(handle=int(sys.argv[1]), succeeded=True, cacheToDisc=cache)
+        self.common.log("Done", 5)
 
     def executeAction(self, params={}):
         self.common.log(params, 3)
@@ -183,9 +185,11 @@ class YouTubeNavigation():
             self.storage.reversePlaylistOrder(params)
         if (get("action") == "create_playlist"):
             self.playlist.createPlaylist(params)
+        self.common.log("Done", 5)
 
     #==================================== Item Building and Listing ===========================================
     def list(self, params={}):
+        self.common.log("", 5)
         get = params.get
         results = []
         if (get("feed") == "search" or get("scraper") == "search_disco"):
@@ -213,12 +217,15 @@ class YouTubeNavigation():
                 self.parseFolderList(params, results)
             else:
                 self.parseVideoList(params, results)
+                self.common.log("Done", 5)
                 return True
         else:
             self.showListingError(params)
+            self.common.log("Error")
             return False
 
     def showListingError(self, params={}):
+        self.common.log(repr(params), 5)
         get = params.get
         label = ""
         if get("external"):
@@ -241,18 +248,23 @@ class YouTubeNavigation():
             label = self.language(30615)
         if label:
             self.utils.showMessage(label, self.language(30601))
+        self.common.log("Done", 5)
 
     #================================== Plugin Actions =========================================
     def addToFavorites(self, params={}):
+        self.common.log("", 5)
         get = params.get
         if (get("videoid")):
             (message, status) = self.core.add_favorite(params)
             if status != 200:
                 self.utils.showErrorMessage(self.language(30020), message, status)
+                self.common.log("Error", 5)
                 return False
+        self.common.log("Done", 5)
         return True
 
     def removeFromFavorites(self, params={}):
+        self.common.log("", 5)
         get = params.get
 
         if (get("editid")):
@@ -262,9 +274,11 @@ class YouTubeNavigation():
                 return False
             self.xbmc.executebuiltin("Container.Refresh")
 
+        self.common.log("Done", 5)
         return True
 
     def addContact(self, params={}):
+        self.common.log("", 5)
         get = params.get
 
         if not get("contact"):
@@ -279,9 +293,11 @@ class YouTubeNavigation():
             self.utils.showMessage(self.language(30613), get("contact"))
             self.xbmc.executebuiltin("Container.Refresh")
 
+        self.common.log("Done", 5)
         return True
 
     def removeContact(self, params={}):
+        self.common.log("", 5)
         get = params.get
 
         if (get("contact")):
@@ -295,15 +311,18 @@ class YouTubeNavigation():
         return True
 
     def addSubscription(self, params={}):
+        self.common.log("", 5)
         get = params.get
         if (get("channel")):
             (message, status) = self.core.add_subscription(params)
             if status != 200:
                 self.utils.showErrorMessage(self.language(30021), message, status)
                 return False
+        self.common.log("Done", 5)
         return True
 
     def removeSubscription(self, params={}):
+        self.common.log("", 5)
         get = params.get
         if (get("editid")):
             (message, status) = self.core.remove_subscription(params)
@@ -312,11 +331,13 @@ class YouTubeNavigation():
                 return False
 
             self.xbmc.executebuiltin("Container.Refresh")
+        self.common.log("Done", 5)
         return True
 
     #================================== List Item manipulation =========================================
     # is only used by List Menu
     def addListItem(self, params={}, item_params={}):
+        self.common.log("", 5)
         item = item_params.get
 
         if (not item("action")):
@@ -337,9 +358,11 @@ class YouTubeNavigation():
                 self.addVideoListItem(params, item_params, 0)
             else:
                 self.addActionListItem(params, item_params)
+        self.common.log("Done", 5)
 
     # common function for adding folder items
     def addFolderListItem(self, params={}, item_params={}, size=0):
+        self.common.log("", 5)
         item = item_params.get
 
         icon = "DefaultFolder.png"
@@ -364,9 +387,11 @@ class YouTubeNavigation():
         if (item("feed") == "downloads"):
             url = self.settings.getSetting("downloadPath")
         self.xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url, listitem=listitem, isFolder=True, totalItems=size)
+        self.common.log("Done", 5)
 
     # common function for adding action items
     def addActionListItem(self, params={}, item_params={}, size=0):
+        self.common.log("", 5)
         item = item_params.get
         folder = True
         icon = "DefaultFolder.png"
@@ -381,9 +406,11 @@ class YouTubeNavigation():
         url += 'action=' + item("action") + '&'
 
         self.xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url, listitem=listitem, isFolder=folder, totalItems=size)
+        self.common.log("Done", 5)
 
     # common function for adding video items
     def addVideoListItem(self, params={}, item_params={}, listSize=0):
+        self.common.log("", 5)
         get = params.get
         item = item_params.get
 
@@ -416,11 +443,13 @@ class YouTubeNavigation():
         listitem.setProperty("IsPlayable", "true")
         listitem.setInfo(type='Video', infoLabels=item_params)
         self.xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url, listitem=listitem, isFolder=False, totalItems=listSize + 1)
+        self.common.log("Done", 5)
 
     #==================================== Core Output Parsing Functions ===========================================
 
     # Parses a folder list consisting of a tuple of dictionaries
     def parseFolderList(self, params, results):
+        self.common.log("", 5)
         listSize = len(results)
         get = params.get
 
@@ -433,9 +462,11 @@ class YouTubeNavigation():
             self.addFolderListItem(params, result_params, listSize + 1)
 
         self.xbmcplugin.endOfDirectory(handle=int(sys.argv[1]), succeeded=True, cacheToDisc=cache)
+        self.common.log("Done", 5)
 
     # parses a video list consisting of a tuple of dictionaries
     def parseVideoList(self, params, results):
+        self.common.log("", 5)
         listSize = len(results)
         get = params.get
 
@@ -467,8 +498,10 @@ class YouTubeNavigation():
         self.xbmcplugin.addSortMethod(handle=int(sys.argv[1]), sortMethod=self.xbmcplugin.SORT_METHOD_GENRE)
 
         self.xbmcplugin.endOfDirectory(handle=int(sys.argv[1]), succeeded=True, cacheToDisc=True)
+        self.common.log("Done", 5)
 
     def addVideoContextMenuItems(self, params={}, item_params={}):
+        self.common.log("", 5)
         cm = []
         get = params.get
         item = item_params.get
@@ -512,9 +545,11 @@ class YouTubeNavigation():
         cm.append((self.language(30523), "XBMC.ActivateWindow(VideoPlaylist)"))
         cm.append((self.language(30502), "XBMC.Action(Info)",))
 
+        self.common.log("Done", 5)
         return cm
 
     def addFolderContextMenuItems(self, params={}, item_params={}):
+        self.common.log("", 5)
         cm = []
         get = params.get
         item = item_params.get
@@ -593,4 +628,5 @@ class YouTubeNavigation():
                     cm.append((self.language(30025), 'XBMC.RunPlugin(%s?path=%s&action=remove_contact&contact=%s&)' % (sys.argv[0], item("path"), item("Title"))))
 
         cm.append((self.language(30523), "XBMC.ActivateWindow(VideoPlaylist)"))
+        self.common.log("Done", 5)
         return cm
