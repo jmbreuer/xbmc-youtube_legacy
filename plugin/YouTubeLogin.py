@@ -183,8 +183,9 @@ class YouTubeLogin():
                         # Check if there are any errors to report
                         errors = self.core._findErrors(ret, silent=True)
                         if errors:
-                                self.common.log("Returning error: " + repr(errors))
-                                return (errors, 303)
+                                if errors.find("The code you entered didn") == -1 or (errors.find("The code you entered didn") > -1 and step > 12):
+                                        self.common.log("Returning error: " + repr(errors))
+                                        return (errors, 303)
 
                         if len(nick) > 0:
                                 self.common.log("Logged in. Parsing data.")
