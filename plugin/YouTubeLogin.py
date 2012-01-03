@@ -223,6 +223,8 @@ class YouTubeLogin():
                         ## 2-factor login start
                         if ret["content"].find("smsUserPin") > -1:
                                 url_data = self._fillUserPin(ret["content"])
+                                if len(url_data) == 0:
+                                    return (False, 500)
 
                                 target_url = ret["new_url"]
                                 if target_url.rfind("/") > 10:
@@ -307,15 +309,17 @@ class YouTubeLogin():
                 email = self.common.parseDOM(content, "input", attrs={"name": "email"}, ret="value")
                 userpin = self.common.getUserInputNumbers(self.language(30627))
 
-                if len(smsToken) > 0 and len(email) > 0 and len(userpin) > 0:
+                if len(userpin) > 0:
                         url_data = {"smsToken": smsToken[0],
                                      "PersistentCookie": "yes",
                                      "smsUserPin": userpin,
-                                     "smsVerifyPin" : "Verify",
-                                     "timeStmp" : "",
-                                     "secTok" : "",
-                                     "email" : email[0]}
+                                     "smsVerifyPin": "Verify",
+                                     "timeStmp": "",
+                                     "secTok": "",
+                                     "email": email[0]}
                         return url_data
+                else:
+                    self.common.log("Replace this with a message telling users that they didn't enter a pin")
                 return {}
 
         def _getCookieInfoAsHTML(self):
