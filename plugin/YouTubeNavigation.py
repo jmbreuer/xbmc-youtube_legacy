@@ -157,6 +157,7 @@ class YouTubeNavigation():
         if (get("action") == "download"):
             (video, status) = self.player.getVideoObject(params)
             if "video_url" in video:
+                params["Title"] = video['Title']
                 params["url"] = video['video_url']
                 params["download_path"] = self.settings.getSetting("downloadPath")
                 filename = "%s-[%s].mp4" % (''.join(c for c in video['Title'].decode("utf-8") if c not in self.utils.INVALID_CHARS), video["videoid"])
