@@ -27,6 +27,7 @@
 [B]Version 2.9.0[/B]
 - Changed Merged Music and disco since YouTube removed almost all disco features
 - Changed Removed disco top artists since YouTube Removed it from their site
+- Added Scraper for the users watched history feed
 - Report SSL errors back to the user.
 
 [B]Version 2.8.0[/B]
