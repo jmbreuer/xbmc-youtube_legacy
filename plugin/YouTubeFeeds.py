@@ -331,10 +331,13 @@ class YouTubeFeeds():
                         else:
                                 temp_objects = self.core.getVideoInfo(result["content"], params)
 
-                        next = temp_objects[len(temp_objects) - 1].get("next", "false")
-                        if next == "true":
+                        if len(temp_objects) > 0:
+                            next = temp_objects[len(temp_objects) - 1].get("next", "false")
+                            if next == "true":
                                 temp_objects = temp_objects[:len(temp_objects) - 1]
-                        ytobjects += temp_objects
+                            ytobjects += temp_objects
+                        else:
+                            self.common.log("Didn't get any temp_objects. This should NOT happen")
 
                 if get("user_feed"):
                         if get("user_feed") != "playlist" and get("action") != "play_all":
