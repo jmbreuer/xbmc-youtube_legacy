@@ -166,7 +166,7 @@ class YouTubePlayer():
                 self.common.log("")
                 get = video.get
 
-                filename = ''.join(c for c in video['Title'].decode("utf-8") if c not in self.utils.INVALID_CHARS) + "-[" + get('videoid') + "]" + ".ssa"
+                filename = ''.join(c for c in self.common.makeUTF8(video['Title']) if c not in self.utils.INVALID_CHARS) + "-[" + get('videoid') + "]" + ".ssa"
                 path = os.path.join(self.xbmc.translatePath(self.settings.getAddonInfo("profile")).decode("utf-8"), filename)
 
                 w = self.storage.openFile(path, "wb")
