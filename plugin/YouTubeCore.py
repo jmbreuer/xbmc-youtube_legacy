@@ -165,6 +165,13 @@ class YouTubeCore():
         result = self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true", "method": "DELETE"})
         return (result["content"], result["status"])
 
+    def set_video_watched(self, params={}):
+        self.common.log("")
+        get = params.get
+        url = "https://gdata.youtube.com/feeds/api/users/default/watch_later/%s" % get("videoid")
+        result = self._fetchPage({"link": url, "api": "true", "login": "true", "auth": "true", "method": "DELETE"})
+        return (result["content"], result["status"])
+
     def getCategoriesFolderInfo(self, xml, params={}):
         self.common.log("")
 
