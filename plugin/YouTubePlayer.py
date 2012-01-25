@@ -737,7 +737,6 @@ class YouTubePlayer():
                 data = result["content"][start: end]
                 if len(data) > 0:
                     data = data.replace("\\/", "/")
-                    print "PLAYER_CONFIG : " + data
                     player_object = json.loads('{ "PLAYER_CONFIG" : ' + data + "}" )
                     self.common.log("player_object " + repr(player_object), 4)
             else:
