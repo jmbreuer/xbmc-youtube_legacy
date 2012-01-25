@@ -9,12 +9,15 @@
 - Unit test coverage of Core above 90% im looking at you "Fetch page"
 - Unit test new functions in storage...
 - Allow users to change sort on searches
+- Fix: Embed code will never be triggered in a real world scenario
+- Main Playback code (JSON) is broken we're currently using our fall back in 99% of all cases we need better testing of this code
 - Hook-in Caching the right places. And only the right places. (mostly scrapers)
 - Scrape Education. Search for feeds.
 - Check live feed vs scrape
 - Replace scraper with feeds for: Trailers, shows, music, education, disco.
 - If not replaceable refactor show scraper at least.
 - Integration tests on all user actions.
+- Check that page 2 works on subscriptions and make sure it cant crash due to too few items
 - http://forum.xbmc.org/showpost.php?p=934392&postcount=1512
 - youtube videos in smartplaylist.
 
