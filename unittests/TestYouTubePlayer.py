@@ -846,7 +846,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 
     def test_getVideoLinks_should_parse_flashvars(self):
         player = YouTubePlayer()
-        # watch-8wxOVn99FTE-rtmpe.html
+
         sys.modules["__main__"].core._fetchPage.return_value = {"status": 200, "content": self.readTestInput("watch-gyzlwNvf8ss-standard-without-player_config.html", False)}
         sys.modules["__main__"].common.parseDOM.return_value = [self.readTestInput("watch-gyzlwNvf8ss-flashvars.txt", False)]
 
@@ -856,7 +856,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 
     def test_getVideoLinks_should_parse_flashvars_from_embed(self):
         player = YouTubePlayer()
-        # watch-8wxOVn99FTE-rtmpe.html
+
         sys.modules["__main__"].core._fetchPage.side_effect = [{"status": 500, "content": self.readTestInput("get_video_info-gyzlwNvf8ss", False)}, {"status": 200, "content": self.readTestInput("get_video_info-gyzlwNvf8ss", False)} ]
         sys.modules["__main__"].common.parseDOM.return_value = [self.readTestInput("watch-gyzlwNvf8ss-flashvars.txt", False) ]
 
@@ -868,7 +868,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         player = YouTubePlayer()
         player.getVideoUrlMap = Mock()
         player.getVideoUrlMap.return_value = {}
-        # watch-8wxOVn99FTE-rtmpe.html
+
         sys.modules["__main__"].core._fetchPage.side_effect = [{"status": 500, "content": self.readTestInput("get_video_info-gyzlwNvf8ss", False)}, {"status": 200, "content": self.readTestInput("get_video_info-gyzlwNvf8ss", False)} ]
         sys.modules["__main__"].common.parseDOM.return_value = [self.readTestInput("watch-gyzlwNvf8ss-flashvars.txt", False) ]
         sys.modules["__main__"].core._findErrors.return_value = "mock error"
