@@ -28,30 +28,30 @@ except ImportError: import json
 
 
 class YouTubePlayer():
-    fmt_value = {
-        5: "240p h263 flv container",
-        18: "360p h264 mp4 container | 270 for rtmpe?",
-        22: "720p h264 mp4 container",
-        26: "???",
-        33: "???",
-        34: "360p h264 flv container",
-        35: "480p h264 flv container",
-        37: "1080p h264 mp4 container",
-        38: "720p vp8 webm container",
-        43: "360p h264 flv container",
-        44: "480p vp8 webm container",
-        45: "720p vp8 webm container",
-        46: "520p vp8 webm stereo",
-        59: "480 for rtmpe",
-        78: "seems to be around 400 for rtmpe",
-        82: "360p h264 stereo",
-        83: "240p h264 stereo",
-        84: "720p h264 stereo",
-        85: "520p h264 stereo",
-        100: "360p vp8 webm stereo",
-        101: "480p vp8 webm stereo",
-        102: "720p vp8 webm stereo"
-        }
+        fmt_value = {
+                5: "240p h263 flv container",
+                18: "360p h264 mp4 container | 270 for rtmpe?",
+                22: "720p h264 mp4 container",
+                26: "???",
+                33: "???",
+                34: "360p h264 flv container",
+                35: "480p h264 flv container",
+                37: "1080p h264 mp4 container",
+                38: "720p vp8 webm container",
+                43: "360p h264 flv container",
+                44: "480p vp8 webm container",
+                45: "720p vp8 webm container",
+                46: "520p vp8 webm stereo",
+                59: "480 for rtmpe",
+                78: "seems to be around 400 for rtmpe",
+                82: "360p h264 stereo",
+                83: "240p h264 stereo",
+                84: "720p h264 stereo",
+                85: "520p h264 stereo",
+                100: "360p vp8 webm stereo",
+                101: "480p vp8 webm stereo",
+                102: "720p vp8 webm stereo"
+                }
 
     # YouTube Playback Feeds
     urls = {}
@@ -166,8 +166,7 @@ class YouTubePlayer():
         self.common.log("")
         get = video.get
 
-        filename = ''.join(c for c in video['Title'].decode("utf-8") if c not in self.utils.INVALID_CHARS) + "-[" + get('videoid') + "]" + ".ssa"
-        filename = filename.encode("ascii", "ignore")
+        filename = ''.join(c for c in self.common.makeUTF8(video['Title']) if c not in self.utils.INVALID_CHARS) + "-[" + get('videoid') + "]" + ".ssa"
         path = os.path.join(self.xbmc.translatePath(self.settings.getAddonInfo("profile")).decode("utf-8"), filename)
 
         w = self.storage.openFile(path, "wb")

@@ -3,6 +3,7 @@ import os
 import time
 import unittest2
 import MockYouTubeDepends
+from mock import Mock
 
 MockYouTubeDepends.MockYouTubeDepends().mockXBMC()
 
@@ -16,7 +17,7 @@ else:
                 os.remove("./tmp/" + old_file)
 
 
-class BaseTestCase(unittest2.TestCase):  #pragma: no cover
+class BaseTestCase(unittest2.TestCase):
         def setUp(self):
                 time.sleep(5)
                 MockYouTubeDepends.MockYouTubeDepends().mock()
@@ -35,8 +36,12 @@ class BaseTestCase(unittest2.TestCase):  #pragma: no cover
                 reload(CommonFunctions)
                 sys.modules["__main__"].common = CommonFunctions
                 sys.modules["__main__"].common.log = sys.modules["__main__"].xbmc.log
+                sys.modules["__main__"].settingsDL.load_strings("./resources/settings.xml")
+                sys.modules["__main__"].xbmcaddon.Addon.return_value = sys.modules["__main__"].settingsDL
+                sys.modules["__main__"].xbmcvfs.exists.return_value = True
                 import SimpleDownloader
                 sys.modules["__main__"].downloader = SimpleDownloader.SimpleDownloader()
+                sys.modules["__main__"].xbmcvfs.exists.return_value = False
                 import YouTubeUtils
                 sys.modules["__main__"].utils = YouTubeUtils.YouTubeUtils()
                 import YouTubeStorage

@@ -155,18 +155,7 @@ class YouTubeNavigation():
         if (get("action") == "add_subscription"):
             self.addSubscription(params)
         if (get("action") == "download"):
-            (video, status) = self.player.getVideoObject(params)
-            if "video_url" in video:
-                params["url"] = video['video_url']
-                params["download_path"] = self.settings.getSetting("downloadPath")
-                filename = "%s-[%s].mp4" % (''.join(c for c in video['Title'].decode("utf-8") if c not in self.utils.INVALID_CHARS), video["videoid"])
-                self.player.downloadSubtitle(video)
-                self.downloader.download(filename, params)
-            else:
-                if "apierror" in video:
-                    self.utils.showMessage(self.language(30625), video["apierror"])
-                else:
-                    self.utils.showMessage(self.language(30625), "ERROR")
+            self.downloadVideo(params)
         if (get("action") == "play_video"):
             self.player.playVideo(params)
         if (get("action") == "queue_video"):
@@ -252,6 +241,25 @@ class YouTubeNavigation():
         self.common.log("Done", 5)
 
     #================================== Plugin Actions =========================================
+    def downloadVideo(self, params):
+        get = params.get
+        (video, status) = self.player.getVideoObject(params)
+        if "video_url" in video:
+            params["Title"] = video['Title']
+            params["url"] = video['video_url']
+            params["download_path"] = self.settings.getSetting("downloadPath")
+            filename = "%s-[%s].mp4" % (''.join(c for c in video['Title'].decode("utf-8") if c not in self.utils.INVALID_CHARS), video["videoid"])
+            self.player.downloadSubtitle(video)
+            if get("async"):
+                self.downloader.download(filename, params, async=False)
+            else:
+                self.downloader.download(filename, params)
+        else:
+            if "apierror" in video:
+                self.utils.showMessage(self.language(30625), video["apierror"])
+            else:
+                self.utils.showMessage(self.language(30625), "ERROR")
+
     def addToFavorites(self, params={}):
         self.common.log("", 5)
         get = params.get

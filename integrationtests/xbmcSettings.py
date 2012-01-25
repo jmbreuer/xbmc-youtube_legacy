@@ -1,6 +1,5 @@
 import xml.dom.minidom as minidom
 import io
-import inspect
 
 
 class xbmcSettings():
@@ -18,25 +17,22 @@ class xbmcSettings():
         for string in self.strings:
             self.settingsString[string.getAttribute("id")] = string.getAttribute("value")
 
-    def __call__(self, id="", value=""):
-
+    def __call__(self, key="", value=""):
         if not self.settingsString:
             self.load_strings()
 
         if value:
-            self.settingsString[id] = value
+            self.settingsString[key] = value
             if self.path.find("settings-logged-in") > -1:  # This only updates. No insert!
-                updated = False
                 for string in self.strings:
-                    if string.getAttribute("id") == id:
+                    if string.getAttribute("id") == key:
                         string.setAttribute("value", value)
-                        updated = True
                 f = open(self.path, 'w')
                 self.dom.writexml(f)
                 f.close()
 
-        elif id in self.settingsString:
-            return self.settingsString[id]
+        elif key in self.settingsString:
+            return self.settingsString[key]
 
         return ""
 
