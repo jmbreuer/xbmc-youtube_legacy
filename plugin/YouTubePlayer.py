@@ -729,7 +729,7 @@ class YouTubePlayer():
             result = self.core._fetchPage({"link": self.urls["video_stream"] % get("videoid")})
 
         if result["status"] == 200:
-            start = result["content"].find("yt.playerConfig = ")
+            start = result["content"].find("yt.playerCconfig = ")
             if start > -1:
                 self.common.log("Found player_config", 4)
                 start = start + len("yt.playerConfig = ")
@@ -740,12 +740,15 @@ class YouTubePlayer():
                     player_object = json.loads('{ "PLAYER_CONFIG" : ' + data + "}" )
                     self.common.log("player_object " + repr(player_object), 4)
             else:
-                self.common.log("Using flashvars", 4)
+                self.common.log("Using flashvars")
+                result["content"] = result["content"].replace("\n", "").replace("\u0026","&").replace("&amp;", "&").replace('\\"','"')
+                print "data " + repr(result["content"])
                 data = self.common.parseDOM(result["content"], "embed", attrs={"id": "movie_player" }, ret="flashvars")
+                print "data " + repr(data)
                 src = self.common.parseDOM(result["content"], "embed", attrs={"id": "movie_player"}, ret="src")
                 if len(data) > 0 and len(src) > 0:
                     self.common.log("Using flashvars converting", 4)
-                    data = data[0].replace("&amp;", "&")
+                    data = data[0].replace("\n", "")
                     player_object = self._convertFlashVars(data)
                     if "PLAYER_CONFIG" in player_object:
                         player_object["PLAYER_CONFIG"]["url"] = src[0]
