@@ -20,9 +20,6 @@
 - Replace scraper with feeds for: Trailers, shows, music, education, disco.
 - If not replaceable refactor show scraper at least.
 - Integration tests on all user actions.
-- Check that page 2 works on subscriptions and make sure it cant crash due to too few items
-- http://forum.xbmc.org/showpost.php?p=934392&postcount=1512
-- youtube videos in smartplaylist.
 
 [B]Version 2.9.0[/B]
 - Sanity check feeds -> listAll temp_objects, since it (randomly?) fails
@@ -31,6 +28,7 @@
 - Changed Removed disco top artists since YouTube Removed it from their site
 - Added Scraper for the users watched history feed
 - Report SSL errors back to the user
+- Fixed page 2 on subscriptions.
 
 [B]Version 2.8.0[/B]
 - Changed All videos now have a unique path from xbmc's perspective eventhough they're present in different folders.
