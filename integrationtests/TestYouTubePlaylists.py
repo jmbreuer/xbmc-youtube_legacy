@@ -4,6 +4,7 @@ import sys
 
 
 class TestYouTubePlaylists(BaseTestCase.BaseTestCase):
+
     def test_plugin_should_queue_playlist_and_start_playback_if_user_selects_play_all_in_playlist(self):
         sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
         self.navigation.executeAction({"action": "play_all", "videoid": "Q7GVSx7yMaA","playlist": "E3E0C28746217FA6"})
