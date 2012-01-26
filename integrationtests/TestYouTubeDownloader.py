@@ -44,7 +44,7 @@ class TestYouTubeDownloader(BaseTestCase.BaseTestCase):
         self.navigation.executeAction({"action": "download", "videoid": "bUcszN8jRB8", "async": "false"})
 
         assert(os.path.exists('./tmp/Morning Dew — a bad lip reading of Bruno Mars, feat. Lady Gaga and Jay-Z-[bUcszN8jRB8].mp4'))
-        assert(os.path.exists('./tmp/Morning Dew — a bad lip reading of Bruno Mars, feat. Lady Gaga and Jay-Z-[bUcszN8jRB8].ssa'))
+        assert(os.path.exists('./tmp/Morning Dew  a bad lip reading of Bruno Mars, feat. Lady Gaga and Jay-Z-[bUcszN8jRB8].ssa'))
 
 if __name__ == "__main__":
     nose.runmodule()

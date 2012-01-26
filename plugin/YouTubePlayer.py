@@ -167,6 +167,9 @@ class YouTubePlayer():
         get = video.get
 
         filename = ''.join(c for c in self.common.makeUTF8(video['Title']) if c not in self.utils.INVALID_CHARS) + "-[" + get('videoid') + "]" + ".ssa"
+        
+        filename = filename.encode("ascii", "ignore")
+
         path = os.path.join(self.xbmc.translatePath(self.settings.getAddonInfo("profile")).decode("utf-8"), filename)
 
         w = self.storage.openFile(path, "wb")
@@ -188,6 +191,16 @@ class YouTubePlayer():
                     trans_url += "&tlang=" + lang_code
         return trans_url
 
+    def simpleReplaceHTMLCodes(self, str):
+        str = str.strip()
+        str = str.replace("&amp;", "&")
+        str = str.replace("&quot;", '"')
+        str = str.replace("&hellip;", "...")
+        str = str.replace("&gt;", ">")
+        str = str.replace("&lt;", "<")
+        str = str.replace("&#39;", "'")
+        return str
+
     def transformSubtitleXMLtoSRT(self, xml):
         self.common.log("")
         dom = parseString(xml)
@@ -199,7 +212,7 @@ class YouTubePlayer():
             if node:
                 if node.firstChild:
                     if node.firstChild.nodeValue:
-                        text = self.common.replaceHTMLCodes(node.firstChild.nodeValue).replace("\n", "\\n")
+                        text = self.simpleReplaceHTMLCodes(node.firstChild.nodeValue).replace("\n", "\\n")
                         start = ""
 
                         if node.getAttribute("start"):
@@ -345,6 +358,8 @@ class YouTubePlayer():
         self.common.log("fetching subtitle if available")
 
         filename = ''.join(c for c in self.common.makeUTF8(video['Title']) if c not in self.utils.INVALID_CHARS) + "-[" + get('videoid') + "]" + ".ssa"
+
+        filename = filename.encode("ascii", "ignore")
 
         download_path = os.path.join(self.settings.getSetting("downloadPath").decode("utf-8"), filename)
         path = os.path.join(self.xbmc.translatePath(self.settings.getAddonInfo("profile")).decode("utf-8"), filename)

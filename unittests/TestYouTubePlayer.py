@@ -261,14 +261,14 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 
     def test_transformSubtitleXMLtoSRT_should_call_replaceHTMLCodes_for_user_visible_text(self):
         player = YouTubePlayer()
-        sys.modules["__main__"].common.replaceHTMLCodes = Mock()
-        sys.modules["__main__"].common.replaceHTMLCodes.side_effect = lambda x: x.encode("ascii", 'ignore')
+        player.simpleReplaceHTMLCodes = Mock()
+        player.simpleReplaceHTMLCodes.side_effect = lambda x: x.encode("ascii", 'ignore')
 
         result = player.transformSubtitleXMLtoSRT(self.readTestInput("subtitleTest.xml", False))
 
         print repr(result)
 
-        assert(sys.modules["__main__"].common.replaceHTMLCodes.call_count > 0)
+        assert(player.simpleReplaceHTMLCodes.call_count > 0)
 
     def test_transformSubtitleXMLtoSRT_should_correctly_find_start_time_for_text_elements(self):
         input = '<?xml version="1.0" encoding="utf-8" ?><transcript>\n\
