@@ -34,8 +34,9 @@ class YouTubeFeeds():
     urls['contacts'] = "http://gdata.youtube.com/feeds/api/users/default/contacts"
     urls['subscriptions'] = "http://gdata.youtube.com/feeds/api/users/%s/subscriptions"
     urls['newsubscriptions'] = "http://gdata.youtube.com/feeds/api/users/%s/newsubscriptionvideos"
-    urls["recommended"] = "https://gdata.youtube.com/feeds/api/users/default/recommendations"
-    urls['watch_later'] = "https://gdata.youtube.com/feeds/api/users/default/watch_later?v=2.1"
+    urls["recommended"] = "http://gdata.youtube.com/feeds/api/users/default/recommendations"
+    urls['watch_later'] = "http://gdata.youtube.com/feeds/api/users/default/watch_later?v=2.1"
+    urls['watch_history'] = "http://gdata.youtube.com/feeds/api/users/default/watch_history?v=2"
 
     # YouTube Standard feeds
     urls['feed_categories'] = "http://gdata.youtube.com/schemas/2007/categories.cat"
