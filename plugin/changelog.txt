@@ -8,7 +8,7 @@
 - [XBMC] Has Excessive Memory use after running the plugin for prolonged periods of time
 - [RTMPDUMP] Doesn't support handshake type 10 which is required by youtube.
 
-[B]TODO 2.9.1:[/B]
+[B]TODO 2.9.0[/B]
 - Unit test coverage of Core above 90% im looking at you "Fetch page"
 - Unit test new functions in storage...
 - Allow users to change sort on searches
@@ -24,11 +24,9 @@
 - http://forum.xbmc.org/showpost.php?p=934392&postcount=1512
 - youtube videos in smartplaylist.
 
-[B]Version 2.9.1[/B]
+[B]Version 2.9.0[/B]
 - Sanity check feeds -> listAll temp_objects, since it (randomly?) fails
 - Upgraded dependencies
-
-[B]Version 2.9.0[/B]
 - Changed Merged Music and disco since YouTube removed almost all disco features
 - Changed Removed disco top artists since YouTube Removed it from their site
 - Added Scraper for the users watched history feed
