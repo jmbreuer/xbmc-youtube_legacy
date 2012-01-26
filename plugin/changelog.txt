@@ -8,12 +8,10 @@
 - [XBMC] Has Excessive Memory use after running the plugin for prolonged periods of time
 - [RTMPDUMP] Doesn't support handshake type 10 which is required by youtube.
 
-[B]TODO 2.9.0[/B]
+[B]TODO 2.9.1[/B]
 - Unit test coverage of Core above 90% im looking at you "Fetch page"
 - Unit test new functions in storage...
 - Allow users to change sort on searches
-- Fix: Embed code will never be triggered in a real world scenario
-- Main Playback code (JSON) is broken we're currently using our fall back in 99% of all cases we need better testing of this code
 - Hook-in Caching the right places. And only the right places. (mostly scrapers)
 - Scrape Education. Search for feeds.
 - Check live feed vs scrape
