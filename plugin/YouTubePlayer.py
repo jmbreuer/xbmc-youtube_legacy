@@ -344,8 +344,8 @@ class YouTubePlayer():
         get = video.get
         self.common.log("fetching subtitle if available")
 
-        filename = ''.join(c for c in video['Title'].decode("utf-8") if c not in self.utils.INVALID_CHARS) + "-[" + get('videoid') + "]" + ".ssa"
-        filename = filename.encode("ascii", "ignore")
+        filename = ''.join(c for c in self.common.makeUTF8(video['Title']) if c not in self.utils.INVALID_CHARS) + "-[" + get('videoid') + "]" + ".ssa"
+
         download_path = os.path.join(self.settings.getSetting("downloadPath").decode("utf-8"), filename)
         path = os.path.join(self.xbmc.translatePath(self.settings.getAddonInfo("profile")).decode("utf-8"), filename)
 
