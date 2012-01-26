@@ -415,7 +415,7 @@ class YouTubeStorage():
         if type == "thumbnail" or type == "viewmode" or type == "value":
             self.storeValue(key, results)
         else:
-            self.storeResultSetSettings(key, results)
+            self.storeResultSet(key, results)
         self.common.log("done", 5)
 
     def storeValue(self, key, value):
