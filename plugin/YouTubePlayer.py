@@ -662,6 +662,7 @@ class YouTubePlayer():
         return ""
 
     def getVideoObject(self, params):
+        self.common.log(repr(params))
         get = params.get
         video = {}
         links = []
@@ -701,6 +702,7 @@ class YouTubePlayer():
                 else:
                     video['apierror'] = self.language(30618)
 
+        self.common.log("Done : " + repr(status))
         return (video, status)
 
     def _convertFlashVars(self, html):
@@ -715,13 +717,13 @@ class YouTubePlayer():
         return obj
 
     def _getVideoLinks(self, video, params):
+        self.common.log("trying website: " + repr(params))
+
         get = params.get
         #vget = video.get
         player_object = {}
         links = []
         fresult = False
-
-        self.common.log("trying website: " + repr(params))
 
         if get("proxy"):
             result = self.core._fetchPage({"link": self.urls["video_stream"] % get("videoid"), "proxy": get("proxy")})
@@ -741,11 +743,10 @@ class YouTubePlayer():
                     self.common.log("player_object " + repr(player_object), 4)
             else:
                 self.common.log("Using flashvars")
-                result["content"] = result["content"].replace("\n", "").replace("\u0026","&").replace("&amp;", "&").replace('\\"','"')
-                print "data " + repr(result["content"])
-                data = self.common.parseDOM(result["content"], "embed", attrs={"id": "movie_player" }, ret="flashvars")
-                print "data " + repr(data)
+                data = result["content"].replace("\n", "").replace("\u0026", "&").replace("&amp;", "&").replace('\\"', '"')
+                data = re.findall('flashvars="(.*?)"', data)
                 src = self.common.parseDOM(result["content"], "embed", attrs={"id": "movie_player"}, ret="src")
+
                 if len(data) > 0 and len(src) > 0:
                     self.common.log("Using flashvars converting", 4)
                     data = data[0].replace("\n", "")
@@ -791,4 +792,5 @@ class YouTubePlayer():
                 if not video['apierror'] and fresult:
                     video['apierror'] = self.core._findErrors(fresult)
 
+        self.common.log("Done")
         return (links, video)
