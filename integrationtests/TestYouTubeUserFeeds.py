@@ -97,11 +97,11 @@ class TestYouTubeUserFeeds(BaseTestCase.BaseTestCase):
 	def test_plugin_should_list_user_playlist_video_list_correctly_(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
 
-		#self.navigation.listMenu({"user_feed":"playlist", 'login':'true', "path":"/root/playlist/smokey", "playlist":"E3E0C28746217FA6"})
+		self.navigation.listMenu({"user_feed":"playlist", 'login':'true', "path":"/root/playlist/smokey", "playlist":"E3E0C28746217FA6"})
 		
-		#self.assert_directory_count_greater_than_or_equals(10)
-		#self.assert_directory_count_less_than_or_equals(51)
-		#self.assert_directory_is_a_video_list()
+		self.assert_directory_count_greater_than_or_equals(10)
+		self.assert_directory_count_less_than_or_equals(51)
+		self.assert_directory_is_a_video_list()
 	
 	def test_plugin_should_list_user_playlist_video_list_page_2_correctly_(self):
 		sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
