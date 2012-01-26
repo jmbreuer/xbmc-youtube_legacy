@@ -731,7 +731,7 @@ class YouTubePlayer():
             result = self.core._fetchPage({"link": self.urls["video_stream"] % get("videoid")})
 
         if result["status"] == 200:
-            start = result["content"].find("yt.playerCconfig = ")
+            start = result["content"].find("yt.playerConfig = ")
             if start > -1:
                 self.common.log("Found player_config", 4)
                 start = start + len("yt.playerConfig = ")
@@ -746,7 +746,7 @@ class YouTubePlayer():
                 data = result["content"].replace("\n", "").replace("\u0026", "&").replace("&amp;", "&").replace('\\"', '"')
                 data = re.findall('flashvars="(.*?)"', data)
                 src = self.common.parseDOM(result["content"], "embed", attrs={"id": "movie_player"}, ret="src")
-
+                self.common.log(repr(data) + " - " + repr(src))
                 if len(data) > 0 and len(src) > 0:
                     self.common.log("Using flashvars converting", 4)
                     data = data[0].replace("\n", "")

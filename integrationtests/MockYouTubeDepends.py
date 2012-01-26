@@ -70,10 +70,6 @@ class MockYouTubeDepends:
 
     def log(self, description, level=0):
         if sys.modules["__main__"].dbg and sys.modules["__main__"].dbglevel > level:
-            print repr(inspect.stack()[1])
-            print repr(inspect.stack()[2])
-            print repr(inspect.stack()[3])
-            print repr(inspect.stack()[4])
             try:
                 print "%s [%s] %s : '%s'" % (time.strftime("%H:%M:%S"), "YouTube IntegrationTest", inspect.stack()[3][3], description.decode("utf-8", "ignore"))
             except:
