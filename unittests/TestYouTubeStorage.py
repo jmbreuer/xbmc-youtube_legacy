@@ -81,7 +81,7 @@ class TestYouTubeStorage(BaseTestCase.BaseTestCase):
         storage = YouTubeStorage()
         storage.retrieve = Mock()
         storage.retrieve.return_value = []
-        storage.store = Mock()
+        storage.storeSettings = Mock()
         
         storage.deleteStoredArtist({"path": "some_path", "store": "somestore"})
         
@@ -91,27 +91,27 @@ class TestYouTubeStorage(BaseTestCase.BaseTestCase):
         storage = YouTubeStorage()
         storage.retrieve = Mock()
         storage.retrieve.return_value = [("some_title", "some_artist")]
-        storage.store = Mock()
+        storage.storeSettings = Mock()
         
         storage.deleteStoredArtist({"path": "some_path", "store": "somestore"})
         
-        storage.store.assert_called_with({"path": "some_path", "store": "somestore"},[('some_title', 'some_artist')])
+        storage.storeSettings.assert_called_with({"path": "some_path", "store": "somestore"},[('some_title', 'some_artist')])
 
     def test_deleteStoredArtist_should_remove_artist_from_list_before_saving(self):
         storage = YouTubeStorage()
         storage.retrieve = Mock()
         storage.retrieve.return_value = [("some_title", "some_artist")]
-        storage.store = Mock()
+        storage.storeSettings = Mock()
         
         storage.deleteStoredArtist({"path": "some_path", "store": "somestore", "artist": "some_artist"})
         
-        storage.store.assert_called_with({"path": "some_path", "store": "somestore", "artist": "some_artist"},[])
+        storage.storeSettings.assert_called_with({"path": "some_path", "store": "somestore", "artist": "some_artist"},[])
 
     def test_getStoredArtists_should_call_executebuiltin_when_done(self):
         storage = YouTubeStorage()
         storage.retrieve = Mock()
         storage.retrieve.return_value = [("some_title", "some_artist")]
-        storage.store = Mock()
+        storage.storeSettings = Mock()
         
         storage.deleteStoredArtist({"path": "some_path", "store": "somestore", "artist": "some_artist"})
         
@@ -120,19 +120,19 @@ class TestYouTubeStorage(BaseTestCase.BaseTestCase):
     def test_saveStoredArtist_should_exit_cleanly_if_artist_or_artist_name_is_missing(self):
         storage = YouTubeStorage()
         storage.retrieve = Mock()
-        storage.store = Mock()
+        storage.storeSettings = Mock()
         
         storage.saveStoredArtist({})
         
         assert(storage.retrieve.call_count == 0)
-        assert(storage.store.call_count == 0)
+        assert(storage.storeSettings.call_count == 0)
 
     def test_saveStoredArtist_should_call_retrieve_with_correct_params(self):
         sys.modules["__main__"].settings.getSetting.return_value = "0"
         storage = YouTubeStorage()
         storage.retrieve = Mock()
         storage.retrieve.return_value = []
-        storage.store = Mock()
+        storage.storeSettings = Mock()
         
         storage.saveStoredArtist({"artist": "some_artist", "artist_name": "some_artist_name"})
         
@@ -143,7 +143,7 @@ class TestYouTubeStorage(BaseTestCase.BaseTestCase):
         storage = YouTubeStorage()
         storage.retrieve = Mock()
         storage.retrieve.return_value = []
-        storage.store = Mock()
+        storage.storeSettings = Mock()
         
         storage.saveStoredArtist({"artist": "some_artist", "artist_name": "some_artist_name"})
         
@@ -154,41 +154,41 @@ class TestYouTubeStorage(BaseTestCase.BaseTestCase):
         storage = YouTubeStorage()
         storage.retrieve = Mock()
         storage.retrieve.return_value = []
-        storage.store = Mock()
+        storage.storeSettings = Mock()
         
         storage.saveStoredArtist({"artist": "some_artist", "artist_name": "some_artist_name"})
         
-        storage.store.assert_called_with({'artist_name': 'some_artist_name', 'artist': 'some_artist'}, [('some_artist_name', 'some_artist')])
+        storage.storeSettings.assert_called_with({'artist_name': 'some_artist_name', 'artist': 'some_artist'}, [('some_artist_name', 'some_artist')])
 
     def test_saveStoredArtist_should_limit_artist_collection_before_calling_store(self):
         sys.modules["__main__"].settings.getSetting.return_value = "0"
         storage = YouTubeStorage()
         storage.retrieve = Mock()
         storage.retrieve.return_value =  [("", ""),("", ""),("", ""),("", ""),("", ""),("", ""),("", ""),("", ""),("", ""),("", ""),("", ""),("", ""),("", ""),("", ""),("", "")]
-        storage.store = Mock()
+        storage.storeSettings = Mock()
         
         storage.saveStoredArtist({"artist": "some_artist", "artist_name": "some_artist_name"})
         
-        assert(len(storage.store.call_args[0][1]) == 10)
+        assert(len(storage.storeSettings.call_args[0][1]) == 10)
         
     def test_saveStoredArtist_should_add_artist_to_collection_before_calling_store(self):
         sys.modules["__main__"].settings.getSetting.return_value = "0"
         storage = YouTubeStorage()
         storage.retrieve = Mock()
         storage.retrieve.return_value =  [("", "")]
-        storage.store = Mock()
+        storage.storeSettings = Mock()
         
         storage.saveStoredArtist({"artist": "some_artist", "artist_name": "some_artist_name"})
         
-        assert(len(storage.store.call_args[0][1]) == 2)
-        storage.store.assert_called_with({'artist_name': 'some_artist_name', 'artist': 'some_artist'}, [('some_artist_name', 'some_artist'), ("", "")])        
+        assert(len(storage.storeSettings.call_args[0][1]) == 2)
+        storage.storeSettings.assert_called_with({'artist_name': 'some_artist_name', 'artist': 'some_artist'}, [('some_artist_name', 'some_artist'), ("", "")])        
 
     def test_saveStoredArtist_should_delete_store_from_params_before_exiting(self):
         sys.modules["__main__"].settings.getSetting.return_value = 0
         storage = YouTubeStorage()
         storage.retrieve = Mock()
         storage.retrieve.return_value =  [("", "")]
-        storage.store = Mock()
+        storage.storeSettings = Mock()
         params = {"artist": "some_artist", "artist_name": "some_artist_name", "store": "artists"}
         
         storage.saveStoredArtist(params)
@@ -199,7 +199,7 @@ class TestYouTubeStorage(BaseTestCase.BaseTestCase):
         storage = YouTubeStorage()
         storage.retrieveSettings = Mock()
         storage.retrieveSettings.return_value =  ["some_search"]
-        storage.store = Mock()
+        storage.storeSettings = Mock()
         
         storage.getStoredSearches({"path": "some_path"})
         
@@ -209,7 +209,7 @@ class TestYouTubeStorage(BaseTestCase.BaseTestCase):
         storage = YouTubeStorage()
         storage.retrieveSettings = Mock()
         storage.retrieveSettings.return_value =  ["some_search"]
-        storage.store = Mock()
+        storage.storeSettings = Mock()
         
         storage.getStoredSearches({"path": "some_path"})
         
@@ -222,7 +222,7 @@ class TestYouTubeStorage(BaseTestCase.BaseTestCase):
         storage = YouTubeStorage()
         storage.retrieveSettings = Mock()
         storage.retrieveSettings.return_value =  ["some_search"]
-        storage.store = Mock()
+        storage.storeSettings = Mock()
         
         (result, status) = storage.getStoredSearches({"path": "some_path"})
         
@@ -237,7 +237,7 @@ class TestYouTubeStorage(BaseTestCase.BaseTestCase):
         storage = YouTubeStorage()
         storage.retrieveSettings = Mock()
         storage.retrieveSettings.return_value =  ["some_search"]
-        storage.store = Mock()
+        storage.storeSettings = Mock()
         
         (result, status) = storage.getStoredSearches({"path": "some_path"})
         args = urllib.quote_plus.call_args
@@ -255,7 +255,7 @@ class TestYouTubeStorage(BaseTestCase.BaseTestCase):
         storage = YouTubeStorage()
         storage.retrieve = Mock()
         storage.retrieve.return_value =  ["some_search1"]
-        storage.store = Mock()
+        storage.storeSettings = Mock()
         
         storage.deleteStoredSearch({"delete": "some_search2"})
         args = urllib.unquote_plus.call_args
@@ -267,7 +267,7 @@ class TestYouTubeStorage(BaseTestCase.BaseTestCase):
         storage = YouTubeStorage()
         storage.retrieveSettings = Mock()
         storage.retrieveSettings.return_value =  ["some_search1"]
-        storage.store = Mock()
+        storage.storeSettings = Mock()
         
         storage.deleteStoredSearch({"delete": "some_search2"})
         
@@ -278,17 +278,17 @@ class TestYouTubeStorage(BaseTestCase.BaseTestCase):
         storage = YouTubeStorage()
         storage.retrieve = Mock()
         storage.retrieve.return_value =  ["some_search2"]
-        storage.store = Mock()
+        storage.storeSettings = Mock()
         
         storage.deleteStoredSearch({"delete": "some_search2"})
         
-        storage.store.assert_called_with({"delete": "some_search2"},[])
+        storage.storeSettings.assert_called_with({"delete": "some_search2"},[])
 
     def test_deleteStoredSearch_should_call_executebuiltin(self):
         storage = YouTubeStorage()
         storage.retrieve = Mock()
         storage.retrieve.return_value =  ["some_search2"]
-        storage.store = Mock()
+        storage.storeSettings = Mock()
         
         storage.deleteStoredSearch({"delete": "some_search2"})
         
@@ -298,12 +298,12 @@ class TestYouTubeStorage(BaseTestCase.BaseTestCase):
         storage = YouTubeStorage()
         storage.retrieve = Mock()
         storage.retrieve.return_value =  ["some_search2"]
-        storage.store = Mock()
+        storage.storeSettings = Mock()
         
         storage.saveStoredSearch({})
         
         assert(storage.retrieve.call_count == 0)
-        assert(storage.store.call_count == 0)
+        assert(storage.storeSettings.call_count == 0)
         
     def test_saveStoredSearch_should_call_unquote_on_search_param(self):
         sys.modules["__main__"].settings.getSetting.return_value = "0"        
@@ -314,7 +314,7 @@ class TestYouTubeStorage(BaseTestCase.BaseTestCase):
         storage = YouTubeStorage()
         storage.retrieveSettings = Mock()
         storage.retrieveSettings.return_value =  ["some_search1"]
-        storage.store = Mock()
+        storage.storeSettings = Mock()
         
         storage.saveStoredSearch({"search": "some_search"})
 
@@ -332,7 +332,7 @@ class TestYouTubeStorage(BaseTestCase.BaseTestCase):
         storage = YouTubeStorage()
         storage.retrieveSettings = Mock()
         storage.retrieveSettings.return_value =  ["some_search1"]
-        storage.store = Mock()
+        storage.storeSettings = Mock()
         
         storage.saveStoredSearch({"search": "some_search1", "old_search": "some_search2"})
         
@@ -347,7 +347,7 @@ class TestYouTubeStorage(BaseTestCase.BaseTestCase):
         storage = YouTubeStorage()
         storage.retrieveSettings = Mock()
         storage.retrieveSettings.return_value =  ["some_search2"]
-        storage.store = Mock()
+        storage.storeSettings = Mock()
         
         storage.saveStoredSearch({"search": "some_search1", "old_search": "some_search2"})
         
@@ -358,30 +358,30 @@ class TestYouTubeStorage(BaseTestCase.BaseTestCase):
         storage = YouTubeStorage()
         storage.retrieveSettings = Mock()
         storage.retrieveSettings.return_value =  ["some_search4", "some_search2", "some_search3"]
-        storage.store = Mock()
+        storage.storeSettings = Mock()
         
         storage.saveStoredSearch({"search": "some_search1", "old_search": "some_search2"})
         
-        storage.store.assert_called_with({"search": "some_search1", "old_search": "some_search2"},['some_search1', 'some_search4', 'some_search3'])
+        storage.storeSettings.assert_called_with({"search": "some_search1", "old_search": "some_search2"},['some_search1', 'some_search4', 'some_search3'])
         
     def test_saveStoredSearch_should_limit_search_collection_before_calling_store(self):
         sys.modules["__main__"].settings.getSetting.return_value = "0"
         storage = YouTubeStorage()
         storage.retrieveSettings = Mock()
         storage.retrieveSettings.return_value =  ["some_search4", "some_search2", "some_search3", "", "", "", "", "", "", "", ""]
-        storage.store = Mock()
+        storage.storeSettings = Mock()
         
         storage.saveStoredSearch({"search": "some_search1", "old_search": "some_search2"})
         
-        assert(len(storage.store.call_args[0][1]) == 10)
-        storage.store.assert_called_with({"search": "some_search1", "old_search": "some_search2"},['some_search1', 'some_search4', 'some_search3',"", "", "", "", "", "", ""])
+        assert(len(storage.storeSettings.call_args[0][1]) == 10)
+        storage.storeSettings.assert_called_with({"search": "some_search1", "old_search": "some_search2"},['some_search1', 'some_search4', 'some_search3',"", "", "", "", "", "", ""])
 
     def test_saveStoredSearch_should_call_getSettings_to_get_max_searches_count(self):
         sys.modules["__main__"].settings.getSetting.return_value = "0"
         storage = YouTubeStorage()
         storage.retrieveSettings = Mock()
         storage.retrieveSettings.return_value =  ["some_search2"]
-        storage.store = Mock()
+        storage.storeSettings = Mock()
         
         storage.saveStoredSearch({"search": "some_search1", "old_search": "some_search2"})
         
@@ -392,11 +392,11 @@ class TestYouTubeStorage(BaseTestCase.BaseTestCase):
         storage = YouTubeStorage()
         storage.retrieveSettings = Mock()
         storage.retrieveSettings.return_value =  ["some_search2"]
-        storage.store = Mock()
+        storage.storeSettings = Mock()
         
         storage.saveStoredSearch({"search": "some_search1", "old_search": "some_search2"})
         
-        assert(storage.store.call_count > 0)
+        assert(storage.storeSettings.call_count > 0)
 
     def test_editStoredSearch_should_exit_cleanly_if_search_param_is_missing(self):
         sys.modules["__main__"].settings.getSetting.return_value = "0"
@@ -404,11 +404,11 @@ class TestYouTubeStorage(BaseTestCase.BaseTestCase):
         storage = YouTubeStorage()
         storage.retrieve = Mock()
         storage.retrieve.return_value =  ["some_search2"]
-        storage.store = Mock()
+        storage.storeSettings = Mock()
         
         storage.editStoredSearch({})
         
-        assert(storage.store.call_count == 0)
+        assert(storage.storeSettings.call_count == 0)
         assert(storage.retrieve.call_count == 0)
 
     def test_editStoredSearch_should_ask_user_for_new_search_phrase(self):
@@ -418,7 +418,7 @@ class TestYouTubeStorage(BaseTestCase.BaseTestCase):
         storage = YouTubeStorage()
         storage.retrieveSettings = Mock()
         storage.retrieveSettings.return_value =  ["some_search2"]
-        storage.store = Mock()
+        storage.storeSettings = Mock()
         
         storage.editStoredSearch({"search": "some_search1"})
         
@@ -431,11 +431,11 @@ class TestYouTubeStorage(BaseTestCase.BaseTestCase):
         storage = YouTubeStorage()
         storage.retrieveSettings = Mock()
         storage.retrieveSettings.return_value =  ["some_search2"]
-        storage.store = Mock()
+        storage.storeSettings = Mock()
         
         storage.editStoredSearch({"search": "some_search1"})
         
-        assert(storage.store.call_args[0][0].has_key("feed"))
+        assert(storage.storeSettings.call_args[0][0].has_key("feed"))
         
     def test_editStoredSearch_should_set_store_to_disco_if_editing_disco_searches(self):
         sys.modules["__main__"].settings.getSetting.return_value = "0"
@@ -444,11 +444,11 @@ class TestYouTubeStorage(BaseTestCase.BaseTestCase):
         storage = YouTubeStorage()
         storage.retrieveSettings = Mock()
         storage.retrieveSettings.return_value =  ["some_search2"]
-        storage.store = Mock()
+        storage.storeSettings = Mock()
         
         storage.editStoredSearch({"search": "some_search1", "action": "edit_disco"})
         
-        assert(storage.store.call_args[0][0].has_key("scraper"))
+        assert(storage.storeSettings.call_args[0][0].has_key("scraper"))
 
     def test_editStoredSearch_should_call_saveStoredSearch(self):
         sys.modules["__main__"].settings.getSetting.return_value = "0"
@@ -457,7 +457,7 @@ class TestYouTubeStorage(BaseTestCase.BaseTestCase):
         storage = YouTubeStorage()
         storage.retrieve = Mock()
         storage.retrieve.return_value =  ["some_search2"]
-        storage.store = Mock()
+        storage.storeSettings = Mock()
         storage.saveStoredSearch = Mock()
         
         storage.editStoredSearch({"search": "some_search1", "action": "edit_disco"})
@@ -471,7 +471,7 @@ class TestYouTubeStorage(BaseTestCase.BaseTestCase):
         storage = YouTubeStorage()
         storage.retrieve = Mock()
         storage.retrieve.return_value =  ["some_search2"]
-        storage.store = Mock()
+        storage.storeSettings = Mock()
         storage.saveStoredSearch = Mock()
         params = {"search": "some_search1", "action": "edit_disco", "old_search": "some_search4"}
         
@@ -486,7 +486,7 @@ class TestYouTubeStorage(BaseTestCase.BaseTestCase):
         storage = YouTubeStorage()
         storage.retrieve = Mock()
         storage.retrieve.return_value =  ["some_search2"]
-        storage.store = Mock()
+        storage.storeSettings = Mock()
         storage.saveStoredSearch = Mock()
         params = {"search": "some_search1", "action": "edit_disco", "old_search": "some_search4"}
         

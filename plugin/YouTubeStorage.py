@@ -101,7 +101,7 @@ class YouTubeStorage():
                 del(artists[count])
                 break
 
-        self.store(params, artists)
+        self.storeSettings(params, artists)
 
         self.xbmc.executebuiltin("Container.Refresh")
 
@@ -114,7 +114,7 @@ class YouTubeStorage():
             artists = self.retrieve(params)
             searchCount = (10, 20, 30, 40,)[int(self.settings.getSetting("saved_searches"))] - 1
             artists = [(get("artist_name"), get("artist"))] + artists[:searchCount]
-            self.store(params, artists)
+            self.storeSettings(params, artists)
             del params["store"]
 
     def getStoredSearches(self, params={}):
@@ -159,7 +159,7 @@ class YouTubeStorage():
                 del(searches[count])
                 break
 
-        self.store(params, searches)
+        self.storeSettings(params, searches)
 
         self.xbmc.executebuiltin("Container.Refresh")
 
@@ -170,7 +170,7 @@ class YouTubeStorage():
         if get("search"):
             searches = self.retrieveSettings(params)
             self.common.log("1: " + repr(searches), 5)
-            
+
             new_query = urllib.unquote_plus(get("search"))
             old_query = new_query
 
@@ -185,7 +185,7 @@ class YouTubeStorage():
             searchCount = (10, 20, 30, 40,)[int(self.settings.getSetting("saved_searches"))] - 1
             searches = [new_query] + searches[:searchCount]
             self.common.log("2: " + repr(searches), 5)
-            self.store(params, searches)
+            self.storeSettings(params, searches)
         self.common.log("Done", 5)
 
     def editStoredSearch(self, params={}):
@@ -412,6 +412,7 @@ class YouTubeStorage():
 
         self.common.log("Got key " + repr(key))
 
+        self.common.log(repr(type), 5)
         if type == "thumbnail" or type == "viewmode" or type == "value":
             self.storeValue(key, results)
         else:
@@ -443,6 +444,19 @@ class YouTubeStorage():
                 value = repr(results)
                 self.common.log(repr(key) + " - " + repr(value), 5)
                 self.cache.set(key, value)
+        self.common.log("done", 5)
+
+    def storeSettings(self, params={}, results=[], type="", item={}):
+        self.common.log(repr(params), 5)
+        key = self.getStorageKey(params, type, item)
+
+        self.common.log("Got key " + repr(key))
+
+        self.common.log(repr(type), 5)
+        if type == "thumbnail" or type == "viewmode" or type == "value":
+            self.storeValue(key, results)
+        else:
+            self.storeResultSetSettings(key, results)
         self.common.log("done", 5)
 
     def storeValueSettings(self, key, value):
