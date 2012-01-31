@@ -1,17 +1,19 @@
-import os, sys, re
+import os
+import sys
+import re
 from traceback import print_exc
 
-if sys.modules[ "__main__" ].xbmc:
+if sys.modules["__main__"].xbmc:
 	xbmc = sys.modules["__main__"].xbmc
 else:
 	import xbmc
 
-if sys.modules[ "__main__" ].xbmcgui:
+if sys.modules["__main__"].xbmcgui:
 	xbmcgui = sys.modules["__main__"].xbmcgui
 else:
 	import xbmcgui
 
-if sys.modules[ "__main__" ].xbmcaddon:
+if sys.modules["__main__"].xbmcaddon:
 	xbmcaddon = sys.modules["__main__"].xbmcaddon
 else:
 	import xbmcaddon
@@ -19,8 +21,8 @@ else:
 try:
 	settings = xbmcaddon.Addon(id='script.module.simple.downloader')
 except:
-	if sys.modules[ "__main__" ].settings:
-		settings = sys.modules[ "__main__" ].settings
+	if sys.modules["__main__"].settings:
+		settings = sys.modules["__main__"].settings
 
 addonDir = settings.getAddonInfo( "path" )
 XBMC_SKIN  = xbmc.getSkinDir()
@@ -32,7 +34,7 @@ class xbmcguiWindowError( Exception ):
 class Control:
 	def __init__( self, control, coords=( 0, 0 ), anim=[], **kwargs ):
 		self.SKINS_PATH = os.path.join( addonDir, "resources", "skins" )
-		self.ADDON_SKIN = ( "default", XBMC_SKIN )[ os.path.exists( os.path.join( self.SKINS_PATH, XBMC_SKIN ) ) ]
+		self.ADDON_SKIN = ( "default", XBMC_SKIN )[os.path.exists( os.path.join( self.SKINS_PATH, XBMC_SKIN ) )]
 		self.MEDIA_PATH = os.path.join( self.SKINS_PATH, self.ADDON_SKIN, "media" )
 
 		self.controlXML = control
@@ -40,7 +42,7 @@ class Control:
 		self.label = xbmc.getInfoLabel( "Control.GetLabel(%i)" % self.id )
 		self.anim = anim
 
-		try: extra = dict( [ k.split( "=" ) for k in self.label.split( "," ) ] )
+		try: extra = dict( [k.split( "=" ) for k in self.label.split( "," )] )
 		except: extra = {}
 		option = {}
 		x, y, w, h = self.getCoords( coords )
@@ -52,11 +54,11 @@ class Control:
 				key, value = key.strip(), value.strip()
 				if key == "texture": texture = value
 				if key not in valideOption: continue
-				option[ key ] = value
+				option[key] = value
 				if "color" in key.lower():
-					option[ key ] = '0x' + value
+					option[key] = '0x' + value
 				elif key == "aspectRatio" and value.isdigit():
-					option[ key ] = int( value )
+					option[key] = int( value )
 			texture = self.getTexture( texture )
 			# ControlImage( x, y, width, height, filename[, colorKey, aspectRatio, colorDiffuse] )
 			self.control = xbmcgui.ControlImage( x, y, w, h, texture, **option )
@@ -67,15 +69,15 @@ class Control:
 			for key, value in extra.items():
 				key, value = key.strip(), value.strip()
 				if key not in valideOption: continue
-				option[ key ] = value
+				option[key] = value
 				if "color" in key.lower():
-					option[ key ] = '0x' + value
+					option[key] = '0x' + value
 				elif key == "alignment":
-					option[ key ] = self.getAlignment( value )
+					option[key] = self.getAlignment( value )
 				elif key == "hasPath" and value == "true":
-					option[ key ] = True
+					option[key] = True
 				elif key == "angle" and value.isdigit():
-					option[ key ] = int( value )
+					option[key] = int( value )
 			# ControlLabel(x, y, width, height, label[, font, textColor, disabledColor, alignment, hasPath, angle])
 			self.control = xbmcgui.ControlLabel( x, y, w, h, "", **option )
 
@@ -85,7 +87,7 @@ class Control:
 			for key, value in kwargs.items():
 				key, value = key.strip(), value.strip()
 				if key not in valideOption: continue
-				option[ key ] = self.getTexture( value )
+				option[key] = self.getTexture( value )
 			# ControlProgress(x, y, width, height[, texturebg, textureleft, texturemid, textureright, textureoverlay])
 			self.control = xbmcgui.ControlProgress( x, y, w, h, **option )
 
@@ -100,7 +102,7 @@ class Control:
 	def getCoords( self, default ):
 		x, y = self.controlXML.getPosition()
 		w, h = self.controlXML.getWidth(), self.controlXML.getHeight()
-		return ( default[ 0 ] + x, default[ 1 ] + y, w, h )
+		return ( default[0] + x, default[1] + y, w, h )
 
 	def getAlignment( self, alignment ):
 		xbfont = {
@@ -110,9 +112,9 @@ class Control:
 			"centery"  : 0x00000004,
 			"truncated": 0x00000008
 			}
-		align = xbfont[ "left" ]
+		align = xbfont["left"]
 		for a in alignment.split( "+" ):
-			align += xbfont.get( a, xbfont[ "left" ] )
+			align += xbfont.get( a, xbfont["left"] )
 		return align
 
 	def setAnimations( self ):
@@ -151,19 +153,19 @@ class DialogDownloadProgressXML( xbmcgui.WindowXMLDialog ):
 		except:
 			print_exc()
 
-		self.controls[ "background" ] = Control( self.getControl( 2001 ), coordinates, c_anim )
+		self.controls["background"] = Control( self.getControl( 2001 ), coordinates, c_anim )
 
-		self.controls[ "heading" ] = Control( self.getControl( 2002 ), coordinates, c_anim )
+		self.controls["heading"] = Control( self.getControl( 2002 ), coordinates, c_anim )
 
-		self.controls[ "label" ] = Control( self.getControl( 2003 ), coordinates, c_anim )
+		self.controls["label"] = Control( self.getControl( 2003 ), coordinates, c_anim )
 		
 		try:
 			v = xbmc.getInfoLabel( "Control.GetLabel(2045)" ).replace( ", ", "," )
-			progressTextures = dict( [ k.split( "=" ) for k in v.split( "," ) ] )
+			progressTextures = dict( [k.split( "=" ) for k in v.split( "," )] )
 		except:
 			progressTextures = {}
 
-		self.controls[ "progress" ] = Control( self.getControl( 2004 ), coordinates, c_anim, **progressTextures )
+		self.controls["progress"] = Control( self.getControl( 2004 ), coordinates, c_anim, **progressTextures )
 	def onFocus( self, controlID ):
 		pass
 
@@ -179,7 +181,7 @@ class Window:
 			raise xbmcguiWindowError( "DialogDownloadProgress IsAlive: Not possible to overscan!" )
 		
 		self.SKINS_PATH = os.path.join( addonDir, "resources", "skins" )
-		self.ADDON_SKIN = ( "default", XBMC_SKIN )[ os.path.exists( os.path.join( self.SKINS_PATH, XBMC_SKIN ) ) ]
+		self.ADDON_SKIN = ( "default", XBMC_SKIN )[os.path.exists( os.path.join( self.SKINS_PATH, XBMC_SKIN ) )]
 
 		windowXml = DialogDownloadProgressXML( "DialogDownloadProgress.xml", addonDir, self.ADDON_SKIN )
 		self.controls = windowXml.controls
@@ -217,24 +219,24 @@ class Window:
 	def initialize( self ):
 		try:
 			# BACKGROUND
-			self.background = self.controls[ "background" ].addControl( self.window )
+			self.background = self.controls["background"].addControl( self.window )
 		except:
 			print_exc()
 		try:
 			# HEADING
-			self.heading = self.controls[ "heading" ].addControl( self.window )
+			self.heading = self.controls["heading"].addControl( self.window )
 			self.heading.setLabel( self.header )
 		except:
 			print_exc()
 		try:
 			# LABEL
-			self.label = self.controls[ "label" ].addControl( self.window )
+			self.label = self.controls["label"].addControl( self.window )
 			self.label.setLabel( self.line )
 		except:
 			print_exc()
 		try:
 			# CURRENT PROGRESS
-			self.progress = self.controls[ "progress" ].addControl( self.window )
+			self.progress = self.controls["progress"].addControl( self.window )
 		except:
 			print_exc()
 

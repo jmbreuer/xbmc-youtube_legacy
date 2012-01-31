@@ -3,7 +3,6 @@ import os
 import time
 import unittest2
 import MockYouTubeDepends
-from mock import Mock
 
 MockYouTubeDepends.MockYouTubeDepends().mockXBMC()
 

@@ -21,7 +21,7 @@ class TestYouTubePublicFeedsScraper(BaseTestCase.BaseTestCase):
         self.assert_directory_items_should_have_external_thumbnails()
 
     def test_plugin_should_list_category_video_list_page_2_correctly(self):
-        self.navigation.listMenu({"feed": "feed_category", "path": "/root/explore/categories", "category": "Comedy","page": "1"})
+        self.navigation.listMenu({"feed": "feed_category", "path": "/root/explore/categories", "category": "Comedy", "page": "1"})
 
         self.assert_directory_count_greater_than_or_equals(30)
         self.assert_directory_count_less_than_or_equals(51)

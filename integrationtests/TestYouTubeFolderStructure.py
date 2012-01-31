@@ -6,7 +6,7 @@ import sys
 class TestYouTubeFolderStructure(BaseTestCase.BaseTestCase):
     def test_plugin_should_list_advanced_folder_structure_when_user_is_logged_in(self):
         sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings.xml")
-        sys.modules["__main__"].settings.setSetting("oauth2_access_token","some_token")
+        sys.modules["__main__"].settings.setSetting("oauth2_access_token", "some_token")
 
         self.navigation.listMenu()
 

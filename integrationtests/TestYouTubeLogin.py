@@ -2,12 +2,11 @@ import BaseTestCase
 import nose
 import sys
 import time
-from mock import Mock
 
 
 class TestYouTubeLogin(BaseTestCase.BaseTestCase):
     totp = ""
-    
+
     def test_plugin_should_perform_basic_login_correctly(self):
         sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings.xml")
 
@@ -105,7 +104,7 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
         print "oauth2_access_token: " + oauth2_access_token + " - " + str(len(oauth2_access_token))
         assert(len(nick.strip()) > 0 )
         assert(len(oauth2_access_token) > 40)
-    
+
     def generatePin(self, *args, **kwargs):
         userpin = self.totp.at(time.time())
         if userpin == self.lastpin or len(str(userpin)) < 6:
@@ -113,6 +112,6 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
             return self.generatePin(args, kwargs)
         print "GENERATED PIN : " + str(userpin)
         return userpin
-        
+
 if __name__ == "__main__":
     nose.runmodule()

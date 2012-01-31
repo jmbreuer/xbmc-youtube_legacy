@@ -41,7 +41,7 @@ if hasattr(sys.modules["__main__"], "xbmcgui"):
     xbmcgui = sys.modules["__main__"].xbmcgui
 else:
     import xbmcgui
-xbmcgui = xbmcgui 
+xbmcgui = xbmcgui
 
 if hasattr(sys.modules["__main__"], "dbg"):
     dbg = sys.modules["__main__"].dbg
@@ -349,6 +349,7 @@ def fetchPage(params={}):
         ret_obj = fetchPage(params)
         return ret_obj
 
+
 def getCookieInfoAsHTML(self):
     log("", 5)
     if hasattr(sys.modules["__main__"], "cookiejar"):
@@ -365,6 +366,7 @@ def getCookieInfoAsHTML(self):
 
     log("Found no cookie", 5)
     return ""
+
 
 # This function implements a horrible hack related to python 2.4's terrible unicode handling.
 def makeAscii(data):
