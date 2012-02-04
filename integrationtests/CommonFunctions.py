@@ -23,9 +23,10 @@ import re
 import io
 import inspect
 import time
+import HTMLParser
 
 
-version = "0.9.1"
+version = "0.9.2"
 plugin = "CommonFunctions-" + version
 print plugin
 
@@ -35,18 +36,16 @@ if hasattr(sys.modules["__main__"], "xbmc"):
     xbmc = sys.modules["__main__"].xbmc
 else:
     import xbmc
-xbmc = xbmc
 
 if hasattr(sys.modules["__main__"], "xbmcgui"):
     xbmcgui = sys.modules["__main__"].xbmcgui
 else:
     import xbmcgui
-xbmcgui = xbmcgui
 
 if hasattr(sys.modules["__main__"], "dbg"):
     dbg = sys.modules["__main__"].dbg
 else:
-    dbg = True
+    dbg = False
 
 if hasattr(sys.modules["__main__"], "dbglevel"):
     dbglevel = sys.modules["__main__"].dbglevel
@@ -78,7 +77,7 @@ def getUserInput(title="Input", default="", hidden=False):
 
 
 # This function raises a keyboard numpad for user input
-def getUserInputNumbers(title="Input", default="", hidden=False):
+def getUserInputNumbers(title="Input", default=""):
     log("", 5)
     result = None
 
@@ -112,13 +111,11 @@ def getParameters(parameterString):
 
 def replaceHTMLCodes(txt):
     log(repr(txt), 5)
-    txt = makeUTF8(txt)
-    # Fix missing ; in &#<number>;
-    txt = re.sub("(&#[0-9]+)([^;^0-9]+)", "\\1;\\2", txt)
 
-    import HTMLParser
-    h = HTMLParser.HTMLParser()
-    txt = h.unescape(txt)
+    # Fix missing ; in &#<number>;
+    txt = re.sub("(&#[0-9]+)([^;^0-9]+)", "\\1;\\2", makeUTF8(txt))
+
+    txt = HTMLParser.HTMLParser().unescape(txt)
 
     log(repr(txt), 5)
     return txt
@@ -137,16 +134,18 @@ def stripTags(html):
     return html
 
 
-def _getDOMContent(html, name, match):
+def _getDOMContent(html, name, match):  # Cleanup
     log("match: " + match, 2)
-    start = html.find(match)
-    endstr = "</" + name + ">"
-    end = html.find(endstr, start)
 
+    endstr = "</" + name + ">"
+
+    start = html.find(match)
+    end = html.find(endstr, start)
     pos = html.find("<" + name, start + 1 )
+
     log(str(start) + " < " + str(end) + ", pos = " + str(pos) + ", endpos: " + str(end), 8)
 
-    while pos < end and pos != -1:
+    while pos < end and pos != -1:  # Ignore too early </endstr> return
         tend = html.find(endstr, end + len(endstr))
         if tend != -1:
             end = tend
@@ -172,17 +171,26 @@ def _getDOMAttributes(lst):
     ret = []
     for tmp in lst:
         cont_char = tmp[0]
-        if tmp.find('="', tmp.find(cont_char, 1)) > -1:
-            tmp = tmp[:tmp.find('="', tmp.find(cont_char, 1))]
+        if cont_char in "'\"":
+            log("Using %s as quotation mark" % cont_char, 4)
 
-        if tmp.find('=\'', tmp.find(cont_char, 1)) > -1:
-            tmp = tmp[:tmp.find('=\'', tmp.find(cont_char, 1))]
+            # Limit down to next variable.
+            if tmp.find('=' + cont_char, tmp.find(cont_char, 1)) > -1:
+                tmp = tmp[:tmp.find('=' + cont_char, tmp.find(cont_char, 1))]
 
-        tmp = tmp[1:]
-        if tmp.rfind(cont_char) > -1:
-            tmp = tmp[:tmp.rfind(cont_char)]
-        tmp = tmp.strip()
-        ret.append(tmp)
+            # Limit to the last quotation mark
+            if tmp.rfind(cont_char, 1) > -1:
+                tmp = tmp[1:tmp.rfind(cont_char)]
+        else:
+            log("No quotation mark found", 4)
+            if tmp.find(" ") > 0:
+                tmp = tmp[:tmp.find(" ")]
+            elif tmp.find("/") > 0:
+                tmp = tmp[:tmp.find("/")]
+            elif tmp.find(">") > 0:
+                tmp = tmp[:tmp.find(">")]
+
+        ret.append(tmp.strip())
 
     log("Done: " + repr(ret), 2)
     return ret
@@ -196,12 +204,11 @@ def parseDOM(html, name="", attrs={}, ret=False):
     # Default return <- Returns a list with the content
     log("start: " + repr(name) + " - " + repr(attrs) + " - " + repr(ret) + " - " + str(type(html)), 1)
 
-    if not isinstance(html, str) and not isinstance(html, list) and not isinstance(html, unicode):
+    if isinstance(html, str) or isinstance(html, unicode):
+        html = [html]
+    elif not isinstance(html, list):
         log("Input isn't list or string/unicode.")
         return ""
-
-    if not isinstance(html, list):
-        html = [html]
 
     if not name.strip():
         log("Missing tag name")
@@ -210,54 +217,38 @@ def parseDOM(html, name="", attrs={}, ret=False):
     ret_lst = []
 
     # Find all elements with the tag
-
     i = 0
     for item in html:
-        item = item.replace("\n", "")
         lst = []
-
         for key in attrs:
-            scripts = ['(<' + name + ' [^>]*?(?:' + key + '=[\'"]' + attrs[key] + '[\'"][^>]*?>))',  # Hit often.
-                       '(<' + name + ' (?:' + key + '=[\'"]' + attrs[key] + '[\'"])[^>]*?>)',  # Hit twice
-                       '(<' + name + ' [^>]*?(?:' + key + '=[\'"]' + attrs[key] + '[\'"])[^>]*?>)']
+            lst2 = re.compile('(<' + name + ' [^>]*?(?:' + key + '=[\'"]' + attrs[key] + '[\'"].*?>))', re.M | re.S | re.X).findall(item)
+            if len(lst2) == 0 and attrs[key].find(" ") == -1:  # Try matching without quotation marks
+                lst2 = re.compile('(<' + name + ' [^>]*?(?:' + key + '=' + attrs[key] + '.*?>))', re.M | re.S | re.X).findall(item)
 
-            lst2 = []
-            for script in scripts:
-                if len(lst2) == 0:
-                    #log("scanning " + str(i) + " " + str(len(lst)) + " Running :" + script, 2)
-                    lst2 = re.compile(script).findall(item)
-                    i += 1
-
-                if len(lst2) > 0:
-                    if len(lst) == 0:
-                        lst = lst2
-                        lst2 = []
-                    else:
-                        test = range(len(lst))
-                        test.reverse()
-                        for i in test:  # Delete anything missing from the next list.
-                            if not lst[i] in lst2:
-                                log("Purging mismatch " + str(len(lst)) + " - " + repr(lst[i]), 1)
-                                del(lst[i])
+            i += 1
+            if len(lst) == 0:
+                lst = lst2
+                lst2 = []
+            else:
+                test = range(len(lst))
+                test.reverse()
+                for i in test:  # Delete anything missing from the next list.
+                    if not lst[i] in lst2:
+                        log("Purging mismatch " + str(len(lst)) + " - " + repr(lst[i]), 1)
+                        del(lst[i])
 
         if len(lst) == 0 and attrs == {}:
-            log("no list found, making one on just the element name", 1)
-            lst = re.compile('(<' + name + ' [^>]*?>)').findall(item)
+            log("No list found, trying to match on name only", 1)
+            lst = re.compile('(<' + name + '.*?>)', re.M | re.S | re.X).findall(item)
 
-            if len(lst) == 0:  # If the elemnt doesn't exist with args, try it without args.
-                lst = re.compile('(<' + name + '>)').findall(item)
-
-        if ret != False:
+        if ret:
             log("Getting attribute %s content for %s matches " % (ret, len(lst) ), 2)
             lst2 = []
             for match in lst:
-                tmp_list = re.compile('<' + name + '.*?' + ret + '=([\'"][^>]*?)>').findall(match)
+                tmp_list = re.compile('<' + name + '.*?' + ret + '=(.[^>]*?)>', re.M | re.S | re.X).findall(match)
                 lst2 += _getDOMAttributes(tmp_list)
-                log(lst, 3)
-                log(match, 3)
-                log(lst2, 3)
             lst = lst2
-        elif name != "img":
+        else:
             log("Getting element content for %s matches " % len(lst), 2)
             lst2 = []
             for match in lst:
@@ -265,9 +256,6 @@ def parseDOM(html, name="", attrs={}, ret=False):
                 temp = _getDOMContent(item, name, match).strip()
                 item = item[item.find(temp, item.find(match)) + len(temp):]
                 lst2.append(temp)
-                log(lst, 4)
-                log(match, 4)
-                log(lst2, 4)
             lst = lst2
         ret_lst += lst
 
@@ -290,7 +278,11 @@ def fetchPage(params={}):
         return ret_obj
 
     if get("post_data"):
-        log("Got data to POST: " + urllib.urlencode(get("post_data")), 2)
+        if get("hide_post_data"):
+            log("Posting data", 2)
+        else:
+            log("Posting data: " + urllib.urlencode(get("post_data")), 2)
+
         request = urllib2.Request(link, urllib.urlencode(get("post_data")))
         request.add_header('Content-Type', 'application/x-www-form-urlencoded')
     else:
@@ -350,7 +342,7 @@ def fetchPage(params={}):
         return ret_obj
 
 
-def getCookieInfoAsHTML(self):
+def getCookieInfoAsHTML():
     log("", 5)
     if hasattr(sys.modules["__main__"], "cookiejar"):
         cookiejar = sys.modules["__main__"].cookiejar
@@ -412,26 +404,23 @@ def makeUTF8(data):
         return s
 
 
-def openFile(filepath, options="w"):
-    log(repr(filepath), 5)
+def openFile(filepath, options="r"):
+    log(repr(filepath) + " - " + repr(options), 5)
     if options.find("b") == -1:  # Toggle binary mode on failure
         alternate = options + "b"
     else:
         alternate = options.replace("b", "")
 
     try:
-        log("Trying normal", 5)
+        log("Trying normal: %s" % options, 5)
         return io.open(filepath, options)
     except:
-        log("Fallback to binary", 5)
+        log("Fallback to binary: %s" % alternate, 5)
         return io.open(filepath, alternate)
 
 
 def log(description, level=0):
     if dbg and dbglevel > level:
-        # Funny stuff..
-        # [1][3] needed for calls from scrapeShow
-        # print repr(inspect.stack())
         try:
             xbmc.log("[%s] %s : '%s'" % (plugin, inspect.stack()[1][3], description.encode("utf-8", "ignore")), xbmc.LOGNOTICE)
         except:

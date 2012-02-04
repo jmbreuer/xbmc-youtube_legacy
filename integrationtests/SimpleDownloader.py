@@ -137,6 +137,15 @@ class SimpleDownloader():
         params["path_complete"] = os.path.join(params["download_path"].decode("utf-8"), self.common.makeUTF8(filename))
         self.common.log(params["path_incomplete"], 5)
         self.common.log(params["path_complete"], 5)
+
+        if self.xbmcvfs.exists(params["path_complete"]):
+            self.common.log("Removing existing %s" % repr(params["path_complete"]))
+            self.xbmcvfs.delete(params["path_complete"])
+
+        if self.xbmcvfs.exists(params["path_incomplete"]):
+            self.common.log("Removing incomplete %s" % repr(params["path_incomplete"]))
+            self.xbmcvfs.delete(params["path_incomplete"])
+
         self.common.log("Done", 5)
 
     def _processQueue(self):
@@ -153,13 +162,6 @@ class SimpleDownloader():
                 while item:
                     status = 500
                     self._setPaths(filename, item)
-                    if self.xbmcvfs.exists(item["path_complete"]):
-                        self.common.log("Removing existing %s" % repr(item["path_complete"]))
-                        self.xbmcvfs.delete(item["path_complete"])
-
-                    if self.xbmcvfs.exists(item["path_incomplete"]):
-                        self.common.log("Removing incomplete %s" % repr(item["path_incomplete"]))
-                        self.xbmcvfs.delete(item["path_incomplete"])
 
                     if not "url" in item:
                         self.common.log("URL missing : %s" % repr(item))
@@ -207,15 +209,27 @@ class SimpleDownloader():
             return p
 
     def _readstdout(self, proc, retVal=""):
-        self.common.log("", 5)
-        while (select.select([proc.stdout], [], [], 0)[0] != []):
-            retVal += proc.stdout.read(1)
+        self.common.log("", 50)
+        try:
+            while (select.select([proc.stdout], [], [], 0)[0] != []):
+                retVal += proc.stdout.read(1)
+        except:
+            #retVal += p.communicate()[0]
+            self.common.log("Fallback")
+            retVal += proc.stdout.read()
+
         return retVal
 
     def _readstderr(self, proc, retVal=""):
-        self.common.log("", 5)
-        while (select.select([proc.stderr], [], [], 0)[0] != []):
-            retVal += proc.stderr.read(1)
+        self.common.log("", 50)
+        try:
+            while (select.select([proc.stderr], [], [], 0)[0] != []):
+                retVal += proc.stderr.read(1)
+        except:
+            #retVal += p.communicate()[1]
+            self.common.log("Fallback")
+            retVal += proc.stderr.read()
+
         return retVal
 
     def _detectStream(self, filename, item):
@@ -309,7 +323,8 @@ class SimpleDownloader():
                 p.kill()
 
         # Mplayer
-        if ("total_size" not in item and "cmd_call" not in item and "duration2" not in item) or get("use_mplayer"):
+        # -endpos doesn't work with dumpstream.
+        if ("total_size" not in item and "cmd_call" not in item and "duration" not in item) or get("use_mplayer"):
             self.common.log("Trying mplayer")
             # Detect filesize
             probe_args = [self.mplayer_binary, "-v", "-endpos", "1", "-vo", "null", "-ao", "null", get("url")]
@@ -656,7 +671,6 @@ class SimpleDownloader():
 
     def movieItemToPosition(self, filename, position):
         if position > 0 and  self.cache.lock("SimpleDownloaderQueueLock"):
-
             items = []
             if filename:
                 queue = self.cache.get("SimpleDownloaderQueue")
