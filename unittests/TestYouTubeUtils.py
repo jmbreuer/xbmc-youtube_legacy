@@ -7,6 +7,7 @@ from  YouTubeUtils import YouTubeUtils
 
 
 class TestYouTubeUtils(BaseTestCase.BaseTestCase):
+
     def test_showMessage_should_call_xbmc_execute_builtin_correctly(self):
         sys.modules["__main__"].settings.getSetting.return_value = "3"
         utils = YouTubeUtils()
