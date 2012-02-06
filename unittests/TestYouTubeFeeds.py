@@ -733,7 +733,7 @@ class TestYouTubeFeeds(BaseTestCase.BaseTestCase):
 
         print repr(video)
 
-        assert(video == [{'next': 'false'}, {'next': 'false'}, {'next': 'false'}])
+        assert(video == [{'next': 'false'}, {'next': 'false'}, {'next': 'false'}, {'next': 'false'}, {'next': 'false'}])
 
     def test_listAll_should_call_storage_getReversePlaylistOrder_to_reverse_list_if_not_play_all(self):
         sys.modules["__main__"].settings.getSetting.return_value = "1"
