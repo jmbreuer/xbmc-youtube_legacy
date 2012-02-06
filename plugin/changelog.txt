@@ -19,6 +19,9 @@
 - If not replaceable refactor show scraper at least.
 - Integration tests on all user actions.
 
+[B]Version 2.9.1[/B]
+- Fixed indentation error that broke pagination of long playlists and subscription lists, basically any folder list with more than 50 elemtents was broken.
+
 [B]Version 2.9.0[/B]
 - Sanity check feeds -> listAll temp_objects, since it (randomly?) fails
 - Upgraded dependencies
