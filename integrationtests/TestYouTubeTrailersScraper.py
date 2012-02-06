@@ -3,6 +3,7 @@ import nose
 
 
 class TestYouTubeTrailersScraper(BaseTestCase.BaseTestCase):
+
     def test_plugin_should_scrape_latest_trailers_correctly(self):
         self.navigation.listMenu({"scraper": "latest_trailers", "path": "/root/explore/trailers/latest"})
 
