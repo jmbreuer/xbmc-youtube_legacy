@@ -102,6 +102,7 @@ class TestYouTubeUserFeeds(BaseTestCase.BaseTestCase):
 
         self.assert_directory_count_greater_than_or_equals(10)
         self.assert_directory_count_less_than_or_equals(51)
+        self.assert_directory_should_have_next_folder()
         self.assert_directory_is_a_video_list()
 
     def test_plugin_should_list_user_playlist_video_list_page_2_correctly_(self):
@@ -120,6 +121,7 @@ class TestYouTubeUserFeeds(BaseTestCase.BaseTestCase):
 
         self.assert_directory_count_greater_than_or_equals(2)
         self.assert_directory_count_less_than_or_equals(51)
+        self.assert_directory_should_have_next_folder()
         self.assert_directory_is_a_folder_list()
         self.assert_directory_item_urls_contain("contact")
 
@@ -146,24 +148,24 @@ class TestYouTubeUserFeeds(BaseTestCase.BaseTestCase):
 
     def test_plugin_should_list_user_watched_history_video_list_correctly(self):
         sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
-        self.navigation.listMenu({"user_feed": "watched_history", 'login': 'true', "path": "/root/history"})
+        self.navigation.listMenu({"user_feed": "watch_history", 'login': 'true', "path": "/root/history"})
 
         self.assert_directory_count_greater_than_or_equals(10)
         self.assert_directory_count_less_than_or_equals(51)
         self.assert_directory_is_a_video_list()
+        self.assert_directory_should_have_next_folder()
         self.assert_directory_contains_almost_only_unique_video_items()
         self.assert_directory_items_should_have_external_thumbnails()
 
     def test_plugin_should_list_user_watched_history_video_list_page_2_correctly(self):
         sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
-        self.navigation.listMenu({"user_feed": "watched_history", 'login': 'true', "page": "1", "path": "/root/history"})
+        self.navigation.listMenu({"user_feed": "watch_history", 'login': 'true', "page": "1", "path": "/root/history"})
 
         self.assert_directory_count_greater_than_or_equals(10)
         self.assert_directory_count_less_than_or_equals(51)
         self.assert_directory_is_a_video_list()
         self.assert_directory_contains_almost_only_unique_video_items()
         self.assert_directory_items_should_have_external_thumbnails()
-        self.assert_directory_item_urls_contain("playlist_entry_id")
 
 if __name__ == "__main__":
     nose.runmodule()
