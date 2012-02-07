@@ -218,7 +218,9 @@ class YouTubeCore():
             if get("feed") != "feed_categories":
                 folder["login"] = "true"
             title = node.getElementsByTagName("title").item(0).firstChild.nodeValue
-            folder['Title'] = title[title.find(": ") + 2:]
+            if title.find(": ") > 0:
+                title = title[title.find(": ") + 2:]
+            folder['Title'] = title
             folder['published'] = self._getNodeValue(node, "published", "2008-07-05T19:56:35.000-07:00")
 
             if node.getElementsByTagName("id"):
