@@ -219,11 +219,12 @@ def parseDOM(html, name="", attrs={}, ret=False):
     # Find all elements with the tag
     i = 0
     for item in html:
+        item = item.replace("\n", "")
         lst = []
         for key in attrs:
-            lst2 = re.compile('(<' + name + ' [^>]*?(?:' + key + '=[\'"]' + attrs[key] + '[\'"].*?>))', re.M | re.S | re.X).findall(item)
+            lst2 = re.compile('(<' + name + '[^>]*?(?:' + key + '=[\'"]' + attrs[key] + '[\'"].*?>))', re.M | re.S).findall(item)
             if len(lst2) == 0 and attrs[key].find(" ") == -1:  # Try matching without quotation marks
-                lst2 = re.compile('(<' + name + ' [^>]*?(?:' + key + '=' + attrs[key] + '.*?>))', re.M | re.S | re.X).findall(item)
+                lst2 = re.compile('(<' + name + '[^>]*?(?:' + key + '=' + attrs[key] + '.*?>))', re.M | re.S).findall(item)
 
             i += 1
             if len(lst) == 0:
@@ -239,13 +240,13 @@ def parseDOM(html, name="", attrs={}, ret=False):
 
         if len(lst) == 0 and attrs == {}:
             log("No list found, trying to match on name only", 1)
-            lst = re.compile('(<' + name + '.*?>)', re.M | re.S | re.X).findall(item)
+            lst = re.compile('(<' + name + '.*?>)', re.M | re.S).findall(item)
 
         if ret:
             log("Getting attribute %s content for %s matches " % (ret, len(lst) ), 2)
             lst2 = []
             for match in lst:
-                tmp_list = re.compile('<' + name + '.*?' + ret + '=(.[^>]*?)>', re.M | re.S | re.X).findall(match)
+                tmp_list = re.compile('<' + name + '.*?' + ret + '=(.[^>]*?)>', re.M | re.S).findall(match)
                 lst2 += _getDOMAttributes(tmp_list)
             lst = lst2
         else:
