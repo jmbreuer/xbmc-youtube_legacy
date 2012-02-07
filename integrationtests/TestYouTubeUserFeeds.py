@@ -121,7 +121,6 @@ class TestYouTubeUserFeeds(BaseTestCase.BaseTestCase):
 
         self.assert_directory_count_greater_than_or_equals(2)
         self.assert_directory_count_less_than_or_equals(51)
-        self.assert_directory_should_have_next_folder()
         self.assert_directory_is_a_folder_list()
         self.assert_directory_item_urls_contain("contact")
 
