@@ -514,7 +514,7 @@ class YouTubeScraper():
         videos = self.common.parseDOM(result["content"], "div", attrs={"class": "show-season-videos"})
         videos = self.common.parseDOM(videos, "button", ret="data-video-ids")
 
-        nexturl = self.common.parseDOM(result["content"], "button", {"class": " yt-uix-button"}, ret="data-next-url")
+        nexturl = self.common.parseDOM(result["content"], "button", {"class": " yt-uix-button.*?"}, ret="data-next-url")
 
         if (len(nexturl) > 0):
             nexturl = nexturl[0]
@@ -542,7 +542,7 @@ class YouTubeScraper():
                     else:
                         videos += more_videos
                         start += 20
-
+        
         self.common.log("Done")
         return (videos, result["status"])
 
