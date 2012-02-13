@@ -542,7 +542,7 @@ class YouTubeScraper():
                     else:
                         videos += more_videos
                         start += 20
-        
+
         self.common.log("Done")
         return (videos, result["status"])
 
