@@ -490,8 +490,6 @@ class YouTubeCore():
                     ret_obj["content"] = self.language(30606)
                     return self._verifyAge(link, ret_obj["new_url"], params)
                 else:
-                    #ret_obj["status"] = 303
-                    #ret_obj["content"] = self.language(30606)
                     return ret_obj
 
         except urllib2.HTTPError, e:
