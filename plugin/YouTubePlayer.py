@@ -699,12 +699,13 @@ class YouTubePlayer():
         (video, status) = self.getInfo(params)
 
         if status != 200:
+            video['apierror'] = self.language(30618)
             return (video, 303)
 
         #Check if file has been downloaded locally and use that as a source instead
         video_url = self.checkLocalFileSource(get, status, video)
         if video_url:
-            video['video_url'] = path
+            video['video_url'] = video_url
             return (video, 200)
 
         (links, video) = self._getVideoLinks(video, params)
