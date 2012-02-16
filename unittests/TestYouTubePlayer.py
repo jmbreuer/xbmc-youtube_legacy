@@ -795,12 +795,11 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 
     def test_getVideoObject_should_use_pre_defined_error_messages_on_missing_url(self):
         sys.modules["__main__"].settings.getSetting.return_value = ""
-
         player = YouTubePlayer()
         player.getInfo = Mock()
         player.getInfo.return_value = ({}, 303)
-        player._getVideoLinks = Mock()
-        player._getVideoLinks.return_value = ({}, {})
+        player.checkLocalFileSource = Mock(return_value="")
+        player._getVideoLinks = Mock(return_value = ({}, {}))
 
         player.getVideoObject({})
 
