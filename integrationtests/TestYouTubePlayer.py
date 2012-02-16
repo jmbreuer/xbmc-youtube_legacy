@@ -68,7 +68,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
     def test_plugin_should_play_live_vidoes(self):
         sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
 
-        self.navigation.executeAction({"action": "play_video", "videoid": "JpYHuK45We0"})
+        self.navigation.executeAction({"action": "play_video", "videoid": "e8RnJYYlIvg"})
 
         args = sys.modules["__main__"].xbmcplugin.setResolvedUrl.call_args_list
 
