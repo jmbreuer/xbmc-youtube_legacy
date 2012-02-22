@@ -134,10 +134,10 @@ def stripTags(html):
     return html
 
 
-def _getDOMContent(html, name, match):  # Cleanup
+def _getDOMContent(html, name, match, ret):  # Cleanup
     log("match: " + match, 2)
 
-    endstr = "</" + name + ">"
+    endstr = "</" + name  # + ">"
 
     start = html.find(match)
     end = html.find(endstr, start)
@@ -154,25 +154,30 @@ def _getDOMContent(html, name, match):  # Cleanup
 
     log("start: %s, len: %s, end: %s" % (start, len(match), end), 2)
     if start == -1 and end == -1:
-        html = ""
+        result = ""
     elif start > -1 and end > -1:
-        html = html[start + len(match):end]
+        result = html[start + len(match):end]
     elif end > -1:
-        html = html[:end]
+        result = html[:end]
     elif start > -1:
-        html = html[start + len(match):]
+        result = html[start + len(match):]
 
-    log("done html length: " + str(len(html)), 2)
-    return html
+    if ret:
+        endstr = html[end:html.find(">", html.find(endstr)) + 1]
+        result = match + result + endstr
+
+    log("done result length: " + str(len(result)), 2)
+    return result
 
 
-def _getDOMAttributes(lst):
+def _getDOMAttributes(match, name, ret):
     log("", 2)
+    lst = re.compile('<' + name + '.*? ' + ret + '=(.[^>]*?)>', re.M | re.S).findall(match)
     ret = []
     for tmp in lst:
         cont_char = tmp[0]
         if cont_char in "'\"":
-            log("Using %s as quotation mark" % cont_char, 4)
+            log("Using %s as quotation mark" % cont_char)
 
             # Limit down to next variable.
             if tmp.find('=' + cont_char, tmp.find(cont_char, 1)) > -1:
@@ -182,7 +187,7 @@ def _getDOMAttributes(lst):
             if tmp.rfind(cont_char, 1) > -1:
                 tmp = tmp[1:tmp.rfind(cont_char)]
         else:
-            log("No quotation mark found", 4)
+            log("No quotation mark found", 2)
             if tmp.find(" ") > 0:
                 tmp = tmp[:tmp.find(" ")]
             elif tmp.find("/") > 0:
@@ -195,14 +200,38 @@ def _getDOMAttributes(lst):
     log("Done: " + repr(ret), 2)
     return ret
 
+def _getDOMElements(item, name, attrs):
+    log("Name: " + repr(name) + " - Attrs:" + repr(attrs) + " - HTML: " + str(type(item)))
+    lst = []
+    for key in attrs:
+        lst2 = re.compile('(<' + name + '[^>]*?(?:' + key + '=[\'"]' + attrs[key] + '[\'"].*?>))', re.M | re.S).findall(item)
+        if len(lst2) == 0 and attrs[key].find(" ") == -1:  # Try matching without quotation marks
+            lst2 = re.compile('(<' + name + '[^>]*?(?:' + key + '=' + attrs[key] + '.*?>))', re.M | re.S).findall(item)
+
+        if len(lst) == 0:
+            log("Setting main list " + repr(lst2), 5)
+            lst = lst2
+            lst2 = []
+        else:
+            log("Setting new list " + repr(lst2), 5)
+            test = range(len(lst))
+            test.reverse()
+            for i in test:  # Delete anything missing from the next list.
+                if not lst[i] in lst2:
+                    log("Purging mismatch " + str(len(lst)) + " - " + repr(lst[i]), 1)
+                    del(lst[i])
+
+    if len(lst) == 0 and attrs == {}:
+        log("No list found, trying to match on name only", 1)
+        lst = re.compile('(<' + name + '>)', re.M | re.S).findall(item)
+        if len(lst) == 0:
+            lst = re.compile('(<' + name + ' .*?>)', re.M | re.S).findall(item)
+
+    log("Done: " + str(type(lst)))
+    return lst
 
 def parseDOM(html, name="", attrs={}, ret=False):
-    # html <- text to scan.
-    # name <- Element name
-    # attrs <- { "id": "my-div", "class": "oneclass.*anotherclass", "attribute": "a random tag" }
-    # ret <- Return content of element
-    # Default return <- Returns a list with the content
-    log("start: " + repr(name) + " - " + repr(attrs) + " - " + repr(ret) + " - " + str(type(html)), 1)
+    log("Name: " + repr(name) + " - Attrs:" + repr(attrs) + " - Ret: " + repr(ret) + " - HTML: " + str(type(html)), 1)
 
     if isinstance(html, str) or isinstance(html, unicode):
         html = [html]
@@ -215,46 +244,25 @@ def parseDOM(html, name="", attrs={}, ret=False):
         return ""
 
     ret_lst = []
-
-    # Find all elements with the tag
-    i = 0
     for item in html:
-        item = item.replace("\n", "")
-        lst = []
-        for key in attrs:
-            lst2 = re.compile('(<' + name + '[^>]*?(?:' + key + '=[\'"]' + attrs[key] + '[\'"].*?>))', re.M | re.S).findall(item)
-            if len(lst2) == 0 and attrs[key].find(" ") == -1:  # Try matching without quotation marks
-                lst2 = re.compile('(<' + name + '[^>]*?(?:' + key + '=' + attrs[key] + '.*?>))', re.M | re.S).findall(item)
+        temp_item = re.compile('(<[^>]*?\n[^>]*?>)').findall(item)
+        for match in temp_item:
+            item = item.replace(match, match.replace("\n", " "))
 
-            i += 1
-            if len(lst) == 0:
-                lst = lst2
-                lst2 = []
-            else:
-                test = range(len(lst))
-                test.reverse()
-                for i in test:  # Delete anything missing from the next list.
-                    if not lst[i] in lst2:
-                        log("Purging mismatch " + str(len(lst)) + " - " + repr(lst[i]), 1)
-                        del(lst[i])
+        lst = _getDOMElements(item, name, attrs)
 
-        if len(lst) == 0 and attrs == {}:
-            log("No list found, trying to match on name only", 1)
-            lst = re.compile('(<' + name + '.*?>)', re.M | re.S).findall(item)
-
-        if ret:
+        if isinstance(ret, str):
             log("Getting attribute %s content for %s matches " % (ret, len(lst) ), 2)
             lst2 = []
             for match in lst:
-                tmp_list = re.compile('<' + name + '.*?' + ret + '=(.[^>]*?)>', re.M | re.S).findall(match)
-                lst2 += _getDOMAttributes(tmp_list)
+                lst2 += _getDOMAttributes(match, name, ret)
             lst = lst2
         else:
             log("Getting element content for %s matches " % len(lst), 2)
             lst2 = []
             for match in lst:
                 log("Getting element content for %s" % match, 4)
-                temp = _getDOMContent(item, name, match).strip()
+                temp = _getDOMContent(item, name, match, ret).strip()
                 item = item[item.find(temp, item.find(match)) + len(temp):]
                 lst2.append(temp)
             lst = lst2
@@ -262,6 +270,11 @@ def parseDOM(html, name="", attrs={}, ret=False):
 
     log("Done", 1)
     return ret_lst
+
+
+def extractJSON(data):
+    lst = re.compile('({.*?})', re.M | re.S).findall(data)
+    return lst
 
 
 def fetchPage(params={}):
@@ -406,17 +419,17 @@ def makeUTF8(data):
 
 
 def openFile(filepath, options="r"):
-    log(repr(filepath) + " - " + repr(options), 5)
+    log(repr(filepath) + " - " + repr(options))
     if options.find("b") == -1:  # Toggle binary mode on failure
         alternate = options + "b"
     else:
         alternate = options.replace("b", "")
 
     try:
-        log("Trying normal: %s" % options, 5)
+        log("Trying normal: %s" % options)
         return io.open(filepath, options)
     except:
-        log("Fallback to binary: %s" % alternate, 5)
+        log("Fallback to binary: %s" % alternate)
         return io.open(filepath, alternate)
 
 
