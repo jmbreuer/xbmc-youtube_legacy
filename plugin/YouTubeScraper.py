@@ -72,7 +72,7 @@ class YouTubeScraper():
         if (len(trailers) > 0):
             ahref = self.common.parseDOM(trailers, "a", attrs={"class": " yt-uix-hovercard-target", "id": ".*?"}, ret="href")
 
-            athumbs = self.common.parseDOM(trailers, "img", attrs={"alt": "Thumbnail"}, ret="data-thumb")
+            athumbs = self.common.parseDOM(trailers, "img", attrs={"alt": "Thumbnail "}, ret="data-thumb")
 
             videos = self.utils.extractVID(ahref)
 
@@ -113,7 +113,7 @@ class YouTubeScraper():
                     videos = self.utils.extractVID(ahref)
 
                     for index, videoid in enumerate(videos):
-                        thumb = self.common.parseDOM(athumbs[index], "img", attrs={"alt": "Thumbnail"}, ret="data-thumb")
+                        thumb = self.common.parseDOM(athumbs[index], "img", attrs={"alt": "Thumbnail "}, ret="data-thumb")
                         if len(thumb) > 0:
                             thumb = thumb[0]
 
@@ -414,7 +414,7 @@ class YouTubeScraper():
         if len(categories) > 0:
             ahref = self.common.parseDOM(categories, "a", attrs={"href": "/course.*?", "title": ".*?"}, ret="href")
             atitle = self.common.parseDOM(result["content"], "a", attrs={"href": "/course.*?"}, ret="title")
-            athumb = self.common.parseDOM(categories, "img", attrs={"alt": "Thumbnail"}, ret="data-thumb")
+            athumb = self.common.parseDOM(categories, "img", attrs={"alt": "Thumbnail "}, ret="data-thumb")
 
             item = {}
 
@@ -629,7 +629,7 @@ class YouTubeScraper():
             for show in shows:
                 ahref = self.common.parseDOM(show, "a", attrs={"title": ".*?"}, ret="href")
                 acont = self.common.parseDOM(show, "a", ret="title")
-                athumb = self.common.parseDOM(show, "img", attrs={"alt": "Thumbnail"}, ret="src")
+                athumb = self.common.parseDOM(show, "img", attrs={"alt": "Thumbnail "}, ret="src")
                 acount = self.common.parseDOM(show, "span", {"class": "show-video-counts"})
 
                 #self.common.log("XXX " + str(len(ahref)) + " - " +  str(len(acont)) + " - " + str(len(athumb)) + " - " + str(len(acount)) + repr(show))
@@ -730,7 +730,7 @@ class YouTubeScraper():
                     next = "true"
 
             videoids = self.common.parseDOM(result["content"], "button", {"class": "addto-button.*?"}, ret="data-video-ids")
-            thumbs = self.common.parseDOM(result["content"], "img", attrs={"alt": "Thumbnail"}, ret="data-thumb")
+            thumbs = self.common.parseDOM(result["content"], "img", attrs={"alt": "Thumbnail "}, ret="data-thumb")
             page += 1
             #self.common.log("Found videoids: " + repr(videoids))
             #self.common.log("Items before: " + repr(items))
