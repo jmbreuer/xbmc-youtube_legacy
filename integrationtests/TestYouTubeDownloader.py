@@ -20,7 +20,7 @@ class TestYouTubeDownloader(BaseTestCase.BaseTestCase):
         assert(os.path.exists('./tmp/Roll a D6-[54VJWHL2K3I].mp4'))
         assert(os.path.getsize('./tmp/Roll a D6-[54VJWHL2K3I].mp4') > 100)
 
-    def test_plugin_should_download_agerestricted_over_18_videos(self):
+    def ttest_plugin_should_download_agerestricted_over_18_videos(self):
         sys.modules["__main__"].xbmcvfs.rename.side_effect = os.rename
         sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings.xml")
         sys.modules["__main__"].downloader._getNextItemFromQueue = Mock()
@@ -34,7 +34,7 @@ class TestYouTubeDownloader(BaseTestCase.BaseTestCase):
         assert(os.path.exists("./tmp/נלה מהיפה והחנון בסטריפ צ'אט בקליפ של חובבי ציון-[fOdNOtS8ZIs].mp4"))
         assert(os.path.getsize("./tmp/נלה מהיפה והחנון בסטריפ צ'אט בקליפ של חובבי ציון-[fOdNOtS8ZIs].mp4") > 100)
 
-    def test_plugin_should_download_with_subtitles_when_available(self):
+    def ttest_plugin_should_download_with_subtitles_when_available(self):
         sys.modules["__main__"].xbmcvfs.rename.side_effect = os.rename
         sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings.xml")
         sys.modules["__main__"].downloader._getNextItemFromQueue = Mock()
