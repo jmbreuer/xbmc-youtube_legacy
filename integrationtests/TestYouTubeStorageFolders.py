@@ -20,7 +20,6 @@ class TestYouTubeStorageFolders(BaseTestCase.BaseTestCase):
         self.assert_directory_count_less_than_or_equals(4)
         self.assert_directory_count_greater_than_or_equals(3)
         self.assert_directory_is_a_folder_list()
-        #self.assert_directory_items_should_have_external_thumbnails()
 
 if __name__ == "__main__":
     nose.runmodule()
