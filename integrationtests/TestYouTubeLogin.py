@@ -74,7 +74,7 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
         self.navigation.executeAction({"action": "settings"})
 
         nick = sys.modules["__main__"].settings.getSetting("nick")
-        oauth2_access_token = sys.modules["__main__"].settings.getSetting("oauth2_access_token")
+        oauth2_access_token = sys.modules["__main__"].settings.getSetting("oauth2_access_token") 
         print "nick: " + nick + " - " + str(len(nick))
         print "username: " + sys.modules["__main__"].settings.getSetting("username")
         print "pass: " + sys.modules["__main__"].settings.getSetting("user_password")

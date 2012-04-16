@@ -183,7 +183,7 @@ class YouTubeLogin():
                         # Check if there are any errors to report
                         errors = self.core._findErrors(ret, silent=True)
                         if errors:
-                                if errors.find("The code you entered didn") == -1 or (errors.find("The code you entered didn") > -1 and step > 12):
+                                if errors.find("cookie-clear-message-1") == -1 and (errors.find("The code you entered didn") == -1 or (errors.find("The code you entered didn") > -1 and step > 12)):
                                         self.common.log("Returning error: " + repr(errors))
                                         return (errors, 303)
 
@@ -226,24 +226,16 @@ class YouTubeLogin():
                                 if len(url_data) == 0:
                                     return (False, 500)
 
-                                target_url = ret["new_url"]
-                                if target_url.rfind("/") > 10:
-                                        target_url = target_url[:target_url.find("/", 10)]
-                                else:
-                                        target_url += "/"
-
                                 new_part = self.common.parseDOM(ret["content"], "form", attrs={"name": "verifyForm"}, ret="action")
-                                fetch_options = {"link": target_url + new_part[0], "url_data": url_data, "no-language-cookie": "true", "referer": ret["location"]}
+                                fetch_options = {"link": new_part[0], "url_data": url_data, "no-language-cookie": "true", "referer": ret["location"]}
 
                                 self.common.log("Part D: " + repr(fetch_options))
                                 continue
 
                         smsToken = self.common.parseDOM(ret["content"].replace("\n", ""), "input", attrs={"name": "smsToken"}, ret="value")
-                        cont = self.common.parseDOM(ret["content"], "input", attrs={"name": "continue"}, ret="value")
 
-                        if len(cont) > 0 and len(smsToken) > 0 and galx != "":
+                        if len(smsToken) > 0 and galx != "":
                                 url_data = {"smsToken": smsToken[0],
-                                             "continue": cont[0],
                                              "PersistentCookie": "yes",
                                              "service": "youtube",
                                              "GALX": galx}
@@ -304,23 +296,23 @@ class YouTubeLogin():
                         return (galx, url_data)
 
         def _fillUserPin(self, content):
-                smsToken = self.common.parseDOM(content, "input", attrs={"name": "smsToken"}, ret="value")
-                self.smsToken = smsToken
-                email = self.common.parseDOM(content, "input", attrs={"name": "email"}, ret="value")
-                userpin = self.common.getUserInputNumbers(self.language(30627))
+            self.common.log(repr(content), 5)
+            smsToken = self.common.parseDOM(content, "input", attrs={"name": "smsToken"}, ret="value")
+            self.smsToken = smsToken
+            userpin = self.common.getUserInputNumbers(self.language(30627))
 
-                if len(userpin) > 0:
-                        url_data = {"smsToken": smsToken[0],
-                                     "PersistentCookie": "yes",
-                                     "smsUserPin": userpin,
-                                     "smsVerifyPin": "Verify",
-                                     "timeStmp": "",
-                                     "secTok": "",
-                                     "email": email[0]}
-                        return url_data
-                else:
-                    self.common.log("Replace this with a message telling users that they didn't enter a pin")
-                return {}
+            if len(userpin) > 0:
+                url_data = {"smsToken": smsToken[0],
+                            "PersistentCookie": "yes",
+                            "smsUserPin": userpin,
+                            "smsVerifyPin": "Verify",
+                            "timeStmp": "",
+                            "secTok": ""}
+                self.common.log("Done: " + repr(url_data))
+                return url_data
+            else:
+                self.common.log("Replace this with a message telling users that they didn't enter a pin")
+            return {}
 
         def _getCookieInfoAsHTML(self):
                 cookie = repr(sys.modules["__main__"].cookiejar)
