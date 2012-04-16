@@ -460,8 +460,7 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
         result = login._httpLogin({"new":"true"})
         
         assert(sys.modules["__main__"].core._fetchPage.call_count == 2)
-        sys.modules["__main__"].core._fetchPage.assert_called_with({'referer': 'here', 'link': 'http://www.mock.com/Login', 'no-language-cookie': 'true', 'url_data': 'some_url_data'})
-
+        sys.modules["__main__"].core._fetchPage.assert_called_with({'referer': 'here', 'link': 'Login', 'no-language-cookie': 'true', 'url_data': 'some_url_data'})
         
     def test_httpLogin_should_use_parseDOM_to_find_smsToken(self):
         sys.modules["__main__"].core._findErrors.return_value = False
@@ -478,22 +477,6 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
         assert(sys.modules["__main__"].core._fetchPage.call_count == 1)
         assert(args[5][0] == ('', 'input'))
         assert(args[5][1] == {'attrs': {'name': 'smsToken'}, 'ret': 'value'})
-
-    def test_httpLogin_should_use_parseDOM_to_find_cont_value_for_smsToken(self):
-        sys.modules["__main__"].core._findErrors.return_value = False
-        sys.modules["__main__"].core._fetchPage.return_value = {"content":"","status":200}
-        sys.modules["__main__"].settings.getSetting.return_value = "smokey" 
-        sys.modules["__main__"].common.parseDOM.return_value = ""
-        login = YouTubeLogin()
-        
-        result = login._httpLogin({"new":"true"})
-
-        args = sys.modules["__main__"].common.parseDOM.call_args_list
-
-        print repr(args)
-        assert(sys.modules["__main__"].core._fetchPage.call_count == 1)
-        assert(args[6][0] == ('', 'input'))
-        assert(args[6][1] == {'attrs': {'name': 'continue'}, 'ret': 'value'})
 
     def test_httpLogin_should_call_fetchPage_with_correct_fetch_options_if_smsToken_is_found(self):
         sys.modules["__main__"].core._findErrors.return_value = False
@@ -512,7 +495,7 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
         print sys.modules["__main__"].core._fetchPage.call_count
         assert(sys.modules["__main__"].core._fetchPage.call_count == 3)
         print repr(sys.modules["__main__"].core._fetchPage.call_args_list)
-        sys.modules["__main__"].core._fetchPage.assert_called_with({'referer': 'here', 'link': 'http://www.mock.com', 'no-language-cookie': 'true', 'url_data': {'service': 'youtube', 'continue': 'some cont', 'GALX': 'some_galx', 'PersistentCookie': 'yes', 'smsToken': 'some smsToken'}})
+        sys.modules["__main__"].core._fetchPage.assert_called_with({'referer': 'here', 'link': 'some cont', 'no-language-cookie': 'true', 'url_data': {'service': 'youtube', 'GALX': 'some_galx', 'PersistentCookie': 'yes', 'smsToken': 'some smsToken'}})
 
     def test_httpLogin_should_look_for_user_name_to_indicate_login_success(self):
         sys.modules["__main__"].core._findErrors.return_value = False
@@ -674,20 +657,6 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
         assert(args[0][0] == ("new","input"))
         assert(args[0][1] == {'attrs': {'name': 'smsToken'}, 'ret': 'value'})
         
-    def test_fillUserPin_should_call_parseDOM_for_email(self):
-        sys.modules["__main__"].settings.getSetting.return_value = "" 
-        sys.modules["__main__"].common.parseDOM.return_value = "something"
-        sys.modules["__main__"].language.return_value = ""
-        sys.modules["__main__"].common.getUserInput.return_value = ""
-        sys.modules["__main__"].common.getUserInputNumbers.return_value = "123456"
-        login = YouTubeLogin()
-        
-        result = login._fillUserPin("new")
-
-        args = sys.modules["__main__"].common.parseDOM.call_args_list
-        assert(args[1][0] == ("new","input"))
-        assert(args[1][1] == {'attrs': {'name': 'email'}, 'ret': 'value'})
-        
     def test_fillUserPin_should_ask_user_for_user_pin(self):
         sys.modules["__main__"].settings.getSetting.return_value = "" 
         sys.modules["__main__"].common.parseDOM.return_value = "something"
@@ -710,7 +679,6 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
         
         assert(result["smsUserPin"] == "value3")
         assert(result["smsToken"] == "value2")
-        assert(result["email"] == "value2")
         
     def test_fillUserPin_should_not_return_url_data_structure_if_values_are_missing(self):
         sys.modules["__main__"].settings.getSetting.return_value = ""
