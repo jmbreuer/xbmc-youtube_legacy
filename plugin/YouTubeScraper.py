@@ -41,7 +41,7 @@ class YouTubeScraper():
     urls['watched_history'] = "http://www.youtube.com/my_history"
     urls['liked_videos'] = "http://www.youtube.com/my_liked_videos"
     urls['music'] = "http://www.youtube.com/music"
-    urls['artist'] = "http://www.youtube.com/artist/%s?feature=music"
+    urls['artist'] = "http://www.youtube.com/artist?a=%s&feature=music"
     urls['education'] = "http://www.youtube.com/education"
     urls['education_category'] = "http://www.youtube.com/education?category=%s"
     urls['playlist'] = "http://www.youtube.com/view_play_list?p=%s"
