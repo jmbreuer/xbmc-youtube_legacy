@@ -2,7 +2,6 @@ import BaseTestCase
 import nose
 import sys
 
-
 class TestYouTubeUserFeeds(BaseTestCase.BaseTestCase):
 
     def test_plugin_should_list_user_favorites_video_list_correctly(self):
