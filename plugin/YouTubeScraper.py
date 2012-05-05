@@ -72,7 +72,9 @@ class YouTubeScraper():
         if (len(trailers) > 0):
             ahref = self.common.parseDOM(trailers, "a", attrs={"class": " yt-uix-hovercard-target", "id": ".*?"}, ret="href")
 
-            athumbs = self.common.parseDOM(trailers, "img", attrs={"alt": "Thumbnail "}, ret="data-thumb")
+            thumbs = self.common.parseDOM(trailers, "span", attrs={"class": "video-thumb .*?"})
+
+            athumbs = self.common.parseDOM(thumbs, "img", ret="data-thumb")
 
             videos = self.utils.extractVID(ahref)
 
@@ -108,16 +110,14 @@ class YouTubeScraper():
                 if len(trailers) > 0:
                     ahref = self.common.parseDOM(trailers, "a", attrs={"class": 'ux-thumb-wrap.*?'}, ret="href")
 
-                    athumbs = self.common.parseDOM(trailers, "a", attrs={"class": "ux-thumb-wrap.*?"})
+                    thumbs = self.common.parseDOM(trailers, "span", attrs={"class": "video-thumb .*?"})
+
+                    athumbs = self.common.parseDOM(thumbs, "img", ret="data-thumb")
 
                     videos = self.utils.extractVID(ahref)
 
                     for index, videoid in enumerate(videos):
-                        thumb = self.common.parseDOM(athumbs[index], "img", attrs={"alt": "Thumbnail "}, ret="data-thumb")
-                        if len(thumb) > 0:
-                            thumb = thumb[0]
-
-                        items.append((videoid, thumb))
+                        items.append((videoid, athumbs[index]))
 
         del params["page"]
         self.common.log("Done")
