@@ -46,7 +46,7 @@ class TestYouTubeTrailersScraper(BaseTestCase.BaseTestCase):
         self.assert_directory_should_have_next_folder()
 
     def test_plugin_should_scrape_latest_game_trailers_correctly(self):
-        self.navigation.listMenu({"scraper": "latest_game_trailers", "path": "/root/explore/trailers/popular"})
+        self.navigation.listMenu({"scraper": "latest_game_trailers", "path": "/root/explore/trailers/latest"})
 
         self.assert_directory_count_greater_than_or_equals(10)
         self.assert_directory_count_less_than_or_equals(51)
