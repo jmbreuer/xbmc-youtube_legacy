@@ -163,8 +163,6 @@ class YouTubeScraper():
 
         result = {"status": 303}
 
-        items = []
-
         if get("artist") and get("artist_name"):
             self.storage.saveStoredArtist(params)
 
@@ -172,15 +170,33 @@ class YouTubeScraper():
             url = self.createUrl(params)
             result = self.core._fetchPage({"link": url})
 
-            if result["status"] == 200:
-                videos = self.common.parseDOM(result["content"], "a", attrs={"href": ".*feature=artist"}, ret="href")
-                videos = self.utils.extractVID(videos)
+            playlistids = self.common.parseDOM(result["content"], "div", attrs={"class": "blogger-playall"})
+            playlistids = self.common.parseDOM(playlistids, "a", ret="href")
+
+            if (playlistids[0].find("list=") > 0):
+                playlistid = playlistids[0][playlistids[0].find("list=") + len("list="):]
+                playlistid = playlistid[:playlistid.find("&")]
+
+                return self.scrapePlaylist(params, playlistid)
+
+        self.common.log("Done")
+        return ([], result["status"])
+
+    def scrapePlaylist(self, params={}, playlistId =""):
+        url = "http://www.youtube.com/playlist?list=%s" % playlistId
+        result = self.core._fetchPage({"link":url})
+        items = []
+
+        if result["status"] == 200:
+
+            videos = self.common.parseDOM(result["content"], "li", attrs={"class": "playlist-video-item.*?"})
+            videos = self.common.parseDOM(videos, "a", attrs={"class": ".*?video-tile"}, ret="href")
+            videos = self.utils.extractVID(videos)
 
             for v in videos:
                 if v not in items:
                     items.append(v)
 
-        self.common.log("Done")
         return (items, result["status"])
 
     def scrapeSimilarArtists(self, params={}):
