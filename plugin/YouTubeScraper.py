@@ -404,15 +404,19 @@ class YouTubeScraper():
                 if (tmp.find("Next") > 0):
                     next = "true"
 
-            videoids = self.common.parseDOM(result["content"], "button", {"class": "addto-button.*?"}, ret="data-video-ids")
-            thumbs = self.common.parseDOM(result["content"], "img", attrs={"alt": "Thumbnail "}, ret="data-thumb")
+            videos = self.common.parseDOM(result["content"],"div", {"id":"browse-main-column"})
+            videoids = self.common.parseDOM(videos, "button", {"class": "addto-button.*?"}, ret="data-video-ids")
+            thumbs = self.common.parseDOM(videos, "img", attrs={"data-thumb": ".*?"}, ret="data-thumb")
+            
             page += 1
-            #self.common.log("Found videoids: " + repr(videoids))
-            #self.common.log("Items before: " + repr(items))
+            self.common.log("Found " + str(len(videoids)) + " videoids: " + repr(videoids))
+            self.common.log("Found " + str(len(thumbs)) + " thumbs: " + repr(thumbs))
+
+            self.common.log("Items before: " + repr(items))
             if len(videoids) == len(thumbs) and len(videoids) > 0:
                 for i in range(0, len(videoids)):
                     items.append((videoids[i], thumbs[i]))
-            #self.common.log("Items now: " + repr(items))
+            self.common.log("Items now: " + repr(items))
 
         del params["page"]
         self.common.log("Done : " + str(len(items)))
