@@ -362,7 +362,7 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
         assert(sys.modules["__main__"].common.parseDOM.call_count > 2)
         
     def test_scrapeMoviesGrid_should_return_list_of_videoid_and_thumbnail_tuples(self):
-        sys.modules["__main__"].common.parseDOM.side_effect = [["some_string"],["some_video_id"],["some_thumb"],[],[]]
+        sys.modules["__main__"].common.parseDOM.side_effect = [["some_string"],["some_string"],["some_video_id"],["some_thumb"],[],[]]
         
         result, status = self.scraper.scrapeMoviesGrid({})        
         
