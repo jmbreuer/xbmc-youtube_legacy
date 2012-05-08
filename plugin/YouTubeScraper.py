@@ -258,52 +258,55 @@ class YouTubeScraper():
             result = self.core._fetchPage({"link": url})
 
             showcont = self.common.parseDOM(result["content"], "ul", {"class": "browse-item-list"})
-
             showcont = "".join(showcont)
-
             shows = self.common.parseDOM(showcont, "div", {"class": "browse-item show-item.*?"})
+
             if (len(shows) > 0):
                 page += 1
                 next = "true"
 
-            for show in shows:
-                ahref = self.common.parseDOM(show, "a", attrs={"title": ".*?"}, ret="href")
-                acont = self.common.parseDOM(show, "a", ret="title")
-                athumb = self.common.parseDOM(show, "img", attrs={"alt": "Thumbnail "}, ret="src")
-                acount = self.common.parseDOM(show, "span", {"class": "show-video-counts"})
+                print "very long list of shows " + repr(shows)
 
-                #self.common.log("XXX " + str(len(ahref)) + " - " +  str(len(acont)) + " - " + str(len(athumb)) + " - " + str(len(acount)) + repr(show))
-                if len(ahref) == len(acont) and len(ahref) == len(acount) and len(ahref) == len(athumb) and len(ahref) > 0:
-                    for i in range(0, len(ahref)):
-                        item = {}
+                for show in shows:
+                    ahref = self.common.parseDOM(show, "a", attrs={"title": ".*?"}, ret="href")
+                    acont = self.common.parseDOM(show, "a", ret="title")
+                    athumb = self.common.parseDOM(show, "img", attrs={"alt": ""}, ret="src")
+                    acount = self.common.parseDOM(show, "span", {"class": "browse-item-info"})
 
-                        count = self.common.stripTags(acount[i].replace("\n", "").replace(",", ", "))
-                        title = acont[i] + " (" + count + ")"
-                        title = self.common.replaceHTMLCodes(title)
-                        item['Title'] = title
+                    item = {}
 
-                        show_url = ahref[i]
-                        if (show_url.find("?p=") > 0):
-                            show_url = show_url[show_url.find("?p=") + 1:]
-                        else:
-                            show_url = show_url.replace("/show/", "")
-                        show_url = urllib.quote_plus(show_url)
-                        item['show'] = show_url
+                    count = self.common.stripTags(acount[0].replace("\n", "").replace(",", ", "))
+                    title = acont[0] + " (" + count + ")"
+                    title = self.common.replaceHTMLCodes(title)
+                    item['Title'] = title
 
-                        item['icon'] = "shows"
-                        item['scraper'] = "shows"
-                        thumbnail = athumb[i]
-                        if (thumbnail.find("_thumb.") > 0):
-                            thumbnail = thumbnail.replace("_thumb.", ".")
-                        else:
-                            thumbnail = "shows"
+                    show_url = ahref[0]
+                    if (show_url.find("?p=") > 0):
+                        show_url = show_url[show_url.find("?p=") + 1:]
+                    else:
+                        show_url = show_url.replace("/show/", "")
+                    show_url = urllib.quote_plus(show_url)
+                    item['show'] = show_url
 
-                        item["thumbnail"] = thumbnail
-                        items.append(item)
-            del params["page"]
+                    item['icon'] = "shows"
+                    item['scraper'] = "shows"
 
-        self.common.log("Done")
-        self.common.log("funky : " + repr(items))
+                    thumbnail = athumb[0]
+                    if (thumbnail.find("_thumb.") > 0):
+                        thumbnail = thumbnail.replace("_thumb.", ".")
+                    else:
+                        thumbnail = "shows"
+
+                    item["thumbnail"] = thumbnail
+
+                    print "adding item: " + repr(item) + " show " + repr(show)
+
+                    items.append(item)
+
+        del params["page"]
+
+        self.common.log("Done" + repr(items), 3)
+
         return (items, result["status"])
 
 #=================================== Music ============================================
