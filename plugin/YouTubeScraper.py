@@ -407,7 +407,7 @@ class YouTubeScraper():
             videos = self.common.parseDOM(result["content"],"div", {"id":"browse-main-column"})
             videoids = self.common.parseDOM(videos, "button", {"class": "addto-button.*?"}, ret="data-video-ids")
             thumbs = self.common.parseDOM(videos, "img", attrs={"data-thumb": ".*?"}, ret="data-thumb")
-            
+
             page += 1
             self.common.log("Found " + str(len(videoids)) + " videoids: " + repr(videoids))
             self.common.log("Found " + str(len(thumbs)) + " thumbs: " + repr(thumbs))
