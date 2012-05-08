@@ -261,7 +261,7 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
         assert(sys.modules["__main__"].common.parseDOM.call_count > 1)
         
     def test_scrapeShowsGrid_should_call_common_stripTags_to_remove_html_tags_from_episode_count(self):
-        sys.modules["__main__"].common.parseDOM.side_effect = [["some_string"],["some_string"],["some_string","some_title1"],["some_string","some_title2"],["some_string","some_title3"],["some_string","some_title4"],[],[]]
+        sys.modules["__main__"].common.parseDOM.side_effect = [["some_string"],["some_string"],["some_title1"],["some_title2"],["some_title3"],["some_title4"],[],[]]
         
         self.scraper.scrapeShowsGrid({})        
         
