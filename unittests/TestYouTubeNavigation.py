@@ -1497,24 +1497,6 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
         
         assert(cm == [])
 
-    def test_addFolderContextMenuItems_should_add_artist_scraper_options_to_artist_items(self):
-        self.prepareContestMenu()
-        sys.modules["__main__"].settings.getSetting.return_value = "something"
-        navigation = YouTubeNavigation()
-        path_params = {}
-        item_params = {"Title": "some_title", "path": "some_path", "icon": "some_icon", "thumbnail": "some_thumbnail", "videoid": "someid", "artist": "some_artist"}
-        
-        cm = navigation.addFolderContextMenuItems(path_params, item_params)
-        
-        sys.modules["__main__"].language.assert_any_call(30507)
-        sys.modules["__main__"].language.assert_any_call(30520)
-        sys.modules["__main__"].language.assert_any_call(30540)
-        sys.modules["__main__"].language.assert_any_call(30522)
-        self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.Container.Update(some_plugin?path=some_path&scraper=similar_artist&artist=some_artist&folder=true&)')
-        self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=delete_artist&store=artists&artist=some_artist&)')
-        self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=play_all&scraper=music_artist&artist=some_artist&)')
-        self.assert_context_menu_contains(cm, "some_button_string %s", 'XBMC.RunPlugin(some_plugin?path=some_path&action=play_all&shuffle=true&scraper=music_artist&artist=some_artist&)')
-
     def test_addFolderContextMenuItems_should_add_play_all_option_to_newsubsctiptions_feed(self):
         self.prepareContestMenu()
         sys.modules["__main__"].settings.getSetting.return_value = "something"

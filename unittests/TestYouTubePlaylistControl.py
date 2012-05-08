@@ -42,16 +42,7 @@ class TestYouTubePlaylistControl(BaseTestCase.BaseTestCase):
         control.playAll({"scraper":"liked_videos"})
         
         control.getLikedVideos.assert_called_with({"scraper":"liked_videos", 'fetch_all': 'true'})
-        
-    def test_playAll_should_call_getArtist_if_scraper_is_music_artist_in_params(self):        
-        control = YouTubePlaylistControl()
-        control.getArtist = Mock()
-        control.getArtist.return_value = ""
-        
-        control.playAll({"scraper":"music_artist"})
-        
-        control.getArtist.assert_called_with({"scraper":"music_artist", 'fetch_all': 'true'})
-                
+
     def test_playAll_should_call_getUserFeed_if_user_feed_is_subscriptions_in_params(self):
         control = YouTubePlaylistControl()
         control.getUserFeed = Mock()
@@ -255,33 +246,7 @@ class TestYouTubePlaylistControl(BaseTestCase.BaseTestCase):
         control.getYouTubeTop100({})
 
         assert(sys.modules["__main__"].core.getBatchDetails.call_count == 1)
-	
-    def test_getArtist_should_exit_cleanly_if_artist_is_not_in_params(self):
-        control = YouTubePlaylistControl()
-        
-        control.getArtist({})
-        
-        assert(sys.modules["__main__"].scraper.scrapeArtist.call_count == 0)
 
-    def test_getArtist_should_call_scraper_scrapeArtist(self):
-        sys.modules["__main__"].scraper.scrapeArtist.return_value = ("",200)
-        sys.modules["__main__"].core.getBatchDetails.return_value = ("",200)
-        control = YouTubePlaylistControl()
-        
-        control.getArtist({"artist":"some_artist"})
-        
-        sys.modules["__main__"].scraper.scrapeArtist.assert_called_with({"artist":"some_artist"})
-
-    def test_getArtist_should_call_core_getBatchDetails_if_scraper_succeded(self):
-        sys.modules["__main__"].scraper.scrapeArtist.return_value = ("",200)
-        sys.modules["__main__"].core.getBatchDetails.return_value = ("",200)
-        control = YouTubePlaylistControl()
-        
-        control.getArtist({"artist":"some_artist"})
-        
-        sys.modules["__main__"].scraper.scrapeArtist.assert_called_with({"artist":"some_artist"})
-        sys.modules["__main__"].core.getBatchDetails.assert_called_with("", {"artist":"some_artist"})
-        
     def test_getLikedVideos_should_exit_cleanly_if_scraper_or_login_is_not_in_params(self):
         control = YouTubePlaylistControl()
         
