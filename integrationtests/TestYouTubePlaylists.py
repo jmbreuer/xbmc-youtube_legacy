@@ -79,12 +79,5 @@ class TestYouTubePlaylists(BaseTestCase.BaseTestCase):
         self.assert_directory_items_should_have_thumbnails()
         self.assert_playlist_contains_only_unique_video_items()
 
-    def test_plugin_should_queue_artist_video_list_if_user_selects_play_all_outside_list(self):
-        self.navigation.executeAction({"action": "play_all", "scraper": "music_artist", "artist": "GxdCwVVULXewLzmGzHQKeUHShvQYOHQH"})
-
-        self.assert_playlist_count_greater_than_or_equals(20)
-        self.assert_directory_items_should_have_thumbnails()
-        self.assert_playlist_contains_only_unique_video_items()
-
 if __name__ == "__main__":
     nose.runmodule()
