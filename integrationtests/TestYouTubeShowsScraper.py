@@ -4,6 +4,7 @@ import sys
 
 
 class TestYouTubeShowsScraper(BaseTestCase.BaseTestCase):
+
     def test_plugin_should_scrape_shows_category_listing_correctly(self):
         self.navigation.listMenu({"scraper": "shows", "path": "/root/explore/shows", "folder": "true"})
 
