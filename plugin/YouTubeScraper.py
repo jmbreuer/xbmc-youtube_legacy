@@ -41,9 +41,6 @@ class YouTubeScraper():
     urls['watched_history'] = "http://www.youtube.com/my_history"
     urls['liked_videos'] = "http://www.youtube.com/my_liked_videos"
     urls['music'] = "http://www.youtube.com/music"
-    urls['artist'] = "http://www.youtube.com/artist?a=%s&feature=music"
-    urls['education'] = "http://www.youtube.com/education"
-    urls['education_category'] = "http://www.youtube.com/education?category=%s"
     urls['playlist'] = "http://www.youtube.com/view_play_list?p=%s"
 
     def __init__(self):
@@ -120,380 +117,6 @@ class YouTubeScraper():
                         items.append((videoid, athumbs[index]))
 
         del params["page"]
-        self.common.log("Done")
-        return (items, result["status"])
-
-#=================================== Music  ============================================
-    def scrapeMusicCategories(self, params={}):
-        get = params.get
-        self.common.log("")
-
-        items = []
-
-        url = self.createUrl(params)
-        result = self.core._fetchPage({"link": url})
-
-        if result["status"] == 200:
-            categories = self.common.parseDOM(result["content"], "div", attrs={"id": "browse-filter-menu"})
-            ahref = self.common.parseDOM(categories, "a", ret="href")
-            acontent = self.common.parseDOM(categories, "a")
-
-            if len(acontent) == len(ahref) and len(ahref) > 0:
-                for i in range(0, len(ahref)):
-                    item = {}
-                    title = self.common.makeAscii(acontent[i])
-                    title = self.common.replaceHTMLCodes(title)
-                    link = ahref[i].replace("/music/", "/")
-                    item["Title"] = title
-                    item["category"] = urllib.quote_plus(link)
-                    item["icon"] = "music"
-                    item["thumbnail"] = "music"
-                    item["scraper"] = get("scraper")
-                    if get("scraper") == "music_artists":
-                        item["folder"] = "true"
-
-                    items.append(item)
-
-        self.common.log("Done")
-        return (items, result["status"])
-
-    def scrapeArtist(self, params={}):
-        get = params.get
-        self.common.log("")
-
-        result = {"status": 303}
-
-        if get("artist") and get("artist_name"):
-            self.storage.saveStoredArtist(params)
-
-        if get("artist"):
-            url = self.createUrl(params)
-            result = self.core._fetchPage({"link": url})
-
-            playlistids = self.common.parseDOM(result["content"], "div", attrs={"class": "blogger-playall"})
-            playlistids = self.common.parseDOM(playlistids, "a", ret="href")
-
-            if (playlistids[0].find("list=") > 0):
-                playlistid = playlistids[0][playlistids[0].find("list=") + len("list="):]
-                playlistid = playlistid[:playlistid.find("&")]
-
-                return self.scrapePlaylist(params, playlistid)
-
-        self.common.log("Done")
-        return ([], result["status"])
-
-    def scrapePlaylist(self, params={}, playlistId =""):
-        url = "http://www.youtube.com/playlist?list=%s" % playlistId
-        result = self.core._fetchPage({"link":url})
-        items = []
-
-        if result["status"] == 200:
-
-            videos = self.common.parseDOM(result["content"], "li", attrs={"class": "playlist-video-item.*?"})
-            videos = self.common.parseDOM(videos, "a", attrs={"class": ".*?video-tile"}, ret="href")
-            videos = self.utils.extractVID(videos)
-
-            for v in videos:
-                if v not in items:
-                    items.append(v)
-
-        return (items, result["status"])
-
-    def scrapeSimilarArtists(self, params={}):
-        get = params.get
-        self.common.log("")
-
-        items = []
-        if get("artist"):
-            url = self.createUrl(params)
-            result = self.core._fetchPage({"link": url})
-
-            if result["status"] == 200:
-                artists = self.common.parseDOM(result["content"], "div", {"id": "similar-artists"})
-                ahref = self.common.parseDOM(artists, "a", ret="href")
-                atitle = self.common.parseDOM(artists, "a")
-                if len(ahref) == len(atitle):
-                    for i in range(0, len(ahref)):
-                        item = {}
-                        title = self.common.makeAscii(atitle[i])
-                        title = self.common.replaceHTMLCodes(title)
-                        item["Title"] = title
-                        item["artist_name"] = urllib.quote_plus(title)
-                        link = ahref[i]
-                        link = link[link.rfind("/") + 1:link.rfind("?")]
-                        item["artist"] = link
-                        item["icon"] = "music"
-                        item["scraper"] = "music_artist"
-                        item["thumbnail"] = "music"
-                        items.append(item)
-
-        self.common.log("Done")
-        return (items, result["status"])
-
-    def scrapeMusicCategoryArtists(self, params={}):
-        get = params.get
-        self.common.log("")
-
-        status = 200
-        items = []
-
-        if get("category"):
-            url = self.createUrl(params)
-            result = self.core._fetchPage({"link": url})
-
-            artist_container = self.common.parseDOM(result["content"], "div", attrs={"id": "artist-recs-container"})
-            artists = self.common.parseDOM(artist_container, "div", {"class": "artist-recommendation .*?"})
-
-            for artist in artists:
-                div = self.common.parseDOM(artist, "div", attrs={"class": "browse-item-content"})
-
-                id = self.common.parseDOM(div, "a", ret="href")[0]
-                id = id[id.rfind("/") + 1:id.rfind("?")]
-
-                atitle = self.common.parseDOM(div, "a", ret="title")[0]
-                athumb = self.common.parseDOM(artist, "img", ret="data-thumb")[0]
-
-                item = {}
-                title = self.common.makeAscii(atitle)
-                title = self.common.replaceHTMLCodes(title)
-                item["Title"] = title
-                item["scraper"] = "music_artist"
-                item["artist_name"] = urllib.quote_plus(title)
-                item["artist"] = id
-                item["icon"] = "music"
-                item["thumbnail"] = athumb
-                items.append(item)
-
-        self.common.log("Done")
-        return (items, status)
-
-    def scrapeMusicCategoryHits(self, params={}):
-        get = params.get
-        self.common.log("")
-
-        status = 200
-        items = []
-        params["batch"] = "true"
-
-        if get("category"):
-            url = self.createUrl(params)
-            result = self.core._fetchPage({"link": url})
-
-            container = self.common.parseDOM(result["content"], "div", {"id": "music-guide-container"})
-            content = self.common.parseDOM(container, "a", attrs={"class": "ux-thumb-wrap.*?"}, ret="href")
-            items = self.utils.extractVID(content)
-
-        self.common.log("Done")
-        return (items, status)
-
-    def searchDisco(self, params={}):
-        self.common.log("")
-
-        items = []
-
-        url = self.createUrl(params)
-        result = self.core._fetchPage({"link": url})
-
-        if (result["content"].find("list=") != -1):
-            result["content"] = result["content"].replace("\u0026", "&")
-            mix_list_id = result["content"][result["content"].find("list=") + 5:]
-            if (mix_list_id.find("&") != -1):
-                mix_list_id = mix_list_id[:mix_list_id.find("&")]
-            elif (mix_list_id.find('"') != -1):
-                mix_list_id = mix_list_id[:mix_list_id.find('"')]
-            params["mix_list_id"] = mix_list_id
-
-            video_id = result["content"][result["content"].find("v=") + 2:]
-            params["disco_videoid"] = video_id[:video_id.find("&")]
-
-            url = self.createUrl(params)
-            result = self.core._fetchPage({"link": url})
-
-            mix_list = self.common.parseDOM(result["content"], "div", {"id": "playlist-bar"}, ret="data-video-ids")
-
-            if (len(mix_list) > 0):
-                items = mix_list[0].split(",")
-
-        self.common.log("Done")
-        return (items, result["status"])
-
-#=================================== Eduction ============================================
-    def scrapeEducationCategories(self, params={}):
-        self.common.log("")
-
-        url = self.createUrl(params)
-        result = self.core._fetchPage({"link": url})
-
-        categories = self.common.parseDOM(result["content"], "div", {"id": "browse-filter-menu-0"})
-        items = []
-
-        if len(categories) > 0:
-            ahref = self.common.parseDOM(categories, "a", ret="href")
-            atitle = self.common.parseDOM(categories, "a")
-
-            for i in range(0, len(ahref)):
-                item = {}
-
-                item['Title'] = atitle[i]
-                show_url = ahref[i]
-                show_url = show_url.replace("/education?category=", "")
-                show_url = urllib.quote_plus(show_url).replace("%25", "%")
-                item['category'] = show_url
-                item['icon'] = "feeds"
-                item['scraper'] = "education"
-
-                items.append(item)
-
-        self.common.log("Done")
-        return (items, result["status"])
-
-    def scrapeEducationSubCategories(self, params={}):
-        get = params.get
-        self.common.log("")
-
-        url = self.createUrl(params)
-        result = self.core._fetchPage({"link": url})
-
-        categories = self.common.parseDOM(result["content"], "div", {"id": "browse-filter-menu-1"})
-        items = []
-
-        if len(categories) > 0:
-            ahref = self.common.parseDOM(categories, "a", ret="href")
-            atitle = self.common.parseDOM(categories, "a")
-
-            item = {}
-
-            item['Title'] = self.common.replaceHTMLCodes(atitle[0])
-            item['Title'] = "Videos"
-            show_url = ahref[0]
-            show_url = show_url.replace("/education?category=", "")
-            show_url = urllib.quote_plus(show_url).replace("%25", "%")
-            if show_url == "":
-                show_url = get("category")
-            item['videos'] = show_url
-            item['icon'] = "feeds"
-            item['scraper'] = "education"
-
-            items.append(item)
-
-            item = {}
-            item['Title'] = self.common.replaceHTMLCodes(atitle[0])
-            item['Title'] = "Courses"
-            show_url = ahref[0]
-            show_url = show_url.replace("/education?category=", "")
-            show_url = urllib.quote_plus(show_url)
-            if show_url == "":
-                show_url = get("category")
-            item['courses'] = show_url
-            item['icon'] = "feeds"
-            item['scraper'] = "education"
-
-            items.append(item)
-            for i in range(1, len(ahref)):
-                item = {}
-
-                item['Title'] = self.common.replaceHTMLCodes(atitle[i])
-                show_url = ahref[i]
-                show_url = show_url.replace("/education?category=", "")
-                show_url = urllib.quote_plus(show_url).replace("%25", "%")
-                if show_url.count("%2F") > 1:
-                    item["courses"] = show_url
-                else:
-                    item['category'] = show_url
-                item['icon'] = "feeds"
-                item['scraper'] = "education"
-
-                items.append(item)
-
-        self.common.log("Done : " + repr(items))
-        return (items, result["status"])
-
-    def scrapeEducationCourses(self, params={}):
-        get = params.get
-        self.common.log("")
-
-        url = self.createUrl(params)
-        result = self.core._fetchPage({"link": url})
-
-        next = "false"
-        pagination = self.common.parseDOM(result["content"], "div", attrs={"class": "yt-uix-pager"})
-
-        if (len(pagination) > 0):
-            tmp = str(pagination)
-            if (tmp.find("Next") > 0):
-                next = "true"
-
-        categories = self.common.parseDOM(result["content"], "div", {"class": "playlist-extra-thumb-outer "})
-        if len(categories) == 0:
-            categories = self.common.parseDOM(result["content"], "div", {"class": "ytg-fl browse-content"})
-
-        items = []
-        if len(categories) > 0:
-            ahref = self.common.parseDOM(categories, "a", attrs={"href": "/course.*?", "title": ".*?"}, ret="href")
-            atitle = self.common.parseDOM(result["content"], "a", attrs={"href": "/course.*?"}, ret="title")
-            athumb = self.common.parseDOM(categories, "img", attrs={"alt": "Thumbnail "}, ret="data-thumb")
-
-            item = {}
-
-            item['Title'] = "Videos"
-            item['videos'] = get("courses")
-            item['icon'] = "feeds"
-            item['scraper'] = "education"
-
-            items.append(item)
-
-            for i in range(1, len(ahref)):
-                item = {}
-
-                item['Title'] = self.common.replaceHTMLCodes(atitle[i])
-                show_url = ahref[i]
-                show_url = show_url.replace("/education?category=", "")
-                if (show_url.find("list=") != -1):
-                    show_url = show_url[show_url.find("list=") + 5:]
-                if (show_url.find("&") > 0):
-                    show_url = show_url[:show_url.find("&")]
-                item['playlist'] = show_url
-                item['icon'] = "feeds"
-                item['scraper'] = "education"
-                item["thumbnail"] = athumb[i]
-                if item["thumbnail"].find("//") == 0:
-                    item["thumbnail"] = "http:" + item["thumbnail"]
-                items.append(item)
-
-        self.common.log("Done : " + repr(items))
-        return (items, result["status"])
-
-    def scrapeEducationVideos(self, params={}):
-        self.common.log("")
-
-        url = self.createUrl(params)
-        result = self.core._fetchPage({"link": url})
-
-        next = "false"
-        pagination = self.common.parseDOM(result["content"], "div", attrs={"class": "yt-uix-pager"})
-
-        if (len(pagination) > 0):
-            tmp = str(pagination)
-            if (tmp.find("Next") > 0):
-                next = "true"
-
-        categories = self.common.parseDOM(result["content"], "li", attrs={"class": " yt-uix-expander"})
-        if len(categories) == 0:
-            categories = self.common.parseDOM(result["content"], "div", attrs={"class": "ytg-fl browse-content"})
-
-        if len(categories) == 0:
-            categories = self.common.parseDOM(result["content"], "li", attrs={"class": "video"})
-
-        items = []
-
-        if len(categories) > 0:
-            ahref = self.common.parseDOM(categories, "a", attrs={"class": "ux-thumb-wrap contains-addto"}, ret="href")
-            if len(ahref) == 0:
-                ahref = self.common.parseDOM(categories, "a", attrs={"class": "tile-link-block video-tile.*?"}, ret="href")
-
-            links = self.utils.extractVID(ahref)
-            items.extend(links)
-
         self.common.log("Done")
         return (items, result["status"])
 
@@ -684,6 +307,38 @@ class YouTubeScraper():
         return (items, result["status"])
 
 #=================================== Music ============================================
+
+    def searchDisco(self, params={}):
+        self.common.log("")
+
+        items = []
+
+        url = self.createUrl(params)
+        result = self.core._fetchPage({"link": url})
+
+        if (result["content"].find("list=") != -1):
+            result["content"] = result["content"].replace("\u0026", "&")
+            mix_list_id = result["content"][result["content"].find("list=") + 5:]
+            if (mix_list_id.find("&") != -1):
+                mix_list_id = mix_list_id[:mix_list_id.find("&")]
+            elif (mix_list_id.find('"') != -1):
+                mix_list_id = mix_list_id[:mix_list_id.find('"')]
+            params["mix_list_id"] = mix_list_id
+
+            video_id = result["content"][result["content"].find("v=") + 2:]
+            params["disco_videoid"] = video_id[:video_id.find("&")]
+
+            url = self.createUrl(params)
+            result = self.core._fetchPage({"link": url})
+
+            mix_list = self.common.parseDOM(result["content"], "div", {"id": "playlist-bar"}, ret="data-video-ids")
+
+            if (len(mix_list) > 0):
+                items = mix_list[0].split(",")
+
+        self.common.log("Done")
+        return (items, result["status"])
+
     def scrapeYouTubeTop100(self, params={}):
         self.common.log("")
 
@@ -774,19 +429,6 @@ class YouTubeScraper():
         if (get("scraper") == "music_top100"):
             function = self.scrapeYouTubeTop100
             params["batch"] = "true"
-        if (get("scraper") == "music_artist"):
-            function = self.scrapeArtist
-            params["batch"] = "true"
-        if (get("scraper") == "similar_artist"):
-            function = self.scrapeSimilarArtists
-            params["folder"] = "true"
-        if (get("scraper") == "music_hits" or get("scraper") == "music_artists"):
-            if get("category") and get("scraper") == "music_hits":
-                function = self.scrapeMusicCategoryHits
-            elif get("category") and get("scraper") == "music_artists":
-                function = self.scrapeMusicCategoryArtists
-            else:
-                function = self.scrapeMusicCategories
 
         if (get("scraper") in ["movies", "shows"] and not get("category")):
             function = self.scrapeCategoryList
@@ -808,18 +450,6 @@ class YouTubeScraper():
             else:
                 params["batch"] = "thumbnails"
                 function = self.scrapeMoviesGrid
-
-        if get("scraper") == "education":
-            params["folder"] = "true"
-            function = self.scrapeEducationCategories
-            if (get("category")):
-                function = self.scrapeEducationSubCategories
-            if (get("courses")):
-                function = self.scrapeEducationCourses
-            if (get("playlist") or  get("videos")):
-                params["batch"] = "true"
-                del params["folder"]
-                function = self.scrapeEducationVideos
 
         if (get("scraper") in ['current_trailers', 'game_trailers', 'popular_game_trailers', 'popular_trailers', 'trailers', 'upcoming_game_trailers', 'upcoming_trailers']):
             params["batch"] = "thumbnails"
@@ -870,19 +500,6 @@ class YouTubeScraper():
                 if (get("season")):
                     url = url + "&s=" + get("season")
 
-        if (get("scraper") == "education"):
-            url = self.urls["education"]
-            if get("category"):
-                url = self.urls["education_category"] % get("category")
-            if get("subcategory"):
-                url = self.urls["education_category"] % get("subcategory")
-            if get("videos"):
-                url = self.urls["education_category"] % get("videos")
-            if get("courses"):
-                url = self.urls["education_category"] % get("courses")
-            if get("playlist"):
-                url = self.urls["playlist"] % get("playlist")
-
         if (get("scraper") == "movies"):
             if (get("category")):
                 category = get("category")
@@ -900,13 +517,8 @@ class YouTubeScraper():
             else:
                 url = self.urls["movies"] + "?hl=en"
 
-        if get("scraper") in ["music_artists", "music_artist", "similar_artist", "music_hits", "music_top100"]:
+        if get("scraper") == "music_top100":
             url = self.urls["music"]
-            if get("category"):
-                url = self.urls["music"] + urllib.unquote_plus(get("category"))
-
-            if get("artist"):
-                url = self.urls["artist"] % get("artist")
 
         if (get("scraper") in "search_disco"):
             url = self.urls["disco_search"] % urllib.quote_plus(get("search"))
