@@ -294,8 +294,6 @@ class YouTubeScraper():
                     thumbnail = athumb[0]
                     if (thumbnail.find("_thumb.") > 0):
                         thumbnail = thumbnail.replace("_thumb.", ".")
-                    else:
-                        thumbnail = "shows"
 
                     item["thumbnail"] = thumbnail
 
