@@ -18,6 +18,7 @@ class TestYouTubeFolderStructure(BaseTestCase.BaseTestCase):
 
     def test_plugin_should_list_basic_folder_structure_when_user_is_not_logged_in(self):
         self.navigation.listMenu()
+        
         # we probably need some better asserts here
         self.assert_directory_count_greater_than_or_equals(3)
         self.assert_directory_count_less_than_or_equals(10)
@@ -27,7 +28,7 @@ class TestYouTubeFolderStructure(BaseTestCase.BaseTestCase):
         self.navigation.listMenu({"path": "/root/explore"})
 
         # we probably need some better asserts here
-        self.assert_directory_count_greater_than_or_equals(7)
+        self.assert_directory_count_greater_than_or_equals(6)
         self.assert_directory_count_less_than_or_equals(10)
         self.assert_directory_is_a_folder_list()
 
