@@ -173,7 +173,7 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
         login._apiLogin()
         
         args = sys.modules["__main__"].common.parseDOM.call_args
-        assert(args[0] == ("","textarea"))
+        assert(args[0] == ("","input"))
         assert(args[1].has_key("attrs"))
         assert(args[1]["attrs"].has_key("id"))
         assert(args[1]["attrs"]["id"] == "code")
