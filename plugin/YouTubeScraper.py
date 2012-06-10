@@ -31,6 +31,7 @@ class YouTubeScraper():
     urls['movies'] = "http://www.youtube.com/ytmovies"
     urls['popular_game_trailers'] = "http://www.youtube.com/trailers?s=gtp&p=%s&hl=en"
     urls['popular_trailers'] = "http://www.youtube.com/trailers?s=trp&p=%s&hl=en"
+    urls['show_single_list'] = "http://www.youtube.com/channel_ajax?action_more_single_playlist_videos=1&page=%s&list_id=%s"
     urls['show_list'] = "http://www.youtube.com/show"
     urls['shows'] = "http://www.youtube.com/shows"
     urls['trailers'] = "http://www.youtube.com/trailers?s=tr"
@@ -145,43 +146,47 @@ class YouTubeScraper():
             return ([], 303)  # Something else
 
 #=================================== Shows ============================================
+
+    def extractListId(self, result):
+        list = self.common.parseDOM(result["content"], "a", attrs={"class": "play-all.*?"}, ret="href")[0]
+        if list.find("list=") > 0:
+            list = list[list.find("list=") + len("list="):]
+            list = list[:list.find("&")]
+        return list
+
     def scrapeShowEpisodes(self, params={}):
+        get = params.get
         self.common.log(repr(params))
 
-        url = self.createUrl(params)
-        result = self.core._fetchPage({"link": url})
-
-        videos = self.common.parseDOM(result["content"], "div", attrs={"class": "show-season-videos"})
-        videos = self.common.parseDOM(videos, "button", ret="data-video-ids")
-
-        nexturl = self.common.parseDOM(result["content"], "button", {"class": " yt-uix-button.*?"}, ret="data-next-url")
-
-        if (len(nexturl) > 0):
-            nexturl = nexturl[0]
+        if not get("season"):
+            url = self.createUrl(params)
+            result = self.core._fetchPage({"link": url})
+            listId = self.extractListId(result)
         else:
-            nexturl = ""
+            listId = get("season")
 
-        if nexturl.find("start=") > 0:
-            fetch = True
-            start = 20
-            nexturl = nexturl.replace("start=20", "start=%s")
-            while fetch:
-                url = self.urls["main"] + nexturl % start
-                result = self.core._fetchPage({"link": url})
+        nexturl = self.urls["show_single_list"]
 
-                if result["status"] == 200:
-                    result["content"] = result["content"].replace("\\u0026", "&")
-                    result["content"] = result["content"].replace("\\/", "/")
-                    result["content"] = result["content"].replace('\\"', '"')
-                    result["content"] = result["content"].replace("\\u003c", "<")
-                    result["content"] = result["content"].replace("\\u003e", ">")
-                    more_videos = self.common.parseDOM(result["content"], "button", ret="data-video-ids")
+        videos = []
+        fetch = True
+        start = 1
+        while fetch:
+            url = nexturl % (start, listId)
+            result = self.core._fetchPage({"link": url})
 
-                    if not more_videos:
-                        fetch = False
-                    else:
-                        videos += more_videos
-                        start += 20
+            if result["status"] == 200:
+                result["content"] = result["content"].replace("\\u0026", "&")
+                result["content"] = result["content"].replace("\\/", "/")
+                result["content"] = result["content"].replace('\\"', '"')
+                result["content"] = result["content"].replace("\\u003c", "<")
+                result["content"] = result["content"].replace("\\u003e", ">")
+                more_videos = self.common.parseDOM(result["content"], "button", ret="data-video-ids")
+
+                if not more_videos:
+                    fetch = False
+                else:
+                    videos += more_videos
+                    start += 1
 
         self.common.log("Done")
         return (videos, result["status"])
@@ -196,7 +201,7 @@ class YouTubeScraper():
         url = self.createUrl(params)
         result = self.core._fetchPage({"link": url})
 
-        if ((result["content"].find('class="seasons "') == -1) or get("season")):
+        if ((result["content"].find('channel-module') == -1) or get("season")):
             self.common.log("scrapeShow parsing videolist for single season")
             return self.cache.cacheFunction(self.scrapeShowEpisodes, params)
 
@@ -205,6 +210,15 @@ class YouTubeScraper():
         self.common.log("Done")
         return self.cache.cacheFunction(self.scrapeShowSeasons, result["content"], params)
 
+    def extractMultipleListIds(self, seasons):
+        season_list = self.common.parseDOM(seasons, "a", attrs={"class": "yt-uix-tile-link"}, ret="href")
+        for i, season in enumerate(season_list):
+            if season.find("list=") > 0:
+                season = season[season.find("list=") + len("list="):]
+                season = season[:season.find("&")]
+            season_list[i] = season
+        return season_list
+
     def scrapeShowSeasons(self, html, params={}):
         get = params.get
         params["folder"] = "true"
@@ -212,24 +226,21 @@ class YouTubeScraper():
 
         yobjects = []
 
-        seasons = self.common.parseDOM(html, "div", attrs={"class": "seasons "})
+        seasons = self.common.parseDOM(html, "div", attrs={"class": "playlists-wide channel-module.*?"})
         if (len(seasons) > 0):
             params["folder"] = "true"
 
-            season_list = self.common.parseDOM(seasons, "button", attrs={"type": "button"}, ret="data-season-number")
+            season_list = self.extractMultipleListIds(seasons)
+            atitle = self.common.parseDOM(seasons, "a", attrs={"class": "yt-uix-tile-link"})
 
             self.common.log(repr(season_list))
-            atitle = self.common.parseDOM(seasons, "button", attrs={"type": "button"}, ret="title")
 
             if len(season_list) == len(atitle) and len(atitle) > 0:
                 for i in range(0, len(atitle)):
                     item = {}
 
-                    season_id = season_list[i]
-                    title = self.language(30058) % season_id.encode("utf-8")
-                    title += " - " + atitle[i].encode("utf-8")
-                    item["Title"] = title
-                    item["season"] = season_id.encode("utf-8")
+                    item["Title"] = atitle[i]
+                    item["season"] = season_list[i]
                     item["thumbnail"] = "shows"
                     item["scraper"] = "shows"
                     item["icon"] = "shows"
@@ -264,8 +275,6 @@ class YouTubeScraper():
             if (len(shows) > 0):
                 page += 1
                 next = "true"
-
-                print "very long list of shows " + repr(shows)
 
                 for show in shows:
                     ahref = self.common.parseDOM(show, "a", attrs={"title": ".*?"}, ret="href")
