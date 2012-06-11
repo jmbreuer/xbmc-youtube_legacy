@@ -171,6 +171,7 @@ class YouTubeScraper():
         fetch = True
         start = 1
         while fetch:
+            fetch = False
             url = nexturl % (start, listId)
             result = self.core._fetchPage({"link": url})
 
@@ -182,9 +183,8 @@ class YouTubeScraper():
                 result["content"] = result["content"].replace("\\u003e", ">")
                 more_videos = self.common.parseDOM(result["content"], "button", ret="data-video-ids")
 
-                if not more_videos:
-                    fetch = False
-                else:
+                if more_videos:
+                    fetch = True
                     videos += more_videos
                     start += 1
 
