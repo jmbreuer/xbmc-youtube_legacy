@@ -155,39 +155,40 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
         
         assert(sys.modules["__main__"].common.parseDOM.call_count > 0)
         
-    def test_scrapeShowEpisodes_should_call_createUrl_to_get_proper_url(self):
-        
+    def test_scrapeShowEpisodes_should_call_createUrl_to_get_proper_url_if_no_season_is_given(self):
+        sys.modules["__main__"].common.parseDOM.return_value = []
+        self.scraper.extractListId = Mock()
+
         self.scraper.scrapeShowEpisodes({})        
         
         self.scraper.createUrl.assert_any_call({})
         
     def test_scrapeShowEpisodes_should_call_fetchPage_to_get_page_content(self):
-        
+        sys.modules["__main__"].common.parseDOM.return_value = []
+        self.scraper.extractListId = Mock()
+
         self.scraper.scrapeShowEpisodes({})        
         
         sys.modules["__main__"].core._fetchPage.assert_any_call({"link":"some_url"})
         
     def test_scrapeShowEpisodes_should_call_parseDOM_to_find_video_elements(self):
-        
+        sys.modules["__main__"].common.parseDOM.return_value = []
+        self.scraper.extractListId = Mock()
+
         self.scraper.scrapeShowEpisodes({})
         
         assert(sys.modules["__main__"].common.parseDOM.call_count > 0)
     
     def test_scrapeShowEpisodes_should_return_list_of_video_ids(self):
-        sys.modules["__main__"].common.parseDOM.return_value = ["some_id_1","some_id_2","some_id_3"]
+        self.scraper.extractListId = Mock()
+        sys.modules["__main__"].common.parseDOM.side_effect = [["some_id_1","some_id_2","some_id_3"],[]]
                 
         result, status = self.scraper.scrapeShowEpisodes({})        
         
         assert(result[0] == "some_id_1")
         assert(result[1] == "some_id_2")
         assert(result[2] == "some_id_3")
-    
-    def test_scrapeShowEpisodes_should_call_parseDOM_to_find_next_url(self):
-        
-        self.scraper.scrapeShowEpisodes({})        
-        
-        assert(sys.modules["__main__"].common.parseDOM.call_count > 1)
-        
+
     def test_scrapeShowEpisodes_should_fetch_entire_list(self):
         sys.modules["__main__"].common.parseDOM.side_effect = [["some_string"],["some_string"],["some_string start=20"],["some_string"],["some_string"],["some_string"],["some_string"],[],[]]
         
@@ -214,24 +215,18 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
         sys.modules["__main__"].cache.cacheFunction.assert_called_with(self.scraper.scrapeShowEpisodes, {})
     
     def test_scrapeShow_should_call_cacheFunction_with_scrape_show_seasons_pointer_if_season_list_is_found(self):
-        sys.modules["__main__"].core._fetchPage.return_value = {"content":'something class="seasons "',"status":200}
+        sys.modules["__main__"].core._fetchPage.return_value = {"content":'something class="channel-module"',"status":200}
         
         self.scraper.scrapeShow({"batch":"something"})
         
-        sys.modules["__main__"].cache.cacheFunction.assert_called_with(self.scraper.scrapeShowSeasons, 'something class="seasons "', {"folder":"true"})
+        sys.modules["__main__"].cache.cacheFunction.assert_called_with(self.scraper.scrapeShowSeasons, 'something class="channel-module"', {"folder":"true"})
         
     def test_scrapeShowSeasons_should_call_parseDOM_to_find_seasons(self):
         
         self.scraper.scrapeShowSeasons({})
         
         assert(sys.modules["__main__"].common.parseDOM.call_count > 0)
-        
-    def test_scrapeShowSeasons_should_call_language_to_get_seasons_string(self):
-        
-        self.scraper.scrapeShowSeasons({})
-        
-        sys.modules["__main__"].language.assert_called_with(30058)
-    
+
     def test_scrapeShowsGrid_should_call_createUrl_to_get_proper_url(self):
         sys.modules["__main__"].common.parseDOM.side_effect = [["some_string"],["some_string"],["some_string","some_title1"],["some_string","some_title2"],["some_string","some_title3"],["some_string","some_title4"],[],[]]
         
