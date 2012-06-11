@@ -215,11 +215,11 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
         sys.modules["__main__"].cache.cacheFunction.assert_called_with(self.scraper.scrapeShowEpisodes, {})
     
     def test_scrapeShow_should_call_cacheFunction_with_scrape_show_seasons_pointer_if_season_list_is_found(self):
-        sys.modules["__main__"].core._fetchPage.return_value = {"content":'something class="channel-module"',"status":200}
+        sys.modules["__main__"].core._fetchPage.return_value = {"content":'something class="single-playlist channel-module"',"status":200}
         
         self.scraper.scrapeShow({"batch":"something"})
         
-        sys.modules["__main__"].cache.cacheFunction.assert_called_with(self.scraper.scrapeShowSeasons, 'something class="channel-module"', {"folder":"true"})
+        sys.modules["__main__"].cache.cacheFunction.assert_called_with(self.scraper.scrapeShowSeasons, 'something class="single-playlist channel-module"', {"folder":"true"})
         
     def test_scrapeShowSeasons_should_call_parseDOM_to_find_seasons(self):
         
