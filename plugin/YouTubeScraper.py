@@ -201,7 +201,7 @@ class YouTubeScraper():
         url = self.createUrl(params)
         result = self.core._fetchPage({"link": url})
 
-        if ((result["content"].find('channel-module') == -1) or get("season")):
+        if ((result["content"].find('single-playlist channel-module') > 0) or get("season")):
             self.common.log("scrapeShow parsing videolist for single season")
             return self.cache.cacheFunction(self.scrapeShowEpisodes, params)
 
