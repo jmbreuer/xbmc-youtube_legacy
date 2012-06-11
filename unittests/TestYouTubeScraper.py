@@ -198,28 +198,29 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
         
     def test_scrapeShow_should_call_createUrl_to_get_proper_url(self):
 
-        self.scraper.scrapeShow({})        
+        self.scraper.scrapeShow({"batch":"something"})
         
-        self.scraper.createUrl.assert_any_call({})
+        self.scraper.createUrl.assert_any_call({"folder":"true"})
 
     def test_scrapeShow_should_call_fetchPage_to_get_page_content(self):
         
-        self.scraper.scrapeShow({})        
+        self.scraper.scrapeShow({"batch":"something"})
         
         sys.modules["__main__"].core._fetchPage.assert_any_call({"link":"some_url"})
                 
     def test_scrapeShow_should_call_cacheFunction_with_scrape_show_episodes_pointer_if_season_list_isnt_found(self):
-        
-        self.scraper.scrapeShow({})
-        
-        sys.modules["__main__"].cache.cacheFunction.assert_called_with(self.scraper.scrapeShowEpisodes, {})
-    
-    def test_scrapeShow_should_call_cacheFunction_with_scrape_show_seasons_pointer_if_season_list_is_found(self):
         sys.modules["__main__"].core._fetchPage.return_value = {"content":'something class="single-playlist channel-module"',"status":200}
         
         self.scraper.scrapeShow({"batch":"something"})
         
-        sys.modules["__main__"].cache.cacheFunction.assert_called_with(self.scraper.scrapeShowSeasons, 'something class="single-playlist channel-module"', {"folder":"true"})
+        sys.modules["__main__"].cache.cacheFunction.assert_called_with(self.scraper.scrapeShowEpisodes, {"batch":"something"})
+    
+    def test_scrapeShow_should_call_cacheFunction_with_scrape_show_seasons_pointer_if_season_list_is_found(self):
+        sys.modules["__main__"].core._fetchPage.return_value = {"content":'something class="wide-playlist channel-module"',"status":200}
+        
+        self.scraper.scrapeShow({"batch":"something"})
+        
+        sys.modules["__main__"].cache.cacheFunction.assert_called_with(self.scraper.scrapeShowSeasons, 'something class="wide-playlist channel-module"', {"folder":"true"})
         
     def test_scrapeShowSeasons_should_call_parseDOM_to_find_seasons(self):
         
