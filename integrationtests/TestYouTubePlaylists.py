@@ -26,7 +26,7 @@ class TestYouTubePlaylists(BaseTestCase.BaseTestCase):
     def test_plugin_should_queue_disco_search_and_start_playback_if_user_selects_play_all_outside_disco_search(self):
         sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
 
-        self.navigation.executeAction({"action": "play_all", "scraper": "search_disco", "search": "Linkin+Park"})
+        self.navigation.executeAction({"action": "play_all", "scraper": "search_disco", "search": "Linkin Park"})
 
         self.assert_playlist_count_greater_than_or_equals(30)
         self.assert_directory_items_should_have_thumbnails()
@@ -35,7 +35,7 @@ class TestYouTubePlaylists(BaseTestCase.BaseTestCase):
     def test_plugin_should_queue_disco_search_and_start_playback_if_user_selects_play_all_in_disco_search(self):
         sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
 
-        self.navigation.executeAction({"action": "play_all", "scraper": "search_disco", "search": "Linkin+Park", "videoid": "AyBFySXi6Cc"})
+        self.navigation.executeAction({"action": "play_all", "scraper": "search_disco", "search": "Linkin Park", "videoid": "AyBFySXi6Cc"})
 
         self.assert_playlist_count_greater_than_or_equals(30)
         self.assert_directory_items_should_have_thumbnails()
