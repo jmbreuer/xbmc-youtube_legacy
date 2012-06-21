@@ -135,7 +135,7 @@ class YouTubePlayer():
             subtitle = ""
             code = ""
             codelist = self.common.parseDOM(xml["content"], "track", ret="lang_code")
-            sublist = self.common.parseDOM(xml["content"], "track", ret="lang_original")
+            sublist = self.common.parseDOM(xml["content"], "track", ret="name")
             if len(sublist) != len(codelist):
                 self.common.log("Code list and sublist length mismatch: " + repr(codelist) + " - " + repr(sublist))
                 return ""
@@ -175,7 +175,7 @@ class YouTubePlayer():
         path = os.path.join(self.xbmc.translatePath(self.settings.getAddonInfo("profile")).decode("utf-8"), filename)
 
         w = self.storage.openFile(path, "wb")
-        w.write(result.encode("utf-8", "ignore"))
+        w.write(result)
         w.close()
 
         if "downloadPath" in video:
@@ -205,32 +205,23 @@ class YouTubePlayer():
 
     def transformSubtitleXMLtoSRT(self, xml):
         self.common.log("")
-        #dom = parseString(xml)
-        #entries = dom.getElementsByTagName("text")
-        self.common.log("BLA: " + repr(xml))
 
         result = ""
+        for node in self.common.parseDOM(xml, "text", ret=True):
+            text = self.common.parseDOM(node, "text")[0]
+            text = self.simpleReplaceHTMLCodes(text).replace("\n", "\\n")
+            start = self.common.parseDOM(node, "text", ret="start")[0]
+            dur = self.common.parseDOM(node, "text", ret="dur")[0]
 
-        for node in entries:
-            if node:
-                if node.firstChild:
-                    if node.firstChild.nodeValue:
-                        text = self.simpleReplaceHTMLCodes(node.firstChild.nodeValue).replace("\n", "\\n")
-                        start = ""
+            dur = str(datetime.timedelta(seconds=float(start) + float(dur))).replace("000", "")
+            if (dur.find(".") == -1):
+                dur += ".000"
+            start = str(datetime.timedelta(seconds=float(start))).replace("000", "")
+            if (start.find(".") == -1):
+                start += ".000"
 
-                        if node.getAttribute("start"):
-                            start = str(datetime.timedelta(seconds=float(node.getAttribute("start")))).replace("000", "")
-                            if (start.find(".") == -1):
-                                start += ".000"
-
-                        dur = ""
-                        if node.getAttribute("dur"):
-                            dur = str(datetime.timedelta(seconds=float(node.getAttribute("start")) + float(node.getAttribute("dur")))).replace("000", "")
-                            if (dur.find(".") == -1):
-                                dur += ".000"
-
-                        if start and dur:
-                            result += "Dialogue: Marked=%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\r\n" % ("0", start, dur, "Default", "Name", "0000", "0000", "0000", "", text)
+            if start and dur:
+                result += "Dialogue: Marked=%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\r\n" % ("0", start, dur, "Default", "Name", "0000", "0000", "0000", "", text)
 
         return result
 
@@ -266,7 +257,6 @@ class YouTubePlayer():
 
     def transformAnnotationToSSA(self, xml):
         self.common.log("")
-        self.common.log("BLA: " + repr(xml))
         result = ""
         ssa_fixes = []
         style_template = "Style: annot%s,Arial,%s,&H%s&,&H%s&,&H%s&,&H%s&,0,0,3,3,0,1,0,0,0,0,0\r\n"
