@@ -182,9 +182,9 @@ class YouTubeCore():
 
             if len(self.common.parseDOM(node, "yt:deprecated")):
                 continue
-            folder['Title'] = "".join(self.common.parseDOM(node, "atom:category", ret="label"))
+            folder['Title'] = self.common.parseDOM(node, "atom:category", ret="label")[0]
 
-            folder['category'] = "".join(self.common.parseDOM(node, "atom:category", ret="term"))
+            folder['category'] = self.common.parseDOM(node, "atom:category", ret="term")[0]
             folder["icon"] = "explore"
             folder["thumbnail"] = "explore"
             folder["feed"] = "feed_category"
@@ -212,7 +212,7 @@ class YouTubeCore():
 
             if get("feed") != "feed_categories":
                 folder["login"] = "true"
-            title = "".join(self.common.parseDOM(node, "title"))
+            title = self.common.parseDOM(node, "title")[0]
             if title.find(": ") > 0:
                 title = title[title.find(": ") + 2:]
             folder['Title'] = title
@@ -233,7 +233,7 @@ class YouTubeCore():
                 folder["channel"] = folder["Title"]
 
             if get("user_feed") == "playlists":
-                folder['playlist'] = "".join(self.common.parseDOM(node, 'yt:playlistId'))
+                folder['playlist'] = self.common.parseDOM(node, 'yt:playlistId')[0]
                 folder["user_feed"] = "playlist"
 
             params["thumb"] = "true"
@@ -766,12 +766,12 @@ class YouTubeCore():
                     video["videoid"] = videoid
                     video['videoid'] = video['videoid'][video['videoid'].rfind("/") + 1:]
 
-            # MISSING !!!!!!!!!!!!!!!!!!!!!!
-            if video['videoid'] == "false" and node.getElementsByTagName("link").item(0):
-                video['videolink'] = node.getElementsByTagName("link").item(0).getAttribute('href')
-                match = re.match('.*?v=(.*)\&.*', video['videolink'])
-                if match:
-                    video['videoid'] = match.group(1)
+            if video['videoid'] == "false":
+                for tmp in self.common.parseDOM(node, "link", ret="href"):
+                    video['videolink'] = tmp
+                    match = re.match('.*?v=(.*)\&.*', video['videolink'])
+                    if match:
+                        video['videoid'] = match.group(1)
 
             for entryid in self.common.parseDOM(node, "id"):
                 entryid = entryid[entryid.rfind(":") + 1:]
