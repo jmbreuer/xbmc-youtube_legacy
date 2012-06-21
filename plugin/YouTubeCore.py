@@ -180,11 +180,11 @@ class YouTubeCore():
         for node in entries:
             folder = {}
 
-            if len(self.common.parseDOM(xml, "yt:deprecated")):
+            if len(self.common.parseDOM(node, "yt:deprecated")):
                 continue
-            folder['Title'] = "".join(self.common.parseDOM(xml, "atom:category", ret="label"))
+            folder['Title'] = "".join(self.common.parseDOM(node, "atom:category", ret="label"))
 
-            folder['category'] = "".join(self.common.parseDOM(xml, "atom:category", ret="term"))
+            folder['category'] = "".join(self.common.parseDOM(node, "atom:category", ret="term"))
             folder["icon"] = "explore"
             folder["thumbnail"] = "explore"
             folder["feed"] = "feed_category"
@@ -212,14 +212,14 @@ class YouTubeCore():
 
             if get("feed") != "feed_categories":
                 folder["login"] = "true"
-            title = node.getElementsByTagName("title").item(0).firstChild.nodeValue
+            title = "".join(self.common.parseDOM(node, "title"))
             if title.find(": ") > 0:
                 title = title[title.find(": ") + 2:]
             folder['Title'] = title
-            for tmp in self.common.parseDOM(xml, "published"):
+            for tmp in self.common.parseDOM(node, "published"):
                 folder['published'] = tmp
 
-            for entryid in self.common.parseDOM(xml, "id"):
+            for entryid in self.common.parseDOM(node, "id"):
                 folder["editid"] = entryid[entryid.rfind(":") + 1:]
 
             thumb = ""
@@ -233,7 +233,7 @@ class YouTubeCore():
                 folder["channel"] = folder["Title"]
 
             if get("user_feed") == "playlists":
-                folder['playlist'] = "".join(self.common.parseDOM(xml, 'yt:playlistId'))
+                folder['playlist'] = "".join(self.common.parseDOM(node, 'yt:playlistId'))
                 folder["user_feed"] = "playlist"
 
             params["thumb"] = "true"

@@ -205,8 +205,8 @@ class YouTubePlayer():
 
     def transformSubtitleXMLtoSRT(self, xml):
         self.common.log("")
-        dom = parseString(xml)
-        entries = dom.getElementsByTagName("text")
+        #dom = parseString(xml)
+        #entries = dom.getElementsByTagName("text")
 
         result = ""
 
@@ -265,9 +265,9 @@ class YouTubePlayer():
 
     def transformAnnotationToSSA(self, xml):
         self.common.log("")
-        #self.common.log(xml)
-        dom = parseString(xml)
-        entries = dom.getElementsByTagName("annotation")
+        self.common.log(xml)
+        #dom = parseString(xml)
+        #entries = dom.getElementsByTagName("annotation")
         result = ""
         ssa_fixes = []
         style_template = "Style: annot%s,Arial,%s,&H%s&,&H%s&,&H%s&,&H%s&,0,0,3,3,0,1,0,0,0,0,0\r\n"
