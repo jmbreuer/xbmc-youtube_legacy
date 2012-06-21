@@ -18,6 +18,7 @@
 - Replace scraper with feeds for: shows, music, education, disco.
 - If not replaceable refactor show scraper at least.
 - Integration tests on all user actions.
+- Raspberry PI slow search. srau on irc. http://sprunge.us/RAgS . minidom to parsedom 
 
 [B]Version 2.9.3[/B]
 - Fixed show scraper since it was broken in a recent redesign

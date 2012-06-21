@@ -132,29 +132,29 @@ class YouTubePlayer():
         self.common.log("subtitle index: " + repr(xml["content"]))
 
         if xml["status"] == 200:
-            try:
-                dom = parseString(xml["content"])
-            except:
-                return ""
-            entries = dom.getElementsByTagName("track")
-
             subtitle = ""
             code = ""
-            if len(entries) > 0:
+            codelist = self.common.parseDOM(xml["content"], "track", ret="lang_code")
+            sublist = self.common.parseDOM(xml["content"], "track", ret="lang_original")
+            if len(sublist) != len(codelist):
+                self.common.log("Code list and sublist length mismatch: " + repr(codelist) + " - " + repr(sublist))
+                return ""
+
+            if len(codelist) > 0:
                 # Fallback to first in list.
-                subtitle = entries[0].getAttribute("name").replace(" ", "%20")
-                code = entries[0].getAttribute("lang_code")
+                subtitle = sublist[0].replace(" ", "%20")
+                code = codelist[0]
 
             lang_code = ["off", "en", "es", "de", "fr", "it", "ja"][int(self.settings.getSetting("lang_code"))]
-            for node in entries:
-                if node.getAttribute("lang_code") == lang_code:
-                    subtitle = node.getAttribute("name").replace(" ", "%20")
+            for i in range(0, len(codelist)):
+                if codelist[i] == lang_code:
+                    subtitle = codelist[i].replace(" ", "%20")
                     code = lang_code
                     self.common.log("found subtitle specified: " + subtitle + " - " + code)
                     break
 
-                if node.getAttribute("lang_code") == "en":
-                    subtitle = node.getAttribute("name").replace(" ", "%20")
+                if codelist[i] == "en":
+                    subtitle = codelist[i].replace(" ", "%20")
                     code = "en"
                     self.common.log("found subtitle default: " + subtitle + " - " + code)
 
@@ -265,6 +265,7 @@ class YouTubePlayer():
 
     def transformAnnotationToSSA(self, xml):
         self.common.log("")
+        #self.common.log(xml)
         dom = parseString(xml)
         entries = dom.getElementsByTagName("annotation")
         result = ""
@@ -692,7 +693,7 @@ class YouTubePlayer():
         result = ""
         if (get("action", "") != "download"):
             path = self.settings.getSetting("downloadPath")
-            filename = ''.join(c for c in video['Title'].decode("utf-8") if c not in self.utils.INVALID_CHARS) + "-[" + get('videoid') + "]" + ".mp4"
+            filename = ''.join(c for c in self.common.makeUTF8(video['Title']) if c not in self.utils.INVALID_CHARS) + "-[" + get('videoid') + "]" + ".mp4"
             path = os.path.join(path.decode("utf-8"), filename)
             try:
                 if self.xbmcvfs.exists(path):

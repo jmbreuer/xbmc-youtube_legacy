@@ -22,7 +22,6 @@ import urllib2
 import re
 import time
 import socket
-import xml.dom.minidom as minidom
 try:
     import simplejson as json
 except ImportError:
@@ -174,19 +173,18 @@ class YouTubeCore():
 
     def getCategoriesFolderInfo(self, xml, params={}):
         self.common.log("")
-
-        dom = minidom.parseString(xml)
-        entries = dom.getElementsByTagName("atom:category")
+        self.common.log(xml)
+        entries = self.common.parseDOM(xml, "atom:category", ret=True)
 
         folders = []
         for node in entries:
             folder = {}
 
-            if node.getElementsByTagName("yt:deprecated"):
+            if len(self.common.parseDOM(xml, "yt:deprecated")):
                 continue
-            folder['Title'] = node.getAttribute("label")
+            folder['Title'] = "".join(self.common.parseDOM(xml, "atom:category", ret="label"))
 
-            folder['category'] = node.getAttribute("term")
+            folder['category'] = "".join(self.common.parseDOM(xml, "atom:category", ret="term"))
             folder["icon"] = "explore"
             folder["thumbnail"] = "explore"
             folder["feed"] = "feed_category"
@@ -198,22 +196,19 @@ class YouTubeCore():
     def getFolderInfo(self, xml, params={}):
         get = params.get
 
-        dom = minidom.parseString(xml)
-        links = dom.getElementsByTagName("link")
-        entries = dom.getElementsByTagName("entry")
+        self.common.log(xml)
+        entries = self.common.parseDOM(xml, "entry")
         show_next = False
 
         #find out if there are more pages
-        if (len(links)):
-            for link in links:
-                lget = link.attributes.get
-                if (lget("rel").value == "next"):
-                    show_next = True
-                    break
+        for link in self.common.parseDOM(xml, "link", ret="rel"):
+            if link == "next":
+                show_next = True
+                break
 
         folders = []
         for node in entries:
-            folder = {}
+            folder = {"published": "2008-07-05T19:56:35.000-07:00"}
 
             if get("feed") != "feed_categories":
                 folder["login"] = "true"
@@ -221,12 +216,11 @@ class YouTubeCore():
             if title.find(": ") > 0:
                 title = title[title.find(": ") + 2:]
             folder['Title'] = title
-            folder['published'] = self._getNodeValue(node, "published", "2008-07-05T19:56:35.000-07:00")
+            for tmp in self.common.parseDOM(xml, "published"):
+                folder['published'] = tmp
 
-            if node.getElementsByTagName("id"):
-                entryid = self._getNodeValue(node, "id", "")
-                entryid = entryid[entryid.rfind(":") + 1:]
-                folder["editid"] = entryid
+            for entryid in self.common.parseDOM(xml, "id"):
+                folder["editid"] = entryid[entryid.rfind(":") + 1:]
 
             thumb = ""
             if get("user_feed") == "contacts":
@@ -239,7 +233,7 @@ class YouTubeCore():
                 folder["channel"] = folder["Title"]
 
             if get("user_feed") == "playlists":
-                folder['playlist'] = self._getNodeValue(node, 'yt:playlistId', '')
+                folder['playlist'] = "".join(self.common.parseDOM(xml, 'yt:playlistId'))
                 folder["user_feed"] = "playlist"
 
             params["thumb"] = "true"
@@ -504,7 +498,7 @@ class YouTubeCore():
             if msg.find("<?xml") > -1:
                 acted = False
 
-                dom = minidom.parseString(msg)
+                #dom = minidom.parseString(msg)
                 self.common.log(str(len(msg)))
                 domains = dom.getElementsByTagName("domain")
                 codes = dom.getElementsByTagName("code")
@@ -747,88 +741,84 @@ class YouTubeCore():
 
         return False
 
-    def _getNodeAttribute(self, node, tag, attribute, default=""):
-        if node.getElementsByTagName(tag).item(0):
-            if node.getElementsByTagName(tag).item(0).hasAttribute(attribute):
-                return node.getElementsByTagName(tag).item(0).getAttribute(attribute)
-        return default
-
-    def _getNodeValue(self, node, tag, default=""):
-        if node.getElementsByTagName(tag).item(0):
-            if node.getElementsByTagName(tag).item(0).firstChild:
-                return node.getElementsByTagName(tag).item(0).firstChild.nodeValue
-        return default
-
     def getVideoInfo(self, xml, params={}):
-        dom = minidom.parseString(xml)
         self.common.log(str(len(xml)))
-        links = dom.getElementsByTagName("link")
-        entries = dom.getElementsByTagName("entry")
-        if (not entries):
-            entries = dom.getElementsByTagName("atom:entry")
+        entries = self.common.parseDOM(xml, "entry")
+        if not entries:
+            entries = self.common.parseDOM(xml, "atom:entry")
         show_next = False
 
         # find out if there are more pages
-        if (len(links)):
-            for link in links:
-                lget = link.attributes.get
-                if (lget("rel").value == "next"):
-                    show_next = True
-                    break
+        for link in self.common.parseDOM(xml, "link", ret="rel"):
+            if link == "next":
+                show_next = True
+                break
 
         ytobjects = []
         for node in entries:
-            video = {}
+            video = {"videoid": "false", "Title": "Unknown Title", "Plot": "Unknown Plot", "Date": "Unknown Date", "user": "Unknown Name", "Studio": "Unknown Uploader", "Duration": 0, "Rating": 0.0, "count": 0, "Genre": "Unknown Genre"}
 
-            video['videoid'] = self._getNodeValue(node, "yt:videoid", "false")
+            for videoid in self.common.parseDOM(node, "yt:videoid"):
+                video["videoid"] = videoid
+
             if video['videoid'] == "false":
-                video['videoid'] = self._getNodeAttribute(node, "content", "src", "false")
-                video['videoid'] = video['videoid'][video['videoid'].rfind("/") + 1:]
+                for videoid in self.common.parseDOM(node, "content", ret="src"):
+                    video["videoid"] = videoid
+                    video['videoid'] = video['videoid'][video['videoid'].rfind("/") + 1:]
 
+            # MISSING !!!!!!!!!!!!!!!!!!!!!!
             if video['videoid'] == "false" and node.getElementsByTagName("link").item(0):
                 video['videolink'] = node.getElementsByTagName("link").item(0).getAttribute('href')
                 match = re.match('.*?v=(.*)\&.*', video['videolink'])
                 if match:
                     video['videoid'] = match.group(1)
 
-            if node.getElementsByTagName("id"):
-                entryid = self._getNodeValue(node, "id", "")
+            for entryid in self.common.parseDOM(node, "id"):
                 entryid = entryid[entryid.rfind(":") + 1:]
                 video["playlist_entry_id"] = entryid
 
-            if node.getElementsByTagName("yt:state").item(0):
-                state = self._getNodeAttribute(node, "yt:state", 'name', 'Unknown Name')
-
+            for state in self.common.parseDOM(node, "yt:state", ret=True):
                 # Ignore unplayable items.
                 if (state == 'deleted' or state == 'rejected'):
                     video['videoid'] = "false"
 
                 # Get reason for why we can't playback the file.
-                if node.getElementsByTagName("yt:state").item(0).hasAttribute('reasonCode'):
-                    reason = self._getNodeAttribute(node, "yt:state", 'reasonCode', 'Unknown reasonCode')
-                    value = self._getNodeValue(node, "yt:state", "Unknown reasonValue").encode('utf-8')
-                    if reason == "private":
-                        video['videoid'] = "false"
-                    elif reason == 'requesterRegion':
-                        video['videoid'] = "false"
-                    elif reason != 'limitedSyndication':
-                        self.common.log("removing video, reason: %s value: %s" % (reason, value))
-                        video['videoid'] = "false"
+                reason = self.common.parseDOM(node, "yt:state", ret="reasonCode")
+                value = self.common.parseDOM(node, "yt:state")
+                if reason[0] == "private":
+                    video['videoid'] = "false"
+                elif reason[0] == 'requesterRegion':
+                    video['videoid'] = "false"
+                elif reason[0] != 'limitedSyndication':
+                    self.common.log("removing video, reason: %s value: %s" % (reason[0], value[0].encode('utf-8')))
+                    video['videoid'] = "false"
 
-            video['Title'] = self._getNodeValue(node, "media:title", "Unknown Title").encode('utf-8')  # Convert from utf-16 to combat breakage
-            video['Plot'] = self._getNodeValue(node, "media:description", "Unknown Plot").encode("utf-8")
-            video['Date'] = self._getNodeValue(node, "published", "Unknown Date").encode("utf-8")
-            video['user'] = self._getNodeValue(node, "name", "Unknown Name").encode("utf-8")
 
             # media:credit is not set for favorites, playlists
-            video['Studio'] = self._getNodeValue(node, "media:credit", "").encode("utf-8")
+            for tmp in self.common.parseDOM(node, "media:credit"):
+                video["Studio"] = self.common.makeUTF8(tmp)
             if video['Studio'] == "":
-                video['Studio'] = self._getNodeValue(node, "name", "Unknown Uploader").encode("utf-8")
+                for tmp in self.common.parseDOM(node, "name"):
+                    video["Studio"] = self.common.makeUTF8(tmp)
 
-            duration = int(self._getNodeAttribute(node, "yt:duration", 'seconds', '0'))
-            video['Duration'] = "%02d:%02d" % (int(duration / 60), int(duration % 60))
-            video['Rating'] = float(self._getNodeAttribute(node, "gd:rating", 'average', "0.0"))
-            video['count'] = int(self._getNodeAttribute(node, "yt:statistics", 'viewCount', "0"))
+            for tmp in self.common.parseDOM(node, "media:title"):
+                video["Title"] = self.common.makeUTF8(tmp)
+            for tmp in self.common.parseDOM(node, "media:description"):
+                video["Plot"] = self.common.makeUTF8(tmp)
+            for tmp in self.common.parseDOM(node, "published"):
+                video["Date"] = self.common.makeUTF8(tmp)
+            for tmp in self.common.parseDOM(node, "name"):
+                video["user"] = self.common.makeUTF8(tmp)
+            for tmp in self.common.parseDOM(node, "yt:duration", ret="seconds"):
+                tmp = int(tmp)
+                video["Duration"] = "%02d:%02d" % (int(tmp / 60), int(tmp % 60))
+            for tmp in self.common.parseDOM(node, "gd:rating", ret="average"):
+                video["Rating"] = float(tmp)
+            for tmp in self.common.parseDOM(node, "yt:statistics", ret="viewCount"):
+                video["count"] = int(tmp)
+            for tmp in self.common.parseDOM(node, "media:category", ret="label"):
+                video["Genre"] = self.common.makeUTF8(tmp)
+
             infoString = ""
             if video['Date'] != "Unknown Date":
                 c = time.strptime(video['Date'][:video['Date'].find(".")], "%Y-%m-%dT%H:%M:%S")
@@ -836,14 +826,10 @@ class YouTubeCore():
                 infoString += "Date Uploaded: " + time.strftime("%Y-%m-%d %H:%M:%S", c) + ", "
             infoString += "View count: " + str(video['count'])
             video['Plot'] = infoString + "\n" + video['Plot']
-            video['Genre'] = self._getNodeAttribute(node, "media:category", "label", "Unknown Genre").encode("utf-8")
 
-            edit_links = node.getElementsByTagName("link")
-            if edit_links:
-                for edit_link in edit_links:
-                    if edit_link.getAttribute('rel') == 'edit':
-                        obj = edit_link.getAttribute('href')
-                        video['editid'] = obj[obj.rfind('/') + 1:]
+            for edit_link in self.common.parseDOM(node, "link", ret=True):
+                for obj in self.common.parseDOM(node, "link", attrs={"rel": "edit"}, ret="href"):
+                    video['editid'] = obj[obj.rfind('/') + 1:]
 
             video['thumbnail'] = self.urls["thumbnail"] % video['videoid']
 
