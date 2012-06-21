@@ -498,7 +498,9 @@ class YouTubeCore():
             if msg.find("<?xml") > -1:
                 acted = False
 
-                #dom = minidom.parseString(msg)
+                self.common.log("REPLACE THIS MINIDOM WITH PARSEDOM: " + repr(msg))
+                import xml.dom.minidom as minidom
+                dom = minidom.parseString(msg)
                 self.common.log(str(len(msg)))
                 domains = dom.getElementsByTagName("domain")
                 codes = dom.getElementsByTagName("code")

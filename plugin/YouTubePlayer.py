@@ -207,6 +207,7 @@ class YouTubePlayer():
         self.common.log("")
         #dom = parseString(xml)
         #entries = dom.getElementsByTagName("text")
+        self.common.log("BLA: " + repr(xml))
 
         result = ""
 
@@ -265,18 +266,17 @@ class YouTubePlayer():
 
     def transformAnnotationToSSA(self, xml):
         self.common.log("")
-        self.common.log(xml)
-        #dom = parseString(xml)
-        #entries = dom.getElementsByTagName("annotation")
+        self.common.log("BLA: " + repr(xml))
         result = ""
         ssa_fixes = []
         style_template = "Style: annot%s,Arial,%s,&H%s&,&H%s&,&H%s&,&H%s&,0,0,3,3,0,1,0,0,0,0,0\r\n"
         styles_count = 0
         append_style = ""
+        entries = self.common.parseDOM(xml, "annotation", ret=True)
         for node in entries:
             if node:
-                stype = node.getAttribute("type")
-                style = node.getAttribute("style")
+                stype = self.common.parseDOM(node, "annotation", ret="type")[0]
+                style = self.common.parseDOM(node, "annotation", ret="style")[0]
                 self.common.log("stype : " + stype, 5)
                 self.common.log("style : " + style, 5)
 
@@ -285,38 +285,29 @@ class YouTubePlayer():
                     linkv = self.core._getNodeAttribute(node, "url", "value", "")
                     if linkt == "video":
                         self.common.log("Reference to video : " + linkv)
-                elif node.firstChild:
-                    self.common.log("node.firstChild: %s - value : %s" % (repr(node.firstChild), repr(self.core._getNodeValue(node, "TEXT", ""))), 5)
-                    text = self.core._getNodeValue(node, "TEXT", "")
-                    if text:
-                        text = self.common.replaceHTMLCodes(text)
+                else:
+                    text = self.common.parseDOM(node, "TEXT")
+                    if len(text):
+                        text = self.common.replaceHTMLCodes(text[0])
                         start = ""
 
-                        if style == "popup":
-                            cnode = node.getElementsByTagName("rectRegion")
-                        elif style == "speech":
-                            cnode = node.getElementsByTagName("anchoredRegion")
-                        elif style == "higlightText":
-                            cnode = False
-                        else:
-                            cnode = False
-
-                        snode = node.getElementsByTagName("appearance")
                         ns_fsize = 60
-                        self.common.log("snode: %s" % snode, 5)
-                        if snode:
-                            if snode.item(0).hasAttribute("textSize"):
-                                ns_fsize = int(1.2 * (1280 * float(snode.item(0).getAttribute("textSize")) / 100))
+                        tmp = self.common.parseDOM(node, "appearance", ret=True)
+                        self.common.log("snode: %s" % tmp, 5)
+                        for snode in tmp:
+                            ns_fsize = self.common.parseDOM(snode, "appearance", ret="textSize")
+                            if len(ns_fsize):
+                                ns_fsize = int(1.2 * (1280 * float(ns_fsize[0]) / 100))
                             else:
                                 ns_fsize = 60
-                            ns_fcolor = snode.item(0).getAttribute("fgColor")
-                            ns_fcolor = self.transformColor(ns_fcolor)
+                            ns_fcolor = self.common.parseDOM(snode, "appearance", ret="fgColor")
+                            ns_fcolor = self.transformColor(ns_fcolor[0])
 
-                            ns_bcolor = snode.item(0).getAttribute("bgColor")
-                            ns_bcolor = self.transformColor(ns_bcolor)
+                            ns_bcolor = self.common.parseDOM(snode, "appearance", ret="bgColor")
+                            ns_bcolor = self.transformColor(ns_bcolor[0])
 
-                            ns_alpha = snode.item(0).getAttribute("bgAlpha")
-                            ns_alpha = self.transformAlpha(ns_alpha)
+                            ns_alpha = self.common.parseDOM(snode, "appearance", ret="bgAlpha")
+                            ns_alpha = self.transformAlpha(ns_alpha[0])
 
                             append_style += style_template % (styles_count, ns_fsize, ns_fcolor, ns_fcolor, ns_fcolor, ns_alpha + ns_bcolor)
                             style = "annot" + str(styles_count)
@@ -324,12 +315,28 @@ class YouTubePlayer():
 
                         start = False
                         end = False
-                        if cnode:
-                            if cnode.item(0):
-                                start = cnode.item(0).getAttribute("t")
 
-                            if cnode.item(1):
-                                end = cnode.item(1).getAttribute("t")
+                        if style == "popup":
+                            cnode = self.common.parseDOM(node, "rectRegion", ret="t")
+                            start = cnode[0]
+                            end = cnode[1]
+                            tmp_y = self.common.parseDOM(node, "rectRegion", ret="y")
+                            tmp_h = self.common.parseDOM(node, "rectRegion", ret="h")
+                            tmp_x = self.common.parseDOM(node, "rectRegion", ret="x")
+                            tmp_w = self.common.parseDOM(node, "rectRegion", ret="w")
+                        elif style == "speech":
+                            cnode = self.common.parseDOM(node, "anchoredRegion", ret="t")
+                            start = cnode[0]
+                            end = cnode[1]
+                            tmp_y = self.common.parseDOM(node, "anchoredRegion", ret="y")
+                            tmp_h = self.common.parseDOM(node, "anchoredRegion", ret="h")
+                            tmp_x = self.common.parseDOM(node, "anchoredRegion", ret="x")
+                            tmp_w = self.common.parseDOM(node, "anchoredRegion", ret="w")
+                        elif style == "higlightText":
+                            cnode = False
+                        else:
+                            cnode = False
+
 
                         self.common.log("start: %s - end: %s - style: %s" % (start, end, style), 5)
                         if start and end and style != "highlightText":
@@ -344,8 +351,7 @@ class YouTubePlayer():
                                 marginR = 0
                             result += "Dialogue: Marked=%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\r\n" % ("0", start, end, style, "Name", marginL, marginR, marginV, "", text)
                             ssa_fixes.append([start, end])
-                else:
-                    self.common.log("wrong type")
+
         # Fix errors in the SSA specs.
         if len(ssa_fixes) > 0:
             for a_start, a_end in ssa_fixes:
