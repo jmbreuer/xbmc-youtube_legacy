@@ -756,7 +756,7 @@ class YouTubeCore():
 
         ytobjects = []
         for node in entries:
-            video = {"videoid": "false", "Title": "Unknown Title", "Plot": "Unknown Plot", "Date": "Unknown Date", "user": "Unknown Name", "Studio": "Unknown Uploader", "Duration": 0, "Rating": 0.0, "count": 0, "Genre": "Unknown Genre"}
+            video = {"videoid": "false", "Title": "Unknown Title", "Plot": "Unknown Plot", "date": "Unknown Date", "user": "Unknown Name", "Studio": "Unknown Uploader", "Duration": 0, "Rating": 0.0, "count": 0, "Genre": "Unknown Genre"}
 
             for videoid in self.common.parseDOM(node, "yt:videoid"):
                 video["videoid"] = videoid
@@ -806,7 +806,7 @@ class YouTubeCore():
             for tmp in self.common.parseDOM(node, "media:description"):
                 video["Plot"] = self.common.makeUTF8(tmp)
             for tmp in self.common.parseDOM(node, "published"):
-                video["Date"] = self.common.makeUTF8(tmp)
+                video["date"] = self.common.makeUTF8(tmp)
             for tmp in self.common.parseDOM(node, "name"):
                 video["user"] = self.common.makeUTF8(tmp)
             for tmp in self.common.parseDOM(node, "yt:duration", ret="seconds"):
@@ -820,10 +820,10 @@ class YouTubeCore():
                 video["Genre"] = self.common.makeUTF8(tmp)
 
             infoString = ""
-            if video['Date'] != "Unknown Date":
-                c = time.strptime(video['Date'][:video['Date'].find(".")], "%Y-%m-%dT%H:%M:%S")
-                video['Date'] = time.strftime("%d-%m-%Y", c)
+            if video['date'] != "Unknown Date":
+                c = time.strptime(video['date'][:video['date'].find(".")], "%Y-%m-%dT%H:%M:%S")
                 infoString += "Date Uploaded: " + time.strftime("%Y-%m-%d %H:%M:%S", c) + ", "
+                video['date'] = time.strftime("%d.%m.%Y", c)
             infoString += "View count: " + str(video['count'])
             video['Plot'] = infoString + "\n" + video['Plot']
 
