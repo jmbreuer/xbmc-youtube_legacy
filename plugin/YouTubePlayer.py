@@ -265,26 +265,28 @@ class YouTubePlayer():
         entries = self.common.parseDOM(xml, "annotation", ret=True)
         for node in entries:
             if node:
-                stype = self.common.parseDOM(node, "annotation", ret="type")[0]
-                style = self.common.parseDOM(node, "annotation", ret="style")[0]
+                stype = "".join(self.common.parseDOM(node, "annotation", ret="type"))
+                style = "".join(self.common.parseDOM(node, "annotation", ret="style"))
                 self.common.log("stype : " + stype, 5)
                 self.common.log("style : " + style, 5)
 
                 if stype == "highlight":
-                    linkt = self.core._getNodeAttribute(node, "url", "type", "")
-                    linkv = self.core._getNodeAttribute(node, "url", "value", "")
+                    linkt = self.common.parseDOM(node, "url", ret="type")[0]
+                    linkv = self.common.parseDOM(node, "url", ret="value")[0]
                     if linkt == "video":
                         self.common.log("Reference to video : " + linkv)
-                else:
+                elif node.find("TEXT") > -1:
                     text = self.common.parseDOM(node, "TEXT")
                     if len(text):
                         text = self.common.replaceHTMLCodes(text[0])
                         start = ""
 
                         ns_fsize = 60
-                        tmp = self.common.parseDOM(node, "appearance", ret=True)
+                        self.common.log("BLA: " + repr(node))
+                        tmp = self.common.parseDOM(node, "appearance", attrs={"fgColor": ".*?"}, ret=True)
                         self.common.log("snode: %s" % tmp, 5)
                         for snode in tmp:
+                            self.common.log("BLA2: " + repr(snode))
                             ns_fsize = self.common.parseDOM(snode, "appearance", ret="textSize")
                             if len(ns_fsize):
                                 ns_fsize = int(1.2 * (1280 * float(ns_fsize[0]) / 100))
@@ -330,13 +332,13 @@ class YouTubePlayer():
 
                         self.common.log("start: %s - end: %s - style: %s" % (start, end, style), 5)
                         if start and end and style != "highlightText":
-                            marginV = 1280 * float(cnode.item(0).getAttribute("y")) / 100
-                            marginV += 1280 * float(cnode.item(0).getAttribute("h")) / 100
+                            marginV = 1280 * float(tmp_y[0]) / 100
+                            marginV += 1280 * float(tmp_h[0]) / 100
                             marginV = 1280 - int(marginV)
                             marginV += 5
-                            marginL = int((800 * float(cnode.item(0).getAttribute("x")) / 100))
+                            marginL = int((800 * float(tmp_x[0]) / 100))
                             marginL += 5
-                            marginR = 800 - marginL - int((800 * float(cnode.item(0).getAttribute("w")) / 100)) - 15
+                            marginR = 800 - marginL - int((800 * float(tmp_w[0]) / 100)) - 15
                             if marginR < 0:
                                 marginR = 0
                             result += "Dialogue: Marked=%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\r\n" % ("0", start, end, style, "Name", marginL, marginR, marginV, "", text)
