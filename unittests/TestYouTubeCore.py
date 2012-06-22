@@ -154,6 +154,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
     def test_getCategoriesFolderInfo_should_set_item_params_correctly_for_contacts_feed(self):
         input = self.readTestInput("categories-test.xml", False)
         core = YouTubeCore()
+        sys.modules["__main__"].common.parseDOM.side_effect = [["entries"], [], ["Film & Animation"], ["Film"]]
         
         result = core.getCategoriesFolderInfo(input, {"feed":"feed_categories"})
         
@@ -162,92 +163,56 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
         assert(result[0]["Title"] == "Film & Animation")
         assert(result[0]["category"] == "Film")
         
-    def test_getCategoriesFolderInfo_should_use_getElementsByTagName_to_look_for_categories(self):
-        patcher = patch("xml.dom.minidom.parseString")
-        patcher.start()
-        import xml.dom.minidom
-        xml.dom.minidom.parseString = Mock()
-        xml.dom.minidom.parseString().getElementsByTagName.return_value = ""
+    def test_getCategoriesFolderInfo_should_use_parseDOM_to_look_for_categories(self):
         core = YouTubeCore()
+        sys.modules["__main__"].common.parseDOM.side_effect = [["entries"], [], ["label"], ["term"]]
 
         core.getCategoriesFolderInfo("xml", {})
         
-        calls = xml.dom.minidom.parseString().getElementsByTagName.call_args_list
-        
-        patcher.stop("")
-        assert(calls[0][0][0] == "atom:category")
+        sys.modules["__main__"].common.parseDOM.assert_any_call('entries', 'atom:category', ret="label")
 	
-    def test_getCategoriesFolderInfo_should_use_getElementsByTagName_to_look_for_deprecated_categories(self):
-        patcher = patch("xml.dom.minidom.parseString")
-        patcher.start()
-        import xml.dom.minidom
-        node = Mock()
-        xml.dom.minidom.parseString = Mock()
-        xml.dom.minidom.parseString().getElementsByTagName.side_effect = [[node],""]
+    def test_getCategoriesFolderInfo_should_use_parseDOM_to_look_for_deprecated_categories(self):
         core = YouTubeCore()
+        sys.modules["__main__"].common.parseDOM.side_effect = [["entries"], ["dep"]]
 
         core.getCategoriesFolderInfo("xml", {})
-        
-        calls = xml.dom.minidom.parseString().getElementsByTagName.call_args_list
-        
-        patcher.stop("")
-        
-        node.getElementsByTagName.assert_any_call("yt:deprecated")
+                        
+        sys.modules["__main__"].common.parseDOM.assert_any_call('entries', 'yt:deprecated')
         
     def test_getCategoriesFolderInfo_should_skip_deprecated_categories(self):
-        patcher = patch("xml.dom.minidom.parseString")
-        patcher.start()
-        import xml.dom.minidom
-        node = Mock()
-        xml.dom.minidom.parseString = Mock()
-        xml.dom.minidom.parseString().getElementsByTagName.side_effect = [[node],""]
+        sys.modules["__main__"].common.parseDOM.side_effect = [["entries"], ["depcrecated"], ["label"], ["term"]]
         core = YouTubeCore()
 
         result = core.getCategoriesFolderInfo("xml", {})
         
-        calls = xml.dom.minidom.parseString().getElementsByTagName.call_args_list
-        
-        patcher.stop("")
-        
-        node.getElementsByTagName.assert_any_call("yt:deprecated")
-        assert(node.getAttribute.call_count == 0)
-        assert(len(result) == 0)
-        
+        calls = sys.modules["__main__"].common.parseDOM.call_args_list #assert_any_call('entries', 'yt:deprecated')
+        print repr(calls)
+        assert(len(calls) == 2)
+
     def test_getFolderInfo_should_use_getElementsByTagName_to_look_for_link_and_entries(self):
-        patcher = patch("xml.dom.minidom.parseString")
-        patcher.start()
-        import xml.dom.minidom
-        xml.dom.minidom.parseString = Mock()
-        xml.dom.minidom.parseString().getElementsByTagName.return_value = ""
+        sys.modules["__main__"].common.parseDOM.side_effect = [["entry"], [""], ["title"], ["published"], ["id"]]
         core = YouTubeCore()
 
         core.getFolderInfo("xml", {})
         
-        calls = xml.dom.minidom.parseString().getElementsByTagName.call_args_list
-        patcher.stop("")
-        assert(calls[0][0][0] == "link")
-        assert(calls[1][0][0] == "entry")
+        calls = sys.modules["__main__"].common.parseDOM.call_args_list
+        print repr(calls)
+
+        assert(calls[0][0][1] == "entry")
+        assert(calls[1][0][1] == "link")
 
     def test_getFolderInfo_should_search_links_relation_attribute_for_multiple_pages(self):
-        patcher = patch("xml.dom.minidom.parseString")
-        patcher.start()
-        import xml.dom.minidom
-        link = Mock()
-        rel = Mock()
-        rel.value = "next"
-        link.attributes = {"rel":rel}
-        tags = ["", [link]]
-        xml.dom.minidom.parseString = Mock()
-        xml.dom.minidom.parseString().getElementsByTagName.side_effect = lambda x: tags.pop() 
+        sys.modules["__main__"].common.parseDOM.side_effect = [["entry"], ["next"], ["title"], ["published"], ["id"]]
+        sys.modules["__main__"].common.parseDOM.side_effect = [[], ["next"]]
         core = YouTubeCore()
         
         core.getFolderInfo("xml", {})
 
-        patcher.stop("")
         sys.modules["__main__"].utils.addNextFolder.assert_called_with([], {})
 	
     def test_getFolderInfo_should_find_edit_id_in_xml_structure_if_id_tag_is_present(self):
         input = self.readTestInput("getFolderInfoPlaylistTest.xml", False)
+        sys.modules["__main__"].common.parseDOM.side_effect = [["entry"], [], ["title"], ["published"], ["some_playlist_id"]]
         core = YouTubeCore()
         
         result = core.getFolderInfo(input, {})
@@ -257,6 +222,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 
     def test_getFolderInfo_should_set_item_params_correctly_for_contacts_feed(self):
         input = self.readTestInput("getFolderInfoContactTest.xml", False)
+        sys.modules["__main__"].common.parseDOM.side_effect = [["entry"], [], ["some_other_user"], ["published"], ["some_other_user"]]
         core = YouTubeCore()
         
         result = core.getFolderInfo(input, {"user_feed":"contacts"})
@@ -271,6 +237,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 
     def test_getFolderInfo_should_set_item_params_correctly_for_subscriptions_feed(self):
         input = self.readTestInput("getFolderInfoSubscriptionsTest.xml", False)
+        sys.modules["__main__"].common.parseDOM.side_effect = [["entry"], [], ["GoogleTechTalks"], ["published"], ["some_edit_id"]]
         core = YouTubeCore()
         
         result = core.getFolderInfo(input, {"user_feed":"subscriptions"})
@@ -283,6 +250,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
         
     def test_getFolderInfo_should_set_item_params_correctly_for_playlist_feed(self):
         input = self.readTestInput("getFolderInfoPlaylistTest.xml", False)
+        sys.modules["__main__"].common.parseDOM.side_effect = [["entry"], [], ["Stand back I'm going to try Science!"], ["published"], ["some_playlist_id"], ["some_playlist_id"]]
         core = YouTubeCore()
         
         result = core.getFolderInfo(input, {"user_feed":"playlists"})
@@ -296,6 +264,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 
     def test_getFolderInfo_should_call_storage_retrieve_to_find_thumbnail(self):
         input = self.readTestInput("getFolderInfoPlaylistTest.xml", False)
+        sys.modules["__main__"].common.parseDOM.side_effect = [["entry"], [], ["Stand back I'm going to try Science!"], ["published"], ["some_playlist_id"], ["some_playlist_id"]]
         core = YouTubeCore()
         
         result = core.getFolderInfo(input, {})
@@ -303,21 +272,11 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
         assert(sys.modules["__main__"].storage.retrieve.call_count == 1)
 	
     def test_getFolderInfo_should_call_utils_addNextFolder_to_set_default_next_folder_on_feed(self):
-        patcher = patch("xml.dom.minidom.parseString")
-        patcher.start()
-        import xml.dom.minidom
-        link = Mock()
-        rel = Mock()
-        rel.value = "next"
-        link.attributes = {"rel":rel}
-        tags = ["", [link]]
-        xml.dom.minidom.parseString = Mock()
-        xml.dom.minidom.parseString().getElementsByTagName.side_effect = lambda x: tags.pop() 
+        sys.modules["__main__"].common.parseDOM.side_effect = [[], ["next"]]
         core = YouTubeCore()
         
         core.getFolderInfo("xml", {})
 
-        patcher.stop("")
         sys.modules["__main__"].utils.addNextFolder.assert_called_with([], {})
         
     def test_getBatchDetailsOverride_should_call_getBatchDetails_with_list_of_video_ids(self):
@@ -1228,45 +1187,15 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
         
         sys.modules[ "__main__" ].login.login.assert_called_with()
         sys.modules[ "__main__" ].settings.getSetting.assert_called_with("oauth2_access_token")
-
-    def test_getNodeAttribute_should_parse_node_structure_correctly(self):
-        core = YouTubeCore()
-        node = Mock()
-        
-        node.getElementsByTagName
-        result = core._getNodeAttribute(node, "tag","attribute","default")
-        
-        node.getElementsByTagName.assert_called_with("tag")
-        node.getElementsByTagName().item.assert_called_with(0)
-        node.getElementsByTagName().item().hasAttribute.assert_called_with("attribute")
-        node.getElementsByTagName().item().getAttribute.assert_called_with("attribute")
-        
-    def test_getNodeValue_should_parse_node_structure_correctly(self):
-        core = YouTubeCore()
-        node = Mock()
-        node.getElementsByTagName().item().firstChild.nodeValue = 5
-        
-        node.getElementsByTagName
-        result = core._getNodeValue(node, "tag","default")
-        
-        node.getElementsByTagName.assert_called_with("tag")
-        node.getElementsByTagName().item.assert_called_with(0)
-        assert(result == 5)
         
     def test_getVideoInfo_should_call_minidom_getElementsByTagName_to_find_links(self):
-        patcher = patch("xml.dom.minidom.parseString")
-        patcher.start()
-        import xml.dom.minidom
-        dom = Mock()
-        xml.dom.minidom.parseString = Mock()
-        xml.dom.minidom.parseString.return_value = dom
-        dom.getElementsByTagName.return_value = ""
+        sys.modules[ "__main__" ].common.parseDOM.side_effect = [["entry"], [], ["yt:videoid"], ["id"], [], ["media:credit"], ["media:title"], ["media:description"], ["2011-09-29T09:59:22.000Z"], ["name"], ["66"], ["1.2"], ["1234"], ["media:category"], ["links"], ["http://example.com"]]
+        sys.modules[ "__main__" ].common.makeUTF8.side_effect = ["media:credit", "media:title", "media:description", "name", "media:credit"]
         core = YouTubeCore()
         
         result = core.getVideoInfo("xml", {})
-        patcher.stop()
-        
-        args = dom.getElementsByTagName.call_args_list
+        args = sys.modules[ "__main__" ].common.parseDOM.call_args_list
+        print repr(args)
         assert(args[0][0][0] == "link")
 
     def test_getVideoInfo_should_call_minidom_getElementsByTagName_to_find_entries(self):

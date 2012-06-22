@@ -807,7 +807,7 @@ class YouTubeCore():
             for tmp in self.common.parseDOM(node, "media:description"):
                 video["Plot"] = self.common.makeUTF8(tmp)
             for tmp in self.common.parseDOM(node, "published"):
-                video["date"] = self.common.makeUTF8(tmp)
+                video["date"] = tmp
             for tmp in self.common.parseDOM(node, "name"):
                 video["user"] = self.common.makeUTF8(tmp)
             for tmp in self.common.parseDOM(node, "yt:duration", ret="seconds"):
@@ -822,6 +822,7 @@ class YouTubeCore():
 
             infoString = ""
             if video['date'] != "Unknown Date":
+                print repr(video)
                 c = time.strptime(video['date'][:video['date'].find(".")], "%Y-%m-%dT%H:%M:%S")
                 infoString += "Date Uploaded: " + time.strftime("%Y-%m-%d %H:%M:%S", c) + ", "
                 video['date'] = time.strftime("%d.%m.%Y", c)
