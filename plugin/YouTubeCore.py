@@ -635,7 +635,6 @@ class YouTubeCore():
 
             if len(new_url) > 0:
                 self.common.log("Part A - Type 1")
-                self.common.log("BLA:" + repr(ret))
                 new_url = "http://www.youtube.com/" + new_url[0]
                 next_url = self.common.parseDOM(ret["content"], "input", attrs={"name": "next_url"}, ret="value")
                 set_racy = self.common.parseDOM(ret["content"], "input", attrs={"name": "set_racy"}, ret="value")

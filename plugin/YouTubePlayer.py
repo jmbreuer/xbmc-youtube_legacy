@@ -148,13 +148,13 @@ class YouTubePlayer():
             lang_code = ["off", "en", "es", "de", "fr", "it", "ja"][int(self.settings.getSetting("lang_code"))]
             for i in range(0, len(codelist)):
                 if codelist[i] == lang_code:
-                    subtitle = codelist[i].replace(" ", "%20")
-                    code = lang_code
+                    subtitle = sublist[i].replace(" ", "%20")
+                    code = codelist[0]
                     self.common.log("found subtitle specified: " + subtitle + " - " + code)
                     break
 
                 if codelist[i] == "en":
-                    subtitle = codelist[i].replace(" ", "%20")
+                    subtitle = sublist[i].replace(" ", "%20")
                     code = "en"
                     self.common.log("found subtitle default: " + subtitle + " - " + code)
 
@@ -282,29 +282,6 @@ class YouTubePlayer():
                         start = ""
 
                         ns_fsize = 60
-                        self.common.log("BLA: " + repr(node))
-                        tmp = self.common.parseDOM(node, "appearance", attrs={"fgColor": ".*?"}, ret=True)
-                        self.common.log("snode: %s" % tmp, 5)
-                        for snode in tmp:
-                            self.common.log("BLA2: " + repr(snode))
-                            ns_fsize = self.common.parseDOM(snode, "appearance", ret="textSize")
-                            if len(ns_fsize):
-                                ns_fsize = int(1.2 * (1280 * float(ns_fsize[0]) / 100))
-                            else:
-                                ns_fsize = 60
-                            ns_fcolor = self.common.parseDOM(snode, "appearance", ret="fgColor")
-                            ns_fcolor = self.transformColor(ns_fcolor[0])
-
-                            ns_bcolor = self.common.parseDOM(snode, "appearance", ret="bgColor")
-                            ns_bcolor = self.transformColor(ns_bcolor[0])
-
-                            ns_alpha = self.common.parseDOM(snode, "appearance", ret="bgAlpha")
-                            ns_alpha = self.transformAlpha(ns_alpha[0])
-
-                            append_style += style_template % (styles_count, ns_fsize, ns_fcolor, ns_fcolor, ns_fcolor, ns_alpha + ns_bcolor)
-                            style = "annot" + str(styles_count)
-                            styles_count += 1
-
                         start = False
                         end = False
 
@@ -329,6 +306,24 @@ class YouTubePlayer():
                         else:
                             cnode = False
 
+                        for snode in self.common.parseDOM(node, "appearance", attrs={"fgColor": ".*?"}, ret=True):
+                            ns_fsize = self.common.parseDOM(snode, "appearance", ret="textSize")
+                            if len(ns_fsize):
+                                ns_fsize = int(1.2 * (1280 * float(ns_fsize[0]) / 100))
+                            else:
+                                ns_fsize = 60
+                            ns_fcolor = self.common.parseDOM(snode, "appearance", ret="fgColor")
+                            ns_fcolor = self.transformColor(ns_fcolor[0])
+
+                            ns_bcolor = self.common.parseDOM(snode, "appearance", ret="bgColor")
+                            ns_bcolor = self.transformColor(ns_bcolor[0])
+
+                            ns_alpha = self.common.parseDOM(snode, "appearance", ret="bgAlpha")
+                            ns_alpha = self.transformAlpha(ns_alpha[0])
+
+                            append_style += style_template % (styles_count, ns_fsize, ns_fcolor, ns_fcolor, ns_fcolor, ns_alpha + ns_bcolor)
+                            style = "annot" + str(styles_count)
+                            styles_count += 1
 
                         self.common.log("start: %s - end: %s - style: %s" % (start, end, style), 5)
                         if start and end and style != "highlightText":
@@ -351,7 +346,7 @@ class YouTubePlayer():
                     if time.strptime(a_end[0:a_end.rfind(".")], "%H:%M:%S") < time.strptime(b_start[0:b_start.rfind(".")], "%H:%M:%S"):
                         result += "Dialogue: Marked=0,%s,%s,Default,Name,0000,0000,0000,,\r\n" % (a_end, b_start)
 
-        self.common.log("Done : " + repr((result, append_style)), 5)
+        self.common.log("Done : " + repr((result, append_style)),5)
         return (result, append_style)
 
     def addSubtitles(self, video={}):
