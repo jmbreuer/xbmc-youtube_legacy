@@ -9,8 +9,9 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
     def setUp(self):
         super(self.__class__,self).setUp()
         sys.modules[ "__main__" ].settings.getSetting.side_effect = ["3","4", "my_auth"]
-        sys.modules["__main__"].storage.retrieve.return_value = "some_thumbnail"
+        sys.modules[ "__main__" ].storage.retrieve.return_value = "some_thumbnail"
         sys.modules[ "__main__" ].language.return_value = "error_message"
+        sys.modules[ "__main__" ].common.parseDOM.return_value = []
 
 	
     def test_delete_favorite_should_call_fetchPage_with_correct_fetch_options(self):
@@ -1188,15 +1189,13 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
         sys.modules[ "__main__" ].login.login.assert_called_with()
         sys.modules[ "__main__" ].settings.getSetting.assert_called_with("oauth2_access_token")
         
-    def test_getVideoInfo_should_call_minidom_getElementsByTagName_to_find_links(self):
-        sys.modules[ "__main__" ].common.parseDOM.side_effect = [["entry"], [], ["yt:videoid"], ["id"], [], ["media:credit"], ["media:title"], ["media:description"], ["2011-09-29T09:59:22.000Z"], ["name"], ["66"], ["1.2"], ["1234"], ["media:category"], ["links"], ["http://example.com"]]
-        sys.modules[ "__main__" ].common.makeUTF8.side_effect = ["media:credit", "media:title", "media:description", "name", "media:credit"]
+    def test_getVideoInfo_should_call_parseDOM_to_find_links(self):
+        sys.modules[ "__main__" ].common.parseDOM.return_value = []
         core = YouTubeCore()
-        
+
         result = core.getVideoInfo("xml", {})
-        args = sys.modules[ "__main__" ].common.parseDOM.call_args_list
-        print repr(args)
-        assert(args[0][0][0] == "link")
+
+        sys.modules[ "__main__" ].common.parseDOM.assert_any_call("xml", "link", ret="rel")
 
     def test_getVideoInfo_should_call_minidom_getElementsByTagName_to_find_entries(self):
         patcher = patch("xml.dom.minidom.parseString")
