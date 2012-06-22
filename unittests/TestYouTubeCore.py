@@ -9,8 +9,9 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
     def setUp(self):
         super(self.__class__,self).setUp()
         sys.modules[ "__main__" ].settings.getSetting.side_effect = ["3","4", "my_auth"]
-        sys.modules["__main__"].storage.retrieve.return_value = "some_thumbnail"
+        sys.modules[ "__main__" ].storage.retrieve.return_value = "some_thumbnail"
         sys.modules[ "__main__" ].language.return_value = "error_message"
+        sys.modules[ "__main__" ].common.parseDOM.return_value = []
 
 	
     def test_delete_favorite_should_call_fetchPage_with_correct_fetch_options(self):
@@ -1253,21 +1254,13 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
         node.getElementsByTagName().item.assert_called_with(0)
         assert(result == 5)
         
-    def test_getVideoInfo_should_call_minidom_getElementsByTagName_to_find_links(self):
-        patcher = patch("xml.dom.minidom.parseString")
-        patcher.start()
-        import xml.dom.minidom
-        dom = Mock()
-        xml.dom.minidom.parseString = Mock()
-        xml.dom.minidom.parseString.return_value = dom
-        dom.getElementsByTagName.return_value = ""
+    def test_getVideoInfo_should_call_parseDOM_to_find_links(self):
+        sys.modules[ "__main__" ].common.parseDOM.return_value = []
         core = YouTubeCore()
-        
+
         result = core.getVideoInfo("xml", {})
-        patcher.stop()
-        
-        args = dom.getElementsByTagName.call_args_list
-        assert(args[0][0][0] == "link")
+
+        sys.modules[ "__main__" ].common.parseDOM.assert_any_call("xml", "link", ret="rel")
 
     def test_getVideoInfo_should_call_minidom_getElementsByTagName_to_find_entries(self):
         patcher = patch("xml.dom.minidom.parseString")
