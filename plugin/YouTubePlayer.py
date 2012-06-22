@@ -22,7 +22,6 @@ import re
 import os.path
 import datetime
 import time
-from xml.dom.minidom import parseString
 try: import simplejson as json
 except ImportError: import json
 
@@ -686,6 +685,8 @@ class YouTubePlayer():
         result = ""
         if (get("action", "") != "download"):
             path = self.settings.getSetting("downloadPath")
+            bla = self.common.makeUTF8(video['Title'])
+            print repr(bla)
             filename = ''.join(c for c in self.common.makeUTF8(video['Title']) if c not in self.utils.INVALID_CHARS) + "-[" + get('videoid') + "]" + ".mp4"
             path = os.path.join(path.decode("utf-8"), filename)
             try:

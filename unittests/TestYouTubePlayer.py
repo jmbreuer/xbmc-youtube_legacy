@@ -234,6 +234,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         sys.modules["__main__"].core._fetchPage.return_value = {"status": 200, "content": self.readTestInput("timedtextDirectoryTest.xml", False)}
         sys.modules["__main__"].settings.getSetting = Mock()
         sys.modules["__main__"].settings.getSetting.return_value = "3"
+        sys.modules["__main__"].common.parseDOM.side_effect = [["de"], ["german"]]
 
         url = player.getSubtitleUrl({"videoid": "some_id"})
 
@@ -245,6 +246,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         sys.modules["__main__"].core._fetchPage.return_value = {"status": 200, "content": self.readTestInput("timedtextDirectoryTest.xml", False)}
         sys.modules["__main__"].settings.getSetting = Mock()
         sys.modules["__main__"].settings.getSetting.return_value = "2"
+        sys.modules["__main__"].common.parseDOM.side_effect = [["en"], ["english"]]
 
         url = player.getSubtitleUrl({"videoid": "some_id"})
 
@@ -254,12 +256,14 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         player = YouTubePlayer()
         sys.modules["__main__"].common.replaceHTMLCodes = Mock()
         sys.modules["__main__"].common.replaceHTMLCodes.side_effect = lambda x: x.encode("ascii", 'ignore')
+        sys.modules["__main__"].common.parseDOM.side_effect = [["content"] * 3, ["content"], ["00"], ["10"], ["content1"], ["20"], ["30"], ["content3"], ["40"], ["50"]]
 
         result = player.transformSubtitleXMLtoSRT(self.readTestInput("subtitleTest.xml", False))
 
-        assert(len(result.split("\r\n")) == 66)
+        assert(len(result.split("\r\n")) == 4)
 
     def test_transformSubtitleXMLtoSRT_should_call_replaceHTMLCodes_for_user_visible_text(self):
+        sys.modules["__main__"].common.parseDOM.side_effect = [["content TEXT"] * 2, ["text"], ["14.017"], ["2.07"], ["text"], ["16.087"], ["2.996"]]
         player = YouTubePlayer()
         player.simpleReplaceHTMLCodes = Mock()
         player.simpleReplaceHTMLCodes.side_effect = lambda x: x.encode("ascii", 'ignore')
@@ -278,6 +282,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         player = YouTubePlayer()
         sys.modules["__main__"].common.replaceHTMLCodes = Mock()
         sys.modules["__main__"].common.replaceHTMLCodes.side_effect = lambda x: x.encode("ascii", 'ignore')
+        sys.modules["__main__"].common.parseDOM.side_effect = [["content TEXT"] * 2, ["text"], ["14.017"], ["2.07"], ["text"], ["16.087"], ["2.996"]]
 
         result = player.transformSubtitleXMLtoSRT(input).split("\r\n")
 
@@ -292,6 +297,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         player = YouTubePlayer()
         sys.modules["__main__"].common.replaceHTMLCodes = Mock()
         sys.modules["__main__"].common.replaceHTMLCodes.side_effect = lambda x: x.encode("ascii", 'ignore')
+        sys.modules["__main__"].common.parseDOM.side_effect = [["content TEXT"] * 2, ["text"], ["14.017"], ["2.07"], ["text"], ["16.087"], ["2.996"]]
 
         result = player.transformSubtitleXMLtoSRT(input).split("\r\n")
 
@@ -344,15 +350,17 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         player = YouTubePlayer()
         sys.modules["__main__"].common.replaceHTMLCodes = Mock()
         sys.modules["__main__"].common.replaceHTMLCodes.side_effect = lambda x: x.encode("ascii", 'ignore')
+        sys.modules["__main__"].common.parseDOM.side_effect = [["content TEXT"], ["TEXT"], ["popup"], ["popup"], ["0:00:06.5", "0:01:06.5"], [0], [0], [0], [0], [["snode"]], ["16777215"], ["26777215"], ["36777215"], ["46777215"]]
 
         (result, style) = player.transformAnnotationToSSA(self.readTestInput("annotationsTest.xml", False).encode("utf-8"))
-
-        assert(len(result.split("\r\n")) == 11)
+        print repr(result)
+        assert(len(result.split("\r\n")) == 2)
 
     def test_transformAnnotationToSSA_should_call_replaceHTMLCodes_for_user_visible_text(self):
         player = YouTubePlayer()
         sys.modules["__main__"].common.replaceHTMLCodes = Mock()
         sys.modules["__main__"].common.replaceHTMLCodes.side_effect = lambda x: x.encode("ascii", 'ignore')
+        sys.modules["__main__"].common.parseDOM.side_effect = [["content TEXT"], ["TEXT"], ["bla"], ["bla2"], []]
 
         result = player.transformAnnotationToSSA(self.readTestInput("annotationsTest.xml", False).encode("utf-8"))
         print repr(result)
@@ -682,10 +690,11 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         assert(url == "h264")
 
     def test_userSelectsVideoQuality_should_select_proper_quality_based_on_user_input(self):
+        player = YouTubePlayer()
         sys.modules["__main__"].settings.getSetting.return_value = "1"
         sys.modules["__main__"].xbmcgui.Dialog().select.return_value = 0
         sys.modules["__main__"].language.return_value = ""
-        player = YouTubePlayer()
+        sys.modules["__main__"].common.makeUTF8.return_value = "bla"
 
         url = player.userSelectsVideoQuality({}, {35: "SD", 22: "720p", 37: "1080p"})
 
@@ -720,6 +729,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         params = {"videoid": "some_id"}
         sys.modules["__main__"].settings.getSetting.return_value = "somePath/"
         sys.modules["__main__"].xbmcvfs.exists.return_value = False
+        sys.modules["__main__"].common.makeUTF8.return_value = "someTitle"
         player = YouTubePlayer()
         player.getInfo = Mock()
         player.getInfo.return_value = ({"videoid": "some_id", "Title": "someTitle"}, 200)
@@ -733,6 +743,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
     def test_getVideoObject_should_use_local_file_for_playback_if_found(self):
         sys.modules["__main__"].settings.getSetting.return_value = "somePath/"
         sys.modules["__main__"].xbmcvfs.exists.return_value = True
+        sys.modules["__main__"].common.makeUTF8.return_value = "someTitle"
         params = {"videoid": "some_id"}
         player = YouTubePlayer()
         player.getInfo = Mock()
@@ -750,6 +761,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         params = {"videoid": "some_id"}
         sys.modules["__main__"].settings.getSetting.return_value = "somePath/"
         sys.modules["__main__"].xbmcvfs.exists.return_value = False
+        sys.modules["__main__"].common.makeUTF8.return_value = "someTitle"
         player = YouTubePlayer()
         player.getInfo = Mock()
         player.getInfo.return_value = ({"videoid": "some_id", "Title": "someTitle"}, 200)
@@ -765,6 +777,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         params = {"videoid": "some_id"}
         sys.modules["__main__"].settings.getSetting.return_value = "somePath/"
         sys.modules["__main__"].xbmcvfs.exists.return_value = False
+        sys.modules["__main__"].common.makeUTF8.return_value = "someTitle"
         player = YouTubePlayer()
         player.getInfo = Mock()
         player.getInfo.return_value = ({"videoid": "some_id", "Title": "someTitle"}, 200)
@@ -782,6 +795,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         params = {"videoid": "some_id"}
         sys.modules["__main__"].settings.getSetting.return_value = u"somePathé/".encode("utf-8")
         sys.modules["__main__"].xbmcvfs.exists.return_value = False
+        sys.modules["__main__"].common.makeUTF8.return_value = u"\u05e0\u05dc\u05d4 \u05de\u05d4\u05d9\u05e4\u05d4 \u05d5\u05d4\u05d7\u05e0\u05d5\u05df \u05d1\u05e1\u05d8\u05e8\u05d9\u05e4 \u05e6'\u05d0\u05d8 \u05d1\u05e7\u05dc\u05d9\u05e4 \u05e9\u05dc \u05d7\u05d5\u05d1\u05d1\u05d9 \u05e6\u05d9\u05d5\u05df"
         player = YouTubePlayer()
         player.getInfo = Mock()
         player.getInfo.return_value = ({"videoid": "some_id", "Title": u"נלה מהיפה והחנון בסטריפ צ'אט בקליפ של חובבי ציון".encode("utf-8")}, 200)
