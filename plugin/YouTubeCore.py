@@ -855,7 +855,7 @@ class YouTubeCore():
         result = datetime.datetime.now().date()
 
         for tmp in self.common.parseDOM(node, "published"):
-            result = time.strptime(tmp[:tmp.find(".")], "%Y-%m-%dT%H:%M:%S")
+            result =  datetime.datetime.strptime(tmp[:tmp.find(".")], "%Y-%m-%dT%H:%M:%S")
 
         return result
 
@@ -873,7 +873,7 @@ class YouTubeCore():
         for tmp in self.common.parseDOM(node, "media:description"):
             result = self.common.replaceHTMLCodes(self.common.makeUTF8(tmp))
 
-        infoString = "Date Uploaded: " + time.strftime("%Y-%m-%d %H:%M:%S", uploadDate) + ", "
+        infoString = "Date Uploaded: " + uploadDate.strftime("%Y-%m-%d %H:%M:%S") + ", "
         infoString += "View count: " + str(viewCount)
 
         result = infoString + "\n" + result
@@ -892,7 +892,7 @@ class YouTubeCore():
         result = ""
 
         for tmp in self.common.parseDOM(node, "media:category", ret="label"):
-            result = self.common.makeUTF8(tmp)
+            result = self.common.replaceHTMLCodes(self.common.makeUTF8(tmp))
 
         return result
 
@@ -922,7 +922,7 @@ class YouTubeCore():
             viewCount = self.getViewCount(node)
             video["Count"] = viewCount
             uploadDate = self.getVideoUploadDate(node)
-            video['date'] = time.strftime("%d.%m.%Y", uploadDate)
+            video['Date'] = uploadDate.strftime("%d-%m-%Y")
 
             video["Plot"] = self.getVideoDescription(node, uploadDate, viewCount)
 
