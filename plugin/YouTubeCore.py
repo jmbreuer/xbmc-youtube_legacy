@@ -22,6 +22,7 @@ import urllib2
 import re
 import time
 import socket
+import datetime
 try:
     import simplejson as json
 except ImportError:
@@ -742,96 +743,188 @@ class YouTubeCore():
 
         return False
 
-    def getVideoInfo(self, xml, params={}):
-        self.common.log(str(len(xml)))
-        entries = self.common.parseDOM(xml, "entry")
-        if not entries:
-            entries = self.common.parseDOM(xml, "atom:entry")
-        show_next = False
+    def getVideoId(self, node):
+        videoid = "false"
+        for id in self.common.parseDOM(node, "yt:videoid"):
+            videoid = id
 
+        if videoid == "false":
+            for id in self.common.parseDOM(node, "content", ret="src"):
+                videoid = id
+                videoid = videoid[videoid.rfind("/") + 1:]
+
+        if videoid == "false":
+            for id in self.common.parseDOM(node, "link", ret="href"):
+                match = re.match('.*?v=(.*)\&.*', id)
+                if match:
+                    videoid = match.group(1)
+
+        return videoid
+
+    def getPlaylistId(self, node):
+        result = ""
+
+        for entryid in self.common.parseDOM(node, "id"):
+            entryid = entryid[entryid.rfind(":") + 1:]
+            result = entryid
+
+        return result
+
+    def videoIsUnavailable(self, node):
+        result = False
+
+        for state in self.common.parseDOM(node, "yt:state", ret=True):
+        # Ignore unplayable items.
+            if (state == 'deleted' or state == 'rejected'):
+                result = True
+
+                # Get reason for why we can't playback the file.
+            reason = self.common.parseDOM(node, "yt:state", ret="reasonCode")
+            value = self.common.parseDOM(node, "yt:state")
+            if reason[0] == "private":
+                result = True
+            elif reason[0] == 'requesterRegion':
+                result = True
+            elif reason[0] != 'limitedSyndication':
+                self.common.log("removing video, reason: %s value: %s" % (reason[0], value[0].encode('utf-8')))
+                result = True
+
+        return result
+
+    def getVideoEditId(self, node):
+        result = ""
+        for edit_link in self.common.parseDOM(node, "link", ret=True):
+            for obj in self.common.parseDOM(edit_link, "link", attrs={"rel": "edit"}, ret="href"):
+                result = obj[obj.rfind('/') + 1:]
+        return result
+
+    def addNextPageLinkIfNecessary(self, params, xml, ytobjects):
+        show_next = False
         # find out if there are more pages
         for link in self.common.parseDOM(xml, "link", ret="rel"):
             if link == "next":
                 show_next = True
                 break
+        if show_next:
+            self.utils.addNextFolder(ytobjects, params)
+
+    def updateVideoIDCache(self, ytobjects):
+        save_data = {}
+        for item in ytobjects:
+            if "videoid" in item:
+                save_data[item["videoid"]] = repr(item)
+
+        self.cache.setMulti("videoidcache", save_data)
+
+    def getVideoEntries(self, xml):
+
+        entries = self.common.parseDOM(xml, "entry")
+        if not entries:
+            entries = self.common.parseDOM(xml, "atom:entry")
+
+        return entries
+
+    def getVideoCreator(self, node):
+        result = ""
+
+        # media:credit is not set for favorites, playlists
+        for tmp in self.common.parseDOM(node, "media:credit"):
+            result = self.common.makeUTF8(tmp)
+        if result == "":
+            for tmp in self.common.parseDOM(node, "name"):
+                result = self.common.makeUTF8(tmp)
+
+        return result
+
+    def getVideoTitle(self, node):
+        result = ""
+        for tmp in self.common.parseDOM(node, "media:title"):
+            result = self.common.makeUTF8(tmp)
+        return result
+
+    def getVideoDuration(self, node):
+        result = ""
+
+        for tmp in self.common.parseDOM(node, "yt:duration", ret="seconds"):
+            tmp = int(tmp)
+            result = "%02d:%02d" % (int(tmp / 60), int(tmp % 60))
+
+        return result
+
+    def getVideoUploadDate(self, node):
+        result = datetime.datetime.now().date()
+
+        for tmp in self.common.parseDOM(node, "published"):
+            result = time.strptime(tmp[:tmp.find(".")], "%Y-%m-%dT%H:%M:%S")
+
+        return result
+
+    def getViewCount(self, node):
+        result = 0
+
+        for tmp in self.common.parseDOM(node, "yt:statistics", ret="viewCount"):
+            result = int(tmp)
+
+        return result
+
+    def getVideoDescription(self, node, uploadDate, viewCount):
+        result = ""
+
+        for tmp in self.common.parseDOM(node, "media:description"):
+            result = self.common.makeUTF8(tmp)
+
+        infoString = "Date Uploaded: " + time.strftime("%Y-%m-%d %H:%M:%S", uploadDate) + ", "
+        infoString += "View count: " + str(viewCount)
+
+        result = infoString + "\n" + result
+
+        return result
+
+    def getVideoRating(self, node):
+        result = 0.0
+
+        for tmp in self.common.parseDOM(node, "gd:rating", ret="average"):
+            result = float(tmp)
+
+        return result
+
+    def getVideoGenre(self, node):
+        result = ""
+
+        for tmp in self.common.parseDOM(node, "media:category", ret="label"):
+            result = self.common.makeUTF8(tmp)
+
+        return result
+
+    def getVideoInfo(self, xml, params={}):
+        self.common.log("", 3)
+
+        entries = self.getVideoEntries(xml)
 
         ytobjects = []
         for node in entries:
-            video = {"videoid": "false", "Title": "Unknown Title", "Plot": "Unknown Plot", "date": "Unknown Date", "user": "Unknown Name", "Studio": "Unknown Uploader", "Duration": 0, "Rating": 0.0, "count": 0, "Genre": "Unknown Genre"}
+            video ={}
 
-            for videoid in self.common.parseDOM(node, "yt:videoid"):
-                video["videoid"] = videoid
+            video["videoid"] = self.getVideoId(node)
+            video["playlist_entry_id"] = self.getPlaylistId(node)
+            video['editid'] = self.getVideoEditId(node)
 
-            if video['videoid'] == "false":
-                for videoid in self.common.parseDOM(node, "content", ret="src"):
-                    video["videoid"] = videoid
-                    video['videoid'] = video['videoid'][video['videoid'].rfind("/") + 1:]
+            if self.videoIsUnavailable(node):
+                self.common.log("Video is unavailable, removing from result.", 3)
+                video["videoid"] = "false"
 
-            if video['videoid'] == "false":
-                for tmp in self.common.parseDOM(node, "link", ret="href"):
-                    video['videolink'] = tmp
-                    match = re.match('.*?v=(.*)\&.*', video['videolink'])
-                    if match:
-                        video['videoid'] = match.group(1)
+            video["Studio"] = self.getVideoCreator(node)
+            video["Title"] = self.getVideoTitle(node)
+            video["Duration"] = self.getVideoDuration(node)
+            video["Rating"] = self.getVideoRating(node)
+            video["Genre"] = self.getVideoGenre(node)
 
-            for entryid in self.common.parseDOM(node, "id"):
-                entryid = entryid[entryid.rfind(":") + 1:]
-                video["playlist_entry_id"] = entryid
+            viewCount = self.getViewCount(node)
+            video["Count"] = viewCount
+            uploadDate = self.getVideoUploadDate(node)
+            video['date'] = time.strftime("%d.%m.%Y", uploadDate)
 
-            for state in self.common.parseDOM(node, "yt:state", ret=True):
-                # Ignore unplayable items.
-                if (state == 'deleted' or state == 'rejected'):
-                    video['videoid'] = "false"
-
-                # Get reason for why we can't playback the file.
-                reason = self.common.parseDOM(node, "yt:state", ret="reasonCode")
-                value = self.common.parseDOM(node, "yt:state")
-                if reason[0] == "private":
-                    video['videoid'] = "false"
-                elif reason[0] == 'requesterRegion':
-                    video['videoid'] = "false"
-                elif reason[0] != 'limitedSyndication':
-                    self.common.log("removing video, reason: %s value: %s" % (reason[0], value[0].encode('utf-8')))
-                    video['videoid'] = "false"
-
-
-            # media:credit is not set for favorites, playlists
-            for tmp in self.common.parseDOM(node, "media:credit"):
-                video["Studio"] = self.common.makeUTF8(tmp)
-            if video['Studio'] == "":
-                for tmp in self.common.parseDOM(node, "name"):
-                    video["Studio"] = self.common.makeUTF8(tmp)
-
-            for tmp in self.common.parseDOM(node, "media:title"):
-                video["Title"] = self.common.makeUTF8(tmp)
-            for tmp in self.common.parseDOM(node, "media:description"):
-                video["Plot"] = self.common.makeUTF8(tmp)
-            for tmp in self.common.parseDOM(node, "published"):
-                video["date"] = tmp
-            for tmp in self.common.parseDOM(node, "name"):
-                video["user"] = self.common.makeUTF8(tmp)
-            for tmp in self.common.parseDOM(node, "yt:duration", ret="seconds"):
-                tmp = int(tmp)
-                video["Duration"] = "%02d:%02d" % (int(tmp / 60), int(tmp % 60))
-            for tmp in self.common.parseDOM(node, "gd:rating", ret="average"):
-                video["Rating"] = float(tmp)
-            for tmp in self.common.parseDOM(node, "yt:statistics", ret="viewCount"):
-                video["count"] = int(tmp)
-            for tmp in self.common.parseDOM(node, "media:category", ret="label"):
-                video["Genre"] = self.common.makeUTF8(tmp)
-
-            infoString = ""
-            if video['date'] != "Unknown Date":
-                print repr(video)
-                c = time.strptime(video['date'][:video['date'].find(".")], "%Y-%m-%dT%H:%M:%S")
-                infoString += "Date Uploaded: " + time.strftime("%Y-%m-%d %H:%M:%S", c) + ", "
-                video['date'] = time.strftime("%d.%m.%Y", c)
-            infoString += "View count: " + str(video['count'])
-            video['Plot'] = infoString + "\n" + video['Plot']
-
-            for edit_link in self.common.parseDOM(node, "link", ret=True):
-                for obj in self.common.parseDOM(node, "link", attrs={"rel": "edit"}, ret="href"):
-                    video['editid'] = obj[obj.rfind('/') + 1:]
+            video["Plot"] = self.getVideoDescription(node, uploadDate, viewCount)
 
             video['thumbnail'] = self.urls["thumbnail"] % video['videoid']
 
@@ -839,18 +932,11 @@ class YouTubeCore():
             if overlay:
                 video['Overlay'] = int(overlay)
 
-            if video['videoid'] == "false":
-                self.common.log("videoid set to false : " + repr(video))
-
             ytobjects.append(video)
 
-        if show_next:
-            self.utils.addNextFolder(ytobjects, params)
+        self.addNextPageLinkIfNecessary(params, xml, ytobjects)
 
-        self.common.log("Done: " + str(len(ytobjects)))
-        save_data = {}
-        for item in ytobjects:
-            if "videoid" in item:
-                save_data[item["videoid"]] = repr(item)
-        self.cache.setMulti("videoidcache", save_data)
+        self.updateVideoIDCache(ytobjects)
+
+        self.common.log("Done: " + str(len(ytobjects)),3)
         return ytobjects
