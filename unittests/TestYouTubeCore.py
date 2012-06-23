@@ -1223,6 +1223,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 
     def setUp_getVideoInfo_full_run(self):
         self.core.getVideoEntries = Mock(return_value=["entry"])
+        self.core.videoIsUnavailable = Mock(return_value=False)
         self.core.updateVideoIDCache = Mock()
         self.core.addNextPageLinkIfNecessary = Mock()
         self.core.getVideoId = Mock(return_value="123")
@@ -1292,6 +1293,15 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
         self.core.getVideoInfo("xml",{})
 
         self.core.getVideoRating.assert_any_call("entry")
+
+    def test_getVideoInfo_should_set_videoid_false_if_video_is_unavailable(self):
+        self.core = YouTubeCore()
+        self.setUp_getVideoInfo_full_run()
+        self.core.videoIsUnavailable.return_value = True
+
+        result = self.core.getVideoInfo("xml",{})
+
+        assert(result[0]["videoid"] == "false")
 
     def test_getVideoInfo_should_call_getViewCount_to_get_view_Count(self):
         self.core = YouTubeCore()
@@ -1449,6 +1459,313 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
         sys.modules[ "__main__" ].common.replaceHTMLCodes.assert_any_call("some_other_value")
 
         assert(result.find("View count: 1") > -1)
+
+    def test_getVideoId_should_return_false_if_no_id_is_found(self):
+        core = YouTubeCore()
+
+        result = core.getVideoId("xml")
+
+        assert(result == "false")
+
+    def test_getVideoId_should_call_parseDOM_to_find_video_id(self):
+        core = YouTubeCore()
+        sys.modules[ "__main__" ].common.parseDOM.return_value = ["some_id"]
+
+        result = core.getVideoId("xml")
+
+        sys.modules[ "__main__" ].common.parseDOM.assert_any_call("xml","yt:videoid")
+        assert(result == "some_id")
+
+    def test_getVideoId_should_make_2nd_attempt_to_find_videoid(self):
+        core = YouTubeCore()
+        sys.modules[ "__main__" ].common.parseDOM.side_effect = [[],["something/some_id"]]
+
+        result = core.getVideoId("xml")
+
+        sys.modules[ "__main__" ].common.parseDOM.assert_any_call("xml","content",ret="src")
+        assert(result == "some_id")
+
+    def test_getVideoId_should_make_3rd_attempt_to_find_videoid(self):
+        core = YouTubeCore()
+        sys.modules[ "__main__" ].common.parseDOM.side_effect = [[],[],["something?blabla=morebla&v=some_id&bla=morebla"]]
+
+        result = core.getVideoId("xml")
+
+        sys.modules[ "__main__" ].common.parseDOM.assert_any_call("xml","link",ret="href")
+        assert(result == "some_id")
+
+    def test_getPlaylistId_should_call_parseDOM_to_find_playlistId(self):
+        core = YouTubeCore()
+
+        result = core.getPlaylistId("xml")
+
+        sys.modules[ "__main__" ].common.parseDOM.assert_any_call("xml","id")
+
+    def test_getPlaylistId_should_return_empty_string_if_no_playlistId_is_found(self):
+        core = YouTubeCore()
+
+        result = core.getPlaylistId("xml")
+
+        assert(result == "")
+
+    def test_getPlaylistId_should_return_proper_playlistId(self):
+        sys.modules[ "__main__" ].common.parseDOM.return_value = ["some_thing:some_id"]
+        core = YouTubeCore()
+
+        result = core.getPlaylistId("xml")
+
+        assert(result == "some_id")
+
+    def test_getVideoEditId_should_call_parseDOM_to_find_edit_id(self):
+        sys.modules[ "__main__" ].common.parseDOM.return_value = []
+        core = YouTubeCore()
+
+        result = core.getVideoEditId("xml")
+
+        sys.modules[ "__main__" ].common.parseDOM.assert_any_call("xml","link",ret=True)
+
+    def test_getVideoEditId_should_call_parseDOM_twice_to_find_edit_id(self):
+        sys.modules[ "__main__" ].common.parseDOM.side_effect = [["edit_link"], []]
+        core = YouTubeCore()
+
+        result = core.getVideoEditId("xml")
+
+        sys.modules[ "__main__" ].common.parseDOM.assert_any_call("edit_link", "link", attrs={"rel": "edit"}, ret="href")
+
+    def test_getVideoEditId_should_find_proper_edit_id(self):
+        sys.modules[ "__main__" ].common.parseDOM.side_effect = [["edit_link"], ["something/someid"]]
+        core = YouTubeCore()
+
+        result = core.getVideoEditId("xml")
+
+        assert(result == "someid")
+
+    def test_getVideoEditId_should_return_empty_string_if_no_edit_id_is_found(self):
+        sys.modules[ "__main__" ].common.parseDOM.return_value = []
+        core = YouTubeCore()
+
+        result = core.getVideoEditId("xml")
+
+        assert(result == "")
+
+    def test_videoIsUnavailable_should_return_false_if_video_is_available(self):
+        sys.modules[ "__main__" ].common.parseDOM.return_value = []
+        core = YouTubeCore()
+
+        result = core.videoIsUnavailable("xml")
+
+        assert(result == False)
+
+    def test_videoIsUnavailable_should_call_parseDOM_to_check_if_video_is_available(self):
+        sys.modules[ "__main__" ].common.parseDOM.return_value = []
+        core = YouTubeCore()
+
+        result = core.videoIsUnavailable("xml")
+
+        sys.modules[ "__main__" ].common.parseDOM.assert_any_call("xml","yt:state",ret=True)
+
+    def test_videoIsUnavailable_should_return_true_if_video_state_is_rejected(self):
+        sys.modules[ "__main__" ].common.parseDOM.return_value = ["rejected"]
+        core = YouTubeCore()
+
+        result = core.videoIsUnavailable("xml")
+
+        assert(result == True)
+
+    def test_videoIsUnavailable_should_return_true_if_video_state_is_deleted(self):
+        sys.modules[ "__main__" ].common.parseDOM.return_value = ["deleted"]
+        core = YouTubeCore()
+
+        result = core.videoIsUnavailable("xml")
+
+        assert(result == True)
+
+    def test_videoIsUnavailable_should_call_parseDOM_to_find_reason(self):
+        sys.modules[ "__main__" ].common.parseDOM.side_effect = [["something"],[""],[""]]
+        core = YouTubeCore()
+
+        result = core.videoIsUnavailable("xml")
+
+        sys.modules[ "__main__" ].common.parseDOM.assert_any_call("xml","yt:state", ret="reasonCode")
+
+    def test_videoIsUnavailable_should_call_parseDOM_to_find_reason_value(self):
+        sys.modules[ "__main__" ].common.parseDOM.side_effect = [["something"],[""],[""]]
+        core = YouTubeCore()
+
+        result = core.videoIsUnavailable("xml")
+
+        sys.modules[ "__main__" ].common.parseDOM.assert_any_call("xml","yt:state")
+
+    def test_videoIsUnavailable_should_return_true_if_reason_is_private(self):
+        sys.modules[ "__main__" ].common.parseDOM.side_effect = [["something"],["private"],[""]]
+        core = YouTubeCore()
+
+        result = core.videoIsUnavailable("xml")
+
+        assert(result == True)
+
+    def test_videoIsUnavailable_should_return_true_if_reason_is_requesterRegion(self):
+        sys.modules[ "__main__" ].common.parseDOM.side_effect = [["something"],["requesterRegion"],[""]]
+        core = YouTubeCore()
+
+        result = core.videoIsUnavailable("xml")
+
+        assert(result == True)
+
+    def test_videoIsUnavailable_should_return_true_if_reason_is_not_limitedSyndication(self):
+        sys.modules[ "__main__" ].common.parseDOM.side_effect = [["something"],["some_other_reason_than limitedSyndication"],[""]]
+        core = YouTubeCore()
+
+        result = core.videoIsUnavailable("xml")
+
+        assert(result == True)
+
+    def test_getVideoCreator_call_parseDOM_to_find_video_creator(self):
+        core = YouTubeCore()
+
+        result = core.getVideoCreator("xml")
+
+        sys.modules[ "__main__" ].common.parseDOM.assert_any_call("xml","media:credit")
+
+    def test_getVideoCreator_call_parseDOM_twice_to_find_video_creator(self):
+        core = YouTubeCore()
+
+        result = core.getVideoCreator("xml")
+
+        sys.modules[ "__main__" ].common.parseDOM.assert_any_call("xml","name")
+
+    def test_getVideoCreator_should_return_empty_string_if_video_creator_is_not_found(self):
+
+        core = YouTubeCore()
+
+        result = core.getVideoCreator("xml")
+
+        assert(result == "")
+
+    def test_getVideoCreator_should_return_proper_string_if_video_creator_is_found(self):
+        sys.modules[ "__main__" ].common.parseDOM.side_effect = [["some_string"],["some_other_string"]]
+        sys.modules[ "__main__" ].common.makeUTF8.side_effect = ["some_creator","some_other_creator"]
+        core = YouTubeCore()
+
+        result = core.getVideoCreator("xml")
+
+        print repr(result)
+        assert(result == "some_creator")
+
+    def test_getVideoCreator_should_return_proper_string_if_video_creator_is_found_on_2nd_attempt(self):
+        sys.modules[ "__main__" ].common.parseDOM.side_effect = [["some_string"],["some_other_string"]]
+        sys.modules[ "__main__" ].common.makeUTF8.side_effect = ["","some_other_creator"]
+        core = YouTubeCore()
+
+        result = core.getVideoCreator("xml")
+
+        print repr(result)
+        assert(result == "some_other_creator")
+
+    def test_getVideoCreator_should_call_makeUTF8_to_ensure_string_is_xbmc_compatible(self):
+        sys.modules[ "__main__" ].common.parseDOM.side_effect = [["some_string"],["some_other_string"]]
+        sys.modules[ "__main__" ].common.makeUTF8.side_effect = ["","some_other_creator"]
+        core = YouTubeCore()
+
+        result = core.getVideoCreator("xml")
+
+        print repr(result)
+        sys.modules[ "__main__" ].common.makeUTF8.assert_any_call("some_string")
+        sys.modules[ "__main__" ].common.makeUTF8.assert_any_call("some_other_string")
+
+    def test_getVideoTitle_should_call_makeUTF8_to_ensure_string_is_xbmc_compatible(self):
+        sys.modules[ "__main__" ].common.parseDOM.return_value = ["some_string"]
+        sys.modules[ "__main__" ].common.makeUTF8.side_effect = ["some_utf8_string"]
+        sys.modules[ "__main__" ].common.replaceHTMLCodes.side_effect = ["some_title"]
+        core = YouTubeCore()
+
+        result = core.getVideoTitle("xml")
+
+        print repr(result)
+        sys.modules[ "__main__" ].common.makeUTF8.assert_any_call("some_string")
+
+    def test_getVideoTitle_should_call_replaceHTMLCodes_to_ensure_string_is_human_readable(self):
+        sys.modules[ "__main__" ].common.parseDOM.return_value = ["some_string"]
+        sys.modules[ "__main__" ].common.makeUTF8.side_effect = ["some_utf8_string"]
+        sys.modules[ "__main__" ].common.replaceHTMLCodes.side_effect = ["some_title"]
+        core = YouTubeCore()
+
+        result = core.getVideoTitle("xml")
+
+        print repr(result)
+        sys.modules[ "__main__" ].common.makeUTF8.assert_any_call("some_string")
+
+    def test_getVideoTitle_should_call_parseDOM_to_find_title(self):
+        sys.modules[ "__main__" ].common.parseDOM.return_value = ["some_string"]
+        sys.modules[ "__main__" ].common.makeUTF8.side_effect = ["some_utf8_string"]
+        sys.modules[ "__main__" ].common.replaceHTMLCodes.side_effect = ["some_title"]
+        core = YouTubeCore()
+
+        result = core.getVideoTitle("xml")
+
+        print repr(result)
+        sys.modules[ "__main__" ].common.parseDOM.assert_any_call("xml","media:title")
+
+    def test_getVideoTitle_should_return_empty_string_if_no_title_is_found(self):
+        sys.modules[ "__main__" ].common.parseDOM.return_value = []
+        sys.modules[ "__main__" ].common.makeUTF8.side_effect = ["some_utf8_string"]
+        sys.modules[ "__main__" ].common.replaceHTMLCodes.side_effect = ["some_title"]
+        core = YouTubeCore()
+
+        result = core.getVideoTitle("xml")
+
+        print repr(result)
+        assert(result == "")
+
+    def test_getVideoTitle_should_return_proper_title_string_if_title_is_found(self):
+        sys.modules[ "__main__" ].common.parseDOM.return_value = ["some_string"]
+        sys.modules[ "__main__" ].common.makeUTF8.side_effect = ["some_utf8_string"]
+        sys.modules[ "__main__" ].common.replaceHTMLCodes.side_effect = ["some_title"]
+        core = YouTubeCore()
+
+        result = core.getVideoTitle("xml")
+
+        print repr(result)
+        assert(result == "some_title")
+
+
+#        self.getVideoDuration(node)
+
+    def test_getVideoDuration_should_call_parseDOM_to_find_duration(self):
+        sys.modules[ "__main__" ].common.parseDOM.return_value = []
+        core = YouTubeCore()
+
+        result = core.getVideoDuration("xml")
+
+        print repr(result)
+        sys.modules[ "__main__" ].common.parseDOM.assert_any_call("xml","yt:duration",ret="seconds")
+
+    def test_getVideoDuration_should_return_empty_string_if_no_duration_is_found(self):
+        sys.modules[ "__main__" ].common.parseDOM.return_value = []
+        core = YouTubeCore()
+
+        result = core.getVideoDuration("xml")
+
+        print repr(result)
+        assert(result == "")
+
+    def test_getVideoDuration_should_return_proper_title_string_if_title_is_found(self):
+        sys.modules[ "__main__" ].common.parseDOM.return_value = ["120"]
+        core = YouTubeCore()
+
+        result = core.getVideoDuration("xml")
+
+        print repr(result)
+        assert(result == "02:00")
+
+#        self.getVideoRating(node)
+#        self.getVideoGenre(node)
+
+#        self.getViewCount(node)
+#        self.getVideoUploadDate(node)
+
+#        self.getVideoDescription(node, uploadDate, viewCount)
+
 
 
 if __name__ == "__main__":
