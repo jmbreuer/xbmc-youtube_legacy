@@ -839,7 +839,7 @@ class YouTubeCore():
     def getVideoTitle(self, node):
         result = ""
         for tmp in self.common.parseDOM(node, "media:title"):
-            result = self.common.makeUTF8(tmp)
+            result = self.common.replaceHTMLCodes(self.common.makeUTF8(tmp))
         return result
 
     def getVideoDuration(self, node):
@@ -871,7 +871,7 @@ class YouTubeCore():
         result = ""
 
         for tmp in self.common.parseDOM(node, "media:description"):
-            result = self.common.makeUTF8(tmp)
+            result = self.common.replaceHTMLCodes(self.common.makeUTF8(tmp))
 
         infoString = "Date Uploaded: " + time.strftime("%Y-%m-%d %H:%M:%S", uploadDate) + ", "
         infoString += "View count: " + str(viewCount)
