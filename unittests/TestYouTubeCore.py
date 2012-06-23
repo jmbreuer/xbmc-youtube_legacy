@@ -1201,7 +1201,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 
         core.getVideoEntries.assert_any_call("xml")
 
-    def test_getVideoInfo_should_call_updateVideoIDCache_to_save_video_info_to_cache(self): # missing tests
+    def test_getVideoInfo_should_call_updateVideoIDCache_to_save_video_info_to_cache(self):
         core = YouTubeCore()
         core.getVideoEntries = Mock(return_value=[])
         core.updateVideoIDCache = Mock()
@@ -1309,12 +1309,6 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 
         self.core.getVideoGenre.assert_any_call("entry")
 
-    def test_getVideoDescription_should_add_date_to_plot(self):
-        assert(False)
-
-    def test_getVideoDescription_should_add_view_count_to_plot(self):
-        assert(False)
-
     def test_getVideoInfo_should_call_getVideoEditId_to_search_for_edit_id(self):
         self.core = YouTubeCore()
         self.setUp_getVideoInfo_full_run()
@@ -1371,7 +1365,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
         sys.modules["__main__"].common.parseDOM.return_value = ["notnext"]
         core = YouTubeCore()
 
-        result = core.addNextPageLinkIfNecessary({}, "xml", [])
+        core.addNextPageLinkIfNecessary({}, "xml", [])
 
         sys.modules["__main__"].utils.addNextFolder([],{})
 
@@ -1390,6 +1384,72 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
         core.getVideoEntries("xml")
 
         sys.modules["__main__"].common.parseDOM.assert_any_call("xml", "atom:entry")
+
+    def test_updateVideoIDCache_should_construct_proper_videoid_structure_for_cache(self):
+        core = YouTubeCore()
+        item = {"videoid":"someid"}
+        core.updateVideoIDCache([item])
+
+        sys.modules["__main__"].cache.setMulti.assert_any_call("videoidcache", {"someid":repr(item)})
+
+    def test_updateVideoIDCache_should_call_cache_setMulti_to_save_video_items(self):
+        core = YouTubeCore()
+
+        core.updateVideoIDCache([])
+
+        sys.modules["__main__"].cache.setMulti.assert_any_call("videoidcache", {})
+
+    def test_getVideoDescription_should_call_parseDOM_to_find_plot(self):
+        core = YouTubeCore()
+        uploadDate = datetime.datetime.now().date()
+
+        core.getVideoDescription("xml", uploadDate, 1)
+
+        sys.modules[ "__main__" ].common.parseDOM.assert_any_call("xml","media:description")
+
+    def test_getVideoDescription_should_call_makeUTF8_to_ensure_result_is_xbmc_compatible(self):
+        sys.modules[ "__main__" ].common.parseDOM.return_value = ["some_value"]
+        core = YouTubeCore()
+        uploadDate = datetime.datetime.now().date()
+
+        core.getVideoDescription("xml", uploadDate, 1)
+
+        sys.modules[ "__main__" ].common.makeUTF8.assert_any_call("some_value")
+
+    def test_getVideoDescription_should_call_replaceHTMLChars_to_ensure_output_is_human_readable(self):
+        sys.modules[ "__main__" ].common.parseDOM.return_value = ["some_value"]
+        sys.modules[ "__main__" ].common.makeUTF8.return_value = "some_other_value"
+        core = YouTubeCore()
+        uploadDate = datetime.datetime.now().date()
+
+        core.getVideoDescription("xml", uploadDate, 1)
+
+        sys.modules[ "__main__" ].common.replaceHTMLCodes.assert_any_call("some_other_value")
+
+    def test_getVideoDescription_should_add_date_to_plot(self):
+        sys.modules[ "__main__" ].common.parseDOM.return_value = ["some_value"]
+        sys.modules[ "__main__" ].common.makeUTF8.return_value = "some_other_value"
+        core = YouTubeCore()
+        uploadDate = datetime.datetime.now().date()
+
+        result = core.getVideoDescription("xml", uploadDate, 1)
+
+        sys.modules[ "__main__" ].common.replaceHTMLCodes.assert_any_call("some_other_value")
+
+        assert(result.find("Date Uploaded: ") > -1)
+
+    def test_getVideoDescription_should_add_view_count_to_plot(self):
+        sys.modules[ "__main__" ].common.parseDOM.return_value = ["some_value"]
+        sys.modules[ "__main__" ].common.makeUTF8.return_value = "some_other_value"
+        core = YouTubeCore()
+        uploadDate = datetime.datetime.now().date()
+
+        result = core.getVideoDescription("xml", uploadDate, 1)
+
+        sys.modules[ "__main__" ].common.replaceHTMLCodes.assert_any_call("some_other_value")
+
+        assert(result.find("View count: 1") > -1)
+
 
 if __name__ == "__main__":
 	nose.runmodule()
