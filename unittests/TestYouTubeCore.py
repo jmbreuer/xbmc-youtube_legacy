@@ -1669,7 +1669,6 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 
         result = core.getVideoCreator("xml")
 
-        print repr(result)
         sys.modules[ "__main__" ].common.makeUTF8.assert_any_call("some_string")
         sys.modules[ "__main__" ].common.makeUTF8.assert_any_call("some_other_string")
 
@@ -1681,7 +1680,6 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 
         result = core.getVideoTitle("xml")
 
-        print repr(result)
         sys.modules[ "__main__" ].common.makeUTF8.assert_any_call("some_string")
 
     def test_getVideoTitle_should_call_replaceHTMLCodes_to_ensure_string_is_human_readable(self):
@@ -1692,7 +1690,6 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 
         result = core.getVideoTitle("xml")
 
-        print repr(result)
         sys.modules[ "__main__" ].common.makeUTF8.assert_any_call("some_string")
 
     def test_getVideoTitle_should_call_parseDOM_to_find_title(self):
@@ -1703,7 +1700,6 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 
         result = core.getVideoTitle("xml")
 
-        print repr(result)
         sys.modules[ "__main__" ].common.parseDOM.assert_any_call("xml","media:title")
 
     def test_getVideoTitle_should_return_empty_string_if_no_title_is_found(self):
@@ -1728,16 +1724,12 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
         print repr(result)
         assert(result == "some_title")
 
-
-#        self.getVideoDuration(node)
-
     def test_getVideoDuration_should_call_parseDOM_to_find_duration(self):
         sys.modules[ "__main__" ].common.parseDOM.return_value = []
         core = YouTubeCore()
 
-        result = core.getVideoDuration("xml")
+        core.getVideoDuration("xml")
 
-        print repr(result)
         sys.modules[ "__main__" ].common.parseDOM.assert_any_call("xml","yt:duration",ret="seconds")
 
     def test_getVideoDuration_should_return_empty_string_if_no_duration_is_found(self):
@@ -1749,7 +1741,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
         print repr(result)
         assert(result == "")
 
-    def test_getVideoDuration_should_return_proper_title_string_if_title_is_found(self):
+    def test_getVideoDuration_should_return_proper_duration_string_if_duration_is_found(self):
         sys.modules[ "__main__" ].common.parseDOM.return_value = ["120"]
         core = YouTubeCore()
 
@@ -1758,15 +1750,135 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
         print repr(result)
         assert(result == "02:00")
 
-#        self.getVideoRating(node)
-#        self.getVideoGenre(node)
+    def test_getVideoRating_should_call_parseDOM_to_find_rating(self):
+        sys.modules[ "__main__" ].common.parseDOM.return_value = []
+        core = YouTubeCore()
 
-#        self.getViewCount(node)
-#        self.getVideoUploadDate(node)
+        result = core.getVideoRating("xml")
 
-#        self.getVideoDescription(node, uploadDate, viewCount)
+        sys.modules[ "__main__" ].common.parseDOM.assert_any_call("xml", "gd:rating", ret="average")
 
+    def test_getVideoRating_should_return_zero_rating_if_no_rating_is_found(self):
+        sys.modules[ "__main__" ].common.parseDOM.return_value = []
+        core = YouTubeCore()
 
+        result = core.getVideoRating("xml")
+
+        print repr(result)
+        assert(result == 0.0)
+
+    def test_getVideoRating_should_return_proper_rating_if_rating_is_found(self):
+        sys.modules[ "__main__" ].common.parseDOM.return_value = ["0.123"]
+        core = YouTubeCore()
+
+        result = core.getVideoRating("xml")
+
+        print repr(result)
+        assert(result == 0.123)
+
+    def test_getVideoGenre_should_call_makeUTF8_to_ensure_string_is_xbmc_compatible(self):
+        sys.modules[ "__main__" ].common.parseDOM.return_value = ["some_string"]
+        sys.modules[ "__main__" ].common.makeUTF8.side_effect = ["some_utf8_string"]
+        sys.modules[ "__main__" ].common.replaceHTMLCodes.side_effect = ["some_title"]
+        core = YouTubeCore()
+
+        result = core.getVideoGenre("xml")
+
+        sys.modules[ "__main__" ].common.makeUTF8.assert_any_call("some_string")
+
+    def test_getVideoGenre_should_call_replaceHTMLCodes_to_ensure_string_is_human_readable(self):
+        sys.modules[ "__main__" ].common.parseDOM.return_value = ["some_string"]
+        sys.modules[ "__main__" ].common.makeUTF8.side_effect = ["some_utf8_string"]
+        sys.modules[ "__main__" ].common.replaceHTMLCodes.side_effect = ["some_title"]
+        core = YouTubeCore()
+
+        result = core.getVideoGenre("xml")
+
+        sys.modules[ "__main__" ].common.makeUTF8.assert_any_call("some_string")
+
+    def test_getVideoGenre_should_call_parseDOM_to_find_genre(self):
+        sys.modules[ "__main__" ].common.parseDOM.return_value = ["some_string"]
+        sys.modules[ "__main__" ].common.makeUTF8.side_effect = ["some_utf8_string"]
+        sys.modules[ "__main__" ].common.replaceHTMLCodes.side_effect = ["some_title"]
+        core = YouTubeCore()
+
+        result = core.getVideoGenre("xml")
+
+        sys.modules[ "__main__" ].common.parseDOM.assert_any_call("xml", 'media:category', ret='label')
+
+    def test_getVideoGenre_should_return_empty_string_if_no_genre_is_found(self):
+        sys.modules[ "__main__" ].common.parseDOM.return_value = []
+        sys.modules[ "__main__" ].common.makeUTF8.side_effect = ["some_utf8_string"]
+        sys.modules[ "__main__" ].common.replaceHTMLCodes.side_effect = ["some_title"]
+        core = YouTubeCore()
+
+        result = core.getVideoGenre("xml")
+
+        print repr(result)
+        assert(result == "")
+
+    def test_getVideoGenre_should_return_proper_genre_string_if_genre_is_found(self):
+        sys.modules[ "__main__" ].common.parseDOM.return_value = ["some_string"]
+        sys.modules[ "__main__" ].common.makeUTF8.side_effect = ["some_utf8_string"]
+        sys.modules[ "__main__" ].common.replaceHTMLCodes.side_effect = ["some_genre"]
+        core = YouTubeCore()
+
+        result = core.getVideoGenre("xml")
+
+        print repr(result)
+        assert(result == "some_genre")
+
+    def test_getViewCount_should_call_parseDOM_to_find_view_count(self):
+        sys.modules[ "__main__" ].common.parseDOM.return_value = []
+        core = YouTubeCore()
+
+        result = core.getVideoRating("xml")
+
+        sys.modules[ "__main__" ].common.parseDOM.assert_any_call("xml", "gd:rating", ret="average")
+
+    def test_getViewCount_should_return_zero_count_if_no_view_count_is_found(self):
+        sys.modules[ "__main__" ].common.parseDOM.return_value = []
+        core = YouTubeCore()
+
+        result = core.getVideoRating("xml")
+
+        print repr(result)
+        assert(result == 0)
+
+    def test_getViewCount_should_return_proper_view_count_if_view_count_is_found(self):
+        sys.modules[ "__main__" ].common.parseDOM.return_value = ["123"]
+        core = YouTubeCore()
+
+        result = core.getVideoRating("xml")
+
+        print repr(result)
+        assert(result == 123)
+
+    def test_getVideoUploadDate_should_call_parseDOM_to_find_upload_date(self):
+        sys.modules[ "__main__" ].common.parseDOM.return_value = []
+        core = YouTubeCore()
+
+        result = core.getVideoUploadDate("xml")
+
+        sys.modules[ "__main__" ].common.parseDOM.assert_any_call("xml", "published")
+
+    def test_getVideoUploadDate_should_return_current_date_if_upload_date_isnt_found(self):
+        sys.modules[ "__main__" ].common.parseDOM.return_value = []
+        core = YouTubeCore()
+
+        result = core.getVideoUploadDate("xml")
+
+        print repr(result)
+        assert(result == datetime.datetime.now().date())
+
+    def test_getVideoUploadDate_should_return_proper_date_if_upload_date_is_found(self):
+        sys.modules[ "__main__" ].common.parseDOM.return_value = ["2011-04-22T12:12:12.CET"]
+        core = YouTubeCore()
+
+        result = core.getVideoUploadDate("xml")
+
+        print repr(result)
+        assert(result == datetime.datetime(2011,04,22,12,12,12))
 
 if __name__ == "__main__":
 	nose.runmodule()
