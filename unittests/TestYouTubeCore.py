@@ -2,17 +2,19 @@ import nose
 import BaseTestCase
 from mock import Mock, patch
 import sys
+import datetime
 from YouTubeCore import YouTubeCore
 
-
 class TestYouTubeCore(BaseTestCase.BaseTestCase):
+
     def setUp(self):
         super(self.__class__,self).setUp()
         sys.modules[ "__main__" ].settings.getSetting.side_effect = ["3","4", "my_auth"]
         sys.modules[ "__main__" ].storage.retrieve.return_value = "some_thumbnail"
         sys.modules[ "__main__" ].language.return_value = "error_message"
         sys.modules[ "__main__" ].common.parseDOM.return_value = []
-
+        sys.modules[ "__main__" ].common.replaceHTMLCodes.return_value = "SomeHTMLFreeString"
+        sys.modules[ "__main__" ].common.makeUTF8.return_value = "SomeUTF8EncodedString"
 	
     def test_delete_favorite_should_call_fetchPage_with_correct_fetch_options(self):
         core = YouTubeCore()
@@ -1188,232 +1190,156 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
         
         sys.modules[ "__main__" ].login.login.assert_called_with()
         sys.modules[ "__main__" ].settings.getSetting.assert_called_with("oauth2_access_token")
-        
-    def test_getVideoInfo_should_call_parseDOM_to_find_links(self):
-        sys.modules[ "__main__" ].common.parseDOM.return_value = []
+
+    def test_getVideoInfo_should_call_getVideoEntries_to_get_video_items(self):
         core = YouTubeCore()
+        core.getVideoEntries = Mock(return_value=[])
+        core.updateVideoIDCache = Mock()
+        core.addNextPageLinkIfNecessary = Mock()
 
-        result = core.getVideoInfo("xml", {})
+        core.getVideoInfo("xml",{})
 
-        sys.modules[ "__main__" ].common.parseDOM.assert_any_call("xml", "link", ret="rel")
+        core.getVideoEntries.assert_any_call("xml")
 
-    def test_getVideoInfo_should_call_minidom_getElementsByTagName_to_find_entries(self):
-        patcher = patch("xml.dom.minidom.parseString")
-        patcher.start()
-        import xml.dom.minidom
-        dom = Mock()
-        xml.dom.minidom.parseString = Mock()
-        xml.dom.minidom.parseString.return_value = dom
-        dom.getElementsByTagName.return_value = ""
+    def test_getVideoInfo_should_call_updateVideoIDCache_to_save_video_info_to_cache(self): # missing tests
         core = YouTubeCore()
-        
-        result = core.getVideoInfo("xml", {})
-        patcher.stop()
-        
-        args = dom.getElementsByTagName.call_args_list
-        assert(args[1][0][0] == "entry")
-        assert(args[2][0][0] == "atom:entry")
+        core.getVideoEntries = Mock(return_value=[])
+        core.updateVideoIDCache = Mock()
+        core.addNextPageLinkIfNecessary = Mock()
 
-    def test_getVideoInfo_should_search_links_for_next_page_indicator(self):
-        patcher = patch("xml.dom.minidom.parseString")
-        patcher.start()
-        import xml.dom.minidom
-        dom = Mock()
-        link = Mock()
-        tags = ["","", [link]]
-        xml.dom.minidom.parseString = Mock()
-        xml.dom.minidom.parseString.return_value = dom
-        dom.getElementsByTagName.side_effect = lambda x: tags.pop()
+        core.getVideoInfo("xml",{})
+
+        core.updateVideoIDCache.assert_any_call([])
+
+    def test_getVideoInfo_should_call_addNextPageLinkIfNecessary_to_set_next_page_indicator(self):
         core = YouTubeCore()
-        link.attributes.get.value.return_value = "next"
-        
-        result = core.getVideoInfo("xml", {})
-        patcher.stop()
-        
-        link.attributes.get.assert_called_with("rel")
-	
-    def mock_setup_getVideoInfo_full_run(self):
-        self.my_core = ""
-        settings = ["4","3" ]
-        sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
-        self.dompatcher = patch("xml.dom.minidom.parseString")
-        self.dompatcher.start()
-        import xml.dom.minidom
-        sys.modules["__main__"].storage.retrieveValue.return_value = "1"
-        self.testing_dom = Mock()
-        xml.dom.minidom.parseString = Mock()
-        xml.dom.minidom.parseString.return_value = self.testing_dom
-        self.entry = Mock()
-        self.edit_link = Mock()
-        link_attributes = ["","some_link/some_id","edit"]
-        self.edit_link.getAttribute.side_effect = lambda x: link_attributes.pop()
-        entry_elements = ["","","","","","","","","",[self.edit_link],Mock(),Mock(),""]
-        self.entry.getElementsByTagName.side_effect = lambda x ="",y = "",z = "": entry_elements.pop()
-        elements = [[self.entry],[]]
-        self.testing_dom.getElementsByTagName.side_effect = lambda x ="",y = "",z = "": elements.pop() 
-        self.my_core = YouTubeCore()
-        self.my_core._getNodeValue = Mock()
-        nodes = ["","","","","","","","","","","","","2011-09-11T12:00:00","","","","false"]
-        self.my_core._getNodeValue.side_effect = lambda x ="",y = "",z = "": nodes.pop()
-        self.my_core._getNodeAttribute = Mock() 
-        attributes = ["","","","","","","","","","","","","","1","2.0","1","","","/some_video_id"] 
-        self.my_core._getNodeAttribute.side_effect = lambda x ="",y = "",z = "", v = "": attributes.pop() 
-        
-    def test_getVideoInfo_should_call_getNodeValue_to_get_video_id(self):
-        self.mock_setup_getVideoInfo_full_run()
-        
-        result = self.my_core.getVideoInfo("xml", {})
-        
-        self.dompatcher.stop()
-        args = self.my_core._getNodeValue.call_args_list
-        assert(args[0][0][1] == "yt:videoid")
-        assert(args[0][0][2] == "false")
+        core.getVideoEntries = Mock(return_value=[])
+        core.updateVideoIDCache = Mock()
+        core.addNextPageLinkIfNecessary = Mock()
+
+        core.getVideoInfo("xml",{})
+
+        core.addNextPageLinkIfNecessary.assert_any_call({},"xml",[])
+
+    def setUp_getVideoInfo_full_run(self):
+        self.core.getVideoEntries = Mock(return_value=["entry"])
+        self.core.updateVideoIDCache = Mock()
+        self.core.addNextPageLinkIfNecessary = Mock()
+        self.core.getVideoId = Mock(return_value="123")
+        self.core.getVideoTitle = Mock(return_value="Title")
+        self.core.getVideoDescription = Mock(return_value="Description")
+        self.core.getViewCount = Mock(return_value=0)
+        self.core.getVideoUploadDate = Mock(return_value=datetime.datetime.now().date())
+        self.core.getVideoCreator = Mock(return_value="VideoCreator")
+        self.core.getVideoRating = Mock(return_value="1")
+        self.core.getVideoGenre = Mock(return_value="VideoGenre")
+        self.core.getVideoDuration = Mock(return_value="2")
+        self.core.getVideoEditId = Mock(return_value="editId")
+        sys.modules["__main__"].storage.retrieveValue.return_value = "0"
+
+    def test_getVideoInfo_should_call_getVideoId_to_get_video_id(self):
+        self.core = YouTubeCore()
+        self.setUp_getVideoInfo_full_run()
+
+        self.core.getVideoInfo("xml",{})
+
+        self.core.getVideoId.assert_any_call("entry")
 
     def test_getVideoInfo_should_call_getNodeValue_to_get_Title(self):
-        self.mock_setup_getVideoInfo_full_run()
-        
-        result = self.my_core.getVideoInfo("xml", {})
-        
-        self.dompatcher.stop()
-        args = self.my_core._getNodeValue.call_args_list
-        assert(args[2][0][1] == "media:title")
-        assert(args[2][0][2] == "Unknown Title")
+        self.core = YouTubeCore()
+        self.setUp_getVideoInfo_full_run()
 
-    def test_getVideoInfo_should_call_getNodeValue_to_get_Plot(self):
-        self.mock_setup_getVideoInfo_full_run()
-        
-        result = self.my_core.getVideoInfo("xml", {})
-        
-        self.dompatcher.stop()
-        args = self.my_core._getNodeValue.call_args_list
-        assert(args[3][0][1] == 'media:description')
-        assert(args[3][0][2] == "Unknown Plot")
+        self.core.getVideoInfo("xml",{})
 
-    def test_getVideoInfo_should_call_getNodeValue_to_get_Date(self):
-        self.mock_setup_getVideoInfo_full_run()
-        
-        result = self.my_core.getVideoInfo("xml", {})
-        
-        self.dompatcher.stop()
-        args = self.my_core._getNodeValue.call_args_list
-        assert(args[4][0][1] == 'published')
-        assert(args[4][0][2] == "Unknown Date")
+        self.core.getVideoTitle.assert_any_call("entry")
 
-    def test_getVideoInfo_should_call_getNodeValue_to_get_user(self):
-        self.mock_setup_getVideoInfo_full_run()
-        
-        result = self.my_core.getVideoInfo("xml", {})
-        
-        self.dompatcher.stop()
-        args = self.my_core._getNodeValue.call_args_list
-        assert(args[5][0][1] == 'name')
-        assert(args[5][0][2] == "Unknown Name")
+    def test_getVideoInfo_should_call_getVideoDescription_to_get_video_Plot(self):
+        self.core = YouTubeCore()
+        self.setUp_getVideoInfo_full_run()
 
-    def test_getVideoInfo_should_call_getNodeValue_to_get_Studio(self):
-        self.mock_setup_getVideoInfo_full_run()
-        
-        result = self.my_core.getVideoInfo("xml", {})
-        
-        self.dompatcher.stop()
-        args = self.my_core._getNodeValue.call_args_list
-        assert(args[6][0][1] == 'media:credit')
-        assert(args[6][0][2] == "")
-        assert(args[7][0][1] == 'name')
-        assert(args[7][0][2] == "Unknown Uploader")
-        
-    def test_getVideoInfo_should_call_getNodeAttribute_to_get_Duration(self):
-        self.mock_setup_getVideoInfo_full_run()
-        
-        result = self.my_core.getVideoInfo("xml", {})
-        
-        self.dompatcher.stop()
-        args = self.my_core._getNodeAttribute.call_args_list
-        assert(args[3][0][1] == 'yt:duration')
-        assert(args[3][0][2] == "seconds")
-        assert(args[3][0][3] == "0")
+        self.core.getVideoInfo("xml",{})
 
-    def test_getVideoInfo_should_call_getNodeAttribute_to_get_Rating(self):
-        self.mock_setup_getVideoInfo_full_run()
-        
-        result = self.my_core.getVideoInfo("xml", {})
-        
-        self.dompatcher.stop()
-        args = self.my_core._getNodeAttribute.call_args_list
-        assert(args[4][0][1] == 'gd:rating')
-        assert(args[4][0][2] == "average")
-        assert(args[4][0][3] == "0.0")
+        self.core.getVideoDescription.assert_any_call("entry", datetime.datetime.now().date(), 0)
 
-    def test_getVideoInfo_should_call_getNodeAttribute_to_get_view_Count(self):
-        self.mock_setup_getVideoInfo_full_run()
-        
-        result = self.my_core.getVideoInfo("xml", {})
-        
-        self.dompatcher.stop()
-        args = self.my_core._getNodeAttribute.call_args_list
-        assert(args[5][0][1] == 'yt:statistics')
-        assert(args[5][0][2] == "viewCount")
-        assert(args[5][0][3] == "0")
+    def test_getVideoInfo_should_call_getVideoUploadDate_to_get_Date(self):
+        self.core = YouTubeCore()
+        self.setUp_getVideoInfo_full_run()
 
-    def test_getVideoInfo_should_call_getNodeValue_to_get_Genre(self):
-        self.mock_setup_getVideoInfo_full_run()
-        
-        result = self.my_core.getVideoInfo("xml", {})
-        
-        self.dompatcher.stop()
-        args = self.my_core._getNodeAttribute.call_args_list
-        assert(args[6][0][1] == 'media:category')
-        assert(args[6][0][2] == "label")
-        assert(args[6][0][3] == "Unknown Genre")
+        self.core.getVideoInfo("xml",{})
 
-    def test_getVideoInfo_should_add_date_to_plot(self):
-        self.mock_setup_getVideoInfo_full_run()
-        
-        result = self.my_core.getVideoInfo("xml", {})
-        
-        self.dompatcher.stop()
-        args = self.my_core._getNodeAttribute.call_args_list
-        assert(result[0]["Plot"].find("2011-09-11 12:00:00") > 0)
-        
+        self.core.getVideoUploadDate.assert_any_call("entry")
 
-    def test_getVideoInfo_should_add_view_count_to_plot(self):
-        self.mock_setup_getVideoInfo_full_run()
-        
-        result = self.my_core.getVideoInfo("xml", {})
-        
-        self.dompatcher.stop()
-        args = self.my_core._getNodeAttribute.call_args_list
-        assert(result[0]["Plot"].find("View count: 1") > 0)
+    def test_getVideoInfo_should_call_getVideoCreator_to_get_Studio(self):
+        self.core = YouTubeCore()
+        self.setUp_getVideoInfo_full_run()
 
-    def test_getVideoInfo_should_call_getNodeValue_to_search_for_edit_id(self):
-        self.mock_setup_getVideoInfo_full_run()
-        
-        result = self.my_core.getVideoInfo("xml", {})
-        
-        self.dompatcher.stop()
-        args = self.entry.getElementsByTagName.call_args_list
-        assert(args[3][0][0] == "link")
-        assert(result[0]["Plot"].find("View count: 1") > 0)
-        args = self.edit_link.getAttribute.call_args_list
-        assert(args[0][0][0] == "rel")
-        assert(args[1][0][0] == "href")
-        assert(result[0]["editid"] == "some_id")
-        
+        self.core.getVideoInfo("xml",{})
+
+        self.core.getVideoCreator.assert_any_call("entry")
+
+    def test_getVideoInfo_should_call_getVideoDuration_to_get_Duration(self):
+        self.core = YouTubeCore()
+        self.setUp_getVideoInfo_full_run()
+
+        self.core.getVideoInfo("xml",{})
+
+        self.core.getVideoDuration.assert_any_call("entry")
+
+    def test_getVideoInfo_should_call_getVideoRating_to_get_Rating(self):
+        self.core = YouTubeCore()
+        self.setUp_getVideoInfo_full_run()
+
+        self.core.getVideoInfo("xml",{})
+
+        self.core.getVideoRating.assert_any_call("entry")
+
+    def test_getVideoInfo_should_call_getViewCount_to_get_view_Count(self):
+        self.core = YouTubeCore()
+        self.setUp_getVideoInfo_full_run()
+
+        self.core.getVideoInfo("xml",{})
+
+        self.core.getViewCount.assert_any_call("entry")
+
+    def test_getVideoInfo_should_call_getVideoGenre_to_get_Genre(self):
+        self.core = YouTubeCore()
+        self.setUp_getVideoInfo_full_run()
+
+        self.core.getVideoInfo("xml",{})
+
+        self.core.getVideoGenre.assert_any_call("entry")
+
+    def test_getVideoDescription_should_add_date_to_plot(self):
+        assert(False)
+
+    def test_getVideoDescription_should_add_view_count_to_plot(self):
+        assert(False)
+
+    def test_getVideoInfo_should_call_getVideoEditId_to_search_for_edit_id(self):
+        self.core = YouTubeCore()
+        self.setUp_getVideoInfo_full_run()
+
+        self.core.getVideoInfo("xml",{})
+
+        self.core.getVideoEditId.assert_any_call("entry")
+
     def test_getVideoInfo_should_call_storage_retrieveValue_to_get_watch_status(self):
-        self.mock_setup_getVideoInfo_full_run()
-        
-        result = self.my_core.getVideoInfo("xml", {})
-        
-        self.dompatcher.stop()
+        self.core = YouTubeCore()
+        self.setUp_getVideoInfo_full_run()
 
-        sys.modules["__main__"].storage.retrieveValue.assert_called_with("vidstatus-false")
-        
+        self.core.getVideoInfo("xml",{})
+
+        sys.modules[ "__main__" ].storage.retrieveValue.assert_any_call("vidstatus-123")
+
     def test_getVideoInfo_should_parse_youtube_xml(self):
         sys.modules[ "__main__" ].storage.retrieveValue.return_value = "7"
+        import CommonFunctions
+        sys.modules["__main__"].common = CommonFunctions
         core = YouTubeCore()
-        
+
         result = core.getVideoInfo(self.readTestInput("youtubeFavoritesFeed.xml", False))
-        
-        print repr(result[0])
+
+        print repr(result)
         assert(result[0]["Overlay"] == 7)
         assert(result[0]["editid"] == 'some_edit_id')
         assert(result[0]["Title"] == "Aurora seen from the ISS in Orbit")
@@ -1423,9 +1349,47 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
         assert(result[0]["Duration"] == "00:35")
         assert(result[0]["Genre"] == "Science & Technology")
         assert(result[0]["Studio"] == "isoeph")
-        assert(result[0]["user"] == "some_user")
         assert(result[0]["Date"] == "29-09-2011")
         assert(result[0]["thumbnail"] == "http://i.ytimg.com/vi/ogtKe7N05F0/0.jpg")
-	
+
+    def test_addNextPageLinkIfNecessary_should_call_parseDOM_to_find_links(self):
+        core = YouTubeCore()
+
+        core.addNextPageLinkIfNecessary({}, "xml", [])
+
+        sys.modules["__main__"].common.parseDOM.assert_any_call("xml", "link", ret="rel")
+
+    def test_addNextPageLinkIfNecessary_should_call_addNextFolder_if_next_link_is_found(self):
+        sys.modules["__main__"].common.parseDOM.return_value = ["next"]
+        core = YouTubeCore()
+
+        core.addNextPageLinkIfNecessary({}, "xml", [])
+
+        sys.modules["__main__"].utils.addNextFolder([],{})
+
+    def test_addNextPageLinkIfNecessary_should_not_call_addNextFolder_if_next_link_is_not_found(self):
+        sys.modules["__main__"].common.parseDOM.return_value = ["notnext"]
+        core = YouTubeCore()
+
+        result = core.addNextPageLinkIfNecessary({}, "xml", [])
+
+        sys.modules["__main__"].utils.addNextFolder([],{})
+
+    def test_getVideoEntries_should_call_parseDOM_to_find_video_entries(self):
+        sys.modules["__main__"].common.parseDOM.return_value = ["some_entry"]
+        core = YouTubeCore()
+
+        core.getVideoEntries("xml")
+
+        sys.modules["__main__"].common.parseDOM.assert_any_call("xml", "entry")
+
+    def test_getVideoEntries_should_make_2nd_attempt_call_to_parseDOM_to_find_video_entries(self):
+        sys.modules["__main__"].common.parseDOM.side_effect = ["","some_entry"]
+        core = YouTubeCore()
+
+        core.getVideoEntries("xml")
+
+        sys.modules["__main__"].common.parseDOM.assert_any_call("xml", "atom:entry")
+
 if __name__ == "__main__":
 	nose.runmodule()
