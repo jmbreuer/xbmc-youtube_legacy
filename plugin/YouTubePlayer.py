@@ -20,7 +20,6 @@ import sys
 import urllib
 import re
 import os.path
-import datetime
 import time
 try: import simplejson as json
 except ImportError: import json
@@ -202,6 +201,22 @@ class YouTubePlayer():
         str = str.replace("&#39;", "'")
         return str
 
+    def convertSecondsToTimestamp(self, seconds):
+        self.common.log("")
+        hours = str(int(seconds / 3600))
+        seconds = seconds % 3600
+
+        minutes = str(int(seconds/60))
+        if len(minutes) == 1:
+            minutes = "0" + minutes
+
+        seconds = str(seconds % 60)
+        if len(seconds) == 1:
+            seconds = "0" + seconds
+
+        self.common.log("Done")
+        return "%s:%s:%s" % (hours, minutes, seconds)
+
     def transformSubtitleXMLtoSRT(self, xml):
         self.common.log("")
 
@@ -209,18 +224,14 @@ class YouTubePlayer():
         for node in self.common.parseDOM(xml, "text", ret=True):
             text = self.common.parseDOM(node, "text")[0]
             text = self.simpleReplaceHTMLCodes(text).replace("\n", "\\n")
-            start = self.common.parseDOM(node, "text", ret="start")[0]
-            dur = self.common.parseDOM(node, "text", ret="dur")[0]
+            start = float(self.common.parseDOM(node, "text", ret="start")[0])
+            end = start + float(self.common.parseDOM(node, "text", ret="dur")[0])
 
-            dur = str(datetime.timedelta(seconds=float(start) + float(dur))).replace("000", "")
-            if (dur.find(".") == -1):
-                dur += ".000"
-            start = str(datetime.timedelta(seconds=float(start))).replace("000", "")
-            if (start.find(".") == -1):
-                start += ".000"
+            start = self.convertSecondsToTimestamp(start)
+            end = self.convertSecondsToTimestamp(end)
 
-            if start and dur:
-                result += "Dialogue: Marked=%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\r\n" % ("0", start, dur, "Default", "Name", "0000", "0000", "0000", "", text)
+            if start and end:
+                result += "Dialogue: Marked=%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\r\n" % ("0", start, end, "Default", "Name", "0000", "0000", "0000", "", text)
 
         return result
 

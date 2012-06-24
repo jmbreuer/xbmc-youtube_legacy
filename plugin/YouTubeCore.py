@@ -851,7 +851,7 @@ class YouTubeCore():
         return result
 
     def getVideoUploadDate(self, node):
-        result = time.localtime()
+        result = time.time()
 
         for tmp in self.common.parseDOM(node, "published"):
             result = time.strptime(tmp[:tmp.find(".")], "%Y-%m-%dT%H:%M:%S")
@@ -921,7 +921,6 @@ class YouTubeCore():
             viewCount = self.getViewCount(node)
             video["Count"] = viewCount
             uploadDate = self.getVideoUploadDate(node)
-            print "upload date: " + repr(uploadDate)
             video['Date'] = time.strftime("%d-%m-%Y", uploadDate)
 
             video["Plot"] = self.getVideoDescription(node, uploadDate, viewCount)

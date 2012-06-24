@@ -171,6 +171,14 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 
         player.getTranscriptionUrl.assert_called_with({})
 
+    def test_convertSecondsToTimestamp_should_convert(self):
+        player = YouTubePlayer()
+
+        res = player.convertSecondsToTimestamp(250.43800000000002)
+        print repr(res)
+
+        assert(res == "0:04:10.438")
+
     def test_downloadSubtitle_should_call_transformSubtitleXMLtoSRT(self):
         player = YouTubePlayer()
         sys.modules["__main__"].core._fetchPage = Mock()

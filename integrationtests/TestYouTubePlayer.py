@@ -5,7 +5,7 @@ import sys
 
 
 class TestYouTubePlayer(BaseTestCase.BaseTestCase):
-    def test_plugin_should_play_standard_videos(self):
+    def ttest_plugin_should_play_standard_videos(self):
         sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
 
         self.navigation.executeAction({"action": "play_video", "videoid": "54VJWHL2K3I"})
@@ -20,7 +20,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         assert(args[0][1]["handle"] == -1)
         assert(args[0][1]["succeeded"] == True)
 
-    def test_plugin_should_play_agerestricted_over_18_videos(self):
+    def ttest_plugin_should_play_agerestricted_over_18_videos(self):
         sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
 
         self.navigation.executeAction({"action": "play_video", "videoid": "QOpyyrtzgBU"})
@@ -35,7 +35,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         assert(args[0][1]["handle"] == -1)
         assert(args[0][1]["succeeded"] == True)
 
-    def test_plugin_should_play_agerestricted_over_18_videos_not_embeded(self):
+    def ttest_plugin_should_play_agerestricted_over_18_videos_not_embeded(self):
         sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
 
         self.navigation.executeAction({"action": "play_video", "videoid": "QOpyyrtzgBU", "no_embed": "true"})
@@ -50,7 +50,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         assert(args[0][1]["handle"] == -1)
         assert(args[0][1]["succeeded"] == True)
 
-    def test_plugin_should_play_rtmpe_vidoes(self):
+    def ttest_plugin_should_play_rtmpe_vidoes(self):
         sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
 
         self.navigation.executeAction({"action": "play_video", "videoid": "8wxOVn99FTE"})
@@ -65,7 +65,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         assert(args[0][1]["handle"] == -1)
         assert(args[0][1]["succeeded"] == True)
 
-    def test_plugin_should_play_live_vidoes(self):
+    def ttest_plugin_should_play_live_vidoes(self):
         sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
 
         self.navigation.executeAction({"action": "play_video", "videoid": "e8RnJYYlIvg"})
@@ -101,8 +101,9 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         assert(args[0][1]["handle"] == -1)
         assert(args[0][1]["succeeded"] == True)
         assert(args2[0][0][0] == u"./tmp/Morning Dew  a bad lip reading of Bruno Mars, feat. Lady Gaga and Jay-Z-[bUcszN8jRB8].ssa")
+        assert(False)
 
-    def test_plugin_should_play_videos_with_subtitles_and_annotation_when_available(self):
+    def ttest_plugin_should_play_videos_with_subtitles_and_annotation_when_available(self):
         sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
         import os
         sys.modules["__main__"].xbmcvfs.exists.side_effect = os.path.exists
@@ -123,7 +124,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         assert(args[0][1]["succeeded"] == True)
         assert(args2[0][0][0] == './tmp/Super Bass - Nicki Minaj (Cover by @KarminMusic)-[byv-wpqDydI].ssa')
 
-    def ttest_plugin_should_play_geolocked_videos(self):
+    def tttest_plugin_should_play_geolocked_videos(self):
         sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
         import os
         sys.modules["__main__"].xbmcvfs.exists.side_effect = os.path.exists
@@ -140,7 +141,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         assert(args[0][1]["handle"] == -1)
         assert(args[0][1]["succeeded"] == True)
 
-    def ttest_plugin_should_play_geolocked_videos_4oD(self):  # Need to find a stable video.
+    def tttest_plugin_should_play_geolocked_videos_4oD(self):  # Need to find a stable video.
         sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-proxy-uk.xml")
         import os
         sys.modules["__main__"].xbmcvfs.exists.side_effect = os.path.exists
