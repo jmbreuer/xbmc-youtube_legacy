@@ -851,7 +851,7 @@ class YouTubeCore():
         return result
 
     def getVideoUploadDate(self, node):
-        result = time.time()
+        result = time.localtime()
 
         for tmp in self.common.parseDOM(node, "published"):
             result = time.strptime(tmp[:tmp.find(".")], "%Y-%m-%dT%H:%M:%S")
