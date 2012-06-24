@@ -2,6 +2,7 @@ import nose
 import BaseTestCase
 from mock import Mock, patch
 import sys
+import time
 import datetime
 from YouTubeCore import YouTubeCore
 
@@ -1230,7 +1231,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
         self.core.getVideoTitle = Mock(return_value="Title")
         self.core.getVideoDescription = Mock(return_value="Description")
         self.core.getViewCount = Mock(return_value=0)
-        self.core.getVideoUploadDate = Mock(return_value=datetime.datetime.now().date())
+        self.core.getVideoUploadDate = Mock(return_value=time.localtime())
         self.core.getVideoCreator = Mock(return_value="VideoCreator")
         self.core.getVideoRating = Mock(return_value="1")
         self.core.getVideoGenre = Mock(return_value="VideoGenre")
@@ -1260,7 +1261,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 
         self.core.getVideoInfo("xml",{})
 
-        self.core.getVideoDescription.assert_any_call("entry", datetime.datetime.now().date(), 0)
+        self.core.getVideoDescription.assert_any_call("entry", time.localtime(), 0)
 
     def test_getVideoInfo_should_call_getVideoUploadDate_to_get_Date(self):
         self.core = YouTubeCore()
@@ -1411,7 +1412,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 
     def test_getVideoDescription_should_call_parseDOM_to_find_plot(self):
         core = YouTubeCore()
-        uploadDate = datetime.datetime.now().date()
+        uploadDate = time.localtime()
 
         core.getVideoDescription("xml", uploadDate, 1)
 
@@ -1420,7 +1421,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
     def test_getVideoDescription_should_call_makeUTF8_to_ensure_result_is_xbmc_compatible(self):
         sys.modules[ "__main__" ].common.parseDOM.return_value = ["some_value"]
         core = YouTubeCore()
-        uploadDate = datetime.datetime.now().date()
+        uploadDate = time.localtime()
 
         core.getVideoDescription("xml", uploadDate, 1)
 
@@ -1430,7 +1431,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
         sys.modules[ "__main__" ].common.parseDOM.return_value = ["some_value"]
         sys.modules[ "__main__" ].common.makeUTF8.return_value = "some_other_value"
         core = YouTubeCore()
-        uploadDate = datetime.datetime.now().date()
+        uploadDate = time.localtime()
 
         core.getVideoDescription("xml", uploadDate, 1)
 
@@ -1440,7 +1441,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
         sys.modules[ "__main__" ].common.parseDOM.return_value = ["some_value"]
         sys.modules[ "__main__" ].common.makeUTF8.return_value = "some_other_value"
         core = YouTubeCore()
-        uploadDate = datetime.datetime.now().date()
+        uploadDate = time.localtime()
 
         result = core.getVideoDescription("xml", uploadDate, 1)
 
@@ -1452,7 +1453,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
         sys.modules[ "__main__" ].common.parseDOM.return_value = ["some_value"]
         sys.modules[ "__main__" ].common.makeUTF8.return_value = "some_other_value"
         core = YouTubeCore()
-        uploadDate = datetime.datetime.now().date()
+        uploadDate = time.localtime()
 
         result = core.getVideoDescription("xml", uploadDate, 1)
 
@@ -1869,7 +1870,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
         result = core.getVideoUploadDate("xml")
 
         print repr(result)
-        assert(result == datetime.datetime.now().date())
+        assert(result == time.localtime())
 
     def test_getVideoUploadDate_should_return_proper_date_if_upload_date_is_found(self):
         sys.modules[ "__main__" ].common.parseDOM.return_value = ["2011-04-22T12:12:12.CET"]
@@ -1878,7 +1879,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
         result = core.getVideoUploadDate("xml")
 
         print repr(result)
-        assert(result == datetime.datetime(2011,04,22,12,12,12))
+        assert(result == time.struct_time((2011,04,22,12,12,12,4,112,-1)))
 
 if __name__ == "__main__":
 	nose.runmodule()
