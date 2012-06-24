@@ -1429,13 +1429,12 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 
     def test_getVideoDescription_should_add_date_to_plot(self):
         sys.modules[ "__main__" ].common.parseDOM.return_value = ["some_value"]
-        sys.modules[ "__main__" ].common.makeUTF8.return_value = "some_other_value"
         core = YouTubeCore()
         uploadDate = time.localtime()
 
         result = core.getVideoDescription("xml", uploadDate, 1)
 
-        sys.modules[ "__main__" ].common.replaceHTMLCodes.assert_any_call("some_other_value")
+        sys.modules[ "__main__" ].common.replaceHTMLCodes.assert_any_call("some_value")
 
         assert(result.find("Date Uploaded: ") > -1)
 
@@ -1635,33 +1634,21 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 
     def test_getVideoCreator_should_return_proper_string_if_video_creator_is_found(self):
         sys.modules[ "__main__" ].common.parseDOM.side_effect = [["some_string"],["some_other_string"]]
-        sys.modules[ "__main__" ].common.makeUTF8.side_effect = ["some_creator","some_other_creator"]
         core = YouTubeCore()
 
         result = core.getVideoCreator("xml")
 
         print repr(result)
-        assert(result == "some_creator")
+        assert(result == "some_string")
 
     def test_getVideoCreator_should_return_proper_string_if_video_creator_is_found_on_2nd_attempt(self):
         sys.modules[ "__main__" ].common.parseDOM.side_effect = [["some_string"],["some_other_string"]]
-        sys.modules[ "__main__" ].common.makeUTF8.side_effect = ["","some_other_creator"]
         core = YouTubeCore()
 
         result = core.getVideoCreator("xml")
 
         print repr(result)
-        assert(result == "some_other_creator")
-
-    def test_getVideoCreator_should_call_makeUTF8_to_ensure_string_is_xbmc_compatible(self):
-        sys.modules[ "__main__" ].common.parseDOM.side_effect = [["some_string"],["some_other_string"]]
-        sys.modules[ "__main__" ].common.makeUTF8.side_effect = ["","some_other_creator"]
-        core = YouTubeCore()
-
-        result = core.getVideoCreator("xml")
-
-        sys.modules[ "__main__" ].common.makeUTF8.assert_any_call("some_string")
-        sys.modules[ "__main__" ].common.makeUTF8.assert_any_call("some_other_string")
+        assert(result == "some_string")
 
     def test_getVideoTitle_should_call_replaceHTMLCodes_to_ensure_string_is_human_readable(self):
         sys.modules[ "__main__" ].common.parseDOM.return_value = ["some_string"]
