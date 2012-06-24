@@ -855,7 +855,7 @@ class YouTubeCore():
 
         for tmp in self.common.parseDOM(node, "published"):
             result = time.strptime(tmp[:tmp.find(".")], "%Y-%m-%dT%H:%M:%S")
-        
+
         return result
 
     def getViewCount(self, node):
