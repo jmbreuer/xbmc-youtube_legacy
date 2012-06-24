@@ -270,8 +270,8 @@ class YouTubePlayer():
                 self.common.log("style : " + style, 5)
 
                 if stype == "highlight":
-                    linkt = self.common.parseDOM(node, "url", ret="type")[0]
-                    linkv = self.common.parseDOM(node, "url", ret="value")[0]
+                    linkt = "".join(self.common.parseDOM(node, "url", ret="type"))
+                    linkv = "".join(self.common.parseDOM(node, "url", ret="value"))
                     if linkt == "video":
                         self.common.log("Reference to video : " + linkv)
                 elif node.find("TEXT") > -1:
