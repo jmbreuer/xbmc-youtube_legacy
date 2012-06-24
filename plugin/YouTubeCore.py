@@ -828,17 +828,17 @@ class YouTubeCore():
 
         # media:credit is not set for favorites, playlists
         for tmp in self.common.parseDOM(node, "media:credit"):
-            result = self.common.makeUTF8(tmp)
+            result = tmp
         if result == "":
             for tmp in self.common.parseDOM(node, "name"):
-                result = self.common.makeUTF8(tmp)
+                result = tmp
 
         return result
 
     def getVideoTitle(self, node):
         result = ""
         for tmp in self.common.parseDOM(node, "media:title"):
-            result = self.common.replaceHTMLCodes(self.common.makeUTF8(tmp))
+            result = self.common.replaceHTMLCodes(tmp)
         return result
 
     def getVideoDuration(self, node):
@@ -870,7 +870,7 @@ class YouTubeCore():
         result = ""
 
         for tmp in self.common.parseDOM(node, "media:description"):
-            result = self.common.replaceHTMLCodes(self.common.makeUTF8(tmp))
+            result = self.common.replaceHTMLCodes(tmp)
 
         infoString = "Date Uploaded: " + time.strftime("%Y-%m-%d %H:%M:%S", uploadDate) + ", "
         infoString += "View count: " + str(viewCount)
@@ -891,7 +891,7 @@ class YouTubeCore():
         result = ""
 
         for tmp in self.common.parseDOM(node, "media:category", ret="label"):
-            result = self.common.replaceHTMLCodes(self.common.makeUTF8(tmp))
+            result = self.common.replaceHTMLCodes(tmp)
 
         return result
 
