@@ -1,14 +1,6 @@
 [B]TODO:[/B]
 - Fix RTMP support.
 - Purchasable movies.
-
-[B]Errata[/B]
-- [XBMC] Thumbnails sometimes turns into black box or Folder (XBMC not detecting when thumbnail is set and defaulting to icon?)
-- [XBMC] When sorting items, it's impossible to get them to return to their original order
-- [XBMC] Has Excessive Memory use after running the plugin for prolonged periods of time
-- [RTMPDUMP] Doesn't support handshake type 10 which is required by youtube.
-
-[B]TODO 3.X[/B]
 - Unit test coverage of Core above 90% I'm looking at you "Fetch page"
 - Unit test new functions in storage...
 - Allow users to change sort on searches
@@ -18,12 +10,19 @@
 - Replace scraper with feeds for: shows, music, education, disco.
 - If not replaceable refactor show scraper at least.
 - Integration tests on all user actions.
-- Raspberry PI slow search. srau on irc. http://sprunge.us/RAgS . minidom to parsedom 
 
-[B]Version 2.9.3[/B]
+[B]Errata[/B]
+- [XBMC] Thumbnails sometimes turns into black box or Folder (XBMC not detecting when thumbnail is set and defaulting to icon?)
+- [XBMC] When sorting items, it's impossible to get them to return to their original order
+- [XBMC] Has Excessive Memory use after running the plugin for prolonged periods of time
+- [RTMPDUMP] Doesn't support handshake type 10 which is required by youtube.
+
+
+[B]Version 3.0.0[/B]
 - Fixed show scraper since it was broken in a recent redesign
 - Disabled trailers scraper since functionality is gone from YouTubes site
 - Fixed Login code broken by YouTube redesign.
+- Change from minidom to parsedom(Should speedup raspberry PI)
 
 [B]Version 2.9.2[/B]
 - Listing of folders with more than 50 items was broken
