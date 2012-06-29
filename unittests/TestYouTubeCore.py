@@ -159,9 +159,11 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
         input = self.readTestInput("categories-test.xml", False)
         core = YouTubeCore()
         sys.modules["__main__"].common.parseDOM.side_effect = [["entries"], [], ["Film & Animation"], ["Film"]]
+        sys.modules["__main__"].common.replaceHTMLCodes.side_effect = ["Film & Animation", "Film"]
 
         result = core.getCategoriesFolderInfo(input, {"feed":"feed_categories"})
 
+        print repr(result[0])
         assert(len(result) > 0)
         assert(result[0]["thumbnail"] == "explore")
         assert(result[0]["Title"] == "Film & Animation")

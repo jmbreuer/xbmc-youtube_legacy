@@ -182,7 +182,10 @@ class YouTubeCore():
 
             if len(self.common.parseDOM(node, "yt:deprecated")):
                 continue
-            folder['Title'] = self.common.parseDOM(node, "atom:category", ret="label")[0]
+            title = self.common.parseDOM(node, "atom:category", ret="label")[0]
+
+            if title:
+                folder['Title'] = self.common.replaceHTMLCodes(title)
 
             folder['category'] = self.common.parseDOM(node, "atom:category", ret="term")[0]
             folder["icon"] = "explore"
@@ -215,6 +218,8 @@ class YouTubeCore():
             title = self.common.parseDOM(node, "title")[0]
             if title.find(": ") > 0:
                 title = title[title.find(": ") + 2:]
+                title = self.common.replaceHTMLCodes(title)
+                
             folder['Title'] = title
             for tmp in self.common.parseDOM(node, "published"):
                 folder['published'] = tmp

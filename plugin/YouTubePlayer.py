@@ -59,7 +59,7 @@ class YouTubePlayer():
     urls['embed_stream'] = "http://www.youtube.com/get_video_info?video_id=%s"
     urls['timed_text_index'] = "http://www.youtube.com/api/timedtext?type=list&v=%s"
     urls['video_info'] = "http://gdata.youtube.com/feeds/api/videos/%s"
-    urls['close_caption_url'] = "http://www.youtube.com/api/timedtext?type=track&v=%s&name=%s&lang=%s"
+    urls['close_caption_url'] = "http://www.youtube.com/api/timedtext?type=track&v=%s&lang=%s"
     urls['transcription_url'] = "http://www.youtube.com/api/timedtext?sparams=asr_langs,caps,expire,v&asr_langs=en,ja&caps=asr&expire=%s&key=yttt1&signature=%s&hl=en&type=trackformat=1&lang=en&kind=asr&name=&v=%s&tlang=en"
     urls['annotation_url'] = "http://www.youtube.com/annotations/read2?video_id=%s&feat=TC"
     urls['remove_watch_later'] = "http://www.youtube.com/addto_ajax?action_delete_from_playlist=1"
@@ -144,31 +144,38 @@ class YouTubePlayer():
                 code = codelist[0]
 
             lang_code = ["off", "en", "es", "de", "fr", "it", "ja"][int(self.settings.getSetting("lang_code"))]
+            self.common.log("selected language: " + repr(lang_code))
             for i in range(0, len(codelist)):
-                if codelist[i] == lang_code:
+                if codelist[i].find(lang_code) > -1:
                     subtitle = sublist[i].replace(" ", "%20")
-                    code = codelist[0]
+                    code = codelist[i]
                     self.common.log("found subtitle specified: " + subtitle + " - " + code)
                     break
 
-                if codelist[i] == "en":
+                if codelist[i].find("en") > -1:
                     subtitle = sublist[i].replace(" ", "%20")
                     code = "en"
                     self.common.log("found subtitle default: " + subtitle + " - " + code)
 
             if code:
-                url = self.urls["close_caption_url"] % (get("videoid"), subtitle, code)
+                url = self.urls["close_caption_url"] % (get("videoid"), code)
+                if len(subtitle) > 0:
+                    url += "&name=" + subtitle
+
 
         self.common.log("found subtitle url: " + repr(url))
         return url
 
+    def getSubtitleFileName(self, video):
+        get = video.get
+        lang_code = ["off", "en", "es", "de", "fr", "it", "ja"][int(self.settings.getSetting("lang_code"))]
+        filename = ''.join(c for c in self.common.makeUTF8(video['Title']) if c not in self.utils.INVALID_CHARS) + "-[" + get('videoid') + "]-" + lang_code.upper() + ".ssa"
+        filename = filename.encode("ascii", "ignore")
+        return filename
+
     def saveSubtitle(self, result, video={}):
         self.common.log("")
-        get = video.get
-
-        filename = ''.join(c for c in self.common.makeUTF8(video['Title']) if c not in self.utils.INVALID_CHARS) + "-[" + get('videoid') + "]" + ".ssa"
-        
-        filename = filename.encode("ascii", "ignore")
+        filename = self.getSubtitleFileName(video)
 
         path = os.path.join(self.xbmc.translatePath(self.settings.getAddonInfo("profile")).decode("utf-8"), filename)
 
@@ -363,9 +370,7 @@ class YouTubePlayer():
         get = video.get
         self.common.log("fetching subtitle if available")
 
-        filename = ''.join(c for c in self.common.makeUTF8(video['Title']) if c not in self.utils.INVALID_CHARS) + "-[" + get('videoid') + "]" + ".ssa"
-
-        filename = filename.encode("ascii", "ignore")
+        filename = self.getSubtitleFileName(video)
 
         download_path = os.path.join(self.settings.getSetting("downloadPath").decode("utf-8"), filename)
         path = os.path.join(self.xbmc.translatePath(self.settings.getAddonInfo("profile")).decode("utf-8"), filename)
@@ -692,19 +697,17 @@ class YouTubePlayer():
 
         return ""
 
-    def checkLocalFileSource(self, get, status, video):
+    def getLocalFileSource(self, get, status, video):
         result = ""
         if (get("action", "") != "download"):
+            filename = self.getSubtitleFileName(video)
             path = self.settings.getSetting("downloadPath")
-            bla = self.common.makeUTF8(video['Title'])
-            print repr(bla)
-            filename = ''.join(c for c in self.common.makeUTF8(video['Title']) if c not in self.utils.INVALID_CHARS) + "-[" + get('videoid') + "]" + ".mp4"
             path = os.path.join(path.decode("utf-8"), filename)
             try:
                 if self.xbmcvfs.exists(path):
                     result = path
             except:
-                self.common.log("attempt to locate local file failed with unknown error, trying youtube instead")
+                self.common.log("failed to locate local subtitle file, trying youtube instead")
         return result
 
     def getVideoObject(self, params):
@@ -718,8 +721,7 @@ class YouTubePlayer():
             video['apierror'] = self.language(30618)
             return (video, 303)
 
-        #Check if file has been downloaded locally and use that as a source instead
-        video_url = self.checkLocalFileSource(get, status, video)
+        video_url = self.getLocalFileSource(get, status, video)
         if video_url:
             video['video_url'] = video_url
             return (video, 200)
@@ -764,7 +766,6 @@ class YouTubePlayer():
         self.common.log("trying website: " + repr(params))
 
         get = params.get
-        #vget = video.get
         player_object = {}
         links = []
         fresult = False
