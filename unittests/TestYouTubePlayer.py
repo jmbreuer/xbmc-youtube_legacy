@@ -12,6 +12,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         sys.modules["__main__"].common.makeUTF8.return_value = "testTitle"
 
         player = YouTubePlayer()
+        player.getSubtitleFileName = Mock()
 
         player.saveSubtitle("my_subtitle_stream", {"Title": "testTitle", "videoid": "someVideoId", "downloadPath": "downloadFilePath"})
 
@@ -21,6 +22,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         sys.modules["__main__"].xbmc.translatePath.return_value = "tempFilePath"
         sys.modules["__main__"].common.makeUTF8.return_value = "testTitle"
         player = YouTubePlayer()
+        player.getSubtitleFileName = Mock(return_value="testTitle-[someVideoId].ssa")
 
         player.saveSubtitle("my_subtitle_stream", {"Title": "testTitle", "videoid": "someVideoId", "downloadPath": "downloadFilePath"})
 
@@ -30,6 +32,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         sys.modules["__main__"].xbmc.translatePath.return_value = "tempFilePath"
         sys.modules["__main__"].common.makeUTF8.return_value = "testTitle"
         player = YouTubePlayer()
+        player.getSubtitleFileName = Mock(return_value="testTitle-[someVideoId].ssa")
 
         player.saveSubtitle("my_subtitle_stream", {"Title": "testTitle", "videoid": "someVideoId", "downloadPath": "downloadFilePath"})
 
@@ -383,6 +386,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         sys.modules["__main__"].settings.getSetting.return_value = "testDownloadPath"
         sys.modules["__main__"].xbmcvfs.exists.return_value = False
         player.downloadSubtitle = Mock()
+        player.getSubtitleFileName = Mock(return_value="testTitle-[testid].ssa")
         player.downloadSubtitle.return_value = False
 
         player.addSubtitles({"videoid": "testid", "Title": "testTitle"})
@@ -397,6 +401,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         sys.modules["__main__"].xbmcvfs.exists.side_effect = lambda x: settings.pop()
         sys.modules["__main__"].common.makeUTF8.return_value = "testTitle"
         player.downloadSubtitle = Mock()
+        player.getSubtitleFileName = Mock(return_value="testTitle-[testid].ssa")
         player.downloadSubtitle.return_value = False
 
         player.addSubtitles({"videoid": "testid", "Title": "testTitle"})
@@ -409,6 +414,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         sys.modules["__main__"].xbmcvfs.exists.return_value = True
         sys.modules["__main__"].common.makeUTF8.return_value = "testTitle"
         player = YouTubePlayer()
+        player.getSubtitleFileName = Mock(return_value="testTitle-[testid].ssa")
         player.downloadSubtitle = Mock()
         player.downloadSubtitle.return_value = True
 
@@ -428,6 +434,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         import time
         time.sleep = sleep
         player = YouTubePlayer()
+        player.getSubtitleFileName = Mock(return_value="testTitle-[testid].ssa")
         player.downloadSubtitle = Mock()
         player.downloadSubtitle.return_value = True
 
@@ -438,6 +445,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 
     def test_addSubtitles_should_check_if_subtitle_exists_locally_before_calling_xbmcs_setSubtitles(self):
         player = YouTubePlayer()
+        player.getSubtitleFileName = Mock(return_value="testTitle-[testid].ssa")
         sys.modules["__main__"].settings.getSetting.return_value = "testDownloadPath"
         sys.modules["__main__"].xbmcvfs.exists.return_value = True
         sys.modules["__main__"].common.makeUTF8.return_value = "testTitle"
@@ -452,6 +460,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 
     def test_addSubtitles_should_wait_for_playback_to_start_before_adding_subtitle(self):
         player = YouTubePlayer()
+        player.getSubtitleFileName = Mock(return_value="testTitle-[testid].ssa")
         sys.modules["__main__"].settings.getSetting.return_value = "testDownloadPath"
         sys.modules["__main__"].xbmcvfs.exists.return_value = True
         sys.modules["__main__"].common.makeUTF8.return_value = "testTitle"
