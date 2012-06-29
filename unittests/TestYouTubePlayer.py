@@ -820,7 +820,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         player = YouTubePlayer()
         player.getInfo = Mock()
         player.getInfo.return_value = ({}, 303)
-        player.checkLocalFileSource = Mock(return_value="")
+        player.getLocalFileSource = Mock(return_value="")
         player._getVideoLinks = Mock(return_value = ({}, {}))
 
         player.getVideoObject({})
