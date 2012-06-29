@@ -168,8 +168,8 @@ class YouTubePlayer():
 
     def getSubtitleFileName(self, video):
         get = video.get
-        lang_code = ["off", "en", "es", "de", "fr", "it", "ja"][int(self.settings.getSetting("lang_code"))]
         filename = ''.join(c for c in self.common.makeUTF8(video['Title']) if c not in self.utils.INVALID_CHARS) + "-[" + get('videoid') + "]-" + lang_code.upper() + ".ssa"
+        lang_code = ["off", "en", "es", "de", "fr", "it", "ja"][int(self.settings.getSetting("lang_code"))]
         filename = filename.encode("ascii", "ignore")
         return filename
 
@@ -700,8 +700,8 @@ class YouTubePlayer():
     def getLocalFileSource(self, get, status, video):
         result = ""
         if (get("action", "") != "download"):
-            filename = self.getSubtitleFileName(video)
             path = self.settings.getSetting("downloadPath")
+            filename = ''.join(c for c in self.common.makeUTF8(video['Title']) if c not in self.utils.INVALID_CHARS) + "-[" + get('videoid') + "]" + ".mp4"
             path = os.path.join(path.decode("utf-8"), filename)
             try:
                 if self.xbmcvfs.exists(path):
