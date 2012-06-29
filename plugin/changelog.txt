@@ -8,7 +8,6 @@
 - Scrape Education. Search for feeds.
 - Check live feed vs scrape
 - Replace scraper with feeds for: shows, music, education, disco.
-- If not replaceable refactor show scraper at least.
 - Integration tests on all user actions.
 
 [B]Errata[/B]
