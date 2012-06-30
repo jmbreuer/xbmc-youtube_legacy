@@ -168,8 +168,8 @@ class YouTubePlayer():
 
     def getSubtitleFileName(self, video):
         get = video.get
-        filename = ''.join(c for c in self.common.makeUTF8(video['Title']) if c not in self.utils.INVALID_CHARS) + "-[" + get('videoid') + "]-" + lang_code.upper() + ".ssa"
         lang_code = ["off", "en", "es", "de", "fr", "it", "ja"][int(self.settings.getSetting("lang_code"))]
+        filename = ''.join(c for c in self.common.makeUTF8(video['Title']) if c not in self.utils.INVALID_CHARS) + "-[" + get('videoid') + "]-" + lang_code.upper() + ".ssa"
         filename = filename.encode("ascii", "ignore")
         return filename
 
