@@ -232,7 +232,10 @@ class YouTubePlayer():
             text = self.common.parseDOM(node, "text")[0]
             text = self.simpleReplaceHTMLCodes(text).replace("\n", "\\n")
             start = float(self.common.parseDOM(node, "text", ret="start")[0])
-            end = start + float(self.common.parseDOM(node, "text", ret="dur")[0])
+            duration = self.common.parseDOM(node, "text", ret="dur")
+            end = start + 0.1
+            if len(duration) > 0:
+                end = start + float(duration[0])
 
             start = self.convertSecondsToTimestamp(start)
             end = self.convertSecondsToTimestamp(end)
