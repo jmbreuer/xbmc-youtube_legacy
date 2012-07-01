@@ -17,6 +17,10 @@
 - [RTMPDUMP] Doesn't support handshake type 10 which is required by youtube.
 
 
+[B]Version 3.0.1[/B]
+- Fixed subtitle parser which was broken by the move to parseDOM
+- Fixed various scraper integration test failing cause by youtube site changes
+
 [B]Version 3.0.0[/B]
 - Fixed show scraper since it was broken in a recent redesign
 - Disabled trailers scraper since functionality is gone from YouTubes site
