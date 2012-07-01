@@ -21,36 +21,6 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         assert(args[0][1]["handle"] == -1)
         assert(args[0][1]["succeeded"] == True)
 
-    def ttest_plugin_should_play_agerestricted_over_18_videos(self):
-        sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
-
-        self.navigation.executeAction({"action": "play_video", "videoid": "QOpyyrtzgBU"})
-
-        args = sys.modules["__main__"].xbmcplugin.setResolvedUrl.call_args_list
-        print "Args: " + repr(args)
-        print repr("listitem" in args[0][1])
-        print repr(args[0][1]["handle"] == -1)
-        print repr(args[0][1]["succeeded"] == True)
-
-        assert("listitem" in args[0][1])
-        assert(args[0][1]["handle"] == -1)
-        assert(args[0][1]["succeeded"] == True)
-
-    def ttest_plugin_should_play_agerestricted_over_18_videos_not_embeded(self):
-        sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
-
-        self.navigation.executeAction({"action": "play_video", "videoid": "QOpyyrtzgBU", "no_embed": "true"})
-
-        args = sys.modules["__main__"].xbmcplugin.setResolvedUrl.call_args_list
-        print "Args: " + repr(args)
-        print repr("listitem" in args[0][1])
-        print repr(args[0][1]["handle"] == -1)
-        print repr(args[0][1]["succeeded"] == True)
-
-        assert("listitem" in args[0][1])
-        assert(args[0][1]["handle"] == -1)
-        assert(args[0][1]["succeeded"] == True)
-
     def test_plugin_should_play_rtmpe_vidoes(self):
         sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
 
@@ -97,12 +67,12 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         print repr("listitem" in args[0][1])
         print repr(args[0][1]["handle"] == -1)
         print repr(args[0][1]["succeeded"] == True)
-        print repr(args2[0][0][0] == u"./tmp/Morning Dew  a bad lip reading of Bruno Mars, feat. Lady Gaga and Jay-Z-[bUcszN8jRB8].ssa")
+        print repr(args2[0][0][0] == u"./tmp/Morning Dew  a bad lip reading of Bruno Mars, feat. Lady Gaga and Jay-Z-[bUcszN8jRB8]-EN.ssa")
 
         assert("listitem" in args[0][1])
         assert(args[0][1]["handle"] == -1)
         assert(args[0][1]["succeeded"] == True)
-        assert(args2[0][0][0] == u"./tmp/Morning Dew  a bad lip reading of Bruno Mars, feat. Lady Gaga and Jay-Z-[bUcszN8jRB8].ssa")
+        assert(args2[0][0][0] == u"./tmp/Morning Dew  a bad lip reading of Bruno Mars, feat. Lady Gaga and Jay-Z-[bUcszN8jRB8]-EN.ssa")
 
     def test_plugin_should_play_videos_with_subtitles_and_annotation_when_available(self):
         sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
@@ -119,12 +89,12 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         print repr("listitem" in args[0][1])
         print repr(args[0][1]["handle"] == -1)
         print repr(args[0][1]["succeeded"] == True)
-        print repr(args2[0][0][0] == './tmp/Super Bass - Nicki Minaj (Cover by @KarminMusic)-[byv-wpqDydI].ssa')
+        print repr(args2[0][0][0] == './tmp/Super Bass - Nicki Minaj (Cover by @KarminMusic)-[byv-wpqDydI]-EN.ssa')
 
         assert("listitem" in args[0][1])
         assert(args[0][1]["handle"] == -1)
         assert(args[0][1]["succeeded"] == True)
-        assert(args2[0][0][0] == './tmp/Super Bass - Nicki Minaj (Cover by @KarminMusic)-[byv-wpqDydI].ssa')
+        assert(args2[0][0][0] == './tmp/Super Bass - Nicki Minaj (Cover by @KarminMusic)-[byv-wpqDydI]-EN.ssa')
 
     def test_plugin_should_play_video_with_subtitle_other_than_english(self):
         sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
