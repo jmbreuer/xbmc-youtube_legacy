@@ -46,39 +46,44 @@ class YouTubeLogin():
     def login(self, params={}):
         get = params.get
         self.common.log("")
+
         ouname = self.settings.getSetting("username")
         opass = self.settings.getSetting("user_password")
         self.settings.openSettings()
         uname = self.settings.getSetting("username")
+
         self.dbg = self.settings.getSetting("debug") == "true"
         result = ""
         status = 500
 
-        if uname != "":
-            refreshed = False
-            if get("new", "false") == "false" and self.settings.getSetting("oauth2_refresh_token") and ouname == uname and opass == self.settings.getSetting("user_password"):
-                self.common.log("refreshing token: " + str(refreshed))
-                refreshed = self.core._oRefreshToken()
+        if uname == "":
+            return ("",200)
 
-            if not refreshed:
-                self.common.log("token not refresh, or new uname or password")
+        refreshed = False
+        if get("new", "false") == "false" and self.settings.getSetting("oauth2_refresh_token") and ouname == uname and opass == self.settings.getSetting("user_password"):
+            self.common.log("refreshing token: " + str(refreshed))
+            refreshed = self.core._oRefreshToken()
 
-                self.settings.setSetting("oauth2_access_token", "")
-                self.settings.setSetting("oauth2_refresh_token", "")
-                self.settings.setSetting("oauth2_expires_at", "")
-                self.settings.setSetting("nick", "")
-                (result, status) = self._httpLogin({"new": "true"})
-
-                if status == 200:
-                    (result, status) = self._apiLogin()
-
-                if status == 200:
-                    self.utils.showErrorMessage(self.language(30031), result, 303)
-                else:
-                    self.utils.showErrorMessage(self.language(30609), result, status)
+        if not refreshed:
+            result, status = self._login()
 
         self.xbmc.executebuiltin("Container.Refresh")
         return (result, status)
+
+    def _login(self):
+        self.common.log("token not refresh, or new uname or password")
+        self.settings.setSetting("oauth2_access_token", "")
+        self.settings.setSetting("oauth2_refresh_token", "")
+        self.settings.setSetting("oauth2_expires_at", "")
+        self.settings.setSetting("nick", "")
+        (result, status) = self._httpLogin({"new": "true"})
+        if status == 200:
+            (result, status) = self._apiLogin()
+        if status == 200:
+            self.utils.showErrorMessage(self.language(30031), result, 303)
+        else:
+            self.utils.showErrorMessage(self.language(30609), result, status)
+        return result, status
 
     def _apiLogin(self, error=0):
         self.common.log("errors: " + str(error))
