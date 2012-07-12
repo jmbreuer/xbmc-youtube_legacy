@@ -238,8 +238,12 @@ class YouTubeNavigation():
             self.settings.openSettings()
 
         download_path = self.settings.getSetting("download_path")
+        if not download_path:
+            return
+
         self.common.log("path: " + repr(download_path))
         (video, status) = self.player.getVideoObject(params)
+
         if "video_url" in video and download_path:
             params["Title"] = video['Title']
             params["url"] = video['video_url']
