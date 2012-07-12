@@ -261,6 +261,15 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
         
         navigation.addSubscription.assert_called_with({"action": "add_subscription"})
 
+    def test_executeAction_should_not_call_downloader_downloadVideo_if_download_path_is_missing(self):
+        sys.modules["__main__"].settings.getSetting.return_value = ""
+        navigation = YouTubeNavigation()
+        navigation.downloadVideo = Mock()
+
+        navigation.executeAction({"action": "download"})
+
+        assert(navigation.downloadVideo.call_count == 0)
+
     def test_executeAction_should_call_downloader_downloadVideo_if_action_is_download(self):
         navigation = YouTubeNavigation()
         navigation.downloadVideo = Mock()
