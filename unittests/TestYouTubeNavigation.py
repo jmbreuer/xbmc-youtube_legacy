@@ -5,8 +5,8 @@ from mock import Mock
 import sys
 from YouTubeNavigation import YouTubeNavigation
 
-
 class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
+
     def test_listMenu_should_traverse_menustructure_correctly(self):
         sys.argv = ["something", -1, "something_else"]
         sys.modules["__main__"].settings.getSetting.return_value = "true"
@@ -261,15 +261,6 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
         
         navigation.addSubscription.assert_called_with({"action": "add_subscription"})
 
-    def test_executeAction_should_not_call_downloader_downloadVideo_if_download_path_is_missing(self):
-        sys.modules["__main__"].settings.getSetting.return_value = ""
-        navigation = YouTubeNavigation()
-        navigation.downloadVideo = Mock()
-
-        navigation.executeAction({"action": "download"})
-
-        assert(navigation.downloadVideo.call_count == 0)
-
     def test_executeAction_should_call_downloader_downloadVideo_if_action_is_download(self):
         navigation = YouTubeNavigation()
         navigation.downloadVideo = Mock()
@@ -278,13 +269,38 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
 
         navigation.downloadVideo.assert_called_with({'action': 'download'})
 
-    def test_download_should_call_downloader_downloadVideo_if_action_is_download(self):
+    def test_downloadVideo_should_exit_cleanly_if_download_path_is_not_set(self):
+        sys.modules["__main__"].settings.getSetting.return_value = ""
+        navigation = YouTubeNavigation()
+
+        navigation.downloadVideo({"action": "download"})
+
+        assert (sys.modules["__main__"].player.getVideoObject.call_count == 0)
+        assert (sys.modules["__main__"].downloader.download.call_count == 0)
+
+    def test_downloadVideo_should_notify_user_if_download_path_is_not_set(self):
+        sys.modules["__main__"].settings.getSetting.return_value = ""
+        navigation = YouTubeNavigation()
+
+        navigation.downloadVideo({"action": "download"})
+
+        assert (sys.modules["__main__"].utils.showMessage.call_count == 1)
+
+    def test_downloadVideo_should_open_settings_module_so_user_can_enter_new_download_path_if_download_path_is_not_set(self):
+        sys.modules["__main__"].settings.getSetting.return_value = ""
+        navigation = YouTubeNavigation()
+
+        navigation.downloadVideo({"action": "download"})
+
+        assert (sys.modules["__main__"].settings.openSettings.call_count == 1)
+
+    def test_downloadVideo_should_call_downloader_downloadVideo_if_action_is_download(self):
         sys.modules["__main__"].player.getVideoObject = Mock()
         sys.modules["__main__"].player.getVideoObject.return_value = ({"videoid": "ytvideo1", "video_url": "Mock url", "Title": "Mock Title" }, "mock" )
         sys.modules["__main__"].settings.getSetting.return_value = "some_path"
         navigation = YouTubeNavigation()
 
-        navigation.executeAction({"action": "download"})
+        navigation.downloadVideo({"action": "download"})
 
         sys.modules["__main__"].downloader.download.assert_called_with("Mock Title-[ytvideo1].mp4", {'action': 'download', 'url': 'Mock url', "download_path": "some_path", "Title": "Mock Title"})
 
