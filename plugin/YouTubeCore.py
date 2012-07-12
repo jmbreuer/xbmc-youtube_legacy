@@ -782,9 +782,13 @@ class YouTubeCore():
             if (state == 'deleted' or state == 'rejected'):
                 result = True
 
-                # Get reason for why we can't playback the file.
+            # Get reason for why we can't playback the file.
             reason = self.common.parseDOM(node, "yt:state", ret="reasonCode")
             value = self.common.parseDOM(node, "yt:state")
+
+            if not reason:
+                return result
+
             if reason[0] == "private":
                 result = True
             elif reason[0] == 'requesterRegion':
