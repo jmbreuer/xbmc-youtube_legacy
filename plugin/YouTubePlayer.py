@@ -180,11 +180,12 @@ class YouTubePlayer():
         path = os.path.join(self.xbmc.translatePath(self.settings.getAddonInfo("profile")).decode("utf-8"), filename)
 
         w = self.storage.openFile(path, "wb")
-        w.write(result)
+        w.write(self.utils.convertStringToBinary(result))
         w.close()
 
         if "downloadPath" in video:
             self.xbmcvfs.rename(path, os.path.join(video["downloadPath"], filename))
+
 
     def getTranscriptionUrl(self, video={}):
         self.common.log("")
