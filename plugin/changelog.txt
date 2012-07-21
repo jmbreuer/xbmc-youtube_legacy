@@ -3,11 +3,7 @@
 - Purchasable movies.
 - Unit test coverage of Core above 90% I'm looking at you "Fetch page"
 - Unit test new functions in storage...
-- Allow users to change sort on searches
-- Hook-in Caching the right places. And only the right places. (mostly scrapers)
-- Scrape Education. Search for feeds.
-- Check live feed vs scrape
-- Replace scraper with feeds for: shows, music, education, disco.
+- Replace scraper with feeds for: shows, disco.
 - Integration tests on all user actions.
 
 [B]Errata[/B]
@@ -16,8 +12,8 @@
 - [XBMC] Has Excessive Memory use after running the plugin for prolonged periods of time
 - [RTMPDUMP] Doesn't support handshake type 10 which is required by youtube.
 
-
 [B]Version 3.0.1[/B]
+- Fixed crash when listing subscriptions with non ascii chars
 - Fixed subtitle parser which was broken by the move to parseDOM
 - Fixed various scraper integration test failing cause by youtube site changes
 
