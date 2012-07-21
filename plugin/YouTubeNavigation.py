@@ -614,12 +614,11 @@ class YouTubeNavigation():
 
         if (item("channel") or item("contact")):
             if (self.settings.getSetting("username") != "" and self.settings.getSetting("oauth2_access_token")):
-                channel = get("channel", "")
-                if not channel:
-                    channel = get("contact")
-                title = self.common.makeAscii(channel)
-
+                title = self.common.makeAscii(item("channel", ""))
                 if (get("external")):
+                    channel = get("channel", "")
+                    if not channel:
+                        channel = get("contact")
                     cm.append((self.language(30512) % title, 'XBMC.RunPlugin(%s?path=%s&channel=%s&action=add_subscription)' % (sys.argv[0], item("path"), channel)))
                 elif item("editid"):
                     cm.append((self.language(30513) % title, 'XBMC.RunPlugin(%s?path=%s&editid=%s&action=remove_subscription)' % (sys.argv[0], item("path"), item("editid"))))
