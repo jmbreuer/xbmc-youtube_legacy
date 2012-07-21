@@ -1716,11 +1716,12 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
         cm = navigation.addFolderContextMenuItems(path_params, item_params)
         
         sys.modules["__main__"].language.assert_any_call(30512)        
-        self.assert_context_menu_contains(cm, "some_button_string some_channel", 'XBMC.RunPlugin(some_plugin?path=some_path&channel=None&action=add_subscription)')        
+        self.assert_context_menu_contains(cm, "some_button_string some_channel", 'XBMC.RunPlugin(some_plugin?path=some_path&channel=None&action=add_subscription)')
         
     def test_addFolderContextMenuItems_should_add_remove_subscription_option_to_subscriptions_in_users_subscriptions_feed(self):
         self.prepareContestMenu()
         sys.modules["__main__"].settings.getSetting.return_value = "something"
+        sys.modules["__main__"].common.makeAscii.side_effect = lambda x: x
         navigation = YouTubeNavigation()
         path_params = {}
         item_params = {"Title": "some_title", "path": "some_path", "icon": "some_icon", "thumbnail": "some_thumbnail", "videoid": "someid", "channel": "some_channel", "editid": "some_editid"}
