@@ -13,7 +13,10 @@ class MockYouTubeDepends:
         #Setup default test various values
         sys.modules["__main__"].plugin = "YouTube - Unittest"
         sys.modules["__main__"].dbg = True
-        sys.modules["__main__"].dbglevel = 10
+        if plat[0] == "FreeBSD":
+            sys.modules["__main__"].dbglevel = 5
+        else:
+            sys.modules["__main__"].dbglevel = 3
         sys.modules["__main__"].login = ""
         sys.modules["__main__"].language = Mock()
         sys.modules["__main__"].opener = Mock()
