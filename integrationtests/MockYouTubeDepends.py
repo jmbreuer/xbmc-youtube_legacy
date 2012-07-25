@@ -18,9 +18,9 @@ class MockYouTubeDepends:
             plat = ('', '', '', '', '', '')
 
         if plat[0] == "FreeBSD":
-            sys.modules["__main__"].dbglevel = 10
+            sys.modules["__main__"].dbglevel = 5
         else:
-            sys.modules["__main__"].dbglevel = 30
+            sys.modules["__main__"].dbglevel = 3
 
         sys.modules["__main__"].login = ""
         sys.modules["__main__"].cache = Mock()
