@@ -13,6 +13,11 @@ class MockYouTubeDepends:
         #Setup default test various values
         sys.modules["__main__"].plugin = "YouTube - Unittest"
         sys.modules["__main__"].dbg = True
+        try:
+            plat = platform.uname()
+        except:
+            plat = ('', '', '', '', '', '')
+
         if plat[0] == "FreeBSD":
             sys.modules["__main__"].dbglevel = 5
         else:
