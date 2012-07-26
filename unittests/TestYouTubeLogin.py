@@ -27,7 +27,6 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
         assert(calls[0] == (("oauth2_access_token",""),{}))
         assert(calls[1] == (("oauth2_refresh_token",""),{}))
         assert(calls[2] == (("oauth2_expires_at",""),{}))
-        assert(calls[3] == (("nick",""),{}))
         
     def test_login_should_call_xbmc_execute_builtin(self):
         settings = ["password","","true","username","password","username"]
@@ -317,12 +316,13 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
 
         print repr(args)
         assert(sys.modules["__main__"].core._fetchPage.call_count == 1)
-        assert(args[2][0] == ("","a"))
-        assert(args[2][1] == {'attrs': {'class': 'end'}, 'ret': 'href'})
+        print repr(args[1][1])
+        assert(args[1][0] == ("","button"))
+        assert(args[1][1] == {'attrs': {'id': 'masthead-user-button'}, 'ret': 'href'})
 
     def test_httpLogin_should_call_fetchPage_with_proper_redirect_url_if_login_link_is_found(self):
         sys.modules["__main__"].core._findErrors.return_value = False
-        dom_values = ["", ["USERNAME"], ["USERNAME"], "", "","","","","","","","","",["someURL"], "", ""]
+        dom_values = ["", "", "", "", "","","","","","","","","",["someURL"], ""]
         sys.modules["__main__"].core._fetchPage.return_value = {"content":"","status":200, "location": "here"}
         sys.modules["__main__"].settings.getSetting.return_value = "smokey" 
         sys.modules["__main__"].common.parseDOM.side_effect = lambda x = "",y = "",attrs = {},ret = "": dom_values.pop()
@@ -347,12 +347,12 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
 
         print repr(args)
         assert(sys.modules["__main__"].core._fetchPage.call_count == 1)
-        assert(args[3][0] == ("","form"))
-        assert(args[3][1] == {'attrs': {'id': 'gaia_loginform'}, 'ret': 'action'})
+        assert(args[2][0] == ("","form"))
+        assert(args[2][1] == {'attrs': {'id': 'gaia_loginform'}, 'ret': 'action'})
 
     def test_httpLogin_should_call_fillLoginInfo_if_login_form_present(self):
         sys.modules["__main__"].core._findErrors.return_value = False
-        dom_values = ["","","","","","","","",["someURL"],"", "", ""]
+        dom_values = ["","","","","","","","",["someURL"],"", ""]
         sys.modules["__main__"].core._fetchPage.return_value = {"content":"somePage","status":200}
         sys.modules["__main__"].settings.getSetting.return_value = "smokey" 
         sys.modules["__main__"].common.parseDOM.side_effect = lambda x = "",y = "",attrs = {},ret = "": dom_values.pop()
@@ -366,7 +366,7 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
 
     def test_httpLogin_should_call_fetchPage_with_proper_fetch_options_if_fillLoginInfo_succeded(self):
         sys.modules["__main__"].core._findErrors.return_value = False
-        dom_values = ["","","","","","","","",["someURL"],"", "", ""]
+        dom_values = ["","","","","","","","",["someURL"],"", ""]
         sys.modules["__main__"].core._fetchPage.return_value = {"content":"somePage","status":200, "location": "here"}
         sys.modules["__main__"].settings.getSetting.return_value = "smokey" 
         sys.modules["__main__"].common.parseDOM.side_effect = lambda x = "",y = "",attrs = {},ret = "": dom_values.pop()
@@ -392,12 +392,12 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
         args = sys.modules["__main__"].common.parseDOM.call_args_list
         print repr(args[2])
         assert(sys.modules["__main__"].core._fetchPage.call_count == 1)
-        assert(args[4][0] == ('', 'meta'))
-        assert(args[4][1] == {'attrs': {'http-equiv': 'refresh'}, 'ret': 'content'})
+        assert(args[3][0] == ('', 'meta'))
+        assert(args[3][1] == {'attrs': {'http-equiv': 'refresh'}, 'ret': 'content'})
 
     def test_httpLogin_should_call_fetchPage_with_proper_redirect_url(self):
         sys.modules["__main__"].core._findErrors.return_value = False
-        dom_values = ["","","","","","","",["&#39;someURL&#39;"],"","", "", ""]
+        dom_values = ["","","","","","","",["&#39;someURL&#39;"],"","", ""]
         sys.modules["__main__"].core._fetchPage.return_value = {"content":"somePage","status":200, "location": "here"}
         sys.modules["__main__"].settings.getSetting.return_value = "smokey" 
         sys.modules["__main__"].common.parseDOM.side_effect = lambda x = "",y = "",attrs = {},ret = "": dom_values.pop()
@@ -434,7 +434,7 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
         page_values = [ {"content":"captcha","status":200, "location": "here"}, { "new_url": "http://www.mock.com/", "content":"something,smsUserPin,somethingElse","status":200, "location": "here"}]
         sys.modules["__main__"].core._fetchPage.side_effect = lambda x: page_values.pop() 
         sys.modules["__main__"].settings.getSetting.return_value = "smokey" 
-        dom_values = [["Login"], [], [], [], [], []]
+        dom_values = [["Login"], [], [], [], []]
         sys.modules["__main__"].common.parseDOM.side_effect = lambda x = "",y = "",attrs = {},ret = "": dom_values.pop()
 
         login = YouTubeLogin()
@@ -451,7 +451,7 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
         page_values = [ {"content":"captcha","status":200, "location": "here"}, { "new_url": "http://www.mock.com", "content":"something,smsUserPin,somethingElse","status":200, "location": "here"}]
         sys.modules["__main__"].core._fetchPage.side_effect = lambda x: page_values.pop() 
         sys.modules["__main__"].settings.getSetting.return_value = "smokey" 
-        dom_values = [["Login"], [], [], [], [], []]
+        dom_values = [["Login"], [], [], [], []]
         sys.modules["__main__"].common.parseDOM.side_effect = lambda x = "",y = "",attrs = {},ret = "": dom_values.pop()
         login = YouTubeLogin()
         login._fillUserPin = Mock()
@@ -475,18 +475,20 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
 
         print repr(args)
         assert(sys.modules["__main__"].core._fetchPage.call_count == 1)
-        assert(args[5][0] == ('', 'input'))
-        assert(args[5][1] == {'attrs': {'name': 'smsToken'}, 'ret': 'value'})
+        assert(args[4][0] == ('', 'input'))
+        assert(args[4][1] == {'attrs': {'name': 'smsToken'}, 'ret': 'value'})
 
     def test_httpLogin_should_call_fetchPage_with_correct_fetch_options_if_smsToken_is_found(self):
         sys.modules["__main__"].core._findErrors.return_value = False
-        dom_values = [["USERNAME"], ["USERNAME"], ["USERNAME"], [],[],[],[],[],[], ["http://www.mock.com"],["some cont"],["some smsToken"], [],[],[], "", "", ["galx"], "", "", ""]
+        dom_values = ["USERNAME", ["some cont"], ["some smsToken"], "", "", "", "", ["galx"], "", ""]
         login_values = [("",""), ("some_galx", "some_url_data")]
         sys.modules["__main__"].core._fetchPage.return_value = {"content":"","status":200, "location": "here"}
         sys.modules["__main__"].settings.getSetting.return_value = "smokey" 
         sys.modules["__main__"].common.parseDOM.side_effect = lambda x = "",y = "",attrs = {},ret = "": dom_values.pop()
 
         login = YouTubeLogin()
+        login._getLoginInfo = Mock()
+        login._getLoginInfo.return_value = 200
         login._fillLoginInfo = Mock()
         login._fillLoginInfo.side_effect = lambda x: login_values.pop()
 
@@ -508,7 +510,7 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
         result = login._httpLogin({"new":"true"})
 
         assert(sys.modules["__main__"].core._fetchPage.call_count == 1)
-        login._getLoginInfo.assert_called_with("logged_in")
+        login._getLoginInfo.assert_called_with(["USERNAME"])
 
     def test_httpLogin_should_call_findErrors_on_login_failure(self):
         sys.modules["__main__"].core._findErrors.return_value = False
@@ -533,7 +535,7 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
         
         result = login._httpLogin({"new":"true"})
 
-        login._getLoginInfo.assert_called_with("<span class='masthead-user-username'>USERNAME</class>")
+        login._getLoginInfo.assert_called_with(["USERNAME"])
 
     def test_httpLogin_should_fail_with_captcha(self):
         sys.modules["__main__"].core._fetchPage.return_value = {"content":"captcha","status":200}
@@ -691,47 +693,26 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
         result = login._fillUserPin("new")
 
         assert(result == {})
-        
-    def test_getLoginInfo_should_search_input_for_username(self):
-        sys.modules["__main__"].settings.getSetting.return_value = "" 
-        sys.modules["__main__"].common.parseDOM.side_effect = [["honk"], ["honk honk"], ["honk honk2"]] 
-        login = YouTubeLogin()
-        
-        result = login._getLoginInfo("some_data")
-
-        sys.modules["__main__"].common.parseDOM.assert_any_call('some_data', 'span', attrs={'class': 'masthead-user-username'})
-        
-    def test_getLoginInfo_should_call_setSetting_to_save_nick(self):
-        sys.modules["__main__"].settings.getSetting.return_value = "" 
-        sys.modules["__main__"].common.parseDOM.return_value = ["some_value"]
-        login = YouTubeLogin()
-        login._getCookieInfoAsHTML = Mock()
-
-        result = login._getLoginInfo("")
-        
-        sys.modules["__main__"].settings.setSetting.assert_any_call("nick","some_value")
-        
+                
     def test_getLoginInfo_should_ask_for_cookies(self):
         sys.modules["__main__"].settings.getSetting.return_value = "" 
-        sys.modules["__main__"].common.parseDOM.side_effect = [["honk"], ["honk honk"], ["honk honk2"]] 
+        sys.modules["__main__"].common.parseDOM.side_effect = [["honk honk"], ["honk honk2"]] 
         login = YouTubeLogin()
-        login._getCookieInfoAsHTML = Mock()
 
         result = login._getLoginInfo("   USERNAME', 'some_value" + '")')
-        login._getCookieInfoAsHTML.assert_called_with()
+        sys.modules["__main__"].common.getCookieInfoAsHTML.assert_called_with()
         
     def test_getLoginInfo_should_call_setSetting_to_save_login_info(self):
         dummy_content = Mock()
         dummy_content.find.return_value = -1
         sys.modules["__main__"].settings.getSetting.return_value = "" 
-        sys.modules["__main__"].common.parseDOM.side_effect = [["honk"], ["honk honk"], ["honk honk2"]] 
+        sys.modules["__main__"].common.parseDOM.side_effect = [["honk honk"], ["honk honk2"]] 
         login = YouTubeLogin()
-        login._getCookieInfoAsHTML = Mock()
         
         result = login._getLoginInfo("")
         
-        login._getCookieInfoAsHTML.assert_called_with()
-        assert(sys.modules["__main__"].settings.setSetting.call_count == 3)
+        sys.modules["__main__"].common.getCookieInfoAsHTML.assert_called_with()
+        assert(sys.modules["__main__"].settings.setSetting.call_count == 2)
         sys.modules["__main__"].settings.setSetting.assert_any_call("login_info","honk honk")
         sys.modules["__main__"].settings.setSetting.assert_any_call("SID","honk honk2")
         
@@ -754,18 +735,9 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
         sys.modules["__main__"].settings.getSetting.return_value = "" 
         sys.modules["__main__"].common.parseDOM.side_effect = [["honk"], ["honk honk"], ["honk honk2"]] 
         login = YouTubeLogin()
-        login._getCookieInfoAsHTML = Mock()
 
         result = login._getLoginInfo("")
         
-        assert(result == 200)
-
-    def ttest__getCookieInfoAsHTML_properly_converts(self):
-        login = YouTubeLogin()
-        result = login._getLoginInfo("")
-        sys.modules[ "__main__" ].cookiejar = Mock()
-        sys.modules[ "__main__" ].cookiejar = "   name='LOGIN_INFO', value='honk honk', port=None  "
-
         assert(result == 200)
 
 
