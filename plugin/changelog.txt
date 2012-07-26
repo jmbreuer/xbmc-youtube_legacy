@@ -12,7 +12,8 @@
 - [XBMC] Has Excessive Memory use after running the plugin for prolonged periods of time
 - [RTMPDUMP] Doesn't support handshake type 10 which is required by youtube.
 
-[B]Version 3.0.1[/B]
+[B]Version 3.1.0[/B]
+- Fixed login
 - Fixed crash when listing subscriptions with non ascii chars
 - Fixed subtitle parser which was broken by the move to parseDOM
 - Fixed various scraper integration test failing cause by youtube site changes
