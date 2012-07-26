@@ -117,6 +117,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         assert(args[0][1]["handle"] == -1)
         assert(args[0][1]["succeeded"] == True)
         assert(args2[0][0][0] == u"./tmp/ZEITGEIST MOVING FORWARD  OFFICIAL RELEASE  2011-[4Z9WVZddH9w]-ES.ssa")
+        assert(False)
 
     def ttest_plugin_should_play_geolocked_videos(self):
         sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")

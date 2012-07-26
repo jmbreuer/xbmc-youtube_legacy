@@ -134,7 +134,8 @@ class YouTubePlayer():
             code = ""
             codelist = self.common.parseDOM(xml["content"], "track", ret="lang_code")
             sublist = self.common.parseDOM(xml["content"], "track", ret="name")
-            if len(sublist) != len(codelist):
+            lang_original = self.common.parseDOM(xml["content"], "track", ret="lang_original")
+            if len(sublist) != len(codelist) or len(sublist) != len(lang_original):
                 self.common.log("Code list and sublist length mismatch: " + repr(codelist) + " - " + repr(sublist))
                 return ""
 
@@ -145,17 +146,26 @@ class YouTubePlayer():
 
             lang_code = ["off", "en", "es", "de", "fr", "it", "ja"][int(self.settings.getSetting("lang_code"))]
             self.common.log("selected language: " + repr(lang_code))
-            for i in range(0, len(codelist)):
-                if codelist[i].find(lang_code) > -1:
-                    subtitle = sublist[i].replace(" ", "%20")
-                    code = codelist[i]
-                    self.common.log("found subtitle specified: " + subtitle + " - " + code)
-                    break
+            if lang_code in codelist:
+                for i in range(0, len(codelist)):
+                    if codelist[i].find(lang_code) > -1:
+                        subtitle = sublist[i].replace(" ", "%20")
+                        code = codelist[i]
+                        self.common.log("found subtitle specified: " + subtitle + " - " + code)
+                        break
+            else:
+                choices = []
+                for i in range(0, len(codelist)):
+                    choices.append(codelist[i] + " - " + lang_original[i])
+                    self.common.log("TEST: " + codelist[i] + " - " + lang_original[i])
+                if len(choices) > 0:
+                    dialog = self.xbmcgui.Dialog()
+                    selected = dialog.select("Select subtitle language", choices)
 
-                if codelist[i].find("en") > -1:
-                    subtitle = sublist[i].replace(" ", "%20")
-                    code = "en"
-                    self.common.log("found subtitle default: " + subtitle + " - " + code)
+                    if selected > -1:
+                        subtitle = sublist[selected].replace(" ", "%20")
+                        code = codelist[selected]
+                        self.common.log("found subtitle default: " + subtitle + " - " + code)
 
             if code:
                 url = self.urls["close_caption_url"] % (get("videoid"), code)
@@ -210,7 +220,7 @@ class YouTubePlayer():
         return str
 
     def convertSecondsToTimestamp(self, seconds):
-        self.common.log("")
+        self.common.log("", 3)
         hours = str(int(seconds / 3600))
         seconds = seconds % 3600
 
@@ -222,7 +232,7 @@ class YouTubePlayer():
         if len(seconds) == 1:
             seconds = "0" + seconds
 
-        self.common.log("Done")
+        self.common.log("Done", 3)
         return "%s:%s:%s" % (hours, minutes, seconds)
 
     def transformSubtitleXMLtoSRT(self, xml):
@@ -370,7 +380,7 @@ class YouTubePlayer():
         self.common.log("Done : " + repr((result, append_style)),5)
         return (result, append_style)
 
-    def addSubtitles(self, video={}):
+    def addSubtitles(self, video={}, add=True):
         get = video.get
         self.common.log("fetching subtitle if available")
 
@@ -389,7 +399,7 @@ class YouTubePlayer():
             set_subtitle = True
 
         self.common.log("Done trying to locate: " + path, 4)
-        if self.xbmcvfs.exists(path) and not "downloadPath" in video and set_subtitle:
+        if self.xbmcvfs.exists(path) and not "downloadPath" in video and set_subtitle and add:
             player = self.xbmc.Player()
 
             i = 0
@@ -422,10 +432,13 @@ class YouTubePlayer():
 
         self.common.log("Playing video: " + repr(video['Title']) + " - " + repr(get('videoid')) + " - " + repr(video['video_url']))
 
+        if self.settings.getSetting("lang_code") != "0" or self.settings.getSetting("annotations") == "true":
+            self.addSubtitles(video, add=False)
+
         self.xbmcplugin.setResolvedUrl(handle=int(sys.argv[1]), succeeded=True, listitem=listitem)
 
         if self.settings.getSetting("lang_code") != "0" or self.settings.getSetting("annotations") == "true":
-            self.addSubtitles(video)
+            self.addSubtitles(video, add=True)
 
         if (get("watch_later") == "true" and get("playlist_entry_id")):
             self.common.log("removing video from watch later playlist")

@@ -794,7 +794,7 @@ class YouTubeCore():
             elif reason[0] == 'requesterRegion':
                 result = True
             elif reason[0] != 'limitedSyndication':
-                self.common.log("removing video, reason: %s value: %s" % (reason[0], value[0].encode('utf-8')))
+                self.common.log("removing video, reason: %s value: %s" % (reason[0], value[0]))
                 result = True
 
         return result
@@ -816,16 +816,34 @@ class YouTubeCore():
         if show_next:
             self.utils.addNextFolder(ytobjects, params)
 
-    def updateVideoIDCache(self, ytobjects):
+    def setYTCache(self, pre_id, ytobjects):
+        self.common.log(pre_id)
         save_data = {}
         for item in ytobjects:
             if "videoid" in item:
                 save_data[item["videoid"]] = repr(item)
 
-        self.cache.setMulti("videoidcache", save_data)
+        self.cache.setMulti(pre_id, save_data)
+
+    def getYTCache(self, pre_id, ytobjects, key):
+        self.common.log(pre_id)
+        load_data = []
+        for item in ytobjects:
+            if "videoid" in item:
+                load_data.append(item["videoid"])
+
+        res = self.cache.getMulti(pre_id, load_data)
+        if len(res) != len(load_data):
+            self.common.log("Length mismatch")
+        i = 0
+        for item in ytobjects:
+            if "videoid" in item:
+                if res[i]:
+                    item["Overlay"] = res[i]
+                i += 1 # This can NOT be enumerated because there might be missing videoids
+        return ytobjects
 
     def getVideoEntries(self, xml):
-
         entries = self.common.parseDOM(xml, "entry")
         if not entries:
             entries = self.common.parseDOM(xml, "atom:entry")
@@ -936,15 +954,12 @@ class YouTubeCore():
 
             video['thumbnail'] = self.urls["thumbnail"] % video['videoid']
 
-            overlay = self.storage.retrieveValue("vidstatus-" + video['videoid'])
-            if overlay:
-                video['Overlay'] = int(overlay)
-
             ytobjects.append(video)
 
         self.addNextPageLinkIfNecessary(params, xml, ytobjects)
 
-        self.updateVideoIDCache(ytobjects)
+        self.setYTCache("videoidcache", ytobjects)
+        self.getYTCache("vidstatus-", ytobjects, "Overlay")
 
         self.common.log("Done: " + str(len(ytobjects)),3)
         return ytobjects
