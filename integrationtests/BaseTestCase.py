@@ -3,7 +3,7 @@ import os
 import time
 import unittest2
 import MockYouTubeDepends
-
+from mock import Mock
 MockYouTubeDepends.MockYouTubeDepends().mockXBMC()
 
 sys.path.append('../plugin/')
@@ -47,6 +47,8 @@ class BaseTestCase(unittest2.TestCase):
         sys.modules["__main__"].storage = YouTubeStorage.YouTubeStorage()
         import YouTubeCore
         sys.modules["__main__"].core = YouTubeCore.YouTubeCore()
+        sys.modules["__main__"].core.getYTCache = Mock()
+        sys.modules["__main__"].core.getYTCache.return_value = []
         import YouTubeLogin
         sys.modules["__main__"].login = YouTubeLogin.YouTubeLogin()
         import YouTubeFeeds
