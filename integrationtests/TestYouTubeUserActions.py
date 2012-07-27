@@ -1,5 +1,6 @@
 import BaseTestCase
 import nose
+import time
 import sys
 from mock import Mock
 
@@ -151,6 +152,7 @@ class TestYouTubeUserActions(BaseTestCase.BaseTestCase):
 
         self.navigation.executeAction({"action": "create_playlist", "title": "testlist", "summary": "test"})
 
+        time.sleep(15)
         exists = False
         result = sys.modules["__main__"].core._fetchPage({"link": "http://gdata.youtube.com/feeds/api/users/default/playlists?v=2.1&start-index=1&max-results=50", "auth": "true"})
         items = sys.modules["__main__"].core.getFolderInfo(result["content"])
