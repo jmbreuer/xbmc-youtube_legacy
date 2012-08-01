@@ -24,7 +24,8 @@ import io
 import inspect
 import time
 import HTMLParser
-
+#try: import simplejson as json
+#except ImportError: import json
 
 version = "1.1.0"
 plugin = "CommonFunctions Beta-" + version
@@ -111,8 +112,11 @@ def getParameters(parameterString):
 
 def replaceHTMLCodes(txt):
     log(repr(txt), 5)
+
     # Fix missing ; in &#<number>;
     txt = re.sub("(&#[0-9]+)([^;^0-9]+)", "\\1;\\2", makeUTF8(txt))
+
+    txt = HTMLParser.HTMLParser().unescape(txt)
 
     log(repr(txt), 5)
     return txt
@@ -168,8 +172,7 @@ def _getDOMContent(html, name, match, ret):  # Cleanup
 
 def _getDOMAttributes(match, name, ret):
     log("", 3)
-    match = match.replace("\t", " ")
-    lst = re.compile('<' + name + '.*? ' + ret + '=(.[^>]*?)>', re.M | re.S).findall(match)
+    lst = re.compile('<' + name + '.*?' + ret + '=(.[^>]*?)>', re.M | re.S | re.U).findall(match)
     ret = []
     for tmp in lst:
         cont_char = tmp[0]
@@ -201,9 +204,9 @@ def _getDOMElements(item, name, attrs):
     log("", 3)
     lst = []
     for key in attrs:
-        lst2 = re.compile('(<' + name + '[^>]*?(?:' + key + '=[\'"]' + attrs[key] + '[\'"].*?>))', re.M | re.S).findall(item)
+        lst2 = re.compile('(<' + name + '[^>]*?(?:' + key + '=[\'"]' + attrs[key] + '[\'"].*?>))', re.M | re.S | re.U).findall(item)
         if len(lst2) == 0 and attrs[key].find(" ") == -1:  # Try matching without quotation marks
-            lst2 = re.compile('(<' + name + '[^>]*?(?:' + key + '=' + attrs[key] + '.*?>))', re.M | re.S).findall(item)
+            lst2 = re.compile('(<' + name + '[^>]*?(?:' + key + '=' + attrs[key] + '.*?>))', re.M | re.S | re.U).findall(item)
 
         if len(lst) == 0:
             log("Setting main list " + repr(lst2), 5)
@@ -220,9 +223,9 @@ def _getDOMElements(item, name, attrs):
 
     if len(lst) == 0 and attrs == {}:
         log("No list found, trying to match on name only", 3)
-        lst = re.compile('(<' + name + '>)', re.M | re.S).findall(item)
+        lst = re.compile('(<' + name + '>)', re.M | re.S | re.U).findall(item)
         if len(lst) == 0:
-            lst = re.compile('(<' + name + ' .*?>)', re.M | re.S).findall(item)
+            lst = re.compile('(<' + name + ' .*?>)', re.M | re.S | re.U).findall(item)
 
     log("Done: " + str(type(lst)), 3)
     return lst
@@ -242,8 +245,7 @@ def parseDOM(html, name="", attrs={}, ret=False):
 
     ret_lst = []
     for item in html:
-        # Find all tags with destructive \n in them, and replace it
-        temp_item = re.compile('(<[^>]*?\n[^>]*?>)').findall(item)
+        temp_item = re.compile('(<[^>]*?\n[^>]*?>)', re.U).findall(item)
         for match in temp_item:
             item = item.replace(match, match.replace("\n", " "))
 
@@ -282,9 +284,9 @@ def extractJS(data, function=False, variable=False, match=False, evaluate=False,
     for script in scripts:
         tmp_lst = []
         if function:
-            tmp_lst = re.compile(function + '\(.*?\).*?;', re.M | re.S).findall(script)
+            tmp_lst = re.compile(function + '\(.*?\).*?;', re.M | re.S | re.U).findall(script)
         elif variable:
-            tmp_lst = re.compile(variable + '[ ]+=.*?;', re.M | re.S).findall(script)            
+            tmp_lst = re.compile(variable + '[ ]+=.*?\n', re.M | re.S | re.U).findall(script)            
         else:
             tmp_lst = [script]
         if len(tmp_lst) > 0:
@@ -309,29 +311,29 @@ def extractJS(data, function=False, variable=False, match=False, evaluate=False,
 
     if values or evaluate:
         for i in range(0, len(lst)):
-            log("Getting values %s" % lst[i])
+            tmp = lst[i]
+            log("Getting values %s" % tmp)
             if function:
                 if evaluate: # include the ( ) for evaluation
-                    data = re.compile("(\(.*?\))", re.M | re.S).findall(lst[i])
+                    data = re.compile("(\(.*?\))", re.M | re.S | re.U).findall(tmp)
                 else:
-                    data = re.compile("\((.*?)\)", re.M | re.S).findall(lst[i])
+                    data = re.compile("\((.*?)\)", re.M | re.S | re.U).findall(tmp)
             elif variable:
-                tlst = re.compile(variable +".*?=.*?;", re.M | re.S).findall(lst[i])
                 data = []
-                for tmp in tlst:
-                    cont_char = tmp[0]
-                    cont_char = tmp[tmp.find("=") + 1:].strip()
-                    cont_char = cont_char[0]
-                    if cont_char in "'\"":
-                        log("Using %s as quotation mark" % cont_char, 3)
-                        tmp = tmp[tmp.find(cont_char) + 1:tmp.rfind(cont_char)]
-                    else:
-                        log("No quotation mark found", 3)
-                        tmp = tmp[tmp.find("=") + 1: tmp.rfind(";")]
+                cont_char = tmp[0]
+                cont_char = tmp[tmp.find("=") + 1:].strip()
+                cont_char = cont_char[0]
+                log("Getting values %s cont_char: %s " % (tmp, cont_char))
+                if cont_char in "'\"":
+                    log("Using %s as quotation mark" % cont_char, 3)
+                    tmp = tmp[tmp.find(cont_char) + 1:tmp.rfind(cont_char)]
+                else:
+                    log("No quotation mark found", 3)
+                    tmp = tmp[tmp.find("=") + 1: tmp.rfind(";")]
 
-                    tmp = tmp.strip()
-                    if len(tmp) > 0:
-                        data.append(tmp)
+                tmp = tmp.strip()
+                if len(tmp) > 0:
+                    data.append(tmp)
             else:
                 log("ERROR: Don't know what to extract values from")
 
@@ -340,17 +342,19 @@ def extractJS(data, function=False, variable=False, match=False, evaluate=False,
                 lst[i] = data[0]
 
     if evaluate:
+        keywords = [("true", "True"), ("false", "False"), ("null", "None")]
         for i in range(0, len(lst)):
-            log("Evaluating %s" % lst[i])
             data = lst[i].strip()
+            for key in keywords:
+                data = data.replace(key[0], key[1])
+            log("Evaluating %s" % data)
             try:
-                lst[i] = eval(data)
+                lst[i] = eval(data) # json.loads can't be used here.
             except:
-                log("Couldn't eval: %s from %s" % (repr(data), repr(lst[i])))
+                log("Couldn't eval: %s" % (repr(data)))
 
     log("Done: " + str(len(lst)))
     return lst
-
 
 def fetchPage(params={}):
     get = params.get

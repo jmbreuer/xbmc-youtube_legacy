@@ -6,6 +6,7 @@
 - Replace scraper with feeds for: shows, disco.
 - Integration tests on all user actions.
 - Use extractJS and urlparse.parse_qs.
+- UTF8/16 does not work consistently(Verify failures against minidom implementation)
 
 [B]Errata[/B]
 - [XBMC] Thumbnails sometimes turns into black box or Folder (XBMC not detecting when thumbnail is set and defaulting to icon?)

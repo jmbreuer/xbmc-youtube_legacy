@@ -21,6 +21,8 @@ import urllib
 import re
 import os.path
 import time
+import codecs
+import urlparse
 try: import simplejson as json
 except ImportError: import json
 
@@ -459,14 +461,13 @@ class YouTubePlayer():
             video["live_play"] = "true"
 
         fmt_url_map = [html]
-        if html.find("|") > -1:
+        if html.find("|") > -1 and False:
             fmt_url_map = html.split('|')
         elif html.find(",url=") > -1:
             fmt_url_map = html.split(',url=')
-        elif html.find("&conn=") > -1:
+        elif html.find("&conn=") > -1 and False:
             video["stream_map"] = "true"
             fmt_url_map = html.split('&conn=')
-
         if len(fmt_url_map) > 0:
             for index, fmt_url in enumerate(fmt_url_map):
                 if fmt_url.find("&url") > -1:
@@ -645,10 +646,6 @@ class YouTubePlayer():
             self.common.log("- construct_video_url failed, video_url not set")
             return video_url
 
-        if get("proxy"):
-            proxy = get("proxy")
-            video_url = proxy + urllib.quote(video_url) + " |Referer=" + proxy[:proxy.rfind("/")]
-
         if get("action") != "download":
             video_url += " | " + self.common.USERAGENT
 
@@ -737,10 +734,6 @@ class YouTubePlayer():
 
         (links, video) = self._getVideoLinks(video, params)
 
-        if not links and self.settings.getSetting("proxy"):
-            params["proxy"] = self.settings.getSetting("proxy")
-            (links, video) = self._getVideoLinks(video, params)
-
         if links:
             video["video_url"] = self.selectVideoQuality(links, params)
             if video["video_url"] == "":
@@ -762,13 +755,18 @@ class YouTubePlayer():
 
     def _convertFlashVars(self, html):
         self.common.log(repr(html))
-        obj = {"PLAYER_CONFIG": {"args": {}}}
+        obj = {"args": {}}
+
+        #for k, v in urlparse.parse_qs(html).items():
+        #    obj["args"][k] = v[0]
+        #return obj
+
         temp = html.split("&")
         for item in temp:
             self.common.log(item, 9)
             it = item.split("=")
             self.common.log(it, 9)
-            obj["PLAYER_CONFIG"]["args"][it[0]] = urllib.unquote_plus(it[1])
+            obj["args"][it[0]] = urllib.unquote_plus(it[1])
         return obj
 
     def _getVideoLinks(self, video, params):
@@ -779,42 +777,33 @@ class YouTubePlayer():
         links = []
         fresult = False
 
-        if get("proxy"):
-            result = self.core._fetchPage({"link": self.urls["video_stream"] % get("videoid"), "proxy": get("proxy")})
-        else:
-            result = self.core._fetchPage({"link": self.urls["video_stream"] % get("videoid")})
+        result = self.core._fetchPage({"link": self.urls["video_stream"] % get("videoid")})
 
-        if result["status"] == 200:
-            start = result["content"].find("yt.playerConfig = ")
-            if start > -1:
+        if result["status"] == 200 and get("embed", "false") == "false":
+            player_object = self.common.extractJS(result["content"].replace("\\/", "/"), variable="yt.playerConfig", match="args", evaluate=True)
+            if len(player_object) == 1 and get("use_flashvars", "false") == "false":
                 self.common.log("Found player_config", 4)
-                start = start + len("yt.playerConfig = ")
-                end = result["content"].find("};", start) + 1
-                data = result["content"][start: end]
-                if len(data) > 0:
-                    data = data.replace("\\/", "/")
-                    player_object = json.loads('{ "PLAYER_CONFIG" : ' + data + "}" )
-                    self.common.log("player_object " + repr(player_object), 4)
+                player_object = player_object[0]
+                self.common.log("player_object " + repr(player_object), 4)
             else:
                 self.common.log("Using flashvars")
-                data = result["content"].replace("\n", "").replace("\u0026", "&").replace("&amp;", "&").replace('\\"', '"')
-                data = re.findall('flashvars="(.*?)"', data)
-                src = self.common.parseDOM(result["content"], "embed", attrs={"id": "movie_player"}, ret="src")
-                self.common.log(repr(data) + " - " + repr(src))
-                if len(data) > 0 and len(src) > 0:
-                    self.common.log("Using flashvars converting", 4)
-                    data = data[0].replace("\n", "")
-                    player_object = self._convertFlashVars(data)
-                    if "PLAYER_CONFIG" in player_object:
-                        player_object["PLAYER_CONFIG"]["url"] = src[0]
-
+                tdata = self.common.extractJS(result["content"].replace("\\/", "/"), variable="swf", match="flashvars", values=True)
+                if len(tdata) > 0:
+                    tdata = codecs.raw_unicode_escape_decode(tdata[0])
+                    tdata = tdata[0].replace('\\"', '"').replace("amp;", "")
+                    data = self.common.parseDOM(tdata, "embed", attrs={"id": "movie_player"}, ret="flashvars")
+                    src = self.common.parseDOM(tdata, "embed", attrs={"id": "movie_player"}, ret="src")
+                    self.common.log("Using flashvars: " + repr(data) + " - " + repr(src))
+                    if len(data) > 0 and len(src) > 0:
+                        self.common.log("Using flashvars converting", 0)
+                        data = data[0].replace("\n", "")
+                        player_object = self._convertFlashVars(data)
+                        if "args" in player_object:
+                            player_object["args"]["url"] = src[0]
         elif get("no_embed", "false") == "false":
             self.common.log("Falling back to embed")
 
-            if get("proxy"):
-                fresult = self.core._fetchPage({"link": self.urls["embed_stream"] % get("videoid"), "proxy": get("proxy")})
-            else:
-                fresult = self.core._fetchPage({"link": self.urls["embed_stream"] % get("videoid") })
+            fresult = self.core._fetchPage({"link": self.urls["embed_stream"] % get("videoid") })
 
             # Fallback error reporting
             if fresult["content"].find("status=fail") > -1:
@@ -827,16 +816,16 @@ class YouTubePlayer():
                 video["apierror"] = error.replace("+", " ")
 
             if fresult["status"] == 200:
-                # this gives no player_object["PLAYER_CONFIG"]["url"] for rtmpe...
+                # this gives no player_object["args"]["url"] for rtmpe...
                 player_object = self._convertFlashVars(fresult["content"])
 
         # Find playback URI
-        if "PLAYER_CONFIG" in player_object:
-            if "args" in player_object["PLAYER_CONFIG"]:
-                if "ttsurl" in player_object["PLAYER_CONFIG"]["args"]:
-                    video["ttsurl"] = player_object["PLAYER_CONFIG"]["args"]["ttsurl"]
+        if "args" in player_object:
+            self.common.log("player_object args: " + repr(player_object["args"]), 4)
+            if "ttsurl" in player_object["args"]:
+                video["ttsurl"] = player_object["args"]["ttsurl"]
 
-                links = self.getVideoUrlMap(player_object["PLAYER_CONFIG"], video)
+            links = self.getVideoUrlMap(player_object, video)
 
         if len(links) == 0:
             self.common.log("Couldn't find url map or stream map.")

@@ -37,8 +37,7 @@
     <setting id="user_password" value="yt tester"/>
     <setting id="username" value="logintester@tobiasussing.dk"/>
     <setting id="watch_later" value="true"/>
-    <setting id="proxy_dis" value="http://15aa51.info/browse.php?u="/>
-    <setting id="proxy" value="http://www.keepanonymous.com/search.php?u="/>
+    <setting id="proxy_dis" value="http://www.keepanonymous.com/search.php?u="/>
     <setting id="force_proxy" value="false"/>
     <setting id="auth" value=""/>
     <setting id="login_info" value="86cf83fa10326e417f70ffe230b474b6c40AAAB7IjEiOiAxLCAiMyI6IDc3MTY5MTQ4MywgIjIiOiAiMDNyb0xSeW9CTWJzY1hxczJDRmYydz09IiwgIjUiOiA0NTAzNjAxNzY2NDY1NTM2LCAiNCI6ICJHQUlBIiwgIjciOiAxMzQwMzA1NDU3LCAiNiI6IGZhbHNlLCAiOCI6IDExNTMwODYxNzc4NH0="/>
