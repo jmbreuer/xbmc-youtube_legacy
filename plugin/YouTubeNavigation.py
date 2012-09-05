@@ -248,7 +248,9 @@ class YouTubeNavigation():
             params["Title"] = video['Title']
             params["url"] = video['video_url']
             params["download_path"] = download_path
-            filename = "%s-[%s].mp4" % (''.join(c for c in video['Title'].decode("utf-8") if c not in self.utils.INVALID_CHARS), video["videoid"])
+            #filename = "%s-[%s].mp4" % (''.join(c for c in video['Title'].decode("utf-8") if c not in self.utils.INVALID_CHARS), video["videoid"])
+            filename = "%s-[%s].mp4" % (''.join(c for c in video['Title'] if c not in self.utils.INVALID_CHARS), video["videoid"])
+
             self.player.downloadSubtitle(video)
             if get("async"):
                 self.downloader.download(filename, params, async=False)

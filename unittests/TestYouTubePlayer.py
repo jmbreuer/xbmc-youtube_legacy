@@ -36,7 +36,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 
         player.saveSubtitle("my_subtitle_stream", {"Title": "testTitle", "videoid": "someVideoId", "downloadPath": "downloadFilePath"})
 
-        sys.modules["__main__"].storage.openFile.assert_called_with("tempFilePath/testTitle-[someVideoId].ssa", "wb")
+        sys.modules["__main__"].storage.openFile.assert_called_with("tempFilePath/testTitle-[someVideoId].ssa", "w") # was "wb"
 
     def test_getVideoUrlMap_should_return_empty_dictionary_on_missing_map(self):
         player = YouTubePlayer()
@@ -245,7 +245,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         sys.modules["__main__"].core._fetchPage.return_value = {"status": 200, "content": self.readTestInput("timedtextDirectoryTest.xml", False)}
         sys.modules["__main__"].settings.getSetting = Mock()
         sys.modules["__main__"].settings.getSetting.return_value = "3"
-        sys.modules["__main__"].common.parseDOM.side_effect = [["de"], ["german"]]
+        sys.modules["__main__"].common.parseDOM.side_effect = [["de"], ["german"], ["deutch"]]
         sys.modules["__main__"].core.getYTCache = Mock()
 
         url = player.getSubtitleUrl({"videoid": "some_id"})
@@ -260,7 +260,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         sys.modules["__main__"].core.getYTCache = Mock()
         sys.modules["__main__"].settings.getSetting = Mock()
         sys.modules["__main__"].settings.getSetting.return_value = "2"
-        sys.modules["__main__"].common.parseDOM.side_effect = [["en"], ["english"]]
+        sys.modules["__main__"].common.parseDOM.side_effect = [["en"], ["english"], ["english"]]
 
         url = player.getSubtitleUrl({"videoid": "some_id"})
 

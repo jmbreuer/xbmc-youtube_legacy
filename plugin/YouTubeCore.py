@@ -16,12 +16,14 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import sys
-import urllib
-import urllib2
 import re
+import sys
 import time
 import socket
+import urllib
+import urllib2
+import chardet
+
 try:
     import simplejson as json
 except ImportError:
@@ -464,8 +466,13 @@ class YouTubeCore():
 
             con = urllib2.urlopen(request)
 
-            ret_obj["content"] = con.read()
+            inputdata = con.read()
+            data_type = chardet.detect(inputdata)
+            inputdata = inputdata.decode(data_type["encoding"])
+            self.common.log("AAAAAAAAAAAAAAAAAA: " + repr(type(inputdata)) + " - " + repr(data_type))
+            ret_obj["content"] = inputdata
             ret_obj["location"] = link
+
             ret_obj["new_url"] = con.geturl()
             ret_obj["header"] = str(con.info())
             con.close()
@@ -834,7 +841,7 @@ class YouTubeCore():
 
         res = self.cache.getMulti(pre_id, load_data)
         if len(res) != len(load_data):
-            self.common.log("Length mismatch:" + repr(res) + " -" + repr(load_data))
+            self.common.log("Length mismatch:" + repr(res) + " - " + repr(load_data))
         i = 0
         for item in ytobjects:
             if "videoid" in item:
