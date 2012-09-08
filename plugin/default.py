@@ -82,6 +82,8 @@ if (__name__ == "__main__" ):
     login = YouTubeLogin.YouTubeLogin()
     import YouTubeFeeds
     feeds = YouTubeFeeds.YouTubeFeeds()
+    import YouTubeSubtitleControl
+    player = YouTubeSubtitleControl.YouTubeSubtitleControl()
     import YouTubePlayer
     player = YouTubePlayer.YouTubePlayer()
     import SimpleDownloader as downloader
