@@ -1344,24 +1344,6 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 
         self.core.getVideoEditId.assert_any_call("entry")
 
-    def ttest_getYTCache_should_(self):
-        self.core = YouTubeCore()
-        self.setUp_getVideoInfo_full_run()
-        self.core.getYTCache = Mock()
-
-        self.core.getVideoInfo("xml",{})
-
-        sys.modules[ "__main__" ].storage.retrieveValue.assert_any_call("vidstatus-123")
-
-    def ttest_setYTCache_should_(self):
-        self.core = YouTubeCore()
-        self.setUp_getVideoInfo_full_run()
-        self.core.getYTCache = Mock()
-
-        self.core.getVideoInfo("xml",{})
-
-        sys.modules[ "__main__" ].storage.retrieveValue.assert_any_call("vidstatus-123")
-
     def test_getVideoInfo_should_parse_youtube_xml(self):
         sys.modules[ "__main__" ].storage.retrieveValue.return_value = "7"
         import CommonFunctions
