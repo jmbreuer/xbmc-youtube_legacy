@@ -74,6 +74,7 @@ class YouTubePlayer():
         self.utils = sys.modules["__main__"].utils
         self.cache = sys.modules["__main__"].cache
         self.core = sys.modules["__main__"].core
+        self.subtitles = sys.modules["__main__"].subtitles
 
     def playVideo(self, params={}):
         self.common.log(repr(params), 3)
@@ -95,7 +96,7 @@ class YouTubePlayer():
         self.xbmcplugin.setResolvedUrl(handle=int(sys.argv[1]), succeeded=True, listitem=listitem)
 
         if self.settings.getSetting("lang_code") != "0" or self.settings.getSetting("annotations") == "true":
-            self.addSubtitles(video)
+            self.subtitles.addSubtitles(video)
 
         if (get("watch_later") == "true" and get("playlist_entry_id")):
             self.common.log(u"removing video from watch later playlist")
@@ -368,7 +369,6 @@ class YouTubePlayer():
 
     def getVideoObject(self, params):
         self.common.log(repr(params))
-        get = params.get
 
         links = []
         (video, status) = self.getInfo(params)
@@ -377,7 +377,7 @@ class YouTubePlayer():
             video['apierror'] = self.language(30618)
             return (video, 303)
 
-        video_url = self.getLocalFileSource(get, status, video)
+        video_url = self.subtitles.getLocalFileSource(params, video)
         if video_url:
             video['video_url'] = video_url
             return (video, 200)
@@ -406,10 +406,6 @@ class YouTubePlayer():
     def _convertFlashVars(self, html):
         self.common.log(repr(html))
         obj = {"args": {}}
-
-        #for k, v in urlparse.parse_qs(html).items():
-        #    obj["args"][k] = v[0]
-        #return obj
 
         temp = html.split("&")
         for item in temp:
@@ -466,13 +462,10 @@ class YouTubePlayer():
                 video["apierror"] = error.replace("+", " ")
 
             if fresult["status"] == 200:
-                # this gives no player_object["args"]["url"] for rtmpe...
                 player_object = self._convertFlashVars(fresult["content"])
 
         # Find playback URI
         if "args" in player_object:
-            # Hack, kinda works. Should really be done in extractJS
-            #player_object = eval(player_object.replace(" null", " 'null'").replace(" false", " 'false'").replace(" true", " 'true'"))
             self.common.log(u"player_object args: " + repr(player_object["args"]), 2)
             if "ttsurl" in player_object["args"]:
                 video["ttsurl"] = player_object["args"]["ttsurl"]
