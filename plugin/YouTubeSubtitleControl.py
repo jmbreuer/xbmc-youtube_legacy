@@ -27,11 +27,9 @@ except ImportError: import json
 
 class YouTubeSubtitleControl():
 
-    # YouTube Playback Feeds
     urls = {}
     urls['timed_text_index'] = "http://www.youtube.com/api/timedtext?type=list&v=%s"
     urls['close_caption_url'] = "http://www.youtube.com/api/timedtext?type=track&v=%s&lang=%s"
-    #urls['transcription_url'] = "http://www.youtube.com/api/timedtext?sparams=asr_langs,caps,expire,v&asr_langs=en,ja&caps=asr&expire=%s&key=yttt1&signature=%s&hl=en&type=trackformat=1&lang=en&kind=asr&name=&v=%s&tlang=en"
     urls['annotation_url'] = "http://www.youtube.com/annotations/read2?video_id=%s&feat=TC"
 
     def __init__(self):
@@ -91,6 +89,7 @@ class YouTubeSubtitleControl():
 
         self.common.log(u"subtitle index: " + repr(xml["content"]))
         self.common.log(u"CONTENT TYPE1: " + repr(type(xml["content"])))
+
         if xml["status"] == 200:
             subtitle = ""
             code = ""
@@ -124,30 +123,6 @@ class YouTubeSubtitleControl():
                         subtitle = sublist[i].replace(" ", "%20")
                         code = "en"
                         self.common.log(u"found subtitle default: " + subtitle + " - " + code)
-
-            # POC User selection code. Feel free to purge
-            if lang_code in codelist and False:
-                for i in range(0, len(codelist)):
-                    if codelist[i].find(lang_code) > -1:
-                        subtitle = sublist[i].replace(" ", "%20")
-                        code = codelist[i]
-                        self.common.log(u"found subtitle specified: " + subtitle + " - " + code)
-                        break
-            elif False:
-                choices = []
-                for i in range(0, len(codelist)):
-                    choices.append(codelist[i] + " - " + lang_original[i])
-                    self.common.log(u"TEST: " + codelist[i] + " - " + lang_original[i])
-                if len(choices) > 0:
-                    dialog = self.xbmcgui.Dialog()
-                    self.common.log(u"CONTENT TYPE2: " + repr(codelist) + repr(lang_original))
-                    selected = dialog.select("Select subtitle language", choices)
-
-                    if selected > -1:
-                        subtitle = sublist[selected].replace(" ", "%20")
-                        code = codelist[selected]
-                        self.common.log(u"found subtitle default: " + subtitle + " - " + code)
-                # POC Ends here
 
             if code:
                 url = self.urls["close_caption_url"] % (get("videoid"), code)
@@ -278,14 +253,14 @@ class YouTubeSubtitleControl():
         self.common.log(u"")
         result = u""
         ssa_fixes = []
-        style_template = "Style: annot%s,Arial,%s,&H%s&,&H%s&,&H%s&,&H%s&,0,0,3,3,0,1,0,0,0,0,0\r\n"
+        style_template = u"Style: annot%s,Arial,%s,&H%s&,&H%s&,&H%s&,&H%s&,0,0,3,3,0,1,0,0,0,0,0\r\n"
         styles_count = 0
-        append_style = ""
+        append_style = u""
         entries = self.common.parseDOM(xml, "annotation", ret=True)
         for node in entries:
             if node:
-                stype = "".join(self.common.parseDOM(node, "annotation", ret="type"))
-                style = "".join(self.common.parseDOM(node, "annotation", ret="style"))
+                stype = u"".join(self.common.parseDOM(node, "annotation", ret="type"))
+                style = u"".join(self.common.parseDOM(node, "annotation", ret="style"))
                 self.common.log(u"stype : " + stype, 5)
                 self.common.log(u"style : " + style, 5)
 
@@ -401,7 +376,7 @@ class YouTubeSubtitleControl():
             self.xbmc.Player().setSubtitles(path)
             self.common.log(u"added subtitle %s to playback" % path)
 
-    def getLocalFileSource(self, get, status, video):
+    def getLocalFileSource(self, get, video):
         result = u""
         if (get("action", "") != "download"):
             path = self.settings.getSetting("downloadPath")
