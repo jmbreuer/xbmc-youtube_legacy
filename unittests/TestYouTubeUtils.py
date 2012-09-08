@@ -32,7 +32,6 @@ class TestYouTubeUtils(BaseTestCase.BaseTestCase):
         
         sys.modules["__main__"].xbmc.skinHasImage.assert_called_with('YouTube - Unittest/DefaultFolder.png')
         assert(result == "DefaultFolder.png")
-        
 	
     def test_getThumbnail_should_user_thumbnail_path_to_resolve_file_paths(self):
         sys.modules["__main__"].settings.getAddonInfo.return_value = "testingPath/"
