@@ -5,9 +5,9 @@ import sys
 
 
 class TestYouTubePlayer(BaseTestCase.BaseTestCase):
-
     def test_plugin_should_play_standard_videos(self):
         sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
+        sys.modules["__main__"].cache.getMulti.return_value = ["7"]
 
         self.navigation.executeAction({"action": "play_video", "videoid": "54VJWHL2K3I"})
 
@@ -21,8 +21,41 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         assert(args[0][1]["handle"] == -1)
         assert(args[0][1]["succeeded"] == True)
 
-    def test_plugin_should_play_rtmpe_vidoes(self):
+    def test_plugin_should_play_standard_videos_flashvars_fallback(self):
         sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
+        sys.modules["__main__"].cache.getMulti.return_value = ["7"]
+
+        self.navigation.executeAction({"action": "play_video", "videoid": "54VJWHL2K3I", "use_flashvars": "true"})
+
+        args = sys.modules["__main__"].xbmcplugin.setResolvedUrl.call_args_list
+        print "Args: " + repr(args)
+        print repr("listitem" in args[0][1])
+        print repr(args[0][1]["handle"] == -1)
+        print repr(args[0][1]["succeeded"] == True)
+
+        assert("listitem" in args[0][1])
+        assert(args[0][1]["handle"] == -1)
+        assert(args[0][1]["succeeded"] == True)
+
+    def test_plugin_should_play_standard_videos_embed_fallback(self):
+        sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
+        sys.modules["__main__"].cache.getMulti.return_value = ["7"]
+
+        self.navigation.executeAction({"action": "play_video", "videoid": "54VJWHL2K3I", "embed": "true"})
+
+        args = sys.modules["__main__"].xbmcplugin.setResolvedUrl.call_args_list
+        print "Args: " + repr(args)
+        print repr("listitem" in args[0][1])
+        print repr(args[0][1]["handle"] == -1)
+        print repr(args[0][1]["succeeded"] == True)
+
+        assert("listitem" in args[0][1])
+        assert(args[0][1]["handle"] == -1)
+        assert(args[0][1]["succeeded"] == True)
+
+    def ttest_plugin_should_play_rtmpe_vidoes(self):
+        sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
+        sys.modules["__main__"].cache.getMulti.return_value = ["7"]
 
         self.navigation.executeAction({"action": "play_video", "videoid": "8wxOVn99FTE"})
 
@@ -38,6 +71,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 
     def test_plugin_should_play_live_vidoes(self):
         sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
+        sys.modules["__main__"].cache.getMulti.return_value = ["7"]
 
         self.navigation.executeAction({"action": "play_video", "videoid": "e8RnJYYlIvg"})
 
@@ -58,6 +92,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         sys.modules["__main__"].settings.setSetting("lang_code", "1")
         import os
         sys.modules["__main__"].xbmcvfs.exists.side_effect = os.path.exists
+        sys.modules["__main__"].cache.getMulti.return_value = ["7"]
         self.navigation.executeAction({"action": "play_video", "videoid": "bUcszN8jRB8"})
 
         args = sys.modules["__main__"].xbmcplugin.setResolvedUrl.call_args_list
@@ -79,6 +114,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         sys.modules["__main__"].settings.setSetting("lang_code", "1")
         import os
         sys.modules["__main__"].xbmcvfs.exists.side_effect = os.path.exists
+        sys.modules["__main__"].cache.getMulti.return_value = ["7"]
 
         self.navigation.executeAction({"action": "play_video", "videoid": "byv-wpqDydI"})  # This is JUST annotations for now.
 
@@ -99,6 +135,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
     def test_plugin_should_play_video_with_subtitle_other_than_english(self):
         sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
         sys.modules["__main__"].settings.setSetting("lang_code", "2")
+        sys.modules["__main__"].cache.getMulti.return_value = ["7"]
         import os
         sys.modules["__main__"].xbmcvfs.exists.side_effect = os.path.exists
 
@@ -117,31 +154,14 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         assert(args[0][1]["handle"] == -1)
         assert(args[0][1]["succeeded"] == True)
         assert(args2[0][0][0] == u"./tmp/ZEITGEIST MOVING FORWARD  OFFICIAL RELEASE  2011-[4Z9WVZddH9w]-ES.ssa")
-        assert(False)
 
     def ttest_plugin_should_play_geolocked_videos(self):
         sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
+        sys.modules["__main__"].cache.getMulti.return_value = ["7"]
         import os
         sys.modules["__main__"].xbmcvfs.exists.side_effect = os.path.exists
 
         self.navigation.executeAction({"action": "play_video", "videoid": "ha_NOX_-Aeg"})
-
-        args = sys.modules["__main__"].xbmcplugin.setResolvedUrl.call_args_list
-        print "Args: " + repr(args)
-        print repr("listitem" in args[0][1])
-        print repr(args[0][1]["handle"] == -1)
-        print repr(args[0][1]["succeeded"] == True)
-
-        assert("listitem" in args[0][1])
-        assert(args[0][1]["handle"] == -1)
-        assert(args[0][1]["succeeded"] == True)
-
-    def ttest_plugin_should_play_geolocked_videos_4oD(self):  # Need to find a stable video.
-        sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-proxy-uk.xml")
-        import os
-        sys.modules["__main__"].xbmcvfs.exists.side_effect = os.path.exists
-
-        self.navigation.executeAction({"action": "play_video", "videoid": "1aHKCQlyAL0"})
 
         args = sys.modules["__main__"].xbmcplugin.setResolvedUrl.call_args_list
         print "Args: " + repr(args)
