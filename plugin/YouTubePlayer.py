@@ -218,7 +218,6 @@ class YouTubePlayer():
         return video_url
 
     def userSelectsVideoQuality(self, params, links):
-        get = params.get
         link = links.get
         quality_list = []
         choices = []
@@ -304,17 +303,28 @@ class YouTubePlayer():
         self.common.log(u"Done : " + repr(status))
         return (video, status)
 
-    def _convertFlashVars(self, html):
-        self.common.log(repr(html))
-        obj = {"args": {}}
+    def extractFlashVars(self, data):
+        flashvars = {}
 
-        temp = html.split("&")
-        for item in temp:
-            self.common.log(item, 9)
-            it = item.split("=")
-            self.common.log(it, 9)
-            obj["args"][it[0]] = urllib.unquote_plus(it[1])
-        return obj
+        for line in data.split("\n"):
+            if line.strip().startswith("var swf = \""):
+                p1 = line.find("=")
+                p2 = line.rfind(";")
+                if p1 <= 0 or p2 <= 0:
+                    continue
+                data = line[p1 + 1:p2]
+                break
+
+        data = json.loads(data)
+        data = data[data.find("flashvars"):]
+        data = data[data.find("\""):]
+        data = data[:1 + data[1:].find("\"")]
+
+
+        for k, v in cgi.parse_qs(data).items():
+            flashvars[k] = v[0]
+
+        return flashvars
 
     def _getVideoLinks(self, video, params):
         self.common.log(u"trying website: " + repr(params))
@@ -327,33 +337,22 @@ class YouTubePlayer():
         if result["status"] != 200:
             return (links, video)
 
-        data = result
-
-        for line in data.split("\n"):
-            if line.strip().startswith("var swf = \""):
-                p1 = line.find("=")
-                p2 = line.rfind(";")
-                if p1 <= 0 or p2 <= 0:
-                    continue
-                data = line[p1+1:p2]
-                break
-
-        data = json.loads(data)
-        data = data[data.find("flashvars"):]
-        data = data[data.find("\""):]
-        data = data[:1+data[1:].find("\"")]
-
-        flashvars = {}
-        for k, v in cgi.parse_qs(data).items():
-            flashvars[k] = v[0]
+        flashvars = self.extractFlashVars(result["content"])
 
         if flashvars.has_key("ttsurl"):
             video["ttsurl"] = flashvars["ttsurl"]
 
         for url_desc in flashvars["url_encoded_fmt_stream_map"].split(","):
             url_desc_map = cgi.parse_qs(url_desc)
+
+            if not (url_desc_map.has_key("url") or url_desc_map.has_key("stream")):
+                continue
+
             key = int(url_desc_map["itag"][0])
-            links[key] = url_desc_map["url"][0]
+            if url_desc_map.has_key("url"):
+                links[key] = url_desc_map["url"][0]
+            elif url_desc_map.has_key("stream"):
+                links[key] = url_desc_map["stream"][0]
 
         if len(links) == 0:
             self.common.log(u"Couldn't find url map or stream map.")
