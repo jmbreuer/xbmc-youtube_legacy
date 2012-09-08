@@ -83,7 +83,7 @@ if (__name__ == "__main__" ):
     import YouTubeFeeds
     feeds = YouTubeFeeds.YouTubeFeeds()
     import YouTubeSubtitleControl
-    player = YouTubeSubtitleControl.YouTubeSubtitleControl()
+    subtitles = YouTubeSubtitleControl.YouTubeSubtitleControl()
     import YouTubePlayer
     player = YouTubePlayer.YouTubePlayer()
     import SimpleDownloader as downloader
