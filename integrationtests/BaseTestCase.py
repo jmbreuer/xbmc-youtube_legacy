@@ -53,8 +53,8 @@ class BaseTestCase(unittest2.TestCase):
         sys.modules["__main__"].login = YouTubeLogin.YouTubeLogin()
         import YouTubeFeeds
         sys.modules["__main__"].feeds = YouTubeFeeds.YouTubeFeeds()
-        import YouTubeScraper
-        sys.modules["__main__"].scraper = YouTubeScraper.YouTubeScraper()
+        import YouTubeSubtitleControl
+        sys.modules["__main__"].subtitles = YouTubeSubtitleControl.YouTubeSubtitleControl()
         import YouTubePlayer
         sys.modules["__main__"].player = YouTubePlayer.YouTubePlayer()
         import YouTubeScraper
