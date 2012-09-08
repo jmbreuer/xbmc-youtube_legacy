@@ -18,11 +18,7 @@
 
 import sys
 import urllib
-import re
-import os.path
-import time
 import codecs
-import urlparse
 try: import simplejson as json
 except ImportError: import json
 

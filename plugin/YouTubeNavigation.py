@@ -43,6 +43,7 @@ class YouTubeNavigation():
         self.downloader = sys.modules["__main__"].downloader
         self.storage = sys.modules["__main__"].storage
         self.scraper = sys.modules["__main__"].scraper
+        self.subtitles = sys.modules["__main__"].subtitles
 
         # This list contains the main menu structure the user first encounters when running the plugin
         #     label                        , path                                          , thumbnail                    ,  login                  ,  feed / action
@@ -248,10 +249,9 @@ class YouTubeNavigation():
             params["Title"] = video['Title']
             params["url"] = video['video_url']
             params["download_path"] = download_path
-            #filename = "%s-[%s].mp4" % (''.join(c for c in video['Title'].decode("utf-8") if c not in self.utils.INVALID_CHARS), video["videoid"])
             filename = "%s-[%s].mp4" % (''.join(c for c in video['Title'] if c not in self.utils.INVALID_CHARS), video["videoid"])
 
-            self.player.downloadSubtitle(video)
+            self.subtitles.downloadSubtitle(video)
             if get("async"):
                 self.downloader.download(filename, params, async=False)
             else:
