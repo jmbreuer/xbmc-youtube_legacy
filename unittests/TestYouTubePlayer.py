@@ -7,36 +7,6 @@ from YouTubePlayer import YouTubePlayer
 
 
 class TestYouTubePlayer(BaseTestCase.BaseTestCase):
-    def test_saveSubtitle_should_call_xbmcvfs_translatePath(self):
-        sys.modules["__main__"].xbmc.translatePath.return_value = "tempFilePath"
-        sys.modules["__main__"].common.makeUTF8.return_value = "testTitle"
-
-        player = YouTubePlayer()
-        player.getSubtitleFileName = Mock()
-
-        player.saveSubtitle("my_subtitle_stream", {"Title": "testTitle", "videoid": "someVideoId", "downloadPath": "downloadFilePath"})
-
-        sys.modules["__main__"].xbmc.translatePath.assert_called_with("somepath")
-
-    def test_saveSubtitle_should_call_xbmcvfs_rename(self):
-        sys.modules["__main__"].xbmc.translatePath.return_value = "tempFilePath"
-        sys.modules["__main__"].common.makeUTF8.return_value = "testTitle"
-        player = YouTubePlayer()
-        player.getSubtitleFileName = Mock(return_value="testTitle-[someVideoId].ssa")
-
-        player.saveSubtitle("my_subtitle_stream", {"Title": "testTitle", "videoid": "someVideoId", "downloadPath": "downloadFilePath"})
-
-        sys.modules["__main__"].xbmcvfs.rename.assert_called_with("tempFilePath/testTitle-[someVideoId].ssa", "downloadFilePath/testTitle-[someVideoId].ssa")
-
-    def test_saveSubtitle_should_call_openFile_with_correct_params(self):
-        sys.modules["__main__"].xbmc.translatePath.return_value = "tempFilePath"
-        sys.modules["__main__"].common.makeUTF8.return_value = "testTitle"
-        player = YouTubePlayer()
-        player.getSubtitleFileName = Mock(return_value="testTitle-[someVideoId].ssa")
-
-        player.saveSubtitle("my_subtitle_stream", {"Title": "testTitle", "videoid": "someVideoId", "downloadPath": "downloadFilePath"})
-
-        sys.modules["__main__"].storage.openFile.assert_called_with("tempFilePath/testTitle-[someVideoId].ssa", "w") # was "wb"
 
     def test_getVideoUrlMap_should_return_empty_dictionary_on_missing_map(self):
         player = YouTubePlayer()
@@ -52,15 +22,6 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 
         assert(len(result) == 11)
         keys = [5, 18, 22, 34, 35, 37, 43, 44, 45, 82, 84]
-        for key in keys:
-            assert(key in result)
-
-    def ttest_getVideoUrlMap_should_parse_rtmpe(self): #Disabled for now
-        player = YouTubePlayer()
-        result = player.getVideoUrlMap(self.readTestInput("rtmpMapTest2.txt"), {})
-        print repr(result)
-        assert(len(result) == 1)
-        keys = [78]
         for key in keys:
             assert(key in result)
 
@@ -107,371 +68,6 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         assert(len(result) == 1)
         assert(34 in result)
 
-    def test_downloadSubtitle_should_call_transformSubtitleToSSA(self):
-        player = YouTubePlayer()
-        sys.modules["__main__"].core._fetchPage = Mock()
-        sys.modules["__main__"].core._fetchPage.return_value = {"status": 200, "content": "nothingness"}
-        subtitlesettings = ["false", "0", "true"]
-        sys.modules["__main__"].settings.getSetting = Mock()
-        sys.modules["__main__"].settings.getSetting.side_effect = lambda x: subtitlesettings.pop()
-        player.transformAnnotationToSSA = Mock()
-        player.transformAnnotationToSSA.return_value = ("", "style")
-
-        player.downloadSubtitle()
-
-        player.transformAnnotationToSSA.assert_called_with("nothingness")
-
-    def test_downloadSubtitle_should_call_saveSubtitle(self):
-        player = YouTubePlayer()
-        sys.modules["__main__"].core._fetchPage = Mock()
-        sys.modules["__main__"].core._fetchPage.return_value = {"status": 200, "content": "nothingness"}
-        subtitlesettings = ["false", "0", "true"]
-        sys.modules["__main__"].settings.getSetting = Mock()
-        sys.modules["__main__"].settings.getSetting.side_effect = lambda x: subtitlesettings.pop()
-        player.transformAnnotationToSSA = Mock()
-        player.transformAnnotationToSSA.return_value = ("something", "style")
-        player.saveSubtitle = Mock()
-
-        result = player.downloadSubtitle()
-
-        assert(result == True)
-        assert(player.saveSubtitle.called)
-
-    def test_downloadSubtitle_should_call_getSubtitleUrl(self):
-        player = YouTubePlayer()
-        sys.modules["__main__"].core._fetchPage = Mock()
-        sys.modules["__main__"].core._fetchPage.return_value = {"status": 200, "content": "nothingness"}
-
-        subtitlesettings = ["false", "2", "true"]
-
-        sys.modules["__main__"].settings.getSetting = Mock()
-        sys.modules["__main__"].settings.getSetting.side_effect = lambda x: subtitlesettings.pop()
-        player.transformAnnotationToSSA = Mock()
-        player.transformAnnotationToSSA.return_value = ("", "style")
-        player.getSubtitleUrl = Mock()
-        player.getSubtitleUrl.return_value = ""
-
-        player.downloadSubtitle()
-
-        player.getSubtitleUrl.assert_called_with({})
-
-    def test_downloadSubtitle_should_call_getTranscriptionUrl(self):
-        player = YouTubePlayer()
-        sys.modules["__main__"].core._fetchPage = Mock()
-        sys.modules["__main__"].core._fetchPage.return_value = {"status": 200, "content": "nothingness"}
-        subtitlesettings = ["true", "2", "true"]
-
-        sys.modules["__main__"].settings.getSetting = Mock()
-        sys.modules["__main__"].settings.getSetting.side_effect = lambda x: subtitlesettings.pop()
-        player.transformAnnotationToSSA = Mock()
-        player.transformAnnotationToSSA.return_value = ("", "style")
-        player.getSubtitleUrl = Mock()
-        player.getSubtitleUrl.return_value = ""
-        player.getTranscriptionUrl = Mock()
-        player.getTranscriptionUrl.return_value = ""
-
-        player.downloadSubtitle()
-
-        player.getTranscriptionUrl.assert_called_with({})
-
-    def test_convertSecondsToTimestamp_should_convert(self):
-        player = YouTubePlayer()
-
-        res = player.convertSecondsToTimestamp(250.43800000000002)
-        print repr(res)
-
-        assert(res == "0:04:10.438")
-
-    def test_downloadSubtitle_should_call_transformSubtitleXMLtoSRT(self):
-        player = YouTubePlayer()
-        sys.modules["__main__"].core._fetchPage = Mock()
-        sys.modules["__main__"].core._fetchPage.return_value = {"status": 200, "content": "nothingness"}
-
-        subtitlesettings = ["true", "2", "true"]
-
-        sys.modules["__main__"].settings.getSetting = Mock()
-        sys.modules["__main__"].settings.getSetting.side_effect = lambda x: subtitlesettings.pop()
-        player.transformAnnotationToSSA = Mock()
-        player.transformAnnotationToSSA.return_value = ("", "style")
-        player.getSubtitleUrl = Mock()
-        player.getSubtitleUrl.return_value = ""
-        player.getTranscriptionUrl = Mock()
-        player.getTranscriptionUrl.return_value = "something"
-        player.transformSubtitleXMLtoSRT = Mock()
-        player.transformSubtitleXMLtoSRT.return_value = ""
-
-        player.downloadSubtitle()
-
-        player.transformSubtitleXMLtoSRT.assert_called_with("nothingness")
-
-    def test_downloadSubtitle_should_exit_gracefully_if_subtitles_and_annotations_are_disabled(self):
-        player = YouTubePlayer()
-
-        subtitlessettings = ["false", "0", "false"]
-
-        def popSetting(self, *args, **kwargs):
-            val = subtitlessettings.pop()
-            return val
-
-        sys.modules["__main__"].settings.getSetting = Mock()
-        sys.modules["__main__"].settings.getSetting.side_effect = popSetting
-
-        result = player.downloadSubtitle()
-
-        assert(result == False)
-
-    def test_getSubtitleUrl_should_call_fetchPage_with_correct_url(self):
-        player = YouTubePlayer()
-        sys.modules["__main__"].core._fetchPage = Mock()
-        sys.modules["__main__"].core._fetchPage.return_value = {"status": 303, "content": ""}
-
-        player.getSubtitleUrl({"videoid": "some_id"})
-
-        sys.modules["__main__"].core._fetchPage.assert_called_with({"link": player.urls["timed_text_index"] % ('some_id')})
-
-    def test_getTranscriptionUrl_should_call_return_correct_url(self):
-        player = YouTubePlayer()
-        sys.modules["__main__"].core._fetchPage = Mock()
-        sys.modules["__main__"].core._fetchPage.return_value = {"status": 303, "content": ""}
-        sys.modules["__main__"].settings.getSetting = Mock()
-        sys.modules["__main__"].settings.getSetting.return_value = "1"
-        ret = player.getTranscriptionUrl({"videoid": "some_id", "ttsurl": "http://some.url/transcript"})
-        print ret
-        assert(ret == "http://some.url/transcript&type=trackformat=1&lang=en&kind=asr&name=&v=some_id&tlang=en")
-
-    def test_getSubtitleUrl_should_find_url_with_proper_language_code(self):
-        player = YouTubePlayer()
-        sys.modules["__main__"].core._fetchPage = Mock()
-        sys.modules["__main__"].core._fetchPage.return_value = {"status": 200, "content": self.readTestInput("timedtextDirectoryTest.xml", False)}
-        sys.modules["__main__"].settings.getSetting = Mock()
-        sys.modules["__main__"].settings.getSetting.return_value = "3"
-        sys.modules["__main__"].common.parseDOM.side_effect = [["de"], ["german"], ["deutch"]]
-        sys.modules["__main__"].core.getYTCache = Mock()
-
-        url = player.getSubtitleUrl({"videoid": "some_id"})
-        print repr(url)
-
-        assert(url.find("lang=de") > 0)
-
-    def test_getSubtitleUrl_should_fall_back_to_english_if_proper_language_code_is_not_found(self):
-        player = YouTubePlayer()
-        sys.modules["__main__"].core._fetchPage = Mock()
-        sys.modules["__main__"].core._fetchPage.return_value = {"status": 200, "content": self.readTestInput("timedtextDirectoryTest.xml", False)}
-        sys.modules["__main__"].core.getYTCache = Mock()
-        sys.modules["__main__"].settings.getSetting = Mock()
-        sys.modules["__main__"].settings.getSetting.return_value = "2"
-        sys.modules["__main__"].common.parseDOM.side_effect = [["en"], ["english"], ["english"]]
-
-        url = player.getSubtitleUrl({"videoid": "some_id"})
-
-        assert(url.find("lang=en") > 0)
-
-    def test_transformSubtitleXMLtoSRT_should_parse_youtube_subtitle_xml(self):
-        player = YouTubePlayer()
-        sys.modules["__main__"].common.replaceHTMLCodes = Mock()
-        sys.modules["__main__"].common.replaceHTMLCodes.side_effect = lambda x: x.encode("ascii", 'ignore')
-        sys.modules["__main__"].common.parseDOM.side_effect = [["content"] * 3, ["content"], ["00"], ["10"], ["content1"], ["20"], ["30"], ["content3"], ["40"], ["50"]]
-
-        result = player.transformSubtitleXMLtoSRT(self.readTestInput("subtitleTest.xml", False))
-
-        assert(len(result.split("\r\n")) == 4)
-
-    def test_transformSubtitleXMLtoSRT_should_call_replaceHTMLCodes_for_user_visible_text(self):
-        sys.modules["__main__"].common.parseDOM.side_effect = [["content TEXT"] * 2, ["text"], ["14.017"], ["2.07"], ["text"], ["16.087"], ["2.996"]]
-        player = YouTubePlayer()
-        player.simpleReplaceHTMLCodes = Mock()
-        player.simpleReplaceHTMLCodes.side_effect = lambda x: x.encode("ascii", 'ignore')
-
-        result = player.transformSubtitleXMLtoSRT(self.readTestInput("subtitleTest.xml", False))
-
-        print repr(result)
-
-        assert(player.simpleReplaceHTMLCodes.call_count > 0)
-
-    def test_transformSubtitleXMLtoSRT_should_correctly_find_start_time_for_text_elements(self):
-        input = '<?xml version="1.0" encoding="utf-8" ?><transcript>\n\
-                <text start="14.017" dur="2.07">first</text>\n\
-                <text start="16.087" dur="2.996">second</text>\n\
-                </transcript>'
-        player = YouTubePlayer()
-        sys.modules["__main__"].common.replaceHTMLCodes = Mock()
-        sys.modules["__main__"].common.replaceHTMLCodes.side_effect = lambda x: x.encode("ascii", 'ignore')
-        sys.modules["__main__"].common.parseDOM.side_effect = [["content TEXT"] * 2, ["text"], ["14.017"], ["2.07"], ["text"], ["16.087"], ["2.996"]]
-
-        result = player.transformSubtitleXMLtoSRT(input).split("\r\n")
-
-        assert(result[0].find("Marked=0,0:00:14.017") > 0)
-        assert(result[1].find("Marked=0,0:00:16.087") > 0)
-
-    def test_transformSubtitleXMLtoSRT_should_correctly_recalculate_duration_time_for_text_elements(self):
-        input = '<?xml version="1.0" encoding="utf-8" ?><transcript>\n\
-                <text start="14.017" dur="2.07">first</text>\n\
-                <text start="16.087" dur="2.996">second</text>\n\
-                </transcript>'
-        player = YouTubePlayer()
-        sys.modules["__main__"].common.replaceHTMLCodes = Mock()
-        sys.modules["__main__"].common.replaceHTMLCodes.side_effect = lambda x: x.encode("ascii", 'ignore')
-        sys.modules["__main__"].common.parseDOM.side_effect = [["content TEXT"] * 2, ["text"], ["14.017"], ["2.07"], ["text"], ["16.087"], ["2.996"]]
-
-        result = player.transformSubtitleXMLtoSRT(input).split("\r\n")
-
-        assert(result[0].find("0:00:16.087,Default") > 0)
-        assert(result[1].find("0:00:19.083,Default") > 0)
-
-    def test_transformAlpha_should_tranform_transparent(self):
-        player = YouTubePlayer()
-
-        color = player.transformAlpha("0.0")
-        print color
-        assert(color == "-1")
-
-    def test_transformAlpha_should_tranform_80(self):
-        player = YouTubePlayer()
-
-        color = player.transformAlpha("0.800000011921")
-        print color
-        assert(color == "34")
-
-    def test_transformColor_should_convert_white(self):
-        player = YouTubePlayer()
-
-        color = player.transformColor("16777215")
-        print color
-        assert(color == "ffffff")
-
-    def test_transformColor_should_convert_red(self):
-        player = YouTubePlayer()
-
-        color = player.transformColor("13369344")
-        print color
-        assert(color == "0000cc")
-
-    def test_transformColor_should_convert_blue(self):
-        player = YouTubePlayer()
-
-        color = player.transformColor("9828")
-        print color
-        assert(color == "642600")
-
-    def test_transformColor_should_convert_0(self):
-        player = YouTubePlayer()
-
-        color = player.transformColor("0")
-        print color
-        assert(color == "000000")
-
-    def test_transformAnnotationToSSA_should_parse_youtube_annotations_xml(self):
-        player = YouTubePlayer()
-        sys.modules["__main__"].common.replaceHTMLCodes = Mock()
-        sys.modules["__main__"].common.replaceHTMLCodes.side_effect = lambda x: x.encode("ascii", 'ignore')
-        sys.modules["__main__"].common.parseDOM.side_effect = [["content TEXT"], ["TEXT"], ["popup"], ["popup"], ["0:00:06.5", "0:01:06.5"], [0], [0], [0], [0], [["snode"]], ["16777215"], ["26777215"], ["36777215"], ["46777215"]]
-
-        (result, style) = player.transformAnnotationToSSA(self.readTestInput("annotationsTest.xml", False).encode("utf-8"))
-        print repr(result)
-        assert(len(result.split("\r\n")) == 2)
-
-    def test_transformAnnotationToSSA_should_call_replaceHTMLCodes_for_user_visible_text(self):
-        player = YouTubePlayer()
-        sys.modules["__main__"].common.replaceHTMLCodes = Mock()
-        sys.modules["__main__"].common.replaceHTMLCodes.side_effect = lambda x: x.encode("ascii", 'ignore')
-        sys.modules["__main__"].common.parseDOM.side_effect = [["content TEXT"], ["TEXT"], ["bla"], ["bla2"], []]
-
-        result = player.transformAnnotationToSSA(self.readTestInput("annotationsTest.xml", False).encode("utf-8"))
-        print repr(result)
-
-        assert(sys.modules["__main__"].common.replaceHTMLCodes.call_count > 0)
-
-    def test_addSubtitles_should_call_downloadSubtitle(self):
-        player = YouTubePlayer()
-
-        sys.modules["__main__"].common.makeUTF8.return_value = "testTitle"
-        sys.modules["__main__"].settings.getSetting = Mock()
-        sys.modules["__main__"].settings.getSetting.return_value = "testDownloadPath"
-        sys.modules["__main__"].xbmcvfs.exists.return_value = False
-        player.downloadSubtitle = Mock()
-        player.getSubtitleFileName = Mock(return_value="testTitle-[testid].ssa")
-        player.downloadSubtitle.return_value = False
-
-        player.addSubtitles({"videoid": "testid", "Title": "testTitle"})
-
-        player.downloadSubtitle.assert_called_with({"videoid": "testid", "Title": "testTitle"})
-
-    def test_addSubtitles_should_check_if_subtitle_exists_locally_before_calling_downloadSubtitle(self):
-        player = YouTubePlayer()
-
-        settings = [False, True]
-        sys.modules["__main__"].settings.getSetting.return_value = "testDownloadPath"
-        sys.modules["__main__"].xbmcvfs.exists.side_effect = lambda x: settings.pop()
-        sys.modules["__main__"].common.makeUTF8.return_value = "testTitle"
-        player.downloadSubtitle = Mock()
-        player.getSubtitleFileName = Mock(return_value="testTitle-[testid].ssa")
-        player.downloadSubtitle.return_value = False
-
-        player.addSubtitles({"videoid": "testid", "Title": "testTitle"})
-
-        sys.modules["__main__"].xbmcvfs.exists.assert_called_with('testDownloadPath/testTitle-[testid].ssa')
-        assert(player.downloadSubtitle.call_count == 0)
-
-    def test_addSubtitles_should_call_xbmcs_setSubtitles(self):
-        sys.modules["__main__"].settings.getSetting.return_value = "testDownloadPath"
-        sys.modules["__main__"].xbmcvfs.exists.return_value = True
-        sys.modules["__main__"].common.makeUTF8.return_value = "testTitle"
-        player = YouTubePlayer()
-        player.getSubtitleFileName = Mock(return_value="testTitle-[testid].ssa")
-        player.downloadSubtitle = Mock()
-        player.downloadSubtitle.return_value = True
-
-        player.addSubtitles({"videoid": "testid", "Title": "testTitle"})
-
-        sys.modules["__main__"].xbmcvfs.exists.assert_called_with('testDownloadPath/testTitle-[testid].ssa')
-        sys.modules["__main__"].xbmc.Player().setSubtitles.assert_called_with('testDownloadPath/testTitle-[testid].ssa')
-
-    def test_addSubtitles_should_sleep_for_1_second_if_player_isnt_ready(self):
-        sys.modules["__main__"].settings.getSetting.return_value = "testDownloadPath"
-        sys.modules["__main__"].xbmcvfs.exists.return_value = True
-        sys.modules["__main__"].xbmc.Player().isPlaying.side_effect = [False, True] 
-        sys.modules["__main__"].common.makeUTF8.return_value = "testTitle"
-        patcher = patch("time.sleep")
-        patcher.start()
-        sleep = Mock()
-        import time
-        time.sleep = sleep
-        player = YouTubePlayer()
-        player.getSubtitleFileName = Mock(return_value="testTitle-[testid].ssa")
-        player.downloadSubtitle = Mock()
-        player.downloadSubtitle.return_value = True
-
-        player.addSubtitles({"videoid": "testid", "Title": "testTitle"})
-
-        patcher.stop()
-        sleep.assert_any_call(1)
-
-    def test_addSubtitles_should_check_if_subtitle_exists_locally_before_calling_xbmcs_setSubtitles(self):
-        player = YouTubePlayer()
-        player.getSubtitleFileName = Mock(return_value="testTitle-[testid].ssa")
-        sys.modules["__main__"].settings.getSetting.return_value = "testDownloadPath"
-        sys.modules["__main__"].xbmcvfs.exists.return_value = True
-        sys.modules["__main__"].common.makeUTF8.return_value = "testTitle"
-        player.downloadSubtitle = Mock()
-        player.downloadSubtitle.return_value = False
-
-        player.addSubtitles({"videoid": "testid", "Title": "testTitle"})
-
-        sys.modules["__main__"].xbmcvfs.exists.assert_called_with('testDownloadPath/testTitle-[testid].ssa')
-        assert(player.downloadSubtitle.call_count == 0)
-        sys.modules["__main__"].xbmc.Player().setSubtitles.assert_called_with('testDownloadPath/testTitle-[testid].ssa')
-
-    def test_addSubtitles_should_wait_for_playback_to_start_before_adding_subtitle(self):
-        player = YouTubePlayer()
-        player.getSubtitleFileName = Mock(return_value="testTitle-[testid].ssa")
-        sys.modules["__main__"].settings.getSetting.return_value = "testDownloadPath"
-        sys.modules["__main__"].xbmcvfs.exists.return_value = True
-        sys.modules["__main__"].common.makeUTF8.return_value = "testTitle"
-        player.addSubtitles({"videoid": "testid", "Title": "testTitle"})
-
-        sys.modules["__main__"].xbmc.Player().isPlaying.assert_called_with()
-        sys.modules["__main__"].xbmc.Player().setSubtitles.assert_called_with('testDownloadPath/testTitle-[testid].ssa')
-
     def test_playVideo_should_call_getVideoObject(self):
         player = YouTubePlayer()
         player.getVideoObject = Mock(return_value=[{"apierror": "some error"}, 303])
@@ -507,13 +103,12 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         sys.modules["__main__"].settings.getSetting.return_value = "1"
         sys.argv = ["test1", "1", "test2"]
         player = YouTubePlayer()
-        player.addSubtitles = Mock()
         player.getVideoObject = Mock()
         player.getVideoObject.return_value = (video, 200)
 
         player.playVideo({"videoid": "some_id"})
 
-        player.addSubtitles.assert_called_with(video)
+        sys.modules["__main__"].subtitles.addSubtitles.assert_called_with(video)
 
     def test_playVideo_should_call_remove_from_watch_later_if_viewing_video_from_watch_later_queue(self):
         player = YouTubePlayer()
@@ -735,87 +330,73 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 
         player.getInfo.assert_called_with({})
 
-    def test_getVideoObject_should_ttest_if_local_file_exists_if_download_path_is_set(self):
+    def test_getVideoObject_should_use_local_file_for_playback_if_found(self):
+        sys.modules["__main__"].subtitles.getLocalFileSource.return_value = "somePath/someTitle.mp4"
         params = {"videoid": "some_id"}
-        sys.modules["__main__"].settings.getSetting.return_value = "somePath/"
-        sys.modules["__main__"].xbmcvfs.exists.return_value = False
-        sys.modules["__main__"].common.makeUTF8.return_value = "someTitle"
         player = YouTubePlayer()
         player.getInfo = Mock()
-        player.getInfo.return_value = ({"videoid": "some_id", "Title": "someTitle"}, 200)
+        video = {"videoid": "some_id", "Title": "someTitle"}
+        player.getInfo.return_value = (video, 200)
+
+        (video, status) = player.getVideoObject(params)
+
+        assert(video["video_url"] == "somePath/someTitle.mp4")
+
+    def test_getVideoObject_should_not_scrape_webpage_if_local_file_is_found(self):
+        sys.modules["__main__"].subtitles.getLocalFileSource.return_value = "somePath/someTitle.mp4"
+        params = {"videoid": "some_id"}
+        player = YouTubePlayer()
+        player.getInfo = Mock()
         player._getVideoLinks = Mock()
-        player._getVideoLinks.return_value = ({}, {})
+        video = {"videoid": "some_id", "Title": "someTitle"}
+        player.getInfo.return_value = (video, 200)
 
         player.getVideoObject(params)
 
-        sys.modules["__main__"].xbmcvfs.exists.assert_called_with("somePath/someTitle-[some_id].mp4")
+        assert(player._getVideoLinks.call_count == 0)
 
-    def test_getVideoObject_should_use_local_file_for_playback_if_found(self):
-        sys.modules["__main__"].settings.getSetting.return_value = "somePath/"
-        sys.modules["__main__"].xbmcvfs.exists.return_value = True
-        sys.modules["__main__"].common.makeUTF8.return_value = "someTitle"
+    def test_getVideoObject_should_check_for_local_file_before_scraping(self):
+        sys.modules["__main__"].subtitles.getLocalFileSource.return_value = "somePath/someTitle.mp4"
         params = {"videoid": "some_id"}
         player = YouTubePlayer()
         player.getInfo = Mock()
-        player.getInfo.return_value = ({"videoid": "some_id", "Title": "someTitle"}, 200)
-        player._getVideoLinks = Mock()
-        player._getVideoLinks.return_value = ({}, {})
+        video = {"videoid": "some_id", "Title": "someTitle"}
+        player.getInfo.return_value = (video, 200)
 
         (video, status) = player.getVideoObject(params)
 
-        sys.modules["__main__"].xbmcvfs.exists.assert_called_with("somePath/someTitle-[some_id].mp4")
-        assert(player._getVideoLinks.call_count == 0)
-        assert(video["video_url"] == "somePath/someTitle-[some_id].mp4")
+        sys.modules["__main__"].subtitles.getLocalFileSource.assert_called_with(params, video)
 
     def test_getVideoObject_should_call_getVideoLinks_if_local_file_not_found(self):
+        sys.modules["__main__"].subtitles.getLocalFileSource.return_value = ""
         params = {"videoid": "some_id"}
-        sys.modules["__main__"].settings.getSetting.return_value = "somePath/"
-        sys.modules["__main__"].xbmcvfs.exists.return_value = False
-        sys.modules["__main__"].common.makeUTF8.return_value = "someTitle"
         player = YouTubePlayer()
         player.getInfo = Mock()
-        player.getInfo.return_value = ({"videoid": "some_id", "Title": "someTitle"}, 200)
         player._getVideoLinks = Mock()
         player._getVideoLinks.return_value = ({}, {})
+        video = {"videoid": "some_id", "Title": "someTitle"}
+        player.getInfo.return_value = (video, 200)
 
-        (video, status) = player.getVideoObject(params)
+        player.getVideoObject(params)
 
-        sys.modules["__main__"].xbmcvfs.exists.assert_called_with("somePath/someTitle-[some_id].mp4")
-        assert(player._getVideoLinks.call_count > 0)
+        player._getVideoLinks.assert_any_call(video, params)
 
     def test_getVideoObject_should_call_selectVideoQuality_if_local_file_not_found_and_remote_links_found(self):
+        sys.modules["__main__"].subtitles.getLocalFileSource.return_value = ""
         params = {"videoid": "some_id"}
-        sys.modules["__main__"].settings.getSetting.return_value = "somePath/"
-        sys.modules["__main__"].xbmcvfs.exists.return_value = False
-        sys.modules["__main__"].common.makeUTF8.return_value = "someTitle"
+        video = {"videoid": "some_id", "Title": "someTitle"}
+
         player = YouTubePlayer()
         player.getInfo = Mock()
-        player.getInfo.return_value = ({"videoid": "some_id", "Title": "someTitle"}, 200)
+        player.getInfo.return_value = (video, 200)
+
         player._getVideoLinks = Mock()
         player._getVideoLinks.return_value = ({22: "720p"}, {})
         player.selectVideoQuality = Mock()
 
-        (video, status) = player.getVideoObject(params)
+        player.getVideoObject(params)
 
-        sys.modules["__main__"].xbmcvfs.exists.assert_called_with("somePath/someTitle-[some_id].mp4")
         player.selectVideoQuality.assert_called_with({22: "720p"}, params)
-        assert(player._getVideoLinks.call_count > 0)
-
-    def test_getVideoObject_should_handle_accents_and_utf8(self):
-        params = {"videoid": "some_id"}
-        sys.modules["__main__"].settings.getSetting.return_value = u"somePathé/".encode("utf-8")
-        sys.modules["__main__"].xbmcvfs.exists.return_value = False
-        sys.modules["__main__"].common.makeUTF8.return_value = u"\u05e0\u05dc\u05d4 \u05de\u05d4\u05d9\u05e4\u05d4 \u05d5\u05d4\u05d7\u05e0\u05d5\u05df \u05d1\u05e1\u05d8\u05e8\u05d9\u05e4 \u05e6'\u05d0\u05d8 \u05d1\u05e7\u05dc\u05d9\u05e4 \u05e9\u05dc \u05d7\u05d5\u05d1\u05d1\u05d9 \u05e6\u05d9\u05d5\u05df"
-        player = YouTubePlayer()
-        player.getInfo = Mock()
-        player.getInfo.return_value = ({"videoid": "some_id", "Title": u"נלה מהיפה והחנון בסטריפ צ'אט בקליפ של חובבי ציון".encode("utf-8")}, 200)
-        player._getVideoLinks = Mock()
-        player._getVideoLinks.return_value = ([], {})
-        player.selectVideoQuality = Mock()
-
-        (video, status) = player.getVideoObject(params)
-
-        sys.modules["__main__"].xbmcvfs.exists.assert_called_with(u"somePath\xe9/\u05e0\u05dc\u05d4 \u05de\u05d4\u05d9\u05e4\u05d4 \u05d5\u05d4\u05d7\u05e0\u05d5\u05df \u05d1\u05e1\u05d8\u05e8\u05d9\u05e4 \u05e6'\u05d0\u05d8 \u05d1\u05e7\u05dc\u05d9\u05e4 \u05e9\u05dc \u05d7\u05d5\u05d1\u05d1\u05d9 \u05e6\u05d9\u05d5\u05df-[some_id].mp4")
 
     def test_getVideoObject_should_use_pre_defined_error_messages_on_missing_url(self):
         sys.modules["__main__"].settings.getSetting.return_value = ""
@@ -863,27 +444,6 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         print repr(result)
         assert(result[0] == [])
         assert(result[1] == {'apierror': u'Ugyldige parametre.'})
-
-    def ttest_getVideoLinks_should_parse_playerconfig_for_rtmpe(self):
-        player = YouTubePlayer()
-        # watch-8wxOVn99FTE-rtmpe.html
-        sys.modules["__main__"].core._fetchPage.return_value = {"status": 200, "content": self.readTestInput("watch-8wxOVn99FTE-rtmpe.html", False)}
-        sys.modules["__main__"].common.parseDOM.return_value = ""
-
-        result = player._getVideoLinks({}, {"videoid": "some_id"})
-        print repr(result)
-        assert(result == self.readTestInput("rtmpMapTest.txt"))
-
-    def ttest_getVideoLinks_should_parse_flashvars(self): #This is a bad test.
-        player = YouTubePlayer()
-
-        sys.modules["__main__"].core._fetchPage.return_value = {"status": 200, "content": self.readTestInput("watch-gyzlwNvf8ss-standard-without-playerconfig.html", False)}
-        sys.modules["__main__"].common.parseDOM.return_value = [self.readTestInput("watch-gyzlwNvf8ss-flashvars.txt", False)]
-        sys.modules["__main__"].common.extractJS.side_effect = [[], ["flashvars"]]
-
-        result = player._getVideoLinks({}, {"videoid": "some_id"})
-        print repr(result)
-        assert(result == self.readTestInput("flashvars-gyzlwNvf8ss-map-test.txt"))
 
     def test_getVideoLinks_should_parse_flashvars_from_embed(self):
         player = YouTubePlayer()
