@@ -59,12 +59,7 @@ class YouTubePlayer():
     urls = {}
     urls['video_stream'] = "http://www.youtube.com/watch?v=%s&safeSearch=none"
     urls['embed_stream'] = "http://www.youtube.com/get_video_info?video_id=%s"
-    urls['timed_text_index'] = "http://www.youtube.com/api/timedtext?type=list&v=%s"
     urls['video_info'] = "http://gdata.youtube.com/feeds/api/videos/%s"
-    urls['close_caption_url'] = "http://www.youtube.com/api/timedtext?type=track&v=%s&lang=%s"
-    urls['transcription_url'] = "http://www.youtube.com/api/timedtext?sparams=asr_langs,caps,expire,v&asr_langs=en,ja&caps=asr&expire=%s&key=yttt1&signature=%s&hl=en&type=trackformat=1&lang=en&kind=asr&name=&v=%s&tlang=en"
-    urls['annotation_url'] = "http://www.youtube.com/annotations/read2?video_id=%s&feat=TC"
-    urls['remove_watch_later'] = "http://www.youtube.com/addto_ajax?action_delete_from_playlist=1"
 
     def __init__(self):
         self.xbmc = sys.modules["__main__"].xbmc
@@ -377,19 +372,6 @@ class YouTubePlayer():
             return link(quality)
 
         return ""
-
-    def getLocalFileSource(self, get, status, video):
-        result = u""
-        if (get("action", "") != "download"):
-            path = self.settings.getSetting("downloadPath")
-            filename = ''.join(c for c in self.common.makeUTF8(video['Title']) if c not in self.utils.INVALID_CHARS) + "-[" + get('videoid') + "]" + ".mp4"
-            path = os.path.join(path.decode("utf-8"), filename)
-            try:
-                if self.xbmcvfs.exists(path):
-                    result = path
-            except:
-                self.common.log(u"failed to locate local subtitle file, trying youtube instead")
-        return result
 
     def getVideoObject(self, params):
         self.common.log(repr(params))
