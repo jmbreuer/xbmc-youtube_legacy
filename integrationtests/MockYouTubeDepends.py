@@ -59,8 +59,8 @@ class MockYouTubeDepends:
         sys.modules["__main__"].xbmcvfs.exists.return_value = False
         import xbmcSettings
         sys.modules["__main__"].settings = xbmcSettings.xbmcSettings()
-        import xbmcSettings
         sys.modules["__main__"].settingsDL = xbmcSettings.xbmcSettings()
+
         import xbmcLanguage
         sys.modules["__main__"].language = xbmcLanguage.xbmcLanguage()
 
