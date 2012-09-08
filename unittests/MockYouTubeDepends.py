@@ -46,8 +46,8 @@ class MockYouTubeDepends:
         sys.modules["__main__"].login = Mock(spec=YouTubeLogin.YouTubeLogin)
         import YouTubeFeeds
         sys.modules["__main__"].feeds = Mock(spec=YouTubeFeeds.YouTubeFeeds)
-        import YouTubeScraper
-        sys.modules["__main__"].scraper = Mock(spec=YouTubeScraper.YouTubeScraper)
+        import YouTubeSubtitleControl
+        sys.modules["__main__"].subtitles = Mock(spec=YouTubeSubtitleControl.YouTubeSubtitleControl)
         import YouTubePlayer
         sys.modules["__main__"].player = Mock(spec=YouTubePlayer.YouTubePlayer)
         sys.modules["__main__"].downloader = Mock()
