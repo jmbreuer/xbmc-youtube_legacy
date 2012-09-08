@@ -111,24 +111,7 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
         navigation.listMenu({"path": "/root/some_other_path"})
         
         sys.modules["__main__"].settings.getSetting.assert_called_with("list_view")
-        
-    def ttest_listMenu_should_call_settings_getSetting_to_get_listview_twice(self):
-        sys.argv = ["something", -1, "something_else"]
-        settings = ["0", "0", "true"]
-        sys.modules["__main__"].settings.getSetting.side_effect = lambda x: settings.pop()
-        navigation = YouTubeNavigation()
-        navigation.list = Mock()
-        navigation.addListItem = Mock()
-        
-        navigation.listMenu({"path": "/root/some_other_path", "scraper": "shows"})
-        
-        sys.modules["__main__"].settings.getSetting.assert_called_with("list_view")
-        counter = 0
-        for arg in sys.modules["__main__"].settings.getSetting.call_args_list:
-                if arg[0][0] == "list_view":
-                    counter +=1
-        assert(counter == 2)
-        
+
     def test_listMenu_should_call_xbmc_executeBuiltin_correctly_if_list_view_is_set(self):
         sys.argv = ["something", -1, "something_else"]
         settings = ["1", "true", "1"]
@@ -984,16 +967,6 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
         navigation.addVideoListItem({"scraper": "scraper_music"}, {"Title": "some_title", "icon": "some_icon", "thumbnail": "some_thumbnail"})
         
         sys.modules["__main__"].utils.getThumbnail.assert_called_with("music")
-
-    def ttest_addVideoListItem_should_call_utils_get_thumbnail_to_get_icon_path(self):
-        sys.argv = ["some_path", -1, "some_params"]
-        sys.modules["__main__"].utils.getThumbnail.return_value = "some_image_path"
-        navigation = YouTubeNavigation()
-        navigation.addVideoContextMenuItems = Mock()
-        
-        navigation.addVideoListItem({}, {"Title": "some_title", "icon": "some_icon", "thumbnail": "some_thumbnail"})
-        
-        sys.modules["__main__"].utils.getThumbnail.assert_called_with("some_icon")
 
     def test_addVideoListItem_should_call_xbmcgui_ListItem_to_fetch_xbmc_listitem_object(self):
         sys.argv = ["some_path", -1, "some_params"]
