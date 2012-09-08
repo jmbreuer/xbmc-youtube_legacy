@@ -31,36 +31,29 @@ class YouTubeSubtitleControl():
     urls = {}
     urls['timed_text_index'] = "http://www.youtube.com/api/timedtext?type=list&v=%s"
     urls['close_caption_url'] = "http://www.youtube.com/api/timedtext?type=track&v=%s&lang=%s"
-    urls['transcription_url'] = "http://www.youtube.com/api/timedtext?sparams=asr_langs,caps,expire,v&asr_langs=en,ja&caps=asr&expire=%s&key=yttt1&signature=%s&hl=en&type=trackformat=1&lang=en&kind=asr&name=&v=%s&tlang=en"
+    #urls['transcription_url'] = "http://www.youtube.com/api/timedtext?sparams=asr_langs,caps,expire,v&asr_langs=en,ja&caps=asr&expire=%s&key=yttt1&signature=%s&hl=en&type=trackformat=1&lang=en&kind=asr&name=&v=%s&tlang=en"
     urls['annotation_url'] = "http://www.youtube.com/annotations/read2?video_id=%s&feat=TC"
 
     def __init__(self):
         self.xbmc = sys.modules["__main__"].xbmc
         self.xbmcgui = sys.modules["__main__"].xbmcgui
-        self.xbmcplugin = sys.modules["__main__"].xbmcplugin
         self.xbmcvfs = sys.modules["__main__"].xbmcvfs
-
-        self.settings = sys.modules["__main__"].settings
-        self.language = sys.modules["__main__"].language
-        self.plugin = sys.modules["__main__"].plugin
-        self.dbg = sys.modules["__main__"].dbg
 
         self.common = sys.modules["__main__"].common
         self.utils = sys.modules["__main__"].utils
-        self.cache = sys.modules["__main__"].cache
         self.core = sys.modules["__main__"].core
 
-        self.login = sys.modules["__main__"].login
-        self.feeds = sys.modules["__main__"].feeds
+        self.dbg = sys.modules["__main__"].dbg
+        self.settings = sys.modules["__main__"].settings
         self.storage = sys.modules["__main__"].storage
-        self.scraper = sys.modules["__main__"].scraper
 
+    # ================================ Subtitle Downloader ====================================
     def downloadSubtitle(self, video={}):
-        self.common.log("")
+        self.common.log(u"")
         get = video.get
 
-        style = ""
-        result = ""
+        style = u""
+        result = u""
 
         if self.settings.getSetting("annotations") == "true" and not "downloadPath" in video:
             xml = self.core._fetchPage({"link": self.urls["annotation_url"] % get('videoid')})
@@ -71,7 +64,7 @@ class YouTubeSubtitleControl():
             subtitle_url = self.getSubtitleUrl(video)
 
             if not subtitle_url and self.settings.getSetting("transcode") == "true":
-                    subtitle_url = self.getTranscriptionUrl(video)
+                subtitle_url = self.getTranscriptionUrl(video)
 
             if subtitle_url:
                 xml = self.core._fetchPage({"link": subtitle_url})
@@ -83,58 +76,78 @@ class YouTubeSubtitleControl():
 
             result += "Dialogue: Marked=0,0:00:0.00,0:00:0.00,Default,Name,0000,0000,0000,,\r\n"  # This solves a bug.
             self.saveSubtitle(result, video)
-            self.common.log("Done")
+            self.common.log(u"Done")
             return True
 
-        self.common.log("Failure")
+        self.common.log(u"Failure")
         return False
 
     def getSubtitleUrl(self, video={}):
-        self.common.log("")
+        self.common.log(u"")
         get = video.get
         url = ""
 
         xml = self.core._fetchPage({"link": self.urls["timed_text_index"] % get('videoid')})
 
-        self.common.log("subtitle index: " + repr(xml["content"]))
-
+        self.common.log(u"subtitle index: " + repr(xml["content"]))
+        self.common.log(u"CONTENT TYPE1: " + repr(type(xml["content"])))
         if xml["status"] == 200:
             subtitle = ""
             code = ""
             codelist = self.common.parseDOM(xml["content"], "track", ret="lang_code")
             sublist = self.common.parseDOM(xml["content"], "track", ret="name")
             lang_original = self.common.parseDOM(xml["content"], "track", ret="lang_original")
-            if len(sublist) != len(codelist) or len(sublist) != len(lang_original):
-                self.common.log("Code list and sublist length mismatch: " + repr(codelist) + " - " + repr(sublist))
+            if len(sublist) != len(codelist) and len(sublist) != len(lang_original):
+                self.common.log(u"Code list and sublist length mismatch: " + repr(codelist) + " - " + repr(sublist))
                 return ""
 
             if len(codelist) > 0:
                 # Fallback to first in list.
-                subtitle = sublist[0].replace(" ", "%20")
+                subtitle = sublist[0].replace(u" ", u"%20")
                 code = codelist[0]
 
             lang_code = ["off", "en", "es", "de", "fr", "it", "ja"][int(self.settings.getSetting("lang_code"))]
-            self.common.log("selected language: " + repr(lang_code))
-            if lang_code in codelist:
+            self.common.log(u"selected language: " + repr(lang_code))
+            if True:
+                for i in range(0, len(codelist)):
+                    data = codelist[i].lower()
+                    if data.find("-") > -1:
+                        data = data[:data.find("-")]
+
+                    if codelist[i].find(lang_code) > -1:
+                        subtitle = sublist[i].replace(" ", "%20")
+                        code = codelist[i]
+                        self.common.log(u"found subtitle specified: " + subtitle + " - " + code)
+                        break
+
+                    if codelist[i].find("en") > -1:
+                        subtitle = sublist[i].replace(" ", "%20")
+                        code = "en"
+                        self.common.log(u"found subtitle default: " + subtitle + " - " + code)
+
+            # POC User selection code. Feel free to purge
+            if lang_code in codelist and False:
                 for i in range(0, len(codelist)):
                     if codelist[i].find(lang_code) > -1:
                         subtitle = sublist[i].replace(" ", "%20")
                         code = codelist[i]
-                        self.common.log("found subtitle specified: " + subtitle + " - " + code)
+                        self.common.log(u"found subtitle specified: " + subtitle + " - " + code)
                         break
-            else:
+            elif False:
                 choices = []
                 for i in range(0, len(codelist)):
                     choices.append(codelist[i] + " - " + lang_original[i])
-                    self.common.log("TEST: " + codelist[i] + " - " + lang_original[i])
+                    self.common.log(u"TEST: " + codelist[i] + " - " + lang_original[i])
                 if len(choices) > 0:
                     dialog = self.xbmcgui.Dialog()
+                    self.common.log(u"CONTENT TYPE2: " + repr(codelist) + repr(lang_original))
                     selected = dialog.select("Select subtitle language", choices)
 
                     if selected > -1:
                         subtitle = sublist[selected].replace(" ", "%20")
                         code = codelist[selected]
-                        self.common.log("found subtitle default: " + subtitle + " - " + code)
+                        self.common.log(u"found subtitle default: " + subtitle + " - " + code)
+                # POC Ends here
 
             if code:
                 url = self.urls["close_caption_url"] % (get("videoid"), code)
@@ -142,7 +155,7 @@ class YouTubeSubtitleControl():
                     url += "&name=" + subtitle
 
 
-        self.common.log("found subtitle url: " + repr(url))
+        self.common.log(u"found subtitle url: " + repr(url))
         return url
 
     def getSubtitleFileName(self, video):
@@ -153,13 +166,19 @@ class YouTubeSubtitleControl():
         return filename
 
     def saveSubtitle(self, result, video={}):
-        self.common.log("")
+        self.common.log(repr(type(result)))
         filename = self.getSubtitleFileName(video)
 
         path = os.path.join(self.xbmc.translatePath(self.settings.getAddonInfo("profile")).decode("utf-8"), filename)
 
-        w = self.storage.openFile(path, "wb")
-        w.write(self.utils.convertStringToBinary(result))
+        w = self.storage.openFile(path, "w")
+        try:
+            w.write(result.encode("utf-8")) # WTF, didn't have to do this before, did i?
+        except:
+            w.write(result)
+            self.common.log(u"NOT utf-8 WRITE!!!: " + path + " - " + repr(result))
+            time.sleep(20)
+
         w.close()
 
         if "downloadPath" in video:
@@ -167,7 +186,7 @@ class YouTubeSubtitleControl():
 
 
     def getTranscriptionUrl(self, video={}):
-        self.common.log("")
+        self.common.log(u"")
         get = video.get
         trans_url = ""
         if "ttsurl" in video:
@@ -189,7 +208,7 @@ class YouTubeSubtitleControl():
         return str
 
     def convertSecondsToTimestamp(self, seconds):
-        self.common.log("", 3)
+        self.common.log(u"", 3)
         hours = str(int(seconds / 3600))
         seconds = seconds % 3600
 
@@ -201,13 +220,13 @@ class YouTubeSubtitleControl():
         if len(seconds) == 1:
             seconds = "0" + seconds
 
-        self.common.log("Done", 3)
+        self.common.log(u"Done", 3)
         return "%s:%s:%s" % (hours, minutes, seconds)
 
     def transformSubtitleXMLtoSRT(self, xml):
-        self.common.log("")
+        self.common.log(u"")
 
-        result = ""
+        result = u""
         for node in self.common.parseDOM(xml, "text", ret=True):
             text = self.common.parseDOM(node, "text")[0]
             text = self.simpleReplaceHTMLCodes(text).replace("\n", "\\n")
@@ -221,17 +240,17 @@ class YouTubeSubtitleControl():
             end = self.convertSecondsToTimestamp(end)
 
             if start and end:
-                result += "Dialogue: Marked=%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\r\n" % ("0", start, end, "Default", "Name", "0000", "0000", "0000", "", text)
+                result += u"Dialogue: Marked=%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\r\n" % ("0", start, end, "Default", "Name", "0000", "0000", "0000", "", text)
 
         return result
 
     def transformColor(self, color):
-        self.common.log("Color: %s - len: %s" % (color, len(color)), 3)
+        self.common.log(u"Color: %s - len: %s" % (color, len(color)), 3)
         if color:
             color = hex(int(color))
             color = str(color)
             color = color[2:]
-            self.common.log("Color: %s - len: %s" % (color, len(color)), 5)
+            self.common.log(u"Color: %s - len: %s" % (color, len(color)), 5)
             if color == "0":
                 color = "000000"
             if len(color) == 4:
@@ -239,11 +258,11 @@ class YouTubeSubtitleControl():
             if len(color) == 6:
                 color = color[4:6] + color[2:4] + color[0:2]
 
-        self.common.log("Returning color: %s - len: %s" % (color, len(color)), 5)
+        self.common.log(u"Returning color: %s - len: %s" % (color, len(color)), 5)
         return color
 
     def transformAlpha(self, alpha):
-        self.common.log("Alpha: %s - len: %s" % (alpha, len(alpha)), 5)
+        self.common.log(u"Alpha: %s - len: %s" % (alpha, len(alpha)), 5)
         if not alpha or alpha == "0" or alpha == "0.0":
             alpha = "-1"  # No background.
         else:
@@ -252,12 +271,12 @@ class YouTubeSubtitleControl():
             alpha = hex(256 - alpha)
             alpha = alpha[2:]
 
-        self.common.log("Alpha: %s - len: %s" % (alpha, len(alpha)), 5)
+        self.common.log(u"Alpha: %s - len: %s" % (alpha, len(alpha)), 5)
         return alpha
 
     def transformAnnotationToSSA(self, xml):
-        self.common.log("")
-        result = ""
+        self.common.log(u"")
+        result = u""
         ssa_fixes = []
         style_template = "Style: annot%s,Arial,%s,&H%s&,&H%s&,&H%s&,&H%s&,0,0,3,3,0,1,0,0,0,0,0\r\n"
         styles_count = 0
@@ -267,14 +286,14 @@ class YouTubeSubtitleControl():
             if node:
                 stype = "".join(self.common.parseDOM(node, "annotation", ret="type"))
                 style = "".join(self.common.parseDOM(node, "annotation", ret="style"))
-                self.common.log("stype : " + stype, 5)
-                self.common.log("style : " + style, 5)
+                self.common.log(u"stype : " + stype, 5)
+                self.common.log(u"style : " + style, 5)
 
                 if stype == "highlight":
                     linkt = "".join(self.common.parseDOM(node, "url", ret="type"))
                     linkv = "".join(self.common.parseDOM(node, "url", ret="value"))
                     if linkt == "video":
-                        self.common.log("Reference to video : " + linkv)
+                        self.common.log(u"Reference to video : " + linkv)
                 elif node.find("TEXT") > -1:
                     text = self.common.parseDOM(node, "TEXT")
                     if len(text):
@@ -325,7 +344,7 @@ class YouTubeSubtitleControl():
                             style = "annot" + str(styles_count)
                             styles_count += 1
 
-                        self.common.log("start: %s - end: %s - style: %s" % (start, end, style), 5)
+                        self.common.log(u"start: %s - end: %s - style: %s" % (start, end, style), 5)
                         if start and end and style != "highlightText":
                             marginV = 1280 * float(tmp_y[0]) / 100
                             marginV += 1280 * float(tmp_h[0]) / 100
@@ -346,12 +365,12 @@ class YouTubeSubtitleControl():
                     if time.strptime(a_end[0:a_end.rfind(".")], "%H:%M:%S") < time.strptime(b_start[0:b_start.rfind(".")], "%H:%M:%S"):
                         result += "Dialogue: Marked=0,%s,%s,Default,Name,0000,0000,0000,,\r\n" % (a_end, b_start)
 
-        self.common.log("Done : " + repr((result, append_style)),5)
+        self.common.log(u"Done : " + repr((result, append_style)),5)
         return (result, append_style)
 
-    def addSubtitles(self, video={}, add=True):
+    def addSubtitles(self, video={}):
         get = video.get
-        self.common.log("fetching subtitle if available")
+        self.common.log(u"fetching subtitle if available")
 
         filename = self.getSubtitleFileName(video)
 
@@ -367,23 +386,23 @@ class YouTubeSubtitleControl():
         elif self.downloadSubtitle(video):
             set_subtitle = True
 
-        self.common.log("Done trying to locate: " + path, 4)
-        if self.xbmcvfs.exists(path) and not "downloadPath" in video and set_subtitle and add:
+        self.common.log(u"Done trying to locate: " + path, 4)
+        if self.xbmcvfs.exists(path) and not "downloadPath" in video and set_subtitle:
             player = self.xbmc.Player()
 
             i = 0
             while not player.isPlaying():
                 i += 1
-                self.common.log("Waiting for playback to start ")
+                self.common.log(u"Waiting for playback to start ")
                 time.sleep(1)
                 if i > 10:
                     break
 
             self.xbmc.Player().setSubtitles(path)
-            self.common.log("added subtitle %s to playback" % path)
+            self.common.log(u"added subtitle %s to playback" % path)
 
     def getLocalFileSource(self, get, status, video):
-        result = ""
+        result = u""
         if (get("action", "") != "download"):
             path = self.settings.getSetting("downloadPath")
             filename = ''.join(c for c in self.common.makeUTF8(video['Title']) if c not in self.utils.INVALID_CHARS) + "-[" + get('videoid') + "]" + ".mp4"
@@ -392,5 +411,5 @@ class YouTubeSubtitleControl():
                 if self.xbmcvfs.exists(path):
                     result = path
             except:
-                self.common.log("failed to locate local subtitle file, trying youtube instead")
+                self.common.log(u"failed to locate local subtitle file, trying youtube instead")
         return result
