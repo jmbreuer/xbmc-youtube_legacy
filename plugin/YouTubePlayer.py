@@ -62,25 +62,18 @@ class YouTubePlayer():
     urls['video_info'] = "http://gdata.youtube.com/feeds/api/videos/%s"
 
     def __init__(self):
-        self.xbmc = sys.modules["__main__"].xbmc
         self.xbmcgui = sys.modules["__main__"].xbmcgui
         self.xbmcplugin = sys.modules["__main__"].xbmcplugin
-        self.xbmcvfs = sys.modules["__main__"].xbmcvfs
 
+        self.storage = sys.modules["__main__"].storage
         self.settings = sys.modules["__main__"].settings
         self.language = sys.modules["__main__"].language
-        self.plugin = sys.modules["__main__"].plugin
         self.dbg = sys.modules["__main__"].dbg
 
         self.common = sys.modules["__main__"].common
         self.utils = sys.modules["__main__"].utils
         self.cache = sys.modules["__main__"].cache
         self.core = sys.modules["__main__"].core
-
-        self.login = sys.modules["__main__"].login
-        self.feeds = sys.modules["__main__"].feeds
-        self.storage = sys.modules["__main__"].storage
-        self.scraper = sys.modules["__main__"].scraper
 
     def playVideo(self, params={}):
         self.common.log(repr(params), 3)
