@@ -41,6 +41,8 @@ class BaseTestCase(unittest2.TestCase):
         import SimpleDownloader
         sys.modules["__main__"].downloader = SimpleDownloader.SimpleDownloader()
         sys.modules["__main__"].xbmcvfs.exists.return_value = False
+        import YouTubePluginSettings
+        sys.modules["__main__"].pluginsettings = YouTubePluginSettings.YouTubePluginSettings()
         import YouTubeUtils
         sys.modules["__main__"].utils = YouTubeUtils.YouTubeUtils()
         import YouTubeStorage
