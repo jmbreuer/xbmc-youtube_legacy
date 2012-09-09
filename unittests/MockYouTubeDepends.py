@@ -40,6 +40,8 @@ class MockYouTubeDepends:
 
         import YouTubeStorage
         sys.modules["__main__"].storage = Mock(spec=YouTubeStorage.YouTubeStorage)
+        import YouTubePluginSettings
+        sys.modules["__main__"].pluginsettings = Mock(spec=YouTubePluginSettings.YouTubePluginSettings)
         import YouTubeCore
         sys.modules["__main__"].core = Mock(spec=YouTubeCore.YouTubeCore)
         import YouTubeLogin
