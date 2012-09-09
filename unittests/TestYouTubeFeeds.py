@@ -7,33 +7,37 @@ from YouTubeFeeds import YouTubeFeeds
 
 class TestYouTubeFeeds(BaseTestCase.BaseTestCase):
     def test_createUrl_should_call_getSetting_to_get_videos_pr_page(self):
-        sys.modules["__main__"].settings.getSetting.return_value = "1"
+        sys.modules["__main__"].pluginsettings.itemsPerPage.return_value = 15
+        sys.modules["__main__"].pluginsettings.currentRegion.return_value = ""
         feeds = YouTubeFeeds()
         
         feeds.createUrl()
         
-        sys.modules["__main__"].settings.getSetting.assert_any_call("perpage")
+        sys.modules["__main__"].pluginsettings.itemsPerPage.assert_any_call()
 
     def test_createUrl_should_call_getSetting_to_get_region_id(self):
-        sys.modules["__main__"].settings.getSetting.return_value = "1"
+        sys.modules["__main__"].pluginsettings.itemsPerPage.return_value = 15
+        sys.modules["__main__"].pluginsettings.currentRegion.return_value = ""
         feeds = YouTubeFeeds()
         
         feeds.createUrl()
-        
-        sys.modules["__main__"].settings.getSetting.assert_any_call("region_id")
+
+        sys.modules["__main__"].pluginsettings.currentRegion.assert_any_call()
 
     def test_createUrl_should_get_correct_feed_url_if_feed_is_in_params(self):
-        sys.modules["__main__"].settings.getSetting.return_value = "1"
+        sys.modules["__main__"].pluginsettings.itemsPerPage.return_value = 15
+        sys.modules["__main__"].pluginsettings.currentRegion.return_value = ""
         feeds = YouTubeFeeds()
         
         result = feeds.createUrl({"feed": "favorites"})
         result = result[:result.find("?")]
         url = feeds.urls["favorites"] % ("default")
-        sys.modules["__main__"].settings.getSetting.assert_any_call("region_id")
+        sys.modules["__main__"].pluginsettings.currentRegion.assert_any_call()
         assert(result == url)
 
     def test_createUrl_should_get_correct_user_feed_url_if_user_feed_is_in_params(self):
-        sys.modules["__main__"].settings.getSetting.return_value = "1"
+        sys.modules["__main__"].pluginsettings.itemsPerPage.return_value = 15
+        sys.modules["__main__"].pluginsettings.currentRegion.return_value = ""
         feeds = YouTubeFeeds()
         
         result = feeds.createUrl({"user_feed": "favorites"})
@@ -43,6 +47,9 @@ class TestYouTubeFeeds(BaseTestCase.BaseTestCase):
         
     def test_createUrl_should_get_correct_search_url_if_search_is_in_params(self):
         sys.modules["__main__"].settings.getSetting.return_value = "1"
+        sys.modules["__main__"].pluginsettings.itemsPerPage.return_value = 15
+        sys.modules["__main__"].pluginsettings.currentRegion.return_value = ""
+        sys.modules["__main__"].pluginsettings.safeSearchLevel.return_value = "moderate"
         feeds = YouTubeFeeds()
         
         result = feeds.createUrl({"search": "some_search"})
@@ -51,7 +58,8 @@ class TestYouTubeFeeds(BaseTestCase.BaseTestCase):
         assert(result == url)
         
     def test_createUrl_should_add_contact_name_to_url_if_contact_is_in_params(self):
-        sys.modules["__main__"].settings.getSetting.return_value = "1"
+        sys.modules["__main__"].pluginsettings.itemsPerPage.return_value = 15
+        sys.modules["__main__"].pluginsettings.currentRegion.return_value = ""
         feeds = YouTubeFeeds()
         
         result = feeds.createUrl({"feed": "favorites", "contact": "some_contact"})
@@ -61,7 +69,8 @@ class TestYouTubeFeeds(BaseTestCase.BaseTestCase):
         assert(result == url)
 
     def test_createUrl_should_add_channel_to_url_if_channel_is_in_params(self):
-        sys.modules["__main__"].settings.getSetting.return_value = "1"
+        sys.modules["__main__"].pluginsettings.itemsPerPage.return_value = 15
+        sys.modules["__main__"].pluginsettings.currentRegion.return_value = ""
         feeds = YouTubeFeeds()
         
         result = feeds.createUrl({"feed": "favorites", "channel": "some_channel"})
@@ -71,7 +80,8 @@ class TestYouTubeFeeds(BaseTestCase.BaseTestCase):
         assert(result == url)
 	
     def test_createUrl_should_add_category_and_time_to_url_if_category_is_in_params(self):
-        sys.modules["__main__"].settings.getSetting.return_value = "0"
+        sys.modules["__main__"].pluginsettings.itemsPerPage.return_value = 15
+        sys.modules["__main__"].pluginsettings.currentRegion.return_value = ""
         feeds = YouTubeFeeds()
         
         result = feeds.createUrl({"feed": "feed_category", "category": "some_category"})
@@ -82,7 +92,8 @@ class TestYouTubeFeeds(BaseTestCase.BaseTestCase):
         assert(result == url)
 
     def test_createUrl_should_add_playlist_to_url_if_playlist_is_in_params(self):
-        sys.modules["__main__"].settings.getSetting.return_value = "1"
+        sys.modules["__main__"].pluginsettings.itemsPerPage.return_value = 15
+        sys.modules["__main__"].pluginsettings.currentRegion.return_value = ""
         feeds = YouTubeFeeds()
         
         result = feeds.createUrl({"feed": "playlist", "channel": "some_playlist"})
@@ -92,7 +103,9 @@ class TestYouTubeFeeds(BaseTestCase.BaseTestCase):
         assert(result == url)
 
     def test_createUrl_should_add_videoid_to_url_if_videoid_is_in_params(self):
-        sys.modules["__main__"].settings.getSetting.return_value = "1"
+        sys.modules["__main__"].pluginsettings.itemsPerPage.return_value = 15
+        sys.modules["__main__"].pluginsettings.currentRegion.return_value = ""
+
         feeds = YouTubeFeeds()
         
         result = feeds.createUrl({"feed": "related", "videoid": "some_videoid"})
@@ -102,7 +115,8 @@ class TestYouTubeFeeds(BaseTestCase.BaseTestCase):
         assert(result == url)
 
     def test_createUrl_should_add_region_if_standard_feed(self):
-        sys.modules["__main__"].settings.getSetting.return_value = "1"
+        sys.modules["__main__"].pluginsettings.itemsPerPage.return_value = 15
+        sys.modules["__main__"].pluginsettings.currentRegion.return_value = "AU"
         feeds = YouTubeFeeds()
         
         result = feeds.createUrl({"feed": "feed_linked"})
@@ -111,7 +125,9 @@ class TestYouTubeFeeds(BaseTestCase.BaseTestCase):
         assert(result.find("standardfeeds/AU/") > 0)
 
     def test_createUrl_should_start_index_and_max_results_for_non_folder_non_play_all_feeds(self):
-        sys.modules["__main__"].settings.getSetting.return_value = "1"
+        sys.modules["__main__"].pluginsettings.itemsPerPage.return_value = 15
+        sys.modules["__main__"].pluginsettings.currentRegion.return_value = ""
+
         feeds = YouTubeFeeds()
         
         result = feeds.createUrl({"feed": "feed_linked"})
@@ -120,7 +136,8 @@ class TestYouTubeFeeds(BaseTestCase.BaseTestCase):
         assert(result == "?time=this_week&start-index=1&max-results=15")
 	
     def test_createUrl_should_add_time_if_url_contains_time_param(self):
-        sys.modules["__main__"].settings.getSetting.return_value = "1"
+        sys.modules["__main__"].pluginsettings.itemsPerPage.return_value = 15
+        sys.modules["__main__"].pluginsettings.currentRegion.return_value = ""
         feeds = YouTubeFeeds()
         
         result = feeds.createUrl({"feed": "feed_linked"})
@@ -128,7 +145,7 @@ class TestYouTubeFeeds(BaseTestCase.BaseTestCase):
         assert(result.find("?time=this_week") > 0)
 	
     def test_list_should_call_listFolder_if_folder_is_in_params(self):
-        sys.modules["__main__"].settings.getSetting.return_value = "1"
+        sys.modules["__main__"].pluginsettings.itemsPerPage.return_value = 15
         feeds = YouTubeFeeds()
         feeds.listFolder = Mock()
         
@@ -273,8 +290,8 @@ class TestYouTubeFeeds(BaseTestCase.BaseTestCase):
 
         sys.modules["__main__"].storage.store.assert_called_with({}, "some_thumb", "thumbnail")
 
-    def test_listPlaylist_should_call_getSetting_to_get_perpage(self):
-        sys.modules["__main__"].settings.getSetting.return_value = "1"
+    def test_listPlaylist_should_call_pluginSettings_to_get_perpage(self):
+
         sys.modules["__main__"].core._fetchPage.return_value = {"content": "some_fail", "status": 200}
         sys.modules["__main__"].core.getVideoInfo.return_value = [{"videoid": "some_id", "thumbnail": "some_thumb"}]
         sys.modules["__main__"].language.return_value = "some_string"
@@ -288,7 +305,7 @@ class TestYouTubeFeeds(BaseTestCase.BaseTestCase):
         result = feeds.listPlaylist()
         print repr(result)
 
-        sys.modules["__main__"].settings.getSetting.assert_called_with("perpage")
+        sys.modules["__main__"].pluginsettings.itemsPerPage.assert_any_call()
                         
     def test_listPlaylist_should_call_storage_retrieve_to_fetch_cached_video_listing(self):
         sys.modules["__main__"].settings.getSetting.return_value = "1"
@@ -309,7 +326,7 @@ class TestYouTubeFeeds(BaseTestCase.BaseTestCase):
         sys.modules["__main__"].storage.retrieve.assert_called_with({})
         
     def test_listPlaylist_should_call_getBatchDetailsOverride_to_fetch_video_info_for_stored_video_list(self):
-        sys.modules["__main__"].settings.getSetting.return_value = "1"
+        sys.modules["__main__"].pluginsettings.itemsPerPage.return_value = 15
         sys.modules["__main__"].core._fetchPage.return_value = {"content": "some_fail", "status": 200}
         sys.modules["__main__"].core.getVideoInfo.return_value = [{"videoid": "some_id", "thumbnail": "some_thumb"}]
         sys.modules["__main__"].language.return_value = "some_string"
@@ -347,7 +364,7 @@ class TestYouTubeFeeds(BaseTestCase.BaseTestCase):
         feeds.listAll.assert_called_with({})
         
     def test_listPlaylist_should_return_error_status_if_listAll_returns_empty_list(self):
-        sys.modules["__main__"].settings.getSetting.return_value = "1"
+        sys.modules["__main__"].pluginsettings.itemsPerPage.return_value = 15
         sys.modules["__main__"].core._fetchPage.return_value = {"content": "some_fail", "status": 200}
         sys.modules["__main__"].core.getVideoInfo.return_value = [{"videoid": "some_id", "thumbnail": "some_thumb"}]
         sys.modules["__main__"].language.return_value = "some_string"
@@ -363,7 +380,7 @@ class TestYouTubeFeeds(BaseTestCase.BaseTestCase):
         assert(result == ([], 303))
 
     def test_listPlaylist_should_call_storage_store_with_list_of_video_ids_and_entryids(self):
-        sys.modules["__main__"].settings.getSetting.return_value = "1"
+        sys.modules["__main__"].pluginsettings.itemsPerPage.return_value = 15
         sys.modules["__main__"].core._fetchPage.return_value = {"content": "some_fail", "status": 200}
         sys.modules["__main__"].language.return_value = "some_string"
         list = [{"videoid": "some_id", "thumbnail": "some_thumb", "playlist_entry_id": "some_id"}]
@@ -381,7 +398,7 @@ class TestYouTubeFeeds(BaseTestCase.BaseTestCase):
         sys.modules["__main__"].storage.store.assert_any_call({}, [{"videoid": "some_id", "playlist_entry_id": "some_id"}], )
                 
     def test_listPlaylist_should_call_storage_store_with_first_thumbnail_of_list(self):
-        sys.modules["__main__"].settings.getSetting.return_value = "1"
+        sys.modules["__main__"].pluginsettings.itemsPerPage.return_value = 15
         sys.modules["__main__"].core._fetchPage.return_value = {"content": "some_fail", "status": 200}
         sys.modules["__main__"].language.return_value = "some_string"
         list = [{"videoid": "some_id", "thumbnail": "some_thumb", "playlist_entry_id": "some_id"}]
@@ -399,7 +416,7 @@ class TestYouTubeFeeds(BaseTestCase.BaseTestCase):
         sys.modules["__main__"].storage.store.assert_called_with({}, "some_thumb", "thumbnail")
         
     def test_listPlaylist_should_call_addNextFolder_for_lists_longer_than_perpage(self):
-        sys.modules["__main__"].settings.getSetting.return_value = "1"
+        sys.modules["__main__"].pluginsettings.itemsPerPage.return_value = 15
         sys.modules["__main__"].core._fetchPage.return_value = {"content": "some_fail", "status": 200}
         sys.modules["__main__"].language.return_value = "some_string"
         ids = []
@@ -421,7 +438,7 @@ class TestYouTubeFeeds(BaseTestCase.BaseTestCase):
         sys.modules["__main__"].utils.addNextFolder.assert_called_with(ids[:15], {})
 
     def test_listPlaylist_should_limit_list_lengt_to_perpage_count(self):
-        sys.modules["__main__"].settings.getSetting.return_value = "1"
+        sys.modules["__main__"].pluginsettings.itemsPerPage.return_value = 15
         sys.modules["__main__"].core._fetchPage.return_value = {"content": "some_fail", "status": 200}
         sys.modules["__main__"].language.return_value = "some_string"
         ids = []
@@ -440,7 +457,7 @@ class TestYouTubeFeeds(BaseTestCase.BaseTestCase):
         assert(len(videos) == 15)
         
     def test_listPlaylist_should_starts_list_position_from_page_count_and_perpage_count(self):
-        sys.modules["__main__"].settings.getSetting.return_value = "1"
+        sys.modules["__main__"].pluginsettings.itemsPerPage.return_value = 15
         sys.modules["__main__"].core._fetchPage.return_value = {"content": "some_fail", "status": 200}
         sys.modules["__main__"].language.return_value = "some_string"
         ids = []
@@ -479,7 +496,6 @@ class TestYouTubeFeeds(BaseTestCase.BaseTestCase):
         sys.modules["__main__"].storage.getStoredSearches.assert_called_with({"store": "some_store"})
 
     def test_listFolder_should_call_getSetting_to_get_perpage(self):
-        sys.modules["__main__"].settings.getSetting.return_value = "1"
         feeds = YouTubeFeeds()
         feeds.listAll = Mock()
         feeds.listAll.return_value = []
@@ -488,10 +504,10 @@ class TestYouTubeFeeds(BaseTestCase.BaseTestCase):
         
         feeds.listFolder()
         	
-        sys.modules["__main__"].settings.getSetting.assert_called_with("perpage")
+        sys.modules["__main__"].pluginsettings.itemsPerPage.assert_any_call()
         
     def test_listFolder_should_call_storage_retrieve_to_fetch_cached_video_listing_if_page_is_in_params(self):
-        sys.modules["__main__"].settings.getSetting.return_value = "1"
+        sys.modules["__main__"].pluginsettings.itemsPerPage.return_value = 15
         sys.modules["__main__"].storage.retrieve.return_value = []
         feeds = YouTubeFeeds()
         feeds.listAll = Mock()
@@ -504,7 +520,7 @@ class TestYouTubeFeeds(BaseTestCase.BaseTestCase):
         sys.modules["__main__"].storage.retrieve.assert_called_with({"page": "1"})
 
     def test_listFolder_should_call_listAll_page_is_not_in_params(self):
-        sys.modules["__main__"].settings.getSetting.return_value = "1"
+        sys.modules["__main__"].pluginsettings.itemsPerPage.return_value = 15
         sys.modules["__main__"].storage.retrieve.return_value = []
         feeds = YouTubeFeeds()
         feeds.listAll = Mock()
@@ -517,7 +533,7 @@ class TestYouTubeFeeds(BaseTestCase.BaseTestCase):
         feeds.listAll.assert_called_with({})
 
     def test_listFolder_should_call_storage_store_to_save_new_list(self):
-        sys.modules["__main__"].settings.getSetting.return_value = "1"
+        sys.modules["__main__"].pluginsettings.itemsPerPage.return_value = 15
         sys.modules["__main__"].storage.retrieve.return_value = []
         feeds = YouTubeFeeds()
         feeds.listAll = Mock()
@@ -530,7 +546,7 @@ class TestYouTubeFeeds(BaseTestCase.BaseTestCase):
         sys.modules["__main__"].storage.store.assert_called_with({}, ["some"])
 
     def test_listFolder_should_call_addNextFolder_for_lists_longer_than_perpage(self):
-        sys.modules["__main__"].settings.getSetting.return_value = "1"
+        sys.modules["__main__"].pluginsettings.itemsPerPage.return_value = 15
         sys.modules["__main__"].storage.retrieve.return_value = []
         ids = []
         i= 1
@@ -548,7 +564,7 @@ class TestYouTubeFeeds(BaseTestCase.BaseTestCase):
         sys.modules["__main__"].utils.addNextFolder.assert_called_with(ids[:15], {})
         
     def test_listFolder_should_limit_list_lengt_to_perpage_count(self):
-        sys.modules["__main__"].settings.getSetting.return_value = "1"
+        sys.modules["__main__"].pluginsettings.itemsPerPage.return_value = 15
         sys.modules["__main__"].storage.retrieve.return_value = []
         ids = []
         i= 1
@@ -566,7 +582,7 @@ class TestYouTubeFeeds(BaseTestCase.BaseTestCase):
         assert(len(videos) == 15)
         
     def test_listFolder_should_starts_list_position_from_page_count_and_perpage_count(self):
-        sys.modules["__main__"].settings.getSetting.return_value = "1"
+        sys.modules["__main__"].pluginsettings.itemsPerPage.return_value = 15
         ids = []
         i= 1
         while i < 52:
@@ -585,7 +601,7 @@ class TestYouTubeFeeds(BaseTestCase.BaseTestCase):
         assert(videos[14]["id"] == "some_id_30")
         
     def test_listFolder_should_call_retrieve_to_get_view_mode_if_feed_is_subscriptions(self):
-        sys.modules["__main__"].settings.getSetting.return_value = "1"
+        sys.modules["__main__"].pluginsettings.itemsPerPage.return_value = 15
         sys.modules["__main__"].storage.retrieve.return_value = [{"id": "some_item"}]
         feeds = YouTubeFeeds()
         feeds.listAll = Mock()
@@ -598,7 +614,7 @@ class TestYouTubeFeeds(BaseTestCase.BaseTestCase):
         sys.modules["__main__"].storage.retrieve.assert_called_with({"user_feed": "subscriptions"}, "viewmode", {'user_feed': 'uploads', 'view_mode': 'subscriptions_favorites', 'id': 'some_item'})
 	
     def test_listFolder_should_set_correct_view_mode_if_feed_is_subscriptions(self):
-        sys.modules["__main__"].settings.getSetting.return_value = "1"
+        sys.modules["__main__"].pluginsettings.itemsPerPage.return_value = 15
         sys.modules["__main__"].storage.retrieve.return_value = "favorites"
         feeds = YouTubeFeeds()
         feeds.listAll = Mock()
@@ -611,7 +627,7 @@ class TestYouTubeFeeds(BaseTestCase.BaseTestCase):
         assert(videos[0]["user_feed"] == "favorites")
 	
     def test_listAll_should_call_getAuth_if_login_is_in_params(self):
-        sys.modules["__main__"].settings.getSetting.return_value = "1"
+        sys.modules["__main__"].pluginsettings.itemsPerPage.return_value = 15
         sys.modules["__main__"].storage.retrieve.return_value = "favorites"
         sys.modules["__main__"].core._fetchPage.return_value = {"content": "some_fail", "status": 200}
         sys.modules["__main__"].core.getVideoInfo.return_value = []
@@ -624,7 +640,7 @@ class TestYouTubeFeeds(BaseTestCase.BaseTestCase):
         sys.modules["__main__"].core._getAuth.assert_called_with()
         
     def test_listAll_should_call_createUrl_to_get_url(self):
-        sys.modules["__main__"].settings.getSetting.return_value = "1"
+        sys.modules["__main__"].pluginsettings.itemsPerPage.return_value = 15
         sys.modules["__main__"].storage.retrieve.return_value = "favorites"
         sys.modules["__main__"].core._fetchPage.return_value = {"content": "some_fail", "status": 200}
         sys.modules["__main__"].core.getVideoInfo.return_value = []
@@ -637,7 +653,7 @@ class TestYouTubeFeeds(BaseTestCase.BaseTestCase):
         feeds.createUrl.assert_called_with({"login": "true"})
 	
     def test_listAll_should_call_fetchPage_correctly(self):
-        sys.modules["__main__"].settings.getSetting.return_value = "1"
+        sys.modules["__main__"].pluginsettings.itemsPerPage.return_value = 15
         sys.modules["__main__"].storage.retrieve.return_value = "favorites"
         sys.modules["__main__"].core._fetchPage.return_value = {"content": "some_fail", "status": 200}
         sys.modules["__main__"].core.getVideoInfo.return_value = []
