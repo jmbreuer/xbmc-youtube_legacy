@@ -3,7 +3,6 @@ import BaseTestCase
 from mock import Mock, patch
 import sys
 import time
-import datetime
 from YouTubeCore import YouTubeCore
 
 class TestYouTubeCore(BaseTestCase.BaseTestCase):
