@@ -1,7 +1,5 @@
 [B]TODO:[/B]
 - Fix RTMP support.
-- Purchasable movies.
-- Unit test coverage of Core above 90% I'm looking at you "Fetch page"
 - Unit test new functions in storage...
 - Replace scraper with feeds for: shows, disco.
 - Integration tests on all user actions.
