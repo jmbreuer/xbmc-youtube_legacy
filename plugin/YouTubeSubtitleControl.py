@@ -1,6 +1,6 @@
 '''
    YouTube plugin for XBMC
-    Copyright (C) 2010-2011 Tobias Ussing And Henrik Mosgaard Jensen
+    Copyright (C) 2010-2012 Tobias Ussing And Henrik Mosgaard Jensen
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -381,7 +381,7 @@ class YouTubeSubtitleControl():
         result = u""
         if (get("action", "") != "download"):
             path = self.settings.getSetting("downloadPath")
-            filename = ''.join(c for c in self.common.makeUTF8(video['Title']) if c not in self.utils.INVALID_CHARS) + "-[" + get('videoid') + "]" + ".mp4"
+            filename = u"".join(c for c in self.common.makeUTF8(video['Title']) if c not in self.utils.INVALID_CHARS) + u"-[" + get('videoid') + u"]" + u".mp4"
             path = os.path.join(path.decode("utf-8"), filename)
             try:
                 if self.xbmcvfs.exists(path):
