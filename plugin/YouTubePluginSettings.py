@@ -20,7 +20,6 @@
 class YouTubePluginSettings():
 
     def __init__(self):
-        self.storage = sys.modules["__main__"].storage
         self.settings = sys.modules["__main__"].settings
         self.dbg = sys.modules["__main__"].dbg
 
@@ -32,3 +31,6 @@ class YouTubePluginSettings():
 
     def safeSearchLevel(self):
         return ("none", "moderate", "strict")[int(self.settings.getSetting("safe_search"))]
+
+    def requestTimeout(self):
+        return [5, 10, 15, 20, 25][int(self.settings.getSetting("timeout"))]
