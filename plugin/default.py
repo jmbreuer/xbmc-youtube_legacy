@@ -76,6 +76,8 @@ if (__name__ == "__main__" ):
     utils = YouTubeUtils.YouTubeUtils()
     import YouTubeStorage
     storage = YouTubeStorage.YouTubeStorage()
+    import YouTubePluginSettings
+    pluginsettings = YouTubePluginSettings.YouTubePluginSettings()
     import YouTubeCore
     core = YouTubeCore.YouTubeCore()
     import YouTubeLogin
