@@ -376,7 +376,8 @@ class YouTubeSubtitleControl():
             self.xbmc.Player().setSubtitles(path)
             self.common.log(u"added subtitle %s to playback" % path)
 
-    def getLocalFileSource(self, get, video):
+    def getLocalFileSource(self, params, video):
+        get = params.get
         result = u""
         if (get("action", "") != "download"):
             path = self.settings.getSetting("downloadPath")
