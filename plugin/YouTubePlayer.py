@@ -349,7 +349,6 @@ class YouTubePlayer():
             if not (url_desc_map.has_key("url") or url_desc_map.has_key("stream")):
                 continue
 
-            signature=url_desc_map["sig"][0]
             key = int(url_desc_map["itag"][0])
             url = u""
             if url_desc_map.has_key("url"):
@@ -357,7 +356,11 @@ class YouTubePlayer():
             elif url_desc_map.has_key("stream"):
                 url = urllib.unquote(url_desc_map["stream"][0])
 
-            links[key] = url + u"&signature=" + signature
+            if url_desc_map.has_key("sig"):
+                signature=url_desc_map["sig"][0]
+                url + u"&signature=" + signature
+            
+            links[key] = url
 
 
         if len(links) == 0:
