@@ -9,64 +9,22 @@ from YouTubePlayer import YouTubePlayer
 class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 
     def ttest_getVideoUrlMap_should_return_empty_dictionary_on_missing_map(self):
-        player = YouTubePlayer()
-
-        result = player.getVideoUrlMap({"args": {}}, {})
-
-        assert(result == {})
+        assert(False)
 
     def ttest_getVideoUrlMap_should_parse_streamMap(self):
-        player = YouTubePlayer()
-
-        result = player.getVideoUrlMap(self.readTestInput("streamMapTest.txt"), {})
-
-        assert(len(result) == 11)
-        keys = [5, 18, 22, 34, 35, 37, 43, 44, 45, 82, 84]
-        for key in keys:
-            assert(key in result)
+        assert(False)
 
     def ttest_getVideoUrlMap_should_parse_url_encoded_stream_map(self):
-        player = YouTubePlayer()
-
-        result = player.getVideoUrlMap(self.readTestInput("urlEncodedStreamMapTest.txt"), {})
-
-        assert(len(result) == 11)
-        keys = [5, 18, 22, 34, 35, 37, 43, 44, 45, 82, 84]
-        for key in keys:
-            assert(key in result)
+        assert(False)
 
     def ttest_getVideoUrlMap_should_parse_url_map(self):
-        player = YouTubePlayer()
-
-        result = player.getVideoUrlMap(self.readTestInput("urlMapTest.txt"), {})
-
-        assert(len(result) == 11)
-        keys = [5, 18, 22, 34, 35, 37, 43, 44, 45, 82, 84]
-        for key in keys:
-            assert(key in result)
+        assert(False)
 
     def ttest_getVideoUrlMap_should_parse_url_map_fallback(self):
-        sys.modules["__main__"].settings.getSetting = Mock()
-        sys.modules["__main__"].settings.getSetting.return_value = "false"
-
-        player = YouTubePlayer()
-        result = player.getVideoUrlMap(self.readTestInput("urlMapTest.txt"), {})
-        print "BLA: " + str(len(result))
-        assert(len(result) == 11)
-        keys = [5, 18, 22, 34, 35, 37, 43, 44, 45, 82, 84]
-        for key in keys:
-            assert(key in result)
-            assert(result[key].find("preferred") > result[key].find("fallback_host"))
+        assert(False)
 
     def ttest_getVideoUrlMap_should_mark_live_play(self):
-        player = YouTubePlayer()
-        video = {}
-
-        result = player.getVideoUrlMap(self.readTestInput("liveStreamTest.txt"), video)
-
-        assert(video["live_play"] == "true")
-        assert(len(result) == 1)
-        assert(34 in result)
+        assert(False)
 
     def test_playVideo_should_call_getVideoObject(self):
         player = YouTubePlayer()
@@ -412,41 +370,13 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         sys.modules["__main__"].language.assert_called_with(30618)
 
     def ttest_getVideoLinks_should_try_scraping_first(self):
-        player = YouTubePlayer()
-        sys.modules["__main__"].core._fetchPage.return_value = {"status": 200, "content": "something"}
-        sys.modules["__main__"].common.parseDOM.return_value = ""
-        sys.modules["__main__"].common.extractJS.return_value = [{"args": ""}]
-
-        player._getVideoLinks({}, {"videoid": "some_id"})
-
-        sys.modules["__main__"].core._fetchPage.assert_called_with({"link": player.urls["video_stream"] % ("some_id")})
+        assert(False)
 
     def ttest_getVideoLinks_should_fall_back_to_embed(self):
-        sys.modules["__main__"].core._fetchPage.return_value = {"status": 303, "content": "something"}
-        player = YouTubePlayer()
-
-        player._getVideoLinks({}, {"videoid": "some_id"})
-
-        sys.modules["__main__"].core._fetchPage.assert_called_with({"link": player.urls["embed_stream"] % ("some_id")})
+        assert(False)
 
     def ttest_getVideoLinks_should_get_error_message_from_embed(self):
-        sys.modules["__main__"].core._fetchPage.return_value = {"status": 303, "content": self.readTestInput("watch-gyzlwNvf8ss-get_video_info.txt", False)}
-
-        player = YouTubePlayer()
-        result = player._getVideoLinks({}, {"videoid": "some_id"})
-        print repr(result)
-        assert(result[0] == [])
-        assert(result[1] == {'apierror': u'Ugyldige parametre.'})
-
-    def ttest_getVideoLinks_should_parse_flashvars_from_embed(self):
-        player = YouTubePlayer()
-
-        sys.modules["__main__"].core._fetchPage.side_effect = [{"status": 500, "content": self.readTestInput("get_video_info-gyzlwNvf8ss", False)}, {"status": 200, "content": self.readTestInput("get_video_info-gyzlwNvf8ss", False)} ]
-        sys.modules["__main__"].common.parseDOM.return_value = [self.readTestInput("watch-gyzlwNvf8ss-flashvars.txt", False) ]
-
-        result = player._getVideoLinks({}, {"videoid": "some_id"})
-        print repr(result)
-        assert(result == self.readTestInput("flashvars-gyzlwNvf8ss-map-test-embed.txt"))
+        assert(False)
 
     def test_getVideoLinks_should_parse_main_video_structure_on_webpage_correctly(self):
         sys.modules["__main__"].core._fetchPage.return_value = {"status": 200, "content": self.readTestInput("normal-video-page-bQbbtnTz1KE.html", False)}
