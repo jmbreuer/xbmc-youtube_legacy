@@ -151,7 +151,7 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
 
         sys.modules["__main__"].utils.showErrorMessage.assert_called_with("string1","",303)
         sys.modules["__main__"].language.assert_called_with(30031)
-		
+
     def test_apiLogin_should_call_oauth2_login_url_only_one_time_if_url_fails(self):
         sys.modules["__main__"].core._fetchPage.return_value = {"content":""}
         sys.modules["__main__"].common.parseDOM.return_value = ""
