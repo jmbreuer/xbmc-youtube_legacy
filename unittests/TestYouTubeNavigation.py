@@ -1706,6 +1706,7 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
         
     def test_addFolderContextMenuItems_should_add_add_contact_option_to_external_contacts_if_user_is_logged_in(self):
         self.prepareContestMenu()
+        sys.modules["__main__"].pluginsettings.userHasProvidedValidCredentials.return_value = True
         sys.modules["__main__"].settings.getSetting.return_value = "something"
         navigation = YouTubeNavigation()
         path_params = {}
