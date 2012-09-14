@@ -420,42 +420,21 @@ class YouTubeStorage():
 
     def storeSettings(self, params={}, results=[], type="", item={}):
         self.common.log(repr(params), 5)
+
         key = self.getStorageKey(params, type, item)
 
-        self.common.log("Got key " + repr(key))
+        self.storeResultSetSettings(key, results)
 
-        self.common.log(repr(type), 5)
-        if type == "thumbnail" or type == "viewmode" or type == "value":
-            self.storeValue(key, results)
-        else:
-            self.storeResultSetSettings(key, results)
-        self.common.log("done", 5)
-
-    def storeValueSettings(self, key, value):
-        self.common.log(repr(key) + " - " + repr(value), 5)
-        if value:
-            self.settings.setSetting(key, value)
         self.common.log("done", 5)
 
     def storeResultSetSettings(self, key, results=[], params={}):
         self.common.log(repr(params), 5)
-        get = params.get
 
         if results:
-            if get("prepend"):
-                searchCount = (10, 20, 30, 40,)[int(self.settings.getSetting("saved_searches"))]
-                existing = self.retrieveResultSet(key)
-                existing = [results] + existing[:searchCount]
-                self.settings.setSetting(key, repr(existing))
-            elif get("append"):
-                existing = self.retrieveResultSet(key)
-                existing.append(results)
-                self.settings.setSetting(key, repr(existing))
-            else:
-                self.common.log("hit else", 5)
-                value = repr(results)
-                self.common.log(repr(key) + " - " + repr(value), 5)
-                self.settings.setSetting(key, value)
+            value = repr(results)
+            self.common.log(repr(key) + " - " + repr(value), 5)
+            self.settings.setSetting(key, value)
+
         self.common.log("done", 5)
 
     #============================= Retrieval Functions =================================
@@ -498,18 +477,7 @@ class YouTubeStorage():
 
         self.common.log("Got key " + repr(key))
 
-        if type == "thumbnail" or type == "viewmode" or type == "value":
-            return self.retrieveValueSettings(key)
-        else:
-            return self.retrieveResultSetSettings(key)
-
-    def retrieveValueSettings(self, key):
-        self.common.log(repr(key), 5)
-        value = ""
-        if key:
-            value = self.settings.getSetting(key)
-
-        return value
+        return self.retrieveResultSetSettings(key)
 
     def retrieveResultSetSettings(self, key):
         self.common.log(repr(key), 5)
