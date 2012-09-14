@@ -484,18 +484,7 @@ class YouTubeCore():
                 ret_obj["status"] = 200
                 return ret_obj
             else:
-                self.common.log("found verify age request: " + repr(params))
-                # We need login to verify age
-                if not get("login"):
-                    params["error"] = get("error", 0)
-                    params["login"] = "true"
-                    return self._fetchPage(params)
-                elif get("no_verify_age", "false") == "false":
-                    ret_obj["status"] = 303
-                    ret_obj["content"] = self.language(30606)
-                    return self._verifyAge(link, ret_obj["new_url"], params)
-                else:
-                    return ret_obj
+                self.common.log("Youtube requires you to verify your age to view this content: " + repr(params))
 
         except urllib2.HTTPError, e:
             cont = False
@@ -617,73 +606,6 @@ class YouTubeCore():
             self.common.log("couldn't find any errors: " + repr(ret))
 
         return False
-
-    def _verifyAge(self, org_link, next_url, params={}):
-        self.common.log("org_link : " + org_link + " - next_url: " + next_url)
-        fetch_options = {"link": next_url, "no_verify_age": "true", "login": "true"}
-        verified = False
-        step = 0
-        ret = {}
-        while not verified and fetch_options and step < 6:
-            self.common.log("Step : " + str(step))
-            step += 1
-
-            if step == 5:
-                return {"content": self._findErrors(ret), "status": 303}
-
-            ret = self._fetchPage(fetch_options)
-            fetch_options = False
-
-            # Check if we should login.
-            new_url = self.common.parseDOM(ret["content"].replace("\n", " "), "form", attrs={"id": "gaia_loginform"}, ret="action")
-
-            if len(new_url) == 1:
-                if isinstance(self.login, str):
-                    self.login = sys.modules["__main__"].login
-                self.login._httpLogin({"page": ret})
-
-            new_url = self.common.parseDOM(ret["content"], "form", attrs={"id": "confirm-age-form"}, ret="action")
-
-            if len(new_url) > 0:
-                self.common.log("Part A - Type 1")
-                new_url = "http://www.youtube.com/" + new_url[0]
-                next_url = self.common.parseDOM(ret["content"], "input", attrs={"name": "next_url"}, ret="value")
-                set_racy = self.common.parseDOM(ret["content"], "input", attrs={"name": "set_racy"}, ret="value")
-                session_token_start = ret["content"].find("'XSRF_TOKEN': '") + len("'XSRF_TOKEN': '")
-                session_token_stop = ret["content"].find("',", session_token_start)
-                session_token = ret["content"][session_token_start:session_token_stop]
-
-                fetch_options = {"link": new_url, "no_verify_age": "true", "login": "true", "url_data": {"next_url": next_url[0], "set_racy": set_racy[0], "session_token": session_token}}
-                continue
-            else:
-                self.common.log("Part A - Type 2")
-                actions = self.common.parseDOM(ret["content"], "div", attrs={"id": "verify-actions"})
-                if len(actions) > 0:
-                    new_url = self.common.parseDOM(actions, "button", attrs={"type": "button"}, ret="href")
-                    fetch_options = {"link": new_url[0].replace("&amp;", "&"), "no_verify_age": "true", "login": "true"}
-                    continue
-
-            new_url = self.common.parseDOM(ret["content"], "button", attrs={"href": "/verify.*?"}, ret="href")
-            if len(new_url) > 0:
-                target_url = ret["new_url"]
-                if target_url.rfind("/") > 10:
-                    target_url = target_url[:target_url.find("/", 10)]
-                else:
-                    target_url += "/"
-
-                fetch_options = {"link": target_url + new_url[0], "no_verify_age": "true", "login": "true"}
-                continue
-
-            if ret["content"].find("PLAYER_CONFIG") > -1:
-                self.common.log("Found PLAYER_CONFIG. Verify successful")
-                return ret
-
-            if not fetch_options:
-                self.common.log("Nothing hit, assume we are verified: " + repr(ret))
-                fetch_options = {"link": org_link, "no_verify_age": "true", "login": "true"}
-                return self._fetchPage(fetch_options)
-
-        self.common.log("Done")
 
     def _oRefreshToken(self):
         self.common.log("")
