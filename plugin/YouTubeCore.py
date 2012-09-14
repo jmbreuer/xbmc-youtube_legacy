@@ -22,7 +22,7 @@ import time
 import socket
 import urllib
 import urllib2
-import chardet
+#import chardet
 
 try:
     import simplejson as json
@@ -256,7 +256,6 @@ class YouTubeCore():
         return folders
 
     def getBatchDetailsOverride(self, items, params={}):
-        ytobjects = []
         videoids = []
 
         for video in items:
@@ -467,9 +466,9 @@ class YouTubeCore():
             con = urllib2.urlopen(request)
 
             inputdata = con.read()
-            data_type = chardet.detect(inputdata)
-            inputdata = inputdata.decode(data_type["encoding"])
-            self.common.log("AAAAAAAAAAAAAAAAAA: " + repr(type(inputdata)) + " - " + repr(data_type))
+            #data_type = chardet.detect(inputdata)
+            #inputdata = inputdata.decode(data_type["encoding"])
+            #self.common.log("AAAAAAAAAAAAAAAAAA: " + repr(type(inputdata)) + " - " + repr(data_type))
             ret_obj["content"] = inputdata
             ret_obj["location"] = link
 
@@ -832,7 +831,7 @@ class YouTubeCore():
 
         self.cache.setMulti(pre_id, save_data)
 
-    def getYTCache(self, pre_id, ytobjects, key):
+    def getYTCache(self, pre_id, ytobjects):
         self.common.log(pre_id)
         load_data = []
         for item in ytobjects:
@@ -966,7 +965,7 @@ class YouTubeCore():
         self.addNextPageLinkIfNecessary(params, xml, ytobjects)
 
         self.setYTCache("videoidcache", ytobjects)
-        self.getYTCache("vidstatus-", ytobjects, "Overlay")
+        self.getYTCache("vidstatus-", ytobjects)
 
         self.common.log("Done: " + str(len(ytobjects)),3)
         return ytobjects
