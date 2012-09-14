@@ -780,34 +780,6 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
         assert(args[1][0][0] == "Cookie")
         assert(args[1][0][1] == 'PREF=f1=50000000&hl=en;LOGIN_INFO=my_token;SID=my_token;')
 
-    def test_fetchPage_should_call_retry_if_youtube_ask_user_to_verify_age(self):
-        settings = [ "3", "", "", "4", "false", "false", "false", "user", "pass", "my_token","my_token","my_token","my_token","my_token" ]
-        sys.modules[ "__main__" ].settings.getSetting.side_effect = settings
-        patcher1 = patch("urllib2.urlopen")
-        patcher2 = patch("YouTubeCore.url2request")
-        patcher1.start()
-        patcher2.start()
-        import YouTubeCore
-        import urllib2
-        YouTubeCore.url2request = Mock()
-        dummy_connection = Mock()
-        read_values = ["Nothing here\n","something verify-age-actions"]
-        dummy_connection.read.side_effect = lambda: read_values.pop()
-        dummy_connection.geturl.return_value = ""
-        dummy_connection.info.return_value = "Mock header"
-        patcher1(urllib2.urlopen).return_value = dummy_connection
-        core = YouTubeCore.YouTubeCore()
-        core._getAuth = Mock()
-
-        params = {"login":"","link":"www.somelink.dk"}
-        ret = core._fetchPage(params)
-
-        patcher1.stop()
-        args = YouTubeCore.url2request().add_header.call_args_list
-        patcher2.stop()
-
-        assert(dummy_connection.read.call_count == 2)
-
     def test_fetchPage_should_retry_on_URLError(self):
         settings = ["my_token", "my_token", "my_token", "my_token", "my_token", "user", "pass", "4", "", "", "3"]
         sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
@@ -1026,45 +998,6 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
         result = core._findErrors( input )
 
         assert(result == "Mock error")
-
-    def test_verifyAge_should_call_fetch_page_with_correct_params(self):
-        parsedom = [ ["/verifyAgeMock"], ["http://next.com" ], ["very racy"] ] * 6
-        sys.modules[ "__main__" ].common.parseDOM.side_effect = parsedom
-        url_data = { "next_url": "http://next", "set_racy": "very racy", "session_token" : "MY_token"}
-        sys.modules[ "__main__" ].login._httpLogin.return_value = ( { "content": "", "status": "200"} , "")
-        core = YouTubeCore()
-        core._fetchPage = Mock()
-        core._fetchPage.return_value = { "status":303,"content":'<form method="POST" action="/verify_age?action_confirm=true" id="confirm-age-form">yt.setConfig({      \'XSRF_TOKEN\': \'MY_token\',      \'XSRF_FIELD_NAME\': \'session_token\'    }); ' }
-
-        result = core._verifyAge("http://mock.link","http://verify.age", { "link": "http://mock.link", "login": "true"} )
-
-        core._fetchPage.assert_any_call({'login': 'true', 'link': 'http://www.youtube.com//verifyAgeMock', 'url_data': {'next_url': 'http://next.com', 'set_racy': 'very racy', 'session_token': 'MY_token'}, 'no_verify_age': 'true'})
-
-    def test_verifyAge_should_return_if_done(self):
-        settings = [ "","some_token","3"]
-        sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
-        sys.modules[ "__main__" ].common.parseDOM.return_value = []
-        core = YouTubeCore()
-        core._fetchPage = Mock()
-        core._fetchPage.return_value = { "status":303,"content":'PLAYER_CONFIG' }
-
-        result = core._verifyAge("http://mock.link","http://verify.age", { "link": "http://mock.link", "login": "true"} )
-
-        core._fetchPage.assert_any_call({'login': 'true', 'link': 'http://verify.age', 'no_verify_age': 'true'})
-        assert(result == { "status":303,"content":'PLAYER_CONFIG' })
-
-    def test_verifyAge_should_try_assuming_it_is_logged_in(self):
-        settings = [ "","some_token","3"]
-        sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
-        sys.modules[ "__main__" ].common.parseDOM.return_value = []
-        core = YouTubeCore()
-        core._fetchPage = Mock()
-        core._fetchPage.return_value = { "status":303,"content":'nothing here' }
-
-        result = core._verifyAge("http://mock.link","http://verify.age", { "link": "http://mock.link", "login": "true"} )
-
-        core._fetchPage.assert_any_call({'login': 'true', 'link': 'http://verify.age', 'no_verify_age': 'true'})
-        core._fetchPage.assert_any_call({'login': 'true', 'link': 'http://mock.link', 'no_verify_age': 'true'})
 
     def test_oRefreshToken_should_reset_access_token_before_calling_fetch_page(self):
         settings = [ "","some_token","3"]
