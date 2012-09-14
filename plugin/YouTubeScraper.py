@@ -662,6 +662,3 @@ class YouTubeScraper():
         result = self.paginator(params)
         self.common.log(repr(result), 5)
         return result
-
-if __name__ == '__main__':
-    sys.exit(0)
