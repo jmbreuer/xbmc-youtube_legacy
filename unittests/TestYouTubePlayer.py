@@ -8,23 +8,13 @@ from YouTubePlayer import YouTubePlayer
 
 class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 
-    def ttest_getVideoUrlMap_should_return_empty_dictionary_on_missing_map(self):
-        assert(False)
+    def test__getVideoLinks_should_return_empty_dictionary_on_missing_map(self):
+        sys.modules["__main__"].core._fetchPage.return_value = {"status":303}
 
-    def ttest_getVideoUrlMap_should_parse_streamMap(self):
-        assert(False)
+        player = YouTubePlayer()
+        (result, status) = player._getVideoLinks({},{"videoid":"123"})
 
-    def ttest_getVideoUrlMap_should_parse_url_encoded_stream_map(self):
-        assert(False)
-
-    def ttest_getVideoUrlMap_should_parse_url_map(self):
-        assert(False)
-
-    def ttest_getVideoUrlMap_should_parse_url_map_fallback(self):
-        assert(False)
-
-    def ttest_getVideoUrlMap_should_mark_live_play(self):
-        assert(False)
+        assert (result == {})
 
     def test_playVideo_should_call_getVideoObject(self):
         player = YouTubePlayer()
@@ -369,10 +359,16 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         player.getInfo.assert_called_with({})
         sys.modules["__main__"].language.assert_called_with(30618)
 
-    def ttest_getVideoLinks_should_try_scraping_first(self):
-        assert(False)
+    def test_getVideoLinks_should_try_scraping_first(self):
+        sys.modules["__main__"].core._fetchPage.return_value = {"status":303}
+
+        player = YouTubePlayer()
+        player._getVideoLinks({},{"videoid":"123"})
+
+        sys.modules["__main__"].core._fetchPage.assert_any_call({"link":player.urls["video_stream"] % "123"})
 
     def ttest_getVideoLinks_should_fall_back_to_embed(self):
+
         assert(False)
 
     def ttest_getVideoLinks_should_get_error_message_from_embed(self):
