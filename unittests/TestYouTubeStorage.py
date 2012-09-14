@@ -76,47 +76,7 @@ class TestYouTubeStorage(BaseTestCase.BaseTestCase):
         assert(result[0]["scraper"] == "music_artist")
         assert(result[0].has_key("icon"))
         assert(result[0].has_key("thumbnail"))
-        
-    def test_deleteStoredArtist_should_call_retrieve_to_get_list_of_artists(self):
-        storage = YouTubeStorage()
-        storage.retrieve = Mock()
-        storage.retrieve.return_value = []
-        storage.storeSettings = Mock()
-        
-        storage.deleteStoredArtist({"path": "some_path", "store": "somestore"})
-        
-        storage.retrieve.assert_called_with({"path": "some_path", "store": "somestore"})
 
-    def test_deleteStoredArtist_should_call_store_to_save_new_list_of_artists(self):
-        storage = YouTubeStorage()
-        storage.retrieve = Mock()
-        storage.retrieve.return_value = [("some_title", "some_artist")]
-        storage.storeSettings = Mock()
-        
-        storage.deleteStoredArtist({"path": "some_path", "store": "somestore"})
-        
-        storage.storeSettings.assert_called_with({"path": "some_path", "store": "somestore"},[('some_title', 'some_artist')])
-
-    def test_deleteStoredArtist_should_remove_artist_from_list_before_saving(self):
-        storage = YouTubeStorage()
-        storage.retrieve = Mock()
-        storage.retrieve.return_value = [("some_title", "some_artist")]
-        storage.storeSettings = Mock()
-        
-        storage.deleteStoredArtist({"path": "some_path", "store": "somestore", "artist": "some_artist"})
-        
-        storage.storeSettings.assert_called_with({"path": "some_path", "store": "somestore", "artist": "some_artist"},[])
-
-    def test_getStoredArtists_should_call_executebuiltin_when_done(self):
-        storage = YouTubeStorage()
-        storage.retrieve = Mock()
-        storage.retrieve.return_value = [("some_title", "some_artist")]
-        storage.storeSettings = Mock()
-        
-        storage.deleteStoredArtist({"path": "some_path", "store": "somestore", "artist": "some_artist"})
-        
-        sys.modules["__main__"].xbmc.executebuiltin.assert_called_with('Container.Refresh')
-        
     def test_saveStoredArtist_should_exit_cleanly_if_artist_or_artist_name_is_missing(self):
         storage = YouTubeStorage()
         storage.retrieve = Mock()
