@@ -195,7 +195,41 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
         self.scraper.scrapeShowEpisodes({})        
         
         assert(sys.modules["__main__"].core._fetchPage.call_count > 1)
-        
+
+    def test_extractListId_should_user_parseDOM(self):
+        sys.modules["__main__"].common.parseDOM.return_value = [""]
+
+        result = self.scraper.extractListId({"content":""})
+
+
+        assert(sys.modules["__main__"].common.parseDOM.call_count > 0)
+
+    def test_extractListId_should_extract_list_id_correctly(self):
+        sys.modules["__main__"].common.parseDOM.return_value = ["dsllfskf=sodfkoskf&list=some_list&sdkofkodskof=sokfosk"]
+
+        result = self.scraper.extractListId({"content":""})
+
+        print repr(result)
+        assert(result == "some_list")
+
+    def test_extractMultipleListIds_should_extract_list_id_correctly(self):
+        sys.modules["__main__"].common.parseDOM.return_value = ["a=1&list=list1&b=2","a=1&list=list2&b=2","a=1&list=list3&b=2","a=1&list=list4&b=2"]
+
+        result = self.scraper.extractMultipleListIds({"content":""})
+
+        print repr(result)
+        assert(result[0] == "list1")
+        assert(result[1] == "list2")
+        assert(result[2] == "list3")
+        assert(result[3] == "list4")
+
+    def test_extractMultipleListIds_should_use_parseDOM(self):
+        sys.modules["__main__"].common.parseDOM.return_value = ["a=1&list=list1&b=2","a=1&list=list2&b=2","a=1&list=list3&b=2","a=1&list=list4&b=2"]
+
+        result = self.scraper.extractMultipleListIds({"content":""})
+
+        assert(sys.modules["__main__"].common.parseDOM.call_count > 0)
+
     def test_scrapeShow_should_call_createUrl_to_get_proper_url(self):
 
         self.scraper.scrapeShow({"batch":"something"})
