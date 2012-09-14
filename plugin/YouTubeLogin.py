@@ -34,6 +34,7 @@ class YouTubeLogin():
     def __init__(self):
         self.xbmc = sys.modules["__main__"].xbmc
 
+        self.pluginsettings = sys.modules["__main__"].pluginsettings
         self.settings = sys.modules["__main__"].settings
         self.language = sys.modules["__main__"].language
         self.plugin = sys.modules["__main__"].plugin
@@ -47,20 +48,22 @@ class YouTubeLogin():
         get = params.get
         self.common.log("")
 
-        ouname = self.settings.getSetting("username")
-        opass = self.settings.getSetting("user_password")
+        old_user_name = self.pluginsettings.userName
+        old_user_password = self.pluginsettings.userPassword
         self.settings.openSettings()
-        uname = self.settings.getSetting("username")
 
-        self.dbg = self.settings.getSetting("debug") == "true"
+        user_name = self.pluginsettings.userName
+        user_password = self.pluginsettings.userPassword
+
+        self.dbg = self.pluginsettings.debugModeIsEnabled
         result = ""
         status = 500
 
-        if uname == "":
-            return ("",200)
+        if not user_name:
+            return (result, 200)
 
         refreshed = False
-        if get("new", "false") == "false" and self.settings.getSetting("oauth2_refresh_token") and ouname == uname and opass == self.settings.getSetting("user_password"):
+        if get("new", "false") == "false" and self.pluginsettings.authenticationRefreshRoken and old_user_name == uname and old_user_password == user_password:
             self.common.log("refreshing token: " + str(refreshed))
             refreshed = self.core._oRefreshToken()
 
@@ -262,7 +265,6 @@ class YouTubeLogin():
         if len(dsh) == 0:
             dsh = self.common.parseDOM(content, "input", attrs={"id": "dsh"}, ret="value")
 
-        # Can we get this elsewhere?
         galx = self.common.parseDOM(content, "input", attrs={"name": "GALX"}, ret="value")
         uname = self.settings.getSetting("username")
         pword = self.settings.getSetting("user_password")
