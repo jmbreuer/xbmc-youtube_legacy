@@ -48,32 +48,33 @@ class YouTubeLogin():
         get = params.get
         self.common.log("")
 
-        old_user_name = self.pluginsettings.userName
-        old_user_password = self.pluginsettings.userPassword
+        old_user_name = self.pluginsettings.userName()
+        old_user_password = self.pluginsettings.userPassword()
         self.settings.openSettings()
 
-        user_name = self.pluginsettings.userName
-        user_password = self.pluginsettings.userPassword
+        user_name = self.pluginsettings.userName()
+        user_password = self.pluginsettings.userPassword()
 
-        self.dbg = self.pluginsettings.debugModeIsEnabled
+        self.dbg = self.pluginsettings.debugModeIsEnabled()
         result = ""
         status = 500
 
+        print "dkokdoko " + repr(user_name)
         if not user_name:
             return (result, 200)
 
         refreshed = False
-        if get("new", "false") == "false" and self.pluginsettings.authenticationRefreshRoken and old_user_name == uname and old_user_password == user_password:
+        if get("new", "false") == "false" and self.pluginsettings.authenticationRefreshRoken and old_user_name == user_name and old_user_password == user_password:
             self.common.log("refreshing token: " + str(refreshed))
             refreshed = self.core._oRefreshToken()
 
         if not refreshed:
-            result, status = self._login()
+            result, status = self.authorize()
 
         self.xbmc.executebuiltin("Container.Refresh")
         return (result, status)
 
-    def _login(self):
+    def authorize(self):
         self.common.log("token not refresh, or new uname or password")
         self.settings.setSetting("oauth2_access_token", "")
         self.settings.setSetting("oauth2_refresh_token", "")
