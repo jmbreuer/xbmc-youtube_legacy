@@ -115,59 +115,41 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
 
         login._httpLogin.assert_any_call({ "new": "true"})
         login._apiLogin.assert_any_call()
-	
-    def test_authorize_should_not_show_refreshing_folder_message_on_token_refresh_success(self):
+
+    def test_authorize_should_show_error_message_on_http_login_failure(self):
+        sys.modules["__main__"].language.side_effect = ["string1", "string2"]
+
+        login = YouTubeLogin()
+        login._apiLogin = Mock(return_value=("",200))
+        login._httpLogin = Mock(return_value=("",500))
+
+        login.authorize()
+        
+        sys.modules["__main__"].utils.showErrorMessage.assert_called_with("string1","",500)
+        sys.modules["__main__"].language.assert_called_with(30609)
+
+    def test_authorize_should_show_error_message_on_api_login_failure(self):
+        sys.modules["__main__"].language.side_effect = ["string1", "string2"]
+
+        login = YouTubeLogin()
+        login._apiLogin = Mock(return_value=("",500))
+        login._httpLogin = Mock(return_value=("",200))
+
+        login.authorize()
+
+        sys.modules["__main__"].utils.showErrorMessage.assert_called_with("string1","",500)
+        sys.modules["__main__"].language.assert_called_with(30609)
+
+    def test_authorize_should_show_refreshing_folder_message_on_success(self):
+        sys.modules["__main__"].language.side_effect = ["string1", "string2"]
+
         login = YouTubeLogin()
         login._apiLogin = Mock(return_value=("",200))
         login._httpLogin = Mock(return_value=("",200))
 
         login.authorize()
 
-        sys.modules["__main__"].core._oRefreshToken.assert_called_with()
-        assert(sys.modules["__main__"].utils.showMessage.call_count == 0)
-        assert(sys.modules["__main__"].utils.showErrorMessage.call_count == 0)
-	
-    def test_authorize_should_show_error_message_on_failure(self):
-        settings = ["password","some_token","true","username","password","username"]
-        language = ["string1", "string2"]
-        sys.modules["__main__"].settings.getSetting.side_effect = lambda x: settings.pop()
-        sys.modules["__main__"].language.side_effect = lambda x: language.pop()
-        sys.modules["__main__"].core._oRefreshToken.return_value = False
-        login = YouTubeLogin()
-        login._apiLogin = Mock()
-        login._apiLogin.return_value = ("",303)
-        login._httpLogin = Mock()
-        login._httpLogin.return_value = ("",200)
-        
-        login.login()
-        
-        login._httpLogin.assert_called_with({ "new": "true"})
-        login._apiLogin.assert_called_with()
-        sys.modules["__main__"].core._oRefreshToken.assert_called_with()
-        sys.modules["__main__"].utils.showErrorMessage.assert_called_with("string2","",303)
-        sys.modules["__main__"].language.assert_called_with(30609)
-	
-    def test_login_should_show_refreshing_folder_message_on_login_success(self):
-        sys.modules["__main__"].pluginsettings.authenticationRefreshRoken.return_value =  "some_token"
-        sys.modules["__main__"].pluginsettings.userName.return_value = "username"
-        sys.modules["__main__"].pluginsettings.userPassword.return_value = "password"
-        settings = ["true","username"]
-        language = ["string1", "string2"]
-        sys.modules["__main__"].settings.getSetting.side_effect = lambda x: settings.pop()
-        sys.modules["__main__"].language.side_effect = lambda x: language.pop()
-        sys.modules["__main__"].core._oRefreshToken.return_value = False
-        login = YouTubeLogin()
-        login._apiLogin = Mock()
-        login._apiLogin.return_value = ("",200)
-        login._httpLogin = Mock()
-        login._httpLogin.return_value = ("",200)
-        
-        login.login()
-        
-        sys.modules["__main__"].core._oRefreshToken.assert_called_with()
-        login._httpLogin.assert_called_with({ "new": "true"})
-        login._apiLogin.assert_called_with()
-        sys.modules["__main__"].utils.showErrorMessage.assert_called_with("string2","",303)
+        sys.modules["__main__"].utils.showErrorMessage.assert_called_with("string1","",303)
         sys.modules["__main__"].language.assert_called_with(30031)
 	
     def test_apiLogin_should_clear_auth_value_in_settings_before_doing_anything_else(self):
