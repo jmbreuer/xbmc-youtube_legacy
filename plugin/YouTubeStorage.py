@@ -89,22 +89,6 @@ class YouTubeStorage():
 
         return (result, 200)
 
-    def deleteStoredArtist(self, params={}):
-        self.common.log(repr(params), 5)
-        get = params.get
-
-        artist = get("artist")
-        artists = self.retrieve(params)
-
-        for count, (title, artist_id) in enumerate(artists):
-            if (artist == artist_id):
-                del(artists[count])
-                break
-
-        self.storeSettings(params, artists)
-
-        self.xbmc.executebuiltin("Container.Refresh")
-
     def saveStoredArtist(self, params={}):
         self.common.log(repr(params), 5)
         get = params.get
