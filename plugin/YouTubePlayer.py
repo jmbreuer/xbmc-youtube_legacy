@@ -349,11 +349,16 @@ class YouTubePlayer():
             if not (url_desc_map.has_key("url") or url_desc_map.has_key("stream")):
                 continue
 
+            signature=url_desc_map["sig"][0]
             key = int(url_desc_map["itag"][0])
+            url = u""
             if url_desc_map.has_key("url"):
-                links[key] = urllib.unquote(url_desc_map["url"][0])
+                url = urllib.unquote(url_desc_map["url"][0])
             elif url_desc_map.has_key("stream"):
-                links[key] = urllib.unquote(url_desc_map["stream"][0])
+                url = urllib.unquote(url_desc_map["stream"][0])
+
+            links[key] = url + u"&signature=" + signature
+
 
         if len(links) == 0:
             self.common.log(u"Couldn't find url map or stream map.")
