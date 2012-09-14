@@ -31,6 +31,9 @@ except ImportError: import json
 class YouTubeLogin():
     APIKEY = "AI39si6hWF7uOkKh4B9OEAX-gK337xbwR9Vax-cdeF9CF9iNAcQftT8NVhEXaORRLHAmHxj6GjM-Prw04odK4FxACFfKkiH9lg"
 
+    urls = {}
+    urls[u"oauth_api_login"] = u"https://accounts.google.com/o/oauth2/auth?client_id=208795275779.apps.googleusercontent.com&redirect_uri=urn:ietf:wg:oauth:2.0:oob&scope=http%3A%2F%2Fgdata.youtube.com&response_type=code"
+
     def __init__(self):
         self.xbmc = sys.modules["__main__"].xbmc
 
@@ -59,7 +62,6 @@ class YouTubeLogin():
         result = ""
         status = 500
 
-        print "dkokdoko " + repr(user_name)
         if not user_name:
             return (result, 200)
 
@@ -88,14 +90,10 @@ class YouTubeLogin():
             self.utils.showErrorMessage(self.language(30609), result, status)
         return result, status
 
-    def _apiLogin(self, error=0):
-        self.common.log("errors: " + str(error))
+    def _apiLogin(self):
+        self.common.log("")
 
-        self.settings.setSetting("oauth2_expires_at", "")
-        self.settings.setSetting("oauth2_access_token", "")
-        self.settings.setSetting("oauth2_refresh_token", "")
-
-        url = "https://accounts.google.com/o/oauth2/auth?client_id=208795275779.apps.googleusercontent.com&redirect_uri=urn:ietf:wg:oauth:2.0:oob&scope=http%3A%2F%2Fgdata.youtube.com&response_type=code"
+        url = self.urls[u"oauth_api_login"]
 
         logged_in = False
         fetch_options = {"link": url, "no-language-cookie": "true"}
@@ -267,8 +265,8 @@ class YouTubeLogin():
             dsh = self.common.parseDOM(content, "input", attrs={"id": "dsh"}, ret="value")
 
         galx = self.common.parseDOM(content, "input", attrs={"name": "GALX"}, ret="value")
-        uname = self.settings.getSetting("username")
-        pword = self.settings.getSetting("user_password")
+        uname = self.pluginsettings.userName()
+        pword = self.pluginsettings.userPassword()
 
         if pword == "":
             pword = self.common.getUserInput(self.language(30628), hidden=True)
