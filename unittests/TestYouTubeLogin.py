@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import nose
 import BaseTestCase
-from mock import Mock
+from mock import Mock, patch
 import sys
 from  YouTubeLogin import YouTubeLogin 
 
@@ -151,16 +151,7 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
 
         sys.modules["__main__"].utils.showErrorMessage.assert_called_with("string1","",303)
         sys.modules["__main__"].language.assert_called_with(30031)
-	
-    def test_apiLogin_should_clear_auth_value_in_settings_before_doing_anything_else(self):
-        sys.modules["__main__"].core._fetchPage.return_value = {"content":""}
-        sys.modules["__main__"].common.parseDOM.return_value = ""
-        login = YouTubeLogin()
-        
-        login._apiLogin()
-        
-        sys.modules["__main__"].settings.setSetting.assert_any_call("oauth2_access_token","")
-	
+		
     def test_apiLogin_should_call_oauth2_login_url_only_one_time_if_url_fails(self):
         sys.modules["__main__"].core._fetchPage.return_value = {"content":""}
         sys.modules["__main__"].common.parseDOM.return_value = ""
@@ -231,37 +222,37 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
         assert(sys.modules["__main__"].core._fetchPage.call_count == 2)
 	
     def test_apiLogin_should_call_fetchPage_with_correct_params_when_fetching_request_token(self):
-        dom_values = ["","","",["some_code"],"",""]
         sys.modules["__main__"].core._fetchPage.return_value = {"content":""}
-        sys.modules["__main__"].common.parseDOM.side_effect = lambda x = "", y ="",attrs = {},ret = {}: dom_values.pop()
+        sys.modules["__main__"].common.parseDOM.side_effect = ["","",["some_code"],"","",""]
         login = YouTubeLogin()
         
         login._apiLogin()
-        
-        args = sys.modules["__main__"].core._fetchPage.call_args
-        assert(args[0][0]["link"] == "https://accounts.google.com/o/oauth2/token")
-        assert(args[0][0].has_key("url_data"))
-        assert(args[0][0]["url_data"]["code"] == "some_code" )
-        assert(args[0][0]["url_data"]["grant_type"] == "authorization_code" )
+
+        args = sys.modules["__main__"].core._fetchPage.call_args[0][0]
+
+        assert(args["link"] == "https://accounts.google.com/o/oauth2/token")
+        assert(args.has_key("url_data"))
+        assert(args["url_data"]["code"] == "some_code" )
+        assert(args["url_data"]["grant_type"] == "authorization_code" )
         
     def test_apiLogin_should_set_oauth_specific_values_on_success(self):
-        fetch_values = [{"content":""},{"content":'{"expires_in":"12", "access_token":"my_favorite_access_token", "refresh_token":"my_favorite_refresh_token" }'}]
-        sys.modules["__main__"].core._fetchPage.side_effect = lambda x: fetch_values.pop()
-        sys.modules["__main__"].settings.getSetting.return_value = "" 
+        patcher = patch("time.time")
+        patcher.start()
+        import time
+        time.time = Mock(return_value=1)
+
+        sys.modules["__main__"].core._fetchPage.side_effect = [{"content":'{"expires_in":"12", "access_token":"my_favorite_access_token", "refresh_token":"my_favorite_refresh_token" }'},{"content":""}]
+        sys.modules["__main__"].settings.getSetting.return_value = ""
         sys.modules["__main__"].common.parseDOM.return_value = ""
         login = YouTubeLogin()
         
         login._apiLogin()
-        
-        args = sys.modules["__main__"].settings.setSetting.call_args_list
-        print repr(args)
-        assert(args[3][0][0] == "oauth2_expires_at")
-        assert(len(args[3][0][1]) > 1)
-        assert(args[4][0][0] == "oauth2_access_token")
-        assert(args[4][0][1] == "my_favorite_access_token")
-        assert(args[5][0][0] == "oauth2_refresh_token")
-        assert(args[5][0][1] == "my_favorite_refresh_token")
-        
+        patcher.stop()
+
+        sys.modules["__main__"].settings.setSetting.assert_any_call("oauth2_expires_at", '13')
+        sys.modules["__main__"].settings.setSetting.assert_any_call("oauth2_access_token", "my_favorite_access_token")
+        sys.modules["__main__"].settings.setSetting.assert_any_call("oauth2_refresh_token", "my_favorite_refresh_token")
+
     def test_apiLogin_should_provide_correct_message_and_success_status_code_on_success(self):
         fetch_values = [{"content":""},{"content":'{"expires_in":"12", "access_token":"my_favorite_access_token", "refresh_token":"my_favorite_refresh_token" }'}]
         sys.modules["__main__"].core._fetchPage.side_effect = lambda x: fetch_values.pop()
@@ -564,67 +555,32 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
         print repr(result)
         assert(result == ({'content': 'captcha', 'status': 200},500))
 
-    def test_fillLoginInfo_should_call_parseDOM_to_find_rmShow(self):
-        sys.modules["__main__"].settings.getSetting.return_value = "smokey" 
+    def test_fillLoginInfo_should_use_parseDOM(self):
+        sys.modules["__main__"].pluginsettings.userName.return_value = "value1"
+        sys.modules["__main__"].pluginsettings.userPassword.return_value = "value1"
         sys.modules["__main__"].common.parseDOM.return_value = ""
         login = YouTubeLogin()
         
         result = login._fillLoginInfo("new")
 
-        args = sys.modules["__main__"].common.parseDOM.call_args_list
-        assert(args[0][0] == ("new","input"))
-        assert(args[0][1] == {'attrs': {'name': 'rmShown'}, 'ret': 'value'})
+        assert(sys.modules["__main__"].common.parseDOM.call_count > 0)
 
-    def test_fillLoginInfo_should_call_parseDOM_twice_to_find_uilel(self):
-        sys.modules["__main__"].settings.getSetting.return_value = "smokey" 
+    def test_fillLoginInfo_should_get_username_and_passwords_from_pluginsettings(self):
+        sys.modules["__main__"].pluginsettings.userName.return_value = "value1"
+        sys.modules["__main__"].pluginsettings.userPassword.return_value = "value1"
+
+        sys.modules["__main__"].settings.getSetting.return_value = "smokey"
         sys.modules["__main__"].common.parseDOM.return_value = ""
         login = YouTubeLogin()
         
         result = login._fillLoginInfo("new")
 
-        args = sys.modules["__main__"].common.parseDOM.call_args_list
-        assert(args[2][0] == ("new","input"))
-        assert(args[2][1] == {'attrs': {'name': 'uilel'}, 'ret': 'value'})
-        assert(args[3][0] == ("new","input"))
-        assert(args[3][1] == {'attrs': {'id': 'uilel'}, 'ret': 'value'})
-
-    def test_fillLoginInfo_should_call_parseDOM_twice_to_find_dsh(self):
-        sys.modules["__main__"].settings.getSetting.return_value = "smokey" 
-        sys.modules["__main__"].common.parseDOM.return_value = ""
-        login = YouTubeLogin()
-        
-        result = login._fillLoginInfo("new")
-
-        args = sys.modules["__main__"].common.parseDOM.call_args_list
-        assert(args[4][0] == ("new","input"))
-        assert(args[4][1] == {'attrs': {'name': 'dsh'}, 'ret': 'value'})
-        assert(args[5][0] == ("new","input"))
-        assert(args[5][1] == {'attrs': {'id': 'dsh'}, 'ret': 'value'})
-
-    def test_fillLoginInfo_should_call_parseDOM_to_get_galx(self):
-        sys.modules["__main__"].settings.getSetting.return_value = "smokey" 
-        sys.modules["__main__"].common.parseDOM.return_value = ""
-        login = YouTubeLogin()
-        
-        result = login._fillLoginInfo("new")
-
-        args = sys.modules["__main__"].common.parseDOM.call_args_list
-        assert(args[6][0] == ("new","input"))
-        assert(args[6][1] == {'attrs': {'name': 'GALX'}, 'ret': 'value'})
-
-    def test_fillLoginInfo_should_get_username_and_passwords_from_settings(self):
-        sys.modules["__main__"].settings.getSetting.return_value = "smokey" 
-        sys.modules["__main__"].common.parseDOM.return_value = ""
-        login = YouTubeLogin()
-        
-        result = login._fillLoginInfo("new")
-
-        sys.modules["__main__"].settings.getSetting.assert_any_call("username")
-        sys.modules["__main__"].settings.getSetting.assert_any_call("user_password")
-
+        sys.modules["__main__"].pluginsettings.userName.assert_any_call()
+        sys.modules["__main__"].pluginsettings.userPassword.assert_any_call()
 
     def test_fillLoginInfo_should_ask_user_for_password_if_not_set(self):
-        sys.modules["__main__"].settings.getSetting.return_value = "" 
+        sys.modules["__main__"].pluginsettings.userName.return_value = ""
+        sys.modules["__main__"].pluginsettings.userPassword.return_value = ""
         sys.modules["__main__"].common.parseDOM.return_value = ""
         sys.modules["__main__"].language.return_value = "someTitle"
         sys.modules["__main__"].common.getUserInput.return_value = "somePword"
@@ -635,7 +591,8 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
         sys.modules["__main__"].common.getUserInput.assert_any_call('someTitle', hidden=True)
 
     def test_fillLoginInfo_should_return_login_info_if_all_values_are_found(self):
-        sys.modules["__main__"].settings.getSetting.return_value = "value1" 
+        sys.modules["__main__"].pluginsettings.userName.return_value = "value1"
+        sys.modules["__main__"].pluginsettings.userPassword.return_value = "value1"
         sys.modules["__main__"].common.parseDOM.return_value = ["value2"]
         sys.modules["__main__"].language.return_value = "someTitle"
         sys.modules["__main__"].common.getUserInput.return_value = "somePword"
@@ -652,7 +609,8 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
         assert(url_data["Email"] == "value1")
 
     def test_fillLoginInfo_should_not_return_login_info_if_values_are_missing(self):
-        sys.modules["__main__"].settings.getSetting.return_value = "" 
+        sys.modules["__main__"].pluginsettings.userName.return_value = ""
+        sys.modules["__main__"].pluginsettings.userPassword.return_value = ""
         sys.modules["__main__"].common.parseDOM.return_value = ""
         sys.modules["__main__"].language.return_value = "someTitle"
         sys.modules["__main__"].common.getUserInput.return_value = "somePword"
