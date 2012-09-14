@@ -21,6 +21,7 @@ import urllib
 import cgi
 try: import simplejson as json
 except ImportError: import json
+import urllib
 
 
 class YouTubePlayer():
@@ -350,9 +351,9 @@ class YouTubePlayer():
 
             key = int(url_desc_map["itag"][0])
             if url_desc_map.has_key("url"):
-                links[key] = url_desc_map["url"][0]
+                links[key] = urllib.unquote(url_desc_map["url"][0])
             elif url_desc_map.has_key("stream"):
-                links[key] = url_desc_map["stream"][0]
+                links[key] = urllib.unquote(url_desc_map["stream"][0])
 
         if len(links) == 0:
             self.common.log(u"Couldn't find url map or stream map.")
