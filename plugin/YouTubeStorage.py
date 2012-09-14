@@ -89,18 +89,6 @@ class YouTubeStorage():
 
         return (result, 200)
 
-    def saveStoredArtist(self, params={}):
-        self.common.log(repr(params), 5)
-        get = params.get
-
-        if get("artist") and get("artist_name"):
-            params["store"] = "artists"
-            artists = self.retrieve(params)
-            searchCount = (10, 20, 30, 40,)[int(self.settings.getSetting("saved_searches"))] - 1
-            artists = [(get("artist_name"), get("artist"))] + artists[:searchCount]
-            self.storeSettings(params, artists)
-            del params["store"]
-
     def getStoredSearches(self, params={}):
         self.common.log(repr(params), 5)
         get = params.get
