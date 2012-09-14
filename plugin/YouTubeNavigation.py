@@ -627,7 +627,7 @@ class YouTubeNavigation():
                     cm.append((self.language(30513) % title, 'XBMC.RunPlugin(%s?path=%s&editid=%s&action=remove_subscription)' % (sys.argv[0], item("path"), item("editid"))))
 
         if (item("contact") and not get("store")):
-            if (self.pluginsettings.userHasProvidedValidCredentials):
+            if (self.pluginsettings.userHasProvidedValidCredentials()):
                 if (item("external")):
                     cm.append((self.language(30026), 'XBMC.RunPlugin(%s?path=%s&action=add_contact&contact=%s&)' % (sys.argv[0], item("path"), item("Title"))))
                 else:
