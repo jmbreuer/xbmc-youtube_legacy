@@ -15,7 +15,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
-
+import sys
 
 class YouTubePluginSettings():
 
@@ -34,3 +34,18 @@ class YouTubePluginSettings():
 
     def requestTimeout(self):
         return [5, 10, 15, 20, 25][int(self.settings.getSetting("timeout"))]
+
+    def userHasProvidedValidCredentials(self):
+        return (self.settings.getSetting("username") != "" and self.settings.getSetting("oauth2_access_token"))
+
+    def userName(self):
+        return self.settings.getSetting("username")
+
+    def userPassword(self):
+        return self.settings.getSetting("user_password")
+
+    def debugModeIsEnabled(self):
+        return self.settings.getSetting("debug") == "true"
+
+    def authenticationRefreshRoken(self):
+        return self.settings.getSetting("oauth2_refresh_token")
