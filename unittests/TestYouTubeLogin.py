@@ -7,94 +7,127 @@ from  YouTubeLogin import YouTubeLogin
 
 
 class TestYouTubeLogin(BaseTestCase.BaseTestCase):
-    def test_login_should_call_xbmc_open_settings(self):
+
+    def test_login_should_get_both_old_and_new_user_name_to_check_for_user_changes(self):
+        sys.modules["__main__"].settings.getSetting.return_value = ""
         login = YouTubeLogin()
-        
+        login.authorize = Mock(return_value=([],200))
+
         login.login()
-        
+
+        sys.modules["__main__"].pluginsettings.userName.call_count = 2
+        sys.modules["__main__"].pluginsettings.userPassword.call_count = 2
+
+    def test_login_should_call_xbmc_open_settings_to_allow_user_to_revise_credentials(self):
+        login = YouTubeLogin()
+        login.authorize = Mock(return_value=([],200))
+
+        login.login()
+
         sys.modules["__main__"].settings.openSettings.assert_called_with()
-	
-    def test_login_reset_oauth2_data_when_refreshing(self):
-        settings = ["password","","true","username","password","username"]
-        sys.modules["__main__"].settings.getSetting.side_effect = lambda x: settings.pop()
+
+    def test_login_should_check_debug_flag_to_ensure_we_get_proper_debug_incase_of_errors(self):
         login = YouTubeLogin()
-        login._httpLogin = Mock()
-        login._httpLogin.return_value = ("",303)
-        
+        login.authorize = Mock(return_value=([],200))
+
         login.login()
-        
-        calls = sys.modules["__main__"].settings.setSetting.call_args_list
-        assert(calls[0] == (("oauth2_access_token",""),{}))
-        assert(calls[1] == (("oauth2_refresh_token",""),{}))
-        assert(calls[2] == (("oauth2_expires_at",""),{}))
-        
-    def test_login_should_call_xbmc_execute_builtin(self):
-        settings = ["password","","true","username","password","username"]
-        sys.modules["__main__"].settings.getSetting.side_effect = lambda x: settings.pop()
+
+        sys.modules["__main__"].pluginsettings.debugModeIsEnabled.assert_called_with()
+
+    def test_login_should_exit_cleanly_if_user_hasnt_entered_a_username(self):
+        sys.modules["__main__"].pluginsettings.userName.return_value = ""
         login = YouTubeLogin()
-        login._httpLogin = Mock()
-        login._httpLogin.return_value = ("",303)
-        
+        login.authorize = Mock(return_value=([],200))
+
+        (result, status) = login.login()
+
+        assert (result == "")
+        assert (status == 200)
+
+    def test_login_should_tell_xbmc_to_refresh_the_current_folder_listing_if_login_was_success_full(self):
+        login = YouTubeLogin()
+        login.authorize = Mock(return_value=([],200))
+
         login.login()
         
         sys.modules["__main__"].xbmc.executebuiltin.assert_called_with("Container.Refresh")
-	
-    def test_login_should_call_oRefreshToken(self):
-        settings = ["password","some_token","true","username","password","username"]
-        sys.modules["__main__"].settings.getSetting.side_effect = lambda x: settings.pop()
-        sys.modules["__main__"].core._oRefreshToken.return_value = True
+
+    def test_login_should_ask_core_to_refresh_security_token_if_we_have_an_existing_token_and_credentials_are_unchanged(self):
+        sys.modules["__main__"].pluginsettings.userName.return_value = "some_user"
+        sys.modules["__main__"].pluginsettings.userPassword.return_value = "some_pass"
+        sys.modules["__main__"].pluginsettings.authenticationRefreshRoken.return_value = "some_token"
         login = YouTubeLogin()
-        login._httpLogin = Mock()
-        login._httpLogin.return_value = ("",303)
-        
-        login.login()
-        
-        sys.modules["__main__"].core._oRefreshToken.assert_called_with()
-	
-    def test_login_should_call_httpLogin_if_refresh_token_didnt_work(self):
-        settings = ["password","some_token","true","username","password","username"]
-        sys.modules["__main__"].settings.getSetting.side_effect = lambda x: settings.pop()
+        login.authorize = Mock(return_value=([],200))
+
+        login.login({"new":"false"})
+
+        sys.modules["__main__"].core._oRefreshToken.assert_any_call()
+
+    def test_login_should_not_ask_core_to_refresh_security_token_if_user_name_has_changed(self):
+        sys.modules["__main__"].pluginsettings.userName.side_effect = ["some_user","some_other_user"]
+        sys.modules["__main__"].pluginsettings.userPassword.return_value = "some_pass"
+        sys.modules["__main__"].pluginsettings.authenticationRefreshRoken.return_value = "some_token"
+        login = YouTubeLogin()
+        login.authorize = Mock(return_value=([],200))
+
+        login.login({"new":"false"})
+
+        assert(sys.modules["__main__"].core._oRefreshToken.call_count == 0)
+
+    def test_login_should_not_ask_core_to_refresh_security_token_if_user_password_has_changed(self):
+        sys.modules["__main__"].pluginsettings.userName.return_value = "some_user"
+        sys.modules["__main__"].pluginsettings.userPassword.side_effect = ["some_pass","some_other_pass"]
+        sys.modules["__main__"].pluginsettings.authenticationRefreshRoken.return_value = "some_token"
+        login = YouTubeLogin()
+        login.authorize = Mock(return_value=([],200))
+
+        login.login({"new":"false"})
+
+        assert(sys.modules["__main__"].core._oRefreshToken.call_count == 0)
+
+    def test_login_should_call_authorize_if_refresh_token_didnt_work(self):
         sys.modules["__main__"].core._oRefreshToken.return_value = False
         login = YouTubeLogin()
-        login._httpLogin = Mock()
-        login._httpLogin.return_value = ("",303)
-        
+        login.authorize = Mock(return_value=("",303))
+
         login.login()
         
         sys.modules["__main__"].core._oRefreshToken.assert_called_with()
-        login._httpLogin.assert_called_with({ "new": "true"})
-	
-    def test_login_should_call_apiLogin_if_refresh_token_didnt_work(self):
-        settings = ["password","some_token","true","username","password","username"]
-        sys.modules["__main__"].settings.getSetting.side_effect = lambda x: settings.pop()
-        sys.modules["__main__"].core._oRefreshToken.return_value = False
+        login.authorize.assert_called_with()
+
+    def test_authorize_should_reset_oauth2_data_when_refreshing(self):
+        sys.modules["__main__"].settings.getSetting.return_value = ""
         login = YouTubeLogin()
-        login._apiLogin = Mock()
-        login._apiLogin.return_value = ("",200)
-        login._httpLogin = Mock()
-        login._httpLogin.return_value = ("",200)
-        
-        login.login()
-        
-        sys.modules["__main__"].core._oRefreshToken.assert_called_with()
-        login._httpLogin.assert_called_with({ "new": "true"})
-        login._apiLogin.assert_called_with()
-	
-    def test_login_should_not_show_refreshing_folder_message_on_token_refresh_success(self):
-        settings = ["password","some_token","true","username","password","username"]
-        sys.modules["__main__"].settings.getSetting.side_effect = lambda x: settings.pop()
-        sys.modules["__main__"].core._oRefreshToken.return_value = True
+        login._httpLogin = Mock(return_value=("",303))
+
+        login.authorize()
+
+        sys.modules["__main__"].settings.setSetting.assert_any_call("oauth2_access_token","")
+        sys.modules["__main__"].settings.setSetting.assert_any_call("oauth2_refresh_token","")
+        sys.modules["__main__"].settings.setSetting.assert_any_call("oauth2_expires_at","")
+
+    def test_authorize_should_call_apiLogin_if_httplogin_succeded(self):
         login = YouTubeLogin()
-        login._httpLogin = Mock()
-        login._httpLogin.return_value = ("",303)
-        
-        login.login()
-        
+        login._apiLogin = Mock(return_value=("",200))
+        login._httpLogin = Mock(return_value=("",200))
+
+        login.authorize()
+
+        login._httpLogin.assert_any_call({ "new": "true"})
+        login._apiLogin.assert_any_call()
+	
+    def test_authorize_should_not_show_refreshing_folder_message_on_token_refresh_success(self):
+        login = YouTubeLogin()
+        login._apiLogin = Mock(return_value=("",200))
+        login._httpLogin = Mock(return_value=("",200))
+
+        login.authorize()
+
         sys.modules["__main__"].core._oRefreshToken.assert_called_with()
         assert(sys.modules["__main__"].utils.showMessage.call_count == 0)
         assert(sys.modules["__main__"].utils.showErrorMessage.call_count == 0)
 	
-    def test_login_should_show_error_message_on_failure(self):
+    def test_authorize_should_show_error_message_on_failure(self):
         settings = ["password","some_token","true","username","password","username"]
         language = ["string1", "string2"]
         sys.modules["__main__"].settings.getSetting.side_effect = lambda x: settings.pop()
@@ -115,7 +148,10 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
         sys.modules["__main__"].language.assert_called_with(30609)
 	
     def test_login_should_show_refreshing_folder_message_on_login_success(self):
-        settings = ["password","some_token","true","username","password","username"]
+        sys.modules["__main__"].pluginsettings.authenticationRefreshRoken.return_value =  "some_token"
+        sys.modules["__main__"].pluginsettings.userName.return_value = "username"
+        sys.modules["__main__"].pluginsettings.userPassword.return_value = "password"
+        settings = ["true","username"]
         language = ["string1", "string2"]
         sys.modules["__main__"].settings.getSetting.side_effect = lambda x: settings.pop()
         sys.modules["__main__"].language.side_effect = lambda x: language.pop()
