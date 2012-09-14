@@ -36,6 +36,7 @@ class YouTubeNavigation():
         self.common = sys.modules["__main__"].common
         self.cache = sys.modules["__main__"].cache
 
+        self.pluginsettings = sys.modules["__main__"].pluginsettings
         self.playlist = sys.modules["__main__"].playlist
         self.login = sys.modules["__main__"].login
         self.feeds = sys.modules["__main__"].feeds
