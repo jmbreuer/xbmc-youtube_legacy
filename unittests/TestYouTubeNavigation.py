@@ -189,13 +189,6 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
         
         navigation.listMenu.assert_called_with({"action": "edit_disco"})
 
-    def test_executeAction_should_call_storage_deleteStoredArtist_if_action_is_delete_artist(self):
-        navigation = YouTubeNavigation()
-        
-        navigation.executeAction({"action": "delete_artist"})
-        
-        sys.modules["__main__"].storage.deleteStoredArtist.assert_called_with({"action": "delete_artist"})        
-
     def test_executeAction_should_call_removeFromFavorites_if_action_is_remove_favorite(self):
         navigation = YouTubeNavigation()
         navigation.removeFromFavorites = Mock()
