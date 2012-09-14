@@ -359,7 +359,7 @@ class YouTubePlayer():
             if url_desc_map.has_key("sig"):
                 signature=url_desc_map["sig"][0]
                 url + u"&signature=" + signature
-            
+
             links[key] = url
 
 
