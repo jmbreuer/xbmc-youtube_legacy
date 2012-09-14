@@ -306,9 +306,11 @@ class YouTubePlayer():
 
     def extractFlashVars(self, data):
         flashvars = {}
+        found = False
 
         for line in data.split("\n"):
             if line.strip().startswith("var swf = \""):
+                found = True
                 p1 = line.find("=")
                 p2 = line.rfind(";")
                 if p1 <= 0 or p2 <= 0:
@@ -316,14 +318,15 @@ class YouTubePlayer():
                 data = line[p1 + 1:p2]
                 break
 
-        data = json.loads(data)
-        data = data[data.find("flashvars"):]
-        data = data[data.find("\""):]
-        data = data[:1 + data[1:].find("\"")]
+        if found:
+            data = json.loads(data)
+            data = data[data.find("flashvars"):]
+            data = data[data.find("\""):]
+            data = data[:1 + data[1:].find("\"")]
 
 
-        for k, v in cgi.parse_qs(data).items():
-            flashvars[k] = v[0]
+            for k, v in cgi.parse_qs(data).items():
+                flashvars[k] = v[0]
 
         return flashvars
 
@@ -340,6 +343,9 @@ class YouTubePlayer():
 
         flashvars = self.extractFlashVars(result["content"])
 
+        if not flashvars.has_key("url_encoded_fmt_stream_map"):
+            return (links, video)
+
         if flashvars.has_key("ttsurl"):
             video["ttsurl"] = flashvars["ttsurl"]
 
@@ -349,6 +355,8 @@ class YouTubePlayer():
             if not (url_desc_map.has_key("url") or url_desc_map.has_key("stream")):
                 continue
 
+            print "urls: " + repr(url_desc_map)
+            print "signature: " + repr(url_desc_map.has_key("sig"))
             key = int(url_desc_map["itag"][0])
             url = u""
             if url_desc_map.has_key("url"):
@@ -358,10 +366,9 @@ class YouTubePlayer():
 
             if url_desc_map.has_key("sig"):
                 signature=url_desc_map["sig"][0]
-                url + u"&signature=" + signature
+                url = url + u"&signature=" + signature
 
             links[key] = url
-
 
         if len(links) == 0:
             self.common.log(u"Couldn't find url map or stream map.")
