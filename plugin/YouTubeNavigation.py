@@ -130,8 +130,6 @@ class YouTubeNavigation():
         if (get("action") in ["edit_search", "edit_disco"]):
             self.storage.editStoredSearch(params)
             self.listMenu(params)
-        if (get("action") == "delete_artist"):
-            self.storage.deleteStoredArtist(params)
         if (get("action") == "remove_favorite"):
             self.removeFromFavorites(params)
         if (get("action") == "add_favorite"):
