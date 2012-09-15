@@ -1,7 +1,7 @@
 [B]TODO:[/B]
 - Fix RTMP support.
 - Unit test new functions in storage...
-- Replace scraper with feeds for: shows, disco.
+- Replace scraper with feeds for: shows.
 - Integration tests on all user actions.
 - Use extractJS and urlparse.parse_qs.
 - UTF8/16 does not work consistently(Verify failures against minidom implementation)
