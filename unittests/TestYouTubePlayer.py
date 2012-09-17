@@ -12,22 +12,22 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         sys.modules["__main__"].core._fetchPage.return_value = {"status":303}
 
         player = YouTubePlayer()
-        (result, status) = player._getVideoLinks({},{"videoid":"123"})
+        (result, status) = player.extractVideoLinksFromYoutube({},{"videoid":"123"})
 
         assert (result == {})
 
     def test_playVideo_should_call_getVideoObject(self):
         player = YouTubePlayer()
-        player.getVideoObject = Mock(return_value=[{"apierror": "some error"}, 303])
+        player.buildVideoObject = Mock(return_value=[{"apierror": "some error"}, 303])
 
         player.playVideo()
 
-        player.getVideoObject.assert_called_with({})
+        player.buildVideoObject.assert_called_with({})
 
     def test_playVideo_should_log_and_fail_gracefully_on_apierror(self):
         player = YouTubePlayer()
-        player.getVideoObject = Mock()
-        player.getVideoObject.return_value = [{"apierror": "some error"}, 303]
+        player.buildVideoObject = Mock()
+        player.buildVideoObject.return_value = [{"apierror": "some error"}, 303]
 
         result = player.playVideo()
 
@@ -38,8 +38,8 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         sys.modules["__main__"].settings.getSetting.return_value = "0"
         player = YouTubePlayer()
         player.addSubtitles = Mock()
-        player.getVideoObject = Mock()
-        player.getVideoObject.return_value = ({"Title": "someTitle", "videoid": "some_id", "thumbnail": "someThumbnail", "video_url": "someUrl"}, 200)
+        player.buildVideoObject = Mock()
+        player.buildVideoObject.return_value = ({"Title": "someTitle", "videoid": "some_id", "thumbnail": "someThumbnail", "video_url": "someUrl"}, 200)
         sys.argv = ["test1", "1", "test2"]
 
         player.playVideo({"videoid": "some_id"})
@@ -51,8 +51,8 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         sys.modules["__main__"].settings.getSetting.return_value = "1"
         sys.argv = ["test1", "1", "test2"]
         player = YouTubePlayer()
-        player.getVideoObject = Mock()
-        player.getVideoObject.return_value = (video, 200)
+        player.buildVideoObject = Mock()
+        player.buildVideoObject.return_value = (video, 200)
 
         player.playVideo({"videoid": "some_id"})
 
@@ -62,8 +62,8 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         player = YouTubePlayer()
         sys.modules["__main__"].settings.getSetting.return_value = "0"
         sys.argv = ["test1", "1", "test2"]
-        player.getVideoObject = Mock()
-        player.getVideoObject.return_value = ({"Title": "someTitle", "videoid": "some_id", "thumbnail": "someThumbnail", "video_url": "someUrl"}, 200)
+        player.buildVideoObject = Mock()
+        player.buildVideoObject.return_value = ({"Title": "someTitle", "videoid": "some_id", "thumbnail": "someThumbnail", "video_url": "someUrl"}, 200)
         player.addSubtitles = Mock()
         call_params = {"videoid": "some_id", "watch_later": "true", "playlist": "playlist_id", "playlist_entry_id": "entry_id"}
 
@@ -75,8 +75,8 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         sys.modules["__main__"].settings.getSetting.return_value = "0"
         sys.argv = ["test1", "1", "test2"]
         player = YouTubePlayer()
-        player.getVideoObject = Mock()
-        player.getVideoObject.return_value = ({"Title": "someTitle", "videoid": "some_id", "thumbnail": "someThumbnail", "video_url": "someUrl"}, 200)
+        player.buildVideoObject = Mock()
+        player.buildVideoObject.return_value = ({"Title": "someTitle", "videoid": "some_id", "thumbnail": "someThumbnail", "video_url": "someUrl"}, 200)
         player.addSubtitles = Mock()
 
         player.playVideo({"videoid": "some_id"})
@@ -128,7 +128,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         sys.modules["__main__"].core.getVideoInfo.return_value = [{"videoid": "some_id"}]
         player = YouTubePlayer()
 
-        (video, status) = player.getInfo({"videoid": "some_id"})
+        player.getInfo({"videoid": "some_id"})
 
         sys.modules["__main__"].cache.set.assert_called_with('videoidcachesome_id', "{'videoid': 'some_id'}")
 
@@ -136,15 +136,16 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         sys.modules["__main__"].settings.getSetting.return_value = "2"
         player = YouTubePlayer()
 
-        url = player.selectVideoQuality({22: "h264", 45: "vp8"}, {})
+        url = player.selectVideoQuality({},{22: "h264", 45: "vp8"})
 
+        print "url: " + repr(url)
         assert(url == "h264 | Mozilla/5.0 (MOCK)")
 
     def test_selectVideoQuality_should_prefer_1080p_if_asked_to(self):
         sys.modules["__main__"].settings.getSetting.return_value = "2"
         player = YouTubePlayer()
 
-        url = player.selectVideoQuality({37: "1080p", 22: "720p", 35: "SD"}, {"quality": "1080p"})
+        url = player.selectVideoQuality({"quality": "1080p"},{37: "1080p", 22: "720p", 35: "SD"})
 
         assert(url == "1080p | Mozilla/5.0 (MOCK)")
 
@@ -152,7 +153,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         sys.modules["__main__"].settings.getSetting.return_value = "2"
         player = YouTubePlayer()
 
-        url = player.selectVideoQuality({37: "1080p", 22: "720p", 35: "SD"}, {"quality": "720p"})
+        url = player.selectVideoQuality({"quality": "720p"},{37: "1080p", 22: "720p", 35: "SD"})
 
         assert(url == "720p | Mozilla/5.0 (MOCK)")
 
@@ -160,7 +161,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         sys.modules["__main__"].settings.getSetting.return_value = "2"
         player = YouTubePlayer()
 
-        url = player.selectVideoQuality({37: "1080p", 22: "720p", 35: "SD"}, {"quality": "SD"})
+        url = player.selectVideoQuality({"quality": "SD"},{37: "1080p", 22: "720p", 35: "SD"})
 
         assert(url == "SD | Mozilla/5.0 (MOCK)")
 
@@ -168,7 +169,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         sys.modules["__main__"].settings.getSetting.return_value = "1"
         player = YouTubePlayer()
 
-        url = player.selectVideoQuality({5: "1", 33: "2", 18: "3", 26: "4", 43: "5", 34: "6", 78: "7", 44: "8", 59: "9", 35: "10"}, {})
+        url = player.selectVideoQuality({},{5: "1", 33: "2", 18: "3", 26: "4", 43: "5", 34: "6", 78: "7", 44: "8", 59: "9", 35: "10"})
 
         assert(url == "10 | Mozilla/5.0 (MOCK)")
 
@@ -176,7 +177,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         sys.modules["__main__"].settings.getSetting.return_value = "3"
         player = YouTubePlayer()
 
-        url = player.selectVideoQuality({35: "SD", 22: "720p", 37: "1080p"}, {})
+        url = player.selectVideoQuality({},{35: "SD", 22: "720p", 37: "1080p"})
 
         assert(url == "1080p | Mozilla/5.0 (MOCK)")
 
@@ -184,7 +185,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         sys.modules["__main__"].settings.getSetting.return_value = "2"
         player = YouTubePlayer()
 
-        url = player.selectVideoQuality({35: "SD", 22: "720p", 37: "1080p"}, {})
+        url = player.selectVideoQuality({},{35: "SD", 22: "720p", 37: "1080p"})
 
         assert(url == "720p | Mozilla/5.0 (MOCK)")
 
@@ -192,7 +193,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         sys.modules["__main__"].settings.getSetting.return_value = "1"
         player = YouTubePlayer()
 
-        url = player.selectVideoQuality({35: "SD", 22: "720p", 37: "1080p"}, {})
+        url = player.selectVideoQuality({},{35: "SD", 22: "720p", 37: "1080p"})
 
         assert(url == "SD | Mozilla/5.0 (MOCK)")
 
@@ -201,7 +202,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         player = YouTubePlayer()
         player.userSelectsVideoQuality = Mock()
 
-        player.selectVideoQuality({35: "SD", 22: "720p", 37: "1080p"}, {})
+        player.selectVideoQuality({},{35: "SD", 22: "720p", 37: "1080p"})
 
         player.userSelectsVideoQuality.assert_called_with({}, {35: 'SD', 37: '1080p', 22: '720p'})
 
@@ -209,7 +210,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         sys.modules["__main__"].settings.getSetting.return_value = "1"
         player = YouTubePlayer()
 
-        url = player.selectVideoQuality({35: "SD", 22: "720p", 37: "1080p"}, {})
+        url = player.selectVideoQuality({},{35: "SD", 22: "720p", 37: "1080p"})
 
         assert(url.find("| Mozilla/5.0 (MOCK)") > 0)
 
@@ -217,7 +218,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         sys.modules["__main__"].settings.getSetting.return_value = "1"
         player = YouTubePlayer()
 
-        url = player.selectVideoQuality({35: "SD", 22: "720p", 37: "1080p"}, {"action": "download"})
+        url = player.selectVideoQuality({"action": "download"},{35: "SD", 22: "720p", 37: "1080p"})
 
         assert(url.find("| Mozilla/5.0 (MOCK)") < 0)
 
@@ -227,10 +228,10 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         sys.modules["__main__"].language.return_value = ""
         player = YouTubePlayer()
 
-        url = player.userSelectsVideoQuality({}, {35: "SD", 22: "720p", 37: "1080p", 35: "480p", 18: "380p", 34: "360p", 5: "240p", 17: "144p"})
+        url = player.userSelectsVideoQuality({}, {35: u"SD", 22: u"720p", 37: u"1080p", 35: u"480p", 18: u"380p", 34: u"360p", 5: u"240p", 17: u"144p"})
         print repr(url)
 
-        sys.modules["__main__"].xbmcgui.Dialog().select.assert_any_call("", ["1080p", "720p", "480p", "380p", "360p", "240p", "144p"])
+        sys.modules["__main__"].xbmcgui.Dialog().select.assert_any_call("", [u"1080p", u"720p", u"480p", u"380p", u"360p", u"240p", u"144p"])
 
     def test_userSelectsVideoQuality_should_prefer_h264_over_vp8_as_appletv2_cant_handle_vp8_properly(self):
         sys.modules["__main__"].settings.getSetting.return_value = "1"
@@ -249,9 +250,9 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         sys.modules["__main__"].language.return_value = ""
         sys.modules["__main__"].common.makeUTF8.return_value = "bla"
 
-        url = player.userSelectsVideoQuality({}, {35: "SD", 22: "720p", 37: "1080p"})
+        url = player.userSelectsVideoQuality({}, {35: u"SD", 22: u"720p", 37: u"1080p"})
 
-        sys.modules["__main__"].xbmcgui.Dialog().select.assert_called_with("", ["1080p", "720p", "480p"])
+        sys.modules["__main__"].xbmcgui.Dialog().select.assert_called_with("", [u"1080p", u"720p", u"480p"])
         assert(url == "1080p")
 
     def test_userSelectsVideoQuality_should_call_xbmc_dialog_select_to_ask_for_user_input(self):
@@ -266,19 +267,19 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 
         assert(sys.modules["__main__"].xbmcgui.Dialog().select.call_count > 0)
 
-    def test_getVideoObject_should_get_video_information_from_getInfo(self):
+    def test_buildVideoObject_should_get_video_information_from_getInfo(self):
         sys.modules["__main__"].settings.getSetting.return_value = ""
         player = YouTubePlayer()
         player.getInfo = Mock()
         player.getInfo.return_value = ({}, 303)
-        player._getVideoLinks = Mock()
-        player._getVideoLinks.return_value = ({}, {})
+        player.extractVideoLinksFromYoutube = Mock()
+        player.extractVideoLinksFromYoutube.return_value = ({}, {})
 
-        player.getVideoObject({})
+        player.buildVideoObject({})
 
         player.getInfo.assert_called_with({})
 
-    def test_getVideoObject_should_use_local_file_for_playback_if_found(self):
+    def test_buildVideoObject_should_use_local_file_for_playback_if_found(self):
         sys.modules["__main__"].subtitles.getLocalFileSource.return_value = "somePath/someTitle.mp4"
         params = {"videoid": "some_id"}
         player = YouTubePlayer()
@@ -286,50 +287,52 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         video = {"videoid": "some_id", "Title": "someTitle"}
         player.getInfo.return_value = (video, 200)
 
-        (video, status) = player.getVideoObject(params)
+        (video, status) = player.buildVideoObject(params)
 
         assert(video["video_url"] == "somePath/someTitle.mp4")
 
-    def test_getVideoObject_should_not_scrape_webpage_if_local_file_is_found(self):
+    def test_buildVideoObject_should_not_scrape_webpage_if_local_file_is_found(self):
         sys.modules["__main__"].subtitles.getLocalFileSource.return_value = "somePath/someTitle.mp4"
         params = {"videoid": "some_id"}
         player = YouTubePlayer()
         player.getInfo = Mock()
-        player._getVideoLinks = Mock()
+        player.extractVideoLinksFromYoutube = Mock()
         video = {"videoid": "some_id", "Title": "someTitle"}
         player.getInfo.return_value = (video, 200)
 
-        player.getVideoObject(params)
+        player.buildVideoObject(params)
 
-        assert(player._getVideoLinks.call_count == 0)
+        assert(player.extractVideoLinksFromYoutube.call_count == 0)
 
-    def test_getVideoObject_should_check_for_local_file_before_scraping(self):
+    def test_buildVideoObject_should_check_for_local_file_before_scraping(self):
         sys.modules["__main__"].subtitles.getLocalFileSource.return_value = "somePath/someTitle.mp4"
+        sys.modules["__main__"].settings.getSetting.return_value = "1"
         params = {"videoid": "some_id"}
         player = YouTubePlayer()
         player.getInfo = Mock()
         video = {"videoid": "some_id", "Title": "someTitle"}
         player.getInfo.return_value = (video, 200)
 
-        (video, status) = player.getVideoObject(params)
+        (video, status) = player.buildVideoObject(params)
 
         sys.modules["__main__"].subtitles.getLocalFileSource.assert_called_with(params, video)
 
-    def test_getVideoObject_should_call_getVideoLinks_if_local_file_not_found(self):
+    def test_buildVideoObject_should_call_getVideoLinks_if_local_file_not_found(self):
         sys.modules["__main__"].subtitles.getLocalFileSource.return_value = ""
+        sys.modules["__main__"].settings.getSetting.return_value = "1"
         params = {"videoid": "some_id"}
         player = YouTubePlayer()
         player.getInfo = Mock()
-        player._getVideoLinks = Mock()
-        player._getVideoLinks.return_value = ({}, {})
+        player.extractVideoLinksFromYoutube = Mock()
+        player.extractVideoLinksFromYoutube.return_value = ({}, {})
         video = {"videoid": "some_id", "Title": "someTitle"}
         player.getInfo.return_value = (video, 200)
 
-        player.getVideoObject(params)
+        player.buildVideoObject(params)
 
-        player._getVideoLinks.assert_any_call(video, params)
+        player.extractVideoLinksFromYoutube.assert_any_call(video, params)
 
-    def test_getVideoObject_should_call_selectVideoQuality_if_local_file_not_found_and_remote_links_found(self):
+    def test_buildVideoObject_should_call_selectVideoQuality_if_local_file_not_found_and_remote_links_found(self):
         sys.modules["__main__"].subtitles.getLocalFileSource.return_value = ""
         params = {"videoid": "some_id"}
         video = {"videoid": "some_id", "Title": "someTitle"}
@@ -338,32 +341,32 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         player.getInfo = Mock()
         player.getInfo.return_value = (video, 200)
 
-        player._getVideoLinks = Mock()
-        player._getVideoLinks.return_value = ({22: "720p"}, {})
+        player.extractVideoLinksFromYoutube = Mock()
+        player.extractVideoLinksFromYoutube.return_value = ({22: "720p"}, {})
         player.selectVideoQuality = Mock()
 
-        player.getVideoObject(params)
+        player.buildVideoObject(params)
 
-        player.selectVideoQuality.assert_called_with({22: "720p"}, params)
+        player.selectVideoQuality.assert_called_with(params,{22: "720p"})
 
-    def test_getVideoObject_should_use_pre_defined_error_messages_on_missing_url(self):
+    def test_buildVideoObject_should_use_pre_defined_error_messages_on_missing_url(self):
         sys.modules["__main__"].settings.getSetting.return_value = ""
         player = YouTubePlayer()
         player.getInfo = Mock()
         player.getInfo.return_value = ({}, 303)
         player.getLocalFileSource = Mock(return_value="")
-        player._getVideoLinks = Mock(return_value = ({}, {}))
+        player.extractVideoLinksFromYoutube = Mock(return_value = ({}, {}))
 
-        player.getVideoObject({})
+        player.buildVideoObject({})
 
         player.getInfo.assert_called_with({})
         sys.modules["__main__"].language.assert_called_with(30618)
 
-    def test_getVideoLinks_should_try_scraping_first(self):
+    def test_buildVideoLinks_should_try_scraping_first(self):
         sys.modules["__main__"].core._fetchPage.return_value = {"status":303}
 
         player = YouTubePlayer()
-        player._getVideoLinks({},{"videoid":"123"})
+        player.extractVideoLinksFromYoutube({},{"videoid":"123"})
 
         sys.modules["__main__"].core._fetchPage.assert_any_call({"link":player.urls["video_stream"] % "123"})
 
@@ -379,7 +382,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         player = YouTubePlayer()
         sys.modules["__main__"].core._findErrors.return_value = "mock error"
 
-        result = player._getVideoLinks({}, {"videoid": "some_id"})
+        result = player.extractVideoLinksFromYoutube({}, {"videoid": "some_id"})
 
         print repr(result)
 
@@ -390,7 +393,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         player = YouTubePlayer()
         sys.modules["__main__"].core._findErrors.return_value = "mock error"
 
-        result = player._getVideoLinks({}, {"videoid": "some_id"})
+        result = player.extractVideoLinksFromYoutube({}, {"videoid": "some_id"})
 
         print repr(result)
 
@@ -401,7 +404,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         player = YouTubePlayer()
         sys.modules["__main__"].core._findErrors.return_value = "mock error"
 
-        result = player._getVideoLinks({}, {"videoid": "some_id"})
+        result = player.extractVideoLinksFromYoutube({}, {"videoid": "some_id"})
 
         print repr(result)
 
