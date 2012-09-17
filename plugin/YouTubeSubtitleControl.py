@@ -215,7 +215,7 @@ class YouTubeSubtitleControl():
             end = self.convertSecondsToTimestamp(end)
 
             if start and end:
-                result += u"Dialogue: Marked=%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\r\n" % ("0", start, end, "Default", "Name", "0000", "0000", "0000", "", text)
+                result += "Dialogue: Marked=%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\r\n" % ("0", start, end, "Default", "Name", "0000", "0000", "0000", "", text)
 
         return result
 

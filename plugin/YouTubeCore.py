@@ -469,7 +469,7 @@ class YouTubeCore():
             #data_type = chardet.detect(inputdata)
             #inputdata = inputdata.decode(data_type["encoding"])
             #self.common.log("AAAAAAAAAAAAAAAAAA: " + repr(type(inputdata)) + " - " + repr(data_type))
-            ret_obj["content"] = inputdata
+            ret_obj["content"] = inputdata.decode("utf-8")
             ret_obj["location"] = link
 
             ret_obj["new_url"] = con.geturl()
