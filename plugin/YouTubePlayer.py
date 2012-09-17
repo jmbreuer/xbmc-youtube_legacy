@@ -77,7 +77,7 @@ class YouTubePlayer():
         self.common.log(repr(params), 3)
         get = params.get
 
-        (video, status) = self.getVideoObject(params)
+        (video, status) = self.buildVideoObject(params)
 
         if status != 200:
             self.common.log(u"construct video url failed contents of video item " + repr(video))
@@ -129,7 +129,7 @@ class YouTubePlayer():
         self.cache.set("videoidcache" + get("videoid"), repr(video))
         return (video, result["status"])
 
-    def selectVideoQuality(self, links, params):
+    def selectVideoQuality(self, params, links):
         get = params.get
         link = links.get
         video_url = ""
@@ -219,89 +219,73 @@ class YouTubePlayer():
         return video_url
 
     def userSelectsVideoQuality(self, params, links):
+        levels =    [([37,121], u"1080p"),
+                     ([22,45,120], u"720p"),
+                     ([35,44], u"480p"),
+                     ([18], u"380p"),
+                     ([34,43],u"360p"),
+                     ([5],u"240p"),
+                     ([17],u"144p")]
+
         link = links.get
         quality_list = []
         choices = []
 
-        if link(37):
-            quality_list.append((37, "1080p"))
-        elif link(121):
-            quality_list.append((121, "1080p"))
+        for qualities, name in levels:
+            for quality in qualities:
+                if link(quality):
+                    quality_list.append((quality, name))
+                    break
 
-        if link(22):
-            quality_list.append((22, "720p"))
-        elif link(45):
-            quality_list.append((45, "720p"))
-        elif link(120):
-            quality_list.append((120, "720p"))
-
-        if link(35):
-            quality_list.append((35, "480p"))
-        elif link(44):
-            quality_list.append((44, "480p"))
-
-        if link(18):
-            quality_list.append((18, "380p"))
-
-        if link(34):
-            quality_list.append((34, "360p"))
-        elif link(43):
-            quality_list.append((43, "360p"))
-
-        if link(5):
-            quality_list.append((5, "240p"))
-        if link(17):
-            quality_list.append((17, "144p"))
-
-        if link(38) and False:
-            quality_list.append((37, "2304p"))
-
-        for (quality, message) in quality_list:
-            choices.append(message)
+        for (quality, name) in quality_list:
+            choices.append(name)
 
         dialog = self.xbmcgui.Dialog()
         selected = dialog.select(self.language(30518), choices)
 
         if selected > -1:
-            (quality, message) = quality_list[selected]
+            (quality, name) = quality_list[selected]
             return link(quality)
 
-        return ""
+        return u""
 
-    def getVideoObject(self, params):
+    def checkForErrors(self, video):
+        status = 200
+
+        if video[u"video_url"] == u"":
+            status = 303
+            vget = video.get
+            if vget(u"live_play"):
+                video[u'apierror'] = self.language(30612)
+            elif vget(u"stream_map"):
+                video[u'apierror'] = self.language(30620)
+            else:
+                video[u'apierror'] = self.language(30618)
+
+        return (video, status)
+
+    def buildVideoObject(self, params):
         self.common.log(repr(params))
 
-        links = []
         (video, status) = self.getInfo(params)
 
         if status != 200:
-            video['apierror'] = self.language(30618)
+            video[u'apierror'] = self.language(30618)
             return (video, 303)
 
         video_url = self.subtitles.getLocalFileSource(params, video)
         if video_url:
-            video['video_url'] = video_url
+            video[u'video_url'] = video_url
             return (video, 200)
 
-        (links, video) = self._getVideoLinks(video, params)
+        (links, video) = self.extractVideoLinksFromYoutube(video, params)
 
-        if links:
-            video["video_url"] = self.selectVideoQuality(links, params)
-            if video["video_url"] == "":
-                video['apierror'] = self.language(30618)
-                status = 303
-        else:
-            status = 303
-            vget = video.get
-            if not "apierror" in video:
-                if vget("live_play"):
-                    video['apierror'] = self.language(30612)
-                elif vget("stream_map"):
-                    video['apierror'] = self.language(30620)
-                else:
-                    video['apierror'] = self.language(30618)
+        video[u"video_url"] = self.selectVideoQuality(params, links)
 
-        self.common.log(u"Done : " + repr(status))
+        (video, status) = self.checkForErrors(video)
+
+        self.common.log(u"Done")
+
         return (video, status)
 
     def extractFlashVars(self, data):
@@ -324,56 +308,59 @@ class YouTubePlayer():
             data = data[data.find("\""):]
             data = data[:1 + data[1:].find("\"")]
 
-
             for k, v in cgi.parse_qs(data).items():
                 flashvars[k] = v[0]
 
         return flashvars
 
-    def _getVideoLinks(self, video, params):
-        self.common.log(u"trying website: " + repr(params))
-
+    def scrapeWebPageForVideoLinks(self, result, video):
         links = {}
-        get = params.get
 
-        result = self.core._fetchPage({"link": self.urls["video_stream"] % get("videoid")})
-
-        if result["status"] != 200:
+        flashvars = self.extractFlashVars(result[u"content"])
+        if not flashvars.has_key(u"url_encoded_fmt_stream_map"):
             return (links, video)
 
-        flashvars = self.extractFlashVars(result["content"])
+        if flashvars.has_key(u"ttsurl"):
+            video[u"ttsurl"] = flashvars[u"ttsurl"]
 
-        if not flashvars.has_key("url_encoded_fmt_stream_map"):
-            return (links, video)
-
-        if flashvars.has_key("ttsurl"):
-            video["ttsurl"] = flashvars["ttsurl"]
-
-        for url_desc in flashvars["url_encoded_fmt_stream_map"].split(","):
+        for url_desc in flashvars[u"url_encoded_fmt_stream_map"].split(u","):
             url_desc_map = cgi.parse_qs(url_desc)
 
-            if not (url_desc_map.has_key("url") or url_desc_map.has_key("stream")):
+            if not (url_desc_map.has_key(u"url") or url_desc_map.has_key(u"stream")):
                 continue
 
-            key = int(url_desc_map["itag"][0])
+            key = int(url_desc_map[u"itag"][0])
             url = u""
-            if url_desc_map.has_key("url"):
-                url = urllib.unquote(url_desc_map["url"][0])
-            elif url_desc_map.has_key("stream"):
-                url = urllib.unquote(url_desc_map["stream"][0])
+            if url_desc_map.has_key(u"url"):
+                url = urllib.unquote(url_desc_map[u"url"][0])
+            elif url_desc_map.has_key(u"stream"):
+                url = urllib.unquote(url_desc_map[u"stream"][0])
 
-            if url_desc_map.has_key("sig"):
-                url = url + u"&signature=" + url_desc_map["sig"][0]
+            if url_desc_map.has_key(u"sig"):
+                url = url + u"&signature=" + url_desc_map[u"sig"][0]
 
             links[key] = url
 
-        if len(links) == 0:
-            self.common.log(u"Couldn't find url map or stream map.")
+        return links
 
-            if not "apierror" in video:
-                video['apierror'] = self.core._findErrors(result)
-                if not video['apierror'] and fresult:
-                    video['apierror'] = self.core._findErrors(fresult)
+    def extractVideoLinksFromYoutube(self, video, params):
+        self.common.log(u"trying website: " + repr(params))
+
+        get = params.get
+
+        result = self.core._fetchPage({u"link": self.urls[u"video_stream"] % get(u"videoid")})
+
+        if result[u"status"] != 200:
+            self.common.log(u"Couldn't get video page from YouTube")
+            return ({}, video)
+
+        links = self.scrapeWebPageForVideoLinks(result, video)
+
+        if len(links) == 0:
+            self.common.log(u"Couldn't find video url- or stream-map.")
+
+            if not u"apierror" in video:
+                video[u'apierror'] = self.core._findErrors(result)
 
         self.common.log(u"Done")
         return (links, video)
