@@ -766,7 +766,7 @@ class YouTubeCore():
         i = 0
         for item in ytobjects:
             if "videoid" in item:
-                if res[i]:
+                if i < len(res):
                     item["Overlay"] = res[i]
                 i += 1 # This can NOT be enumerated because there might be missing videoids
         return ytobjects
