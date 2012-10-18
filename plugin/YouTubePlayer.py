@@ -131,6 +131,8 @@ class YouTubePlayer():
 
     def selectVideoQuality(self, params, links):
         get = params.get
+
+        print "links: " + repr(type(links).__name__)
         link = links.get
         video_url = ""
 
@@ -314,11 +316,12 @@ class YouTubePlayer():
         return flashvars
 
     def scrapeWebPageForVideoLinks(self, result, video):
+        self.common.log(u"")
         links = {}
 
         flashvars = self.extractFlashVars(result[u"content"])
         if not flashvars.has_key(u"url_encoded_fmt_stream_map"):
-            return (links, video)
+            return links
 
         if flashvars.has_key(u"ttsurl"):
             video[u"ttsurl"] = flashvars[u"ttsurl"]
@@ -345,7 +348,6 @@ class YouTubePlayer():
 
     def extractVideoLinksFromYoutube(self, video, params):
         self.common.log(u"trying website: " + repr(params))
-
         get = params.get
 
         result = self.core._fetchPage({u"link": self.urls[u"video_stream"] % get(u"videoid")})
