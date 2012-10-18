@@ -130,7 +130,7 @@ class YouTubeScraper():
 
         result = self.core._fetchPage({"link": url, "login": "true"})
         liked = self.common.parseDOM(result["content"], "div", {"id": "vm-video-list-container"})
-        print "liked videos " + repr(liked)
+
         items = []
 
         if (len(liked) > 0):
@@ -142,8 +142,8 @@ class YouTubeScraper():
         self.common.log("Done")
         if len(liked) > 0:
             return (items, result["status"])
-        else:
-            return ([], 303)  # Something else
+
+        return ([], 303)
 
 #=================================== Shows ============================================
 
