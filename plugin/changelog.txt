@@ -15,6 +15,7 @@
 
 [B]Version 3.3.0[/B]
 - Fixed problem in core that would sometimes break playback
+- Fixed problem in player that would cause hard crash when playback stream isn't available
 
 [B]Version 3.2.0[/B]
 - Fixed playback
