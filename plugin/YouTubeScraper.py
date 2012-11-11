@@ -62,7 +62,7 @@ class YouTubeScraper():
         items = []
 
         if (len(liked) > 0):
-            vidlist = self.common.parseDOM(liked, "li", {"class": "vm-video-item "}, ret="id")
+            vidlist = self.common.parseDOM(liked, "li", {"class": "vm-video-item.*?"}, ret="id")
             for videoid in vidlist:
                 videoid = videoid[videoid.rfind("video-") + 6:]
                 items.append(videoid)
