@@ -49,8 +49,8 @@ class BaseTestCase(unittest2.TestCase):
         sys.modules["__main__"].storage = YouTubeStorage.YouTubeStorage()
         import YouTubeCore
         sys.modules["__main__"].core = YouTubeCore.YouTubeCore()
-        sys.modules["__main__"].core.getYTCache = Mock()
-        sys.modules["__main__"].core.getYTCache.return_value = []
+        sys.modules["__main__"].core.getVideoIdStatusFromCache = Mock()
+        sys.modules["__main__"].core.getVideoIdStatusFromCache.return_value = []
         import YouTubeLogin
         sys.modules["__main__"].login = YouTubeLogin.YouTubeLogin()
         import YouTubeFeeds
