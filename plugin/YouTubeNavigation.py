@@ -425,9 +425,7 @@ class YouTubeNavigation():
         item = item_params.get
 
         icon = item("icon", "default")
-        if (get("scraper", "").find("trailers") > -1):
-            icon = "trailers"
-        elif(get("scraper", "").find("movies") > -1):
+        if (get("scraper", "").find("movies") > -1):
             icon = "movies"
         elif(get("scraper", "").find("music") > -1):
             icon = "music"
