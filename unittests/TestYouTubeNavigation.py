@@ -911,16 +911,6 @@ class TestYouTubeNavigation(BaseTestCase.BaseTestCase):
         
         sys.modules["__main__"].xbmcplugin.addDirectoryItem.assert_called_with(totalItems = 0, url="some_path?path=None&action=some_action&", isFolder=True, listitem = [], handle=-1)
 
-    def test_addVideoListItem_should_set_default_icon_for_trailers(self):
-        sys.argv = ["some_path", -1, "some_params"]
-        sys.modules["__main__"].utils.getThumbnail.return_value = "some_image_path"
-        navigation = YouTubeNavigation()
-        navigation.addVideoContextMenuItems = Mock()
-        
-        navigation.addVideoListItem({"scraper": "movie_trailers"}, {"Title": "some_title", "icon": "some_icon", "thumbnail": "some_thumbnail"})
-        
-        sys.modules["__main__"].utils.getThumbnail.assert_called_with("trailers")
-
     def test_addVideoListItem_should_set_default_icon_for_disco(self):
         sys.argv = ["some_path", -1, "some_params"]
         sys.modules["__main__"].utils.getThumbnail.return_value = "some_image_path"
