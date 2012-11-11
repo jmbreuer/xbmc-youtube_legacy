@@ -22,23 +22,14 @@ import urllib
 
 class YouTubeScraper():
     urls = {}
-    urls['current_trailers'] = "http://www.youtube.com/trailers?s=trit&p=%s&hl=en"
     urls['disco_main'] = "http://www.youtube.com/disco"
     urls['disco_mix_list'] = "http://www.youtube.com/watch?v=%s&feature=disco&playnext=1&list=%s"
     urls['disco_search'] = "http://www.youtube.com/disco?action_search=1&query=%s"
-    urls['game_trailers'] = "http://www.youtube.com/trailers?s=gtcs"
     urls['main'] = "http://www.youtube.com"
     urls['movies'] = "http://www.youtube.com/ytmovies"
-    urls['popular_game_trailers'] = "http://www.youtube.com/trailers?s=gtp&p=%s&hl=en"
-    urls['popular_trailers'] = "http://www.youtube.com/trailers?s=trp&p=%s&hl=en"
     urls['show_single_list'] = "http://www.youtube.com/channel_ajax?action_more_single_playlist_videos=1&page=%s&list_id=%s"
     urls['show_list'] = "http://www.youtube.com/show"
     urls['shows'] = "http://www.youtube.com/shows"
-    urls['trailers'] = "http://www.youtube.com/trailers?s=tr"
-    urls['latest_trailers'] = "http://www.youtube.com/trailers?s=tr"
-    urls['latest_game_trailers'] = "http://www.youtube.com/trailers?s=gtcs"
-    urls['upcoming_game_trailers'] = "http://www.youtube.com/trailers?s=gtcs&p=%s&hl=en"
-    urls['upcoming_trailers'] = "http://www.youtube.com/trailers?s=tros&p=%s&hl=en"
     urls['watched_history'] = "http://www.youtube.com/my_history"
     urls['liked_videos'] = "http://www.youtube.com/my_liked_videos"
     urls['music'] = "http://www.youtube.com/music"
@@ -57,69 +48,6 @@ class YouTubeScraper():
 
         self.feeds = sys.modules["__main__"].feeds
         self.storage = sys.modules["__main__"].storage
-
-#=================================== Trailers ============================================
-    def scrapeTrailersListFormat(self, params={}):
-        self.common.log("")
-        url = self.createUrl(params)
-        result = self.core._fetchPage({"link": url})
-
-        trailers = self.common.parseDOM(result["content"], "div", attrs={"id": "recent-trailers-container"})
-
-        items = []
-        if (len(trailers) > 0):
-            ahref = self.common.parseDOM(trailers, "a", attrs={"class": " yt-uix-hovercard-target", "id": ".*?"}, ret="href")
-
-            thumbs = self.common.parseDOM(trailers, "span", attrs={"class": "video-thumb .*?"})
-
-            athumbs = self.common.parseDOM(thumbs, "img", ret="data-thumb")
-
-            videos = self.utils.extractVID(ahref)
-
-            for index, videoid in enumerate(videos):
-                items.append((videoid, athumbs[index]))
-
-        self.common.log("Done")
-        return (items, result["status"])
-
-    def scrapeTrailersGridFormat(self, params={}):
-        self.common.log("")
-        items = []
-        next = True
-        page = 0
-
-        while next:
-            params["page"] = str(page)
-            url = self.createUrl(params)
-            result = self.core._fetchPage({"link": url})
-
-            page += 1
-
-            next = False
-            if result["status"] == 200:
-                pagination = self.common.parseDOM(result["content"], "div", {"class": "yt-uix-pager"})
-                if (len(pagination) > 0):
-                    tmp = str(pagination)
-                    if (tmp.find("Next") > 0):
-                        next = True
-
-                trailers = self.common.parseDOM(result["content"], "div", attrs={"id": "popular-column"})
-
-                if len(trailers) > 0:
-                    ahref = self.common.parseDOM(trailers, "a", attrs={"class": 'ux-thumb-wrap.*?'}, ret="href")
-
-                    thumbs = self.common.parseDOM(trailers, "span", attrs={"class": "video-thumb .*?"})
-
-                    athumbs = self.common.parseDOM(thumbs, "img", ret="data-thumb")
-
-                    videos = self.utils.extractVID(ahref)
-
-                    for index, videoid in enumerate(videos):
-                        items.append((videoid, athumbs[index]))
-
-        del params["page"]
-        self.common.log("Done")
-        return (items, result["status"])
 
 #=================================== User Scraper ============================================
 
@@ -464,13 +392,6 @@ class YouTubeScraper():
             else:
                 params["batch"] = "thumbnails"
                 function = self.scrapeMoviesGrid
-
-        if (get("scraper") in ['current_trailers', 'game_trailers', 'popular_game_trailers', 'popular_trailers', 'trailers', 'upcoming_game_trailers', 'upcoming_trailers']):
-            params["batch"] = "thumbnails"
-            function = self.scrapeTrailersGridFormat
-        if (get("scraper") in ["latest_game_trailers", "latest_trailers"]):
-            params["batch"] = "thumbnails"
-            function = self.scrapeTrailersListFormat
 
         if function:
             params["new_results_function"] = function
