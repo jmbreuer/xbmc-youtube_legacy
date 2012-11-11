@@ -23,73 +23,6 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
         self.scraper = YouTubeScraper()
         self.scraper.createUrl = Mock()
         self.scraper.createUrl.return_value = "some_url"
-        
-        
-    def test_scrapeTrailersListFormat_should_call_create_url_to_get_page_url(self):
-        
-        self.scraper.scrapeTrailersListFormat({"scraper":"trailers"})
-        
-        self.scraper.createUrl.assert_called_with({"scraper":"trailers"})
-        
-    def test_scrapeTrailersListFormat_should_call_fetchPage_to_fetch_html_contents(self):
-        
-        self.scraper.scrapeTrailersListFormat({"scraper":"trailers"})
-        
-        sys.modules["__main__"].core._fetchPage.assert_called_with({"link":"some_url"})
-        
-    def test_scrapeTrailersListFormat_should_call_parseDOM_to_find_trailers(self):
-        
-        self.scraper.scrapeTrailersListFormat({"scraper":"trailers"})
-        
-        assert(sys.modules["__main__"].common.parseDOM.call_count > 0)
-    
-    def test_scrapeTrailersGridFormat_should_call_createUrl_to_get_proper_url(self):
-        sys.modules["__main__"].common.parseDOM.side_effect = [["some_string"],["some_string"],["some_string"],["some_string"],["some_string1","some_string2","some_string3"],["some_other_string1","some_other_string2","some_other_string3"]]
-        
-        self.scraper.scrapeTrailersGridFormat()        
-        
-        self.scraper.createUrl.assert_any_call({})
-
-    def test_scrapeTrailersGridFormat_should_call_fetchPage_to_get_page_content(self):
-        sys.modules["__main__"].common.parseDOM.side_effect = [["some_string"],["some_string"],["some_string"],["some_string"],["some_string1","some_string2","some_string3"],["some_other_string1","some_other_string2","some_other_string3"]]
-        
-        self.scraper.scrapeTrailersGridFormat()        
-        
-        sys.modules["__main__"].core._fetchPage.assert_any_call({"link":"some_url"})
-    
-    def test_scrapeTrailersGridFormat_should_call_parseDOM_to_find_next_url(self):
-        sys.modules["__main__"].common.parseDOM.side_effect = [["some_string"],["some_string"],["some_string"],["some_string"],["some_string1","some_string2","some_string3"],["some_other_string1","some_other_string2","some_other_string3"]]
-        
-        self.scraper.scrapeTrailersGridFormat()        
-        
-        assert(sys.modules["__main__"].common.parseDOM.call_count > 0)
-        
-    def test_scrapeTrailersGridFormat_should_call_parseDOM_to_find_video_elements(self):
-        sys.modules["__main__"].common.parseDOM.side_effect = [["some_string"],["some_string"],["some_string"],["some_string"],["some_string1","some_string2","some_string3"],["some_other_string1","some_other_string2","some_other_string3"]]
-        
-        self.scraper.scrapeTrailersGridFormat()        
-        
-        assert(sys.modules["__main__"].common.parseDOM.call_count > 1)
-                
-    def test_scrapeTrailersGridFormat_should_call_extractVID_to_get_video_ids(self):
-        sys.modules["__main__"].common.parseDOM.side_effect = [["some_string"],["some_string"],["some_string"],["some_string"],["some_string1","some_string2","some_string3"],["some_other_string1","some_other_string2","some_other_string3"]]
-        
-        result, status = self.scraper.scrapeTrailersGridFormat()
-        
-        assert(sys.modules["__main__"].utils.extractVID.call_count > 0)
-        
-    def test_scrapeTrailersGridFormat_should_return_list_of_video_id_and_thumbnail_touples(self):
-        sys.modules["__main__"].common.parseDOM.side_effect = [["some_string"],["some_string"],["some_string"],["some_string"],["some_string1","some_string2","some_string3"],["some_other_string1","some_other_string2","some_other_string3"]]
-
-        result, status = self.scraper.scrapeTrailersGridFormat({"artist":"some_artist"})
-
-        print repr(result[1])
-        assert(result[0][0] == "some_id_1")
-        assert(result[0][1] == "some_string1")
-        assert(result[1][0] == "some_id_2")
-        assert(result[1][1] == "some_string2")
-        assert(result[2][0] == "some_id_3")
-        assert(result[2][1] == "some_string3")
 
     def test_searchDisco_should_call_createUrl_to_get_seach_url(self):
         
@@ -432,20 +365,6 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
         assert(params["batch"] == "true")
         assert(params["new_results_function"] == self.scraper.scrapeYouTubeTop100)
 
-    def test_getNewResultsFunction_should_set_proper_params_for_scrapeTrailersListFormat_if_scraper_is_latest_trailers(self):
-        params = {"scraper":"latest_trailers"}
-        
-        self.scraper.getNewResultsFunction(params)
-        
-        assert(params["new_results_function"] == self.scraper.scrapeTrailersListFormat)
-        
-    def test_getNewResultsFunction_should_set_proper_params_for_scrapeTrailersListFormat_if_scraper_is_latest_game_trailers(self):
-        params = {"scraper":"latest_game_trailers"}
-        
-        self.scraper.getNewResultsFunction(params)
-        
-        assert(params["new_results_function"] == self.scraper.scrapeTrailersListFormat)
-
     def test_getNewResultsFunction_should_set_proper_params_for_scrapeCategoryList_if_scraper_is_movies_and_category_is_not_in_params(self):
         params = {"scraper":"movies"}
         
@@ -488,55 +407,6 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
         
         assert(params["new_results_function"] == self.scraper.scrapeMovieSubCategory)
 
-    def test_getNewResultsFunction_should_set_proper_params_for_scrapeTrailersGridFormat_if_scraper_is_current_trailers(self):
-        params = {"scraper":"current_trailers"}
-        
-        self.scraper.getNewResultsFunction(params)
-        
-        assert(params["new_results_function"] == self.scraper.scrapeTrailersGridFormat)
-        
-    def test_getNewResultsFunction_should_set_proper_params_for_scrapeTrailersGridFormat_if_scraper_is_game_trailers(self):
-        params = {"scraper":"game_trailers"}
-        
-        self.scraper.getNewResultsFunction(params)
-        
-        assert(params["new_results_function"] == self.scraper.scrapeTrailersGridFormat)
-
-    def test_getNewResultsFunction_should_set_proper_params_for_scrapeTrailersGridFormat_if_scraper_is_popular_game_trailers(self):
-        params = {"scraper":"popular_game_trailers"}
-        
-        self.scraper.getNewResultsFunction(params)
-        
-        assert(params["new_results_function"] == self.scraper.scrapeTrailersGridFormat)
-
-    def test_getNewResultsFunction_should_set_proper_params_for_scrapeGridFormat_if_scraper_is_popular_trailers(self):
-        params = {"scraper":"popular_trailers"}
-        
-        self.scraper.getNewResultsFunction(params)
-        
-        assert(params["new_results_function"] == self.scraper.scrapeTrailersGridFormat)
-
-    def test_getNewResultsFunction_should_set_proper_params_for_scrapeTrailersGridFormat_if_scraper_is_trailers(self):
-        params = {"scraper":"trailers"}
-        
-        self.scraper.getNewResultsFunction(params)
-        
-        assert(params["new_results_function"] == self.scraper.scrapeTrailersGridFormat)
-
-    def test_getNewResultsFunction_should_set_proper_params_for_scrapeTrailersGridFormat_if_scraper_is_upcoming_game_trailers(self):
-        params = {"scraper":"upcoming_game_trailers"}
-        
-        self.scraper.getNewResultsFunction(params)
-        
-        assert(params["new_results_function"] == self.scraper.scrapeTrailersGridFormat)
-
-    def test_getNewResultsFunction_should_set_proper_params_for_scrapeTrailersGridFormat_if_scraper_is_upcoming_trailers(self):
-        params = {"scraper":"upcoming_trailers"}
-        
-        self.scraper.getNewResultsFunction(params)
-        
-        assert(params["new_results_function"] == self.scraper.scrapeTrailersGridFormat)
-                
     def test_createUrl_should_return_proper_url_for_shows_scraper(self):
         self.scraper = YouTubeScraper()
         
