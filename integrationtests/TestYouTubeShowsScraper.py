@@ -23,14 +23,13 @@ class TestYouTubeShowsScraper(BaseTestCase.BaseTestCase):
         self.assert_directory_item_urls_contain("show")
         self.assert_directory_items_should_have_external_thumbnails()
 
-    def ttest_plugin_should_scrape_show_single_season_folder_list_correctly(self):
-        self.navigation.listMenu({"scraper": "shows", "path": "/root/explore/trailers/current", "show": "blackboxtv?feature=sh_b_dr_4_3"})
+    def test_plugin_should_scrape_show_single_season_folder_list_correctly(self):
+        self.navigation.listMenu({"scraper": "shows", "path": "/root/explore/trailers/current", "show": "thesix?feature=sh_co_show_1_1"})
 
         self.assert_directory_count_greater_than_or_equals(1)
         self.assert_directory_count_less_than_or_equals(1)
         self.assert_directory_is_a_folder_list()
         self.assert_directory_item_urls_contain("season")
-        self.assert_directory_items_should_have_external_thumbnails()
 
     def test_plugin_should_scrape_show_season_folder_list_correctly(self):
         self.navigation.listMenu({"scraper": "shows", "path": "/root/explore/trailers/current", "show": "minecraft?feature=sh_gm_show_1_1"})
