@@ -116,7 +116,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         sys.modules["__main__"].xbmcvfs.exists.side_effect = os.path.exists
         sys.modules["__main__"].cache.getMulti.return_value = ["7"]
 
-        self.navigation.executeAction({"action": "play_video", "videoid": "byv-wpqDydI"})  # This is JUST annotations for now.
+        self.navigation.executeAction({"action": "play_video", "videoid": "YcQfiYUXrtI"})
 
         args = sys.modules["__main__"].xbmcplugin.setResolvedUrl.call_args_list
         args2 = sys.modules["__main__"].xbmc.Player().setSubtitles.call_args_list
@@ -125,12 +125,12 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         print repr("listitem" in args[0][1])
         print repr(args[0][1]["handle"] == -1)
         print repr(args[0][1]["succeeded"] == True)
-        print repr(args2[0][0][0] == './tmp/Super Bass - Nicki Minaj (Cover by @KarminMusic)-[byv-wpqDydI]-EN.ssa')
+        print repr(args2[0][0][0] == './tmp/Kicked Your Monkey  A Bad Lip Reading of Gotye\'s Somebody That I Used To Know-[YcQfiYUXrtI]-EN.ssa')
 
         assert("listitem" in args[0][1])
         assert(args[0][1]["handle"] == -1)
         assert(args[0][1]["succeeded"] == True)
-        assert(args2[0][0][0] == './tmp/Super Bass - Nicki Minaj (Cover by @KarminMusic)-[byv-wpqDydI]-EN.ssa')
+        assert(args2[0][0][0] == './tmp/Kicked Your Monkey  A Bad Lip Reading of Gotye\'s Somebody That I Used To Know-[YcQfiYUXrtI]-EN.ssa')
 
     def test_plugin_should_play_video_with_subtitle_other_than_english(self):
         sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
