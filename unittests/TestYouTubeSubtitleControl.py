@@ -177,7 +177,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         sys.modules["__main__"].settings.getSetting = Mock()
         sys.modules["__main__"].settings.getSetting.return_value = "3"
         sys.modules["__main__"].common.parseDOM.side_effect = [["de"], ["german"], ["deutch"]]
-        sys.modules["__main__"].core.getYTCache = Mock()
+        sys.modules["__main__"].core.getVideoIdStatusFromCache = Mock()
 
         url = player.getSubtitleUrl({"videoid": "some_id"})
         print repr(url)
@@ -188,7 +188,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         player = YouTubeSubtitleControl()
         sys.modules["__main__"].core._fetchPage = Mock()
         sys.modules["__main__"].core._fetchPage.return_value = {"status": 200, "content": self.readTestInput("timedtextDirectoryTest.xml", False)}
-        sys.modules["__main__"].core.getYTCache = Mock()
+        sys.modules["__main__"].core.getVideoIdStatusFromCache = Mock()
         sys.modules["__main__"].settings.getSetting = Mock()
         sys.modules["__main__"].settings.getSetting.return_value = "2"
         sys.modules["__main__"].common.parseDOM.side_effect = [["en"], ["english"], ["english"]]
