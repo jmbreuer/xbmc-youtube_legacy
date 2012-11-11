@@ -1129,9 +1129,9 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
     def test_getVideoInfo_should_call_getVideoEntries_to_get_video_items(self):
         core = YouTubeCore()
         core.getVideoEntries = Mock(return_value=[])
-        core.setYTCache = Mock()
+        core.updateVideoIdStatusInCache = Mock()
         core.addNextPageLinkIfNecessary = Mock()
-        core.getYTCache = Mock()
+        core.getVideoIdStatusFromCache = Mock()
 
         core.getVideoInfo("xml",{})
 
@@ -1140,20 +1140,20 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
     def test_getVideoInfo_should_call_setYTCache_to_save_video_info_to_cache(self):
         core = YouTubeCore()
         core.getVideoEntries = Mock(return_value=[])
-        core.setYTCache = Mock()
+        core.updateVideoIdStatusInCache = Mock()
         core.addNextPageLinkIfNecessary = Mock()
-        core.getYTCache = Mock()
+        core.getVideoIdStatusFromCache = Mock()
 
         core.getVideoInfo("xml",{})
 
-        core.setYTCache.assert_any_call("videoidcache", [])
+        core.updateVideoIdStatusInCache.assert_any_call("videoidcache", [])
 
     def test_getVideoInfo_should_call_addNextPageLinkIfNecessary_to_set_next_page_indicator(self):
         core = YouTubeCore()
         core.getVideoEntries = Mock(return_value=[])
-        core.setYTCache = Mock()
+        core.updateVideoIdStatusInCache = Mock()
         core.addNextPageLinkIfNecessary = Mock()
-        core.getYTCache = Mock()
+        core.getVideoIdStatusFromCache = Mock()
 
         core.getVideoInfo("xml",{})
 
@@ -1162,7 +1162,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
     def setUp_getVideoInfo_full_run(self):
         self.core.getVideoEntries = Mock(return_value=["entry"])
         self.core.videoIsUnavailable = Mock(return_value=False)
-        self.core.setYTCache = Mock()
+        self.core.updateVideoIdStatusInCache = Mock()
         self.core.addNextPageLinkIfNecessary = Mock()
         self.core.getVideoId = Mock(return_value="123")
         self.core.getVideoTitle = Mock(return_value="Title")
@@ -1179,7 +1179,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
     def test_getVideoInfo_should_call_getVideoId_to_get_video_id(self):
         self.core = YouTubeCore()
         self.setUp_getVideoInfo_full_run()
-        self.core.getYTCache = Mock()
+        self.core.getVideoIdStatusFromCache = Mock()
 
         self.core.getVideoInfo("xml",{})
 
@@ -1188,7 +1188,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
     def test_getVideoInfo_should_call_getNodeValue_to_get_Title(self):
         self.core = YouTubeCore()
         self.setUp_getVideoInfo_full_run()
-        self.core.getYTCache = Mock()
+        self.core.getVideoIdStatusFromCache = Mock()
 
         self.core.getVideoInfo("xml",{})
 
@@ -1197,7 +1197,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
     def test_getVideoInfo_should_call_getVideoDescription_to_get_video_Plot(self):
         self.core = YouTubeCore()
         self.setUp_getVideoInfo_full_run()
-        self.core.getYTCache = Mock()
+        self.core.getVideoIdStatusFromCache = Mock()
 
         self.core.getVideoInfo("xml",{})
 
@@ -1206,7 +1206,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
     def test_getVideoInfo_should_call_getVideoUploadDate_to_get_Date(self):
         self.core = YouTubeCore()
         self.setUp_getVideoInfo_full_run()
-        self.core.getYTCache = Mock()
+        self.core.getVideoIdStatusFromCache = Mock()
 
         self.core.getVideoInfo("xml",{})
 
@@ -1215,7 +1215,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
     def test_getVideoInfo_should_call_getVideoCreator_to_get_Studio(self):
         self.core = YouTubeCore()
         self.setUp_getVideoInfo_full_run()
-        self.core.getYTCache = Mock()
+        self.core.getVideoIdStatusFromCache = Mock()
 
         self.core.getVideoInfo("xml",{})
 
@@ -1224,7 +1224,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
     def test_getVideoInfo_should_call_getVideoDuration_to_get_Duration(self):
         self.core = YouTubeCore()
         self.setUp_getVideoInfo_full_run()
-        self.core.getYTCache = Mock()
+        self.core.getVideoIdStatusFromCache = Mock()
 
         self.core.getVideoInfo("xml",{})
 
@@ -1233,7 +1233,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
     def test_getVideoInfo_should_call_getVideoRating_to_get_Rating(self):
         self.core = YouTubeCore()
         self.setUp_getVideoInfo_full_run()
-        self.core.getYTCache = Mock()
+        self.core.getVideoIdStatusFromCache = Mock()
 
         self.core.getVideoInfo("xml",{})
 
@@ -1243,7 +1243,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
         self.core = YouTubeCore()
         self.setUp_getVideoInfo_full_run()
         self.core.videoIsUnavailable.return_value = True
-        self.core.getYTCache = Mock()
+        self.core.getVideoIdStatusFromCache = Mock()
 
         result = self.core.getVideoInfo("xml",{})
 
@@ -1252,7 +1252,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
     def test_getVideoInfo_should_call_getViewCount_to_get_view_Count(self):
         self.core = YouTubeCore()
         self.setUp_getVideoInfo_full_run()
-        self.core.getYTCache = Mock()
+        self.core.getVideoIdStatusFromCache = Mock()
 
         self.core.getVideoInfo("xml",{})
 
@@ -1261,7 +1261,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
     def test_getVideoInfo_should_call_getVideoGenre_to_get_Genre(self):
         self.core = YouTubeCore()
         self.setUp_getVideoInfo_full_run()
-        self.core.getYTCache = Mock()
+        self.core.getVideoIdStatusFromCache = Mock()
 
         self.core.getVideoInfo("xml",{})
 
@@ -1270,7 +1270,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
     def test_getVideoInfo_should_call_getVideoEditId_to_search_for_edit_id(self):
         self.core = YouTubeCore()
         self.setUp_getVideoInfo_full_run()
-        self.core.getYTCache = Mock()
+        self.core.getVideoIdStatusFromCache = Mock()
 
         self.core.getVideoInfo("xml",{})
 
@@ -1281,7 +1281,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
         import CommonFunctions
         sys.modules["__main__"].common = CommonFunctions
         core = YouTubeCore()
-        core.getYTCache = Mock()
+        core.getVideoIdStatusFromCache = Mock()
 
         result = core.getVideoInfo(self.readTestInput("youtubeFavoritesFeed.xml", False))
 
@@ -1340,14 +1340,14 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
     def test_setYTCache_should_construct_proper_videoid_structure_for_cache(self):
         core = YouTubeCore()
         item = {"videoid":"someid"}
-        core.setYTCache("pre-id", [item])
+        core.updateVideoIdStatusInCache("pre-id", [item])
 
         sys.modules["__main__"].cache.setMulti.assert_any_call("pre-id", {"someid":repr(item)})
 
     def test_setYTCache_should_call_cache_setMulti_to_save_video_items(self):
         core = YouTubeCore()
 
-        core.setYTCache("pre-id", [])
+        core.updateVideoIdStatusInCache("pre-id", [])
 
         sys.modules["__main__"].cache.setMulti.assert_any_call("pre-id", {})
 
