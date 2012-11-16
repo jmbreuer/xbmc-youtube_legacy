@@ -18,6 +18,7 @@
 - Fixed bug where playback or video listing would fail due to bug in cache
 - Disabled movie section since it seems completely broken on the home page
 - Disabled show section since it seems completely broken on the home page
+- Added new scraper for VISO trailers which seems to have replace the old trailers page.
 
 [B]Version 3.3.0[/B]
 - Fixed problem in core that would sometimes break playback
