@@ -368,7 +368,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         player = YouTubePlayer()
         player.extractVideoLinksFromYoutube({},{"videoid":"123"})
 
-        sys.modules["__main__"].core._fetchPage.assert_any_call({"link":player.urls["video_stream"] % "123"})
+        sys.modules["__main__"].core._fetchPage.assert_any_call({"link":player.urls["video_stream"] % "123", "login":"true"})
 
     def ttest_getVideoLinks_should_fall_back_to_embed(self):
 
