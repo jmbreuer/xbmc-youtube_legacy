@@ -87,8 +87,11 @@ class YouTubeScraper():
             trailers_link = trailers_link[trailers_link.find("list=") + len("list="):]
             trailers_link = trailers_link[:trailers_link.find("&")]
             trailers_link = trailers_link[2:]
+            del params["scraper"]
+            params["feed"] = "playlist"
+            params["playlist"] = trailers_link
 
-            return self.feeds.listPlaylist({"feed":"playlist","playlist":trailers_link})
+            return self.feeds.listPlaylist(params)
 
         return ([], 303)
 
