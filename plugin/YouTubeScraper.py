@@ -88,7 +88,7 @@ class YouTubeScraper():
             trailers_link = trailers_link[:trailers_link.find("&")]
             trailers_link = trailers_link[2:]
 
-            return self.feeds.list({"feed":"playlist","playlist":trailers_link})
+            return self.feeds.listPlaylist({"feed":"playlist","playlist":trailers_link})
 
         return ([], 303)
 
@@ -603,6 +603,10 @@ class YouTubeScraper():
         return (result, status)
 
     def scrape(self, params={}):
+        get = params.get
+        if get("scraper") == "trailers":
+            return self.scraperTop100Trailers(params)
+
         self.getNewResultsFunction(params)
 
         result = self.paginator(params)
