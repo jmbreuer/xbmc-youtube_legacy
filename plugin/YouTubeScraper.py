@@ -30,6 +30,7 @@ class YouTubeScraper():
     urls['show_single_list'] = "http://www.youtube.com/channel_ajax?action_more_single_playlist_videos=1&page=%s&list_id=%s"
     urls['show_list'] = "http://www.youtube.com/show"
     urls['shows'] = "http://www.youtube.com/shows"
+    urls['trailers'] = "http://www.youtube.com/trailers"
     urls['watched_history'] = "http://www.youtube.com/my_history"
     urls['liked_videos'] = "http://www.youtube.com/my_liked_videos"
     urls['music'] = "http://www.youtube.com/music"
@@ -70,6 +71,24 @@ class YouTubeScraper():
         self.common.log("Done")
         if len(liked) > 0:
             return (items, result["status"])
+
+        return ([], 303)
+
+#================================= trailers ===========================================
+
+    def scraperTop100Trailers(self, params):
+        url = self.createUrl(params)
+
+        result = self.core._fetchPage({"link":url})
+
+        trailers_link = self.common.parseDOM(result["content"], "a", attrs={"class":"yt-playall-link.*?"}, ret="href")[0]
+
+        if trailers_link.find("list=") > 0:
+            trailers_link = trailers_link[trailers_link.find("list=") + len("list="):]
+            trailers_link = trailers_link[:trailers_link.find("&")]
+            trailers_link = trailers_link[2:]
+
+            return self.feeds.list({"feed":"playlist","playlist":trailers_link})
 
         return ([], 303)
 
@@ -393,6 +412,9 @@ class YouTubeScraper():
                 params["batch"] = "thumbnails"
                 function = self.scrapeMoviesGrid
 
+        if get("scraper") == "trailers":
+            function = self.scraperTop100Trailers
+
         if function:
             params["new_results_function"] = function
 
@@ -454,6 +476,9 @@ class YouTubeScraper():
 
         if get("scraper") == "music_top100":
             url = self.urls["music"]
+
+        if get("scraper") == "trailers":
+            url = self.urls["trailers"]
 
         if (get("scraper") in "search_disco"):
             url = self.urls["disco_search"] % urllib.quote_plus(get("search"))
