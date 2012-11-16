@@ -27,11 +27,11 @@ import HTMLParser
 #import chardet
 import json
 
-version = u"1.2.0"
+version = u"1.3.0"
 plugin = u"CommonFunctions Beta-" + version
 print plugin
 
-USERAGENT = u"Mozilla/5.0 (Windows; U; Windows NT 6.1; en-GB; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8"
+USERAGENT = u"Mozilla/5.0 (Windows NT 6.2; Win64; x64; rv:16.0.1) Gecko/20121011 Firefox/16.0.1"
 
 if hasattr(sys.modules["__main__"], "xbmc"):
     xbmc = sys.modules["__main__"].xbmc
@@ -117,7 +117,7 @@ def replaceHTMLCodes(txt):
     txt = re.sub("(&#[0-9]+)([^;^0-9]+)", "\\1;\\2", makeUTF8(txt))
 
     txt = HTMLParser.HTMLParser().unescape(txt)
-
+    txt = txt.replace("&amp;", "&")
     log(repr(txt), 5)
     return txt
 
@@ -232,9 +232,20 @@ def _getDOMElements(item, name, attrs):
 
 def parseDOM(html, name=u"", attrs={}, ret=False):
     log("Name: " + repr(name) + " - Attrs:" + repr(attrs) + " - Ret: " + repr(ret) + " - HTML: " + str(type(html)), 3)
+    #log("BLA: " + repr(type(html)) + " - " + repr(type(name)))
 
-    if isinstance(html, str): # Should be handled
-        html = [html]
+    if isinstance(name, str): # Should be handled
+        try:
+            name = name #.decode("utf-8")
+        except:
+            log("Couldn't decode name binary string: " + repr(name))
+
+    if isinstance(html, str):
+        try:
+            html = [html.decode("utf-8")] # Replace with chardet thingy
+        except:
+            log("Couldn't decode html binary string. Data length: " + repr(len(html)))
+            html = [html]
     elif isinstance(html, unicode):
         html = [html]
     elif not isinstance(html, list):
