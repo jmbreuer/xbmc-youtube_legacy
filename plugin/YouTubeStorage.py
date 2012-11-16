@@ -512,6 +512,7 @@ class YouTubeStorage():
         res = self.cache.getMulti(pre_id, load_data)
         if len(res) != len(load_data):
             self.common.log("Length mismatch:" + repr(res) + " - " + repr(load_data))
+
         i = 0
         for item in ytobjects:
             if "videoid" in item:
