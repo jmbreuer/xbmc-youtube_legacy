@@ -892,7 +892,69 @@ class TestYouTubeStorage(BaseTestCase.BaseTestCase):
         
         result = storage.retrieveResultSet("some_key")
         
-        assert(result == ['some_value']) 
-        
+        assert(result == ['some_value'])
+
+    def test_updateVideoIdStatusInCache_should_add_video_items_to_collection_saved_in_cache(self):
+        storage = YouTubeStorage()
+
+        storage.updateVideoIdStatusInCache("some_id",[{"videoid":"test1"}])
+
+        sys.modules["__main__"].cache.setMulti.assert_called_with("some_id", {"test1":repr({"videoid":"test1"})})
+
+    def test_updateVideoIdStatusInCache_should_not_add_items_without_a_video_id_to_collection_saved_in_cache(self):
+        storage = YouTubeStorage()
+
+        storage.updateVideoIdStatusInCache("some_id",[{"other_stuff":"stuff"}])
+
+        sys.modules["__main__"].cache.setMulti.assert_called_with("some_id", {})
+
+    def test_updateVideoIdStatusInCache_should_call_cache_setMulti_to_save_collection_in_cache(self):
+        storage = YouTubeStorage()
+
+        storage.updateVideoIdStatusInCache("some_id",[{"videoid":"test1"}])
+
+        assert (sys.modules["__main__"].cache.setMulti.call_count == 1)
+
+    def test_getVideoIdStatusFromCache_should_set_overlay_information_on_requested(self):
+        storage = YouTubeStorage()
+        sys.modules["__main__"].cache.getMulti.return_value = ["2"]
+
+        result = storage.getVideoIdStatusFromCache("some_id", [{"videoid":"vid1", "Overlay":"1"}])
+
+        assert (result[0]["Overlay"] == "2")
+
+    def test_getVideoIdStatusFromCache_should_result_sets_with_missing_items(self):
+        storage = YouTubeStorage()
+        sys.modules["__main__"].cache.getMulti.return_value = ["2"]
+
+        result = storage.getVideoIdStatusFromCache("some_id", [{"videoid":"vid1", "Overlay":"1"},{"videoid":"vid2", "Overlay":"1"}])
+
+        assert (result[0]["Overlay"] == "2")
+        assert (result[1]["Overlay"] == "1")
+
+    def test_getVideoIdStatusFromCache_should_request_information_for_video_items(self):
+        storage = YouTubeStorage()
+        sys.modules["__main__"].cache.getMulti.return_value = ["2"]
+
+        storage.getVideoIdStatusFromCache("some_id", [{"videoid":"vid1"},{"videoid":"vid2"}])
+
+        sys.modules["__main__"].cache.getMulti.assert_any_call("some_id",["vid1","vid2"])
+
+    def test_getVideoIdStatusFromCache_should_not_request_information_for_items_without_a_videoid(self):
+        storage = YouTubeStorage()
+        sys.modules["__main__"].cache.getMulti.return_value = ["2"]
+
+        storage.getVideoIdStatusFromCache("some_id", [{"videoid":"vid1"},{"other_id":"stuff"}])
+
+        sys.modules["__main__"].cache.getMulti.assert_any_call("some_id",["vid1"])
+
+    def test_getVideoIdStatusFromCache_should_call_cache_GetMulti_to_request_information(self):
+        storage = YouTubeStorage()
+        sys.modules["__main__"].cache.getMulti.return_value = ["2"]
+
+        storage.getVideoIdStatusFromCache("some_id", [{"videoid":"vid1"},{"other_id":"stuff"}])
+
+        assert (sys.modules["__main__"].cache.getMulti.call_count == 1)
+
 if __name__ == '__main__':
         nose.runmodule()
