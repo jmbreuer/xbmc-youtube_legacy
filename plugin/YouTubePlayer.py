@@ -62,6 +62,7 @@ class YouTubePlayer():
         self.xbmcgui = sys.modules["__main__"].xbmcgui
         self.xbmcplugin = sys.modules["__main__"].xbmcplugin
 
+        self.pluginsettings = sys.modules["__main__"].pluginsettings
         self.storage = sys.modules["__main__"].storage
         self.settings = sys.modules["__main__"].settings
         self.language = sys.modules["__main__"].language
@@ -346,11 +347,24 @@ class YouTubePlayer():
 
         return links
 
+    def getVideoPageFromYoutube(self, get):
+        login = "false"
+
+        if self.pluginsettings.userHasProvidedValidCredentials():
+            login = "true"
+
+        page = self.core._fetchPage({u"link": self.urls[u"video_stream"] % get(u"videoid"), "login": login})
+
+        if not page:
+            page = {u"status":303}
+
+        return page
+
     def extractVideoLinksFromYoutube(self, video, params):
         self.common.log(u"trying website: " + repr(params))
         get = params.get
 
-        result = self.core._fetchPage({u"link": self.urls[u"video_stream"] % get(u"videoid")})
+        result = self.getVideoPageFromYoutube(get)
 
         if result[u"status"] != 200:
             self.common.log(u"Couldn't get video page from YouTube")
