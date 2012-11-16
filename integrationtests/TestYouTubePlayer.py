@@ -5,6 +5,7 @@ import sys
 
 
 class TestYouTubePlayer(BaseTestCase.BaseTestCase):
+
     def test_plugin_should_play_standard_videos(self):
         sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
         sys.modules["__main__"].cache.getMulti.return_value = ["7"]
@@ -53,6 +54,38 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         assert(args[0][1]["handle"] == -1)
         assert(args[0][1]["succeeded"] == True)
 
+    def test_plugin_should_play_live_vidoes(self):
+        sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
+        sys.modules["__main__"].cache.getMulti.return_value = ["7"]
+
+        self.navigation.executeAction({"action": "play_video", "videoid": "e8RnJYYlIvg"})
+
+        args = sys.modules["__main__"].xbmcplugin.setResolvedUrl.call_args_list
+        print "Args: " + repr(args)
+        print repr("listitem" in args[0][1])
+        print repr(args[0][1]["handle"] == -1)
+        print repr(args[0][1]["succeeded"] == True)
+
+        assert("listitem" in args[0][1])
+        assert(args[0][1]["handle"] == -1)
+        assert(args[0][1]["succeeded"] == True)
+
+    def test_plugin_should_play_age_restricted_videos_if_user_provides_credentials(self):
+        sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
+        sys.modules["__main__"].cache.getMulti.return_value = ["7"]
+
+        self.navigation.executeAction({"action": "play_video", "videoid": "Vzue74y7A84"})
+
+        args = sys.modules["__main__"].xbmcplugin.setResolvedUrl.call_args_list
+        print "Args: " + repr(args)
+        print repr("listitem" in args[0][1])
+        print repr(args[0][1]["handle"] == -1)
+        print repr(args[0][1]["succeeded"] == True)
+
+        assert("listitem" in args[0][1])
+        assert(args[0][1]["handle"] == -1)
+        assert(args[0][1]["succeeded"] == True)
+
     def ttest_plugin_should_play_rtmpe_vidoes(self):
         sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
         sys.modules["__main__"].cache.getMulti.return_value = ["7"]
@@ -68,24 +101,6 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         assert("listitem" in args[0][1])
         assert(args[0][1]["handle"] == -1)
         assert(args[0][1]["succeeded"] == True)
-
-    def test_plugin_should_play_live_vidoes(self):
-        sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
-        sys.modules["__main__"].cache.getMulti.return_value = ["7"]
-
-        self.navigation.executeAction({"action": "play_video", "videoid": "e8RnJYYlIvg"})
-
-        args = sys.modules["__main__"].xbmcplugin.setResolvedUrl.call_args_list
-
-        if sys.modules["__main__"].xbmc.executebuiltin.call_count == 0:
-            print "Args: " + repr(args)
-            print repr("listitem" in args[0][1])
-            print repr(args[0][1]["handle"] == -1)
-            print repr(args[0][1]["succeeded"] == True)
-
-            assert("listitem" in args[0][1])
-            assert(args[0][1]["handle"] == -1)
-            assert(args[0][1]["succeeded"] == True)
 
     def test_plugin_should_play_videos_with_subtitles_when_available(self):
         sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
