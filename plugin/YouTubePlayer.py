@@ -313,7 +313,7 @@ class YouTubePlayer():
 
             for k, v in cgi.parse_qs(data).items():
                 flashvars[k] = v[0]
-
+        self.common.log(u"flashvars: " + repr(flashvars), 2)
         return flashvars
 
     def scrapeWebPageForVideoLinks(self, result, video):
@@ -329,7 +329,7 @@ class YouTubePlayer():
 
         for url_desc in flashvars[u"url_encoded_fmt_stream_map"].split(u","):
             url_desc_map = cgi.parse_qs(url_desc)
-
+            self.common.log(u"url_map: " + repr(url_desc_map), 2)
             if not (url_desc_map.has_key(u"url") or url_desc_map.has_key(u"stream")):
                 continue
 
@@ -337,7 +337,12 @@ class YouTubePlayer():
             url = u""
             if url_desc_map.has_key(u"url"):
                 url = urllib.unquote(url_desc_map[u"url"][0])
-            elif url_desc_map.has_key(u"stream"):
+            elif url_desc_map.has_key(u"conn") and url_desc_map.has_key(u"stream"):
+                url = urllib.unquote(url_desc_map[u"conn"][0])
+                if url.rfind("/") < len(url) -1:
+                    url = url + "/"
+                url = url + urllib.unquote(url_desc_map[u"stream"][0])
+            elif url_desc_map.has_key(u"stream") and not url_desc_map.has_key(u"conn"):
                 url = urllib.unquote(url_desc_map[u"stream"][0])
 
             if url_desc_map.has_key(u"sig"):
