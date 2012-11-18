@@ -13,6 +13,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         self.navigation.executeAction({"action": "play_video", "videoid": "54VJWHL2K3I"})
 
         args = sys.modules["__main__"].xbmcplugin.setResolvedUrl.call_args_list
+        print "url: " + repr(sys.modules["__main__"].xbmcgui.ListItem.call_args_list)
         print "Args: " + repr(args)
         print repr("listitem" in args[0][1])
         print repr(args[0][1]["handle"] == -1)
@@ -29,6 +30,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         self.navigation.executeAction({"action": "play_video", "videoid": "54VJWHL2K3I", "use_flashvars": "true"})
 
         args = sys.modules["__main__"].xbmcplugin.setResolvedUrl.call_args_list
+        print "url: " + repr(sys.modules["__main__"].xbmcgui.ListItem.call_args_list)
         print "Args: " + repr(args)
         print repr("listitem" in args[0][1])
         print repr(args[0][1]["handle"] == -1)
@@ -45,6 +47,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         self.navigation.executeAction({"action": "play_video", "videoid": "54VJWHL2K3I", "embed": "true"})
 
         args = sys.modules["__main__"].xbmcplugin.setResolvedUrl.call_args_list
+        print "url: " + repr(sys.modules["__main__"].xbmcgui.ListItem.call_args_list)
         print "Args: " + repr(args)
         print repr("listitem" in args[0][1])
         print repr(args[0][1]["handle"] == -1)
@@ -58,9 +61,10 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
         sys.modules["__main__"].cache.getMulti.return_value = ["7"]
 
-        self.navigation.executeAction({"action": "play_video", "videoid": "e8RnJYYlIvg"})
+        self.navigation.executeAction({"action": "play_video", "videoid": "e93MaEwrsfc"})
 
         args = sys.modules["__main__"].xbmcplugin.setResolvedUrl.call_args_list
+        print "url: " + repr(sys.modules["__main__"].xbmcgui.ListItem.call_args_list)
         print "Args: " + repr(args)
         print repr("listitem" in args[0][1])
         print repr(args[0][1]["handle"] == -1)
@@ -77,6 +81,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         self.navigation.executeAction({"action": "play_video", "videoid": "Vzue74y7A84"})
 
         args = sys.modules["__main__"].xbmcplugin.setResolvedUrl.call_args_list
+        print "url: " + repr(sys.modules["__main__"].xbmcgui.ListItem.call_args_list)
         print "Args: " + repr(args)
         print repr("listitem" in args[0][1])
         print repr(args[0][1]["handle"] == -1)
@@ -86,13 +91,14 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         assert(args[0][1]["handle"] == -1)
         assert(args[0][1]["succeeded"] == True)
 
-    def ttest_plugin_should_play_rtmpe_vidoes(self):
+    def test_plugin_should_play_rtmpe_vidoes(self):
         sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
         sys.modules["__main__"].cache.getMulti.return_value = ["7"]
 
         self.navigation.executeAction({"action": "play_video", "videoid": "8wxOVn99FTE"})
 
         args = sys.modules["__main__"].xbmcplugin.setResolvedUrl.call_args_list
+        print "url: " + repr(sys.modules["__main__"].xbmcgui.ListItem.call_args_list)
         print "Args: " + repr(args)
         print repr("listitem" in args[0][1])
         print repr(args[0][1]["handle"] == -1)
@@ -101,6 +107,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         assert("listitem" in args[0][1])
         assert(args[0][1]["handle"] == -1)
         assert(args[0][1]["succeeded"] == True)
+        assert(false)
 
     def test_plugin_should_play_videos_with_subtitles_when_available(self):
         sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
@@ -112,6 +119,8 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 
         args = sys.modules["__main__"].xbmcplugin.setResolvedUrl.call_args_list
         args2 = sys.modules["__main__"].xbmc.Player().setSubtitles.call_args_list
+
+        print "url: " + repr(sys.modules["__main__"].xbmcgui.ListItem.call_args_list)
         print "Args: " + repr(args)
         print "Args2: " + repr(args2)
         print repr("listitem" in args[0][1])
@@ -135,6 +144,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 
         args = sys.modules["__main__"].xbmcplugin.setResolvedUrl.call_args_list
         args2 = sys.modules["__main__"].xbmc.Player().setSubtitles.call_args_list
+        print "url: " + repr(sys.modules["__main__"].xbmcgui.ListItem.call_args_list)
         print "Args: " + repr(args)
         print "Args2: " + repr(args2)
         print repr("listitem" in args[0][1])
@@ -158,6 +168,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 
         args = sys.modules["__main__"].xbmcplugin.setResolvedUrl.call_args_list
         args2 = sys.modules["__main__"].xbmc.Player().setSubtitles.call_args_list
+        print "url: " + repr(sys.modules["__main__"].xbmcgui.ListItem.call_args_list)
         print "Args: " + repr(args)
         print "Args2: " + repr(args2)
         print repr("listitem" in args[0][1])
@@ -170,7 +181,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         assert(args[0][1]["succeeded"] == True)
         assert(args2[0][0][0] == u"./tmp/ZEITGEIST MOVING FORWARD  OFFICIAL RELEASE  2011-[4Z9WVZddH9w]-ES.ssa")
 
-    def ttest_plugin_should_play_geolocked_videos(self):
+    def test_plugin_should_play_geolocked_videos(self):
         sys.modules["__main__"].settings.load_strings("./resources/basic-login-settings-logged-in.xml")
         sys.modules["__main__"].cache.getMulti.return_value = ["7"]
         import os
@@ -179,6 +190,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         self.navigation.executeAction({"action": "play_video", "videoid": "ha_NOX_-Aeg"})
 
         args = sys.modules["__main__"].xbmcplugin.setResolvedUrl.call_args_list
+        print "url: " + repr(sys.modules["__main__"].xbmcgui.ListItem.call_args_list)
         print "Args: " + repr(args)
         print repr("listitem" in args[0][1])
         print repr(args[0][1]["handle"] == -1)
