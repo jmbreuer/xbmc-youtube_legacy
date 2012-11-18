@@ -28,7 +28,7 @@ class TestYouTubeFolderStructure(BaseTestCase.BaseTestCase):
         self.navigation.listMenu({"path": "/root/explore"})
 
         # we probably need some better asserts here
-        self.assert_directory_count_greater_than_or_equals(6)
+        self.assert_directory_count_greater_than_or_equals(4)
         self.assert_directory_count_less_than_or_equals(10)
         self.assert_directory_is_a_folder_list()
 
