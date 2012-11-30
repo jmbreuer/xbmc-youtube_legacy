@@ -121,12 +121,19 @@ class YouTubePlaylistControl():
             return False
 
         playlist = self.xbmc.PlayList(self.xbmc.PLAYLIST_VIDEO)
-        for video in videos:
-            listitem = self.xbmcgui.ListItem(label=video['Title'], iconImage=video['thumbnail'], thumbnailImage=video['thumbnail'], path=video['video_url'])
+
+        video_url = "%s?path=/root&action=play_video&videoid=%s"
+        # queue all entries
+        for entry in result:
+            video = entry.get
+            if video("videoid") == "false":
+                continue
+            listitem = self.xbmcgui.ListItem(label=video("Title"), iconImage=video("thumbnail"), thumbnailImage=video("thumbnail"))
             listitem.setProperty('IsPlayable', 'true')
-            listitem.setInfo(type='Video', infoLabels=video)
-            playlist.add("%s?path=/root&action=play_video&videoid=%s" % (sys.argv[0], video["videoid"] ), listitem)
-            self.common.log("Queuing video: " + self.common.makeAscii(video['Title']) + " - " + get('videoid') + " - " + video['video_url'])
+            listitem.setProperty("Video", "true" )
+            listitem.setInfo(type='Video', infoLabels=entry)
+
+            playlist.add(video_url % (sys.argv[0], video("videoid") ), listitem)
 
     def getDiscoSearch(self, params={}):
         (result, status) = self.scraper.searchDisco(params)
