@@ -124,7 +124,7 @@ class YouTubePlaylistControl():
 
         video_url = "%s?path=/root&action=play_video&videoid=%s"
         # queue all entries
-        for entry in result:
+        for entry in videos:
             video = entry.get
             if video("videoid") == "false":
                 continue
