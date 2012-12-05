@@ -176,7 +176,7 @@ class YouTubeLogin():
 
             ret = self.core._fetchPage(fetch_options)
 
-            if ret["content"].find("captcha") > -1:
+            if ret["content"].find(" captcha") > -1:
                 self.common.log("Captcha needs to be filled")
                 break
             fetch_options = False
