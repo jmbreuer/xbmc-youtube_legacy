@@ -440,7 +440,7 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
 
     def test_httpLogin_should_call_fillUserPin_if_2factor_login_needs_smsUserPin(self):
         sys.modules["__main__"].core._findErrors.return_value = False
-        page_values = [ {"content":"captcha","status":200, "location": "here"}, { "new_url": "http://www.mock.com/", "content":"something,smsUserPin,somethingElse","status":200, "location": "here"}]
+        page_values = [ {"content":" captcha","status":200, "location": "here"}, { "new_url": "http://www.mock.com/", "content":"something,smsUserPin,somethingElse","status":200, "location": "here"}]
         sys.modules["__main__"].core._fetchPage.side_effect = lambda x: page_values.pop() 
         sys.modules["__main__"].settings.getSetting.return_value = "smokey" 
         dom_values = [["Login"], [], [], [], []]
@@ -457,7 +457,7 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
         
     def test_httpLogin_should_call_fetchPage_with_correct_fetch_options_if_fillUserPin_succeded(self):
         sys.modules["__main__"].core._findErrors.return_value = False
-        page_values = [ {"content":"captcha","status":200, "location": "here"}, { "new_url": "http://www.mock.com", "content":"something,smsUserPin,somethingElse","status":200, "location": "here"}]
+        page_values = [ {"content":" captcha","status":200, "location": "here"}, { "new_url": "http://www.mock.com", "content":"something,smsUserPin,somethingElse","status":200, "location": "here"}]
         sys.modules["__main__"].core._fetchPage.side_effect = lambda x: page_values.pop() 
         sys.modules["__main__"].settings.getSetting.return_value = "smokey" 
         dom_values = [["Login"], [], [], [], []]
@@ -547,13 +547,13 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
         login._getLoginInfo.assert_called_with(["USERNAME"])
 
     def test_httpLogin_should_fail_with_captcha(self):
-        sys.modules["__main__"].core._fetchPage.return_value = {"content":"captcha","status":200}
+        sys.modules["__main__"].core._fetchPage.return_value = {"content":" captcha","status":200}
         sys.modules["__main__"].settings.getSetting.return_value = "smokey" 
         sys.modules["__main__"].common.parseDOM.return_value = ""
         login = YouTubeLogin()
         result = login._httpLogin({"new":"true"})
         print repr(result)
-        assert(result == ({'content': 'captcha', 'status': 200},500))
+        assert(result == ({'content': ' captcha', 'status': 200},500))
 
     def test_fillLoginInfo_should_use_parseDOM(self):
         sys.modules["__main__"].pluginsettings.userName.return_value = "value1"
