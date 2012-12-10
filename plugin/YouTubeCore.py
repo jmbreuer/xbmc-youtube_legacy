@@ -797,11 +797,12 @@ class YouTubeCore():
         return result
 
     def getVideoDuration(self, node):
-        result = ""
+        result = 1
 
         for tmp in self.common.parseDOM(node, "yt:duration", ret="seconds"):
-            tmp = int(tmp)
-            result = "%02d:%02d" % (int(tmp / 60), int(tmp % 60))
+            tmp = int(tmp) / 60
+            if tmp:
+                result = tmp
 
         return result
 
