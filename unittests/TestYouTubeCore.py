@@ -1292,7 +1292,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
         assert(result[0]["playlist_entry_id"] == 'some_edit_id')
         assert(result[0]["Rating"] > 4.9)
         assert(result[0]["videoid"] == 'ogtKe7N05F0')
-        assert(result[0]["Duration"] == "00:35")
+        assert(result[0]["Duration"] == 1)
         assert(result[0]["Genre"] == "Science & Technology")
         assert(result[0]["Studio"] == "isoeph")
         assert(result[0]["Date"] == "29-09-2011")
@@ -1640,14 +1640,14 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 
         sys.modules[ "__main__" ].common.parseDOM.assert_any_call("xml","yt:duration",ret="seconds")
 
-    def test_getVideoDuration_should_return_empty_string_if_no_duration_is_found(self):
+    def test_getVideoDuration_should_return_one_if_no_duration_is_found(self):
         sys.modules[ "__main__" ].common.parseDOM.return_value = []
         core = YouTubeCore()
 
         result = core.getVideoDuration("xml")
 
         print repr(result)
-        assert(result == "")
+        assert(result == 1)
 
     def test_getVideoDuration_should_return_proper_duration_string_if_duration_is_found(self):
         sys.modules[ "__main__" ].common.parseDOM.return_value = ["120"]
@@ -1656,7 +1656,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
         result = core.getVideoDuration("xml")
 
         print repr(result)
-        assert(result == "02:00")
+        assert(result == 2)
 
     def test_getVideoRating_should_call_parseDOM_to_find_rating(self):
         sys.modules[ "__main__" ].common.parseDOM.return_value = []
