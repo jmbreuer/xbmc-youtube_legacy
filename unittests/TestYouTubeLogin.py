@@ -327,7 +327,7 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
         assert(sys.modules["__main__"].core._fetchPage.call_count == 1)
         print repr(args[1][1])
         assert(args[1][0] == ("","button"))
-        assert(args[1][1] == {'attrs': {'id': 'masthead-user-button'}, 'ret': 'href'})
+        assert(args[1][1] == {'attrs': {'href': '.*?ServiceLogin.*?'}, 'ret': 'href'})
 
     def test_httpLogin_should_call_fetchPage_with_proper_redirect_url_if_login_link_is_found(self):
         sys.modules["__main__"].core._findErrors.return_value = False
