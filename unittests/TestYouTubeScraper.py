@@ -26,217 +26,60 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
 
     def test_searchDisco_should_call_createUrl_to_get_seach_url(self):
         
-        result, status = self.scraper.searchDisco({"search":"some_search"})        
+        self.scraper.searchDisco({"search":"some_search"})
         
         self.scraper.createUrl.assert_any_call({"search":"some_search"})
-        
-    def test_searchDisco_should_call_createUrl_to_get_mixlist_url(self):
-        sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content&v=some_video_id&list=some_mix_list&blablabla","status":200}
-        
-        result, status = self.scraper.searchDisco({"search":"some_search"})        
-        
-        self.scraper.createUrl.assert_any_call({'mix_list_id': 'some_mix_list', 'search': 'some_search', 'disco_videoid': 'some_video_id'})
-        
+
     def test_searchDisco_should_call_fetchPage_to_get_search_result(self):
         
         self.scraper.searchDisco({"search":"some_search"})
                 
         sys.modules["__main__"].core._fetchPage.assert_any_call({"link":"some_url"})
-        
-    def test_searchDisco_should_call_fetchPage_to_get_mix_list_content(self):
+
+    def test_searchDisco_should_call_listPlaylist_to_list_content(self):
         sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content&v=some_video_id&list=some_mix_list&blablabla","status":200}
-        
-        self.scraper.searchDisco({"search":"some_search"})        
-        
-        assert(sys.modules["__main__"].core._fetchPage.call_count == 2)
+        sys.modules["__main__"].feeds.return_value = []
+
+        self.scraper.searchDisco({"search":"some_search"})
+
+        assert(sys.modules["__main__"].core._fetchPage.call_count == 1)
         sys.modules["__main__"].core._fetchPage.assert_any_call({"link":"some_url"})
-        
-    def test_searchDisco_should_call_parseDOM_to_get_video_list(self):
-        sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content&v=some_video_id&list=some_mix_list&blablabla","status":200}
-        
-        self.scraper.searchDisco({"search":"some_search"})        
-        
-        assert(sys.modules["__main__"].common.parseDOM.call_count > 0)
-        
-    def test_searchDisco_should_return_list_of_videoids(self):
+
+    def test_searchDisco_should_return_list_of_dictionaries_with_video_information(self):
         sys.modules["__main__"].common.parseDOM.return_value = ["some_id_1,some_id_2,some_id_3"]
         sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content&v=some_video_id&list=some_mix_list&blablabla","status":200}
+        sys.modules["__main__"].feeds.listPlaylist.return_value = [{"videoid":"some_id_1"},{"videoid":"some_id_2"},{"videoid":"some_id_3"}]
         
-        result, status = self.scraper.searchDisco({"search":"some_search"})        
+        result = self.scraper.searchDisco({"search":"some_search"})
         
-        assert(result[0] == "some_id_1")
-        assert(result[1] == "some_id_2")
-        assert(result[2] == "some_id_3")
+        assert(result[0]["videoid"] == "some_id_1")
+        assert(result[1]["videoid"] == "some_id_2")
+        assert(result[2]["videoid"] == "some_id_3")
 
-    def test_scrapeUserVideoFeed_should_call_createUrl_to_get_proper_url(self):
-        
-        self.scraper.scrapeUserVideoFeed({})
+    def test_scrapeUserLikedVideos_should_call_createUrl_to_get_proper_url(self):
+        sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content_&p=some_playlist&_blabal", "status":200}
+        sys.modules["__main__"].common.parseDOM.return_value = ["a=1&list=list1&b=2"]
+
+        self.scraper.scrapeUserLikedVideos({})
         
         self.scraper.createUrl.assert_any_call({})
 
-    def test_scrapeUserVideoFeed_should_call_core_fetchPage_to_get_page_content(self):
+    def test_scrapeUserLikedVideos_should_call_core_fetchPage_to_get_page_content(self):
         sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content_&p=some_playlist&_blabal", "status":200}
+        sys.modules["__main__"].common.parseDOM.return_value = ["a=1&list=list1&b=2"]
         
-        self.scraper.scrapeUserVideoFeed({})
+        self.scraper.scrapeUserLikedVideos({})
         
         sys.modules["__main__"].core._fetchPage.assert_any_call({"link":"some_url","login":"true"})
 
-    def test_scrapeUserVideoFeed_should_call_parseDOM_to_find_playlist(self):
+    def test_scrapeUserLikedVideos_should_call_parseDOM_to_find_playlist(self):
         sys.modules["__main__"].core._fetchPage.return_value = {"content":"some_content_&p=some_playlist&_blabal", "status":200}
+        sys.modules["__main__"].common.parseDOM.return_value = ["a=1&list=list1&b=2"]
         
-        self.scraper.scrapeUserVideoFeed({})
-        
-        assert(sys.modules["__main__"].common.parseDOM.call_count > 0)
-        
-    def test_scrapeShowEpisodes_should_call_createUrl_to_get_proper_url_if_no_season_is_given(self):
-        sys.modules["__main__"].common.parseDOM.return_value = []
-        self.scraper.extractListId = Mock()
-
-        self.scraper.scrapeShowEpisodes({})        
-        
-        self.scraper.createUrl.assert_any_call({})
-        
-    def test_scrapeShowEpisodes_should_call_fetchPage_to_get_page_content(self):
-        sys.modules["__main__"].common.parseDOM.return_value = []
-        self.scraper.extractListId = Mock()
-
-        self.scraper.scrapeShowEpisodes({})        
-        
-        sys.modules["__main__"].core._fetchPage.assert_any_call({"link":"some_url"})
-        
-    def test_scrapeShowEpisodes_should_call_parseDOM_to_find_video_elements(self):
-        sys.modules["__main__"].common.parseDOM.return_value = []
-        self.scraper.extractListId = Mock()
-
-        self.scraper.scrapeShowEpisodes({})
-        
-        assert(sys.modules["__main__"].common.parseDOM.call_count > 0)
-    
-    def test_scrapeShowEpisodes_should_return_list_of_video_ids(self):
-        self.scraper.extractListId = Mock()
-        sys.modules["__main__"].common.parseDOM.side_effect = [["some_id_1","some_id_2","some_id_3"],[]]
-                
-        result, status = self.scraper.scrapeShowEpisodes({})        
-        
-        assert(result[0] == "some_id_1")
-        assert(result[1] == "some_id_2")
-        assert(result[2] == "some_id_3")
-
-    def test_scrapeShowEpisodes_should_fetch_entire_list(self):
-        sys.modules["__main__"].common.parseDOM.side_effect = [["some_string"],["some_string"],["some_string start=20"],["some_string"],["some_string"],["some_string"],["some_string"],[],[]]
-        
-        self.scraper.scrapeShowEpisodes({})        
-        
-        assert(sys.modules["__main__"].core._fetchPage.call_count > 1)
-
-    def test_extractListId_should_user_parseDOM(self):
-        sys.modules["__main__"].common.parseDOM.return_value = [""]
-
-        result = self.scraper.extractListId({"content":""})
-
-
-        assert(sys.modules["__main__"].common.parseDOM.call_count > 0)
-
-    def test_extractListId_should_extract_list_id_correctly(self):
-        sys.modules["__main__"].common.parseDOM.return_value = ["dsllfskf=sodfkoskf&list=some_list&sdkofkodskof=sokfosk"]
-
-        result = self.scraper.extractListId({"content":""})
-
-        print repr(result)
-        assert(result == "some_list")
-
-    def test_extractMultipleListIds_should_extract_list_id_correctly(self):
-        sys.modules["__main__"].common.parseDOM.return_value = ["a=1&list=list1&b=2","a=1&list=list2&b=2","a=1&list=list3&b=2","a=1&list=list4&b=2"]
-
-        result = self.scraper.extractMultipleListIds({"content":""})
-
-        print repr(result)
-        assert(result[0] == "list1")
-        assert(result[1] == "list2")
-        assert(result[2] == "list3")
-        assert(result[3] == "list4")
-
-    def test_extractMultipleListIds_should_use_parseDOM(self):
-        sys.modules["__main__"].common.parseDOM.return_value = ["a=1&list=list1&b=2","a=1&list=list2&b=2","a=1&list=list3&b=2","a=1&list=list4&b=2"]
-
-        result = self.scraper.extractMultipleListIds({"content":""})
-
-        assert(sys.modules["__main__"].common.parseDOM.call_count > 0)
-
-    def test_scrapeShow_should_call_createUrl_to_get_proper_url(self):
-
-        self.scraper.scrapeShow({"batch":"something"})
-        
-        self.scraper.createUrl.assert_any_call({"folder":"true"})
-
-    def test_scrapeShow_should_call_fetchPage_to_get_page_content(self):
-        
-        self.scraper.scrapeShow({"batch":"something"})
-        
-        sys.modules["__main__"].core._fetchPage.assert_any_call({"link":"some_url"})
-                
-    def test_scrapeShow_should_call_cacheFunction_with_scrape_show_episodes_pointer_if_season_list_isnt_found(self):
-        sys.modules["__main__"].core._fetchPage.return_value = {"content":'something class="single-playlist channel-module"',"status":200}
-        
-        self.scraper.scrapeShow({"batch":"something"})
-        
-        sys.modules["__main__"].cache.cacheFunction.assert_called_with(self.scraper.scrapeShowEpisodes, {"batch":"something"})
-    
-    def test_scrapeShow_should_call_cacheFunction_with_scrape_show_seasons_pointer_if_season_list_is_found(self):
-        sys.modules["__main__"].core._fetchPage.return_value = {"content":'something class="wide-playlist channel-module"',"status":200}
-        
-        self.scraper.scrapeShow({"batch":"something"})
-        
-        sys.modules["__main__"].cache.cacheFunction.assert_called_with(self.scraper.scrapeShowSeasons, 'something class="wide-playlist channel-module"', {"folder":"true"})
-        
-    def test_scrapeShowSeasons_should_call_parseDOM_to_find_seasons(self):
-        
-        self.scraper.scrapeShowSeasons({})
+        self.scraper.scrapeUserLikedVideos({})
         
         assert(sys.modules["__main__"].common.parseDOM.call_count > 0)
 
-    def test_scrapeShowsGrid_should_call_createUrl_to_get_proper_url(self):
-        sys.modules["__main__"].common.parseDOM.side_effect = [["some_string"],["some_string"],["some_string","some_title1"],["some_string","some_title2"],["some_string","some_title3"],["some_string","some_title4"],[],[]]
-        
-        self.scraper.scrapeShowsGrid({})        
-        
-        self.scraper.createUrl.assert_any_call({})
-
-    def test_scrapeShowsGrid_should_call_fetchPage_to_get_page_content(self):
-        sys.modules["__main__"].common.parseDOM.side_effect = [["some_string"],["some_string"],["some_string","some_title1"],["some_string","some_title2"],["some_string","some_title3"],["some_string","some_title4"],[],[]]
-        
-        self.scraper.scrapeShowsGrid({})        
-        
-        sys.modules["__main__"].core._fetchPage.assert_any_call({"link":"some_url"})
-    
-    def test_scrapeShowsGrid_should_call_parseDOM_to_find_next_url(self):
-        sys.modules["__main__"].common.parseDOM.side_effect = [["some_string"],["some_string"],["some_string","some_title1"],["some_string","some_title2"],["some_string","some_title3"],["some_string","some_title4"],[],[]]
-        
-        self.scraper.scrapeShowsGrid({})        
-        
-        assert(sys.modules["__main__"].common.parseDOM.call_count > 0)
-        
-    def test_scrapeShowsGrid_should_call_parseDOM_to_find_videoids(self):
-        sys.modules["__main__"].common.parseDOM.side_effect = [["some_string"],["some_string"],["some_string","some_title1"],["some_string","some_title2"],["some_string","some_title3"],["some_string","some_title4"],[],[]]
-        
-        self.scraper.scrapeShowsGrid({})        
-        
-        assert(sys.modules["__main__"].common.parseDOM.call_count > 1)
-        
-    def test_scrapeShowsGrid_should_call_common_stripTags_to_remove_html_tags_from_episode_count(self):
-        sys.modules["__main__"].common.parseDOM.side_effect = [["some_string"],["some_string"],["some_title1"],["some_title2"],["some_title3"],["some_title4"],[],[]]
-        
-        self.scraper.scrapeShowsGrid({})        
-        
-        sys.modules["__main__"].common.stripTags.assert_called_with("some_title4")
-        
-    def test_scrapeShowsGrid_should_call_utils_replaceHTMLCodes_to_remove_html_chars_from_title(self):
-        sys.modules["__main__"].common.parseDOM.side_effect = [["some_string"],["some_string"],["some_string","some_title1"],["some_string","some_title2"],["some_string","some_title3"],["some_string","some_title4"],[],[]]
-        
-        self.scraper.scrapeShowsGrid({})        
-        
-        sys.modules["__main__"].common.replaceHTMLCodes.assert_any_call('some_string (some_tag_less_string)')
-        
     def test_scrapeYouTubeTop100_should_call_createUrl_to_get_proper_url(self):
         self.scraper.scrapeYouTubeTop100({})        
         
@@ -261,84 +104,12 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
         assert(result[0] == "some_id_1")
         assert(result[1] == "some_id_2")
         assert(result[2] == "some_id_3")
-        
-    def test_scrapeMovieSubCategory_should_call_createUrl_to_get_proper_url(self):
-        
-        self.scraper.scrapeMovieSubCategory({})        
-        
-        self.scraper.createUrl.assert_any_call({})
-
-    def test_scrapeMovieSubCategory_should_call_fetchPage_to_get_page_content(self):
-        
-        self.scraper.scrapeMovieSubCategory({})        
-        
-        sys.modules["__main__"].core._fetchPage.assert_any_call({"link":"some_url"})
-
-    def test_scrapeMovieSubCategory_should_call_utils_replaceHTMLCodes_to_remove_html_chars_from_title(self):
-
-        self.scraper.scrapeMovieSubCategory({})        
-        
-        sys.modules["__main__"].common.replaceHTMLCodes.assert_any_call('some_string')
-        
-    def test_scrapeMovieSubCategory_should_return_proper_structure(self):
-
-        result, status = self.scraper.scrapeMovieSubCategory({})        
-        
-        assert(result[0].has_key("category"))
-        assert(result[0].has_key("Title"))
-        assert(result[0].has_key("thumbnail"))
-        assert(result[0]["scraper"] == "movies")
-        
-    def test_scrapeMoviesGrid_should_call_createUrl_to_get_proper_url(self):
-        sys.modules["__main__"].common.parseDOM.side_effect = [["some_string"],["0"],["some_string"],["some_string","some_title1"],["some_string","some_title2"],[],[]]
-        
-        self.scraper.scrapeMoviesGrid({})
-        
-        self.scraper.createUrl.assert_any_call({})
-
-    def test_scrapeMoviesGrid_should_call_fetchPage_to_get_page_content(self):
-        sys.modules["__main__"].common.parseDOM.side_effect = [["some_string"],["0"],["some_string"],["some_string","some_title1"],["some_string","some_title2"],[],[]]
-        
-        self.scraper.scrapeMoviesGrid({})        
-        
-        sys.modules["__main__"].core._fetchPage.assert_any_call({"link":"some_url"})
-                
-    def test_scrapeMoviesGrid_should_call_parseDOM_to_find_next_url(self):
-        sys.modules["__main__"].common.parseDOM.side_effect = [["some_string"],["0"],["some_string"],["some_string","some_title1"],["some_string","some_title2"],[],[]]
-        
-        self.scraper.scrapeMoviesGrid({})        
-        
-        assert(sys.modules["__main__"].common.parseDOM.call_count > 0)
-        
-    def test_scrapeMoviesGrid_should_call_parseDOM_to_find_videoids(self):
-        sys.modules["__main__"].common.parseDOM.side_effect = [["some_string"],["0"],["some_string"],["some_string","some_title1"],["some_string","some_title2"],[],[]]
-        
-        self.scraper.scrapeMoviesGrid({})        
-        
-        assert(sys.modules["__main__"].common.parseDOM.call_count > 1)
-
-    def test_scrapeMoviesGrid_should_call_parseDOM_to_find_thumbnails(self):
-        sys.modules["__main__"].common.parseDOM.side_effect = [["some_string"],["0"],["some_string"],["some_string"],["some_string","some_title2"],[],[]]
-        
-        self.scraper.scrapeMoviesGrid({})        
-        
-        assert(sys.modules["__main__"].common.parseDOM.call_count > 2)
-        
-    def test_scrapeMoviesGrid_should_return_list_of_videoid_and_thumbnail_tuples(self):
-        sys.modules["__main__"].common.parseDOM.side_effect = [["some_string"],["some_string"],["some_video_id"],["some_thumb"],[],[]]
-        
-        result, status = self.scraper.scrapeMoviesGrid({})        
-        
-        assert(result[0][0] == "some_video_id")
-        assert(result[0][1] == "some_thumb")
-    
 
     def test_getNewResultsFunction_should_set_proper_params_for_searchDisco_if_scraper_is_search_diso(self):
         params = {"scraper":"search_disco"}
         
         self.scraper.getNewResultsFunction(params)
         
-        assert(params["batch"] == "true")
         assert(params["new_results_function"] == self.scraper.searchDisco)
 
     def test_getNewResultsFunction_should_set_proper_params_for_scrapeUserVideoFeed_if_scraper_is_liked_videos(self):
@@ -347,16 +118,8 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
         self.scraper.getNewResultsFunction(params)
         
         assert(params["batch"] == "true")
-        assert(params["new_results_function"] == self.scraper.scrapeUserVideoFeed)
+        assert(params["new_results_function"] == self.scraper.scrapeUserLikedVideos)
 
-    def test_getNewResultsFunction_should_set_proper_params_for_scrapeUserVideoFeed_if_scraper_is_watched_history(self):
-        params = {"scraper":"watched_history"}
-        
-        self.scraper.getNewResultsFunction(params)
-        
-        assert(params["batch"] == "true")
-        assert(params["new_results_function"] == self.scraper.scrapeUserVideoFeed)
-    
     def test_getNewResultsFunction_should_set_proper_params_for_scrapeYouTubeTop100_if_scraper_is_music_top100(self):
         params = {"scraper":"music_top100"}
         
@@ -365,107 +128,12 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
         assert(params["batch"] == "true")
         assert(params["new_results_function"] == self.scraper.scrapeYouTubeTop100)
 
-    def test_getNewResultsFunction_should_set_proper_params_for_scrapeCategoryList_if_scraper_is_movies_and_category_is_not_in_params(self):
-        params = {"scraper":"movies"}
-        
-        self.scraper.getNewResultsFunction(params)
-        
-        assert(params["new_results_function"] == self.scraper.scrapeCategoryList)
-    
-    def test_getNewResultsFunction_should_set_proper_params_for_scrapeCategoryList_if_scraper_is_shows_and_category_is_not_in_params(self):
-        params = {"scraper":"shows"}
-        
-        self.scraper.getNewResultsFunction(params)
-        
-        assert(params["new_results_function"] == self.scraper.scrapeCategoryList)
-        
-    def test_getNewResultsFunction_should_set_proper_params_for_scrapeShowsGrid_if_scraper_is_shows_and_category_is_in_params(self):
-        params = {"scraper":"shows","category":"some_category"}
-        
-        self.scraper.getNewResultsFunction(params)
-        
-        assert(params["new_results_function"] == self.scraper.scrapeShowsGrid)
-        
-    def test_getNewResultsFunction_should_set_proper_params_for_scrapeShow_if_scraper_is_shows_and_show_is_in_params(self):
-        params = {"scraper":"shows","show":"some_show"}
-        
-        self.scraper.getNewResultsFunction(params)
-        
-        assert(params["new_results_function"] == self.scraper.scrapeShow)
-        
-    def test_getNewResultsFunction_should_set_proper_params_for_scrapeMoviesGrid_if_scraper_is_movies_and_category_is_in_params(self):
-        params = {"scraper":"movies", "category":"some_category"}
-        
-        self.scraper.getNewResultsFunction(params)
-        
-        assert(params["new_results_function"] == self.scraper.scrapeMoviesGrid)
-        
-    def test_getNewResultsFunction_should_set_proper_params_for_scrapeMovieSubCategory_if_scraper_is_movies_and_subcategory_is_in_params(self):
-        params = {"scraper":"movies","subcategory":"some_subcategory","category":"some_category"}
-        
-        self.scraper.getNewResultsFunction(params)
-        
-        assert(params["new_results_function"] == self.scraper.scrapeMovieSubCategory)
-
-    def test_createUrl_should_return_proper_url_for_shows_scraper(self):
-        self.scraper = YouTubeScraper()
-        
-        url = self.scraper.createUrl({"scraper":"shows"})
-        
-        assert(url[:url.rfind("?")] == self.scraper.urls["shows"])
-                
-    def test_createUrl_should_return_proper_url_for_shows_scraper_with_category(self):
-        self.scraper = YouTubeScraper()
-        
-        url = self.scraper.createUrl({"scraper":"shows","category":"some_category"})
-
-        assert(url[:url.rfind("/")] == self.scraper.urls["shows"])
-        assert(url.find("some_category") > 0)
-
-    def test_createUrl_should_return_proper_url_for_shows_scraper_with_show(self):
-        self.scraper = YouTubeScraper()
-        
-        url = self.scraper.createUrl({"scraper":"shows","show":"some_show"})
-        
-        assert(url[:url.rfind("/")] == self.scraper.urls["shows"].replace("shows","show"))
-        assert(url.find("some_show") > 0)
-        
-    def test_createUrl_should_return_proper_url_for_shows_scraper_with_season(self):
-        self.scraper = YouTubeScraper()
-        
-        url = self.scraper.createUrl({"scraper":"shows","show":"some_show","season":"24"})
-        
-        assert(url[:url.rfind("/")] == self.scraper.urls["shows"].replace("shows","show"))
-        assert(url.find("some_show") > 0)
-        assert(url.find("s=") > 0)
-
-    def test_createUrl_should_return_proper_url_for_movies_scraper(self):
-        self.scraper = YouTubeScraper()
-        
-        url = self.scraper.createUrl({"scraper":"movies"})
-        assert(url[:url.rfind("?")] == self.scraper.urls["movies"] )
-        
-    def test_createUrl_should_return_proper_url_for_movies_scraper_with_category(self):
-        self.scraper = YouTubeScraper()
-        
-        url = self.scraper.createUrl({"scraper":"movies", "category":"some_category"})
-        
-        assert(url[:url.rfind("?")] == self.scraper.urls["main"] + "/movies/some_category")
-
-    def test_createUrl_should_return_proper_url_for_movies_scraper_with_subcategory_and_category(self):
-        self.scraper = YouTubeScraper()
-        
-        url = self.scraper.createUrl({"scraper":"movies", "subcategory":"true","category":"some_category"})
-        
-        assert(url[:url.rfind("?")] == self.scraper.urls["main"] + "/movies/some_category")
-        assert(url.rfind("p=") < 0)
-
     def test_createUrl_should_return_proper_url_for_music_top_100(self):
         self.scraper = YouTubeScraper()
         
         url = self.scraper.createUrl({"scraper":"music_top100"})
 
-        assert(url == self.scraper.urls["music"])        
+        assert(url == self.scraper.urls["disco_main"])
 
     def test_createUrl_should_return_proper_url_for_search_disco(self):
         self.scraper = YouTubeScraper()
@@ -473,52 +141,7 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
         url = self.scraper.createUrl({"scraper":"search_disco", "search":"some_search"})
         
         assert(url == self.scraper.urls["disco_search"] % "some_search")
-    
-    def test_createUrl_should_return_proper_url_for_search_disco_with_mix_list_and_videoid(self):
-        self.scraper = YouTubeScraper()
-        
-        url = self.scraper.createUrl({"scraper":"search_disco", "search":"some_search", "mix_list_id":"some_mix_list_id", "disco_videoid":"some_videoid"})
-        
-        assert(url ==  self.scraper.urls["disco_mix_list"] % ("some_videoid", "some_mix_list_id"))
-        
-    def test_scrapeCategoriesList_should_call_parseDOM_to_find_categories(self):
-        sys.modules["__main__"].common.parseDOM.side_effect = [["some_string"],["some_string"],["some_string"],["some_string1","some_string2","some_string3"],["some_string"],["some_string"],["some_string"],[],[]]
-        
-        result, status = self.scraper.scrapeCategoryList()
-        
-        assert(sys.modules["__main__"].common.parseDOM.call_count > 0)
-    
-    def test_scrapeCategoryList_should_call_createUrl_to_get_correct_url(self):
-        sys.modules["__main__"].common.parseDOM.side_effect = [["some_string"],["some_string"],["some_string"],["some_string1","some_string2","some_string3"],["some_string"],["some_string"],["some_string"],[],[]]
-        
-        result, status = self.scraper.scrapeCategoryList()
-        
-        self.scraper.createUrl.assert_any_call({})
-        
-    def test_scrapeCategoryList_should_call_core_fetchPage_to_get_html_content(self):
-        sys.modules["__main__"].common.parseDOM.side_effect = [["some_string"],["some_string"],["some_string"],["some_string1","some_string2","some_string3"],["some_string"],["some_string"],["some_string"],[],[]]
-        
-        result, status = self.scraper.scrapeCategoryList()
-        
-        sys.modules["__main__"].core._fetchPage.assert_any_call({"link":"some_url"})
-        
-    def test_scrapeCategoryList_should_call_parseDOM_to_get_videos_container(self):
-        sys.modules["__main__"].common.parseDOM.side_effect = [["some_string"],["some_string"],["some_string"],["some_string1","some_string2","some_string3"],["some_string"],["some_string"],["some_string"],[],[]]
-        
-        result, status = self.scraper.scrapeCategoryList()
-        
-        assert(sys.modules["__main__"].common.parseDOM.call_count > 1)
-        
-    def test_scrapeCategoryList_should_return_proper_structure(self):
-        sys.modules["__main__"].common.parseDOM.side_effect = [["some_string"],["some_string"],["some_string"],["some_string1","some_string2","some_string3"],["some_string"],["some_string"],["some_string"],[],[]]
-        
-        result, status = self.scraper.scrapeCategoryList()
-        
-        assert(result[0].has_key("category"))
-        assert(result[0].has_key("thumbnail"))
-        assert(result[0].has_key("Title"))
-        assert(result[0]["scraper"] == "movies")        
-    
+
     def test_paginator_should_call_cache_function_with_pointer_to_new_results_function_if_scraper_is_not_show(self):
         
         result, status = self.scraper.paginator({"scraper":"some_scraper","new_results_function":"some_function_pointer"})
