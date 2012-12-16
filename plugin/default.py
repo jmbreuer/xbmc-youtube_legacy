@@ -68,8 +68,7 @@ if (__name__ == "__main__" ):
         import storageserverdummy as StorageServer
         cache = StorageServer.StorageServer("YouTube")
 
-    import CommonFunctions
-    common = CommonFunctions
+    import CommonFunctions as common
     common.plugin = plugin
 
     import YouTubeUtils

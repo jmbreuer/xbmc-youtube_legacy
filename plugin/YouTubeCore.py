@@ -237,7 +237,7 @@ class YouTubeCore():
                 folder["folder"] = "true"
 
             if get("user_feed") == "subscriptions":
-                folder["channel"] = folder["Title"]
+                folder["channel"] = self.common.parseDOM(node, 'yt:username')[0]
 
             if get("user_feed") == "playlists":
                 folder['playlist'] = self.common.parseDOM(node, 'yt:playlistId')[0]
