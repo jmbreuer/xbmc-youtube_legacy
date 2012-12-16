@@ -1,4 +1,3 @@
-
 URL=http://hg.tobiasussing.dk/hgweb.cgi/youtubexbmc/
 DIRNAME=plugin.video.youtube
 RELEASEPATH=/usr/local/www/data/hg/nightly-repo/
@@ -16,33 +15,28 @@ else
     exit;
 fi
 
-cd /tmp
-
 TMPDIR="/tmp/release-tmp-$$"
 mkdir $TMPDIR
 cd $TMPDIR
-
-OWD=`pwd`
-echo "OWD: $OWD"
 
 mkdir trunk
 hg clone $URL trunk/$DIRNAME
 
 hg clone $URL $DIRNAME -b release
 
-echo "WORKING DIR $OWD DOING $DIRNAME"
-cd $OWD/$DIRNAME;
+echo "WORKING DIR $TMPDIR DOING $DIRNAME"
+cd $TMPDIR/$DIRNAME;
 hg update release;
-cp -R $OWD/trunk/$DIRNAME/plugin/* $OWD/$DIRNAME/;
+cp -R $TMPDIR/trunk/$DIRNAME/plugin/* $TMPDIR/$DIRNAME/;
 rm -fv *pyc */*pyc */*/*pyc  *~ */*~ */*/*~
 #hg add * */* */*/*;
 #hg add *
-for j in `ls $OWD/$DIRNAME/ | egrep "addon.xml"`; do
+for j in `ls $TMPDIR/$DIRNAME/ | egrep "addon.xml"`; do
    echo "Cleaning addon.xml $j";
-   cat $OWD/trunk/$DIRNAME/plugin/$j | sed -e 's/.beta//' | sed -e 's/ Beta//' | sed -e 's/.999/.0/'> $OWD/$DIRNAME/$j;
+   cat $TMPDIR/trunk/$DIRNAME/plugin/$j | sed -e 's/.beta//' | sed -e 's/ Beta//' | sed -e 's/.999/.0/'> $TMPDIR/$DIRNAME/$j;
 done;
-VERSION=`cat $OWD/$DIRNAME/addon.xml |grep "addon id" |awk -F\'  ' { print $4 } '`;
-CVERSION=`cat $OWD/$DIRNAME/default.py $OWD/$DIRNAME/lib/*.py |grep "version =" |awk -F\"  ' { print $2 } '`;
+VERSION=`cat $TMPDIR/$DIRNAME/addon.xml |grep "addon id" |awk -F\'  ' { print $4 } '`;
+CVERSION=`cat $TMPDIR/$DIRNAME/default.py $TMPDIR/$DIRNAME/lib/*.py |grep "version =" |awk -F\"  ' { print $2 } '`;
 if [ "$VERSION" != "$CVERSION" ]; then
   echo "ERROR version mismatch on $DIRNAME";
   echo "$DIRNAME version $VERSION - $CVERSION";
@@ -50,23 +44,23 @@ if [ "$VERSION" != "$CVERSION" ]; then
 fi;
 if [ "$VERSION" = "$CVERSION" ]; then
    echo "Removing beta tags";
-   for j in `ls $OWD/$DIRNAME/ | egrep ".py"`; do
+   for j in `ls $TMPDIR/$DIRNAME/ | egrep ".py"`; do
           echo "Cleaning .py $j";
-             cat $OWD/trunk/$DIRNAME/plugin/$j | sed -e 's/.beta//' | sed -e 's/ Beta//' > $OWD/$DIRNAME/$j;
+             cat $TMPDIR/trunk/$DIRNAME/plugin/$j | sed -e 's/.beta//' | sed -e 's/ Beta//' > $TMPDIR/$DIRNAME/$j;
    done;
-   for j in `ls $OWD/$DIRNAME/lib/ | grep ".py"`; do
+   for j in `ls $TMPDIR/$DIRNAME/lib/ | grep ".py"`; do
           echo "Cleaning lib .py $j";
-             cat $OWD/trunk/$DIRNAME/plugin/lib/$j | sed -e 's/.beta//' | sed -e 's/ Beta//' > $OWD/$DIRNAME/lib/$j;
+             cat $TMPDIR/trunk/$DIRNAME/plugin/lib/$j | sed -e 's/.beta//' | sed -e 's/ Beta//' > $TMPDIR/$DIRNAME/lib/$j;
    done;
 fi;
 
 echo "Push updates to relese branch"
-cd $OWD/$DIRNAME/
+cd $TMPDIR/$DIRNAME/
 hg add && hg commit -m "Release script commit" && hg push || echo "Nothing to commit"
 
 if [ -d $RELEASEPATH ]; then
     # Make zip file
-    cd $OWD;
+    cd $TMPDIR;
     zip -r $DIRNAME-$VERSION.zip $DIRNAME/ -x *.pyc */*.hg/*
     mv $DIRNAME-$VERSION.zip $RELEASEPATH/$DIRNAME/
     cp $DIRNAME/changelog.txt $RELEASEPATH/$DIRNAME/changelog-$VERSION.txt
@@ -80,7 +74,7 @@ rm -fr $TMPDIR
 ######
 if [ -d $RELEASEPATH ]; then
     cd $RELEASEPATH 
-    cp tmp/$DIRNAME/addon.xml addons/$DIRNAME-release.xml
+    cp $DIRNAME/addon.xml addons/$DIRNAME-release.xml
 
     echo "<?xml version='1.0' encoding='UTF-8'?><addons>" > addons-temp.xml
     cat addons/* >> addons-temp.xml
