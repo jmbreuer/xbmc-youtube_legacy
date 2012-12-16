@@ -117,7 +117,6 @@ class TestYouTubeScraper(BaseTestCase.BaseTestCase):
         
         self.scraper.getNewResultsFunction(params)
         
-        assert(params["batch"] == "true")
         assert(params["new_results_function"] == self.scraper.scrapeUserLikedVideos)
 
     def test_getNewResultsFunction_should_set_proper_params_for_scrapeYouTubeTop100_if_scraper_is_music_top100(self):

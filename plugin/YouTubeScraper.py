@@ -141,7 +141,6 @@ class YouTubeScraper():
 
         if (get("scraper") in ["liked_videos", "watched_history"]):
             function = self.scrapeUserLikedVideos
-            params["batch"] = "true"
 
         if (get("scraper") == "music_top100"):
             params["batch"] = "true"
