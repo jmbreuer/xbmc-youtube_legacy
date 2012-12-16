@@ -18,12 +18,11 @@ class TestYouTubePlaylistControl(BaseTestCase.BaseTestCase):
         
     def test_playAll_should_call_getDiscoSearch_if_scraper_is_disco_search_in_params(self):
         control = YouTubePlaylistControl()
-        control.getDiscoSearch = Mock()
-        control.getDiscoSearch.return_value = ""
+        sys.modules["__main__"].scraper.searchDisco.return_value = ""
         
         control.playAll({"scraper":"search_disco", "search":"some_search"})
-        
-        control.getDiscoSearch.assert_called_with({"search":"some_search","scraper":"search_disco", 'fetch_all': 'true'})
+
+        sys.modules["__main__"].scraper.searchDisco.assert_called_with({"scraper":"search_disco", "search":"some_search", "fetch_all" : "true"})
                 
     def test_playAll_should_call_getUserFeed_if_user_feed_is_favorites_in_params(self):
         control = YouTubePlaylistControl()
@@ -180,24 +179,6 @@ class TestYouTubePlaylistControl(BaseTestCase.BaseTestCase):
         
         assert(playlist_value.add.call_count == 3)
 
-    def test_getDiscoSearch_should_call_scraper_searchDisco(self):
-        sys.modules["__main__"].scraper.searchDisco.return_value = ("",303)
-        control = YouTubePlaylistControl()
-        
-        control.getDiscoSearch({})
-        
-        sys.modules["__main__"].scraper.searchDisco.assert_called_with({})
-
-    def test_getDiscoSearch_should_call_call_getBatchDetailsDisco_if_scraper_succeded(self):
-        sys.modules["__main__"].scraper.searchDisco.return_value = ("",200)
-        sys.modules["__main__"].core.getBatchDetails.return_value = ("",200)
-        control = YouTubePlaylistControl()
-        
-        control.getDiscoSearch({})
-        
-        sys.modules["__main__"].scraper.searchDisco.assert_called_with({})
-        sys.modules["__main__"].core.getBatchDetails.assert_called_with("", {})
-
     def test_getUserFeed_should_call_feeds_list_all(self):
         control = YouTubePlaylistControl()
         
@@ -252,26 +233,25 @@ class TestYouTubePlaylistControl(BaseTestCase.BaseTestCase):
         
         control.getLikedVideos({})
         
-        assert(sys.modules["__main__"].scraper.scrapeUserVideoFeed.call_count == 0)
+        assert(sys.modules["__main__"].scraper.scrapeUserLikedVideos.call_count == 0)
 	
     def test_getLikedVideos_should_call_scraper_scrapeLikedVideos(self):
-        sys.modules["__main__"].scraper.scrapeUserVideoFeed.return_value = ("",200)
+        sys.modules["__main__"].scraper.scrapeUserLikedVideos.return_value = ("",200)
         sys.modules["__main__"].core.getBatchDetails.return_value = ("",200)
         control = YouTubePlaylistControl()
         
         control.getLikedVideos({"login":"true","scraper":"liked_videos"})
         
-        sys.modules["__main__"].scraper.scrapeUserVideoFeed.assert_called_with({"login":"true","scraper":"liked_videos"})
+        sys.modules["__main__"].scraper.scrapeUserLikedVideos.assert_called_with({"login":"true","scraper":"liked_videos"})
         
     def test_getLikedVideos_should_call_core_getBatchDetails_if_scraper_succeded(self):
-        sys.modules["__main__"].scraper.scrapeUserVideoFeed.return_value = ("",200)
+        sys.modules["__main__"].scraper.scrapeUserLikedVideos.return_value = ("",200)
         sys.modules["__main__"].core.getBatchDetails.return_value = ("",200)
         control = YouTubePlaylistControl()
         
         control.getLikedVideos({"login":"true","scraper":"liked_videos"})
         
-        sys.modules["__main__"].scraper.scrapeUserVideoFeed.assert_called_with({"login":"true","scraper":"liked_videos"})
-        sys.modules["__main__"].core.getBatchDetails.assert_called_with("", {"login":"true","scraper":"liked_videos"})
+        sys.modules["__main__"].scraper.scrapeUserLikedVideos.assert_called_with({"login":"true","scraper":"liked_videos"})
         
     def test_addToPlaylist_should_call_list_all_if_playlist_is_not_in_params(self):
         sys.modules["__main__"].feeds.listAll.return_value = ([])

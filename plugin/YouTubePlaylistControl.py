@@ -46,15 +46,15 @@ class YouTubePlaylistControl():
 
         # fetch the video entries
         if get("scraper") == "search_disco":
-            result = self.getDiscoSearch(params)
+            result = self.scraper.searchDisco(params)
         elif get("scraper") == "liked_videos":
             result = self.getLikedVideos(params)
         elif get("scraper") == "music_top100":
             result = self.getYouTubeTop100(params)
-        elif get("playlist") and not get("user_feed"):
+        elif get("playlist"):
             params["user_feed"] = "playlist"
             result = self.getUserFeed(params)
-        elif get("user_feed") in ["recommended", "watch_later", "newsubscriptions", "favorites", "playlist"]:
+        elif get("user_feed") in ["recommended", "watch_later", "newsubscriptions", "favorites"]:
             result = self.getUserFeed(params)
         elif get("video_list"):
             (ytobjects, status) = self.core.getBatchDetails(get("video_list").split(","))
@@ -135,14 +135,6 @@ class YouTubePlaylistControl():
 
             playlist.add(video_url % (sys.argv[0], video("videoid") ), listitem)
 
-    def getDiscoSearch(self, params={}):
-        (result, status) = self.scraper.searchDisco(params)
-
-        if status == 200:
-            (result, status) = self.core.getBatchDetails(result, params)
-
-        return result
-
     def getUserFeed(self, params={}):
         get = params.get
 
@@ -168,12 +160,7 @@ class YouTubePlaylistControl():
         if not get("scraper") or not get("login"):
             return False
 
-        (result, status) = self.scraper.scrapeUserVideoFeed(params)
-        self.common.log("Liked videos "  + repr(result))
-        if status == 200:
-            (result, status) = self.core.getBatchDetails(result, params)
-
-        return result
+        return self.scraper.scrapeUserLikedVideos(params)
 
     def addToPlaylist(self, params={}):
         get = params.get
