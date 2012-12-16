@@ -242,11 +242,11 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 
     def test_getFolderInfo_should_set_item_params_correctly_for_subscriptions_feed(self):
         input = self.readTestInput("getFolderInfoSubscriptionsTest.xml", False)
-        sys.modules["__main__"].common.parseDOM.side_effect = [["entry"], [], ["GoogleTechTalks"], ["published"], ["some_edit_id"]]
+        sys.modules["__main__"].common.parseDOM.side_effect = [["entry"], [], ["GoogleTechTalks"], ["published"], ["some_edit_id"], ["GoogleTechTalks"]]
         core = YouTubeCore()
 
         result = core.getFolderInfo(input, {"user_feed":"subscriptions"})
-
+        print repr(result)
         assert(result[0]["editid"] == "some_edit_id")
         assert(result[0]["thumbnail"] == "some_thumbnail")
         assert(result[0]["login"] == "true")
