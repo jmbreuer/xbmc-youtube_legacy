@@ -97,13 +97,19 @@ def getUserInputNumbers(title=u"Input", default=u""):
 def getParameters(parameterString):
     log("", 5)
     commands = {}
+    parameterString = urllib.unquote_plus(parameterString)
     splitCommands = parameterString[parameterString.find('?') + 1:].split('&')
 
     for command in splitCommands:
         if (len(command) > 0):
             splitCommand = command.split('=')
             key = splitCommand[0]
-            value = splitCommand[1]
+            try: 
+                value = splitCommand[1].encode("utf-8")
+            except:
+                log("Error utf-8 encoding argument value: " + repr(splitCommand[1]))
+                value = splitCommand[1]
+
             commands[key] = value
 
     log(repr(commands), 5)
