@@ -18,7 +18,7 @@ class TestYouTubePlaylistControl(BaseTestCase.BaseTestCase):
         
     def test_playAll_should_call_getDiscoSearch_if_scraper_is_disco_search_in_params(self):
         control = YouTubePlaylistControl()
-        sys.modules["__main__"].scraper.searchDisco.return_value = ""
+        sys.modules["__main__"].scraper.searchDisco.return_value = ("", 200)
         
         control.playAll({"scraper":"search_disco", "search":"some_search"})
 
@@ -36,7 +36,7 @@ class TestYouTubePlaylistControl(BaseTestCase.BaseTestCase):
     def test_playAll_should_call_getLikedVideos_if_scraper_is_liked_videos_in_params(self):
         control = YouTubePlaylistControl()
         control.getLikedVideos = Mock()
-        control.getLikedVideos.return_value = ""
+        control.getLikedVideos.return_value = ("",200)
         
         control.playAll({"scraper":"liked_videos"})
         
@@ -252,7 +252,7 @@ class TestYouTubePlaylistControl(BaseTestCase.BaseTestCase):
         control.getLikedVideos({"login":"true","scraper":"liked_videos"})
         
         sys.modules["__main__"].scraper.scrapeUserLikedVideos.assert_called_with({"login":"true","scraper":"liked_videos"})
-        
+
     def test_addToPlaylist_should_call_list_all_if_playlist_is_not_in_params(self):
         sys.modules["__main__"].feeds.listAll.return_value = ([])
         control = YouTubePlaylistControl()

@@ -60,7 +60,7 @@ class YouTubeScraper():
             if liked_playlist.rfind("&") > 0:
                 liked_playlist = liked_playlist[:liked_playlist.rfind("&")]
 
-            return self.feeds.listPlaylist({"user_feed": "playlist", "playlist" : liked_playlist})
+            return self.feeds.listPlaylist({"user_feed": "playlist", "playlist" : liked_playlist, "fetch_all":"true"})
 
         return []
 
@@ -101,7 +101,7 @@ class YouTubeScraper():
             elif (mix_list_id.find('"') != -1):
                 mix_list_id = mix_list_id[:mix_list_id.find('"')]
 
-            return self.feeds.listPlaylist({"playlist": mix_list_id, "user_feed": "playlist"})
+            return self.feeds.listPlaylist({"playlist": mix_list_id, "user_feed": "playlist", "fetch_all":"true"})
 
         return []
 

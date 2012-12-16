@@ -202,7 +202,7 @@ class YouTubeFeeds():
             if (thumbnail):
                 self.storage.store(params, thumbnail, "thumbnail")
 
-            if (len(result) > 0):
+            if (len(result) > 0 and get("fetch_all") != "true"):
                 if (per_page * (page + 1) < len(result)):
                     next = 'true'
 
