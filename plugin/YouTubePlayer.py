@@ -368,10 +368,8 @@ class YouTubePlayer():
 
     def isVideoAgeRestricted(self, result):
         error = self.common.parseDOM(result['content'], "div", attrs={"id": "watch7-player-age-gate-content"})
-        self.common.log(repr(len(error) > -1))
-        if len(error) > -1:
-            return True
-        return False
+        self.common.log(repr(error))
+        return len(error) > 0
 
     def extractVideoLinksFromYoutube(self, video, params):
         self.common.log(u"trying website: " + repr(params))
