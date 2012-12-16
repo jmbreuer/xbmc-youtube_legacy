@@ -62,26 +62,24 @@ class YouTubeScraper():
 
             return self.feeds.listPlaylist({"user_feed": "playlist", "playlist" : liked_playlist, "fetch_all":"true"})
 
-        return []
+        return ([], 303)
 
 #================================= trailers ===========================================
 
     def scraperTop100Trailers(self, params):
+        self.common.log("" + repr(params))
         url = self.createUrl(params)
 
         result = self.core._fetchPage({"link":url})
 
-        trailers_link = self.common.parseDOM(result["content"], "a", attrs={"class":"yt-playall-link.*?"}, ret="href")[0]
+        trailers_playlist = self.common.parseDOM(result["content"], "a", attrs={"class":"yt-playall-link .*?"}, ret="href")[0]
 
-        if trailers_link.find("list=") > 0:
-            trailers_link = trailers_link[trailers_link.find("list=") + len("list="):]
-            trailers_link = trailers_link[:trailers_link.find("&")]
-            trailers_link = trailers_link[2:]
-            del params["scraper"]
-            params["feed"] = "playlist"
-            params["playlist"] = trailers_link
+        if trailers_playlist.find("list=") > 0:
+            trailers_playlist = trailers_playlist[trailers_playlist.find("list=") + len("list="):]
+            if (trailers_playlist.rfind("&") > 0):
+                trailers_playlist = trailers_playlist[:trailers_playlist.rfind("&")]
 
-            return self.feeds.listPlaylist(params)
+            return self.feeds.listPlaylist({"user_feed": "playlist", "playlist" : trailers_playlist})
 
         return ([], 303)
 
@@ -103,7 +101,7 @@ class YouTubeScraper():
 
             return self.feeds.listPlaylist({"playlist": mix_list_id, "user_feed": "playlist", "fetch_all":"true"})
 
-        return []
+        return ([], 303)
 
     def scrapeYouTubeTop100(self, params={}):
         self.common.log("")
@@ -117,7 +115,7 @@ class YouTubeScraper():
             return self.scrapeWeeklyTop100Playlist(list_url)
 
         self.common.log("Done")
-        return []
+        return ([], 303)
 
     def scrapeWeeklyTop100Playlist(self, list_url):
         self.common.log("")
@@ -132,7 +130,7 @@ class YouTubeScraper():
 
             return(videos, result["status"])
 
-        return ([], result["status"])
+        return ([], 303)
         #================================== Common ============================================
     def getNewResultsFunction(self, params={}):
         get = params.get
