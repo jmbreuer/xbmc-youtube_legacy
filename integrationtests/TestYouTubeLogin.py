@@ -20,9 +20,11 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
         self.navigation.executeAction({"action": "settings"})
 
         oauth2_access_token = sys.modules["__main__"].settings.getSetting("oauth2_access_token")
+        login_cookies = sys.modules["__main__"].settings.getSetting("login_cookies")
         print "username: " + sys.modules["__main__"].settings.getSetting("username")
         print "pass: " + sys.modules["__main__"].settings.getSetting("user_password")
         print "oauth2_access_token: " + oauth2_access_token + " - " + str(len(oauth2_access_token))
+        print "login_cookies: " + login_cookies + " - " + str(len(login_cookies))
         assert(len(oauth2_access_token) > 40)
 
     def test_plugin_should_perform_unlinked_login_correctly(self):

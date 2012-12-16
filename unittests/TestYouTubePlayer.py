@@ -9,7 +9,8 @@ from YouTubePlayer import YouTubePlayer
 class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 
     def test__getVideoLinks_should_return_empty_dictionary_on_missing_map(self):
-        sys.modules["__main__"].core._fetchPage.return_value = {"status":303}
+        sys.modules["__main__"].core._fetchPage.return_value = {"status":303, "content": ""}
+        sys.modules["__main__"].common.parseDOM.return_value = []
 
         player = YouTubePlayer()
         (result, status) = player.extractVideoLinksFromYoutube({},{"videoid":"123"})
@@ -363,7 +364,8 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         sys.modules["__main__"].language.assert_called_with(30618)
 
     def test_buildVideoLinks_should_try_scraping_first(self):
-        sys.modules["__main__"].core._fetchPage.return_value = {"status":303}
+        sys.modules["__main__"].core._fetchPage.return_value = {"status":303, "content": ""}
+        sys.modules["__main__"].common.parseDOM.return_value = []
 
         player = YouTubePlayer()
         player.extractVideoLinksFromYoutube({},{"videoid":"123"})
@@ -379,6 +381,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 
     def test_getVideoLinks_should_parse_main_video_structure_on_webpage_correctly(self):
         sys.modules["__main__"].core._fetchPage.return_value = {"status": 200, "content": self.readTestInput("normal-video-page-bQbbtnTz1KE.html", False)}
+        sys.modules["__main__"].common.parseDOM.return_value = []
         player = YouTubePlayer()
         sys.modules["__main__"].core._findErrors.return_value = "mock error"
 
@@ -392,6 +395,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
         sys.modules["__main__"].core._fetchPage.return_value = {"status": 200, "content": self.readTestInput("rtmpe-video-page-8wxOVn99FTE.html", False)}
         player = YouTubePlayer()
         sys.modules["__main__"].core._findErrors.return_value = "mock error"
+        sys.modules["__main__"].common.parseDOM.return_value = []
 
         result = player.extractVideoLinksFromYoutube({}, {"videoid": "some_id"})
 
@@ -401,6 +405,7 @@ class TestYouTubePlayer(BaseTestCase.BaseTestCase):
 
     def test_getVideoLinks_should_parse_live_video_structure_on_webpage_correctly(self):
         sys.modules["__main__"].core._fetchPage.return_value = {"status": 200, "content": self.readTestInput("live-video-page-e93MaEwrsfc.html", False)}
+        sys.modules["__main__"].common.parseDOM.return_value = []
         player = YouTubePlayer()
         sys.modules["__main__"].core._findErrors.return_value = "mock error"
 

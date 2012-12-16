@@ -673,6 +673,7 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
     def test_getLoginInfo_should_ask_for_cookies(self):
         sys.modules["__main__"].settings.getSetting.return_value = "" 
         sys.modules["__main__"].common.parseDOM.side_effect = [["honk honk"], ["honk honk2"]] 
+        sys.modules["__main__"].common.getCookieInfoAsHTML.return_value = ""
         login = YouTubeLogin()
 
         result = login._getLoginInfo("   USERNAME', 'some_value" + '")')
@@ -683,12 +684,13 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
         dummy_content.find.return_value = -1
         sys.modules["__main__"].settings.getSetting.return_value = "" 
         sys.modules["__main__"].common.parseDOM.side_effect = [["honk honk"], ["honk honk2"]] 
+        sys.modules["__main__"].common.getCookieInfoAsHTML.return_value = ""
         login = YouTubeLogin()
         
         result = login._getLoginInfo("")
         
         sys.modules["__main__"].common.getCookieInfoAsHTML.assert_called_with()
-        assert(sys.modules["__main__"].settings.setSetting.call_count == 2)
+        assert(sys.modules["__main__"].settings.setSetting.call_count == 3)
         sys.modules["__main__"].settings.setSetting.assert_any_call("login_info","honk honk")
         sys.modules["__main__"].settings.setSetting.assert_any_call("SID","honk honk2")
         
@@ -699,6 +701,7 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
         sys.modules[ "__main__" ].cookiejar = ""
         sys.modules["__main__"].settings.getSetting.return_value = "" 
         sys.modules["__main__"].common.parseDOM.return_value = ""
+        sys.modules["__main__"].common.getCookieInfoAsHTML.return_value = ""
         login = YouTubeLogin()
         
         result = login._getLoginInfo("")
@@ -709,7 +712,9 @@ class TestYouTubeLogin(BaseTestCase.BaseTestCase):
         dummy_content = Mock()
         dummy_content.find.return_value = -1
         sys.modules["__main__"].settings.getSetting.return_value = "" 
-        sys.modules["__main__"].common.parseDOM.side_effect = [["honk"], ["honk honk"], ["honk honk2"]] 
+        sys.modules["__main__"].common.parseDOM.side_effect = [["honk"], ["honk honk"], ["honk honk2"]]
+        sys.modules["__main__"].common.getCookieInfoAsHTML.return_value = ""
+
         login = YouTubeLogin()
 
         result = login._getLoginInfo("")

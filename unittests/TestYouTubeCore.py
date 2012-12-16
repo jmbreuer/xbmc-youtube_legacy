@@ -242,7 +242,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 
     def test_getFolderInfo_should_set_item_params_correctly_for_subscriptions_feed(self):
         input = self.readTestInput("getFolderInfoSubscriptionsTest.xml", False)
-        sys.modules["__main__"].common.parseDOM.side_effect = [["entry"], [], ["GoogleTechTalks"], ["published"], ["some_edit_id"],["GoogleTechTalks"]]
+        sys.modules["__main__"].common.parseDOM.side_effect = [["entry"], [], ["GoogleTechTalks"], ["published"], ["some_edit_id"]]
         core = YouTubeCore()
 
         result = core.getFolderInfo(input, {"user_feed":"subscriptions"})
@@ -726,7 +726,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
         sys.modules[ "__main__" ].language.assert_called_with(30622)
 
     def test_fetchPage_should_fetch_token_from_settings_if_login_is_in_params(self):
-        settings = ["my_token", "my_token", "my_token", "my_token", "my_token", "user", "pass", "4", "", "", "3"]
+        settings = ["my_token", "my_token", "my_token", "{'my_token': 'my_token'}", "my_token", "user", "pass", "4", "", "", "3"]
         sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
         patcher1 = patch("urllib2.urlopen")
         patcher2 = patch("YouTubeCore.url2request")
@@ -748,12 +748,10 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
         patcher1.stop()
         patcher2.stop()
 
-        sys.modules[ "__main__" ].settings.getSetting.assert_any_call("SID")
-        sys.modules[ "__main__" ].settings.getSetting.assert_any_call("login_info")
-
+        sys.modules[ "__main__" ].settings.getSetting.assert_any_call("login_cookies")
 
     def test_fetchPage_should_append_login_token_to_request_headers_if_login_is_in_params(self):
-        settings = ["my_token", "my_token", "my_token", "my_token", "my_token", "user", "pass", "4", "", "", "3"]
+        settings = ["my_token", "my_token", "my_token", "{'LOGIN_INFO': 'my_token', 'SID': 'my_token'}", "my_token", "user", "pass", "4", "", "", "3"]
         sys.modules[ "__main__" ].settings.getSetting.side_effect = lambda x: settings.pop()
         patcher1 = patch("urllib2.urlopen")
         patcher2 = patch("YouTubeCore.url2request")
@@ -947,6 +945,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
         input = { "content": "some_content"}
         parsedom = [ ["Mock error [" ] ] # This should probably be updated to something real.
         sys.modules[ "__main__" ].common.parseDOM.side_effect = lambda x,y,attrs: parsedom.pop()
+        sys.modules[ "__main__" ].common.stripTags.return_value = "Mock error"
         core = YouTubeCore()
 
         result = core._findErrors( input )
@@ -958,6 +957,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
         input = { "content": "some_content"}
         parsedom = [ ["Mock error ["],[] ] # This should probably be updated to something real.
         sys.modules[ "__main__" ].common.parseDOM.side_effect = lambda x,y,attrs: parsedom.pop()
+        sys.modules[ "__main__" ].common.stripTags.return_value = "Mock error"
         core = YouTubeCore()
 
         result = core._findErrors({"content":"some_content"})
@@ -969,6 +969,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
         input = { "content": "some_content"}
         parsedom = [ ["Mock error ["],[],[] ] # This should probably be updated to something real.
         sys.modules[ "__main__" ].common.parseDOM.side_effect = lambda x,y,attrs: parsedom.pop()
+        sys.modules[ "__main__" ].common.stripTags.return_value = "Mock error"
         core = YouTubeCore()
 
         result = core._findErrors({"content":"some_content"})
@@ -980,6 +981,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
         input = { "content": "some_content yt:quota"}
         parsedom = [ ["Mock error ["],[],[],[],[] ] # This should probably be updated to something real.
         sys.modules[ "__main__" ].common.parseDOM.side_effect = lambda x = "",y ="",attrs = {}: parsedom.pop()
+        sys.modules[ "__main__" ].common.stripTags.return_value = "Mock error"
         core = YouTubeCore()
 
         result = core._findErrors(input)
@@ -993,6 +995,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
         input = { "content": "some_content"}
         parsedom = [ ["Mock error [" ] ] # This should probably be updated to something real.
         sys.modules[ "__main__" ].common.parseDOM.side_effect = lambda x,y,attrs: parsedom.pop()
+        sys.modules[ "__main__" ].common.stripTags.return_value = "Mock error"
         core = YouTubeCore()
 
         result = core._findErrors( input )
