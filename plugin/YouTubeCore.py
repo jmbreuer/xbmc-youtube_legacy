@@ -232,7 +232,7 @@ class YouTubeCore():
             thumb = ""
             if get("user_feed") == "contacts":
                 folder["thumbnail"] = "user"
-                folder["contact"] = folder["Title"]
+                folder["contact"] = self.common.parseDOM(node, 'yt:username')[0]
                 folder["store"] = "contact_options"
                 folder["folder"] = "true"
 

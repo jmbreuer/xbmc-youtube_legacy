@@ -227,7 +227,7 @@ class TestYouTubeCore(BaseTestCase.BaseTestCase):
 
     def test_getFolderInfo_should_set_item_params_correctly_for_contacts_feed(self):
         input = self.readTestInput("getFolderInfoContactTest.xml", False)
-        sys.modules["__main__"].common.parseDOM.side_effect = [["entry"], [], ["some_other_user"], ["published"], ["some_other_user"]]
+        sys.modules["__main__"].common.parseDOM.side_effect = [["entry"], [], ["some_other_user"], ["published"], ["some_other_user"],["some_other_user"]]
         core = YouTubeCore()
 
         result = core.getFolderInfo(input, {"user_feed":"contacts"})
