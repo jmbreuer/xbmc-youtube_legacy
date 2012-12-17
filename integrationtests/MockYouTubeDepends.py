@@ -2,7 +2,6 @@ import sys
 import time
 import inspect
 
-
 class MockYouTubeDepends:
     def mock(self):
         import platform
