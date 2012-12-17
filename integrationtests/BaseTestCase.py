@@ -16,7 +16,7 @@ else:
         os.remove("./tmp/" + old_file)
 
 
-class BaseTestCase(unittest2.TestCase):
+class BaseTestCase(unittest2.TestCase):  #pragma: no cover
     def setUp(self):
         time.sleep(5)
         MockYouTubeDepends.MockYouTubeDepends().mock()
@@ -38,6 +38,7 @@ class BaseTestCase(unittest2.TestCase):
         sys.modules["__main__"].settingsDL.load_strings("./resources/settings.xml")
         sys.modules["__main__"].xbmcaddon.Addon.return_value = sys.modules["__main__"].settingsDL
         sys.modules["__main__"].xbmcvfs.exists.return_value = True
+
         import SimpleDownloader
         sys.modules["__main__"].downloader = SimpleDownloader.SimpleDownloader()
         sys.modules["__main__"].xbmcvfs.exists.return_value = False
