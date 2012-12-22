@@ -31,7 +31,7 @@ class TestYouTubePlaylistControl(BaseTestCase.BaseTestCase):
         
         control.playAll({"user_feed":"favorites"})
         
-        control.getUserFeed.assert_called_with({"user_feed":"favorites", 'fetch_all': 'true'})
+        control.getUserFeed.assert_called_with({"user_feed":"favorites", 'login':"true", 'fetch_all': 'true'})
                 
     def test_playAll_should_call_getLikedVideos_if_scraper_is_liked_videos_in_params(self):
         control = YouTubePlaylistControl()
@@ -49,7 +49,7 @@ class TestYouTubePlaylistControl(BaseTestCase.BaseTestCase):
         
         control.playAll({"user_feed":"newsubscriptions"})
         
-        control.getUserFeed.assert_called_with({"user_feed":"newsubscriptions", 'fetch_all': 'true'})
+        control.getUserFeed.assert_called_with({"user_feed":"newsubscriptions", 'login':"true", 'fetch_all': 'true'})
         
     def test_playAll_should_not_call_xbmc_player_if_params_is_empty(self):
         control = YouTubePlaylistControl()
