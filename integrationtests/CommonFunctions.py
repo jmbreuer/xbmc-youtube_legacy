@@ -178,10 +178,16 @@ def _getDOMContent(html, name, match, ret):  # Cleanup
 
 def _getDOMAttributes(match, name, ret):
     log("", 3)
-    lst = re.compile('<' + name + '.*?' + ret + '=(.[^>]*?)>', re.M | re.S).findall(match)
+
+    lst = re.compile('<' + name + '.*?' + ret + '=([\'"].[^>]*?[\'"])>', re.M | re.S).findall(match)
+    log("BLA: " + repr(lst))
+    if len(lst) == 0:
+        lst = re.compile('<' + name + '.*?' + ret + '=(.[^>]*?)>', re.M | re.S).findall(match)
+        log("BLA2: " + repr(lst))
     ret = []
     for tmp in lst:
         cont_char = tmp[0]
+        log("BLA3: " + repr(cont_char))
         if cont_char in "'\"":
             log("Using %s as quotation mark" % cont_char, 3)
 
@@ -208,6 +214,7 @@ def _getDOMAttributes(match, name, ret):
 
 def _getDOMElements(item, name, attrs):
     log("", 3)
+
     lst = []
     for key in attrs:
         lst2 = re.compile('(<' + name + '[^>]*?(?:' + key + '=[\'"]' + attrs[key] + '[\'"].*?>))', re.M | re.S).findall(item)
