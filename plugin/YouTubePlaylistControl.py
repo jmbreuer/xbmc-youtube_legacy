@@ -56,6 +56,7 @@ class YouTubePlaylistControl():
             params["user_feed"] = "playlist"
             result = self.getUserFeed(params)
         elif get("user_feed") in ["recommended", "watch_later", "newsubscriptions", "favorites"]:
+            params["login"] = "true"
             result = self.getUserFeed(params)
         elif get("video_list"):
             (ytobjects, status) = self.core.getBatchDetails(get("video_list").split(","))
