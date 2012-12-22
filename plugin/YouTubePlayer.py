@@ -21,7 +21,6 @@ import urllib
 import cgi
 try: import simplejson as json
 except ImportError: import json
-import urllib
 
 
 class YouTubePlayer():
