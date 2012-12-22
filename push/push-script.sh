@@ -1,27 +1,28 @@
+# Add the following two lines(with version numbers) to a file called 'release', and run.
+#BETAVERSION=
+#RELEASEVERSION=
+
 URL=http://hg.tobiasussing.dk/hgweb.cgi/youtubexbmc/
 DIRNAME=plugin.video.youtube
 RELEASEPATH=/usr/local/www/data/hg/nightly-repo/
-BETAVERSION=3.4.0
-RELEASEVERSION=3.3.0
-
-echo "PID: $$"
+TMPDIR="/tmp/release-tmp-$$"
 
 # Check if trigger is set
 if [ -f release ]; then
     echo "Found release";
-    rm release;
+    BETAVERSION=`cat release | grep "BETA" | sed -e 's/BETAVERSION=//'`
+    RELEASEVERSION=`cat release | grep "RELEASE" | sed -e 's/RELEASEVERSION=//'`
+    #rm release;
 else
     echo "Not set to release";
     exit;
 fi
 
-TMPDIR="/tmp/release-tmp-$$"
 mkdir $TMPDIR
 cd $TMPDIR
 
 mkdir trunk
 hg clone $URL trunk/$DIRNAME
-
 hg clone $URL $DIRNAME -b release
 
 echo "WORKING DIR $TMPDIR DOING $DIRNAME"
@@ -29,6 +30,8 @@ cd $TMPDIR/$DIRNAME;
 hg update release;
 cp -R $TMPDIR/trunk/$DIRNAME/plugin/* $TMPDIR/$DIRNAME/;
 rm -fv *pyc */*pyc */*/*pyc  *~ */*~ */*/*~
+
+# THIS NEEDS ATTENTION!!!
 #hg add * */* */*/*;
 #hg add *
 for j in `ls $TMPDIR/$DIRNAME/ | egrep "addon.xml"`; do
@@ -73,7 +76,9 @@ rm -fr $TMPDIR
 
 ######
 if [ -d $RELEASEPATH ]; then
+    pwd
     cd $RELEASEPATH 
+    pwd
     cp $DIRNAME/addon.xml addons/$DIRNAME-release.xml
 
     echo "<?xml version='1.0' encoding='UTF-8'?><addons>" > addons-temp.xml
