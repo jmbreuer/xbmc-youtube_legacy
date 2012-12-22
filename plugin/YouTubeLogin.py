@@ -199,7 +199,7 @@ class YouTubeLogin():
                 return(ret, status)
 
             # Click login link on youtube.com
-            newurl = self.common.parseDOM(ret["content"], "button", attrs={"href": ".*?ServiceLogin.*?"}, ret="href")
+            newurl = self.common.parseDOM(ret["content"].replace("window.location.href=", "window.location.top="), "button", attrs={"href": ".*?ServiceLogin.*?"}, ret="href")
             if len(newurl) > 0:
                 # Start login procedure
                 if newurl[0] != "#":
