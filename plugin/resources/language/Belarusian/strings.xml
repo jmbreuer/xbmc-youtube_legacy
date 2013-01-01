@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <!-- Translated using Transifex web application. For support, or if you would like to to help out, please visit your language team! -->
-<!-- English language-Team URL: http://www.transifex.com/projects/p/XBMC-Main-Frodo/language/en/ -->
+<!-- Belarusian language-Team URL: http://www.transifex.com/projects/p/XBMC-Main-Frodo/language/be/ -->
 <!-- Report language file syntax bugs at: http://trac.xbmc.org/ -->
 
 <strings>
     <!-- Category strings -->
     <string id="30001">YouTube Feeds</string>
-    <string id="30002">My Favorites</string>
+    <string id="30002">Мае ўпадабаныя</string>
     <string id="30003">My Subscriptions</string>
     <string id="30004">New Subscription Videos</string>
     <string id="30005">My Uploads</string>
@@ -82,7 +82,7 @@
     <string id="30215">SD only</string>
     <string id="30216">720p</string>
     <string id="30217">1080p</string>
-    <string id="30218">General</string>
+    <string id="30218">Агульныя</string>
     <string id="30219">Moderate</string>
     <string id="30220">Strict</string>
     <string id="30221">YouTube feeds country region</string>
@@ -175,9 +175,9 @@
     <string id="30518">Select video quality</string>
     <string id="30519">Enter contact name</string>
     <string id="30520">Play All</string>
-    <string id="30521">Play from here</string>
+    <string id="30521">Прайграць адсюль</string>
     <string id="30522">Shuffle and Play All</string>
-    <string id="30523">Now Playing...</string>
+    <string id="30523">Зараз прайграецца...</string>
     <string id="30524">Edit disco search</string>
     <string id="30525">Delete disco search</string>
     <string id="30526">View playlists</string>
@@ -214,7 +214,7 @@
     <string id="30621">Bad username or password</string>
     <string id="30622">Playback requires valid YouTube account</string>
     <string id="30623">Maximum login attempts tried.</string>
-    <string id="30624">Downloading</string>
+    <string id="30624">Зладоўваецца</string>
     <string id="30625">Download Failed</string>
     <string id="30626">RTMPe playback currently not supported</string>
     <string id="30627">Please provide 2-factor authentication PIN</string>

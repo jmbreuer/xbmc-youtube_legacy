@@ -18,6 +18,7 @@
 - Fixed Playback of over 18 videos was broken with the new youtube look
 - Fixed User scraper for my liked videos
 - Fixed scraper for Top 100 Trailers, Youtube weekly Top 100 Music videos, and Youtube Disco
+- Added Translations for a multitude of languages, special thanks to the Transifex project
 
 [B]Version 3.3.0[/B]
 - Fixed playback of over 18 videos, should now work if the user is logged in.
