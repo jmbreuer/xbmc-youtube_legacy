@@ -1,16 +1,16 @@
 <?xml version='1.0' encoding='UTF-8' standalone='yes'?>
-<addon id='plugin.video.youtube.beta' version='3.4.1' name='YouTube Beta' provider-name='TheCollective'>
+<addon id="plugin.video.youtube.beta" name="YouTube Beta" provider-name="TheCollective" version="3.4.1">
   <requires>
-    <import addon='xbmc.python' version='2.1.0'/>
-    <import addon='script.module.simplejson' version='2.0.10'/>
-    <import addon='script.common.plugin.cache.beta' version='1.5.0'/>
-    <import addon='script.module.parsedom.beta' version='1.5.0'/>
-    <import addon='script.module.simple.downloader.beta' version='0.9.4'/>
+    <import addon="xbmc.python" version="2.0" />
+    <import addon="script.module.simplejson" version="2.0.10" />
+    <import addon="script.common.plugin.cache.beta" version="1.5.0" />
+    <import addon="script.module.parsedom.beta" version="1.5.1" />
+    <import addon="script.module.simple.downloader.beta" version="0.9.4" />
   </requires>
-  <extension point='xbmc.python.pluginsource' library='default.py'>
+  <extension library="default.py" point="xbmc.python.pluginsource">
         <provides>video</provides>
   </extension>
-  <extension point='xbmc.addon.metadata'>
+  <extension point="xbmc.addon.metadata">
     <summary lang="af">YouTube video byvoegsel</summary>
     <summary lang="be">YouTube video plugin</summary>
     <summary lang="bg">Видео добавка за YouTube</summary>
@@ -104,7 +104,8 @@
     <disclaimer lang="ko">이 추가기능의 일부분은 사용자의 국가나 거주지역에 따라 합법적이지 않을 수도 있습니다 - 설치하기 전에 관련 법률을 확인하세요.</disclaimer>
     <disclaimer lang="lt">Kai kurios šio priedo dalys gali būti Nerodomos/Nepaleidžiamos jūsų Šalyje - prašome patikrinti savo vietinius įstatymus prieš įdiegiant priedą.</disclaimer>
     <disclaimer lang="mk">Некои делови од дополнувањето може да не се легални во вашата држава - провери пред да инсталираш.</disclaimer>
-    <disclaimer lang="nl">Sommige onderdelen van deze plugin kunnen illegaal zijn in uw land.&#10;Raadpleeg de lokale wetgeving voordat u deze plugin installeert.</disclaimer>
+    <disclaimer lang="nl">Sommige onderdelen van deze plugin kunnen illegaal zijn in uw land.
+Raadpleeg de lokale wetgeving voordat u deze plugin installeert.</disclaimer>
     <disclaimer lang="no">Noen deler av dette tillegget kan hende ikke er lovlig i landet du bor i - vennligst sjekk med dine lokale lover før du installerer.</disclaimer>
     <disclaimer lang="pl">Niektóre części tego dodatku mogą być nielegalne w twoim kraju - przed instalacją sprawdź zgodność ze swoim lokalnym prawem.</disclaimer>
     <disclaimer lang="pt">Algumas partes deste addon podem não ser legais no seu país de residência - por favor confira as leis regionais antes de instalar.</disclaimer>
