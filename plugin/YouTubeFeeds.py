@@ -144,7 +144,6 @@ class YouTubeFeeds():
                 self.common.log("Login required but auth wasn't set!")
                 return (self.language(30609), 303)
 
-        // TODO: if perPage > 50, fetch in blocks of max 50, until desired quantity has been read
         url = self.createUrl(params)
 
         if url:
