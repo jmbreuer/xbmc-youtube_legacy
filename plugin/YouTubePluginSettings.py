@@ -24,7 +24,7 @@ class YouTubePluginSettings():
         self.dbg = sys.modules["__main__"].dbg
 
     def itemsPerPage(self):
-        return (10, 25, 50, 100, 250, 500)[int(self.settings.getSetting("perpage"))]
+        return (10, 15, 20, 25, 30, 40, 50)[int(self.settings.getSetting("perpage"))]
 
     def currentRegion(self):
         return ('', 'AU', 'BR', 'CA', 'CZ', 'FR', 'DE', 'GB', 'NL', 'HK', 'IN', 'IE', 'IL', 'IT', 'JP', 'MX', 'NZ', 'PL', 'RU', 'KR', 'ES', 'SE', 'TW', 'US', 'ZA')[int(self.settings.getSetting("region_id"))]
@@ -36,7 +36,7 @@ class YouTubePluginSettings():
         return [5, 10, 15, 20, 25][int(self.settings.getSetting("timeout"))]
 
     def userHasProvidedValidCredentials(self):
-        return (self.settings.getSetting("username") != "" and self.settings.getSetting("oauth2_access_token"))
+        return (self.settings.getSetting("username") != "" and self.settings.getSetting("oauth2_access_token") != "")
 
     def userName(self):
         return self.settings.getSetting("username")
